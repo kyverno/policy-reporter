@@ -1,0 +1,12 @@
+loki:
+  # loki host address
+  host: http://loki.loki-stack.svc.cluster.local:3100
+
+# Mapping from policy -> priority
+# Spported:
+#   error
+#   warning
+#   info
+#   debug
+policy_priorities:
+  check-label-app: warning

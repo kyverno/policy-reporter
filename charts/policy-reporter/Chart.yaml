@@ -1,0 +1,7 @@
+apiVersion: v2
+name: policy-reporter
+description: K8s PolicyReporter watches for wgpolicyk8s.io/v1alpha1.PolicyReport resources. It creates Prometheus Metrics and can send rule validation events to Loki
+
+type: application
+version: 0.1.0
+appVersion: 0.1.0

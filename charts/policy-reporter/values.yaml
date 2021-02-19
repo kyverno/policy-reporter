@@ -1,0 +1,19 @@
+loki:
+  host: http://loki.loki-stack.svc.cluster.local:3100
+image:
+  repository: fjogeleit/policy-reporter
+  pullPolicy: Always
+  tag: latest
+imagePullSecrets: []
+service:
+  type: ClusterIP
+  port: 2112
+resources:
+  requests:
+    memory: 50Mi
+    cpu: 10m
+  limits:
+    memory: 100Mi
+    cpu: 50m
+
+policyPriorities: []
