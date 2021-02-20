@@ -9,10 +9,13 @@ It uses this resources to create Prometheus Metrics from it. It also provides a 
 Clone the repository and use the following command:
 
 ```bash
+git clone https://github.com/fjogeleit/policy-reporter.git
+
+cd policy-reporter
+
 helm install policy-reporter ./charts/policy-reporter --set loki=http://lokihost:3100 -n policy-reporter --create-namespace
 ```
-
-You can also customize the `values.yaml` to change the default configurations.
+You can also customize the `./charts/policy-reporter/values.yaml` to change the default configurations.
 
 ### Configure policyPriorities
 
