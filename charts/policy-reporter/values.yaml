@@ -3,7 +3,7 @@ loki:
 image:
   repository: fjogeleit/policy-reporter
   pullPolicy: Always
-  tag: 0.1.0
+  tag: 0.2.0
 imagePullSecrets: []
 service:
   type: ClusterIP
