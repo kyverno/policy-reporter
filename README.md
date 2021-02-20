@@ -38,5 +38,5 @@ policyPriorities:
 ![Prometheus Metrics](https://github.com/fjogeleit/policy-reporter/blob/main/docs/images/prometheus.png?raw=true)
 
 # Todos
-* Support for ClusterPolicyReports
+* ~~Support for ClusterPolicyReports~~
 * Additional Targets

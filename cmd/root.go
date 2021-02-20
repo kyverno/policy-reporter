@@ -49,12 +49,19 @@ func NewCLI() *cobra.Command {
 				})
 			}
 
-			metrics, err := resolver.Metrics()
+			policyMetrics, err := resolver.PolicyReportMetrics()
 			if err != nil {
 				return err
 			}
 
-			go metrics.GenerateMetrics()
+			go policyMetrics.GenerateMetrics()
+
+			clusterPolicyMetrics, err := resolver.ClusterPolicyReportMetrics()
+			if err != nil {
+				return err
+			}
+
+			go clusterPolicyMetrics.GenerateMetrics()
 
 			http.Handle("/metrics", promhttp.Handler())
 			http.ListenAndServe(":2112", nil)
