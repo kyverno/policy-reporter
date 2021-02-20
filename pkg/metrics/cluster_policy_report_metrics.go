@@ -90,6 +90,8 @@ func (m ClusterPolicyReportMetrics) GenerateMetrics() {
 						).
 						Set(1)
 				}
+
+				m.cachedReport(report)
 			case watch.Deleted:
 				policyGauge.WithLabelValues(report.Name, "Pass").Set(0)
 				policyGauge.WithLabelValues(report.Name, "Fail").Set(0)
