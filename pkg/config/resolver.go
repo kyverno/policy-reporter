@@ -2,13 +2,15 @@ package config
 
 import (
 	"github.com/fjogeleit/policy-reporter/pkg/kubernetes"
+	"github.com/fjogeleit/policy-reporter/pkg/metrics"
 	"github.com/fjogeleit/policy-reporter/pkg/target"
 	"github.com/fjogeleit/policy-reporter/pkg/target/loki"
 )
 
 var (
-	kubeClient kubernetes.Client
-	lokiClient target.Client
+	kubeClient       kubernetes.Client
+	lokiClient       target.Client
+	metricsGenerator *metrics.Metrics
 )
 
 type Resolver struct {
@@ -33,6 +35,19 @@ func (r *Resolver) LokiClient() target.Client {
 	}
 
 	return loki.NewClient(r.config.Loki.Host)
+}
+
+func (r *Resolver) Metrics() (*metrics.Metrics, error) {
+	if metricsGenerator != nil {
+		return metricsGenerator, nil
+	}
+
+	client, err := r.KubernetesClient()
+	if err != nil {
+		return nil, err
+	}
+
+	return metrics.NewMetrics(client), nil
 }
 
 func NewResolver(config *Config) Resolver {

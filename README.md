@@ -1,8 +1,8 @@
 # PolicyReporter
 
-PolicyReporter is a simple tool to watch for PolicyReports in your cluster.
+## Motivation
 
-It uses this resources to create Prometheus Metrics from it. It also provides a configuration to push rule validation results to Grafana Loki.
+Kyverno ships with two types of validation. You can either enforce a rule or audit it. If you don't want to block developers or if you want to try out what a new rule you can audit it. The audit configuration creates PolicyReports which you can describe or read with over `kubectl` but it's not that easy to get a good overview. To solve this problem this tool sends informations from PolicyReports to Loki and provide a Metrics endpoint to get metrics about summaries and each rule result.
 
 ## Installation with Helm v3
 
@@ -34,3 +34,7 @@ policyPriorities:
 ![Grafana Loki](https://github.com/fjogeleit/policy-reporter/blob/main/docs/images/grafana-loki.png?raw=true)
 
 ![Prometheus Metrics](https://github.com/fjogeleit/policy-reporter/blob/main/docs/images/prometheus.png?raw=true)
+
+# Todos
+* Support for ClusterPolicyReports
+* Additional Targets

@@ -6,7 +6,6 @@ import (
 	"net/http"
 
 	"github.com/fjogeleit/policy-reporter/pkg/config"
-	"github.com/fjogeleit/policy-reporter/pkg/metrics"
 	"github.com/fjogeleit/policy-reporter/pkg/report"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/spf13/cobra"
@@ -46,11 +45,16 @@ func NewCLI() *cobra.Command {
 
 			if loki != nil {
 				go client.WatchRuleValidation(func(r report.Result) {
-					loki.Send(r)
+					go loki.Send(r)
 				})
 			}
 
-			go metrics.GenerateMetrics(client)
+			metrics, err := resolver.Metrics()
+			if err != nil {
+				return err
+			}
+
+			go metrics.GenerateMetrics()
 
 			http.Handle("/metrics", promhttp.Handler())
 			http.ListenAndServe(":2112", nil)
