@@ -43,7 +43,11 @@ spec:
           - name: config-volume
             mountPath: /app/config.yaml
             subPath: config.yaml
+          env:
+          - name: LOKI_HOST
+            value: {{ .Values.loki.host | quote }}
       volumes:
       - name: config-volume
         configMap:
-          name: {{ include "policyreporter.fullname" . }}-config
+          name: policy-reporter-config
+          optional: true

@@ -4,6 +4,7 @@ import (
 	"flag"
 	"log"
 	"net/http"
+	"strings"
 
 	"github.com/fjogeleit/policy-reporter/pkg/config"
 	"github.com/fjogeleit/policy-reporter/pkg/report"
@@ -80,6 +81,8 @@ func NewCLI() *cobra.Command {
 
 func LoadConfig(cmd *cobra.Command) (*config.Config, error) {
 	v := viper.New()
+	v.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
+
 	cfgFile := ""
 
 	configFlag := cmd.Flags().Lookup("config")
