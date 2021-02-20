@@ -2,7 +2,7 @@ loki:
   host: http://loki.loki-stack.svc.cluster.local:3100
 image:
   repository: fjogeleit/policy-reporter
-  pullPolicy: Always
+  pullPolicy: IfNotPresent
   tag: 0.2.0
 imagePullSecrets: []
 service:
