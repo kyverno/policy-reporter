@@ -57,9 +57,9 @@ func (c *DynamicClient) WatchPolicyReports(cb WatchPolicyReportCallback) {
 	}
 
 	for result := range result.ResultChan() {
-		item := result.Object.(*unstructured.Unstructured)
-
-		cb(result.Type, c.mapReport(item.Object))
+		if item, ok := result.Object.(*unstructured.Unstructured); ok {
+			cb(result.Type, c.mapReport(item.Object))
+		}
 	}
 }
 
