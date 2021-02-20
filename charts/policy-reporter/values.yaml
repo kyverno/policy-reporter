@@ -2,8 +2,8 @@ loki:
   host: http://loki.loki-stack.svc.cluster.local:3100
 image:
   repository: fjogeleit/policy-reporter
-  pullPolicy: IfNotPresent
-  tag: 0.1.0
+  pullPolicy: Always
+  tag: 0.2.0
 imagePullSecrets: []
 service:
   type: ClusterIP
@@ -15,5 +15,3 @@ resources:
   limits:
     memory: 100Mi
     cpu: 50m
-
-policyPriorities: []
