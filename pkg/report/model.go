@@ -52,6 +52,10 @@ func (r Result) GetIdentifier() string {
 	return fmt.Sprintf("%s__%s__%s__%s", r.Policy, r.Rule, r.Status, res.UID)
 }
 
+type Report interface {
+	GetIdentifier() string
+}
+
 type Summary struct {
 	Pass  int
 	Skip  int
@@ -76,6 +80,30 @@ func (pr PolicyReport) GetNewValidation(or PolicyReport) []Result {
 
 	for _, r := range pr.Results {
 		if _, ok := or.Results[r.GetIdentifier()]; ok {
+			continue
+		}
+
+		diff = append(diff, r)
+	}
+
+	return diff
+}
+
+type ClusterPolicyReport struct {
+	Name    string
+	Results map[string]Result
+	Summary Summary
+}
+
+func (cr ClusterPolicyReport) GetIdentifier() string {
+	return cr.Name
+}
+
+func (cr ClusterPolicyReport) GetNewValidation(cor ClusterPolicyReport) []Result {
+	diff := make([]Result, 0)
+
+	for _, r := range cr.Results {
+		if _, ok := cor.Results[r.GetIdentifier()]; ok {
 			continue
 		}
 

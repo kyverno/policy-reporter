@@ -41,7 +41,6 @@ func newLokiPayload(result report.Result) payload {
 		"status=\"" + result.Status + "\"",
 		"policy=\"" + result.Policy + "\"",
 		"priority=\"" + result.Priority + "\"",
-		"namespace=\"" + res.Namespace + "\"",
 		"source=\"kyverno\"",
 	}
 
@@ -57,6 +56,8 @@ func newLokiPayload(result report.Result) payload {
 	if res.Kind != "" {
 		labels = append(labels, "kind=\""+res.Kind+"\"")
 		labels = append(labels, "name=\""+res.Name+"\"")
+		labels = append(labels, "uid=\""+res.UID+"\"")
+		labels = append(labels, "namespace=\""+res.Namespace+"\"")
 	}
 
 	ls.Labels = "{" + strings.Join(labels, ",") + "}"
