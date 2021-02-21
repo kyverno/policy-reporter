@@ -4,7 +4,7 @@
 
 Kyverno ships with two types of validation. You can either enforce a rule or audit it. If you don't want to block developers or if you want to try out a new rule, you can use the audit functionality. The audit configuration creates [PolicyReports](https://kyverno.io/docs/policy-reports/) which you can access with `kubectl`. Because I can't find a simple solution to get a general overview of this PolicyReports and PolicyReportResults, I created this tool to send information from PolicyReports to [Grafana Loki](https://grafana.com/oss/loki/). As additional feature this tool provides an http server with Prometheus Metrics about ReportPolicy Summaries and ReportPolicyRules.
 
-This project is in an early stage. Please let me know if anything did not work as expected or if you want so send your audits to other targets then Loki.
+This project is in an early stage. Please let me know if anything did not work as expected or if you want to send your audits to other targets then Loki.
 
 ## Installation with Helm v3
 
