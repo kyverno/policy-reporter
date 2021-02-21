@@ -1,0 +1,13 @@
+{{- if .Values.metrics.serviceMonitor }}
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: {{ include "policyreporter.fullname" . }}
+  namespace: policy-reporter
+spec:
+  selector:
+    matchLabels:
+        {{- include "policyreporter.selectorLabels" . | nindent 8 }}
+  endpoints:
+  - port: http 
+{{- end }}

@@ -16,7 +16,7 @@ helm install policy-reporter policy-reporter/policy-reporter --set loki=http://l
 ```
 You can also customize the `./charts/policy-reporter/values.yaml` to change the default configurations.
 
-### Configure policyPriorities
+### Configure Policy Priorities
 
 By default kyverno PolicyReports has no priority or severity for policies. So every passed rule validation will be processed as notice, a failed validation is processed as error. To customize this you can configure a mapping from policies to fail priorities. So you can send them as warnings instead of errors. To configure the priorities create a ConfigMap in the `policy-reporter` namespace with the name `policy-reporter-config`. This ConfigMap have to have a property `config.yaml` with the map as YAML content. See the Example for Detailes.
 
@@ -32,6 +32,26 @@ policy_priorities:
 ```bash
 kubectl create configmap policy-reporter-config --from-file=config.yaml -n policy-reporter
 ```
+
+## Monitoring
+
+The Helm Chart includes optional Manifests for the [MonitoringStack](https://github.com/prometheus-community/helm-charts/tree/main/charts/kube-prometheus-stack). The provided Dashboard works without Loki
+
+* Enable a ServiceMonitor by setting `metrics.serviceMonitor` to `true`.
+* Enable a basic Dashboard as ConfigMap by setting `metrics.dashboard.enabled` to `true`.
+    * Change the namespace to your required monitoring namespace by changing `metrics.dashboard.namespace` (default: cattle-dashboards)
+
+
+If you are not using the MonitoringStack you can get the dashboard configuration from this [Gist](https://gist.github.com/fjogeleit/bf540421fd28989fc92841177be972bc)
+
+Example Installation
+```bash
+helm install policy-reporter policy-reporter/policy-reporter --set metrics.serviceMonitor=true --set metrics.dashboard.enabled=true -n policy-reporter --create-namespace
+```
+
+#### Dashboard Preview
+
+![PolicyReporter Grafana Dashboard](https://github.com/fjogeleit/policy-reporter/blob/main/docs/images/policy-reports-dashboard.png?raw=true)
 
 ## Example Outputs
 
