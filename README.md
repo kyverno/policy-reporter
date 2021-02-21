@@ -8,14 +8,11 @@ This project is in an early stage. Please let me know if anything did not work a
 
 ## Installation with Helm v3
 
-Clone the repository and use the following command:
+Installation via Helm Repository
 
 ```bash
-git clone https://github.com/fjogeleit/policy-reporter.git
-
-cd policy-reporter
-
-helm install policy-reporter ./charts/policy-reporter --set loki=http://lokihost:3100 -n policy-reporter --create-namespace
+helm repo add policy-reporter https://fjogeleit.github.io/policy-reporter
+helm install policy-reporter policy-reporter/policy-reporter --set loki=http://lokihost:3100 -n policy-reporter --create-namespace
 ```
 You can also customize the `./charts/policy-reporter/values.yaml` to change the default configurations.
 
