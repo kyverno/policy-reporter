@@ -12,7 +12,7 @@ Installation via Helm Repository
 
 ```bash
 helm repo add policy-reporter https://fjogeleit.github.io/policy-reporter
-helm install policy-reporter policy-reporter/policy-reporter --set loki=http://lokihost:3100 -n policy-reporter --create-namespace
+helm install policy-reporter policy-reporter/policy-reporter --set loki.host=http://lokihost:3100 -n policy-reporter --create-namespace
 ```
 You can also customize the `./charts/policy-reporter/values.yaml` to change the default configurations.
 
