@@ -1,6 +1,8 @@
 loki:
   # loki host address
   host: http://loki.loki-stack.svc.cluster.local:3100
+  minimumPriority: ""
+  skipExistingOnStartup: false
 
 # Mapping from policy -> priority
 # Spported:

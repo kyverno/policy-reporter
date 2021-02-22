@@ -40,7 +40,7 @@ func newLokiPayload(result report.Result) payload {
 	var labels = []string{
 		"status=\"" + result.Status + "\"",
 		"policy=\"" + result.Policy + "\"",
-		"priority=\"" + result.Priority + "\"",
+		"priority=\"" + result.Priority.String() + "\"",
 		"source=\"kyverno\"",
 	}
 
@@ -67,18 +67,23 @@ func newLokiPayload(result report.Result) payload {
 
 func mapPriority(r report.Result) string {
 	if r.Status == report.Error || r.Status == report.Fail {
-		return strings.ToUpper(r.Priority)
+		return strings.ToUpper(r.Priority.String())
 	}
 
-	return strings.ToUpper(report.Information)
+	return strings.ToUpper("INFO")
 }
 
 type Client struct {
-	host   string
-	client *http.Client
+	host            string
+	minimumPriority string
+	client          *http.Client
 }
 
 func (l *Client) Send(result report.Result) {
+	if result.Priority < report.NewPriority(l.minimumPriority) {
+		return
+	}
+
 	payload := newLokiPayload(result)
 	body := new(bytes.Buffer)
 
@@ -114,9 +119,10 @@ func (l *Client) Send(result report.Result) {
 	}
 }
 
-func NewClient(host string) target.Client {
+func NewClient(host, minimumPriority string) target.Client {
 	return &Client{
 		host + "/api/prom/push",
+		minimumPriority,
 		&http.Client{},
 	}
 }

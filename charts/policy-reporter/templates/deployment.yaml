@@ -25,6 +25,13 @@ spec:
         - name: {{ .Chart.Name }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
+          args:
+            - run
+            - --loki={{ .Values.loki.host }}
+            - --loki-minimum-priority={{ .Values.loki.minimumPriority }}
+            {{- if .Values.loki.skipExistingOnStartup }}
+            - --loki-skip-exising-on-startup
+            {{- end }}
           ports:
             - name: http
               containerPort: 2112
@@ -42,10 +49,7 @@ spec:
           volumeMounts:
           - name: config-volume
             mountPath: /app/config.yaml
-            subPath: config.yaml
-          env:
-          - name: LOKI_HOST
-            value: {{ .Values.loki.host | quote }}
+            subPath: config.yaml´
       volumes:
       - name: config-volume
         configMap:

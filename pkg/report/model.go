@@ -1,10 +1,12 @@
 package report
 
-import "fmt"
+import (
+	"fmt"
+	"time"
+)
 
 type Status = string
 type Severity = string
-type Priority = string
 
 const (
 	Fail  Status = "fail"
@@ -17,11 +19,67 @@ const (
 	Medium Severity = "medium"
 	Heigh  Severity = "heigh"
 
-	Alert       Priority = "error"
-	Warning     Priority = "warning"
-	Information Priority = "info"
-	Debug       Priority = "debug"
+	defaultString = ""
+	debugString   = "debug"
+	infoString    = "info"
+	warningString = "warning"
+	errorString   = "error"
 )
+
+const (
+	DefaultPriority = iota
+	DebugPriority
+	InfoPriority
+	WarningPriority
+	ErrorPriority
+)
+
+type Priority int
+
+func (p Priority) String() string {
+	switch p {
+	case DebugPriority:
+		return debugString
+	case InfoPriority:
+		return infoString
+	case WarningPriority:
+		return warningString
+	case ErrorPriority:
+		return errorString
+	default:
+		return defaultString
+	}
+}
+
+func PriorityFromStatus(p Status) Priority {
+	switch p {
+	case Fail:
+		return ErrorPriority
+	case Error:
+		return ErrorPriority
+	case Warn:
+		return WarningPriority
+	case Pass:
+		return InfoPriority
+	default:
+		return DefaultPriority
+	}
+}
+
+func NewPriority(p string) Priority {
+	switch p {
+	case debugString:
+		return DebugPriority
+	case infoString:
+		return InfoPriority
+	case warningString:
+		return WarningPriority
+	case errorString:
+		return ErrorPriority
+	default:
+		return DefaultPriority
+	}
+}
 
 type Resource struct {
 	APIVersion string
@@ -65,10 +123,11 @@ type Summary struct {
 }
 
 type PolicyReport struct {
-	Name      string
-	Namespace string
-	Results   map[string]Result
-	Summary   Summary
+	Name              string
+	Namespace         string
+	Results           map[string]Result
+	Summary           Summary
+	CreationTimestamp time.Time
 }
 
 func (pr PolicyReport) GetIdentifier() string {
@@ -90,9 +149,10 @@ func (pr PolicyReport) GetNewValidation(or PolicyReport) []Result {
 }
 
 type ClusterPolicyReport struct {
-	Name    string
-	Results map[string]Result
-	Summary Summary
+	Name              string
+	Results           map[string]Result
+	Summary           Summary
+	CreationTimestamp time.Time
 }
 
 func (cr ClusterPolicyReport) GetIdentifier() string {
