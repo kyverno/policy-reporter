@@ -22,12 +22,17 @@ type Resolver struct {
 	config *Config
 }
 
-func (r *Resolver) KubernetesClient() (report.Client, error) {
+func (r *Resolver) PolicyReportClient() (report.Client, error) {
 	if kubeClient != nil {
 		return kubeClient, nil
 	}
 
-	client, err := kubernetes.NewPolicyReportClient(context.Background(), r.config.Kubeconfig, time.Now())
+	client, err := kubernetes.NewPolicyReportClient(
+		context.Background(),
+		r.config.Kubeconfig,
+		r.config.Namespace,
+		time.Now(),
+	)
 
 	kubeClient = client
 
@@ -56,7 +61,7 @@ func (r *Resolver) PolicyReportMetrics() (metrics.Metrics, error) {
 		return policyReportMetrics, nil
 	}
 
-	client, err := r.KubernetesClient()
+	client, err := r.PolicyReportClient()
 	if err != nil {
 		return nil, err
 	}
@@ -71,7 +76,7 @@ func (r *Resolver) ClusterPolicyReportMetrics() (metrics.Metrics, error) {
 		return clusterPolicyReportMetrics, nil
 	}
 
-	client, err := r.KubernetesClient()
+	client, err := r.PolicyReportClient()
 	if err != nil {
 		return nil, err
 	}

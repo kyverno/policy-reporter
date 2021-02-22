@@ -312,7 +312,7 @@ func (c *policyReportClient) mapResult(result map[string]interface{}) report.Res
 	return r
 }
 
-func NewPolicyReportClient(ctx context.Context, kubeconfig string, startUp time.Time) (report.Client, error) {
+func NewPolicyReportClient(ctx context.Context, kubeconfig, namespace string, startUp time.Time) (report.Client, error) {
 	var config *rest.Config
 	var err error
 
@@ -330,7 +330,7 @@ func NewPolicyReportClient(ctx context.Context, kubeconfig string, startUp time.
 		return nil, err
 	}
 
-	coreClient, err := NewCoreClient(kubeconfig, "policy-reporter")
+	coreClient, err := NewCoreClient(kubeconfig, namespace)
 	if err != nil {
 		return nil, err
 	}

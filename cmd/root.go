@@ -34,7 +34,7 @@ func NewCLI() *cobra.Command {
 
 			resolver := config.NewResolver(c)
 
-			client, err := resolver.KubernetesClient()
+			client, err := resolver.PolicyReportClient()
 			if err != nil {
 				return err
 			}
