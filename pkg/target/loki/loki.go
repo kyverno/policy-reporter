@@ -28,7 +28,7 @@ type entry struct {
 }
 
 func newLokiPayload(result report.Result) payload {
-	le := entry{Ts: time.Now().Format(time.RFC3339), Line: "[" + mapPriority(result) + "] " + result.Message}
+	le := entry{Ts: time.Now().Format(time.RFC3339), Line: "[" + strings.ToUpper(result.Priority.String()) + "] " + result.Message}
 	ls := stream{Entries: []entry{le}}
 
 	res := report.Resource{}
@@ -63,14 +63,6 @@ func newLokiPayload(result report.Result) payload {
 	ls.Labels = "{" + strings.Join(labels, ",") + "}"
 
 	return payload{Streams: []stream{ls}}
-}
-
-func mapPriority(r report.Result) string {
-	if r.Status == report.Error || r.Status == report.Fail {
-		return strings.ToUpper(r.Priority.String())
-	}
-
-	return strings.ToUpper("INFO")
 }
 
 type Client struct {
