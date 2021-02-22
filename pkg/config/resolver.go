@@ -1,16 +1,18 @@
 package config
 
 import (
+	"context"
 	"time"
 
 	"github.com/fjogeleit/policy-reporter/pkg/kubernetes"
 	"github.com/fjogeleit/policy-reporter/pkg/metrics"
+	"github.com/fjogeleit/policy-reporter/pkg/report"
 	"github.com/fjogeleit/policy-reporter/pkg/target"
 	"github.com/fjogeleit/policy-reporter/pkg/target/loki"
 )
 
 var (
-	kubeClient                 kubernetes.Client
+	kubeClient                 report.Client
 	lokiClient                 target.Client
 	policyReportMetrics        metrics.Metrics
 	clusterPolicyReportMetrics metrics.Metrics
@@ -20,16 +22,25 @@ type Resolver struct {
 	config *Config
 }
 
-func (r *Resolver) KubernetesClient() (kubernetes.Client, error) {
+func (r *Resolver) PolicyReportClient() (report.Client, error) {
 	if kubeClient != nil {
 		return kubeClient, nil
 	}
 
-	return kubernetes.NewDynamicClient(r.config.Kubeconfig, r.config.PolicyPriorities, time.Now())
+	client, err := kubernetes.NewPolicyReportClient(
+		context.Background(),
+		r.config.Kubeconfig,
+		r.config.Namespace,
+		time.Now(),
+	)
+
+	kubeClient = client
+
+	return client, err
 }
 
 func (r *Resolver) LokiClient() target.Client {
-	if kubeClient != nil {
+	if lokiClient != nil {
 		return lokiClient
 	}
 
@@ -37,10 +48,12 @@ func (r *Resolver) LokiClient() target.Client {
 		return nil
 	}
 
-	return loki.NewClient(
+	lokiClient = loki.NewClient(
 		r.config.Loki.Host,
 		r.config.Loki.MinimumPriority,
 	)
+
+	return lokiClient
 }
 
 func (r *Resolver) PolicyReportMetrics() (metrics.Metrics, error) {
@@ -48,25 +61,29 @@ func (r *Resolver) PolicyReportMetrics() (metrics.Metrics, error) {
 		return policyReportMetrics, nil
 	}
 
-	client, err := r.KubernetesClient()
+	client, err := r.PolicyReportClient()
 	if err != nil {
 		return nil, err
 	}
 
-	return metrics.NewPolicyReportMetrics(client), nil
+	policyReportMetrics = metrics.NewPolicyReportMetrics(client)
+
+	return policyReportMetrics, nil
 }
 
 func (r *Resolver) ClusterPolicyReportMetrics() (metrics.Metrics, error) {
-	if policyReportMetrics != nil {
+	if clusterPolicyReportMetrics != nil {
 		return clusterPolicyReportMetrics, nil
 	}
 
-	client, err := r.KubernetesClient()
+	client, err := r.PolicyReportClient()
 	if err != nil {
 		return nil, err
 	}
 
-	return metrics.NewClusterPolicyMetrics(client), nil
+	clusterPolicyReportMetrics = metrics.NewClusterPolicyMetrics(client)
+
+	return clusterPolicyReportMetrics, nil
 }
 
 func NewResolver(config *Config) Resolver {
