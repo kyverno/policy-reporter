@@ -1,5 +1,5 @@
 package metrics
 
 type Metrics interface {
-	GenerateMetrics()
+	GenerateMetrics() error
 }

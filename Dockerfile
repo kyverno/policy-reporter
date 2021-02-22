@@ -24,4 +24,4 @@ COPY --from=builder /app/build/policyreporter /app/policyreporter
 
 EXPOSE 2112
 
-ENTRYPOINT ["/app/policyreporter"]
+ENTRYPOINT ["/app/policyreporter", "run"]

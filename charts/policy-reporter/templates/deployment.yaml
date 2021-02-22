@@ -26,7 +26,6 @@ spec:
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           args:
-            - run
             - --loki={{ .Values.loki.host }}
             {{- if .Values.loki.minimumPriority }}
             - --loki-minimum-priority={{ .Values.loki.minimumPriority }}

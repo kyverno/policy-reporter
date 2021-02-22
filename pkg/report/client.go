@@ -7,8 +7,8 @@ type WatchClusterPolicyReportCallback = func(watch.EventType, ClusterPolicyRepor
 type WatchPolicyResultCallback = func(Result)
 
 type Client interface {
-	FetchPolicyReports() []PolicyReport
-	WatchPolicyReports(WatchPolicyReportCallback)
-	WatchRuleValidation(WatchPolicyResultCallback, bool)
-	WatchClusterPolicyReports(WatchClusterPolicyReportCallback)
+	FetchPolicyReports() ([]PolicyReport, error)
+	WatchPolicyReports(WatchPolicyReportCallback) error
+	WatchRuleValidation(WatchPolicyResultCallback, bool) error
+	WatchClusterPolicyReports(WatchClusterPolicyReportCallback) error
 }

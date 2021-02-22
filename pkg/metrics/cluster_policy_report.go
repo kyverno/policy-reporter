@@ -33,7 +33,7 @@ func (m ClusterPolicyReportMetrics) removeCachedReport(i string) {
 	m.rwmutex.Unlock()
 }
 
-func (m ClusterPolicyReportMetrics) GenerateMetrics() {
+func (m ClusterPolicyReportMetrics) GenerateMetrics() error {
 	policyGauge := promauto.NewGaugeVec(prometheus.GaugeOpts{
 		Name: "cluster_policy_report_summary",
 		Help: "Summary of all ClusterPolicyReports",
@@ -47,7 +47,7 @@ func (m ClusterPolicyReportMetrics) GenerateMetrics() {
 	prometheus.Register(policyGauge)
 	prometheus.Register(ruleGauge)
 
-	m.client.WatchClusterPolicyReports(func(e watch.EventType, r report.ClusterPolicyReport) {
+	return m.client.WatchClusterPolicyReports(func(e watch.EventType, r report.ClusterPolicyReport) {
 		go func(event watch.EventType, report report.ClusterPolicyReport) {
 			switch event {
 			case watch.Added:

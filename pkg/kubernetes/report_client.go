@@ -4,10 +4,10 @@ import (
 	"context"
 	"errors"
 	"log"
-	"sync"
 	"time"
 
 	"github.com/fjogeleit/policy-reporter/pkg/report"
+	"golang.org/x/sync/errgroup"
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
@@ -36,28 +36,27 @@ type policyReportClient struct {
 	startUp            time.Time
 }
 
-func (c *policyReportClient) FetchPolicyReports() []report.PolicyReport {
+func (c *policyReportClient) FetchPolicyReports() ([]report.PolicyReport, error) {
 	var reports []report.PolicyReport
 
 	result, err := c.client.Resource(policyReports).List(context.Background(), metav1.ListOptions{})
 	if err != nil {
 		log.Printf("K8s List Error: %s\n", err.Error())
-		return reports
+		return reports, err
 	}
 
 	for _, item := range result.Items {
 		reports = append(reports, c.mapPolicyReport(item.Object))
 	}
 
-	return reports
+	return reports, nil
 }
 
-func (c *policyReportClient) WatchClusterPolicyReports(cb report.WatchClusterPolicyReportCallback) {
+func (c *policyReportClient) WatchClusterPolicyReports(cb report.WatchClusterPolicyReportCallback) error {
 	for {
 		result, err := c.client.Resource(clusterPolicyReports).Watch(context.Background(), metav1.ListOptions{})
 		if err != nil {
-			log.Printf("K8s Watch Error: %s\n", err.Error())
-			return
+			return err
 		}
 
 		for result := range result.ResultChan() {
@@ -68,12 +67,11 @@ func (c *policyReportClient) WatchClusterPolicyReports(cb report.WatchClusterPol
 	}
 }
 
-func (c *policyReportClient) WatchPolicyReports(cb report.WatchPolicyReportCallback) {
+func (c *policyReportClient) WatchPolicyReports(cb report.WatchPolicyReportCallback) error {
 	for {
 		result, err := c.client.Resource(policyReports).Watch(context.Background(), metav1.ListOptions{})
 		if err != nil {
-			log.Printf("K8s Watch Error: %s\n", err.Error())
-			return
+			return err
 		}
 
 		for result := range result.ResultChan() {
@@ -84,12 +82,11 @@ func (c *policyReportClient) WatchPolicyReports(cb report.WatchPolicyReportCallb
 	}
 }
 
-func (c *policyReportClient) WatchRuleValidation(cb report.WatchPolicyResultCallback, skipExisting bool) {
-	wg := sync.WaitGroup{}
-	wg.Add(2)
+func (c *policyReportClient) WatchRuleValidation(cb report.WatchPolicyResultCallback, skipExisting bool) error {
+	wg := new(errgroup.Group)
 
-	go func(skipExisting bool) {
-		c.WatchPolicyReports(func(e watch.EventType, pr report.PolicyReport) {
+	wg.Go(func() error {
+		return c.WatchPolicyReports(func(e watch.EventType, pr report.PolicyReport) {
 			switch e {
 			case watch.Added:
 				if skipExisting && pr.CreationTimestamp.Before(c.startUp) {
@@ -113,12 +110,10 @@ func (c *policyReportClient) WatchRuleValidation(cb report.WatchPolicyResultCall
 				delete(c.policyCache, pr.GetIdentifier())
 			}
 		})
+	})
 
-		wg.Done()
-	}(skipExisting)
-
-	go func(skipExisting bool) {
-		c.WatchClusterPolicyReports(func(s watch.EventType, cpr report.ClusterPolicyReport) {
+	wg.Go(func() error {
+		return c.WatchClusterPolicyReports(func(s watch.EventType, cpr report.ClusterPolicyReport) {
 			switch s {
 			case watch.Added:
 				if skipExisting && cpr.CreationTimestamp.Before(c.startUp) {
@@ -142,11 +137,9 @@ func (c *policyReportClient) WatchRuleValidation(cb report.WatchPolicyResultCall
 				delete(c.clusterPolicyCache, cpr.GetIdentifier())
 			}
 		})
+	})
 
-		wg.Done()
-	}(skipExisting)
-
-	wg.Wait()
+	return wg.Wait()
 }
 
 func (c *policyReportClient) fetchPriorities(ctx context.Context) error {

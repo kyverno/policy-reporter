@@ -9,6 +9,7 @@ import (
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"golang.org/x/sync/errgroup"
 )
 
 type PolicySeverity = string
@@ -39,32 +40,39 @@ func NewCLI() *cobra.Command {
 				return err
 			}
 
-			loki := resolver.LokiClient()
-
-			if loki != nil {
-				go client.WatchRuleValidation(func(r report.Result) {
-					go loki.Send(r)
-				}, c.Loki.SkipExisting)
-			}
-
 			policyMetrics, err := resolver.PolicyReportMetrics()
 			if err != nil {
 				return err
 			}
-
-			go policyMetrics.GenerateMetrics()
 
 			clusterPolicyMetrics, err := resolver.ClusterPolicyReportMetrics()
 			if err != nil {
 				return err
 			}
 
-			go clusterPolicyMetrics.GenerateMetrics()
+			loki := resolver.LokiClient()
 
-			http.Handle("/metrics", promhttp.Handler())
-			http.ListenAndServe(":2112", nil)
+			g := new(errgroup.Group)
 
-			return nil
+			g.Go(policyMetrics.GenerateMetrics)
+
+			g.Go(clusterPolicyMetrics.GenerateMetrics)
+
+			if loki != nil {
+				g.Go(func() error {
+					return client.WatchRuleValidation(func(r report.Result) {
+						go loki.Send(r)
+					}, c.Loki.SkipExisting)
+				})
+			}
+
+			g.Go(func() error {
+				http.Handle("/metrics", promhttp.Handler())
+
+				return http.ListenAndServe(":2112", nil)
+			})
+
+			return g.Wait()
 		},
 	}
 

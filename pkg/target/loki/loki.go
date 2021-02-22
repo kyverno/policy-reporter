@@ -41,7 +41,7 @@ func newLokiPayload(result report.Result) payload {
 		"status=\"" + result.Status + "\"",
 		"policy=\"" + result.Policy + "\"",
 		"priority=\"" + result.Priority.String() + "\"",
-		"source=\"kyverno\"",
+		"source=\"policy-reporter\"",
 	}
 
 	if result.Rule != "" {
@@ -99,15 +99,15 @@ func (l *Client) Send(result report.Result) {
 	}()
 
 	if err != nil {
-		log.Printf("PUSH ERROR: %s\n", err.Error())
+		log.Printf("[ERROR] PUSH failed: %s\n", err.Error())
 	} else if resp.StatusCode > 400 {
 		fmt.Printf("StatusCode: %d\n", resp.StatusCode)
 		buf := new(bytes.Buffer)
 		buf.ReadFrom(resp.Body)
 
-		log.Printf("PUSH ERROR [%d]: %s\n", resp.StatusCode, buf.String())
+		log.Printf("[ERROR] PUSH failed [%d]: %s\n", resp.StatusCode, buf.String())
 	} else {
-		log.Println("PUSH OK")
+		log.Println("[INFO] PUSH OK")
 	}
 }
 
