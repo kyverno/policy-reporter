@@ -27,18 +27,18 @@ func (c coreClient) GetConfig(ctx context.Context, name string) (*apiv1.ConfigMa
 }
 
 func (c coreClient) WatchConfigs(ctx context.Context, cb ConfigMapCallback) error {
-	watch, err := c.cmClient.Watch(ctx, metav1.ListOptions{})
-	if err != nil {
-		return err
-	}
+	for {
+		watch, err := c.cmClient.Watch(ctx, metav1.ListOptions{})
+		if err != nil {
+			return err
+		}
 
-	for event := range watch.ResultChan() {
-		if cm, ok := event.Object.(*apiv1.ConfigMap); ok {
-			cb(event.Type, cm)
+		for event := range watch.ResultChan() {
+			if cm, ok := event.Object.(*apiv1.ConfigMap); ok {
+				cb(event.Type, cm)
+			}
 		}
 	}
-
-	return nil
 }
 
 func NewCoreClient(kubeconfig, namespace string) (CoreClient, error) {

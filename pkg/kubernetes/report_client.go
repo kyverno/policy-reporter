@@ -65,8 +65,6 @@ func (c *policyReportClient) WatchClusterPolicyReports(cb report.WatchClusterPol
 				cb(result.Type, c.mapClusterPolicyReport(item.Object))
 			}
 		}
-
-		log.Println("[WARNING] WatchClusterPolicyReports Stops")
 	}
 }
 
@@ -83,8 +81,6 @@ func (c *policyReportClient) WatchPolicyReports(cb report.WatchPolicyReportCallb
 				cb(result.Type, c.mapPolicyReport(item.Object))
 			}
 		}
-
-		log.Println("[WARNING] WatchPolicyReports Stops")
 	}
 }
 
