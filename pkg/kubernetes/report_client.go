@@ -53,30 +53,38 @@ func (c *policyReportClient) FetchPolicyReports() []report.PolicyReport {
 }
 
 func (c *policyReportClient) WatchClusterPolicyReports(cb report.WatchClusterPolicyReportCallback) {
-	result, err := c.client.Resource(clusterPolicyReports).Watch(context.Background(), metav1.ListOptions{})
-	if err != nil {
-		log.Printf("K8s Watch Error: %s\n", err.Error())
-		return
-	}
-
-	for result := range result.ResultChan() {
-		if item, ok := result.Object.(*unstructured.Unstructured); ok {
-			cb(result.Type, c.mapClusterPolicyReport(item.Object))
+	for {
+		result, err := c.client.Resource(clusterPolicyReports).Watch(context.Background(), metav1.ListOptions{})
+		if err != nil {
+			log.Printf("K8s Watch Error: %s\n", err.Error())
+			return
 		}
+
+		for result := range result.ResultChan() {
+			if item, ok := result.Object.(*unstructured.Unstructured); ok {
+				cb(result.Type, c.mapClusterPolicyReport(item.Object))
+			}
+		}
+
+		log.Println("[WARNING] WatchClusterPolicyReports Stops")
 	}
 }
 
 func (c *policyReportClient) WatchPolicyReports(cb report.WatchPolicyReportCallback) {
-	result, err := c.client.Resource(policyReports).Watch(context.Background(), metav1.ListOptions{})
-	if err != nil {
-		log.Printf("K8s Watch Error: %s\n", err.Error())
-		return
-	}
-
-	for result := range result.ResultChan() {
-		if item, ok := result.Object.(*unstructured.Unstructured); ok {
-			cb(result.Type, c.mapPolicyReport(item.Object))
+	for {
+		result, err := c.client.Resource(policyReports).Watch(context.Background(), metav1.ListOptions{})
+		if err != nil {
+			log.Printf("K8s Watch Error: %s\n", err.Error())
+			return
 		}
+
+		for result := range result.ResultChan() {
+			if item, ok := result.Object.(*unstructured.Unstructured); ok {
+				cb(result.Type, c.mapPolicyReport(item.Object))
+			}
+		}
+
+		log.Println("[WARNING] WatchPolicyReports Stops")
 	}
 }
 

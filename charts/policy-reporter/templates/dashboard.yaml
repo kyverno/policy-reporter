@@ -219,13 +219,13 @@ data:
             {
             "expr": "sum(cluster_policy_report_result{status=~\"fail|error\"} > 0) by (policy)",
             "interval": "",
-            "legendFormat": "{{` {{ rule }}` }}",
+            "legendFormat": "{{` {{ policy }}` }}",
             "refId": "A"
             },
             {
             "expr": "sum(policy_report_result{status=~\"fail|error\"} > 0) by (policy)",
             "interval": "",
-            "legendFormat": "{{` {{ rule }}` }}",
+            "legendFormat": "{{` {{ policy }}` }}",
             "refId": "B"
             }
         ],
