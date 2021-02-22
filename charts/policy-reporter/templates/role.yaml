@@ -1,17 +1,12 @@
 apiVersion: rbac.authorization.k8s.io/v1
-kind: ClusterRole
+kind: Role
 metadata:
-  labels:
-    rbac.authorization.k8s.io/aggregate-to-admin: "true"
   name: {{ include "policyreporter.fullname" . }}
 rules:
 - apiGroups:
-  - '*'
+  - ''
   resources:
-  - policyreports
-  - policyreports/status
-  - clusterpolicyreports
-  - clusterpolicyreports/status
+  - configmaps
   verbs:
   - get
   - list

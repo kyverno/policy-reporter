@@ -6,6 +6,6 @@ type Config struct {
 		SkipExisting    bool   `mapstructure:"skipExistingOnStartup"`
 		MinimumPriority string `mapstructure:"minimumPriority"`
 	} `mapstructure:"loki"`
-	Kubeconfig       string            `mapstructure:"kubeconfig"`
-	PolicyPriorities map[string]string `mapstructure:"policy_priorities"`
+	Kubeconfig string `mapstructure:"kubeconfig"`
+	Namespace  string `mapstructure:"namespace"`
 }

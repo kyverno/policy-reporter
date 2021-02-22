@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"flag"
-	"log"
 	"net/http"
 
 	"github.com/fjogeleit/policy-reporter/pkg/config"
@@ -83,25 +82,9 @@ func NewCLI() *cobra.Command {
 func LoadConfig(cmd *cobra.Command) (*config.Config, error) {
 	v := viper.New()
 
-	cfgFile := ""
-
-	configFlag := cmd.Flags().Lookup("config")
-	if configFlag != nil {
-		cfgFile = configFlag.Value.String()
-	}
-
-	if cfgFile != "" {
-		v.SetConfigFile(cfgFile)
-	} else {
-		v.AddConfigPath(".")
-		v.SetConfigName("config")
-	}
+	v.SetDefault("namespace", "policy-reporter")
 
 	v.AutomaticEnv()
-
-	if err := v.ReadInConfig(); err != nil {
-		log.Println("no config provided")
-	}
 
 	if flag := cmd.Flags().Lookup("loki"); flag != nil {
 		v.BindPFlag("loki.host", flag)

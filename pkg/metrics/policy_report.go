@@ -3,7 +3,6 @@ package metrics
 import (
 	"sync"
 
-	"github.com/fjogeleit/policy-reporter/pkg/kubernetes"
 	"github.com/fjogeleit/policy-reporter/pkg/report"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
@@ -11,7 +10,7 @@ import (
 )
 
 type PolicyReportMetrics struct {
-	client  kubernetes.Client
+	client  report.Client
 	cache   map[string]report.PolicyReport
 	rwmutex *sync.RWMutex
 }
@@ -150,7 +149,7 @@ func updatePolicyGauge(policyGauge *prometheus.GaugeVec, report report.PolicyRep
 		Set(float64(report.Summary.Skip))
 }
 
-func NewPolicyReportMetrics(client kubernetes.Client) *PolicyReportMetrics {
+func NewPolicyReportMetrics(client report.Client) *PolicyReportMetrics {
 	return &PolicyReportMetrics{
 		client:  client,
 		cache:   make(map[string]report.PolicyReport),

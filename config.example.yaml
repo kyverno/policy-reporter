@@ -1,8 +1,0 @@
-# Mapping from policy -> priority
-# Spported:
-#   error
-#   warning
-#   info
-#   debug
-policy_priorities:
-  check-label-app: warning

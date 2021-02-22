@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/fjogeleit/policy-reporter/pkg/report"
+	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime/schema"
@@ -22,26 +23,20 @@ var (
 	clusterPolicyReports = schema.GroupVersionResource{Group: "wgpolicyk8s.io", Version: "v1alpha1", Resource: "clusterpolicyreports"}
 )
 
-type WatchPolicyReportCallback = func(watch.EventType, report.PolicyReport)
-type WatchClusterPolicyReportCallback = func(watch.EventType, report.ClusterPolicyReport)
-type WatchPolicyResultCallback = func(report.Result)
+const (
+	prioriyConfig = "policy-reporter-priorities"
+)
 
-type Client interface {
-	FetchPolicyReports() []report.PolicyReport
-	WatchPolicyReports(WatchPolicyReportCallback)
-	WatchRuleValidation(WatchPolicyResultCallback, bool)
-	WatchClusterPolicyReports(WatchClusterPolicyReportCallback)
-}
-
-type DynamicClient struct {
+type policyReportClient struct {
 	client             dynamic.Interface
+	coreClient         CoreClient
 	policyCache        map[string]report.PolicyReport
 	clusterPolicyCache map[string]report.ClusterPolicyReport
 	priorityMap        map[string]string
 	startUp            time.Time
 }
 
-func (c *DynamicClient) FetchPolicyReports() []report.PolicyReport {
+func (c *policyReportClient) FetchPolicyReports() []report.PolicyReport {
 	var reports []report.PolicyReport
 
 	result, err := c.client.Resource(policyReports).List(context.Background(), metav1.ListOptions{})
@@ -57,7 +52,7 @@ func (c *DynamicClient) FetchPolicyReports() []report.PolicyReport {
 	return reports
 }
 
-func (c *DynamicClient) WatchClusterPolicyReports(cb WatchClusterPolicyReportCallback) {
+func (c *policyReportClient) WatchClusterPolicyReports(cb report.WatchClusterPolicyReportCallback) {
 	result, err := c.client.Resource(clusterPolicyReports).Watch(context.Background(), metav1.ListOptions{})
 	if err != nil {
 		log.Printf("K8s Watch Error: %s\n", err.Error())
@@ -71,7 +66,7 @@ func (c *DynamicClient) WatchClusterPolicyReports(cb WatchClusterPolicyReportCal
 	}
 }
 
-func (c *DynamicClient) WatchPolicyReports(cb WatchPolicyReportCallback) {
+func (c *policyReportClient) WatchPolicyReports(cb report.WatchPolicyReportCallback) {
 	result, err := c.client.Resource(policyReports).Watch(context.Background(), metav1.ListOptions{})
 	if err != nil {
 		log.Printf("K8s Watch Error: %s\n", err.Error())
@@ -85,7 +80,7 @@ func (c *DynamicClient) WatchPolicyReports(cb WatchPolicyReportCallback) {
 	}
 }
 
-func (c *DynamicClient) WatchRuleValidation(cb WatchPolicyResultCallback, skipExisting bool) {
+func (c *policyReportClient) WatchRuleValidation(cb report.WatchPolicyResultCallback, skipExisting bool) {
 	wg := sync.WaitGroup{}
 	wg.Add(2)
 
@@ -150,34 +145,46 @@ func (c *DynamicClient) WatchRuleValidation(cb WatchPolicyResultCallback, skipEx
 	wg.Wait()
 }
 
-func NewDynamicClient(kubeconfig string, prioties map[string]string, startUp time.Time) (Client, error) {
-	var config *rest.Config
-	var err error
-
-	if kubeconfig != "" {
-		config, err = clientcmd.BuildConfigFromFlags("", kubeconfig)
-	} else {
-		config, err = rest.InClusterConfig()
-	}
+func (c *policyReportClient) fetchPriorities(ctx context.Context) error {
+	cm, err := c.coreClient.GetConfig(ctx, prioriyConfig)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
-	client, err := dynamic.NewForConfig(config)
-	if err != nil {
-		return nil, err
+	if cm != nil {
+		c.priorityMap = cm.Data
+		log.Println("[INFO] Priorities loaded")
 	}
 
-	return &DynamicClient{
-		client:             client,
-		policyCache:        make(map[string]report.PolicyReport),
-		clusterPolicyCache: make(map[string]report.ClusterPolicyReport),
-		priorityMap:        prioties,
-		startUp:            startUp,
-	}, nil
+	return nil
 }
 
-func (c *DynamicClient) mapPolicyReport(reportMap map[string]interface{}) report.PolicyReport {
+func (c *policyReportClient) syncPriorities(ctx context.Context) error {
+	err := c.coreClient.WatchConfigs(ctx, func(e watch.EventType, cm *v1.ConfigMap) {
+		if cm.Name != prioriyConfig {
+			return
+		}
+
+		switch e {
+		case watch.Added:
+			c.priorityMap = cm.Data
+		case watch.Modified:
+			c.priorityMap = cm.Data
+		case watch.Deleted:
+			c.priorityMap = map[string]string{}
+		}
+
+		log.Println("[INFO] Priorities synchronized")
+	})
+
+	if err != nil {
+		log.Printf("[INFO] Unable to sync Priorities: %s", err.Error())
+	}
+
+	return err
+}
+
+func (c *policyReportClient) mapPolicyReport(reportMap map[string]interface{}) report.PolicyReport {
 	summary := report.Summary{}
 
 	if s, ok := reportMap["summary"].(map[string]interface{}); ok {
@@ -205,7 +212,7 @@ func (c *DynamicClient) mapPolicyReport(reportMap map[string]interface{}) report
 	return r
 }
 
-func (c *DynamicClient) mapClusterPolicyReport(reportMap map[string]interface{}) report.ClusterPolicyReport {
+func (c *policyReportClient) mapClusterPolicyReport(reportMap map[string]interface{}) report.ClusterPolicyReport {
 	summary := report.Summary{}
 
 	if s, ok := reportMap["summary"].(map[string]interface{}); ok {
@@ -239,7 +246,7 @@ func (c *DynamicClient) mapClusterPolicyReport(reportMap map[string]interface{})
 	return r
 }
 
-func (c *DynamicClient) mapCreationTime(result map[string]interface{}) (time.Time, error) {
+func (c *policyReportClient) mapCreationTime(result map[string]interface{}) (time.Time, error) {
 	if metadata, ok := result["metadata"].(map[string]interface{}); ok {
 		if created, ok2 := metadata["creationTimestamp"].(string); ok2 {
 			return time.Parse("2006-01-02T15:04:05Z", created)
@@ -251,7 +258,7 @@ func (c *DynamicClient) mapCreationTime(result map[string]interface{}) (time.Tim
 	return time.Time{}, errors.New("No metadata provided")
 }
 
-func (c *DynamicClient) mapResult(result map[string]interface{}) report.Result {
+func (c *policyReportClient) mapResult(result map[string]interface{}) report.Result {
 	var resources []report.Resource
 
 	if ress, ok := result["resources"].([]interface{}); ok {
@@ -303,4 +310,46 @@ func (c *DynamicClient) mapResult(result map[string]interface{}) report.Result {
 	}
 
 	return r
+}
+
+func NewPolicyReportClient(ctx context.Context, kubeconfig string, startUp time.Time) (report.Client, error) {
+	var config *rest.Config
+	var err error
+
+	if kubeconfig != "" {
+		config, err = clientcmd.BuildConfigFromFlags("", kubeconfig)
+	} else {
+		config, err = rest.InClusterConfig()
+	}
+	if err != nil {
+		return nil, err
+	}
+
+	dynamicClient, err := dynamic.NewForConfig(config)
+	if err != nil {
+		return nil, err
+	}
+
+	coreClient, err := NewCoreClient(kubeconfig, "policy-reporter")
+	if err != nil {
+		return nil, err
+	}
+
+	reportClient := &policyReportClient{
+		client:             dynamicClient,
+		coreClient:         coreClient,
+		policyCache:        make(map[string]report.PolicyReport),
+		clusterPolicyCache: make(map[string]report.ClusterPolicyReport),
+		priorityMap:        make(map[string]string),
+		startUp:            startUp,
+	}
+
+	err = reportClient.fetchPriorities(ctx)
+	if err != nil {
+		log.Printf("[INFO] No PriorityConfig found: %s", err.Error())
+	}
+
+	go reportClient.syncPriorities(ctx)
+
+	return reportClient, nil
 }
