@@ -4,7 +4,6 @@ import (
 	"flag"
 	"log"
 	"net/http"
-	"strings"
 
 	"github.com/fjogeleit/policy-reporter/pkg/config"
 	"github.com/fjogeleit/policy-reporter/pkg/report"
@@ -25,10 +24,9 @@ const (
 
 func NewCLI() *cobra.Command {
 	rootCmd := &cobra.Command{
-		Use:          "policyreporter",
-		SilenceUsage: true,
-		Short:        "Kyverno Policy API",
-		Long:         `Kyverno Policy API and Monitoring`,
+		Use:   "run",
+		Short: "Kyverno Policy API",
+		Long:  `Kyverno Policy API and Monitoring`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			c, err := LoadConfig(cmd)
 			if err != nil {
@@ -47,7 +45,7 @@ func NewCLI() *cobra.Command {
 			if loki != nil {
 				go client.WatchRuleValidation(func(r report.Result) {
 					go loki.Send(r)
-				})
+				}, c.Loki.SkipExisting)
 			}
 
 			policyMetrics, err := resolver.PolicyReportMetrics()
@@ -72,7 +70,10 @@ func NewCLI() *cobra.Command {
 	}
 
 	rootCmd.PersistentFlags().StringP("kubeconfig", "k", "", "absolute path to the kubeconfig file")
-	rootCmd.PersistentFlags().StringP("loki", "l", "", "loki host: http://loki:3100")
+
+	rootCmd.PersistentFlags().String("loki", "", "loki host: http://loki:3100")
+	rootCmd.PersistentFlags().String("loki-minimum-priority", "", "Minimum Priority to send Results to Loki (info < warning < error)")
+	rootCmd.PersistentFlags().Bool("loki-skip-exising-on-startup", false, "Skip Results created before PolicyReporter started. Prevent duplicated sending after new deployment")
 
 	flag.Parse()
 
@@ -81,7 +82,6 @@ func NewCLI() *cobra.Command {
 
 func LoadConfig(cmd *cobra.Command) (*config.Config, error) {
 	v := viper.New()
-	v.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
 
 	cfgFile := ""
 
@@ -106,6 +106,13 @@ func LoadConfig(cmd *cobra.Command) (*config.Config, error) {
 	if flag := cmd.Flags().Lookup("loki"); flag != nil {
 		v.BindPFlag("loki.host", flag)
 	}
+	if flag := cmd.Flags().Lookup("loki-minimum-priority"); flag != nil {
+		v.BindPFlag("loki.minimumPriority", flag)
+	}
+	if flag := cmd.Flags().Lookup("loki-skip-exising-on-startup"); flag != nil {
+		v.BindPFlag("loki.skipExistingOnStartup", flag)
+	}
+
 	if flag := cmd.Flags().Lookup("kubeconfig"); flag != nil {
 		v.BindPFlag("kubeconfig", flag)
 	}

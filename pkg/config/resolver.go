@@ -1,6 +1,8 @@
 package config
 
 import (
+	"time"
+
 	"github.com/fjogeleit/policy-reporter/pkg/kubernetes"
 	"github.com/fjogeleit/policy-reporter/pkg/metrics"
 	"github.com/fjogeleit/policy-reporter/pkg/target"
@@ -23,7 +25,7 @@ func (r *Resolver) KubernetesClient() (kubernetes.Client, error) {
 		return kubeClient, nil
 	}
 
-	return kubernetes.NewDynamicClient(r.config.Kubeconfig, r.config.PolicyPriorities)
+	return kubernetes.NewDynamicClient(r.config.Kubeconfig, r.config.PolicyPriorities, time.Now())
 }
 
 func (r *Resolver) LokiClient() target.Client {
@@ -35,7 +37,10 @@ func (r *Resolver) LokiClient() target.Client {
 		return nil
 	}
 
-	return loki.NewClient(r.config.Loki.Host)
+	return loki.NewClient(
+		r.config.Loki.Host,
+		r.config.Loki.MinimumPriority,
+	)
 }
 
 func (r *Resolver) PolicyReportMetrics() (metrics.Metrics, error) {

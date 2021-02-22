@@ -1,5 +1,10 @@
 loki:
+  # loki host address
   host: http://loki.loki-stack.svc.cluster.local:3100
+  # minimum priority "" < info < warning < error
+  minimumPriority: ""
+  # Skip already existing PolicyReportResults on startup
+  skipExistingOnStartup: false
 
 metrics:
   serviceMonitor: false
