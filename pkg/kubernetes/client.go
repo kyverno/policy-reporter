@@ -2,8 +2,10 @@ package kubernetes
 
 import (
 	"context"
+	"errors"
 	"log"
 	"sync"
+	"time"
 
 	"github.com/fjogeleit/policy-reporter/pkg/report"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -27,15 +29,16 @@ type WatchPolicyResultCallback = func(report.Result)
 type Client interface {
 	FetchPolicyReports() []report.PolicyReport
 	WatchPolicyReports(WatchPolicyReportCallback)
-	WatchRuleValidation(WatchPolicyResultCallback)
-	WatchClusterPolicyReports(cb WatchClusterPolicyReportCallback)
+	WatchRuleValidation(WatchPolicyResultCallback, bool)
+	WatchClusterPolicyReports(WatchClusterPolicyReportCallback)
 }
 
 type DynamicClient struct {
 	client             dynamic.Interface
 	policyCache        map[string]report.PolicyReport
 	clusterPolicyCache map[string]report.ClusterPolicyReport
-	priorityMap        map[string]report.Priority
+	priorityMap        map[string]string
+	startUp            time.Time
 }
 
 func (c *DynamicClient) FetchPolicyReports() []report.PolicyReport {
@@ -82,14 +85,19 @@ func (c *DynamicClient) WatchPolicyReports(cb WatchPolicyReportCallback) {
 	}
 }
 
-func (c *DynamicClient) WatchRuleValidation(cb WatchPolicyResultCallback) {
+func (c *DynamicClient) WatchRuleValidation(cb WatchPolicyResultCallback, skipExisting bool) {
 	wg := sync.WaitGroup{}
 	wg.Add(2)
 
-	go func() {
-		c.WatchPolicyReports(func(s watch.EventType, pr report.PolicyReport) {
-			switch s {
+	go func(skipExisting bool) {
+		c.WatchPolicyReports(func(e watch.EventType, pr report.PolicyReport) {
+			switch e {
 			case watch.Added:
+				if skipExisting && pr.CreationTimestamp.Before(c.startUp) {
+					c.policyCache[pr.GetIdentifier()] = pr
+					break
+				}
+
 				for _, result := range pr.Results {
 					cb(result)
 				}
@@ -108,12 +116,17 @@ func (c *DynamicClient) WatchRuleValidation(cb WatchPolicyResultCallback) {
 		})
 
 		wg.Done()
-	}()
+	}(skipExisting)
 
-	go func() {
+	go func(skipExisting bool) {
 		c.WatchClusterPolicyReports(func(s watch.EventType, cpr report.ClusterPolicyReport) {
 			switch s {
 			case watch.Added:
+				if skipExisting && cpr.CreationTimestamp.Before(c.startUp) {
+					c.clusterPolicyCache[cpr.GetIdentifier()] = cpr
+					break
+				}
+
 				for _, result := range cpr.Results {
 					cb(result)
 				}
@@ -132,12 +145,12 @@ func (c *DynamicClient) WatchRuleValidation(cb WatchPolicyResultCallback) {
 		})
 
 		wg.Done()
-	}()
+	}(skipExisting)
 
 	wg.Wait()
 }
 
-func NewDynamicClient(kubeconfig string, prioties map[string]report.Priority) (Client, error) {
+func NewDynamicClient(kubeconfig string, prioties map[string]string, startUp time.Time) (Client, error) {
 	var config *rest.Config
 	var err error
 
@@ -160,6 +173,7 @@ func NewDynamicClient(kubeconfig string, prioties map[string]report.Priority) (C
 		policyCache:        make(map[string]report.PolicyReport),
 		clusterPolicyCache: make(map[string]report.ClusterPolicyReport),
 		priorityMap:        prioties,
+		startUp:            startUp,
 	}, nil
 }
 
@@ -208,6 +222,13 @@ func (c *DynamicClient) mapClusterPolicyReport(reportMap map[string]interface{})
 		Results: make(map[string]report.Result),
 	}
 
+	creationTimestamp, err := c.mapCreationTime(reportMap)
+	if err == nil {
+		r.CreationTimestamp = creationTimestamp
+	} else {
+		r.CreationTimestamp = time.Now()
+	}
+
 	if rs, ok := reportMap["results"].([]interface{}); ok {
 		for _, resultItem := range rs {
 			res := c.mapResult(resultItem.(map[string]interface{}))
@@ -216,6 +237,18 @@ func (c *DynamicClient) mapClusterPolicyReport(reportMap map[string]interface{})
 	}
 
 	return r
+}
+
+func (c *DynamicClient) mapCreationTime(result map[string]interface{}) (time.Time, error) {
+	if metadata, ok := result["metadata"].(map[string]interface{}); ok {
+		if created, ok2 := metadata["creationTimestamp"].(string); ok2 {
+			return time.Parse("2006-01-02T15:04:05Z", created)
+		}
+
+		return time.Time{}, errors.New("No creationTimestamp provided")
+	}
+
+	return time.Time{}, errors.New("No metadata provided")
 }
 
 func (c *DynamicClient) mapResult(result map[string]interface{}) report.Result {
@@ -240,17 +273,21 @@ func (c *DynamicClient) mapResult(result map[string]interface{}) report.Result {
 		}
 	}
 
+	status := result["status"].(report.Status)
+
 	r := report.Result{
 		Message:   result["message"].(string),
 		Policy:    result["policy"].(string),
-		Status:    result["status"].(report.Status),
+		Status:    status,
 		Scored:    result["scored"].(bool),
-		Priority:  report.Alert,
+		Priority:  report.PriorityFromStatus(status),
 		Resources: resources,
 	}
 
-	if priority, ok := c.priorityMap[r.Policy]; ok {
-		r.Priority = priority
+	if r.Status == report.Error || r.Status == report.Fail {
+		if priority, ok := c.priorityMap[r.Policy]; ok {
+			r.Priority = report.NewPriority(priority)
+		}
 	}
 
 	if rule, ok := result["rule"]; ok {
