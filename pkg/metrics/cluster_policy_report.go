@@ -64,16 +64,14 @@ func (m ClusterPolicyReportMetrics) GenerateMetrics() error {
 
 				for _, rule := range m.getCachedReport(report.GetIdentifier()).Results {
 					res := rule.Resources[0]
-					ruleGauge.
-						WithLabelValues(
-							rule.Rule,
-							rule.Policy,
-							report.Name,
-							res.Kind,
-							res.Name,
-							rule.Status,
-						).
-						Set(0)
+					ruleGauge.DeleteLabelValues(
+						rule.Rule,
+						rule.Policy,
+						report.Name,
+						res.Kind,
+						res.Name,
+						rule.Status,
+					)
 				}
 
 				for _, rule := range report.Results {
@@ -92,24 +90,22 @@ func (m ClusterPolicyReportMetrics) GenerateMetrics() error {
 
 				m.cachedReport(report)
 			case watch.Deleted:
-				policyGauge.WithLabelValues(report.Name, "Pass").Set(0)
-				policyGauge.WithLabelValues(report.Name, "Fail").Set(0)
-				policyGauge.WithLabelValues(report.Name, "Warn").Set(0)
-				policyGauge.WithLabelValues(report.Name, "Error").Set(0)
-				policyGauge.WithLabelValues(report.Name, "Skip").Set(0)
+				policyGauge.DeleteLabelValues(report.Name, "Pass")
+				policyGauge.DeleteLabelValues(report.Name, "Fail")
+				policyGauge.DeleteLabelValues(report.Name, "Warn")
+				policyGauge.DeleteLabelValues(report.Name, "Error")
+				policyGauge.DeleteLabelValues(report.Name, "Skip")
 
 				for _, rule := range report.Results {
 					res := rule.Resources[0]
-					ruleGauge.
-						WithLabelValues(
-							rule.Rule,
-							rule.Policy,
-							report.Name,
-							res.Kind,
-							res.Name,
-							rule.Status,
-						).
-						Set(0)
+					ruleGauge.DeleteLabelValues(
+						rule.Rule,
+						rule.Policy,
+						report.Name,
+						res.Kind,
+						res.Name,
+						rule.Status,
+					)
 				}
 
 				m.removeCachedReport(report.GetIdentifier())

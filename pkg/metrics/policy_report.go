@@ -74,17 +74,15 @@ func (m PolicyReportMetrics) GenerateMetrics() error {
 
 				for _, rule := range m.getCachedReport(report.GetIdentifier()).Results {
 					res := rule.Resources[0]
-					ruleGauge.
-						WithLabelValues(
-							report.Namespace,
-							rule.Rule,
-							rule.Policy,
-							report.Name,
-							res.Kind,
-							res.Name,
-							rule.Status,
-						).
-						Set(0)
+					ruleGauge.DeleteLabelValues(
+						report.Namespace,
+						rule.Rule,
+						rule.Policy,
+						report.Name,
+						res.Kind,
+						res.Name,
+						rule.Status,
+					)
 				}
 
 				for _, rule := range report.Results {
@@ -104,25 +102,24 @@ func (m PolicyReportMetrics) GenerateMetrics() error {
 
 				m.cachedReport(report)
 			case watch.Deleted:
-				policyGauge.WithLabelValues(report.Namespace, report.Name, "Pass").Set(0)
-				policyGauge.WithLabelValues(report.Namespace, report.Name, "Fail").Set(0)
-				policyGauge.WithLabelValues(report.Namespace, report.Name, "Warn").Set(0)
-				policyGauge.WithLabelValues(report.Namespace, report.Name, "Error").Set(0)
-				policyGauge.WithLabelValues(report.Namespace, report.Name, "Skip").Set(0)
+				policyGauge.DeleteLabelValues(report.Namespace, report.Name, "Pass")
+				policyGauge.DeleteLabelValues(report.Namespace, report.Name, "Fail")
+				policyGauge.DeleteLabelValues(report.Namespace, report.Name, "Warn")
+				policyGauge.DeleteLabelValues(report.Namespace, report.Name, "Error")
+				policyGauge.DeleteLabelValues(report.Namespace, report.Name, "Skip")
 
 				for _, rule := range report.Results {
 					res := rule.Resources[0]
-					ruleGauge.
-						WithLabelValues(
-							report.Namespace,
-							rule.Rule,
-							rule.Policy,
-							report.Name,
-							res.Kind,
-							res.Name,
-							rule.Status,
-						).
-						Set(0)
+
+					ruleGauge.DeleteLabelValues(
+						report.Namespace,
+						rule.Rule,
+						rule.Policy,
+						report.Name,
+						res.Kind,
+						res.Name,
+						rule.Status,
+					)
 				}
 
 				m.removeCachedReport(report.GetIdentifier())
