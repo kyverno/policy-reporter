@@ -2,7 +2,6 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: {{ include "policyreporter.fullname" . }}
-  namespace: policy-reporter
   labels:
     {{- include "policyreporter.labels" . | nindent 4 }}
 spec:
