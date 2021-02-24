@@ -62,12 +62,17 @@ data:
             "decimals": 0,
             "mappings": [],
             "min": 0,
+            "noValue": "0",
             "thresholds": {
                 "mode": "absolute",
                 "steps": [
                 {
-                    "color": "orange",
+                    "color": "green",
                     "value": null
+                },
+                {
+                    "color": "#EAB839",
+                    "value": 1
                 }
                 ]
             },
@@ -87,7 +92,7 @@ data:
             "orientation": "horizontal",
             "reduceOptions": {
             "calcs": [
-                "lastNotNull"
+                "last"
             ],
             "fields": "",
             "values": false
@@ -117,6 +122,7 @@ data:
             "decimals": 0,
             "mappings": [],
             "min": 0,
+            "noValue": "0",
             "thresholds": {
                 "mode": "absolute",
                 "steps": [
@@ -147,7 +153,7 @@ data:
             "orientation": "vertical",
             "reduceOptions": {
             "calcs": [
-                "lastNotNull"
+                "last"
             ],
             "fields": "",
             "values": false
