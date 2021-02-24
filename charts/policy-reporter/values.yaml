@@ -15,7 +15,7 @@ metrics:
 image:
   repository: fjogeleit/policy-reporter
   pullPolicy: IfNotPresent
-  tag: 0.5.1
+  tag: 0.6.0
 
 imagePullSecrets: []
 

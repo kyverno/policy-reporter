@@ -12,6 +12,7 @@ on:
 
     paths-ignore:
       - README.md
+      - charts/**
 
 jobs:
   test:
