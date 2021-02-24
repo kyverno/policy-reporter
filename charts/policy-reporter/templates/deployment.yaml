@@ -31,7 +31,7 @@ spec:
             - --loki-minimum-priority={{ .Values.loki.minimumPriority }}
             {{- end }}
             {{- if .Values.loki.skipExistingOnStartup }}
-            - --loki-skip-exising-on-startup
+            - --loki-skip-existing-on-startup
             {{- end }}
           ports:
             - name: http

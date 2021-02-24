@@ -1,5 +1,6 @@
 package config
 
+// Config of the PolicyReporter
 type Config struct {
 	Loki struct {
 		Host            string `mapstructure:"host"`

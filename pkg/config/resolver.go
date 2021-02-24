@@ -2,6 +2,7 @@ package config
 
 import (
 	"context"
+	"net/http"
 	"time"
 
 	"github.com/fjogeleit/policy-reporter/pkg/kubernetes"
@@ -18,10 +19,12 @@ var (
 	clusterPolicyReportMetrics metrics.Metrics
 )
 
+// Resolver manages dependencies
 type Resolver struct {
 	config *Config
 }
 
+// PolicyReportClient resolver method
 func (r *Resolver) PolicyReportClient() (report.Client, error) {
 	if kubeClient != nil {
 		return kubeClient, nil
@@ -39,6 +42,7 @@ func (r *Resolver) PolicyReportClient() (report.Client, error) {
 	return client, err
 }
 
+// LokiClient resolver method
 func (r *Resolver) LokiClient() target.Client {
 	if lokiClient != nil {
 		return lokiClient
@@ -51,11 +55,13 @@ func (r *Resolver) LokiClient() target.Client {
 	lokiClient = loki.NewClient(
 		r.config.Loki.Host,
 		r.config.Loki.MinimumPriority,
+		&http.Client{},
 	)
 
 	return lokiClient
 }
 
+// PolicyReportMetrics resolver method
 func (r *Resolver) PolicyReportMetrics() (metrics.Metrics, error) {
 	if policyReportMetrics != nil {
 		return policyReportMetrics, nil
@@ -71,6 +77,7 @@ func (r *Resolver) PolicyReportMetrics() (metrics.Metrics, error) {
 	return policyReportMetrics, nil
 }
 
+// ClusterPolicyReportMetrics resolver method
 func (r *Resolver) ClusterPolicyReportMetrics() (metrics.Metrics, error) {
 	if clusterPolicyReportMetrics != nil {
 		return clusterPolicyReportMetrics, nil
@@ -86,6 +93,15 @@ func (r *Resolver) ClusterPolicyReportMetrics() (metrics.Metrics, error) {
 	return clusterPolicyReportMetrics, nil
 }
 
+// Reset all cached dependencies
+func (r *Resolver) Reset() {
+	kubeClient = nil
+	lokiClient = nil
+	policyReportMetrics = nil
+	clusterPolicyReportMetrics = nil
+}
+
+// NewResolver constructor function
 func NewResolver(config *Config) Resolver {
 	return Resolver{config}
 }

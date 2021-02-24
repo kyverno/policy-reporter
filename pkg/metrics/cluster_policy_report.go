@@ -9,6 +9,7 @@ import (
 	"k8s.io/apimachinery/pkg/watch"
 )
 
+// ClusterPolicyReportMetrics creates ClusterPolicy Metrics
 type ClusterPolicyReportMetrics struct {
 	client  report.Client
 	cache   map[string]report.ClusterPolicyReport
@@ -33,6 +34,7 @@ func (m ClusterPolicyReportMetrics) removeCachedReport(i string) {
 	m.rwmutex.Unlock()
 }
 
+// GenerateMetrics for ClusterPolicyReport Summaries and PolicyResults
 func (m ClusterPolicyReportMetrics) GenerateMetrics() error {
 	policyGauge := promauto.NewGaugeVec(prometheus.GaugeOpts{
 		Name: "cluster_policy_report_summary",
@@ -132,6 +134,7 @@ func updateClusterPolicyGauge(policyGauge *prometheus.GaugeVec, report report.Cl
 		Set(float64(report.Summary.Skip))
 }
 
+// NewClusterPolicyMetrics creates a new ClusterPolicyReportMetrics pointer
 func NewClusterPolicyMetrics(client report.Client) *ClusterPolicyReportMetrics {
 	return &ClusterPolicyReportMetrics{
 		client:  client,

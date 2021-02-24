@@ -13,6 +13,10 @@ import (
 	"github.com/fjogeleit/policy-reporter/pkg/target"
 )
 
+type httpClient interface {
+	Do(req *http.Request) (*http.Response, error)
+}
+
 type payload struct {
 	Streams []stream `json:"streams"`
 }
@@ -65,13 +69,13 @@ func newLokiPayload(result report.Result) payload {
 	return payload{Streams: []stream{ls}}
 }
 
-type Client struct {
+type client struct {
 	host            string
 	minimumPriority string
-	client          *http.Client
+	client          httpClient
 }
 
-func (l *Client) Send(result report.Result) {
+func (l *client) Send(result report.Result) {
 	if result.Priority < report.NewPriority(l.minimumPriority) {
 		return
 	}
@@ -93,7 +97,7 @@ func (l *Client) Send(result report.Result) {
 
 	resp, err := l.client.Do(req)
 	defer func() {
-		if resp != nil {
+		if resp != nil && resp.Body != nil {
 			resp.Body.Close()
 		}
 	}()
@@ -111,10 +115,11 @@ func (l *Client) Send(result report.Result) {
 	}
 }
 
-func NewClient(host, minimumPriority string) target.Client {
-	return &Client{
+// NewClient creates a new loki.client to send Results to Loki
+func NewClient(host, minimumPriority string, httpClient httpClient) target.Client {
+	return &client{
 		host + "/api/prom/push",
 		minimumPriority,
-		&http.Client{},
+		httpClient,
 	}
 }

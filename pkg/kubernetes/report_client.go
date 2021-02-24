@@ -2,7 +2,6 @@ package kubernetes
 
 import (
 	"context"
-	"errors"
 	"log"
 	"time"
 
@@ -32,7 +31,7 @@ type policyReportClient struct {
 	coreClient         CoreClient
 	policyCache        map[string]report.PolicyReport
 	clusterPolicyCache map[string]report.ClusterPolicyReport
-	priorityMap        map[string]string
+	mapper             Mapper
 	startUp            time.Time
 }
 
@@ -46,7 +45,7 @@ func (c *policyReportClient) FetchPolicyReports() ([]report.PolicyReport, error)
 	}
 
 	for _, item := range result.Items {
-		reports = append(reports, c.mapPolicyReport(item.Object))
+		reports = append(reports, c.mapper.MapPolicyReport(item.Object))
 	}
 
 	return reports, nil
@@ -61,7 +60,7 @@ func (c *policyReportClient) WatchClusterPolicyReports(cb report.WatchClusterPol
 
 		for result := range result.ResultChan() {
 			if item, ok := result.Object.(*unstructured.Unstructured); ok {
-				cb(result.Type, c.mapClusterPolicyReport(item.Object))
+				cb(result.Type, c.mapper.MapClusterPolicyReport(item.Object))
 			}
 		}
 	}
@@ -76,7 +75,7 @@ func (c *policyReportClient) WatchPolicyReports(cb report.WatchPolicyReportCallb
 
 		for result := range result.ResultChan() {
 			if item, ok := result.Object.(*unstructured.Unstructured); ok {
-				cb(result.Type, c.mapPolicyReport(item.Object))
+				cb(result.Type, c.mapper.MapPolicyReport(item.Object))
 			}
 		}
 	}
@@ -100,7 +99,7 @@ func (c *policyReportClient) WatchRuleValidation(cb report.WatchPolicyResultCall
 
 				c.policyCache[pr.GetIdentifier()] = pr
 			case watch.Modified:
-				diff := pr.GetNewValidation(c.policyCache[pr.GetIdentifier()])
+				diff := pr.GetNewResults(c.policyCache[pr.GetIdentifier()])
 				for _, result := range diff {
 					cb(result)
 				}
@@ -127,7 +126,7 @@ func (c *policyReportClient) WatchRuleValidation(cb report.WatchPolicyResultCall
 
 				c.clusterPolicyCache[cpr.GetIdentifier()] = cpr
 			case watch.Modified:
-				diff := cpr.GetNewValidation(c.clusterPolicyCache[cpr.GetIdentifier()])
+				diff := cpr.GetNewResults(c.clusterPolicyCache[cpr.GetIdentifier()])
 				for _, result := range diff {
 					cb(result)
 				}
@@ -149,7 +148,7 @@ func (c *policyReportClient) fetchPriorities(ctx context.Context) error {
 	}
 
 	if cm != nil {
-		c.priorityMap = cm.Data
+		c.mapper.SetPriorityMap(cm.Data)
 		log.Println("[INFO] Priorities loaded")
 	}
 
@@ -164,11 +163,11 @@ func (c *policyReportClient) syncPriorities(ctx context.Context) error {
 
 		switch e {
 		case watch.Added:
-			c.priorityMap = cm.Data
+			c.mapper.SetPriorityMap(cm.Data)
 		case watch.Modified:
-			c.priorityMap = cm.Data
+			c.mapper.SetPriorityMap(cm.Data)
 		case watch.Deleted:
-			c.priorityMap = map[string]string{}
+			c.mapper.SetPriorityMap(map[string]string{})
 		}
 
 		log.Println("[INFO] Priorities synchronized")
@@ -181,134 +180,7 @@ func (c *policyReportClient) syncPriorities(ctx context.Context) error {
 	return err
 }
 
-func (c *policyReportClient) mapPolicyReport(reportMap map[string]interface{}) report.PolicyReport {
-	summary := report.Summary{}
-
-	if s, ok := reportMap["summary"].(map[string]interface{}); ok {
-		summary.Pass = int(s["pass"].(int64))
-		summary.Skip = int(s["skip"].(int64))
-		summary.Warn = int(s["warn"].(int64))
-		summary.Error = int(s["error"].(int64))
-		summary.Fail = int(s["fail"].(int64))
-	}
-
-	r := report.PolicyReport{
-		Name:      reportMap["metadata"].(map[string]interface{})["name"].(string),
-		Namespace: reportMap["metadata"].(map[string]interface{})["namespace"].(string),
-		Summary:   summary,
-		Results:   make(map[string]report.Result),
-	}
-
-	if rs, ok := reportMap["results"].([]interface{}); ok {
-		for _, resultItem := range rs {
-			res := c.mapResult(resultItem.(map[string]interface{}))
-			r.Results[res.GetIdentifier()] = res
-		}
-	}
-
-	return r
-}
-
-func (c *policyReportClient) mapClusterPolicyReport(reportMap map[string]interface{}) report.ClusterPolicyReport {
-	summary := report.Summary{}
-
-	if s, ok := reportMap["summary"].(map[string]interface{}); ok {
-		summary.Pass = int(s["pass"].(int64))
-		summary.Skip = int(s["skip"].(int64))
-		summary.Warn = int(s["warn"].(int64))
-		summary.Error = int(s["error"].(int64))
-		summary.Fail = int(s["fail"].(int64))
-	}
-
-	r := report.ClusterPolicyReport{
-		Name:    reportMap["metadata"].(map[string]interface{})["name"].(string),
-		Summary: summary,
-		Results: make(map[string]report.Result),
-	}
-
-	creationTimestamp, err := c.mapCreationTime(reportMap)
-	if err == nil {
-		r.CreationTimestamp = creationTimestamp
-	} else {
-		r.CreationTimestamp = time.Now()
-	}
-
-	if rs, ok := reportMap["results"].([]interface{}); ok {
-		for _, resultItem := range rs {
-			res := c.mapResult(resultItem.(map[string]interface{}))
-			r.Results[res.GetIdentifier()] = res
-		}
-	}
-
-	return r
-}
-
-func (c *policyReportClient) mapCreationTime(result map[string]interface{}) (time.Time, error) {
-	if metadata, ok := result["metadata"].(map[string]interface{}); ok {
-		if created, ok2 := metadata["creationTimestamp"].(string); ok2 {
-			return time.Parse("2006-01-02T15:04:05Z", created)
-		}
-
-		return time.Time{}, errors.New("No creationTimestamp provided")
-	}
-
-	return time.Time{}, errors.New("No metadata provided")
-}
-
-func (c *policyReportClient) mapResult(result map[string]interface{}) report.Result {
-	var resources []report.Resource
-
-	if ress, ok := result["resources"].([]interface{}); ok {
-		for _, res := range ress {
-			if resMap, ok := res.(map[string]interface{}); ok {
-				r := report.Resource{
-					APIVersion: resMap["apiVersion"].(string),
-					Kind:       resMap["kind"].(string),
-					Name:       resMap["name"].(string),
-					UID:        resMap["uid"].(string),
-				}
-
-				if ns, ok := result["namespace"]; ok {
-					r.Namespace = ns.(string)
-				}
-
-				resources = append(resources, r)
-			}
-		}
-	}
-
-	status := result["status"].(report.Status)
-
-	r := report.Result{
-		Message:   result["message"].(string),
-		Policy:    result["policy"].(string),
-		Status:    status,
-		Scored:    result["scored"].(bool),
-		Priority:  report.PriorityFromStatus(status),
-		Resources: resources,
-	}
-
-	if r.Status == report.Error || r.Status == report.Fail {
-		if priority, ok := c.priorityMap[r.Policy]; ok {
-			r.Priority = report.NewPriority(priority)
-		}
-	}
-
-	if rule, ok := result["rule"]; ok {
-		r.Rule = rule.(string)
-	}
-
-	if category, ok := result["category"]; ok {
-		r.Category = category.(string)
-	}
-
-	if severity, ok := result["severity"]; ok {
-		r.Severity = severity.(report.Severity)
-	}
-
-	return r
-}
-
+// NewPolicyReportClient creates a new ReportClient based on the kubernetes go-client
 func NewPolicyReportClient(ctx context.Context, kubeconfig, namespace string, startUp time.Time) (report.Client, error) {
 	var config *rest.Config
 	var err error
@@ -337,7 +209,7 @@ func NewPolicyReportClient(ctx context.Context, kubeconfig, namespace string, st
 		coreClient:         coreClient,
 		policyCache:        make(map[string]report.PolicyReport),
 		clusterPolicyCache: make(map[string]report.ClusterPolicyReport),
-		priorityMap:        make(map[string]string),
+		mapper:             NewMapper(make(map[string]string)),
 		startUp:            startUp,
 	}
 

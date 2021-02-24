@@ -1,4 +1,5 @@
 # PolicyReporter
+[![CI](https://github.com/fjogeleit/policy-reporter/actions/workflows/ci.yaml/badge.svg)](https://github.com/fjogeleit/policy-reporter/actions/workflows/ci.yaml)
 
 ## Motivation
 

@@ -11,11 +11,15 @@ import (
 	"k8s.io/client-go/tools/clientcmd"
 )
 
+// CoreClient provides simplified APIs for ConfigMap Resources
 type CoreClient interface {
+	// GetConfig return a single ConfigMap by name if exist
 	GetConfig(ctx context.Context, name string) (*apiv1.ConfigMap, error)
+	// WatchConfigs calls its ConfigMapCallback whenever a ConfigMap was added, modified or deleted
 	WatchConfigs(ctx context.Context, cb ConfigMapCallback) error
 }
 
+// ConfigMapCallback is used by WatchConfigs
 type ConfigMapCallback = func(watch.EventType, *apiv1.ConfigMap)
 
 type coreClient struct {
@@ -41,6 +45,7 @@ func (c coreClient) WatchConfigs(ctx context.Context, cb ConfigMapCallback) erro
 	}
 }
 
+// NewCoreClient creates a new CoreClient with the provided kubeconfig or InCluster configuration if kubeconfig is empty
 func NewCoreClient(kubeconfig, namespace string) (CoreClient, error) {
 	var config *rest.Config
 	var err error

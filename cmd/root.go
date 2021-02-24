@@ -12,23 +12,14 @@ import (
 	"golang.org/x/sync/errgroup"
 )
 
-type PolicySeverity = string
-
-const (
-	Fail  PolicySeverity = "fail"
-	Warn  PolicySeverity = "warn"
-	Error PolicySeverity = "error"
-	Pass  PolicySeverity = "pass"
-	Skip  PolicySeverity = "skip"
-)
-
+// NewCLI creates a new instance of the root CLI
 func NewCLI() *cobra.Command {
 	rootCmd := &cobra.Command{
 		Use:   "run",
 		Short: "Kyverno Policy API",
 		Long:  `Kyverno Policy API and Monitoring`,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			c, err := LoadConfig(cmd)
+			c, err := loadConfig(cmd)
 			if err != nil {
 				return err
 			}
@@ -80,14 +71,14 @@ func NewCLI() *cobra.Command {
 
 	rootCmd.PersistentFlags().String("loki", "", "loki host: http://loki:3100")
 	rootCmd.PersistentFlags().String("loki-minimum-priority", "", "Minimum Priority to send Results to Loki (info < warning < error)")
-	rootCmd.PersistentFlags().Bool("loki-skip-exising-on-startup", false, "Skip Results created before PolicyReporter started. Prevent duplicated sending after new deployment")
+	rootCmd.PersistentFlags().Bool("loki-skip-existing-on-startup", false, "Skip Results created before PolicyReporter started. Prevent duplicated sending after new deployment")
 
 	flag.Parse()
 
 	return rootCmd
 }
 
-func LoadConfig(cmd *cobra.Command) (*config.Config, error) {
+func loadConfig(cmd *cobra.Command) (*config.Config, error) {
 	v := viper.New()
 
 	v.SetDefault("namespace", "policy-reporter")
@@ -100,7 +91,7 @@ func LoadConfig(cmd *cobra.Command) (*config.Config, error) {
 	if flag := cmd.Flags().Lookup("loki-minimum-priority"); flag != nil {
 		v.BindPFlag("loki.minimumPriority", flag)
 	}
-	if flag := cmd.Flags().Lookup("loki-skip-exising-on-startup"); flag != nil {
+	if flag := cmd.Flags().Lookup("loki-skip-existing-on-startup"); flag != nil {
 		v.BindPFlag("loki.skipExistingOnStartup", flag)
 	}
 
