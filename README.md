@@ -47,7 +47,7 @@ The Helm Chart includes optional Manifests for the [MonitoringStack](https://git
     * Change the namespace to your required monitoring namespace by changing `metrics.dashboard.namespace` (default: cattle-dashboards)
 
 
-If you are not using the MonitoringStack you can get the dashboard configuration from this [Gist](https://gist.github.com/fjogeleit/bf540421fd28989fc92841177be972bc)
+If you are not using the MonitoringStack you can import the dashboard from [Grafana](https://grafana.com/grafana/dashboards/13968)
 
 Example Installation
 ```bash
