@@ -9,25 +9,24 @@ import (
 	"github.com/fjogeleit/policy-reporter/pkg/metrics"
 	"github.com/fjogeleit/policy-reporter/pkg/report"
 	"github.com/fjogeleit/policy-reporter/pkg/target"
+	"github.com/fjogeleit/policy-reporter/pkg/target/elasticsearch"
 	"github.com/fjogeleit/policy-reporter/pkg/target/loki"
-)
-
-var (
-	kubeClient                 report.Client
-	lokiClient                 target.Client
-	policyReportMetrics        metrics.Metrics
-	clusterPolicyReportMetrics metrics.Metrics
 )
 
 // Resolver manages dependencies
 type Resolver struct {
-	config *Config
+	config                     *Config
+	kubeClient                 report.Client
+	lokiClient                 target.Client
+	elasticsearchClient        target.Client
+	policyReportMetrics        metrics.Metrics
+	clusterPolicyReportMetrics metrics.Metrics
 }
 
 // PolicyReportClient resolver method
 func (r *Resolver) PolicyReportClient() (report.Client, error) {
-	if kubeClient != nil {
-		return kubeClient, nil
+	if r.kubeClient != nil {
+		return r.kubeClient, nil
 	}
 
 	client, err := kubernetes.NewPolicyReportClient(
@@ -37,34 +36,63 @@ func (r *Resolver) PolicyReportClient() (report.Client, error) {
 		time.Now(),
 	)
 
-	kubeClient = client
+	r.kubeClient = client
 
 	return client, err
 }
 
 // LokiClient resolver method
 func (r *Resolver) LokiClient() target.Client {
-	if lokiClient != nil {
-		return lokiClient
+	if r.lokiClient != nil {
+		return r.lokiClient
 	}
 
 	if r.config.Loki.Host == "" {
 		return nil
 	}
 
-	lokiClient = loki.NewClient(
+	r.lokiClient = loki.NewClient(
 		r.config.Loki.Host,
 		r.config.Loki.MinimumPriority,
+		r.config.Loki.SkipExisting,
 		&http.Client{},
 	)
 
-	return lokiClient
+	return r.lokiClient
+}
+
+// ElasticsearchClient resolver method
+func (r *Resolver) ElasticsearchClient() target.Client {
+	if r.elasticsearchClient != nil {
+		return r.elasticsearchClient
+	}
+
+	if r.config.Elasticsearch.Host == "" {
+		return nil
+	}
+	if r.config.Elasticsearch.Index == "" {
+		r.config.Elasticsearch.Index = "policy-reporter"
+	}
+	if r.config.Elasticsearch.Rotation == "" {
+		r.config.Elasticsearch.Rotation = elasticsearch.Dayli
+	}
+
+	r.elasticsearchClient = elasticsearch.NewClient(
+		r.config.Elasticsearch.Host,
+		r.config.Elasticsearch.Index,
+		r.config.Elasticsearch.Rotation,
+		r.config.Elasticsearch.MinimumPriority,
+		r.config.Elasticsearch.SkipExisting,
+		&http.Client{},
+	)
+
+	return r.elasticsearchClient
 }
 
 // PolicyReportMetrics resolver method
 func (r *Resolver) PolicyReportMetrics() (metrics.Metrics, error) {
-	if policyReportMetrics != nil {
-		return policyReportMetrics, nil
+	if r.policyReportMetrics != nil {
+		return r.policyReportMetrics, nil
 	}
 
 	client, err := r.PolicyReportClient()
@@ -72,15 +100,15 @@ func (r *Resolver) PolicyReportMetrics() (metrics.Metrics, error) {
 		return nil, err
 	}
 
-	policyReportMetrics = metrics.NewPolicyReportMetrics(client)
+	r.policyReportMetrics = metrics.NewPolicyReportMetrics(client)
 
-	return policyReportMetrics, nil
+	return r.policyReportMetrics, nil
 }
 
 // ClusterPolicyReportMetrics resolver method
 func (r *Resolver) ClusterPolicyReportMetrics() (metrics.Metrics, error) {
-	if clusterPolicyReportMetrics != nil {
-		return clusterPolicyReportMetrics, nil
+	if r.clusterPolicyReportMetrics != nil {
+		return r.clusterPolicyReportMetrics, nil
 	}
 
 	client, err := r.PolicyReportClient()
@@ -88,20 +116,47 @@ func (r *Resolver) ClusterPolicyReportMetrics() (metrics.Metrics, error) {
 		return nil, err
 	}
 
-	clusterPolicyReportMetrics = metrics.NewClusterPolicyMetrics(client)
+	r.clusterPolicyReportMetrics = metrics.NewClusterPolicyMetrics(client)
 
-	return clusterPolicyReportMetrics, nil
+	return r.clusterPolicyReportMetrics, nil
+}
+
+func (r *Resolver) TargetClients() []target.Client {
+	clients := make([]target.Client, 0)
+
+	if loki := r.LokiClient(); loki != nil {
+		clients = append(clients, loki)
+	}
+
+	if elasticsearch := r.ElasticsearchClient(); elasticsearch != nil {
+		clients = append(clients, elasticsearch)
+	}
+
+	return clients
+}
+
+func (r *Resolver) SkipExistingOnStartup() bool {
+	for _, client := range r.TargetClients() {
+		if !client.SkipExistingOnStartup() {
+			return false
+		}
+	}
+
+	return true
 }
 
 // Reset all cached dependencies
 func (r *Resolver) Reset() {
-	kubeClient = nil
-	lokiClient = nil
-	policyReportMetrics = nil
-	clusterPolicyReportMetrics = nil
+	r.kubeClient = nil
+	r.lokiClient = nil
+	r.elasticsearchClient = nil
+	r.policyReportMetrics = nil
+	r.clusterPolicyReportMetrics = nil
 }
 
 // NewResolver constructor function
 func NewResolver(config *Config) Resolver {
-	return Resolver{config}
+	return Resolver{
+		config: config,
+	}
 }

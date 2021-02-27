@@ -3,6 +3,7 @@ package kubernetes
 import (
 	"context"
 	"log"
+	"sync"
 	"time"
 
 	"github.com/fjogeleit/policy-reporter/pkg/report"
@@ -51,6 +52,65 @@ func (c *policyReportClient) FetchPolicyReports() ([]report.PolicyReport, error)
 	return reports, nil
 }
 
+func (c *policyReportClient) FetchClusterPolicyReports() ([]report.ClusterPolicyReport, error) {
+	var reports []report.ClusterPolicyReport
+
+	result, err := c.client.Resource(clusterPolicyReports).List(context.Background(), metav1.ListOptions{})
+	if err != nil {
+		log.Printf("K8s List Error: %s\n", err.Error())
+		return reports, err
+	}
+
+	for _, item := range result.Items {
+		reports = append(reports, c.mapper.MapClusterPolicyReport(item.Object))
+	}
+
+	return reports, nil
+}
+
+func (c *policyReportClient) FetchPolicyReportResults() ([]report.Result, error) {
+	g := new(errgroup.Group)
+	mx := new(sync.Mutex)
+
+	var results []report.Result
+
+	g.Go(func() error {
+		reports, err := c.FetchClusterPolicyReports()
+		if err != nil {
+			return err
+		}
+
+		for _, clusterReport := range reports {
+			for _, result := range clusterReport.Results {
+				mx.Lock()
+				results = append(results, result)
+				mx.Unlock()
+			}
+		}
+
+		return nil
+	})
+
+	g.Go(func() error {
+		reports, err := c.FetchPolicyReports()
+		if err != nil {
+			return err
+		}
+
+		for _, clusterReport := range reports {
+			for _, result := range clusterReport.Results {
+				mx.Lock()
+				results = append(results, result)
+				mx.Unlock()
+			}
+		}
+
+		return nil
+	})
+
+	return results, g.Wait()
+}
+
 func (c *policyReportClient) WatchClusterPolicyReports(cb report.WatchClusterPolicyReportCallback) error {
 	for {
 		result, err := c.client.Resource(clusterPolicyReports).Watch(context.Background(), metav1.ListOptions{})
@@ -81,27 +141,29 @@ func (c *policyReportClient) WatchPolicyReports(cb report.WatchPolicyReportCallb
 	}
 }
 
-func (c *policyReportClient) WatchRuleValidation(cb report.WatchPolicyResultCallback, skipExisting bool) error {
+func (c *policyReportClient) WatchPolicyReportResults(cb report.WatchPolicyResultCallback, skipExisting bool) error {
 	wg := new(errgroup.Group)
 
 	wg.Go(func() error {
 		return c.WatchPolicyReports(func(e watch.EventType, pr report.PolicyReport) {
 			switch e {
 			case watch.Added:
-				if skipExisting && pr.CreationTimestamp.Before(c.startUp) {
+				preExisted := pr.CreationTimestamp.Before(c.startUp)
+
+				if skipExisting && preExisted {
 					c.policyCache[pr.GetIdentifier()] = pr
 					break
 				}
 
 				for _, result := range pr.Results {
-					cb(result)
+					cb(result, preExisted)
 				}
 
 				c.policyCache[pr.GetIdentifier()] = pr
 			case watch.Modified:
 				diff := pr.GetNewResults(c.policyCache[pr.GetIdentifier()])
 				for _, result := range diff {
-					cb(result)
+					cb(result, false)
 				}
 
 				c.policyCache[pr.GetIdentifier()] = pr
@@ -115,20 +177,22 @@ func (c *policyReportClient) WatchRuleValidation(cb report.WatchPolicyResultCall
 		return c.WatchClusterPolicyReports(func(s watch.EventType, cpr report.ClusterPolicyReport) {
 			switch s {
 			case watch.Added:
-				if skipExisting && cpr.CreationTimestamp.Before(c.startUp) {
+				preExisted := cpr.CreationTimestamp.Before(c.startUp)
+
+				if skipExisting && preExisted {
 					c.clusterPolicyCache[cpr.GetIdentifier()] = cpr
 					break
 				}
 
 				for _, result := range cpr.Results {
-					cb(result)
+					cb(result, preExisted)
 				}
 
 				c.clusterPolicyCache[cpr.GetIdentifier()] = cpr
 			case watch.Modified:
 				diff := cpr.GetNewResults(c.clusterPolicyCache[cpr.GetIdentifier()])
 				for _, result := range diff {
-					cb(result)
+					cb(result, false)
 				}
 
 				c.clusterPolicyCache[cpr.GetIdentifier()] = cpr

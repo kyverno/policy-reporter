@@ -70,9 +70,10 @@ func newLokiPayload(result report.Result) payload {
 }
 
 type client struct {
-	host            string
-	minimumPriority string
-	client          httpClient
+	host                  string
+	minimumPriority       string
+	skipExistingOnStartup bool
+	client                httpClient
 }
 
 func (l *client) Send(result report.Result) {
@@ -93,7 +94,7 @@ func (l *client) Send(result report.Result) {
 	}
 
 	req.Header.Add("Content-Type", "application/json")
-	req.Header.Add("User-Agent", "Policy-API")
+	req.Header.Add("User-Agent", "Policy-Reporter")
 
 	resp, err := l.client.Do(req)
 	defer func() {
@@ -115,11 +116,16 @@ func (l *client) Send(result report.Result) {
 	}
 }
 
+func (l *client) SkipExistingOnStartup() bool {
+	return l.skipExistingOnStartup
+}
+
 // NewClient creates a new loki.client to send Results to Loki
-func NewClient(host, minimumPriority string, httpClient httpClient) target.Client {
+func NewClient(host, minimumPriority string, skipExistingOnStartup bool, httpClient httpClient) target.Client {
 	return &client{
 		host + "/api/prom/push",
 		minimumPriority,
+		skipExistingOnStartup,
 		httpClient,
 	}
 }

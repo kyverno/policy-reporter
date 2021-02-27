@@ -1,79 +1,24 @@
 package cmd
 
 import (
-	"flag"
-	"net/http"
+	"log"
 
 	"github.com/fjogeleit/policy-reporter/pkg/config"
-	"github.com/fjogeleit/policy-reporter/pkg/report"
-	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"golang.org/x/sync/errgroup"
 )
 
 // NewCLI creates a new instance of the root CLI
 func NewCLI() *cobra.Command {
 	rootCmd := &cobra.Command{
-		Use:   "run",
-		Short: "Kyverno Policy API",
-		Long:  `Kyverno Policy API and Monitoring`,
-		RunE: func(cmd *cobra.Command, args []string) error {
-			c, err := loadConfig(cmd)
-			if err != nil {
-				return err
-			}
-
-			resolver := config.NewResolver(c)
-
-			client, err := resolver.PolicyReportClient()
-			if err != nil {
-				return err
-			}
-
-			policyMetrics, err := resolver.PolicyReportMetrics()
-			if err != nil {
-				return err
-			}
-
-			clusterPolicyMetrics, err := resolver.ClusterPolicyReportMetrics()
-			if err != nil {
-				return err
-			}
-
-			loki := resolver.LokiClient()
-
-			g := new(errgroup.Group)
-
-			g.Go(policyMetrics.GenerateMetrics)
-
-			g.Go(clusterPolicyMetrics.GenerateMetrics)
-
-			if loki != nil {
-				g.Go(func() error {
-					return client.WatchRuleValidation(func(r report.Result) {
-						go loki.Send(r)
-					}, c.Loki.SkipExisting)
-				})
-			}
-
-			g.Go(func() error {
-				http.Handle("/metrics", promhttp.Handler())
-
-				return http.ListenAndServe(":2112", nil)
-			})
-
-			return g.Wait()
-		},
+		Use:   "policyreporter",
+		Short: "Generates PolicyReport Metrics and Send Results to different targets",
+		Long: `Generates Prometheus Metrics from PolicyReports, ClusterPolicyReports and PolicyReportResults.
+		Sends notifications to different targets like Grafana's Loki.`,
 	}
 
-	rootCmd.PersistentFlags().StringP("kubeconfig", "k", "", "absolute path to the kubeconfig file")
-
-	rootCmd.PersistentFlags().String("loki", "", "loki host: http://loki:3100")
-	rootCmd.PersistentFlags().String("loki-minimum-priority", "", "Minimum Priority to send Results to Loki (info < warning < error)")
-	rootCmd.PersistentFlags().Bool("loki-skip-existing-on-startup", false, "Skip Results created before PolicyReporter started. Prevent duplicated sending after new deployment")
-
-	flag.Parse()
+	rootCmd.AddCommand(newRunCMD())
+	rootCmd.AddCommand(newSendCMD())
 
 	return rootCmd
 }
@@ -83,7 +28,25 @@ func loadConfig(cmd *cobra.Command) (*config.Config, error) {
 
 	v.SetDefault("namespace", "policy-reporter")
 
+	cfgFile := ""
+
+	configFlag := cmd.Flags().Lookup("config")
+	if configFlag != nil {
+		cfgFile = configFlag.Value.String()
+	}
+
+	if cfgFile != "" {
+		v.SetConfigFile(cfgFile)
+	} else {
+		v.AddConfigPath(".")
+		v.SetConfigName("config")
+	}
+
 	v.AutomaticEnv()
+
+	if err := v.ReadInConfig(); err != nil {
+		log.Println("[INFO] No target configuration file found")
+	}
 
 	if flag := cmd.Flags().Lookup("loki"); flag != nil {
 		v.BindPFlag("loki.host", flag)

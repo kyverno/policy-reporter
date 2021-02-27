@@ -8,4 +8,6 @@ import (
 type Client interface {
 	// Send the given Result to the configured Target
 	Send(result report.Result)
+	// SkipExistingOnStartup skips already existing PolicyReportResults on startup
+	SkipExistingOnStartup() bool
 }

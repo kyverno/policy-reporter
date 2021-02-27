@@ -9,7 +9,7 @@ type WatchPolicyReportCallback = func(watch.EventType, PolicyReport)
 type WatchClusterPolicyReportCallback = func(watch.EventType, ClusterPolicyReport)
 
 // WatchPolicyResultCallback is called whenver a new PolicyResult comes in
-type WatchPolicyResultCallback = func(Result)
+type WatchPolicyResultCallback = func(Result, bool)
 
 // Client interface for interacting with the Kubernetes API
 type Client interface {
@@ -17,8 +17,12 @@ type Client interface {
 	FetchPolicyReports() ([]PolicyReport, error)
 	// WatchPolicyReports blocking API to watch for PolicyReport changes
 	WatchPolicyReports(WatchPolicyReportCallback) error
-	// WatchRuleValidation blocking API to watch for PolicyResult changes from PolicyReports and ClusterPolicyReports
-	WatchRuleValidation(WatchPolicyResultCallback, bool) error
+	// WatchPolicyReportResults blocking API to watch for PolicyResult changes from PolicyReports and ClusterPolicyReports
+	WatchPolicyReportResults(WatchPolicyResultCallback, bool) error
+	// FetchPolicyReportResults from the unterlying API
+	FetchPolicyReportResults() ([]Result, error)
 	// WatchClusterPolicyReports blocking API to watch for ClusterPolicyReport changes
 	WatchClusterPolicyReports(WatchClusterPolicyReportCallback) error
+	// FetchClusterPolicyReport from the unterlying API
+	FetchClusterPolicyReports() ([]ClusterPolicyReport, error)
 }

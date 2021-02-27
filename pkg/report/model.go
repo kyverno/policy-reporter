@@ -1,6 +1,7 @@
 package report
 
 import (
+	"bytes"
 	"fmt"
 	"time"
 )
@@ -58,6 +59,15 @@ func (p Priority) String() string {
 	}
 }
 
+// MarshalJSON marshals the enum as a quoted json string
+func (p Priority) MarshalJSON() ([]byte, error) {
+	buffer := bytes.NewBufferString(`"`)
+	buffer.WriteString(p.String())
+	buffer.WriteString(`"`)
+
+	return buffer.Bytes(), nil
+}
+
 // PriorityFromStatus creates a Priority based on a Status
 func PriorityFromStatus(p Status) Priority {
 	switch p {
@@ -106,8 +116,8 @@ type Result struct {
 	Rule      string
 	Priority  Priority
 	Status    Status
-	Severity  Severity
-	Category  string
+	Severity  Severity `json:",omitempty"`
+	Category  string   `json:",omitempty"`
 	Scored    bool
 	Resources []Resource
 }
