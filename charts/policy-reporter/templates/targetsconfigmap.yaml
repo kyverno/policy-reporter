@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "policyreporter.fullname" . }}-targets
+  labels:
+    {{- include "policyreporter.labels" . | nindent 4 }}
+data:
+  config.yaml: |-
+    loki:
+      host: {{ .Values.loki.host | quote }}
+      minimumPriority: {{ .Values.loki.minimumPriority | quote }}
+      skipExistingOnStartup: {{ .Values.loki.skipExistingOnStartup }}
+
+    elasticsearch:
+      host: {{ .Values.elasticsearch.host | quote }}
+      index: {{ .Values.elasticsearch.index | default "policy-reporter" | quote }}
+      rotation: {{ .Values.elasticsearch.rotation | default "dayli" | quote }}
+      minimumPriority: {{ .Values.elasticsearch.minimumPriority | quote }}
+      skipExistingOnStartup: {{ .Values.elasticsearch.skipExistingOnStartup }}

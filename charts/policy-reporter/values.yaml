@@ -1,10 +1,24 @@
 loki:
   # loki host address
-  host: http://loki.loki-stack.svc.cluster.local:3100
+  host: ""
   # minimum priority "" < info < warning < error
   minimumPriority: ""
   # Skip already existing PolicyReportResults on startup
-  skipExistingOnStartup: false
+  skipExistingOnStartup: true
+
+elasticsearch:
+  # elasticsearch host address
+  host: ""
+  # elasticsearch index (default: policy-reporter)
+  index: ""
+  # elasticsearch index rotation and index suffix
+  # possible values: dayli, monthly, annually, none (default: dayli)
+  rotation: ""
+  # minimum priority "" < info < warning < error
+  minimumPriority: ""
+  # Skip already existing PolicyReportResults on startup
+  skipExistingOnStartup: true
+
 
 metrics:
   serviceMonitor: false

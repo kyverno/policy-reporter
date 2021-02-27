@@ -24,14 +24,6 @@ spec:
         - name: {{ .Chart.Name }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
-          args:
-            - --loki={{ .Values.loki.host }}
-            {{- if .Values.loki.minimumPriority }}
-            - --loki-minimum-priority={{ .Values.loki.minimumPriority }}
-            {{- end }}
-            {{- if .Values.loki.skipExistingOnStartup }}
-            - --loki-skip-existing-on-startup
-            {{- end }}
           ports:
             - name: http
               containerPort: 2112

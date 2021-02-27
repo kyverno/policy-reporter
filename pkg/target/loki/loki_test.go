@@ -59,7 +59,7 @@ func Test_LokiTarget(t *testing.T) {
 				t.Errorf("Unexpected Content-Type: %s", contentType)
 			}
 
-			if agend := req.Header.Get("User-Agent"); agend != "Policy-API" {
+			if agend := req.Header.Get("User-Agent"); agend != "Policy-Reporter" {
 				t.Errorf("Unexpected Host: %s", agend)
 			}
 
@@ -109,7 +109,7 @@ func Test_LokiTarget(t *testing.T) {
 			}
 		}
 
-		loki := loki.NewClient("http://localhost:3100", "", testClient{callback, 200})
+		loki := loki.NewClient("http://localhost:3100", "", false, testClient{callback, 200})
 		loki.Send(completeResult)
 	})
 
@@ -119,7 +119,7 @@ func Test_LokiTarget(t *testing.T) {
 				t.Errorf("Unexpected Content-Type: %s", contentType)
 			}
 
-			if agend := req.Header.Get("User-Agent"); agend != "Policy-API" {
+			if agend := req.Header.Get("User-Agent"); agend != "Policy-Reporter" {
 				t.Errorf("Unexpected Host: %s", agend)
 			}
 
@@ -167,7 +167,7 @@ func Test_LokiTarget(t *testing.T) {
 			}
 		}
 
-		loki := loki.NewClient("http://localhost:3100", "", testClient{callback, 200})
+		loki := loki.NewClient("http://localhost:3100", "", false, testClient{callback, 200})
 		loki.Send(minimalResult)
 	})
 }
