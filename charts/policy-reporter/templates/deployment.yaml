@@ -24,6 +24,8 @@ spec:
         - name: {{ .Chart.Name }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
+          args:
+            - --config=/app/config.yaml
           ports:
             - name: http
               containerPort: 2112
@@ -48,5 +50,5 @@ spec:
       volumes:
       - name: config-volume
         configMap:
-          name: policy-reporter-config
+          name: {{ include "policyreporter.fullname" . }}-targets
           optional: true
