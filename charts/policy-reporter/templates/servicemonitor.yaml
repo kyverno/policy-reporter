@@ -1,8 +1,12 @@
-{{- if .Values.metrics.serviceMonitor }}
+{{- if .Values.metrics.serviceMonitor.enabled }}
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
   name: {{ include "policyreporter.fullname" . }}
+  {{- if .Values.metrics.serviceMonitor.labels }}
+  labels:
+    {{- toYaml .Values.metrics.serviceMonitor.labels | nindent 4 }} 
+  {{- end }}
 spec:
   selector:
     matchLabels:

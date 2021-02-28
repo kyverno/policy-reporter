@@ -69,7 +69,7 @@ elasticsearch:
 helm install policy-reporter policy-reporter/policy-reporter --set slack.webhook=http://hook.slack -n policy-reporter --create-namespace
 ```
 
-### Additional configurations for Slack
+#### Additional configurations for Slack
 
 * Configure `slack.minimumPriority` to send only results with the configured minimumPriority or above, empty means all results. (info < warning < error)
 * Configure `slack.skipExistingOnStartup` to skip all results who already existed before the PolicyReporter started (default: `true`).
@@ -101,7 +101,7 @@ discord:
 
 ### Customization
 
-You can combine multiple targets by setting the required `host` or `webhook` configuration for your targets of choice. For all possible configurations checkout the `./charts/policy-reporter/values.yaml` to change any configurations available.
+You can combine multiple targets by setting the required `host` or `webhook` configuration for your targets of choice. For all possible configurations checkout the `./charts/policy-reporter/values.yaml` to change any available configuration.
 
 ### Configure Policy Priorities
 
@@ -117,7 +117,8 @@ kubectl create configmap policy-reporter-priorities --from-literal check-label-a
 
 The Helm Chart includes optional Manifests for the [MonitoringStack](https://github.com/prometheus-community/helm-charts/tree/main/charts/kube-prometheus-stack). The provided Dashboard works without Loki
 
-* Enable a ServiceMonitor by setting `metrics.serviceMonitor` to `true`.
+* Enable a ServiceMonitor by setting `metrics.serviceMonitor.enabled` to `true`.
+    * With `metrics.serviceMonitor.labels` you can add additional labels to the `ServiceMonitor`. This helps to match the `serviceMonitorSelector` configuration of your Prometheus resource
 * Enable a basic Dashboard as ConfigMap by setting `metrics.dashboard.enabled` to `true`.
     * Change the namespace to your required monitoring namespace by changing `metrics.dashboard.namespace` (default: cattle-dashboards)
 

@@ -36,7 +36,11 @@ discord:
   skipExistingOnStartup: true
 
 metrics:
-  serviceMonitor: false
+  serviceMonitor:
+    enabled: false
+    # labels to match the serviceMonitorSelector of the Prometheus Resource
+    labels: {}
+
   dashboard:
     enabled: false
     namespace: cattle-dashboards

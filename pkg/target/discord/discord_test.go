@@ -66,7 +66,7 @@ func Test_LokiTarget(t *testing.T) {
 		}
 
 		slack := discord.NewClient("http://hook.discord:80", "", false, testClient{callback, 200})
-		slack.Send(minimalResult)
+		slack.Send(completeResult)
 	})
 
 	t.Run("Send Minimal Result", func(t *testing.T) {
