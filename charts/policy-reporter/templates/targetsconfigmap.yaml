@@ -20,5 +20,10 @@ data:
 
     slack:
       webhook: {{ .Values.slack.webhook | quote }}
-      minimumPriority: {{ .Values.loki.minimumPriority | quote }}
-      skipExistingOnStartup: {{ .Values.loki.skipExistingOnStartup }}
+      minimumPriority: {{ .Values.slack.minimumPriority | quote }}
+      skipExistingOnStartup: {{ .Values.slack.skipExistingOnStartup }}
+
+    discord:
+      webhook: {{ .Values.discord.webhook | quote }}
+      minimumPriority: {{ .Values.discord.minimumPriority | quote }}
+      skipExistingOnStartup: {{ .Values.discord.skipExistingOnStartup }}

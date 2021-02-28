@@ -2,6 +2,7 @@ package config
 
 import (
 	"context"
+	"log"
 	"net/http"
 	"time"
 
@@ -9,6 +10,7 @@ import (
 	"github.com/fjogeleit/policy-reporter/pkg/metrics"
 	"github.com/fjogeleit/policy-reporter/pkg/report"
 	"github.com/fjogeleit/policy-reporter/pkg/target"
+	"github.com/fjogeleit/policy-reporter/pkg/target/discord"
 	"github.com/fjogeleit/policy-reporter/pkg/target/elasticsearch"
 	"github.com/fjogeleit/policy-reporter/pkg/target/loki"
 	"github.com/fjogeleit/policy-reporter/pkg/target/slack"
@@ -21,6 +23,7 @@ type Resolver struct {
 	lokiClient                 target.Client
 	elasticsearchClient        target.Client
 	slackClient                target.Client
+	discordClient              target.Client
 	policyReportMetrics        metrics.Metrics
 	clusterPolicyReportMetrics metrics.Metrics
 }
@@ -60,6 +63,8 @@ func (r *Resolver) LokiClient() target.Client {
 		&http.Client{},
 	)
 
+	log.Println("[INFO] Loki configured")
+
 	return r.lokiClient
 }
 
@@ -88,10 +93,12 @@ func (r *Resolver) ElasticsearchClient() target.Client {
 		&http.Client{},
 	)
 
+	log.Println("[INFO] Elasticsearch configured")
+
 	return r.elasticsearchClient
 }
 
-// ElasticsearchClient resolver method
+// SlackClient resolver method
 func (r *Resolver) SlackClient() target.Client {
 	if r.slackClient != nil {
 		return r.slackClient
@@ -108,7 +115,31 @@ func (r *Resolver) SlackClient() target.Client {
 		&http.Client{},
 	)
 
+	log.Println("[INFO] Slack configured")
+
 	return r.slackClient
+}
+
+// DiscordClient resolver method
+func (r *Resolver) DiscordClient() target.Client {
+	if r.discordClient != nil {
+		return r.discordClient
+	}
+
+	if r.config.Discord.Webhook == "" {
+		return nil
+	}
+
+	r.discordClient = discord.NewClient(
+		r.config.Discord.Webhook,
+		r.config.Discord.MinimumPriority,
+		r.config.Discord.SkipExisting,
+		&http.Client{},
+	)
+
+	log.Println("[INFO] Discord configured")
+
+	return r.discordClient
 }
 
 // PolicyReportMetrics resolver method
@@ -156,6 +187,10 @@ func (r *Resolver) TargetClients() []target.Client {
 
 	if slack := r.SlackClient(); slack != nil {
 		clients = append(clients, slack)
+	}
+
+	if discord := r.DiscordClient(); discord != nil {
+		clients = append(clients, discord)
 	}
 
 	return clients

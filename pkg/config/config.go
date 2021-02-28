@@ -23,11 +23,19 @@ type Slack struct {
 	MinimumPriority string `mapstructure:"minimumPriority"`
 }
 
+// Discord configuration
+type Discord struct {
+	Webhook         string `mapstructure:"webhook"`
+	SkipExisting    bool   `mapstructure:"skipExistingOnStartup"`
+	MinimumPriority string `mapstructure:"minimumPriority"`
+}
+
 // Config of the PolicyReporter
 type Config struct {
 	Loki          Loki          `mapstructure:"loki"`
 	Elasticsearch Elasticsearch `mapstructure:"elasticsearch"`
 	Slack         Slack         `mapstructure:"slack"`
+	Discord       Discord       `mapstructure:"discord"`
 	Kubeconfig    string        `mapstructure:"kubeconfig"`
 	Namespace     string        `mapstructure:"namespace"`
 }

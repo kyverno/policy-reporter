@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.9.0
+
+* Implement Discord as Target for PolicyReportResults
+
 ## 0.8.0
 
 * Implement Slack as Target for PolicyReportResults
