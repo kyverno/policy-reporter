@@ -28,6 +28,17 @@ helm install policy-reporter policy-reporter/policy-reporter -n policy-reporter 
 ```bash
 helm install policy-reporter policy-reporter/policy-reporter --set loki.host=http://loki:3100 -n policy-reporter --create-namespace
 ```
+#### Additional configurations for Loki
+
+* Configure `loki.minimumPriority` to send only results with the configured minimumPriority or above, empty means all results. (info < warning < error)
+* Configure `loki.skipExistingOnStartup` to skip all results who already existed before the PolicyReporter started (default: `true`).
+
+```yaml
+loki:
+  host: ""
+  minimumPriority: ""
+  skipExistingOnStartup: true
+```
 
 ### Installation with Elasticsearch
 
@@ -35,26 +46,7 @@ helm install policy-reporter policy-reporter/policy-reporter --set loki.host=htt
 helm install policy-reporter policy-reporter/policy-reporter --set elasticsearch.host=http://elasticsearch:3100 -n policy-reporter --create-namespace
 ```
 
-### Installation with Slack
-
-```bash
-helm install policy-reporter policy-reporter/policy-reporter --set slack.webhook=http://hook.slack -n policy-reporter --create-namespace
-```
-
-You can also customize the `./charts/policy-reporter/values.yaml` to change the default configurations.
-
-### Additional configurations for Loki
-
-* Configure `loki.minimumPriority` to send only results with the configured minimumPriority or above, empty means all results. (info < warning < error)
-* Configure `loki.skipExistingOnStartup` to skip all results who already existed before the PolicyReporter started (default: `true`).
-
-```yaml
-loki:
-  minimumPriority: ""
-  skipExistingOnStartup: true
-```
-
-### Additional configurations for Elasticsearch
+#### Additional configurations for Elasticsearch
 
 * Configure `elasticsearch.index` to customize the elasticsearch index.
 * Configure `elasticsearch.rotation` is added as suffix to the index. Possible values are `daily`, `monthly`, `annually` and `none`.
@@ -63,10 +55,18 @@ loki:
 
 ```yaml
 elasticsearch:
+  host: ""
   index: "policy-reporter"
   rotation: "daily"
   minimumPriority: ""
   skipExistingOnStartup: true
+```
+
+
+### Installation with Slack
+
+```bash
+helm install policy-reporter policy-reporter/policy-reporter --set slack.webhook=http://hook.slack -n policy-reporter --create-namespace
 ```
 
 ### Additional configurations for Slack
@@ -76,9 +76,32 @@ elasticsearch:
 
 ```yaml
 slack:
+  webhook: ""
   minimumPriority: ""
   skipExistingOnStartup: true
 ```
+
+### Installation with Discord
+
+```bash
+helm install policy-reporter policy-reporter/policy-reporter --set discord.webhook=http://hook.discord -n policy-reporter --create-namespace
+```
+
+#### Additional configurations for Discord
+
+* Configure `discord.minimumPriority` to send only results with the configured minimumPriority or above, empty means all results. (info < warning < error)
+* Configure `discord.skipExistingOnStartup` to skip all results who already existed before the PolicyReporter started (default: `true`).
+
+```yaml
+discord:
+  webhook: ""
+  minimumPriority: ""
+  skipExistingOnStartup: true
+```
+
+### Customization
+
+You can combine multiple targets by setting the required `host` or `webhook` configuration for your targets of choice. For all possible configurations checkout the `./charts/policy-reporter/values.yaml` to change any configurations available.
 
 ### Configure Policy Priorities
 

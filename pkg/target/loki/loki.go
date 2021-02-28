@@ -60,6 +60,7 @@ func newLokiPayload(result report.Result) payload {
 	if res.Kind != "" {
 		labels = append(labels, "kind=\""+res.Kind+"\"")
 		labels = append(labels, "name=\""+res.Name+"\"")
+		labels = append(labels, "apiVersion=\""+res.APIVersion+"\"")
 		labels = append(labels, "uid=\""+res.UID+"\"")
 		labels = append(labels, "namespace=\""+res.Namespace+"\"")
 	}

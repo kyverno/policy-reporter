@@ -27,6 +27,14 @@ slack:
   # Skip already existing PolicyReportResults on startup
   skipExistingOnStartup: true
 
+discord:
+  # discord app webhook address
+  webhook: ""
+  # minimum priority "" < info < warning < error
+  minimumPriority: ""
+  # Skip already existing PolicyReportResults on startup
+  skipExistingOnStartup: true
+
 metrics:
   serviceMonitor: false
   dashboard:
@@ -36,7 +44,7 @@ metrics:
 image:
   repository: fjogeleit/policy-reporter
   pullPolicy: IfNotPresent
-  tag: 0.8.0
+  tag: 0.9.0
 
 imagePullSecrets: []
 
