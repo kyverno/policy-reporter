@@ -43,7 +43,7 @@ func (e *client) Send(result report.Result) {
 	body := new(bytes.Buffer)
 
 	if err := json.NewEncoder(body).Encode(result); err != nil {
-		log.Printf("[ERROR] : %v\n", err.Error())
+		log.Printf("[ERROR] ELASTICSEARCH : %v\n", err.Error())
 	}
 
 	var host string
@@ -60,7 +60,7 @@ func (e *client) Send(result report.Result) {
 
 	req, err := http.NewRequest("POST", host, body)
 	if err != nil {
-		log.Printf("[ERROR] : %v\n", err.Error())
+		log.Printf("[ERROR] ELASTICSEARCH : %v\n", err.Error())
 	}
 
 	req.Header.Add("Content-Type", "application/json; charset=utf-8")
@@ -74,15 +74,15 @@ func (e *client) Send(result report.Result) {
 	}()
 
 	if err != nil {
-		log.Printf("[ERROR] PUSH failed: %s\n", err.Error())
-	} else if resp.StatusCode > 400 {
+		log.Printf("[ERROR] ELASTICSEARCH PUSH failed: %s\n", err.Error())
+	} else if resp.StatusCode >= 400 {
 		fmt.Printf("StatusCode: %d\n", resp.StatusCode)
 		buf := new(bytes.Buffer)
 		buf.ReadFrom(resp.Body)
 
-		log.Printf("[ERROR] PUSH failed [%d]: %s\n", resp.StatusCode, buf.String())
+		log.Printf("[ERROR] ELASTICSEARCH PUSH failed [%d]: %s\n", resp.StatusCode, buf.String())
 	} else {
-		log.Println("[INFO] PUSH OK")
+		log.Println("[INFO] ELASTICSEARCH PUSH OK")
 	}
 }
 

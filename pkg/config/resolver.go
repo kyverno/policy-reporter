@@ -11,6 +11,7 @@ import (
 	"github.com/fjogeleit/policy-reporter/pkg/target"
 	"github.com/fjogeleit/policy-reporter/pkg/target/elasticsearch"
 	"github.com/fjogeleit/policy-reporter/pkg/target/loki"
+	"github.com/fjogeleit/policy-reporter/pkg/target/slack"
 )
 
 // Resolver manages dependencies
@@ -19,6 +20,7 @@ type Resolver struct {
 	kubeClient                 report.Client
 	lokiClient                 target.Client
 	elasticsearchClient        target.Client
+	slackClient                target.Client
 	policyReportMetrics        metrics.Metrics
 	clusterPolicyReportMetrics metrics.Metrics
 }
@@ -89,6 +91,26 @@ func (r *Resolver) ElasticsearchClient() target.Client {
 	return r.elasticsearchClient
 }
 
+// ElasticsearchClient resolver method
+func (r *Resolver) SlackClient() target.Client {
+	if r.slackClient != nil {
+		return r.slackClient
+	}
+
+	if r.config.Slack.Webhook == "" {
+		return nil
+	}
+
+	r.slackClient = slack.NewClient(
+		r.config.Slack.Webhook,
+		r.config.Slack.MinimumPriority,
+		r.config.Slack.SkipExisting,
+		&http.Client{},
+	)
+
+	return r.slackClient
+}
+
 // PolicyReportMetrics resolver method
 func (r *Resolver) PolicyReportMetrics() (metrics.Metrics, error) {
 	if r.policyReportMetrics != nil {
@@ -130,6 +152,10 @@ func (r *Resolver) TargetClients() []target.Client {
 
 	if elasticsearch := r.ElasticsearchClient(); elasticsearch != nil {
 		clients = append(clients, elasticsearch)
+	}
+
+	if slack := r.SlackClient(); slack != nil {
+		clients = append(clients, slack)
 	}
 
 	return clients

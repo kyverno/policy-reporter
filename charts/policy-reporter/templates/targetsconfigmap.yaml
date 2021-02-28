@@ -17,3 +17,8 @@ data:
       rotation: {{ .Values.elasticsearch.rotation | default "dayli" | quote }}
       minimumPriority: {{ .Values.elasticsearch.minimumPriority | quote }}
       skipExistingOnStartup: {{ .Values.elasticsearch.skipExistingOnStartup }}
+
+    slack:
+      webhook: {{ .Values.slack.webhook | quote }}
+      minimumPriority: {{ .Values.loki.minimumPriority | quote }}
+      skipExistingOnStartup: {{ .Values.loki.skipExistingOnStartup }}
