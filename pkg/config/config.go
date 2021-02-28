@@ -1,19 +1,33 @@
 package config
 
+// Loki configuration
+type Loki struct {
+	Host            string `mapstructure:"host"`
+	SkipExisting    bool   `mapstructure:"skipExistingOnStartup"`
+	MinimumPriority string `mapstructure:"minimumPriority"`
+}
+
+// Elasticsearch configuration
+type Elasticsearch struct {
+	Host            string `mapstructure:"host"`
+	Index           string `mapstructure:"index"`
+	Rotation        string `mapstructure:"rotation"`
+	SkipExisting    bool   `mapstructure:"skipExistingOnStartup"`
+	MinimumPriority string `mapstructure:"minimumPriority"`
+}
+
+// Slack configuration
+type Slack struct {
+	Webhook         string `mapstructure:"webhook"`
+	SkipExisting    bool   `mapstructure:"skipExistingOnStartup"`
+	MinimumPriority string `mapstructure:"minimumPriority"`
+}
+
 // Config of the PolicyReporter
 type Config struct {
-	Loki struct {
-		Host            string `mapstructure:"host"`
-		SkipExisting    bool   `mapstructure:"skipExistingOnStartup"`
-		MinimumPriority string `mapstructure:"minimumPriority"`
-	} `mapstructure:"loki"`
-	Elasticsearch struct {
-		Host            string `mapstructure:"host"`
-		Index           string `mapstructure:"index"`
-		Rotation        string `mapstructure:"rotation"`
-		SkipExisting    bool   `mapstructure:"skipExistingOnStartup"`
-		MinimumPriority string `mapstructure:"minimumPriority"`
-	} `mapstructure:"elasticsearch"`
-	Kubeconfig string `mapstructure:"kubeconfig"`
-	Namespace  string `mapstructure:"namespace"`
+	Loki          Loki          `mapstructure:"loki"`
+	Elasticsearch Elasticsearch `mapstructure:"elasticsearch"`
+	Slack         Slack         `mapstructure:"slack"`
+	Kubeconfig    string        `mapstructure:"kubeconfig"`
+	Namespace     string        `mapstructure:"namespace"`
 }

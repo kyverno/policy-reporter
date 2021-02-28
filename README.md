@@ -3,7 +3,7 @@
 
 ## Motivation
 
-Kyverno ships with two types of validation. You can either enforce a rule or audit it. If you don't want to block developers or if you want to try out a new rule, you can use the audit functionality. The audit configuration creates [PolicyReports](https://kyverno.io/docs/policy-reports/) which you can access with `kubectl`. Because I can't find a simple solution to get a general overview of this PolicyReports and PolicyReportResults, I created this tool to send information from PolicyReports to different targets like [Grafana Loki](https://grafana.com/oss/loki/). This tool provides by default an HTTP server with Prometheus Metrics on `http://localhost:2112/metrics` about ReportPolicy Summaries and ReportPolicyRules.
+Kyverno ships with two types of validation. You can either enforce a rule or audit it. If you don't want to block developers or if you want to try out a new rule, you can use the audit functionality. The audit configuration creates [PolicyReports](https://kyverno.io/docs/policy-reports/) which you can access with `kubectl`. Because I can't find a simple solution to get a general overview of this PolicyReports and PolicyReportResults, I created this tool to send information from PolicyReports to different targets like [Grafana Loki](https://grafana.com/oss/loki/), [Elasticsearch](https://www.elastic.co/de/elasticsearch/) or [Slack](https://slack.com/). This tool provides by default an HTTP server with Prometheus Metrics on `http://localhost:2112/metrics` about ReportPolicy Summaries and ReportPolicyRules.
 
 This project is in an early stage. Please let me know if anything did not work as expected or if you want to send your audits to other targets then Loki.
 
@@ -35,6 +35,12 @@ helm install policy-reporter policy-reporter/policy-reporter --set loki.host=htt
 helm install policy-reporter policy-reporter/policy-reporter --set elasticsearch.host=http://elasticsearch:3100 -n policy-reporter --create-namespace
 ```
 
+### Installation with Slack
+
+```bash
+helm install policy-reporter policy-reporter/policy-reporter --set slack.webhook=http://hook.slack -n policy-reporter --create-namespace
+```
+
 You can also customize the `./charts/policy-reporter/values.yaml` to change the default configurations.
 
 ### Additional configurations for Loki
@@ -59,6 +65,17 @@ loki:
 elasticsearch:
   index: "policy-reporter"
   rotation: "daily"
+  minimumPriority: ""
+  skipExistingOnStartup: true
+```
+
+### Additional configurations for Slack
+
+* Configure `slack.minimumPriority` to send only results with the configured minimumPriority or above, empty means all results. (info < warning < error)
+* Configure `slack.skipExistingOnStartup` to skip all results who already existed before the PolicyReporter started (default: `true`).
+
+```yaml
+slack:
   minimumPriority: ""
   skipExistingOnStartup: true
 ```

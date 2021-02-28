@@ -85,12 +85,12 @@ func (l *client) Send(result report.Result) {
 	body := new(bytes.Buffer)
 
 	if err := json.NewEncoder(body).Encode(payload); err != nil {
-		log.Printf("[ERROR] : %v\n", err.Error())
+		log.Printf("[ERROR] LOKI : %v\n", err.Error())
 	}
 
 	req, err := http.NewRequest("POST", l.host, body)
 	if err != nil {
-		log.Printf("[ERROR] : %v\n", err.Error())
+		log.Printf("[ERROR] LOKI : %v\n", err.Error())
 	}
 
 	req.Header.Add("Content-Type", "application/json")
@@ -104,15 +104,15 @@ func (l *client) Send(result report.Result) {
 	}()
 
 	if err != nil {
-		log.Printf("[ERROR] PUSH failed: %s\n", err.Error())
-	} else if resp.StatusCode > 400 {
+		log.Printf("[ERROR] LOKI PUSH failed: %s\n", err.Error())
+	} else if resp.StatusCode >= 400 {
 		fmt.Printf("StatusCode: %d\n", resp.StatusCode)
 		buf := new(bytes.Buffer)
 		buf.ReadFrom(resp.Body)
 
-		log.Printf("[ERROR] PUSH failed [%d]: %s\n", resp.StatusCode, buf.String())
+		log.Printf("[ERROR] LOKI PUSH failed [%d]: %s\n", resp.StatusCode, buf.String())
 	} else {
-		log.Println("[INFO] PUSH OK")
+		log.Println("[INFO] LOKI PUSH OK")
 	}
 }
 

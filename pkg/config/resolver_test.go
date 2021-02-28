@@ -7,25 +7,20 @@ import (
 )
 
 var testConfig = &config.Config{
-	Loki: struct {
-		Host            string "mapstructure:\"host\""
-		SkipExisting    bool   "mapstructure:\"skipExistingOnStartup\""
-		MinimumPriority string "mapstructure:\"minimumPriority\""
-	}{
+	Loki: config.Loki{
 		Host:            "http://localhost:3100",
 		SkipExisting:    true,
 		MinimumPriority: "debug",
 	},
-	Elasticsearch: struct {
-		Host            string "mapstructure:\"host\""
-		Index           string "mapstructure:\"index\""
-		Rotation        string "mapstructure:\"rotation\""
-		SkipExisting    bool   "mapstructure:\"skipExistingOnStartup\""
-		MinimumPriority string "mapstructure:\"minimumPriority\""
-	}{
+	Elasticsearch: config.Elasticsearch{
 		Host:            "http://localhost:9200",
 		Index:           "policy-reporter",
 		Rotation:        "dayli",
+		SkipExisting:    true,
+		MinimumPriority: "debug",
+	},
+	Slack: config.Slack{
+		Webhook:         "http://localhost:80",
 		SkipExisting:    true,
 		MinimumPriority: "debug",
 	},
@@ -59,33 +54,37 @@ func Test_ResolveElasticSearchClient(t *testing.T) {
 	}
 }
 
+func Test_ResolveSlackClient(t *testing.T) {
+	resolver := config.NewResolver(testConfig)
+
+	client := resolver.SlackClient()
+	if client == nil {
+		t.Error("Expected Client, got nil")
+	}
+
+	client2 := resolver.SlackClient()
+	if client != client2 {
+		t.Error("Error: Should reuse first instance")
+	}
+}
+
 func Test_ResolveTargets(t *testing.T) {
 	resolver := config.NewResolver(testConfig)
 
 	clients := resolver.TargetClients()
-	if count := len(clients); count != 2 {
-		t.Errorf("Expected 2 Clients, got %d", count)
+	if count := len(clients); count != 3 {
+		t.Errorf("Expected 3 Clients, got %d", count)
 	}
 }
 
 func Test_ResolveSkipExistingOnStartup(t *testing.T) {
 	var testConfig = &config.Config{
-		Loki: struct {
-			Host            string "mapstructure:\"host\""
-			SkipExisting    bool   "mapstructure:\"skipExistingOnStartup\""
-			MinimumPriority string "mapstructure:\"minimumPriority\""
-		}{
+		Loki: config.Loki{
 			Host:            "http://localhost:3100",
 			SkipExisting:    true,
 			MinimumPriority: "debug",
 		},
-		Elasticsearch: struct {
-			Host            string "mapstructure:\"host\""
-			Index           string "mapstructure:\"index\""
-			Rotation        string "mapstructure:\"rotation\""
-			SkipExisting    bool   "mapstructure:\"skipExistingOnStartup\""
-			MinimumPriority string "mapstructure:\"minimumPriority\""
-		}{
+		Elasticsearch: config.Elasticsearch{
 			Host:            "http://localhost:9200",
 			Index:           "policy-reporter",
 			Rotation:        "dayli",
@@ -117,11 +116,7 @@ func Test_ResolveSkipExistingOnStartup(t *testing.T) {
 
 func Test_ResolveLokiClientWithoutHost(t *testing.T) {
 	config2 := &config.Config{
-		Loki: struct {
-			Host            string "mapstructure:\"host\""
-			SkipExisting    bool   "mapstructure:\"skipExistingOnStartup\""
-			MinimumPriority string "mapstructure:\"minimumPriority\""
-		}{
+		Loki: config.Loki{
 			Host:            "",
 			SkipExisting:    true,
 			MinimumPriority: "debug",
@@ -138,13 +133,7 @@ func Test_ResolveLokiClientWithoutHost(t *testing.T) {
 
 func Test_ResolveElasticsearchClientWithoutHost(t *testing.T) {
 	config2 := &config.Config{
-		Elasticsearch: struct {
-			Host            string "mapstructure:\"host\""
-			Index           string "mapstructure:\"index\""
-			Rotation        string "mapstructure:\"rotation\""
-			SkipExisting    bool   "mapstructure:\"skipExistingOnStartup\""
-			MinimumPriority string "mapstructure:\"minimumPriority\""
-		}{
+		Elasticsearch: config.Elasticsearch{
 			Host:            "",
 			Index:           "policy-reporter",
 			Rotation:        "dayli",
@@ -156,6 +145,22 @@ func Test_ResolveElasticsearchClientWithoutHost(t *testing.T) {
 	resolver := config.NewResolver(config2)
 
 	if resolver.ElasticsearchClient() != nil {
+		t.Error("Expected Client to be nil if no host is configured")
+	}
+}
+
+func Test_ResolveSlackClientWithoutHost(t *testing.T) {
+	config2 := &config.Config{
+		Slack: config.Slack{
+			Webhook:         "",
+			SkipExisting:    true,
+			MinimumPriority: "debug",
+		},
+	}
+
+	resolver := config.NewResolver(config2)
+
+	if resolver.SlackClient() != nil {
 		t.Error("Expected Client to be nil if no host is configured")
 	}
 }
