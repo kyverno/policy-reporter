@@ -7,6 +7,16 @@ Kyverno ships with two types of validation. You can either enforce a rule or aud
 
 This project is in an early stage. Please let me know if anything did not work as expected or if you want to send your audits to other targets then Loki.
 
+## Getting Started
+* [Installation with Helm v3](#installation-with-helm-v3)
+  * [Grafana Loki](#installation-with-loki)
+  * [Elasticsearch](#installation-with-elasticsearch)
+  * [Slack](#installation-with-slack)
+  * [Discord](#installation-with-discord)
+  * [Customization](#customization)
+* [Configure Policy Priorities](#configure-policy-priorities)
+* [Configure Monitoring](#monitoring)
+
 ## Installation with Helm v3
 
 Installation via Helm Repository
@@ -15,6 +25,7 @@ Installation via Helm Repository
 
 ```bash
 helm repo add policy-reporter https://fjogeleit.github.io/policy-reporter
+helm repo update
 ```
 
 ### Basic Installation - Provides Prometheus Metrics
@@ -22,6 +33,10 @@ helm repo add policy-reporter https://fjogeleit.github.io/policy-reporter
 ```bash
 helm install policy-reporter policy-reporter/policy-reporter -n policy-reporter --create-namespace
 ```
+
+#### Example
+
+![Prometheus Metrics](https://github.com/fjogeleit/policy-reporter/blob/main/docs/images/prometheus.png?raw=true)
 
 ### Installation with Loki
 
@@ -39,6 +54,10 @@ loki:
   minimumPriority: ""
   skipExistingOnStartup: true
 ```
+
+#### Example
+
+![Grafana Loki](https://github.com/fjogeleit/policy-reporter/blob/main/docs/images/grafana-loki.png?raw=true)
 
 ### Installation with Elasticsearch
 
@@ -62,6 +81,9 @@ elasticsearch:
   skipExistingOnStartup: true
 ```
 
+#### Example
+
+![Elasticsearch](https://github.com/fjogeleit/policy-reporter/blob/main/docs/images/elasticsearch.png?raw=true)
 
 ### Installation with Slack
 
@@ -81,6 +103,10 @@ slack:
   skipExistingOnStartup: true
 ```
 
+#### Example
+
+![Slack](https://github.com/fjogeleit/policy-reporter/blob/main/docs/images/slack.png?raw=true)
+
 ### Installation with Discord
 
 ```bash
@@ -99,18 +125,32 @@ discord:
   skipExistingOnStartup: true
 ```
 
+#### Example
+
+![Discord](https://github.com/fjogeleit/policy-reporter/blob/main/docs/images/discord.png?raw=true)
+
 ### Customization
 
 You can combine multiple targets by setting the required `host` or `webhook` configuration for your targets of choice. For all possible configurations checkout the `./charts/policy-reporter/values.yaml` to change any available configuration.
 
-### Configure Policy Priorities
+## Configure Policy Priorities
 
 By default kyverno PolicyReports has no priority or severity for policies. So every passed rule validation will be processed as notice, a failed validation is processed as error. To customize this you can configure a mapping from policies to fail priorities. So you can send them as warnings instead of errors. To configure the priorities create a ConfigMap in the `policy-reporter` namespace with the name `policy-reporter-priorities`. Configure each priority as value with the Policyname as key and the Priority as value. This Configuration is loaded and synchronized during runtime. Any change to this configmap will automaticly synchronized, no new deployment needed.
 
-#### Example
-
+###
 ```bash
 kubectl create configmap policy-reporter-priorities --from-literal check-label-app=warning --from-literal require-ns-labels=warning -n policy-reporter
+```
+
+```yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: policy-reporter-priorities
+  namespace: policy-reporter
+data:
+  check-label-app: warning
+  require-ns-labels: warning
 ```
 
 ## Monitoring
@@ -130,16 +170,12 @@ Example Installation
 helm install policy-reporter policy-reporter/policy-reporter --set metrics.serviceMonitor=true --set metrics.dashboard.enabled=true -n policy-reporter --create-namespace
 ```
 
-#### Dashboard Preview
+### Dashboard Preview
 
 ![PolicyReporter Grafana Dashboard](https://github.com/fjogeleit/policy-reporter/blob/main/docs/images/policy-reports-dashboard.png?raw=true)
 
-## Example Outputs
-
-![Grafana Loki](https://github.com/fjogeleit/policy-reporter/blob/main/docs/images/grafana-loki.png?raw=true)
-
-![Prometheus Metrics](https://github.com/fjogeleit/policy-reporter/blob/main/docs/images/prometheus.png?raw=true)
 
 # Todos
 * ~~Support for ClusterPolicyReports~~
-* Additional Targets
+* ~~Additional Targets~~~
+* Filter

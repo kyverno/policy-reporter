@@ -41,14 +41,14 @@ spec:
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
           volumeMounts:
-          - name: config-volume
+          - name: config-file
             mountPath: /app/config.yaml
             subPath: config.yaml
           env:
           - name: NAMESPACE
             value: {{ .Release.Namespace }}
       volumes:
-      - name: config-volume
-        configMap:
-          name: {{ include "policyreporter.fullname" . }}-targets
+      - name: config-file
+        secret:
+          secretName: {{ include "policyreporter.fullname" . }}-targets
           optional: true

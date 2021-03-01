@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.11.1
+
+* Use a Secret instead of ConfigMap to persist target configurations
+
 ## 0.11.0
 
 * Helm Chart Value `metrics.serviceMonitor` changed to `metrics.serviceMonitor.enabled`
