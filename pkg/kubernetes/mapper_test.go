@@ -278,15 +278,41 @@ func Test_MapMinClusterPolicyReport(t *testing.T) {
 	}
 }
 
-func Test_MapperSetPriorityMap(t *testing.T) {
-	mapper := kubernetes.NewMapper(make(map[string]string))
-	mapper.SetPriorityMap(map[string]string{"required-label": "debug"})
+func Test_PriorityMap(t *testing.T) {
+	t.Run("Test exact match, without default", func(t *testing.T) {
+		mapper := kubernetes.NewMapper(map[string]string{"required-label": "debug"})
 
-	preport := mapper.MapPolicyReport(policyMap)
+		preport := mapper.MapPolicyReport(policyMap)
 
-	result1 := preport.Results["required-label__app-label-required__fail__dfd57c50-f30c-4729-b63f-b1954d8988d1"]
+		result1 := preport.Results["required-label__app-label-required__fail__dfd57c50-f30c-4729-b63f-b1954d8988d1"]
 
-	if result1.Priority != report.DebugPriority {
-		t.Errorf("Expected Policy '%d' (acutal %d)", report.DebugPriority, result1.Priority)
-	}
+		if result1.Priority != report.DebugPriority {
+			t.Errorf("Expected Policy '%d' (acutal %d)", report.DebugPriority, result1.Priority)
+		}
+	})
+
+	t.Run("Test exact match handled over default", func(t *testing.T) {
+		mapper := kubernetes.NewMapper(map[string]string{"required-label": "debug", "default": "warning"})
+
+		preport := mapper.MapPolicyReport(policyMap)
+
+		result1 := preport.Results["required-label__app-label-required__fail__dfd57c50-f30c-4729-b63f-b1954d8988d1"]
+
+		if result1.Priority != report.DebugPriority {
+			t.Errorf("Expected Policy '%d' (acutal %d)", report.DebugPriority, result1.Priority)
+		}
+	})
+
+	t.Run("Test default expressions", func(t *testing.T) {
+		mapper := kubernetes.NewMapper(make(map[string]string))
+		mapper.SetPriorityMap(map[string]string{"default": "warning"})
+
+		preport := mapper.MapPolicyReport(policyMap)
+
+		result1 := preport.Results["required-label__app-label-required__fail__dfd57c50-f30c-4729-b63f-b1954d8988d1"]
+
+		if result1.Priority != report.WarningPriority {
+			t.Errorf("Expected Policy '%d' (acutal %d)", report.WarningPriority, result1.Priority)
+		}
+	})
 }

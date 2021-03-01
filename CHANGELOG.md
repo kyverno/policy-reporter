@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.12.0
+
+* Add support for a special `default` key in the Policy Priority. The `default` key can be used to configure a global default priority instead of `error`
+
 ## 0.11.1
 
 * Use a Secret instead of ConfigMap to persist target configurations

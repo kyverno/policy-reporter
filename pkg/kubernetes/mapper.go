@@ -140,9 +140,7 @@ func (m *mapper) mapResult(result map[string]interface{}) report.Result {
 	}
 
 	if r.Status == report.Error || r.Status == report.Fail {
-		if priority, ok := m.priorityMap[r.Policy]; ok {
-			r.Priority = report.NewPriority(priority)
-		}
+		r.Priority = m.resolvePriority(r.Policy)
 	}
 
 	if rule, ok := result["rule"]; ok {
@@ -160,7 +158,22 @@ func (m *mapper) mapResult(result map[string]interface{}) report.Result {
 	return r
 }
 
+func (m *mapper) resolvePriority(policy string) report.Priority {
+	if priority, ok := m.priorityMap[policy]; ok {
+		return report.NewPriority(priority)
+	}
+
+	if priority, ok := m.priorityMap["default"]; ok {
+		return report.NewPriority(priority)
+	}
+
+	return report.Priority(report.ErrorPriority)
+}
+
 // NewMapper creates an new Mapper instance
-func NewMapper(priorityMap map[string]string) Mapper {
-	return &mapper{priorityMap}
+func NewMapper(priorities map[string]string) Mapper {
+	m := &mapper{}
+	m.SetPriorityMap(priorities)
+
+	return m
 }

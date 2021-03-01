@@ -135,7 +135,9 @@ You can combine multiple targets by setting the required `host` or `webhook` con
 
 ## Configure Policy Priorities
 
-By default kyverno PolicyReports has no priority or severity for policies. So every passed rule validation will be processed as notice, a failed validation is processed as error. To customize this you can configure a mapping from policies to fail priorities. So you can send them as warnings instead of errors. To configure the priorities create a ConfigMap in the `policy-reporter` namespace with the name `policy-reporter-priorities`. Configure each priority as value with the Policyname as key and the Priority as value. This Configuration is loaded and synchronized during runtime. Any change to this configmap will automaticly synchronized, no new deployment needed.
+By default kyverno PolicyReports has no priority or severity for policies. So every passed rule validation will be processed as notice, a failed validation is processed as error. To customize this you can configure a mapping from policies to fail priorities. So you can send them as debug, info or warnings instead of errors. To configure the priorities create a ConfigMap in the `policy-reporter` namespace with the name `policy-reporter-priorities`. Configure each priority as value with the __Policyname__ as key and the __Priority__ as value. This Configuration is loaded and synchronized during runtime. Any change to this configmap will automaticly synchronized, no new deployment needed.
+
+A special Policyname `default` is supported. The `default` configuration can be used to set a global default priority instead of `error`. 
 
 ###
 ```bash
@@ -149,6 +151,7 @@ metadata:
   name: policy-reporter-priorities
   namespace: policy-reporter
 data:
+  default: debug
   check-label-app: warning
   require-ns-labels: warning
 ```
@@ -177,5 +180,5 @@ helm install policy-reporter policy-reporter/policy-reporter --set metrics.servi
 
 # Todos
 * ~~Support for ClusterPolicyReports~~
-* ~~Additional Targets~~~
+* ~~Additional Targets~~
 * Filter
