@@ -1,7 +1,11 @@
 apiVersion: v2
 name: policy-reporter
-description: K8s PolicyReporter watches for wgpolicyk8s.io/v1alpha1.PolicyReport resources. It creates Prometheus Metrics and can send rule validation events to Loki
+description: K8s PolicyReporter watches for wgpolicyk8s.io/v1alpha1.PolicyReport resources. It creates Prometheus Metrics and can send rule validation events to different targets like Loki, Elasticsearch, Slack or Discord
 
 type: application
-version: 0.12.0
+version: 0.13.0
 appVersion: 0.10.0
+
+dependencies:
+  - name: monitoring
+    condition: monitoring.enabled

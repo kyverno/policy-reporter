@@ -1,3 +1,33 @@
+image:
+  repository: fjogeleit/policy-reporter
+  pullPolicy: IfNotPresent
+  tag: 0.10.0
+
+imagePullSecrets: []
+
+deployment:
+  annotations: {}
+
+service:
+  type: ClusterIP
+  port: 2112
+
+resources:
+  requests:
+    memory: 50Mi
+    cpu: 10m
+  limits:
+    memory: 100Mi
+    cpu: 50m
+
+monitoring:
+  enabled: false
+  namespace: cattle-dashboards
+
+  serviceMonitor:
+    # labels to match the serviceMonitorSelector of the Prometheus Resource
+    labels: {}
+
 loki:
   # loki host address
   host: ""
@@ -34,32 +64,3 @@ discord:
   minimumPriority: ""
   # Skip already existing PolicyReportResults on startup
   skipExistingOnStartup: true
-
-metrics:
-  serviceMonitor:
-    enabled: false
-    # labels to match the serviceMonitorSelector of the Prometheus Resource
-    labels: {}
-
-  dashboard:
-    enabled: false
-    namespace: cattle-dashboards
-
-image:
-  repository: fjogeleit/policy-reporter
-  pullPolicy: IfNotPresent
-  tag: 0.10.0
-
-imagePullSecrets: []
-
-service:
-  type: ClusterIP
-  port: 2112
-
-resources:
-  requests:
-    memory: 50Mi
-    cpu: 10m
-  limits:
-    memory: 100Mi
-    cpu: 50m
