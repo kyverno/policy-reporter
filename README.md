@@ -169,7 +169,7 @@ If you are not using the MonitoringStack you can import the dashboards from [Gra
 
 Example Installation
 ```bash
-helm install policy-reporter policy-reporter/policy-reporter --set metrics.serviceMonitor=true --set metrics.dashboard.enabled=true -n policy-reporter --create-namespace
+helm install policy-reporter policy-reporter/policy-reporter --set monitoring.enabled=true --set monitoring.namespace=cattle-dashboards -n policy-reporter --create-namespace
 ```
 
 ### Dashboard Preview
