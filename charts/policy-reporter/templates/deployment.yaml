@@ -4,6 +4,10 @@ metadata:
   name: {{ include "policyreporter.fullname" . }}
   labels:
     {{- include "policyreporter.labels" . | nindent 4 }}
+  {{- if .Values.deployment.annotations }}
+  annotations:
+    {{- toYaml .Values.deployment.annotations | nindent 4 }} 
+  {{- end }}
 spec:
   replicas: 1
   selector:

@@ -1,0 +1,5 @@
+namespace: cattle-dashboards
+
+serviceMonitor:
+  # labels to match the serviceMonitorSelector of the Prometheus Resource
+  labels: {}

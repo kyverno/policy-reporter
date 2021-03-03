@@ -1,55 +1,30 @@
-{{- if .Values.metrics.dashboard.enabled }}
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: {{ include "policyreporter.fullname" . }}-dashboard
-  namespace: {{ .Values.metrics.dashboard.namespace }}
+  name: {{ include "monitoring.fullname" . }}-overview-dashboard
+  namespace: {{ .Values.namespace }}
   labels:
     grafana_dashboard: "1"
 data:
   policy-reporter-dashboard.json: |
     {
-        "__inputs": [
-            {
-                "name": "DS_PROMETHEUS",
-                "label": "prometheus",
-                "description": "",
-                "type": "datasource",
-                "pluginId": "prometheus",
-                "pluginName": "Prometheus"
-            }
-        ],
-        "__requires": [
-            {
-                "type": "grafana",
-                "id": "grafana",
-                "name": "Grafana",
-                "version": "7.1.5"
-            },
-            {
-                "type": "datasource",
-                "id": "prometheus",
-                "name": "Prometheus",
-                "version": "1.0.0"
-            }
-        ],
     "annotations": {
         "list": [
-            {
-                "builtIn": 1,
-                "datasource": "-- Grafana --",
-                "enable": true,
-                "hide": true,
-                "iconColor": "rgba(0, 211, 255, 1)",
-                "name": "Annotations & Alerts",
-                "type": "dashboard"
-            }
+        {
+            "builtIn": 1,
+            "datasource": "-- Grafana --",
+            "enable": true,
+            "hide": true,
+            "iconColor": "rgba(0, 211, 255, 1)",
+            "name": "Annotations & Alerts",
+            "type": "dashboard"
+        }
         ]
     },
     "editable": true,
     "gnetId": null,
     "graphTooltip": 0,
-    "id": 35,
+    "id": 66,
     "links": [],
     "panels": [
         {
@@ -105,7 +80,7 @@ data:
             "expr": "sum(policy_report_summary{status=\"Fail\"} > 0) by (exported_namespace)",
             "instant": false,
             "interval": "",
-            "legendFormat": "{{`{{ exported_namespace }}`}}",
+            "legendFormat": "{{ exported_namespace }}",
             "refId": "A"
             }
         ],
@@ -167,7 +142,7 @@ data:
             "format": "time_series",
             "interval": "",
             "intervalFactor": 1,
-            "legendFormat": "{{`{{ status }}`}}",
+            "legendFormat": "{{ status }}",
             "refId": "A"
             }
         ],
@@ -225,13 +200,13 @@ data:
             {
             "expr": "sum(cluster_policy_report_result{status=~\"fail|error\"} > 0) by (policy)",
             "interval": "",
-            "legendFormat": "{{` {{ policy }}` }}",
+            "legendFormat": " {{ policy }}",
             "refId": "A"
             },
             {
             "expr": "sum(policy_report_result{status=~\"fail|error\"} > 0) by (policy)",
             "interval": "",
-            "legendFormat": "{{` {{ policy }}` }}",
+            "legendFormat": " {{ policy }}",
             "refId": "B"
             }
         ],
@@ -317,7 +292,7 @@ data:
             "format": "table",
             "instant": true,
             "interval": "",
-            "legendFormat": "{{`{{exported_namespace}}`}}: {{`{{ policy }}`}}",
+            "legendFormat": "{{exported_namespace}}: {{ policy }}",
             "refId": "A"
             }
         ],
@@ -335,11 +310,12 @@ data:
                 "indexByName": {
                 "Time": 0,
                 "Value": 6,
-                "exported_namespace": 3,
-                "kind": 4,
-                "name": 5,
-                "policy": 1,
-                "rule": 2
+                "exported_namespace": 1,
+                "kind": 2,
+                "name": 3,
+                "policy": 4,
+                "rule": 5,
+                "status": 7
                 },
                 "renameByName": {
                 "exported_namespace": "namespace"
@@ -390,7 +366,7 @@ data:
             "format": "table",
             "instant": true,
             "interval": "",
-            "legendFormat": "{{`{{ kind }}`}}: {{`{{ name }}`}} - {{`{{ policy }}`}}",
+            "legendFormat": "{{ kind }}: {{ name }} - {{ policy }}",
             "refId": "A"
             }
         ],
@@ -420,13 +396,13 @@ data:
                 "endpoint": 2,
                 "instance": 3,
                 "job": 4,
-                "kind": 11,
-                "name": 12,
+                "kind": 9,
+                "name": 10,
                 "namespace": 5,
                 "pod": 6,
-                "policy": 9,
+                "policy": 11,
                 "report": 7,
-                "rule": 10,
+                "rule": 12,
                 "service": 8,
                 "status": 13
                 },
@@ -441,7 +417,9 @@ data:
     ],
     "schemaVersion": 26,
     "style": "dark",
-    "tags": [],
+    "tags": [
+        "Policy Reporter"
+    ],
     "templating": {
         "list": []
     },
@@ -465,7 +443,5 @@ data:
     },
     "timezone": "",
     "title": "PolicyReports",
-    "uid": "5ivy3MyGz",
-    "version": 2
+    "version": 1
     }
-{{- end }}

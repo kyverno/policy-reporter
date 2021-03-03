@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.13.0
+
+* Split the Monitoring out in a Sub Helm chart
+    * Changed naming from `metrics` to `monitoring`
+* Make Annotations for the Deployment configurable
+* Add two new Grafana Dashboard (PolicyReport Details, ClusterPolicyReport Details)
+
 ## 0.12.0
 
 * Add support for a special `default` key in the Policy Priority. The `default` key can be used to configure a global default priority instead of `error`
