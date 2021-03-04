@@ -3,12 +3,12 @@ package slack
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
 	"log"
 	"net/http"
 
 	"github.com/fjogeleit/policy-reporter/pkg/report"
 	"github.com/fjogeleit/policy-reporter/pkg/target"
+	"github.com/fjogeleit/policy-reporter/pkg/target/helper"
 )
 
 type httpClient interface {
@@ -160,34 +160,20 @@ func (s *client) Send(result report.Result) {
 
 	if err := json.NewEncoder(body).Encode(payload); err != nil {
 		log.Printf("[ERROR] SLACK : %v\n", err.Error())
+		return
 	}
 
 	req, err := http.NewRequest("POST", s.webhook, body)
 	if err != nil {
 		log.Printf("[ERROR] SLACK : %v\n", err.Error())
+		return
 	}
 
 	req.Header.Add("Content-Type", "application/json; charset=utf-8")
 	req.Header.Add("User-Agent", "Policy-Reporter")
 
 	resp, err := s.client.Do(req)
-	defer func() {
-		if resp != nil && resp.Body != nil {
-			resp.Body.Close()
-		}
-	}()
-
-	if err != nil {
-		log.Printf("[ERROR] SLACK PUSH failed: %s\n", err.Error())
-	} else if resp.StatusCode >= 400 {
-		fmt.Printf("StatusCode: %d\n", resp.StatusCode)
-		buf := new(bytes.Buffer)
-		buf.ReadFrom(resp.Body)
-
-		log.Printf("[ERROR] PUSH failed [%d]: %s\n", resp.StatusCode, buf.String())
-	} else {
-		log.Println("[INFO] SLACK PUSH OK")
-	}
+	helper.HandleHTTPResponse("SLACK", resp, err)
 }
 
 func (s *client) SkipExistingOnStartup() bool {

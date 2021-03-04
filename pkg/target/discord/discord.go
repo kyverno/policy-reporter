@@ -3,12 +3,12 @@ package discord
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
 	"log"
 	"net/http"
 
 	"github.com/fjogeleit/policy-reporter/pkg/report"
 	"github.com/fjogeleit/policy-reporter/pkg/target"
+	"github.com/fjogeleit/policy-reporter/pkg/target/helper"
 )
 
 type payload struct {
@@ -107,34 +107,20 @@ func (d *client) Send(result report.Result) {
 
 	if err := json.NewEncoder(body).Encode(payload); err != nil {
 		log.Printf("[ERROR] DISCORD : %v\n", err.Error())
+		return
 	}
 
 	req, err := http.NewRequest("POST", d.webhook, body)
 	if err != nil {
 		log.Printf("[ERROR] DISCORD : %v\n", err.Error())
+		return
 	}
 
 	req.Header.Add("Content-Type", "application/json; charset=utf-8")
 	req.Header.Add("User-Agent", "Policy-Reporter")
 
 	resp, err := d.client.Do(req)
-	defer func() {
-		if resp != nil && resp.Body != nil {
-			resp.Body.Close()
-		}
-	}()
-
-	if err != nil {
-		log.Printf("[ERROR] DISCORD PUSH failed: %s\n", err.Error())
-	} else if resp.StatusCode >= 400 {
-		fmt.Printf("StatusCode: %d\n", resp.StatusCode)
-		buf := new(bytes.Buffer)
-		buf.ReadFrom(resp.Body)
-
-		log.Printf("[ERROR] DISCORD PUSH failed [%d]: %s\n", resp.StatusCode, buf.String())
-	} else {
-		log.Println("[INFO] DISCORD PUSH OK")
-	}
+	helper.HandleHTTPResponse("DISCORD", resp, err)
 }
 
 func (d *client) SkipExistingOnStartup() bool {

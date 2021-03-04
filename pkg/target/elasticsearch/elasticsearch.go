@@ -3,13 +3,13 @@ package elasticsearch
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
 	"log"
 	"net/http"
 	"time"
 
 	"github.com/fjogeleit/policy-reporter/pkg/report"
 	"github.com/fjogeleit/policy-reporter/pkg/target"
+	"github.com/fjogeleit/policy-reporter/pkg/target/helper"
 )
 
 type Rotation = string
@@ -44,6 +44,7 @@ func (e *client) Send(result report.Result) {
 
 	if err := json.NewEncoder(body).Encode(result); err != nil {
 		log.Printf("[ERROR] ELASTICSEARCH : %v\n", err.Error())
+		return
 	}
 
 	var host string
@@ -61,29 +62,14 @@ func (e *client) Send(result report.Result) {
 	req, err := http.NewRequest("POST", host, body)
 	if err != nil {
 		log.Printf("[ERROR] ELASTICSEARCH : %v\n", err.Error())
+		return
 	}
 
 	req.Header.Add("Content-Type", "application/json; charset=utf-8")
 	req.Header.Add("User-Agent", "Policy-Reporter")
 
 	resp, err := e.client.Do(req)
-	defer func() {
-		if resp != nil && resp.Body != nil {
-			resp.Body.Close()
-		}
-	}()
-
-	if err != nil {
-		log.Printf("[ERROR] ELASTICSEARCH PUSH failed: %s\n", err.Error())
-	} else if resp.StatusCode >= 400 {
-		fmt.Printf("StatusCode: %d\n", resp.StatusCode)
-		buf := new(bytes.Buffer)
-		buf.ReadFrom(resp.Body)
-
-		log.Printf("[ERROR] ELASTICSEARCH PUSH failed [%d]: %s\n", resp.StatusCode, buf.String())
-	} else {
-		log.Println("[INFO] ELASTICSEARCH PUSH OK")
-	}
+	helper.HandleHTTPResponse("ELASTICSEARCH", resp, err)
 }
 
 func (e *client) SkipExistingOnStartup() bool {
