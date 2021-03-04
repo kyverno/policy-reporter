@@ -382,11 +382,11 @@ func Test_SkipExisting(t *testing.T) {
 		t.Error("Should receive 2 not skipped Result form notSkippedPolicyMap and notSkippedClusterPolicyMap")
 	}
 
-	if results[0].Policy != "not-skiped-policy-result" {
-		t.Error("Expected result with policy 'not-skiped-policy-result'")
+	if results[0].Policy != "not-skiped-policy-result" && results[0].Policy != "not-skiped-cluster-policy-result" {
+		t.Error("Should be one of 'not-skiped-policy-result', 'not-skiped-cluster-policy-result'")
 	}
-	if results[1].Policy != "not-skiped-cluster-policy-result" {
-		t.Error("Expected result with policy 'not-skiped-cluster-policy-result'")
+	if results[1].Policy != "not-skiped-policy-result" && results[1].Policy != "not-skiped-cluster-policy-result" {
+		t.Error("Should be one of 'not-skiped-policy-result', 'not-skiped-cluster-policy-result'")
 	}
 }
 
