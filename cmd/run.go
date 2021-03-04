@@ -5,11 +5,14 @@ import (
 	"net/http"
 
 	"github.com/fjogeleit/policy-reporter/pkg/config"
+	"github.com/fjogeleit/policy-reporter/pkg/metrics"
 	"github.com/fjogeleit/policy-reporter/pkg/report"
 	"github.com/fjogeleit/policy-reporter/pkg/target"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/spf13/cobra"
 	"golang.org/x/sync/errgroup"
+	"k8s.io/client-go/rest"
+	"k8s.io/client-go/tools/clientcmd"
 )
 
 func newRunCMD() *cobra.Command {
@@ -22,37 +25,30 @@ func newRunCMD() *cobra.Command {
 				return err
 			}
 
-			resolver := config.NewResolver(c)
+			var k8sConfig *rest.Config
+			if c.Kubeconfig != "" {
+				k8sConfig, err = clientcmd.BuildConfigFromFlags("", c.Kubeconfig)
+			} else {
+				k8sConfig, err = rest.InClusterConfig()
+			}
+			if err != nil {
+				return err
+			}
+
+			resolver := config.NewResolver(c, k8sConfig)
 
 			client, err := resolver.PolicyReportClient()
 			if err != nil {
 				return err
 			}
 
-			policyMetrics, err := resolver.PolicyReportMetrics()
-			if err != nil {
-				return err
-			}
+			client.RegisterClusterPolicyReportCallback(metrics.CreateClusterPolicyReportMetricsCallback())
+			client.RegisterPolicyReportCallback(metrics.CreatePolicyReportMetricsCallback())
 
-			clusterPolicyMetrics, err := resolver.ClusterPolicyReportMetrics()
-			if err != nil {
-				return err
-			}
+			targets := resolver.TargetClients()
 
-			g := new(errgroup.Group)
-
-			g.Go(policyMetrics.GenerateMetrics)
-
-			g.Go(clusterPolicyMetrics.GenerateMetrics)
-
-			g.Go(func() error {
-				targets := resolver.TargetClients()
-
-				if len(targets) == 0 {
-					return nil
-				}
-
-				return client.WatchPolicyReportResults(func(r report.Result, e bool) {
+			if len(targets) > 0 {
+				client.RegisterPolicyResultCallback(func(r report.Result, e bool) {
 					for _, t := range targets {
 						go func(target target.Client, result report.Result, preExisted bool) {
 							if preExisted && target.SkipExistingOnStartup() {
@@ -62,9 +58,14 @@ func newRunCMD() *cobra.Command {
 							target.Send(result)
 						}(t, r, e)
 					}
-				}, resolver.SkipExistingOnStartup())
-			})
+				})
 
+				client.RegisterPolicyResultWatcher(resolver.SkipExistingOnStartup())
+			}
+
+			g := new(errgroup.Group)
+			g.Go(client.StartWatchClusterPolicyReports)
+			g.Go(client.StartWatchPolicyReports)
 			g.Go(func() error {
 				http.Handle("/metrics", promhttp.Handler())
 

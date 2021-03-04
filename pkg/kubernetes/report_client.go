@@ -14,8 +14,6 @@ import (
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/watch"
 	"k8s.io/client-go/dynamic"
-	"k8s.io/client-go/rest"
-	"k8s.io/client-go/tools/clientcmd"
 )
 
 var (
@@ -28,12 +26,27 @@ const (
 )
 
 type policyReportClient struct {
-	client             dynamic.Interface
-	coreClient         CoreClient
-	policyCache        map[string]report.PolicyReport
-	clusterPolicyCache map[string]report.ClusterPolicyReport
-	mapper             Mapper
-	startUp            time.Time
+	client                 dynamic.Interface
+	coreClient             CoreClient
+	policyCache            map[string]report.PolicyReport
+	clusterPolicyCache     map[string]report.ClusterPolicyReport
+	clusterPolicyCallbacks []report.ClusterPolicyReportCallback
+	policyCallbacks        []report.PolicyReportCallback
+	resultCallbacks        []report.PolicyResultCallback
+	mapper                 Mapper
+	startUp                time.Time
+}
+
+func (c *policyReportClient) RegisterPolicyReportCallback(cb report.PolicyReportCallback) {
+	c.policyCallbacks = append(c.policyCallbacks, cb)
+}
+
+func (c *policyReportClient) RegisterClusterPolicyReportCallback(cb report.ClusterPolicyReportCallback) {
+	c.clusterPolicyCallbacks = append(c.clusterPolicyCallbacks, cb)
+}
+
+func (c *policyReportClient) RegisterPolicyResultCallback(cb report.PolicyResultCallback) {
+	c.resultCallbacks = append(c.resultCallbacks, cb)
 }
 
 func (c *policyReportClient) FetchPolicyReports() ([]report.PolicyReport, error) {
@@ -111,7 +124,7 @@ func (c *policyReportClient) FetchPolicyReportResults() ([]report.Result, error)
 	return results, g.Wait()
 }
 
-func (c *policyReportClient) WatchClusterPolicyReports(cb report.WatchClusterPolicyReportCallback) error {
+func (c *policyReportClient) StartWatchClusterPolicyReports() error {
 	for {
 		result, err := c.client.Resource(clusterPolicyReports).Watch(context.Background(), metav1.ListOptions{})
 		if err != nil {
@@ -120,13 +133,43 @@ func (c *policyReportClient) WatchClusterPolicyReports(cb report.WatchClusterPol
 
 		for result := range result.ResultChan() {
 			if item, ok := result.Object.(*unstructured.Unstructured); ok {
-				cb(result.Type, c.mapper.MapClusterPolicyReport(item.Object))
+				c.executeClusterPolicyReportHandler(result.Type, c.mapper.MapClusterPolicyReport(item.Object))
 			}
 		}
 	}
 }
 
-func (c *policyReportClient) WatchPolicyReports(cb report.WatchPolicyReportCallback) error {
+func (c *policyReportClient) executeClusterPolicyReportHandler(e watch.EventType, cpr report.ClusterPolicyReport) {
+	wg := sync.WaitGroup{}
+	wg.Add(len(c.clusterPolicyCallbacks))
+
+	opr := report.ClusterPolicyReport{}
+	if e != watch.Added {
+		opr = c.clusterPolicyCache[cpr.GetIdentifier()]
+	}
+
+	for _, cb := range c.clusterPolicyCallbacks {
+		go func(
+			callback report.ClusterPolicyReportCallback,
+			event watch.EventType,
+			creport report.ClusterPolicyReport,
+			oreport report.ClusterPolicyReport,
+		) {
+			callback(event, creport, oreport)
+			wg.Done()
+		}(cb, e, cpr, opr)
+	}
+
+	wg.Wait()
+
+	if e == watch.Deleted {
+		delete(c.clusterPolicyCache, cpr.GetIdentifier())
+	} else {
+		c.clusterPolicyCache[cpr.GetIdentifier()] = cpr
+	}
+}
+
+func (c *policyReportClient) StartWatchPolicyReports() error {
 	for {
 		result, err := c.client.Resource(policyReports).Watch(context.Background(), metav1.ListOptions{})
 		if err != nil {
@@ -135,74 +178,108 @@ func (c *policyReportClient) WatchPolicyReports(cb report.WatchPolicyReportCallb
 
 		for result := range result.ResultChan() {
 			if item, ok := result.Object.(*unstructured.Unstructured); ok {
-				cb(result.Type, c.mapper.MapPolicyReport(item.Object))
+				c.executePolicyReportHandler(result.Type, c.mapper.MapPolicyReport(item.Object))
 			}
 		}
 	}
 }
 
-func (c *policyReportClient) WatchPolicyReportResults(cb report.WatchPolicyResultCallback, skipExisting bool) error {
-	wg := new(errgroup.Group)
+func (c *policyReportClient) executePolicyReportHandler(e watch.EventType, pr report.PolicyReport) {
+	wg := sync.WaitGroup{}
+	wg.Add(len(c.policyCallbacks))
 
-	wg.Go(func() error {
-		return c.WatchPolicyReports(func(e watch.EventType, pr report.PolicyReport) {
+	opr := report.PolicyReport{}
+	if e != watch.Added {
+		opr = c.policyCache[pr.GetIdentifier()]
+	}
+
+	for _, cb := range c.policyCallbacks {
+		go func(
+			callback report.PolicyReportCallback,
+			event watch.EventType,
+			creport report.PolicyReport,
+			oreport report.PolicyReport,
+		) {
+			callback(event, creport, oreport)
+			wg.Done()
+		}(cb, e, pr, opr)
+	}
+
+	wg.Wait()
+
+	if e == watch.Deleted {
+		delete(c.policyCache, pr.GetIdentifier())
+	} else {
+		c.policyCache[pr.GetIdentifier()] = pr
+	}
+}
+
+func (c *policyReportClient) RegisterPolicyResultWatcher(skipExisting bool) {
+	c.RegisterPolicyReportCallback(
+		func(e watch.EventType, pr report.PolicyReport, or report.PolicyReport) {
 			switch e {
 			case watch.Added:
 				preExisted := pr.CreationTimestamp.Before(c.startUp)
 
 				if skipExisting && preExisted {
-					c.policyCache[pr.GetIdentifier()] = pr
 					break
 				}
 
 				for _, result := range pr.Results {
-					cb(result, preExisted)
+					for _, cb := range c.resultCallbacks {
+						cb(result, preExisted)
+					}
 				}
-
-				c.policyCache[pr.GetIdentifier()] = pr
 			case watch.Modified:
-				diff := pr.GetNewResults(c.policyCache[pr.GetIdentifier()])
+				diff := pr.GetNewResults(or)
 				for _, result := range diff {
-					cb(result, false)
+					for _, cb := range c.resultCallbacks {
+						cb(result, false)
+					}
 				}
-
-				c.policyCache[pr.GetIdentifier()] = pr
-			case watch.Deleted:
-				delete(c.policyCache, pr.GetIdentifier())
 			}
 		})
-	})
 
-	wg.Go(func() error {
-		return c.WatchClusterPolicyReports(func(s watch.EventType, cpr report.ClusterPolicyReport) {
-			switch s {
-			case watch.Added:
-				preExisted := cpr.CreationTimestamp.Before(c.startUp)
+	c.RegisterClusterPolicyReportCallback(func(s watch.EventType, cpr report.ClusterPolicyReport, opr report.ClusterPolicyReport) {
+		switch s {
+		case watch.Added:
+			preExisted := cpr.CreationTimestamp.Before(c.startUp)
 
-				if skipExisting && preExisted {
-					c.clusterPolicyCache[cpr.GetIdentifier()] = cpr
-					break
-				}
-
-				for _, result := range cpr.Results {
-					cb(result, preExisted)
-				}
-
-				c.clusterPolicyCache[cpr.GetIdentifier()] = cpr
-			case watch.Modified:
-				diff := cpr.GetNewResults(c.clusterPolicyCache[cpr.GetIdentifier()])
-				for _, result := range diff {
-					cb(result, false)
-				}
-
-				c.clusterPolicyCache[cpr.GetIdentifier()] = cpr
-			case watch.Deleted:
-				delete(c.clusterPolicyCache, cpr.GetIdentifier())
+			if skipExisting && preExisted {
+				break
 			}
-		})
-	})
 
-	return wg.Wait()
+			wg := sync.WaitGroup{}
+			wg.Add(len(cpr.Results) * len(c.resultCallbacks))
+
+			for _, r := range cpr.Results {
+				for _, cb := range c.resultCallbacks {
+					go func(callback report.PolicyResultCallback, result report.Result) {
+						callback(result, preExisted)
+						wg.Done()
+					}(cb, r)
+				}
+			}
+
+			wg.Wait()
+		case watch.Modified:
+			diff := cpr.GetNewResults(c.clusterPolicyCache[cpr.GetIdentifier()])
+
+			wg := sync.WaitGroup{}
+			wg.Add(len(diff) * len(c.resultCallbacks))
+
+			for _, r := range diff {
+				for _, cb := range c.resultCallbacks {
+					go func(callback report.PolicyResultCallback, result report.Result) {
+						callback(result, false)
+						wg.Done()
+					}(cb, r)
+				}
+			}
+
+			wg.Wait()
+		}
+	})
 }
 
 func (c *policyReportClient) fetchPriorities(ctx context.Context) error {
@@ -245,29 +322,7 @@ func (c *policyReportClient) syncPriorities(ctx context.Context) error {
 }
 
 // NewPolicyReportClient creates a new ReportClient based on the kubernetes go-client
-func NewPolicyReportClient(ctx context.Context, kubeconfig, namespace string, startUp time.Time) (report.Client, error) {
-	var config *rest.Config
-	var err error
-
-	if kubeconfig != "" {
-		config, err = clientcmd.BuildConfigFromFlags("", kubeconfig)
-	} else {
-		config, err = rest.InClusterConfig()
-	}
-	if err != nil {
-		return nil, err
-	}
-
-	dynamicClient, err := dynamic.NewForConfig(config)
-	if err != nil {
-		return nil, err
-	}
-
-	coreClient, err := NewCoreClient(kubeconfig, namespace)
-	if err != nil {
-		return nil, err
-	}
-
+func NewPolicyReportClient(ctx context.Context, dynamicClient dynamic.Interface, coreClient CoreClient, startUp time.Time) (report.Client, error) {
 	reportClient := &policyReportClient{
 		client:             dynamicClient,
 		coreClient:         coreClient,
@@ -277,7 +332,7 @@ func NewPolicyReportClient(ctx context.Context, kubeconfig, namespace string, st
 		startUp:            startUp,
 	}
 
-	err = reportClient.fetchPriorities(ctx)
+	err := reportClient.fetchPriorities(ctx)
 	if err != nil {
 		log.Printf("[INFO] No PriorityConfig found: %s", err.Error())
 	}

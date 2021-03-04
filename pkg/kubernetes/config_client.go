@@ -8,7 +8,6 @@ import (
 	"k8s.io/apimachinery/pkg/watch"
 	v1 "k8s.io/client-go/kubernetes/typed/core/v1"
 	"k8s.io/client-go/rest"
-	"k8s.io/client-go/tools/clientcmd"
 )
 
 // CoreClient provides simplified APIs for ConfigMap Resources
@@ -46,18 +45,8 @@ func (c coreClient) WatchConfigs(ctx context.Context, cb ConfigMapCallback) erro
 }
 
 // NewCoreClient creates a new CoreClient with the provided kubeconfig or InCluster configuration if kubeconfig is empty
-func NewCoreClient(kubeconfig, namespace string) (CoreClient, error) {
-	var config *rest.Config
+func NewCoreClient(config *rest.Config, namespace string) (CoreClient, error) {
 	var err error
-
-	if kubeconfig != "" {
-		config, err = clientcmd.BuildConfigFromFlags("", kubeconfig)
-	} else {
-		config, err = rest.InClusterConfig()
-	}
-	if err != nil {
-		return nil, err
-	}
 
 	client, err := v1.NewForConfig(config)
 	if err != nil {

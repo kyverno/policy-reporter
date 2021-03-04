@@ -7,25 +7,25 @@ import (
 	"time"
 
 	"github.com/fjogeleit/policy-reporter/pkg/kubernetes"
-	"github.com/fjogeleit/policy-reporter/pkg/metrics"
 	"github.com/fjogeleit/policy-reporter/pkg/report"
 	"github.com/fjogeleit/policy-reporter/pkg/target"
 	"github.com/fjogeleit/policy-reporter/pkg/target/discord"
 	"github.com/fjogeleit/policy-reporter/pkg/target/elasticsearch"
 	"github.com/fjogeleit/policy-reporter/pkg/target/loki"
 	"github.com/fjogeleit/policy-reporter/pkg/target/slack"
+	"k8s.io/client-go/dynamic"
+	"k8s.io/client-go/rest"
 )
 
 // Resolver manages dependencies
 type Resolver struct {
-	config                     *Config
-	kubeClient                 report.Client
-	lokiClient                 target.Client
-	elasticsearchClient        target.Client
-	slackClient                target.Client
-	discordClient              target.Client
-	policyReportMetrics        metrics.Metrics
-	clusterPolicyReportMetrics metrics.Metrics
+	config              *Config
+	k8sConfig           *rest.Config
+	kubeClient          report.Client
+	lokiClient          target.Client
+	elasticsearchClient target.Client
+	slackClient         target.Client
+	discordClient       target.Client
 }
 
 // PolicyReportClient resolver method
@@ -34,10 +34,20 @@ func (r *Resolver) PolicyReportClient() (report.Client, error) {
 		return r.kubeClient, nil
 	}
 
+	coreClient, err := r.coreClient()
+	if err != nil {
+		return nil, err
+	}
+
+	dynamicClient, err := r.dynamicClient()
+	if err != nil {
+		return nil, err
+	}
+
 	client, err := kubernetes.NewPolicyReportClient(
 		context.Background(),
-		r.config.Kubeconfig,
-		r.config.Namespace,
+		dynamicClient,
+		coreClient,
 		time.Now(),
 	)
 
@@ -142,38 +152,6 @@ func (r *Resolver) DiscordClient() target.Client {
 	return r.discordClient
 }
 
-// PolicyReportMetrics resolver method
-func (r *Resolver) PolicyReportMetrics() (metrics.Metrics, error) {
-	if r.policyReportMetrics != nil {
-		return r.policyReportMetrics, nil
-	}
-
-	client, err := r.PolicyReportClient()
-	if err != nil {
-		return nil, err
-	}
-
-	r.policyReportMetrics = metrics.NewPolicyReportMetrics(client)
-
-	return r.policyReportMetrics, nil
-}
-
-// ClusterPolicyReportMetrics resolver method
-func (r *Resolver) ClusterPolicyReportMetrics() (metrics.Metrics, error) {
-	if r.clusterPolicyReportMetrics != nil {
-		return r.clusterPolicyReportMetrics, nil
-	}
-
-	client, err := r.PolicyReportClient()
-	if err != nil {
-		return nil, err
-	}
-
-	r.clusterPolicyReportMetrics = metrics.NewClusterPolicyMetrics(client)
-
-	return r.clusterPolicyReportMetrics, nil
-}
-
 func (r *Resolver) TargetClients() []target.Client {
 	clients := make([]target.Client, 0)
 
@@ -206,18 +184,18 @@ func (r *Resolver) SkipExistingOnStartup() bool {
 	return true
 }
 
-// Reset all cached dependencies
-func (r *Resolver) Reset() {
-	r.kubeClient = nil
-	r.lokiClient = nil
-	r.elasticsearchClient = nil
-	r.policyReportMetrics = nil
-	r.clusterPolicyReportMetrics = nil
+func (r *Resolver) coreClient() (kubernetes.CoreClient, error) {
+	return kubernetes.NewCoreClient(r.k8sConfig, r.config.Namespace)
+}
+
+func (r *Resolver) dynamicClient() (dynamic.Interface, error) {
+	return dynamic.NewForConfig(r.k8sConfig)
 }
 
 // NewResolver constructor function
-func NewResolver(config *Config) Resolver {
+func NewResolver(config *Config, k8sConfig *rest.Config) Resolver {
 	return Resolver{
-		config: config,
+		config:    config,
+		k8sConfig: k8sConfig,
 	}
 }
