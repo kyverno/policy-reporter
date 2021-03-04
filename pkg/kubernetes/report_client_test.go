@@ -484,7 +484,6 @@ func Test_WatchModifiedEvent(t *testing.T) {
 	wg.Add(5)
 
 	results := make([]report.Result, 0, 5)
-
 	policyClient.RegisterPolicyResultCallback(func(r report.Result, b bool) {
 		results = append(results, r)
 		wg.Done()
