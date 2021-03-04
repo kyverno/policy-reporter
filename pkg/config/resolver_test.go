@@ -99,8 +99,6 @@ func Test_ResolveSkipExistingOnStartup(t *testing.T) {
 		},
 		Elasticsearch: config.Elasticsearch{
 			Host:            "http://localhost:9200",
-			Index:           "policy-reporter",
-			Rotation:        "dayli",
 			SkipExisting:    true,
 			MinimumPriority: "debug",
 		},
@@ -194,5 +192,17 @@ func Test_ResolveClient(t *testing.T) {
 	client2, err := resolver.PolicyReportClient()
 	if client1 != client2 {
 		t.Error("A second call resolver.PolicyReportClient() should return the cached first client")
+	}
+}
+
+func Test_ResolveClientWithInvalidK8sConfig(t *testing.T) {
+	k8sConfig := &rest.Config{}
+	k8sConfig.Host = "invalid/url"
+
+	resolver := config.NewResolver(&config.Config{}, k8sConfig)
+
+	_, err := resolver.PolicyReportClient()
+	if err == nil {
+		t.Error("Error: 'host must be a URL or a host:port pair' was expected")
 	}
 }

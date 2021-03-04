@@ -9,16 +9,8 @@ import (
 	"github.com/fjogeleit/policy-reporter/pkg/report"
 	"golang.org/x/sync/errgroup"
 	v1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
-	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/watch"
-	"k8s.io/client-go/dynamic"
-)
-
-var (
-	policyReports        = schema.GroupVersionResource{Group: "wgpolicyk8s.io", Version: "v1alpha1", Resource: "policyreports"}
-	clusterPolicyReports = schema.GroupVersionResource{Group: "wgpolicyk8s.io", Version: "v1alpha1", Resource: "clusterpolicyreports"}
 )
 
 const (
@@ -26,8 +18,8 @@ const (
 )
 
 type policyReportClient struct {
-	client                 dynamic.Interface
-	coreClient             CoreClient
+	policyAPI              PolicyReportAdapter
+	configMapAPI           ConfigMapAdapter
 	policyCache            map[string]report.PolicyReport
 	clusterPolicyCache     map[string]report.ClusterPolicyReport
 	clusterPolicyCallbacks []report.ClusterPolicyReportCallback
@@ -52,7 +44,7 @@ func (c *policyReportClient) RegisterPolicyResultCallback(cb report.PolicyResult
 func (c *policyReportClient) FetchPolicyReports() ([]report.PolicyReport, error) {
 	var reports []report.PolicyReport
 
-	result, err := c.client.Resource(policyReports).List(context.Background(), metav1.ListOptions{})
+	result, err := c.policyAPI.ListPolicyReports()
 	if err != nil {
 		log.Printf("K8s List Error: %s\n", err.Error())
 		return reports, err
@@ -68,7 +60,7 @@ func (c *policyReportClient) FetchPolicyReports() ([]report.PolicyReport, error)
 func (c *policyReportClient) FetchClusterPolicyReports() ([]report.ClusterPolicyReport, error) {
 	var reports []report.ClusterPolicyReport
 
-	result, err := c.client.Resource(clusterPolicyReports).List(context.Background(), metav1.ListOptions{})
+	result, err := c.policyAPI.ListClusterPolicyReports()
 	if err != nil {
 		log.Printf("K8s List Error: %s\n", err.Error())
 		return reports, err
@@ -126,7 +118,7 @@ func (c *policyReportClient) FetchPolicyReportResults() ([]report.Result, error)
 
 func (c *policyReportClient) StartWatchClusterPolicyReports() error {
 	for {
-		result, err := c.client.Resource(clusterPolicyReports).Watch(context.Background(), metav1.ListOptions{})
+		result, err := c.policyAPI.WatchClusterPolicyReports()
 		if err != nil {
 			return err
 		}
@@ -140,38 +132,40 @@ func (c *policyReportClient) StartWatchClusterPolicyReports() error {
 }
 
 func (c *policyReportClient) executeClusterPolicyReportHandler(e watch.EventType, cpr report.ClusterPolicyReport) {
-	wg := sync.WaitGroup{}
-	wg.Add(len(c.clusterPolicyCallbacks))
-
 	opr := report.ClusterPolicyReport{}
 	if e != watch.Added {
 		opr = c.clusterPolicyCache[cpr.GetIdentifier()]
 	}
 
-	for _, cb := range c.clusterPolicyCallbacks {
-		go func(
-			callback report.ClusterPolicyReportCallback,
-			event watch.EventType,
-			creport report.ClusterPolicyReport,
-			oreport report.ClusterPolicyReport,
-		) {
-			callback(event, creport, oreport)
-			wg.Done()
-		}(cb, e, cpr, opr)
-	}
+	if e != watch.Deleted {
+		wg := sync.WaitGroup{}
+		wg.Add(len(c.clusterPolicyCallbacks))
 
-	wg.Wait()
+		for _, cb := range c.clusterPolicyCallbacks {
+			go func(
+				callback report.ClusterPolicyReportCallback,
+				event watch.EventType,
+				creport report.ClusterPolicyReport,
+				oreport report.ClusterPolicyReport,
+			) {
+				callback(event, creport, oreport)
+				wg.Done()
+			}(cb, e, cpr, opr)
+		}
 
-	if e == watch.Deleted {
-		delete(c.clusterPolicyCache, cpr.GetIdentifier())
-	} else {
+		wg.Wait()
+
 		c.clusterPolicyCache[cpr.GetIdentifier()] = cpr
+
+		return
 	}
+
+	delete(c.clusterPolicyCache, cpr.GetIdentifier())
 }
 
 func (c *policyReportClient) StartWatchPolicyReports() error {
 	for {
-		result, err := c.client.Resource(policyReports).Watch(context.Background(), metav1.ListOptions{})
+		result, err := c.policyAPI.WatchPolicyReports()
 		if err != nil {
 			return err
 		}
@@ -185,33 +179,35 @@ func (c *policyReportClient) StartWatchPolicyReports() error {
 }
 
 func (c *policyReportClient) executePolicyReportHandler(e watch.EventType, pr report.PolicyReport) {
-	wg := sync.WaitGroup{}
-	wg.Add(len(c.policyCallbacks))
-
 	opr := report.PolicyReport{}
 	if e != watch.Added {
 		opr = c.policyCache[pr.GetIdentifier()]
 	}
 
-	for _, cb := range c.policyCallbacks {
-		go func(
-			callback report.PolicyReportCallback,
-			event watch.EventType,
-			creport report.PolicyReport,
-			oreport report.PolicyReport,
-		) {
-			callback(event, creport, oreport)
-			wg.Done()
-		}(cb, e, pr, opr)
-	}
+	if e != watch.Deleted {
+		wg := sync.WaitGroup{}
+		wg.Add(len(c.policyCallbacks))
 
-	wg.Wait()
+		for _, cb := range c.policyCallbacks {
+			go func(
+				callback report.PolicyReportCallback,
+				event watch.EventType,
+				creport report.PolicyReport,
+				oreport report.PolicyReport,
+			) {
+				callback(event, creport, oreport)
+				wg.Done()
+			}(cb, e, pr, opr)
+		}
 
-	if e == watch.Deleted {
-		delete(c.policyCache, pr.GetIdentifier())
-	} else {
+		wg.Wait()
+
 		c.policyCache[pr.GetIdentifier()] = pr
+
+		return
 	}
+
+	delete(c.policyCache, pr.GetIdentifier())
 }
 
 func (c *policyReportClient) RegisterPolicyResultWatcher(skipExisting bool) {
@@ -283,7 +279,7 @@ func (c *policyReportClient) RegisterPolicyResultWatcher(skipExisting bool) {
 }
 
 func (c *policyReportClient) fetchPriorities(ctx context.Context) error {
-	cm, err := c.coreClient.GetConfig(ctx, prioriyConfig)
+	cm, err := c.configMapAPI.GetConfig(ctx, prioriyConfig)
 	if err != nil {
 		return err
 	}
@@ -297,7 +293,7 @@ func (c *policyReportClient) fetchPriorities(ctx context.Context) error {
 }
 
 func (c *policyReportClient) syncPriorities(ctx context.Context) error {
-	err := c.coreClient.WatchConfigs(ctx, func(e watch.EventType, cm *v1.ConfigMap) {
+	err := c.configMapAPI.WatchConfigs(ctx, func(e watch.EventType, cm *v1.ConfigMap) {
 		if cm.Name != prioriyConfig {
 			return
 		}
@@ -322,10 +318,10 @@ func (c *policyReportClient) syncPriorities(ctx context.Context) error {
 }
 
 // NewPolicyReportClient creates a new ReportClient based on the kubernetes go-client
-func NewPolicyReportClient(ctx context.Context, dynamicClient dynamic.Interface, coreClient CoreClient, startUp time.Time) (report.Client, error) {
+func NewPolicyReportClient(ctx context.Context, client PolicyReportAdapter, coreClient ConfigMapAdapter, startUp time.Time) (report.Client, error) {
 	reportClient := &policyReportClient{
-		client:             dynamicClient,
-		coreClient:         coreClient,
+		policyAPI:          client,
+		configMapAPI:       coreClient,
 		policyCache:        make(map[string]report.PolicyReport),
 		clusterPolicyCache: make(map[string]report.ClusterPolicyReport),
 		mapper:             NewMapper(make(map[string]string)),

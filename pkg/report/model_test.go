@@ -115,6 +115,13 @@ func Test_Result(t *testing.T) {
 	})
 }
 
+func Test_MarshalPriority(t *testing.T) {
+	priority := report.NewPriority("error")
+	if result, _ := priority.MarshalJSON(); string(result) != `"error"` {
+		t.Errorf("Unexpected Marshel Result: %s", result)
+	}
+}
+
 func Test_Priorities(t *testing.T) {
 	t.Run("Priority.String", func(t *testing.T) {
 		if prio := report.Priority(0).String(); prio != "" {

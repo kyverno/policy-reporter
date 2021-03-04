@@ -79,10 +79,9 @@ func Test_ClusterPolicyReportMetricGeneration(t *testing.T) {
 			t.Errorf("Unexpected Error: %s", err)
 		}
 
-		summary := metricFam[1]
-
-		if *summary.Name != "cluster_policy_report_summary" {
-			t.Fatalf("Unexpected Metric found: %s (expected: cluster_policy_report_summary)", *summary.Name)
+		summary := findMetric(metricFam, "cluster_policy_report_summary")
+		if summary == nil {
+			t.Fatalf("Metric not found: cluster_policy_report_summary")
 		}
 
 		metrics := summary.GetMetric()
@@ -103,10 +102,9 @@ func Test_ClusterPolicyReportMetricGeneration(t *testing.T) {
 			t.Error(err)
 		}
 
-		results := metricFam[0]
-
-		if *results.Name != "cluster_policy_report_result" {
-			t.Fatalf("Unexpected Metric found: %s (expected: cluster_policy_report_result)", *results.Name)
+		results := findMetric(metricFam, "cluster_policy_report_result")
+		if summary == nil {
+			t.Fatalf("Metric not found: cluster_policy_report_result")
 		}
 
 		metrics = results.GetMetric()
@@ -127,10 +125,9 @@ func Test_ClusterPolicyReportMetricGeneration(t *testing.T) {
 			t.Errorf("Unexpected Error: %s", err)
 		}
 
-		summary := metricFam[1]
-
-		if *summary.Name != "cluster_policy_report_summary" {
-			t.Fatalf("Unexpected Metric found: %s (expected: cluster_policy_report_summary)", *summary.Name)
+		summary := findMetric(metricFam, "cluster_policy_report_summary")
+		if summary == nil {
+			t.Fatalf("Metric not found: cluster_policy_report_summary")
 		}
 
 		metrics := summary.GetMetric()
@@ -151,10 +148,9 @@ func Test_ClusterPolicyReportMetricGeneration(t *testing.T) {
 			t.Error(err)
 		}
 
-		results := metricFam[0]
-
-		if *results.Name != "cluster_policy_report_result" {
-			t.Errorf("Unexpected Metric found: %s (expected: cluster_policy_report_result)", *results.Name)
+		results := findMetric(metricFam, "cluster_policy_report_result")
+		if summary == nil {
+			t.Fatalf("Metric not found: cluster_policy_report_result")
 		}
 
 		metrics = results.GetMetric()
@@ -176,9 +172,8 @@ func Test_ClusterPolicyReportMetricGeneration(t *testing.T) {
 			t.Errorf("Unexpected Error: %s", err)
 		}
 
-		summary := metricFam[1]
-
-		if *summary.Name == "cluster_policy_report_summary" {
+		summary := findMetric(metricFam, "cluster_policy_report_summary")
+		if summary != nil {
 			t.Error("cluster_policy_report_summary should no longer exist", *summary.Name)
 		}
 

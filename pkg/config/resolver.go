@@ -14,6 +14,7 @@ import (
 	"github.com/fjogeleit/policy-reporter/pkg/target/loki"
 	"github.com/fjogeleit/policy-reporter/pkg/target/slack"
 	"k8s.io/client-go/dynamic"
+	v1 "k8s.io/client-go/kubernetes/typed/core/v1"
 	"k8s.io/client-go/rest"
 )
 
@@ -34,20 +35,20 @@ func (r *Resolver) PolicyReportClient() (report.Client, error) {
 		return r.kubeClient, nil
 	}
 
-	coreClient, err := r.coreClient()
+	cmAPI, err := r.configMapAPI()
 	if err != nil {
 		return nil, err
 	}
 
-	dynamicClient, err := r.dynamicClient()
+	policyAPI, err := r.policyReportAPI()
 	if err != nil {
 		return nil, err
 	}
 
 	client, err := kubernetes.NewPolicyReportClient(
 		context.Background(),
-		dynamicClient,
-		coreClient,
+		policyAPI,
+		cmAPI,
 		time.Now(),
 	)
 
@@ -184,12 +185,32 @@ func (r *Resolver) SkipExistingOnStartup() bool {
 	return true
 }
 
-func (r *Resolver) coreClient() (kubernetes.CoreClient, error) {
-	return kubernetes.NewCoreClient(r.k8sConfig, r.config.Namespace)
+func (r *Resolver) ConfigMapClient() (v1.ConfigMapInterface, error) {
+	var err error
+
+	client, err := v1.NewForConfig(r.k8sConfig)
+	if err != nil {
+		return nil, err
+	}
+
+	return client.ConfigMaps(r.config.Namespace), nil
 }
 
-func (r *Resolver) dynamicClient() (dynamic.Interface, error) {
-	return dynamic.NewForConfig(r.k8sConfig)
+func (r *Resolver) configMapAPI() (kubernetes.ConfigMapAdapter, error) {
+	client, err := r.ConfigMapClient()
+	if err != nil {
+		return nil, err
+	}
+
+	return kubernetes.NewConfigMapAdapter(client), nil
+}
+
+func (r *Resolver) policyReportAPI() (kubernetes.PolicyReportAdapter, error) {
+	client, err := dynamic.NewForConfig(r.k8sConfig)
+	if err != nil {
+		return nil, err
+	}
+	return kubernetes.NewPolicyReportAdapter(client), nil
 }
 
 // NewResolver constructor function

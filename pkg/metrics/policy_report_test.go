@@ -82,10 +82,9 @@ func Test_PolicyReportMetricGeneration(t *testing.T) {
 			t.Errorf("Unexpected Error: %s", err)
 		}
 
-		summary := metricFam[len(metricFam)-1]
-
-		if *summary.Name != "policy_report_summary" {
-			t.Fatalf("Unexpected Metric found: %s (expected: policy_report_summary)", *summary.Name)
+		summary := findMetric(metricFam, "policy_report_summary")
+		if summary == nil {
+			t.Fatalf("Metric not found: policy_report_summary")
 		}
 
 		metrics := summary.GetMetric()
@@ -106,10 +105,9 @@ func Test_PolicyReportMetricGeneration(t *testing.T) {
 			t.Error(err)
 		}
 
-		results := metricFam[len(metricFam)-2]
-
-		if *results.Name != "policy_report_result" {
-			t.Fatalf("Unexpected Metric found: %s (expected: policy_report_result)", *results.Name)
+		results := findMetric(metricFam, "policy_report_result")
+		if summary == nil {
+			t.Fatalf("Metric not found: policy_report_result")
 		}
 
 		metrics = results.GetMetric()
@@ -130,10 +128,9 @@ func Test_PolicyReportMetricGeneration(t *testing.T) {
 			t.Errorf("Unexpected Error: %s", err)
 		}
 
-		summary := metricFam[len(metricFam)-1]
-
-		if *summary.Name != "policy_report_summary" {
-			t.Errorf("Unexpected Metric found: %s (expected: policy_report_summary)", *summary.Name)
+		summary := findMetric(metricFam, "policy_report_summary")
+		if summary == nil {
+			t.Fatalf("Metric not found: policy_report_summary")
 		}
 
 		metrics := summary.GetMetric()
@@ -154,10 +151,9 @@ func Test_PolicyReportMetricGeneration(t *testing.T) {
 			t.Error(err)
 		}
 
-		results := metricFam[len(metricFam)-2]
-
-		if *results.Name != "policy_report_result" {
-			t.Fatalf("Unexpected Metric found: %s (expected: policy_report_result)", *results.Name)
+		results := findMetric(metricFam, "policy_report_result")
+		if summary == nil {
+			t.Fatalf("Metric not found: policy_report_result")
 		}
 
 		metrics = results.GetMetric()
@@ -179,15 +175,13 @@ func Test_PolicyReportMetricGeneration(t *testing.T) {
 			t.Errorf("Unexpected Error: %s", err)
 		}
 
-		summary := metricFam[len(metricFam)-1]
-
-		if *summary.Name == "policy_report_summary" {
+		summary := findMetric(metricFam, "policy_report_summary")
+		if summary != nil {
 			t.Error("policy_report_summary should no longer exist", *summary.Name)
 		}
 
-		results := metricFam[len(metricFam)-2]
-
-		if *results.Name == "policy_report_result" {
+		results := findMetric(metricFam, "policy_report_result")
+		if results != nil {
 			t.Error("policy_report_result shoud no longer exist", *results.Name)
 		}
 	})
@@ -277,6 +271,16 @@ func testResultMetricLabels(metric *io_prometheus_client.Metric, result report.R
 
 	if value := metric.Gauge.GetValue(); value != 1 {
 		return fmt.Errorf("Unexpected Metric Value: %v", value)
+	}
+
+	return nil
+}
+
+func findMetric(metrics []*io_prometheus_client.MetricFamily, name string) *io_prometheus_client.MetricFamily {
+	for _, metric := range metrics {
+		if *metric.Name == name {
+			return metric
+		}
 	}
 
 	return nil
