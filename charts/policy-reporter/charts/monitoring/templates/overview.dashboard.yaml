@@ -102,7 +102,7 @@ data:
         "targets": [
             {
             "expr": "sum(policy_report_summary{status=\"Fail\"} > 0) by (exported_namespace)",
-            "instant": false,
+            "instant": true,
             "interval": "",
             "legendFormat": "{{`{{ exported_namespace }}`}}",
             "refId": "A"
