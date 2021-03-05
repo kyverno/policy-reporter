@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"context"
 	"flag"
 	"net/http"
 
@@ -35,20 +36,30 @@ func newRunCMD() *cobra.Command {
 				return err
 			}
 
+			ctx := context.Background()
+
 			resolver := config.NewResolver(c, k8sConfig)
 
-			client, err := resolver.PolicyReportClient()
+			pClient, err := resolver.PolicyReportClient(ctx)
+			if err != nil {
+				return err
+			}
+			cpClient, err := resolver.ClusterPolicyReportClient(ctx)
+			if err != nil {
+				return err
+			}
+			rClient, err := resolver.PolicyResultClient(ctx)
 			if err != nil {
 				return err
 			}
 
-			client.RegisterClusterPolicyReportCallback(metrics.CreateClusterPolicyReportMetricsCallback())
-			client.RegisterPolicyReportCallback(metrics.CreatePolicyReportMetricsCallback())
+			cpClient.RegisterCallback(metrics.CreateClusterPolicyReportMetricsCallback())
+			pClient.RegisterCallback(metrics.CreatePolicyReportMetricsCallback())
 
 			targets := resolver.TargetClients()
 
 			if len(targets) > 0 {
-				client.RegisterPolicyResultCallback(func(r report.Result, e bool) {
+				rClient.RegisterPolicyResultCallback(func(r report.Result, e bool) {
 					for _, t := range targets {
 						go func(target target.Client, result report.Result, preExisted bool) {
 							if preExisted && target.SkipExistingOnStartup() {
@@ -60,12 +71,12 @@ func newRunCMD() *cobra.Command {
 					}
 				})
 
-				client.RegisterPolicyResultWatcher(resolver.SkipExistingOnStartup())
+				rClient.RegisterPolicyResultWatcher(resolver.SkipExistingOnStartup())
 			}
 
 			g := new(errgroup.Group)
-			g.Go(client.StartWatchClusterPolicyReports)
-			g.Go(client.StartWatchPolicyReports)
+			g.Go(cpClient.StartWatching)
+			g.Go(pClient.StartWatching)
 			g.Go(func() error {
 				http.Handle("/metrics", promhttp.Handler())
 

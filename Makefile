@@ -14,11 +14,11 @@ prepare:
 
 .PHONY: test
 test:
-	go test -v ./...
+	go test -v ./... -timeout=120s
 
 .PHONY: coverage
 coverage:
-	go test -v ./... -covermode=count -coverprofile=coverage.out
+	go test -v ./... -covermode=count -coverprofile=coverage.out -timeout=120s
 
 .PHONY: build
 build: prepare

@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"context"
 	"flag"
 	"sync"
 
@@ -34,7 +35,7 @@ func newSendCMD() *cobra.Command {
 
 			resolver := config.NewResolver(c, k8sConfig)
 
-			client, err := resolver.PolicyReportClient()
+			client, err := resolver.PolicyResultClient(context.Background())
 			if err != nil {
 				return err
 			}
@@ -45,7 +46,7 @@ func newSendCMD() *cobra.Command {
 				return nil
 			}
 
-			results, err := client.FetchPolicyReportResults()
+			results, err := client.FetchPolicyResults()
 			if err != nil {
 				return err
 			}

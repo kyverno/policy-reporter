@@ -1,10 +1,16 @@
 package kubernetes_test
 
 import (
+	"context"
 	"testing"
+	"time"
 
 	"github.com/fjogeleit/policy-reporter/pkg/kubernetes"
 	"github.com/fjogeleit/policy-reporter/pkg/report"
+	v1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/watch"
+	testcore "k8s.io/client-go/testing"
 )
 
 var policyMap = map[string]interface{}{
@@ -101,7 +107,7 @@ var priorityMap = map[string]string{
 	"priority-test": "warning",
 }
 
-var mapper = kubernetes.NewMapper(priorityMap)
+var mapper = kubernetes.NewMapper(priorityMap, nil)
 
 func Test_MapPolicyReport(t *testing.T) {
 	preport := mapper.MapPolicyReport(policyMap)
@@ -280,7 +286,7 @@ func Test_MapMinClusterPolicyReport(t *testing.T) {
 
 func Test_PriorityMap(t *testing.T) {
 	t.Run("Test exact match, without default", func(t *testing.T) {
-		mapper := kubernetes.NewMapper(map[string]string{"required-label": "debug"})
+		mapper := kubernetes.NewMapper(map[string]string{"required-label": "debug"}, nil)
 
 		preport := mapper.MapPolicyReport(policyMap)
 
@@ -292,7 +298,7 @@ func Test_PriorityMap(t *testing.T) {
 	})
 
 	t.Run("Test exact match handled over default", func(t *testing.T) {
-		mapper := kubernetes.NewMapper(map[string]string{"required-label": "debug", "default": "warning"})
+		mapper := kubernetes.NewMapper(map[string]string{"required-label": "debug", "default": "warning"}, nil)
 
 		preport := mapper.MapPolicyReport(policyMap)
 
@@ -304,8 +310,7 @@ func Test_PriorityMap(t *testing.T) {
 	})
 
 	t.Run("Test default expressions", func(t *testing.T) {
-		mapper := kubernetes.NewMapper(make(map[string]string))
-		mapper.SetPriorityMap(map[string]string{"default": "warning"})
+		mapper := kubernetes.NewMapper(map[string]string{"default": "warning"}, nil)
 
 		preport := mapper.MapPolicyReport(policyMap)
 
@@ -315,4 +320,94 @@ func Test_PriorityMap(t *testing.T) {
 			t.Errorf("Expected Policy '%d' (acutal %d)", report.WarningPriority, result1.Priority)
 		}
 	})
+}
+
+func Test_PriorityFetch(t *testing.T) {
+	_, cmAPI := newFakeAPI()
+	cmAPI.Create(context.Background(), configMap, metav1.CreateOptions{})
+	mapper := kubernetes.NewMapper(make(map[string]string), kubernetes.NewConfigMapAdapter(cmAPI))
+
+	preport1 := mapper.MapPolicyReport(policyMap)
+	result1 := preport1.Results["required-label__app-label-required__fail__dfd57c50-f30c-4729-b63f-b1954d8988d1"]
+
+	if result1.Priority != report.ErrorPriority {
+		t.Errorf("Default Priority should be Error")
+	}
+
+	mapper.FetchPriorities(context.Background())
+	preport2 := mapper.MapPolicyReport(policyMap)
+	result2 := preport2.Results["required-label__app-label-required__fail__dfd57c50-f30c-4729-b63f-b1954d8988d1"]
+	if result2.Priority != report.WarningPriority {
+		t.Errorf("Default Priority should be Warning after ConigMap fetch")
+	}
+}
+
+func Test_PriorityFetchError(t *testing.T) {
+	_, cmAPI := newFakeAPI()
+	mapper := kubernetes.NewMapper(make(map[string]string), kubernetes.NewConfigMapAdapter(cmAPI))
+
+	mapper.FetchPriorities(context.Background())
+	preport := mapper.MapPolicyReport(policyMap)
+	result := preport.Results["required-label__app-label-required__fail__dfd57c50-f30c-4729-b63f-b1954d8988d1"]
+	if result.Priority != report.ErrorPriority {
+		t.Errorf("Fetch Error should not effect the functionality and continue using Error as default")
+	}
+}
+
+func Test_PrioritySync(t *testing.T) {
+	client, cmAPI := newFakeAPI()
+	watcher := watch.NewFake()
+	client.PrependWatchReactor("configmaps", testcore.DefaultWatchReactor(watcher, nil))
+
+	mapper := kubernetes.NewMapper(make(map[string]string), kubernetes.NewConfigMapAdapter(cmAPI))
+
+	preport1 := mapper.MapPolicyReport(policyMap)
+	result1 := preport1.Results["required-label__app-label-required__fail__dfd57c50-f30c-4729-b63f-b1954d8988d1"]
+
+	if result1.Priority != report.ErrorPriority {
+		t.Errorf("Default Priority should be Error")
+	}
+
+	go mapper.SyncPriorities(context.Background())
+
+	watcher.Add(configMap)
+
+	preport2 := mapper.MapPolicyReport(policyMap)
+	result2 := preport2.Results["required-label__app-label-required__fail__dfd57c50-f30c-4729-b63f-b1954d8988d1"]
+	if result2.Priority != report.WarningPriority {
+		t.Errorf("Default Priority should be Warning after ConigMap add sync")
+	}
+
+	configMap2 := &v1.ConfigMap{
+		TypeMeta: metav1.TypeMeta{
+			Kind:       "ConfigMap",
+			APIVersion: "v1",
+		},
+		ObjectMeta: metav1.ObjectMeta{
+			Name: "policy-reporter-priorities",
+		},
+		Data: map[string]string{
+			"default": "debug",
+		},
+	}
+
+	watcher.Modify(configMap2)
+
+	time.Sleep(100 * time.Millisecond)
+
+	preport3 := mapper.MapPolicyReport(policyMap)
+	result3 := preport3.Results["required-label__app-label-required__fail__dfd57c50-f30c-4729-b63f-b1954d8988d1"]
+	if result3.Priority != report.DebugPriority {
+		t.Errorf("Default Priority should be Debug after ConigMap modify sync")
+	}
+
+	watcher.Delete(configMap2)
+
+	time.Sleep(100 * time.Millisecond)
+
+	preport4 := mapper.MapPolicyReport(policyMap)
+	result4 := preport4.Results["required-label__app-label-required__fail__dfd57c50-f30c-4729-b63f-b1954d8988d1"]
+	if result4.Priority != report.ErrorPriority {
+		t.Errorf("Default Priority should be fallback to Error after ConigMap delete sync")
+	}
 }

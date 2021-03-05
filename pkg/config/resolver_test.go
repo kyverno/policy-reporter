@@ -1,6 +1,7 @@
 package config_test
 
 import (
+	"context"
 	"testing"
 
 	"github.com/fjogeleit/policy-reporter/pkg/config"
@@ -181,17 +182,45 @@ func Test_ResolveTargetWithoutHost(t *testing.T) {
 	})
 }
 
-func Test_ResolveClient(t *testing.T) {
+func Test_ResolveResultClient(t *testing.T) {
 	resolver := config.NewResolver(&config.Config{}, &rest.Config{})
 
-	client1, err := resolver.PolicyReportClient()
+	client1, err := resolver.PolicyResultClient(context.Background())
 	if err != nil {
 		t.Errorf("Unexpected Error: %s", err)
 	}
 
-	client2, err := resolver.PolicyReportClient()
+	client2, err := resolver.PolicyResultClient(context.Background())
+	if client1 != client2 {
+		t.Error("A second call resolver.PolicyResultClient() should return the cached first client")
+	}
+}
+
+func Test_ResolvePolicyClient(t *testing.T) {
+	resolver := config.NewResolver(&config.Config{}, &rest.Config{})
+
+	client1, err := resolver.PolicyReportClient(context.Background())
+	if err != nil {
+		t.Errorf("Unexpected Error: %s", err)
+	}
+
+	client2, err := resolver.PolicyReportClient(context.Background())
 	if client1 != client2 {
 		t.Error("A second call resolver.PolicyReportClient() should return the cached first client")
+	}
+}
+
+func Test_ResolveClusterPolicyClient(t *testing.T) {
+	resolver := config.NewResolver(&config.Config{}, &rest.Config{})
+
+	client1, err := resolver.ClusterPolicyReportClient(context.Background())
+	if err != nil {
+		t.Errorf("Unexpected Error: %s", err)
+	}
+
+	client2, err := resolver.ClusterPolicyReportClient(context.Background())
+	if client1 != client2 {
+		t.Error("A second call resolver.ClusterPolicyReportClient() should return the cached first client")
 	}
 }
 
@@ -201,7 +230,7 @@ func Test_ResolveClientWithInvalidK8sConfig(t *testing.T) {
 
 	resolver := config.NewResolver(&config.Config{}, k8sConfig)
 
-	_, err := resolver.PolicyReportClient()
+	_, err := resolver.PolicyReportClient(context.Background())
 	if err == nil {
 		t.Error("Error: 'host must be a URL or a host:port pair' was expected")
 	}

@@ -9,6 +9,10 @@ import (
 	v1 "k8s.io/client-go/kubernetes/typed/core/v1"
 )
 
+const (
+	prioriyConfig = "policy-reporter-priorities"
+)
+
 // ConfigMapAdapter provides simplified APIs for ConfigMap Resources
 type ConfigMapAdapter interface {
 	// GetConfig return a single ConfigMap by name if exist

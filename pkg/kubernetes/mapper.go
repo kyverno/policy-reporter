@@ -1,10 +1,14 @@
 package kubernetes
 
 import (
+	"context"
 	"errors"
+	"log"
 	"time"
 
 	"github.com/fjogeleit/policy-reporter/pkg/report"
+	v1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/watch"
 )
 
 // Mapper converts maps into report structs
@@ -15,10 +19,15 @@ type Mapper interface {
 	MapClusterPolicyReport(reportMap map[string]interface{}) report.ClusterPolicyReport
 	// SetPriorityMap updates the policy/status to priority mapping
 	SetPriorityMap(map[string]string)
+	// SyncPriorities when ConfigMap has changed
+	SyncPriorities(ctx context.Context) error
+	// FetchPriorities from ConfigMap
+	FetchPriorities(ctx context.Context) error
 }
 
 type mapper struct {
 	priorityMap map[string]string
+	cmAdapter   ConfigMapAdapter
 }
 
 func (m *mapper) MapPolicyReport(reportMap map[string]interface{}) report.PolicyReport {
@@ -170,9 +179,48 @@ func (m *mapper) resolvePriority(policy string) report.Priority {
 	return report.Priority(report.ErrorPriority)
 }
 
+func (m *mapper) FetchPriorities(ctx context.Context) error {
+	cm, err := m.cmAdapter.GetConfig(ctx, prioriyConfig)
+	if err != nil {
+		return err
+	}
+
+	if cm != nil {
+		m.SetPriorityMap(cm.Data)
+		log.Println("[INFO] Priorities loaded")
+	}
+
+	return nil
+}
+
+func (m *mapper) SyncPriorities(ctx context.Context) error {
+	err := m.cmAdapter.WatchConfigs(ctx, func(e watch.EventType, cm *v1.ConfigMap) {
+		if cm.Name != prioriyConfig {
+			return
+		}
+
+		switch e {
+		case watch.Added:
+			m.SetPriorityMap(cm.Data)
+		case watch.Modified:
+			m.SetPriorityMap(cm.Data)
+		case watch.Deleted:
+			m.SetPriorityMap(map[string]string{})
+		}
+
+		log.Println("[INFO] Priorities synchronized")
+	})
+
+	if err != nil {
+		log.Printf("[INFO] Unable to sync Priorities: %s", err.Error())
+	}
+
+	return err
+}
+
 // NewMapper creates an new Mapper instance
-func NewMapper(priorities map[string]string) Mapper {
-	m := &mapper{}
+func NewMapper(priorities map[string]string, cmAdapter ConfigMapAdapter) Mapper {
+	m := &mapper{cmAdapter: cmAdapter}
 	m.SetPriorityMap(priorities)
 
 	return m

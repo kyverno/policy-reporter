@@ -22,20 +22,46 @@ import (
 type Resolver struct {
 	config              *Config
 	k8sConfig           *rest.Config
-	kubeClient          report.Client
+	mapper              kubernetes.Mapper
+	resultClient        report.ResultClient
+	policyClient        report.PolicyClient
+	clusterPolicyClient report.ClusterPolicyClient
 	lokiClient          target.Client
 	elasticsearchClient target.Client
 	slackClient         target.Client
 	discordClient       target.Client
 }
 
-// PolicyReportClient resolver method
-func (r *Resolver) PolicyReportClient() (report.Client, error) {
-	if r.kubeClient != nil {
-		return r.kubeClient, nil
+// PolicyResultClient resolver method
+func (r *Resolver) PolicyResultClient(ctx context.Context) (report.ResultClient, error) {
+	if r.resultClient != nil {
+		return r.resultClient, nil
 	}
 
-	cmAPI, err := r.configMapAPI()
+	pClient, err := r.PolicyReportClient(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	cpClient, err := r.ClusterPolicyReportClient(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	client := kubernetes.NewPolicyResultClient(pClient, cpClient)
+
+	r.resultClient = client
+
+	return client, nil
+}
+
+// PolicyReportClient resolver method
+func (r *Resolver) PolicyReportClient(ctx context.Context) (report.PolicyClient, error) {
+	if r.policyClient != nil {
+		return r.policyClient, nil
+	}
+
+	mapper, err := r.Mapper(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -45,16 +71,62 @@ func (r *Resolver) PolicyReportClient() (report.Client, error) {
 		return nil, err
 	}
 
-	client, err := kubernetes.NewPolicyReportClient(
-		context.Background(),
+	client := kubernetes.NewPolicyReportClient(
 		policyAPI,
-		cmAPI,
+		mapper,
 		time.Now(),
 	)
 
-	r.kubeClient = client
+	r.policyClient = client
 
-	return client, err
+	return client, nil
+}
+
+// ClusterPolicyReportClient resolver method
+func (r *Resolver) ClusterPolicyReportClient(ctx context.Context) (report.ClusterPolicyClient, error) {
+	if r.clusterPolicyClient != nil {
+		return r.clusterPolicyClient, nil
+	}
+
+	mapper, err := r.Mapper(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	policyAPI, err := r.policyReportAPI()
+	if err != nil {
+		return nil, err
+	}
+
+	client := kubernetes.NewClusterPolicyReportClient(
+		policyAPI,
+		mapper,
+		time.Now(),
+	)
+
+	r.clusterPolicyClient = client
+
+	return client, nil
+}
+
+// Mapper resolver method
+func (r *Resolver) Mapper(ctx context.Context) (kubernetes.Mapper, error) {
+	if r.mapper != nil {
+		return r.mapper, nil
+	}
+
+	cmAPI, err := r.configMapAPI()
+	if err != nil {
+		return nil, err
+	}
+
+	mapper := kubernetes.NewMapper(make(map[string]string), cmAPI)
+	mapper.FetchPriorities(ctx)
+	go mapper.SyncPriorities(ctx)
+
+	r.mapper = mapper
+
+	return mapper, err
 }
 
 // LokiClient resolver method

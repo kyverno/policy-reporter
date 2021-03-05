@@ -13,7 +13,7 @@ var completeResult = report.Result{
 	Message:  "validation error: requests and limits required. Rule autogen-check-for-requests-and-limits failed at path /spec/template/spec/containers/0/resources/requests/",
 	Policy:   "require-requests-and-limits-required",
 	Rule:     "autogen-check-for-requests-and-limits",
-	Priority: report.ErrorPriority,
+	Priority: report.WarningPriority,
 	Status:   report.Fail,
 	Severity: report.Heigh,
 	Category: "resources",
@@ -58,8 +58,8 @@ func Test_ElasticsearchTarget(t *testing.T) {
 			}
 		}
 
-		loki := elasticsearch.NewClient("http://localhost:9200", "policy-reporter", "annually", "", false, testClient{callback, 200})
-		loki.Send(completeResult)
+		client := elasticsearch.NewClient("http://localhost:9200", "policy-reporter", "annually", "", false, testClient{callback, 200})
+		client.Send(completeResult)
 	})
 	t.Run("Send with Monthly Result", func(t *testing.T) {
 		callback := func(req *http.Request) {
@@ -68,8 +68,8 @@ func Test_ElasticsearchTarget(t *testing.T) {
 			}
 		}
 
-		loki := elasticsearch.NewClient("http://localhost:9200", "policy-reporter", "monthly", "", false, testClient{callback, 200})
-		loki.Send(completeResult)
+		client := elasticsearch.NewClient("http://localhost:9200", "policy-reporter", "monthly", "", false, testClient{callback, 200})
+		client.Send(completeResult)
 	})
 	t.Run("Send with Monthly Result", func(t *testing.T) {
 		callback := func(req *http.Request) {
@@ -78,8 +78,8 @@ func Test_ElasticsearchTarget(t *testing.T) {
 			}
 		}
 
-		loki := elasticsearch.NewClient("http://localhost:9200", "policy-reporter", "daily", "", false, testClient{callback, 200})
-		loki.Send(completeResult)
+		client := elasticsearch.NewClient("http://localhost:9200", "policy-reporter", "daily", "", false, testClient{callback, 200})
+		client.Send(completeResult)
 	})
 	t.Run("Send with None Result", func(t *testing.T) {
 		callback := func(req *http.Request) {
@@ -88,7 +88,26 @@ func Test_ElasticsearchTarget(t *testing.T) {
 			}
 		}
 
-		loki := elasticsearch.NewClient("http://localhost:9200", "policy-reporter", "none", "", false, testClient{callback, 200})
-		loki.Send(completeResult)
+		client := elasticsearch.NewClient("http://localhost:9200", "policy-reporter", "none", "", false, testClient{callback, 200})
+		client.Send(completeResult)
+	})
+	t.Run("Send with ingored Priority", func(t *testing.T) {
+		callback := func(req *http.Request) {
+			t.Errorf("Unexpected Call")
+		}
+
+		client := elasticsearch.NewClient("http://localhost:9200", "policy-reporter", "none", "error", false, testClient{callback, 200})
+		client.Send(completeResult)
+	})
+	t.Run("SkipExistingOnStartup", func(t *testing.T) {
+		callback := func(req *http.Request) {
+			t.Errorf("Unexpected Call")
+		}
+
+		client := elasticsearch.NewClient("http://localhost:9200", "policy-reporter", "none", "", true, testClient{callback, 200})
+
+		if !client.SkipExistingOnStartup() {
+			t.Error("Should return configured SkipExistingOnStartup")
+		}
 	})
 }
