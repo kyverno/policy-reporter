@@ -1,15 +1,19 @@
 package cmd
 
 import (
+	"context"
 	"flag"
 	"net/http"
 
 	"github.com/fjogeleit/policy-reporter/pkg/config"
+	"github.com/fjogeleit/policy-reporter/pkg/metrics"
 	"github.com/fjogeleit/policy-reporter/pkg/report"
 	"github.com/fjogeleit/policy-reporter/pkg/target"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/spf13/cobra"
 	"golang.org/x/sync/errgroup"
+	"k8s.io/client-go/rest"
+	"k8s.io/client-go/tools/clientcmd"
 )
 
 func newRunCMD() *cobra.Command {
@@ -22,37 +26,40 @@ func newRunCMD() *cobra.Command {
 				return err
 			}
 
-			resolver := config.NewResolver(c)
-
-			client, err := resolver.PolicyReportClient()
+			var k8sConfig *rest.Config
+			if c.Kubeconfig != "" {
+				k8sConfig, err = clientcmd.BuildConfigFromFlags("", c.Kubeconfig)
+			} else {
+				k8sConfig, err = rest.InClusterConfig()
+			}
 			if err != nil {
 				return err
 			}
 
-			policyMetrics, err := resolver.PolicyReportMetrics()
+			ctx := context.Background()
+
+			resolver := config.NewResolver(c, k8sConfig)
+
+			pClient, err := resolver.PolicyReportClient(ctx)
+			if err != nil {
+				return err
+			}
+			cpClient, err := resolver.ClusterPolicyReportClient(ctx)
+			if err != nil {
+				return err
+			}
+			rClient, err := resolver.PolicyResultClient(ctx)
 			if err != nil {
 				return err
 			}
 
-			clusterPolicyMetrics, err := resolver.ClusterPolicyReportMetrics()
-			if err != nil {
-				return err
-			}
+			cpClient.RegisterCallback(metrics.CreateClusterPolicyReportMetricsCallback())
+			pClient.RegisterCallback(metrics.CreatePolicyReportMetricsCallback())
 
-			g := new(errgroup.Group)
+			targets := resolver.TargetClients()
 
-			g.Go(policyMetrics.GenerateMetrics)
-
-			g.Go(clusterPolicyMetrics.GenerateMetrics)
-
-			g.Go(func() error {
-				targets := resolver.TargetClients()
-
-				if len(targets) == 0 {
-					return nil
-				}
-
-				return client.WatchPolicyReportResults(func(r report.Result, e bool) {
+			if len(targets) > 0 {
+				rClient.RegisterPolicyResultCallback(func(r report.Result, e bool) {
 					for _, t := range targets {
 						go func(target target.Client, result report.Result, preExisted bool) {
 							if preExisted && target.SkipExistingOnStartup() {
@@ -62,9 +69,14 @@ func newRunCMD() *cobra.Command {
 							target.Send(result)
 						}(t, r, e)
 					}
-				}, resolver.SkipExistingOnStartup())
-			})
+				})
 
+				rClient.RegisterPolicyResultWatcher(resolver.SkipExistingOnStartup())
+			}
+
+			g := new(errgroup.Group)
+			g.Go(cpClient.StartWatching)
+			g.Go(pClient.StartWatching)
 			g.Go(func() error {
 				http.Handle("/metrics", promhttp.Handler())
 

@@ -98,7 +98,7 @@ data:
         "targets": [
             {
             "expr": "sum(cluster_policy_report_result{policy=~\"$policy\", status=\"pass\"})",
-            "instant": false,
+            "instant": true,
             "interval": "",
             "legendFormat": "",
             "refId": "A"
@@ -155,7 +155,7 @@ data:
         "targets": [
             {
             "expr": "sum(policy_report_result{policy=~\"$policy\", status=\"warn\"})",
-            "instant": false,
+            "instant": true,
             "interval": "",
             "legendFormat": "",
             "refId": "A"
@@ -212,7 +212,7 @@ data:
         "targets": [
             {
             "expr": "sum(cluster_policy_report_result{policy=~\"$policy\", status=\"fail\"})",
-            "instant": false,
+            "instant": true,
             "interval": "",
             "legendFormat": "",
             "refId": "A"
@@ -269,7 +269,7 @@ data:
         "targets": [
             {
             "expr": "sum(cluster_policy_report_result{policy=~\"$policy\", status=\"error\"})",
-            "instant": false,
+            "instant": true,
             "interval": "",
             "legendFormat": "",
             "refId": "A"

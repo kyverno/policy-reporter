@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"context"
 	"flag"
 	"sync"
 
@@ -8,6 +9,8 @@ import (
 	"github.com/fjogeleit/policy-reporter/pkg/report"
 	"github.com/fjogeleit/policy-reporter/pkg/target"
 	"github.com/spf13/cobra"
+	"k8s.io/client-go/rest"
+	"k8s.io/client-go/tools/clientcmd"
 )
 
 func newSendCMD() *cobra.Command {
@@ -20,9 +23,19 @@ func newSendCMD() *cobra.Command {
 				return err
 			}
 
-			resolver := config.NewResolver(c)
+			var k8sConfig *rest.Config
+			if c.Kubeconfig != "" {
+				k8sConfig, err = clientcmd.BuildConfigFromFlags("", c.Kubeconfig)
+			} else {
+				k8sConfig, err = rest.InClusterConfig()
+			}
+			if err != nil {
+				return err
+			}
 
-			client, err := resolver.PolicyReportClient()
+			resolver := config.NewResolver(c, k8sConfig)
+
+			client, err := resolver.PolicyResultClient(context.Background())
 			if err != nil {
 				return err
 			}
@@ -33,7 +46,7 @@ func newSendCMD() *cobra.Command {
 				return nil
 			}
 
-			results, err := client.FetchPolicyReportResults()
+			results, err := client.FetchPolicyResults()
 			if err != nil {
 				return err
 			}

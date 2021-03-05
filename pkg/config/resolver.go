@@ -7,43 +7,126 @@ import (
 	"time"
 
 	"github.com/fjogeleit/policy-reporter/pkg/kubernetes"
-	"github.com/fjogeleit/policy-reporter/pkg/metrics"
 	"github.com/fjogeleit/policy-reporter/pkg/report"
 	"github.com/fjogeleit/policy-reporter/pkg/target"
 	"github.com/fjogeleit/policy-reporter/pkg/target/discord"
 	"github.com/fjogeleit/policy-reporter/pkg/target/elasticsearch"
 	"github.com/fjogeleit/policy-reporter/pkg/target/loki"
 	"github.com/fjogeleit/policy-reporter/pkg/target/slack"
+	"k8s.io/client-go/dynamic"
+	v1 "k8s.io/client-go/kubernetes/typed/core/v1"
+	"k8s.io/client-go/rest"
 )
 
 // Resolver manages dependencies
 type Resolver struct {
-	config                     *Config
-	kubeClient                 report.Client
-	lokiClient                 target.Client
-	elasticsearchClient        target.Client
-	slackClient                target.Client
-	discordClient              target.Client
-	policyReportMetrics        metrics.Metrics
-	clusterPolicyReportMetrics metrics.Metrics
+	config              *Config
+	k8sConfig           *rest.Config
+	mapper              kubernetes.Mapper
+	resultClient        report.ResultClient
+	policyClient        report.PolicyClient
+	clusterPolicyClient report.ClusterPolicyClient
+	lokiClient          target.Client
+	elasticsearchClient target.Client
+	slackClient         target.Client
+	discordClient       target.Client
+}
+
+// PolicyResultClient resolver method
+func (r *Resolver) PolicyResultClient(ctx context.Context) (report.ResultClient, error) {
+	if r.resultClient != nil {
+		return r.resultClient, nil
+	}
+
+	pClient, err := r.PolicyReportClient(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	cpClient, err := r.ClusterPolicyReportClient(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	client := kubernetes.NewPolicyResultClient(pClient, cpClient)
+
+	r.resultClient = client
+
+	return client, nil
 }
 
 // PolicyReportClient resolver method
-func (r *Resolver) PolicyReportClient() (report.Client, error) {
-	if r.kubeClient != nil {
-		return r.kubeClient, nil
+func (r *Resolver) PolicyReportClient(ctx context.Context) (report.PolicyClient, error) {
+	if r.policyClient != nil {
+		return r.policyClient, nil
 	}
 
-	client, err := kubernetes.NewPolicyReportClient(
-		context.Background(),
-		r.config.Kubeconfig,
-		r.config.Namespace,
+	mapper, err := r.Mapper(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	policyAPI, err := r.policyReportAPI()
+	if err != nil {
+		return nil, err
+	}
+
+	client := kubernetes.NewPolicyReportClient(
+		policyAPI,
+		mapper,
 		time.Now(),
 	)
 
-	r.kubeClient = client
+	r.policyClient = client
 
-	return client, err
+	return client, nil
+}
+
+// ClusterPolicyReportClient resolver method
+func (r *Resolver) ClusterPolicyReportClient(ctx context.Context) (report.ClusterPolicyClient, error) {
+	if r.clusterPolicyClient != nil {
+		return r.clusterPolicyClient, nil
+	}
+
+	mapper, err := r.Mapper(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	policyAPI, err := r.policyReportAPI()
+	if err != nil {
+		return nil, err
+	}
+
+	client := kubernetes.NewClusterPolicyReportClient(
+		policyAPI,
+		mapper,
+		time.Now(),
+	)
+
+	r.clusterPolicyClient = client
+
+	return client, nil
+}
+
+// Mapper resolver method
+func (r *Resolver) Mapper(ctx context.Context) (kubernetes.Mapper, error) {
+	if r.mapper != nil {
+		return r.mapper, nil
+	}
+
+	cmAPI, err := r.configMapAPI()
+	if err != nil {
+		return nil, err
+	}
+
+	mapper := kubernetes.NewMapper(make(map[string]string), cmAPI)
+	mapper.FetchPriorities(ctx)
+	go mapper.SyncPriorities(ctx)
+
+	r.mapper = mapper
+
+	return mapper, err
 }
 
 // LokiClient resolver method
@@ -142,38 +225,6 @@ func (r *Resolver) DiscordClient() target.Client {
 	return r.discordClient
 }
 
-// PolicyReportMetrics resolver method
-func (r *Resolver) PolicyReportMetrics() (metrics.Metrics, error) {
-	if r.policyReportMetrics != nil {
-		return r.policyReportMetrics, nil
-	}
-
-	client, err := r.PolicyReportClient()
-	if err != nil {
-		return nil, err
-	}
-
-	r.policyReportMetrics = metrics.NewPolicyReportMetrics(client)
-
-	return r.policyReportMetrics, nil
-}
-
-// ClusterPolicyReportMetrics resolver method
-func (r *Resolver) ClusterPolicyReportMetrics() (metrics.Metrics, error) {
-	if r.clusterPolicyReportMetrics != nil {
-		return r.clusterPolicyReportMetrics, nil
-	}
-
-	client, err := r.PolicyReportClient()
-	if err != nil {
-		return nil, err
-	}
-
-	r.clusterPolicyReportMetrics = metrics.NewClusterPolicyMetrics(client)
-
-	return r.clusterPolicyReportMetrics, nil
-}
-
 func (r *Resolver) TargetClients() []target.Client {
 	clients := make([]target.Client, 0)
 
@@ -206,18 +257,38 @@ func (r *Resolver) SkipExistingOnStartup() bool {
 	return true
 }
 
-// Reset all cached dependencies
-func (r *Resolver) Reset() {
-	r.kubeClient = nil
-	r.lokiClient = nil
-	r.elasticsearchClient = nil
-	r.policyReportMetrics = nil
-	r.clusterPolicyReportMetrics = nil
+func (r *Resolver) ConfigMapClient() (v1.ConfigMapInterface, error) {
+	var err error
+
+	client, err := v1.NewForConfig(r.k8sConfig)
+	if err != nil {
+		return nil, err
+	}
+
+	return client.ConfigMaps(r.config.Namespace), nil
+}
+
+func (r *Resolver) configMapAPI() (kubernetes.ConfigMapAdapter, error) {
+	client, err := r.ConfigMapClient()
+	if err != nil {
+		return nil, err
+	}
+
+	return kubernetes.NewConfigMapAdapter(client), nil
+}
+
+func (r *Resolver) policyReportAPI() (kubernetes.PolicyReportAdapter, error) {
+	client, err := dynamic.NewForConfig(r.k8sConfig)
+	if err != nil {
+		return nil, err
+	}
+	return kubernetes.NewPolicyReportAdapter(client), nil
 }
 
 // NewResolver constructor function
-func NewResolver(config *Config) Resolver {
+func NewResolver(config *Config, k8sConfig *rest.Config) Resolver {
 	return Resolver{
-		config: config,
+		config:    config,
+		k8sConfig: k8sConfig,
 	}
 }

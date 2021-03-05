@@ -15,7 +15,7 @@ var completeResult = report.Result{
 	Message:  "validation error: requests and limits required. Rule autogen-check-for-requests-and-limits failed at path /spec/template/spec/containers/0/resources/requests/",
 	Policy:   "require-requests-and-limits-required",
 	Rule:     "autogen-check-for-requests-and-limits",
-	Priority: report.ErrorPriority,
+	Priority: report.WarningPriority,
 	Status:   report.Fail,
 	Severity: report.Heigh,
 	Category: "resources",
@@ -169,6 +169,26 @@ func Test_LokiTarget(t *testing.T) {
 
 		loki := loki.NewClient("http://localhost:3100", "", false, testClient{callback, 200})
 		loki.Send(minimalResult)
+	})
+
+	t.Run("Send with ingored Priority", func(t *testing.T) {
+		callback := func(req *http.Request) {
+			t.Errorf("Unexpected Call")
+		}
+
+		client := loki.NewClient("http://localhost:9200", "error", false, testClient{callback, 200})
+		client.Send(completeResult)
+	})
+	t.Run("SkipExistingOnStartup", func(t *testing.T) {
+		callback := func(req *http.Request) {
+			t.Errorf("Unexpected Call")
+		}
+
+		client := loki.NewClient("http://localhost:9200", "", true, testClient{callback, 200})
+
+		if !client.SkipExistingOnStartup() {
+			t.Error("Should return configured SkipExistingOnStartup")
+		}
 	})
 }
 

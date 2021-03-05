@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.14.0
+
+* Internal refactoring
+    * Improved test coverage
+    * Removed duplicated caching
+* Updated Dashboard
+    * Filter zero values from Policy Report Detail after Policies / Resources are deleted
+
 ## 0.13.0
 
 * Split the Monitoring out in a Sub Helm chart

@@ -1,28 +1,54 @@
 package report
 
-import "k8s.io/apimachinery/pkg/watch"
+import (
+	"k8s.io/apimachinery/pkg/watch"
+)
 
-// WatchPolicyReportCallback is called whenver a new PolicyReport comes in
-type WatchPolicyReportCallback = func(watch.EventType, PolicyReport)
+// PolicyReportCallback is called whenver a new PolicyReport comes in
+type PolicyReportCallback = func(watch.EventType, PolicyReport, PolicyReport)
 
-// WatchClusterPolicyReportCallback is called whenver a new ClusterPolicyReport comes in
-type WatchClusterPolicyReportCallback = func(watch.EventType, ClusterPolicyReport)
+// ClusterPolicyReportCallback is called whenver a new ClusterPolicyReport comes in
+type ClusterPolicyReportCallback = func(watch.EventType, ClusterPolicyReport, ClusterPolicyReport)
 
-// WatchPolicyResultCallback is called whenver a new PolicyResult comes in
-type WatchPolicyResultCallback = func(Result, bool)
+// PolicyResultCallback is called whenver a new PolicyResult comes in
+type PolicyResultCallback = func(Result, bool)
 
 // Client interface for interacting with the Kubernetes API
-type Client interface {
+type ResultClient interface {
+	// FetchPolicyResults from the unterlying API
+	FetchPolicyResults() ([]Result, error)
+	// RegisterPolicyReportCallback register a handler for ClusterPolicyReports and PolicyReports who call the registered PolicyResultCallbacks
+	RegisterPolicyResultWatcher(skipExisting bool)
+	// RegisterPolicyResultCallback register Handlers called on each PolicyReport- and ClusterPolicyReport watch.Event for each changed PolicyResult
+	RegisterPolicyResultCallback(cb PolicyResultCallback)
+}
+
+type PolicyClient interface {
+	// RegisterPolicyReportCallback register Handlers called on each PolicyReport watch.Event
+	RegisterCallback(PolicyReportCallback)
+	// RegisterPolicyReportCallback register Handlers called on each PolicyReport watch.Event for each changed PolicyResult
+	RegisterPolicyResultCallback(PolicyResultCallback)
 	// FetchPolicyReports from the unterlying API
 	FetchPolicyReports() ([]PolicyReport, error)
-	// WatchPolicyReports blocking API to watch for PolicyReport changes
-	WatchPolicyReports(WatchPolicyReportCallback) error
-	// WatchPolicyReportResults blocking API to watch for PolicyResult changes from PolicyReports and ClusterPolicyReports
-	WatchPolicyReportResults(WatchPolicyResultCallback, bool) error
-	// FetchPolicyReportResults from the unterlying API
-	FetchPolicyReportResults() ([]Result, error)
-	// WatchClusterPolicyReports blocking API to watch for ClusterPolicyReport changes
-	WatchClusterPolicyReports(WatchClusterPolicyReportCallback) error
-	// FetchClusterPolicyReport from the unterlying API
+	// FetchPolicyResults from the unterlying PolicyAPI
+	FetchPolicyResults() ([]Result, error)
+	// RegisterPolicyReportCallback register a handler for ClusterPolicyReports and PolicyReports who call the registered PolicyResultCallbacks
+	RegisterPolicyResultWatcher(skipExisting bool)
+	// StartWatching calls the WatchAPI, waiting for incoming PolicyReport watch.Events and call the registered Handlers
+	StartWatching() error
+}
+
+type ClusterPolicyClient interface {
+	// RegisterClusterPolicyReportCallback register Handlers called on each ClusterPolicyReport watch.Event
+	RegisterCallback(ClusterPolicyReportCallback)
+	// RegisterPolicyReportCallback register Handlers called on each ClusterPolicyReport watch.Event for each changed PolicyResult
+	RegisterPolicyResultCallback(PolicyResultCallback)
+	// FetchClusterPolicyReports from the unterlying API
 	FetchClusterPolicyReports() ([]ClusterPolicyReport, error)
+	// FetchPolicyResults from the unterlying ClusterPolicyAPI
+	FetchPolicyResults() ([]Result, error)
+	// RegisterPolicyReportCallback register a handler for ClusterPolicyReports and PolicyReports who call the registered PolicyResultCallbacks
+	RegisterPolicyResultWatcher(skipExisting bool)
+	// StartWatchPolicyReports calls the WatchAPI, waiting for incoming PolicyReport watch.Events and call the registered Handlers
+	StartWatching() error
 }

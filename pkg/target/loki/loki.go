@@ -3,7 +3,6 @@ package loki
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
 	"log"
 	"net/http"
 	"strings"
@@ -11,6 +10,7 @@ import (
 
 	"github.com/fjogeleit/policy-reporter/pkg/report"
 	"github.com/fjogeleit/policy-reporter/pkg/target"
+	"github.com/fjogeleit/policy-reporter/pkg/target/helper"
 )
 
 type httpClient interface {
@@ -87,34 +87,20 @@ func (l *client) Send(result report.Result) {
 
 	if err := json.NewEncoder(body).Encode(payload); err != nil {
 		log.Printf("[ERROR] LOKI : %v\n", err.Error())
+		return
 	}
 
 	req, err := http.NewRequest("POST", l.host, body)
 	if err != nil {
 		log.Printf("[ERROR] LOKI : %v\n", err.Error())
+		return
 	}
 
 	req.Header.Add("Content-Type", "application/json")
 	req.Header.Add("User-Agent", "Policy-Reporter")
 
 	resp, err := l.client.Do(req)
-	defer func() {
-		if resp != nil && resp.Body != nil {
-			resp.Body.Close()
-		}
-	}()
-
-	if err != nil {
-		log.Printf("[ERROR] LOKI PUSH failed: %s\n", err.Error())
-	} else if resp.StatusCode >= 400 {
-		fmt.Printf("StatusCode: %d\n", resp.StatusCode)
-		buf := new(bytes.Buffer)
-		buf.ReadFrom(resp.Body)
-
-		log.Printf("[ERROR] LOKI PUSH failed [%d]: %s\n", resp.StatusCode, buf.String())
-	} else {
-		log.Println("[INFO] LOKI PUSH OK")
-	}
+	helper.HandleHTTPResponse("LOKI", resp, err)
 }
 
 func (l *client) SkipExistingOnStartup() bool {

@@ -95,8 +95,8 @@ data:
         "pluginVersion": "7.1.5",
         "targets": [
             {
-            "expr": "sum(policy_report_result{policy=~\"$policy\", status=\"pass\"}) by (exported_namespace)",
-            "instant": false,
+            "expr": "sum(policy_report_result{policy=~\"$policy\", status=\"pass\"} > 0) by (exported_namespace)",
+            "instant": true,
             "interval": "",
             "legendFormat": "{{`{{ exported_namespace }}`}}",
             "refId": "A"
@@ -150,8 +150,8 @@ data:
         "pluginVersion": "7.1.5",
         "targets": [
             {
-            "expr": "sum(policy_report_result{policy=~\"$policy\", status=\"fail\"}) by (exported_namespace)",
-            "instant": false,
+            "expr": "sum(policy_report_result{policy=~\"$policy\", status=\"fail\"} > 0) by (exported_namespace)",
+            "instant": true,
             "interval": "",
             "legendFormat": "{{`{{ exported_namespace }}`}}",
             "refId": "A"
@@ -205,8 +205,8 @@ data:
         "pluginVersion": "7.1.5",
         "targets": [
             {
-            "expr": "sum(policy_report_result{policy=~\"$policy\", status=\"warn\"}) by (exported_namespace)",
-            "instant": false,
+            "expr": "sum(policy_report_result{policy=~\"$policy\", status=\"warn\"} > 0) by (exported_namespace)",
+            "instant": true,
             "interval": "",
             "legendFormat": "{{`{{ exported_namespace }}`}}",
             "refId": "A"
@@ -260,8 +260,8 @@ data:
         "pluginVersion": "7.1.5",
         "targets": [
             {
-            "expr": "sum(policy_report_result{policy=~\"$policy\", status=\"error\"}) by (exported_namespace)",
-            "instant": false,
+            "expr": "sum(policy_report_result{policy=~\"$policy\", status=\"error\"} > 0) by (exported_namespace)",
+            "instant": true,
             "interval": "",
             "legendFormat": "{{`{{ exported_namespace }}`}}",
             "refId": "A"
