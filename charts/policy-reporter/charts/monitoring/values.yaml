@@ -3,3 +3,54 @@ namespace: cattle-dashboards
 serviceMonitor:
   # labels to match the serviceMonitorSelector of the Prometheus Resource
   labels: {}
+
+policyReportDetails:
+  firstStatusRow:
+    height: 6
+  secondStatusRow:
+    enabled: true
+    height: 2
+  statusTimeline:
+    enabled: true
+    height: 8
+  passTable:
+    enabled: true
+    height: 8
+  failTable:
+    enabled: true
+    height: 8
+  warningTable:
+    enabled: true
+    height: 4
+  errorTable:
+    enabled: true
+    height: 4
+
+clusterPolicyReportDetails:
+  statusRow:
+    height: 6
+  statusTimeline:
+    enabled: true
+    height: 8
+  passTable:
+    enabled: true
+    height: 8
+  failTable:
+    enabled: true
+    height: 8
+  warningTable:
+    enabled: true
+    height: 4
+  errorTable:
+    enabled: true
+    height: 4
+
+policyReportOverview:
+  failingSummaryRow:
+    height: 8
+  failingTimeline:
+    height: 10
+  failingPolicyRuleTable:
+    height: 10
+  failingClusterPolicyRuleTable:
+    height: 10

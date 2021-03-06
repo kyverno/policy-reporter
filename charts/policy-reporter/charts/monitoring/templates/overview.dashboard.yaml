@@ -80,7 +80,7 @@ data:
             "overrides": []
         },
         "gridPos": {
-            "h": 10,
+            "h": {{ .Values.policyReportOverview.failingSummaryRow.height }},
             "w": 15,
             "x": 0,
             "y": 0
@@ -139,7 +139,7 @@ data:
             "overrides": []
         },
         "gridPos": {
-            "h": 10,
+            "h": {{ .Values.policyReportOverview.failingSummaryRow.height }},
             "w": 9,
             "x": 15,
             "y": 0
@@ -190,7 +190,7 @@ data:
         "fill": 1,
         "fillGradient": 0,
         "gridPos": {
-            "h": 8,
+            "h": {{ .Values.policyReportOverview.failingTimeline.height }},
             "w": 24,
             "x": 0,
             "y": 10
@@ -198,19 +198,21 @@ data:
         "hiddenSeries": false,
         "id": 11,
         "legend": {
-            "alignAsTable": false,
+            "alignAsTable": true,
             "avg": false,
-            "current": false,
+            "current": true,
+            "hideEmpty": true,
+            "hideZero": true,
             "max": false,
             "min": false,
-            "rightSide": false,
+            "rightSide": true,
             "show": true,
             "total": false,
-            "values": false
+            "values": true
         },
         "lines": true,
         "linewidth": 1,
-        "nullPointMode": "null",
+        "nullPointMode": "null as zero",
         "percentage": false,
         "pluginVersion": "7.1.5",
         "pointradius": 2,
@@ -254,6 +256,7 @@ data:
         },
         "yaxes": [
             {
+            "decimals": 0,
             "format": "short",
             "label": null,
             "logBase": 1,
@@ -300,7 +303,7 @@ data:
             "overrides": []
         },
         "gridPos": {
-            "h": 10,
+            "h": {{ .Values.policyReportOverview.failingPolicyRuleTable.height }},
             "w": 24,
             "x": 0,
             "y": 18
@@ -374,7 +377,7 @@ data:
             "overrides": []
         },
         "gridPos": {
-            "h": 11,
+            "h": {{ .Values.policyReportOverview.failingClusterPolicyRuleTable.height }},
             "w": 24,
             "x": 0,
             "y": 28

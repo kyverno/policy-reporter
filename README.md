@@ -164,13 +164,69 @@ The Helm Chart includes optional Sub Chart for the [MonitoringStack](https://git
     * Change the `namespace` to your required monitoring namespace by changing `monitoring.namespace` (default: `cattle-dashboards`)
     * With `monitoring.serviceMonitor.labels` you can add additional labels to the `ServiceMonitor`. This helps to match the `serviceMonitorSelector` configuration of your Prometheus resource
 
-
-If you are not using the MonitoringStack you can import the dashboards from [Grafana](https://grafana.com/orgs/policyreporter/dashboards)
-
-Example Installation
+### Example Installation
 ```bash
 helm install policy-reporter policy-reporter/policy-reporter --set monitoring.enabled=true --set monitoring.namespace=cattle-dashboards -n policy-reporter --create-namespace
 ```
+
+### Customized Dashboards
+
+The Monitoring Subchart offers several values for changing the height or disabling different components of the individual dashboards.
+
+To change a value of this subchart you have to prefix each option with `monitoring.`
+
+Example
+
+```bash
+helm install policy-reporter policy-reporter/policy-reporter --set monitoring.enabled=true --set monitoring.policyReportDetails.secondStatusRow.enabled=false -n policy-reporter --create-namespace
+```
+
+#### PolicyReport Details Dashboard
+
+| Value | Default |
+|-------|---------|
+| policyReportDetails.firstStatusRow.height | 6 |
+| policyReportDetails.secondStatusRow.enabled | true |
+| policyReportDetails.secondStatusRow.height | 2 |
+| policyReportDetails.statusTimeline.enabled | true |
+| policyReportDetails.statusTimeline.height | 8 |
+| policyReportDetails.passTable.enabled | true |
+| policyReportDetails.passTable.height | 8 |
+| policyReportDetails.failTable.enabled | true |
+| policyReportDetails.failTable.height | 8 |
+| policyReportDetails.warningTable.enabled | true |
+| policyReportDetails.warningTable.height | 4 |
+| policyReportDetails.errorTable.enabled | true |
+| policyReportDetails.errorTable.height | 4 |
+
+#### ClusterPolicyReport Details Dashboard
+
+| Value | Default |
+|-------|---------|
+| clusterPolicyReportDetails.statusRow.height | 6 |
+| clusterPolicyReportDetails.statusTimeline.enabled | true |
+| clusterPolicyReportDetails.statusTimeline.height | 8 |
+| clusterPolicyReportDetails.passTable.enabled | true |
+| clusterPolicyReportDetails.passTable.height | 8 |
+| clusterPolicyReportDetails.failTable.enabled | true |
+| clusterPolicyReportDetails.failTable.height | 8 |
+| clusterPolicyReportDetails.warningTable.enabled | true |
+| clusterPolicyReportDetails.warningTable.height | 4 |
+| clusterPolicyReportDetails.errorTable.enabled | true |
+| clusterPolicyReportDetails.errorTable.height | 4 |
+
+#### PolicyReport Overview Dashboard
+
+| Value | Default |
+|-------|---------|
+| policyReportOverview.failingSummaryRow.height | 8 |
+| policyReportOverview.failingTimeline.height | 10 |
+| policyReportOverview.failingPolicyRuleTable.height | 10 |
+| policyReportOverview.failingClusterPolicyRuleTable.height | 10 |
+
+#### Grafana Dashboard Import
+
+If you are not using the MonitoringStack you can import the dashboards from [Grafana](https://grafana.com/orgs/policyreporter/dashboards)
 
 ### Dashboard Preview
 

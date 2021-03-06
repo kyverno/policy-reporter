@@ -89,7 +89,7 @@ data:
             "overrides": []
         },
         "gridPos": {
-            "h": 7,
+            "h": {{ .Values.policyReportDetails.firstStatusRow.height }},
             "w": 12,
             "x": 0,
             "y": 0
@@ -143,7 +143,7 @@ data:
             "overrides": []
         },
         "gridPos": {
-            "h": 7,
+            "h": {{ .Values.policyReportDetails.firstStatusRow.height }},
             "w": 12,
             "x": 12,
             "y": 0
@@ -175,8 +175,9 @@ data:
         "timeShift": null,
         "title": "Policy Fail Status",
         "type": "bargauge"
-        },
-        {
+        }
+{{- if .Values.policyReportDetails.secondStatusRow.enabled }}
+        ,{
         "fieldConfig": {
             "defaults": {
             "custom": {},
@@ -197,7 +198,7 @@ data:
             "overrides": []
         },
         "gridPos": {
-            "h": 4,
+            "h": {{ .Values.policyReportDetails.secondStatusRow.height }},
             "w": 12,
             "x": 0,
             "y": 7
@@ -251,7 +252,7 @@ data:
             "overrides": []
         },
         "gridPos": {
-            "h": 4,
+            "h": {{ .Values.policyReportDetails.secondStatusRow.height }},
             "w": 12,
             "x": 12,
             "y": 7
@@ -283,8 +284,10 @@ data:
         "timeShift": null,
         "title": "Policy Error Status",
         "type": "bargauge"
-        },
-        {
+        }
+{{- end }}
+{{- if .Values.policyReportDetails.statusTimeline.enabled }}
+        ,{
         "aliasColors": {},
         "bars": false,
         "dashLength": 10,
@@ -298,7 +301,7 @@ data:
         "fill": 1,
         "fillGradient": 0,
         "gridPos": {
-            "h": 8,
+            "h": {{ .Values.policyReportDetails.statusTimeline.height }},
             "w": 24,
             "x": 0,
             "y": 11
@@ -308,17 +311,19 @@ data:
         "legend": {
             "alignAsTable": true,
             "avg": false,
-            "current": false,
+            "current": true,
+            "hideEmpty": true,
+            "hideZero": true,
             "max": false,
             "min": false,
             "rightSide": true,
             "show": true,
             "total": false,
-            "values": false
+            "values": true
         },
         "lines": true,
         "linewidth": 1,
-        "nullPointMode": "null",
+        "nullPointMode": "null as zero",
         "percentage": false,
         "pluginVersion": "7.1.5",
         "pointradius": 2,
@@ -378,8 +383,10 @@ data:
             "align": false,
             "alignLevel": null
         }
-        },
-        {
+        }
+{{- end }}
+{{- if .Values.policyReportDetails.passTable.enabled }}
+        ,{
         "fieldConfig": {
             "defaults": {
             "custom": {
@@ -403,7 +410,7 @@ data:
             "overrides": []
         },
         "gridPos": {
-            "h": 8,
+            "h": {{ .Values.policyReportDetails.passTable.height }},
             "w": 24,
             "x": 0,
             "y": 19
@@ -443,8 +450,10 @@ data:
             }
         ],
         "type": "table"
-        },
-        {
+        }
+{{- end }}
+{{- if .Values.policyReportDetails.failTable.enabled }}
+        ,{
         "fieldConfig": {
             "defaults": {
             "custom": {
@@ -468,7 +477,7 @@ data:
             "overrides": []
         },
         "gridPos": {
-            "h": 8,
+            "h": {{ .Values.policyReportDetails.failTable.height }},
             "w": 24,
             "x": 0,
             "y": 27
@@ -508,8 +517,10 @@ data:
             }
         ],
         "type": "table"
-        },
-        {
+        }
+{{- end }}
+{{- if .Values.policyReportDetails.warningTable.enabled }}
+        ,{
         "fieldConfig": {
             "defaults": {
             "custom": {
@@ -530,7 +541,7 @@ data:
             "overrides": []
         },
         "gridPos": {
-            "h": 5,
+            "h": {{ .Values.policyReportDetails.warningTable.height }},
             "w": 24,
             "x": 0,
             "y": 35
@@ -570,8 +581,10 @@ data:
             }
         ],
         "type": "table"
-        },
-        {
+        }
+{{- end }}
+{{- if .Values.policyReportDetails.errorTable.enabled }}
+        ,{
         "fieldConfig": {
             "defaults": {
             "custom": {
@@ -592,7 +605,7 @@ data:
             "overrides": []
         },
         "gridPos": {
-            "h": 4,
+            "h": {{ .Values.policyReportDetails.errorTable.height }},
             "w": 24,
             "x": 0,
             "y": 40
@@ -633,6 +646,7 @@ data:
         ],
         "type": "table"
         }
+{{- end }}
     ],
     "schemaVersion": 26,
     "style": "dark",
