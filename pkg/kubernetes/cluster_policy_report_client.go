@@ -94,30 +94,29 @@ func (c *clusterPolicyReportClient) executeClusterPolicyReportHandler(e watch.Ev
 		opr = c.cache[cpr.GetIdentifier()]
 	}
 
-	if e != watch.Deleted {
-		wg := sync.WaitGroup{}
-		wg.Add(len(c.callbacks))
+	wg := sync.WaitGroup{}
+	wg.Add(len(c.callbacks))
 
-		for _, cb := range c.callbacks {
-			go func(
-				callback report.ClusterPolicyReportCallback,
-				event watch.EventType,
-				creport report.ClusterPolicyReport,
-				oreport report.ClusterPolicyReport,
-			) {
-				callback(event, creport, oreport)
-				wg.Done()
-			}(cb, e, cpr, opr)
-		}
+	for _, cb := range c.callbacks {
+		go func(
+			callback report.ClusterPolicyReportCallback,
+			event watch.EventType,
+			creport report.ClusterPolicyReport,
+			oreport report.ClusterPolicyReport,
+		) {
+			callback(event, creport, oreport)
+			wg.Done()
+		}(cb, e, cpr, opr)
+	}
 
-		wg.Wait()
+	wg.Wait()
 
-		c.cache[cpr.GetIdentifier()] = cpr
-
+	if e == watch.Deleted {
+		delete(c.cache, cpr.GetIdentifier())
 		return
 	}
 
-	delete(c.cache, cpr.GetIdentifier())
+	c.cache[cpr.GetIdentifier()] = cpr
 }
 
 func (c *clusterPolicyReportClient) RegisterPolicyResultWatcher(skipExisting bool) {

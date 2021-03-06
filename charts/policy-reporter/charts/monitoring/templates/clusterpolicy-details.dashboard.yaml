@@ -8,29 +8,47 @@ metadata:
 data:
   cluster-policy-reporter-details-dashboard.json: |
     {
-    "__inputs": [	
-        {	
-            "name": "DS_PROMETHEUS",	
-            "label": "prometheus",	
-            "description": "",	
-            "type": "datasource",	
-            "pluginId": "prometheus",	
-            "pluginName": "Prometheus"	
-        }	
-    ],	
-    "__requires": [	
-        {	
-            "type": "grafana",	
-            "id": "grafana",	
-            "name": "Grafana",	
-            "version": "7.1.5"	
-        },	
-        {	
-            "type": "datasource",	
-            "id": "prometheus",	
-            "name": "Prometheus",	
-            "version": "1.0.0"	
-        }	
+    "__inputs": [
+        {
+        "name": "DS_PROMETHEUS",
+        "label": "Prometheus",
+        "description": "",
+        "type": "datasource",
+        "pluginId": "prometheus",
+        "pluginName": "Prometheus"
+        }
+    ],
+    "__requires": [
+        {
+        "type": "grafana",
+        "id": "grafana",
+        "name": "Grafana",
+        "version": "7.1.5"
+        },
+        {
+        "type": "panel",
+        "id": "graph",
+        "name": "Graph",
+        "version": ""
+        },
+        {
+        "type": "datasource",
+        "id": "prometheus",
+        "name": "Prometheus",
+        "version": "1.0.0"
+        },
+        {
+        "type": "panel",
+        "id": "stat",
+        "name": "Stat",
+        "version": ""
+        },
+        {
+        "type": "panel",
+        "id": "table",
+        "name": "Table",
+        "version": ""
+        }
     ],
     "annotations": {
         "list": [
@@ -48,12 +66,9 @@ data:
     "editable": true,
     "gnetId": null,
     "graphTooltip": 0,
-    "id": 49,
-    "iteration": 1614702969043,
     "links": [],
     "panels": [
         {
-        "datasource": null,
         "fieldConfig": {
             "defaults": {
             "custom": {},
@@ -110,7 +125,6 @@ data:
         "type": "stat"
         },
         {
-        "datasource": null,
         "fieldConfig": {
             "defaults": {
             "custom": {},
@@ -167,7 +181,6 @@ data:
         "type": "stat"
         },
         {
-        "datasource": null,
         "fieldConfig": {
             "defaults": {
             "custom": {},
@@ -224,7 +237,6 @@ data:
         "type": "stat"
         },
         {
-        "datasource": null,
         "fieldConfig": {
             "defaults": {
             "custom": {},
@@ -281,7 +293,101 @@ data:
         "type": "stat"
         },
         {
-        "datasource": null,
+        "aliasColors": {},
+        "bars": false,
+        "dashLength": 10,
+        "dashes": false,
+        "fieldConfig": {
+            "defaults": {
+            "custom": {}
+            },
+            "overrides": []
+        },
+        "fill": 1,
+        "fillGradient": 0,
+        "gridPos": {
+            "h": 8,
+            "w": 24,
+            "x": 0,
+            "y": 7
+        },
+        "hiddenSeries": false,
+        "id": 13,
+        "legend": {
+            "alignAsTable": true,
+            "avg": false,
+            "current": false,
+            "max": false,
+            "min": false,
+            "rightSide": true,
+            "show": true,
+            "total": false,
+            "values": false
+        },
+        "lines": true,
+        "linewidth": 1,
+        "nullPointMode": "null",
+        "percentage": false,
+        "pluginVersion": "7.1.5",
+        "pointradius": 2,
+        "points": false,
+        "renderer": "flot",
+        "seriesOverrides": [],
+        "spaceLength": 10,
+        "stack": false,
+        "steppedLine": false,
+        "targets": [
+            {
+            "expr": "sum(cluster_policy_report_result{policy=~\"$policy\"} > 0) by (status)",
+            "interval": "",
+            "legendFormat": "{{`{{ status }}`}}",
+            "refId": "A"
+            }
+        ],
+        "thresholds": [],
+        "timeFrom": null,
+        "timeRegions": [],
+        "timeShift": null,
+        "title": "Status Timeline",
+        "tooltip": {
+            "shared": true,
+            "sort": 0,
+            "value_type": "individual"
+        },
+        "type": "graph",
+        "xaxis": {
+            "buckets": null,
+            "mode": "time",
+            "name": null,
+            "show": true,
+            "values": []
+        },
+        "yaxes": [
+            {
+            "decimals": 0,
+            "format": "none",
+            "label": null,
+            "logBase": 1,
+            "max": null,
+            "min": "0",
+            "show": true
+            },
+            {
+            "decimals": 0,
+            "format": "short",
+            "label": null,
+            "logBase": 1,
+            "max": null,
+            "min": null,
+            "show": true
+            }
+        ],
+        "yaxis": {
+            "align": false,
+            "alignLevel": null
+        }
+        },
+        {
         "fieldConfig": {
             "defaults": {
             "custom": {
@@ -308,7 +414,7 @@ data:
             "h": 8,
             "w": 24,
             "x": 0,
-            "y": 7
+            "y": 15
         },
         "id": 8,
         "options": {
@@ -347,7 +453,6 @@ data:
         "type": "table"
         },
         {
-        "datasource": null,
         "fieldConfig": {
             "defaults": {
             "custom": {
@@ -374,7 +479,7 @@ data:
             "h": 8,
             "w": 24,
             "x": 0,
-            "y": 15
+            "y": 23
         },
         "id": 9,
         "options": {
@@ -413,7 +518,6 @@ data:
         "type": "table"
         },
         {
-        "datasource": null,
         "fieldConfig": {
             "defaults": {
             "custom": {
@@ -437,7 +541,7 @@ data:
             "h": 5,
             "w": 24,
             "x": 0,
-            "y": 23
+            "y": 31
         },
         "id": 10,
         "options": {
@@ -476,7 +580,6 @@ data:
         "type": "table"
         },
         {
-        "datasource": null,
         "fieldConfig": {
             "defaults": {
             "custom": {
@@ -500,7 +603,7 @@ data:
             "h": 4,
             "w": 24,
             "x": 0,
-            "y": 28
+            "y": 36
         },
         "id": 11,
         "options": {
@@ -548,32 +651,16 @@ data:
         "list": [
         {
             "allValue": null,
-            "current": {
-            "selected": true,
-            "tags": [],
-            "text": [
-                "require-ns-labels"
-            ],
-            "value": [
-                "require-ns-labels"
-            ]
-            },
-            "datasource": "Prometheus",
+            "current": {},
             "definition": "label_values(cluster_policy_report_result, policy)",
             "hide": 0,
             "includeAll": false,
             "label": "Policy",
             "multi": true,
             "name": "policy",
-            "options": [
-            {
-                "selected": true,
-                "text": "require-ns-labels",
-                "value": "require-ns-labels"
-            }
-            ],
+            "options": [],
             "query": "label_values(cluster_policy_report_result, policy)",
-            "refresh": 0,
+            "refresh": 2,
             "regex": "",
             "skipUrlSync": false,
             "sort": 5,
@@ -605,5 +692,6 @@ data:
     },
     "timezone": "",
     "title": "ClusterPolicyReport Details",
+    "uid": "iyJszGUMk",
     "version": 1
     }

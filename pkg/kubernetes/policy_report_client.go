@@ -94,30 +94,29 @@ func (c *policyReportClient) executePolicyReportHandler(e watch.EventType, pr re
 		opr = c.cache[pr.GetIdentifier()]
 	}
 
-	if e != watch.Deleted {
-		wg := sync.WaitGroup{}
-		wg.Add(len(c.callbacks))
+	wg := sync.WaitGroup{}
+	wg.Add(len(c.callbacks))
 
-		for _, cb := range c.callbacks {
-			go func(
-				callback report.PolicyReportCallback,
-				event watch.EventType,
-				creport report.PolicyReport,
-				oreport report.PolicyReport,
-			) {
-				callback(event, creport, oreport)
-				wg.Done()
-			}(cb, e, pr, opr)
-		}
+	for _, cb := range c.callbacks {
+		go func(
+			callback report.PolicyReportCallback,
+			event watch.EventType,
+			creport report.PolicyReport,
+			oreport report.PolicyReport,
+		) {
+			callback(event, creport, oreport)
+			wg.Done()
+		}(cb, e, pr, opr)
+	}
 
-		wg.Wait()
+	wg.Wait()
 
-		c.cache[pr.GetIdentifier()] = pr
-
+	if e == watch.Deleted {
+		delete(c.cache, pr.GetIdentifier())
 		return
 	}
 
-	delete(c.cache, pr.GetIdentifier())
+	c.cache[pr.GetIdentifier()] = pr
 }
 
 func (c *policyReportClient) RegisterPolicyResultWatcher(skipExisting bool) {
