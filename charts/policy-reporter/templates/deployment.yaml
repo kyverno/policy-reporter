@@ -17,6 +17,8 @@ spec:
     metadata:
       labels:
         {{- include "policyreporter.selectorLabels" . | nindent 8 }}
+      annotations:
+        checksum/secret: {{ include (print $.Template.BasePath "/targetssecret.yaml") . | sha256sum }}
     spec:
       {{- with .Values.imagePullSecrets }}
       imagePullSecrets:

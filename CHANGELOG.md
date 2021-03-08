@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.15.1
+
+* Add a checksum for the target configuration secret to the deployment. This enforces a pod recreation when the configuration changed by a Helm upgrade.
+
+## 0.15.0
+
+* Customizable Dashboards via new Helm values for the Monitoring Subchart.
 ## 0.14.0
 
 * Internal refactoring
