@@ -65,7 +65,7 @@ func loadConfig(cmd *cobra.Command) (*config.Config, error) {
 
 	if flag := cmd.Flags().Lookup("apiPort"); flag != nil {
 		v.BindPFlag("api.port", flag)
-		v.SetDefault("api.enabled", true)
+		v.BindPFlag("api.enabled", flag)
 	}
 
 	c := &config.Config{}

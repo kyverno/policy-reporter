@@ -32,6 +32,9 @@ spec:
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           args:
             - --config=/app/config.yaml
+            {{- if .Values.api.enabled }}
+            - --apiPort={{ .Values.api.port }}
+            {{- end }}
           ports:
             - name: http
               containerPort: 2112

@@ -28,6 +28,10 @@ monitoring:
     # labels to match the serviceMonitorSelector of the Prometheus Resource
     labels: {}
 
+api:
+  port: 8080
+  enabled: false
+
 loki:
   # loki host address
   host: ""
