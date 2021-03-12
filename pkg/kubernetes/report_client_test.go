@@ -65,8 +65,8 @@ func Test_ResultClient_FetchPolicyResults(t *testing.T) {
 	mapper := NewMapper(k8sCMClient)
 
 	client := kubernetes.NewPolicyResultClient(
-		kubernetes.NewPolicyReportClient(fakeAdapter, mapper, time.Now()),
-		kubernetes.NewClusterPolicyReportClient(fakeAdapter, mapper, time.Now()),
+		kubernetes.NewPolicyReportClient(fakeAdapter, report.NewPolicyReportStore(), mapper, time.Now()),
+		kubernetes.NewClusterPolicyReportClient(fakeAdapter, report.NewClusterPolicyReportStore(), mapper, time.Now()),
 	)
 
 	fakeAdapter.policies = append(fakeAdapter.policies, unstructured.Unstructured{Object: policyMap})
@@ -92,8 +92,8 @@ func Test_ResultClient_FetchPolicyResultsPolicyReportError(t *testing.T) {
 	mapper := NewMapper(k8sCMClient)
 
 	client := kubernetes.NewPolicyResultClient(
-		kubernetes.NewPolicyReportClient(fakeAdapter, mapper, time.Now()),
-		kubernetes.NewClusterPolicyReportClient(fakeAdapter, mapper, time.Now()),
+		kubernetes.NewPolicyReportClient(fakeAdapter, report.NewPolicyReportStore(), mapper, time.Now()),
+		kubernetes.NewClusterPolicyReportClient(fakeAdapter, report.NewClusterPolicyReportStore(), mapper, time.Now()),
 	)
 
 	_, err := client.FetchPolicyResults()
@@ -112,8 +112,8 @@ func Test_ResultClient_FetchPolicyResultsClusterPolicyReportError(t *testing.T) 
 	mapper := NewMapper(k8sCMClient)
 
 	client := kubernetes.NewPolicyResultClient(
-		kubernetes.NewPolicyReportClient(fakeAdapter, mapper, time.Now()),
-		kubernetes.NewClusterPolicyReportClient(fakeAdapter, mapper, time.Now()),
+		kubernetes.NewPolicyReportClient(fakeAdapter, report.NewPolicyReportStore(), mapper, time.Now()),
+		kubernetes.NewClusterPolicyReportClient(fakeAdapter, report.NewClusterPolicyReportStore(), mapper, time.Now()),
 	)
 
 	_, err := client.FetchPolicyResults()
@@ -129,8 +129,8 @@ func Test_ResultClient_RegisterPolicyResultWatcher(t *testing.T) {
 
 	mapper := NewMapper(k8sCMClient)
 
-	pClient := kubernetes.NewPolicyReportClient(fakeAdapter, mapper, time.Now())
-	cpClient := kubernetes.NewClusterPolicyReportClient(fakeAdapter, mapper, time.Now())
+	pClient := kubernetes.NewPolicyReportClient(fakeAdapter, report.NewPolicyReportStore(), mapper, time.Now())
+	cpClient := kubernetes.NewClusterPolicyReportClient(fakeAdapter, report.NewClusterPolicyReportStore(), mapper, time.Now())
 
 	client := kubernetes.NewPolicyResultClient(pClient, cpClient)
 

@@ -21,6 +21,7 @@ func Test_FetchPolicyReports(t *testing.T) {
 
 	client := kubernetes.NewPolicyReportClient(
 		fakeAdapter,
+		report.NewPolicyReportStore(),
 		NewMapper(k8sCMClient),
 		time.Now(),
 	)
@@ -53,6 +54,7 @@ func Test_FetchPolicyReportsError(t *testing.T) {
 
 	client := kubernetes.NewPolicyReportClient(
 		fakeAdapter,
+		report.NewPolicyReportStore(),
 		NewMapper(k8sCMClient),
 		time.Now(),
 	)
@@ -71,6 +73,7 @@ func Test_FetchPolicyResults(t *testing.T) {
 
 	client := kubernetes.NewPolicyReportClient(
 		fakeAdapter,
+		report.NewPolicyReportStore(),
 		NewMapper(k8sCMClient),
 		time.Now(),
 	)
@@ -95,6 +98,7 @@ func Test_FetchPolicyResultsError(t *testing.T) {
 
 	client := kubernetes.NewPolicyReportClient(
 		fakeAdapter,
+		report.NewPolicyReportStore(),
 		NewMapper(k8sCMClient),
 		time.Now(),
 	)
@@ -112,6 +116,7 @@ func Test_PolicyWatcher(t *testing.T) {
 
 	client := kubernetes.NewPolicyReportClient(
 		fakeAdapter,
+		report.NewPolicyReportStore(),
 		NewMapper(k8sCMClient),
 		time.Now(),
 	)
@@ -146,6 +151,7 @@ func Test_PolicyWatcherTwice(t *testing.T) {
 
 	client := kubernetes.NewPolicyReportClient(
 		fakeAdapter,
+		report.NewPolicyReportStore(),
 		NewMapper(k8sCMClient),
 		time.Now(),
 	)
@@ -202,6 +208,7 @@ func Test_PolicySkipExisting(t *testing.T) {
 
 	client := kubernetes.NewPolicyReportClient(
 		fakeAdapter,
+		report.NewPolicyReportStore(),
 		NewMapper(k8sCMClient),
 		time.Now(),
 	)
@@ -242,6 +249,7 @@ func Test_PolicyWatcherError(t *testing.T) {
 
 	client := kubernetes.NewPolicyReportClient(
 		fakeAdapter,
+		report.NewPolicyReportStore(),
 		NewMapper(k8sCMClient),
 		time.Now(),
 	)
@@ -261,6 +269,7 @@ func Test_PolicyWatchDeleteEvent(t *testing.T) {
 
 	client := kubernetes.NewPolicyReportClient(
 		fakeAdapter,
+		report.NewPolicyReportStore(),
 		NewMapper(k8sCMClient),
 		time.Now(),
 	)
@@ -296,6 +305,7 @@ func Test_PolicyWatchModifiedEvent(t *testing.T) {
 
 	client := kubernetes.NewPolicyReportClient(
 		fakeAdapter,
+		report.NewPolicyReportStore(),
 		NewMapper(k8sCMClient),
 		time.Now(),
 	)

@@ -22,6 +22,7 @@ func Test_FetchClusterPolicyReports(t *testing.T) {
 
 	client := kubernetes.NewClusterPolicyReportClient(
 		fakeAdapter,
+		report.NewClusterPolicyReportStore(),
 		NewMapper(k8sCMClient),
 		time.Now(),
 	)
@@ -54,6 +55,7 @@ func Test_FetchClusterPolicyReportsError(t *testing.T) {
 
 	client := kubernetes.NewClusterPolicyReportClient(
 		fakeAdapter,
+		report.NewClusterPolicyReportStore(),
 		NewMapper(k8sCMClient),
 		time.Now(),
 	)
@@ -75,6 +77,7 @@ func Test_FetchClusterPolicyResults(t *testing.T) {
 
 	client := kubernetes.NewClusterPolicyReportClient(
 		fakeAdapter,
+		report.NewClusterPolicyReportStore(),
 		NewMapper(k8sCMClient),
 		time.Now(),
 	)
@@ -99,6 +102,7 @@ func Test_FetchClusterPolicyResultsError(t *testing.T) {
 
 	client := kubernetes.NewClusterPolicyReportClient(
 		fakeAdapter,
+		report.NewClusterPolicyReportStore(),
 		NewMapper(k8sCMClient),
 		time.Now(),
 	)
@@ -116,6 +120,7 @@ func Test_ClusterPolicyWatcher(t *testing.T) {
 
 	client := kubernetes.NewClusterPolicyReportClient(
 		fakeAdapter,
+		report.NewClusterPolicyReportStore(),
 		NewMapper(k8sCMClient),
 		time.Now(),
 	)
@@ -150,6 +155,7 @@ func Test_ClusterPolicyWatcherTwice(t *testing.T) {
 
 	client := kubernetes.NewClusterPolicyReportClient(
 		fakeAdapter,
+		report.NewClusterPolicyReportStore(),
 		NewMapper(k8sCMClient),
 		time.Now(),
 	)
@@ -204,6 +210,7 @@ func Test_SkipExisting(t *testing.T) {
 
 	client := kubernetes.NewClusterPolicyReportClient(
 		fakeAdapter,
+		report.NewClusterPolicyReportStore(),
 		NewMapper(k8sCMClient),
 		time.Now(),
 	)
@@ -243,6 +250,7 @@ func Test_WatcherError(t *testing.T) {
 
 	client := kubernetes.NewClusterPolicyReportClient(
 		fakeAdapter,
+		report.NewClusterPolicyReportStore(),
 		NewMapper(k8sCMClient),
 		time.Now(),
 	)
@@ -262,6 +270,7 @@ func Test_WatchDeleteEvent(t *testing.T) {
 
 	client := kubernetes.NewClusterPolicyReportClient(
 		fakeAdapter,
+		report.NewClusterPolicyReportStore(),
 		NewMapper(k8sCMClient),
 		time.Now(),
 	)
@@ -297,6 +306,7 @@ func Test_WatchModifiedEvent(t *testing.T) {
 
 	client := kubernetes.NewClusterPolicyReportClient(
 		fakeAdapter,
+		report.NewClusterPolicyReportStore(),
 		NewMapper(k8sCMClient),
 		time.Now(),
 	)

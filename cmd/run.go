@@ -75,6 +75,11 @@ func newRunCMD() *cobra.Command {
 			}
 
 			g := new(errgroup.Group)
+
+			if c.API.Enabled {
+				g.Go(resolver.APIServer().Start)
+			}
+
 			g.Go(cpClient.StartWatching)
 			g.Go(pClient.StartWatching)
 			g.Go(func() error {
@@ -90,6 +95,7 @@ func newRunCMD() *cobra.Command {
 	// For local usage
 	cmd.PersistentFlags().StringP("kubeconfig", "k", "", "absolute path to the kubeconfig file")
 	cmd.PersistentFlags().StringP("config", "c", "", "target configuration file")
+	cmd.PersistentFlags().StringP("apiPort", "a", "", "http port for the optional rest api")
 
 	cmd.PersistentFlags().String("loki", "", "loki host: http://loki:3100")
 	cmd.PersistentFlags().String("loki-minimum-priority", "", "Minimum Priority to send Results to Loki (info < warning < error)")

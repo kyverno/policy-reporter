@@ -13,7 +13,7 @@ import (
 
 type policyReportClient struct {
 	policyAPI       PolicyReportAdapter
-	cache           map[string]report.PolicyReport
+	store           *report.PolicyReportStore
 	callbacks       []report.PolicyReportCallback
 	resultCallbacks []report.PolicyResultCallback
 	mapper          Mapper
@@ -91,7 +91,7 @@ func (c *policyReportClient) StartWatching() error {
 func (c *policyReportClient) executePolicyReportHandler(e watch.EventType, pr report.PolicyReport) {
 	opr := report.PolicyReport{}
 	if e != watch.Added {
-		opr = c.cache[pr.GetIdentifier()]
+		opr, _ = c.store.Get(pr.GetIdentifier())
 	}
 
 	wg := sync.WaitGroup{}
@@ -112,11 +112,11 @@ func (c *policyReportClient) executePolicyReportHandler(e watch.EventType, pr re
 	wg.Wait()
 
 	if e == watch.Deleted {
-		delete(c.cache, pr.GetIdentifier())
+		c.store.Remove(pr.GetIdentifier())
 		return
 	}
 
-	c.cache[pr.GetIdentifier()] = pr
+	c.store.Add(pr)
 }
 
 func (c *policyReportClient) RegisterPolicyResultWatcher(skipExisting bool) {
@@ -149,10 +149,10 @@ func (c *policyReportClient) RegisterPolicyResultWatcher(skipExisting bool) {
 }
 
 // NewPolicyReportClient creates a new PolicyReportClient based on the kubernetes go-client
-func NewPolicyReportClient(client PolicyReportAdapter, mapper Mapper, startUp time.Time) report.PolicyClient {
+func NewPolicyReportClient(client PolicyReportAdapter, store *report.PolicyReportStore, mapper Mapper, startUp time.Time) report.PolicyClient {
 	return &policyReportClient{
 		policyAPI: client,
-		cache:     make(map[string]report.PolicyReport),
+		store:     store,
 		mapper:    mapper,
 		startUp:   startUp,
 	}

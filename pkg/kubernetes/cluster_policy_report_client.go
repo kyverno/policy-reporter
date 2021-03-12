@@ -13,7 +13,7 @@ import (
 
 type clusterPolicyReportClient struct {
 	policyAPI       PolicyReportAdapter
-	cache           map[string]report.ClusterPolicyReport
+	store           *report.ClusterPolicyReportStore
 	callbacks       []report.ClusterPolicyReportCallback
 	resultCallbacks []report.PolicyResultCallback
 	mapper          Mapper
@@ -91,7 +91,7 @@ func (c *clusterPolicyReportClient) StartWatching() error {
 func (c *clusterPolicyReportClient) executeClusterPolicyReportHandler(e watch.EventType, cpr report.ClusterPolicyReport) {
 	opr := report.ClusterPolicyReport{}
 	if e != watch.Added {
-		opr = c.cache[cpr.GetIdentifier()]
+		opr, _ = c.store.Get(cpr.GetIdentifier())
 	}
 
 	wg := sync.WaitGroup{}
@@ -112,11 +112,11 @@ func (c *clusterPolicyReportClient) executeClusterPolicyReportHandler(e watch.Ev
 	wg.Wait()
 
 	if e == watch.Deleted {
-		delete(c.cache, cpr.GetIdentifier())
+		c.store.Remove(cpr.GetIdentifier())
 		return
 	}
 
-	c.cache[cpr.GetIdentifier()] = cpr
+	c.store.Add(cpr)
 }
 
 func (c *clusterPolicyReportClient) RegisterPolicyResultWatcher(skipExisting bool) {
@@ -145,7 +145,7 @@ func (c *clusterPolicyReportClient) RegisterPolicyResultWatcher(skipExisting boo
 
 			wg.Wait()
 		case watch.Modified:
-			diff := cpr.GetNewResults(c.cache[cpr.GetIdentifier()])
+			diff := cpr.GetNewResults(opr)
 
 			wg := sync.WaitGroup{}
 			wg.Add(len(diff) * len(c.resultCallbacks))
@@ -165,10 +165,10 @@ func (c *clusterPolicyReportClient) RegisterPolicyResultWatcher(skipExisting boo
 }
 
 // NewPolicyReportClient creates a new PolicyReportClient based on the kubernetes go-client
-func NewClusterPolicyReportClient(client PolicyReportAdapter, mapper Mapper, startUp time.Time) report.ClusterPolicyClient {
+func NewClusterPolicyReportClient(client PolicyReportAdapter, store *report.ClusterPolicyReportStore, mapper Mapper, startUp time.Time) report.ClusterPolicyClient {
 	return &clusterPolicyReportClient{
 		policyAPI: client,
-		cache:     make(map[string]report.ClusterPolicyReport),
+		store:     store,
 		mapper:    mapper,
 		startUp:   startUp,
 	}
