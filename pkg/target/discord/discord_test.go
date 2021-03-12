@@ -106,4 +106,18 @@ func Test_LokiTarget(t *testing.T) {
 			t.Error("Should return configured SkipExistingOnStartup")
 		}
 	})
+	t.Run("Name", func(t *testing.T) {
+		client := discord.NewClient("http://localhost:9200", "", true, testClient{})
+
+		if client.Name() != "Discord" {
+			t.Errorf("Unexpected Name %s", client.Name())
+		}
+	})
+	t.Run("MinimumPriority", func(t *testing.T) {
+		client := discord.NewClient("http://localhost:9200", "debug", true, testClient{})
+
+		if client.MinimumPriority() != "debug" {
+			t.Errorf("Unexpected MinimumPriority %s", client.MinimumPriority())
+		}
+	})
 }

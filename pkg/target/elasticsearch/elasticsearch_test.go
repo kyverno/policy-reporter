@@ -110,4 +110,18 @@ func Test_ElasticsearchTarget(t *testing.T) {
 			t.Error("Should return configured SkipExistingOnStartup")
 		}
 	})
+	t.Run("Name", func(t *testing.T) {
+		client := elasticsearch.NewClient("http://localhost:9200", "policy-reporter", "none", "", true, testClient{})
+
+		if client.Name() != "Elasticsearch" {
+			t.Errorf("Unexpected Name %s", client.Name())
+		}
+	})
+	t.Run("MinimumPriority", func(t *testing.T) {
+		client := elasticsearch.NewClient("http://localhost:9200", "policy-reporter", "none", "debug", true, testClient{})
+
+		if client.MinimumPriority() != "debug" {
+			t.Errorf("Unexpected MinimumPriority %s", client.MinimumPriority())
+		}
+	})
 }

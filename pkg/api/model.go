@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/fjogeleit/policy-reporter/pkg/report"
+	"github.com/fjogeleit/policy-reporter/pkg/target"
 )
 
 // Resource API Model
@@ -136,5 +137,25 @@ func mapClusterPolicyReport(c report.ClusterPolicyReport) ClusterPolicyReport {
 			Error: c.Summary.Error,
 		},
 		Results: results,
+	}
+}
+
+// Target API Model
+type Target struct {
+	Name                  string `json:"name"`
+	MinimumPriority       string `json:"minimumPriority"`
+	SkipExistingOnStartup bool   `json:"skipExistingOnStartup"`
+}
+
+func mapTarget(t target.Client) Target {
+	minPrio := t.MinimumPriority()
+	if minPrio == "" {
+		minPrio = report.Priority(report.DebugPriority).String()
+	}
+
+	return Target{
+		Name:                  t.Name(),
+		MinimumPriority:       minPrio,
+		SkipExistingOnStartup: t.SkipExistingOnStartup(),
 	}
 }

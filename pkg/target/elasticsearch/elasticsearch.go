@@ -76,6 +76,14 @@ func (e *client) SkipExistingOnStartup() bool {
 	return e.skipExistingOnStartup
 }
 
+func (e *client) Name() string {
+	return "Elasticsearch"
+}
+
+func (e *client) MinimumPriority() string {
+	return e.minimumPriority
+}
+
 // NewClient creates a new loki.client to send Results to Loki
 func NewClient(host, index, rotation, minimumPriority string, skipExistingOnStartup bool, httpClient httpClient) target.Client {
 	return &client{

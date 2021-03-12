@@ -55,3 +55,21 @@ func clusterPolicyReportHandler(s *report.ClusterPolicyReportStore) http.Handler
 		}
 	}
 }
+
+func targetsHandler(targets []Target) http.HandlerFunc {
+	return func(w http.ResponseWriter, req *http.Request) {
+		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+		w.WriteHeader(http.StatusOK)
+
+		if len(targets) == 0 {
+			fmt.Fprint(w, "[]")
+
+			return
+		}
+
+		if err := json.NewEncoder(w).Encode(targets); err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			fmt.Fprintf(w, `{ "message": "%s" }`, err.Error())
+		}
+	}
+}

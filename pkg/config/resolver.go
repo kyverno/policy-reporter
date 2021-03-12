@@ -40,6 +40,7 @@ func (r *Resolver) APIServer() api.Server {
 	return api.NewServer(
 		r.PolicyReportStore(),
 		r.ClusterPolicyReportStore(),
+		r.TargetClients(),
 		r.config.API.Port,
 	)
 }
