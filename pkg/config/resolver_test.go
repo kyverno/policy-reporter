@@ -225,6 +225,15 @@ func Test_ResolveClusterPolicyClient(t *testing.T) {
 }
 
 func Test_ResolveClientWithInvalidK8sConfig(t *testing.T) {
+	resolver := config.NewResolver(testConfig, &rest.Config{})
+
+	server := resolver.APIServer()
+	if server == nil {
+		t.Error("Error: Should return API Server")
+	}
+}
+
+func Test_ResolveAPIServer(t *testing.T) {
 	k8sConfig := &rest.Config{}
 	k8sConfig.Host = "invalid/url"
 

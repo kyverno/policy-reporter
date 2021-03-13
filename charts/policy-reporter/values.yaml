@@ -1,16 +1,12 @@
 image:
   repository: fjogeleit/policy-reporter
   pullPolicy: IfNotPresent
-  tag: 0.11.1
+  tag: 0.12.0
 
 imagePullSecrets: []
 
 deployment:
   annotations: {}
-
-service:
-  type: ClusterIP
-  port: 2112
 
 resources:
   requests:
@@ -29,7 +25,6 @@ monitoring:
     labels: {}
 
 api:
-  port: 8080
   enabled: false
 
 loki:

@@ -8,7 +8,8 @@ import (
 	"github.com/fjogeleit/policy-reporter/pkg/report"
 )
 
-func policyReportHandler(s *report.PolicyReportStore) http.HandlerFunc {
+// PolicyReportHandler for the PolicyReport REST API
+func PolicyReportHandler(s *report.PolicyReportStore) http.HandlerFunc {
 	return func(w http.ResponseWriter, req *http.Request) {
 		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 		w.WriteHeader(http.StatusOK)
@@ -32,7 +33,8 @@ func policyReportHandler(s *report.PolicyReportStore) http.HandlerFunc {
 	}
 }
 
-func clusterPolicyReportHandler(s *report.ClusterPolicyReportStore) http.HandlerFunc {
+// ClusterPolicyReportHandler for the ClusterPolicyReport REST API
+func ClusterPolicyReportHandler(s *report.ClusterPolicyReportStore) http.HandlerFunc {
 	return func(w http.ResponseWriter, req *http.Request) {
 		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 		w.WriteHeader(http.StatusOK)
@@ -56,7 +58,8 @@ func clusterPolicyReportHandler(s *report.ClusterPolicyReportStore) http.Handler
 	}
 }
 
-func targetsHandler(targets []Target) http.HandlerFunc {
+// TargetsHandler for the Targets REST API
+func TargetsHandler(targets []Target) http.HandlerFunc {
 	return func(w http.ResponseWriter, req *http.Request) {
 		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 		w.WriteHeader(http.StatusOK)

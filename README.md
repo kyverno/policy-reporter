@@ -16,6 +16,7 @@ This project is in an early stage. Please let me know if anything did not work a
   * [Customization](#customization)
 * [Configure Policy Priorities](#configure-policy-priorities)
 * [Configure Monitoring](#monitoring)
+* [Policy Report UI](#policy-report-ui)
 
 ## Installation with Helm v3
 
@@ -235,6 +236,36 @@ If you are not using the MonitoringStack you can import the dashboards from [Gra
 ![PolicyReporter Details Grafana Dashboard](https://github.com/fjogeleit/policy-reporter/blob/main/docs/images/policy-details.png?raw=true)
 
 ![ClusterPolicyReporter Details Grafana Dashboard](https://github.com/fjogeleit/policy-reporter/blob/main/docs/images/cluster-policy-details.png?raw=true)
+
+## Policy Report UI
+
+If you don't have any supported Monitoring solution running, you can use the standalone Policy Report UI.
+
+The UI is provided as optional Helm Sub Chart and can be enabled by setting `ui.enabled` to `true`. 
+
+### Installation
+
+```bash
+helm install policy-reporter policy-reporter/policy-reporter --set ui.enabled=true -n policy-reporter --create-namespace
+```
+
+### Access it with Port Forward on localhost
+
+```bash
+kubectl port-forward service/policy-reporter-ui 8082:8080 -n policy-reporter
+```
+
+Open `http://localhost:8082/` in your browser.
+
+### Exmaple
+
+The UI is an optional application and provides three different views with informations about the validation status of your audit policies.
+
+![Dashboard](https://github.com/fjogeleit/policy-reporter-ui/blob/main/docs/images/dashboard.png?raw=true)
+
+![Policy Reports](https://github.com/fjogeleit/policy-reporter-ui/blob/main/docs/images/policy-report.png?raw=true)
+
+![ClusterPolicyReports](https://github.com/fjogeleit/policy-reporter-ui/blob/main/docs/images/cluster-policy-report.png?raw=true)
 
 # Todos
 * ~~Support for ClusterPolicyReports~~

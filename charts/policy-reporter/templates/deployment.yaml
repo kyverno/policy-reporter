@@ -32,13 +32,18 @@ spec:
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           args:
             - --config=/app/config.yaml
-            {{- if .Values.api.enabled }}
-            - --apiPort={{ .Values.api.port }}
+            {{- if or .Values.api.enabled .Values.ui.enabled }}
+            - --apiPort=8080
             {{- end }}
           ports:
             - name: http
               containerPort: 2112
               protocol: TCP
+            {{- if or .Values.api.enabled .Values.ui.enabled }}
+            - name: rest
+              containerPort: 8080
+              protocol: TCP
+            {{- end }}
           livenessProbe:
             httpGet:
               path: /metrics

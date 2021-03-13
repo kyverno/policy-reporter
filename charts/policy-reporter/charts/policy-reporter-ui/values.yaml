@@ -1,0 +1,18 @@
+enabled: false
+
+image:
+  repository: fjogeleit/policy-reporter-ui
+  pullPolicy: IfNotPresent
+  tag: 0.1.0
+
+imagePullSecrets: []
+
+backend: http://policy-reporter:8080
+
+resources:
+  requests:
+    memory: 50Mi
+    cpu: 10m
+  limits:
+    memory: 100Mi
+    cpu: 50m

@@ -23,9 +23,9 @@ type httpServer struct {
 }
 
 func (s *httpServer) registerHandler() {
-	s.mux.HandleFunc("/policy-reports", policyReportHandler(s.pStore))
-	s.mux.HandleFunc("/cluster-policy-reports", clusterPolicyReportHandler(s.cStore))
-	s.mux.HandleFunc("/targets", targetsHandler(s.targets))
+	s.mux.HandleFunc("/policy-reports", PolicyReportHandler(s.pStore))
+	s.mux.HandleFunc("/cluster-policy-reports", ClusterPolicyReportHandler(s.cStore))
+	s.mux.HandleFunc("/targets", TargetsHandler(s.targets))
 }
 
 func (s *httpServer) Start() error {

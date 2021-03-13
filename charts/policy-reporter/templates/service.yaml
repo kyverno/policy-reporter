@@ -5,11 +5,17 @@ metadata:
   labels:
     {{- include "policyreporter.labels" . | nindent 4 }}
 spec:
-  type: {{ .Values.service.type }}
+  type: ClusterIP
   ports:
-    - port: {{ .Values.service.port }}
+    - port: 2112
       targetPort: http
       protocol: TCP
       name: http
+    {{- if or .Values.api.enabled .Values.ui.enabled }}
+    - port: 8080
+      targetPort: rest
+      protocol: TCP
+      name: rest
+    {{- end }}
   selector:
     {{- include "policyreporter.selectorLabels" . | nindent 4 }}

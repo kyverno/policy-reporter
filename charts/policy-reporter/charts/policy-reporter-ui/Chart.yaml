@@ -1,0 +1,7 @@
+apiVersion: v2
+name: policy-reporter-ui
+description: Policy Reporter UI
+
+type: application
+version: 0.1.0
+appVersion: 0.1.0
