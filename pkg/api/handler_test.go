@@ -83,10 +83,29 @@ func Test_PolicyReportAPI(t *testing.T) {
 			t.Fatal(err)
 		}
 
+		result := report.Result{
+			Message:  "validation error: requests and limits required. Rule autogen-check-for-requests-and-limits failed at path /spec/template/spec/containers/0/resources/requests/",
+			Policy:   "require-requests-and-limits-required",
+			Rule:     "autogen-check-for-requests-and-limits",
+			Priority: report.ErrorPriority,
+			Status:   report.Fail,
+			Category: "resources",
+			Scored:   true,
+			Resources: []report.Resource{
+				{
+					APIVersion: "v1",
+					Kind:       "Deployment",
+					Name:       "nginx",
+					Namespace:  "test",
+					UID:        "536ab69f-1b3c-4bd9-9ba4-274a56188409",
+				},
+			},
+		}
+
 		preport := report.PolicyReport{
 			Name:              "polr-test",
 			Namespace:         "test",
-			Results:           make(map[string]report.Result, 0),
+			Results:           map[string]report.Result{"": result},
 			Summary:           report.Summary{},
 			CreationTimestamp: time.Now(),
 		}
@@ -103,7 +122,7 @@ func Test_PolicyReportAPI(t *testing.T) {
 			t.Errorf("handler returned wrong status code: got %v want %v", status, http.StatusOK)
 		}
 
-		expected := `[{"name":"polr-test","namespace":"test","results":[],"summary":{"pass":0,"skip":0,"warn":0,"error":0,"fail":0}`
+		expected := `[{"name":"polr-test","namespace":"test","results":[{"message":"validation error: requests and limits required. Rule autogen-check-for-requests-and-limits failed at path /spec/template/spec/containers/0/resources/requests/","policy":"require-requests-and-limits-required","rule":"autogen-check-for-requests-and-limits","priority":"error","status":"fail","category":"resources","scored":true,"resource":{"apiVersion":"v1","kind":"Deployment","name":"nginx","namespace":"test","uid":"536ab69f-1b3c-4bd9-9ba4-274a56188409"}}],"summary":{"pass":0,"skip":0,"warn":0,"error":0,"fail":0}`
 		if !strings.Contains(rr.Body.String(), expected) {
 			t.Errorf("handler returned unexpected body: got %v want %v", rr.Body.String(), expected)
 		}
@@ -137,11 +156,29 @@ func Test_ClusterPolicyReportAPI(t *testing.T) {
 			t.Fatal(err)
 		}
 
+		result := report.Result{
+			Message:  "validation error: Namespace label missing",
+			Policy:   "ns-label-env-required",
+			Rule:     "ns-label-required",
+			Priority: report.ErrorPriority,
+			Status:   report.Fail,
+			Category: "resources",
+			Scored:   true,
+			Resources: []report.Resource{
+				{
+					APIVersion: "v1",
+					Kind:       "Namespace",
+					Name:       "dev",
+					UID:        "536ab69f-1b3c-4bd9-9ba4-274a56188409",
+				},
+			},
+		}
+
 		creport := report.ClusterPolicyReport{
 			Name:              "cpolr-test",
-			Results:           make(map[string]report.Result, 0),
 			Summary:           report.Summary{},
 			CreationTimestamp: time.Now(),
+			Results:           map[string]report.Result{"": result},
 		}
 
 		store := report.NewClusterPolicyReportStore()
@@ -156,7 +193,7 @@ func Test_ClusterPolicyReportAPI(t *testing.T) {
 			t.Errorf("handler returned wrong status code: got %v want %v", status, http.StatusOK)
 		}
 
-		expected := `[{"name":"cpolr-test","results":[],"summary":{"pass":0,"skip":0,"warn":0,"error":0,"fail":0}`
+		expected := `[{"name":"cpolr-test","results":[{"message":"validation error: Namespace label missing","policy":"ns-label-env-required","rule":"ns-label-required","priority":"error","status":"fail","category":"resources","scored":true,"resource":{"apiVersion":"v1","kind":"Namespace","name":"dev","uid":"536ab69f-1b3c-4bd9-9ba4-274a56188409"}}],"summary":{"pass":0,"skip":0,"warn":0,"error":0,"fail":0}`
 		if !strings.Contains(rr.Body.String(), expected) {
 			t.Errorf("handler returned unexpected body: got %v want %v", rr.Body.String(), expected)
 		}
