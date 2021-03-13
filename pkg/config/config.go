@@ -30,12 +30,19 @@ type Discord struct {
 	MinimumPriority string `mapstructure:"minimumPriority"`
 }
 
+// Server configuration
+type API struct {
+	Enabled bool `mapstructure:"enabled"`
+	Port    int  `mapstructure:"port"`
+}
+
 // Config of the PolicyReporter
 type Config struct {
 	Loki          Loki          `mapstructure:"loki"`
 	Elasticsearch Elasticsearch `mapstructure:"elasticsearch"`
 	Slack         Slack         `mapstructure:"slack"`
 	Discord       Discord       `mapstructure:"discord"`
+	API           API           `mapstructure:"api"`
 	Kubeconfig    string        `mapstructure:"kubeconfig"`
 	Namespace     string        `mapstructure:"namespace"`
 }

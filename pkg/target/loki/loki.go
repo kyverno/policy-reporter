@@ -107,6 +107,14 @@ func (l *client) SkipExistingOnStartup() bool {
 	return l.skipExistingOnStartup
 }
 
+func (l *client) Name() string {
+	return "Loki"
+}
+
+func (l *client) MinimumPriority() string {
+	return l.minimumPriority
+}
+
 // NewClient creates a new loki.client to send Results to Loki
 func NewClient(host, minimumPriority string, skipExistingOnStartup bool, httpClient httpClient) target.Client {
 	return &client{

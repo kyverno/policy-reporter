@@ -1,24 +1,20 @@
 image:
   repository: fjogeleit/policy-reporter
   pullPolicy: IfNotPresent
-  tag: 0.11.1
+  tag: 0.12.0
 
 imagePullSecrets: []
 
 deployment:
   annotations: {}
 
-service:
-  type: ClusterIP
-  port: 2112
-
 resources:
   requests:
-    memory: 50Mi
-    cpu: 10m
+    memory: 20Mi
+    cpu: 5m
   limits:
-    memory: 100Mi
-    cpu: 50m
+    memory: 30Mi
+    cpu: 10m
 
 monitoring:
   enabled: false
@@ -27,6 +23,9 @@ monitoring:
   serviceMonitor:
     # labels to match the serviceMonitorSelector of the Prometheus Resource
     labels: {}
+
+api:
+  enabled: false
 
 loki:
   # loki host address

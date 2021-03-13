@@ -127,6 +127,14 @@ func (d *client) SkipExistingOnStartup() bool {
 	return d.skipExistingOnStartup
 }
 
+func (d *client) Name() string {
+	return "Discord"
+}
+
+func (d *client) MinimumPriority() string {
+	return d.minimumPriority
+}
+
 // NewClient creates a new loki.client to send Results to Loki
 func NewClient(webhook, minimumPriority string, skipExistingOnStartup bool, httpClient httpClient) target.Client {
 	return &client{

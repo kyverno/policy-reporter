@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.16.0
+
+* New Optional REST API
+* New Optional Policy Reporter UI Helm SubChart
+
 ## 0.15.1
 
 * Add a checksum for the target configuration secret to the deployment. This enforces a pod recreation when the configuration changed by a Helm upgrade.

@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/fjogeleit/policy-reporter/pkg/api"
 	"github.com/fjogeleit/policy-reporter/pkg/kubernetes"
 	"github.com/fjogeleit/policy-reporter/pkg/report"
 	"github.com/fjogeleit/policy-reporter/pkg/target"
@@ -23,6 +24,8 @@ type Resolver struct {
 	config              *Config
 	k8sConfig           *rest.Config
 	mapper              kubernetes.Mapper
+	policyStore         *report.PolicyReportStore
+	clusterPolicyStore  *report.ClusterPolicyReportStore
 	resultClient        report.ResultClient
 	policyClient        report.PolicyClient
 	clusterPolicyClient report.ClusterPolicyClient
@@ -30,6 +33,16 @@ type Resolver struct {
 	elasticsearchClient target.Client
 	slackClient         target.Client
 	discordClient       target.Client
+}
+
+// APIServer resolver method
+func (r *Resolver) APIServer() api.Server {
+	return api.NewServer(
+		r.PolicyReportStore(),
+		r.ClusterPolicyReportStore(),
+		r.TargetClients(),
+		r.config.API.Port,
+	)
 }
 
 // PolicyResultClient resolver method
@@ -48,11 +61,31 @@ func (r *Resolver) PolicyResultClient(ctx context.Context) (report.ResultClient,
 		return nil, err
 	}
 
-	client := kubernetes.NewPolicyResultClient(pClient, cpClient)
+	r.resultClient = kubernetes.NewPolicyResultClient(pClient, cpClient)
 
-	r.resultClient = client
+	return r.resultClient, nil
+}
 
-	return client, nil
+// PolicyReportStore resolver method
+func (r *Resolver) PolicyReportStore() *report.PolicyReportStore {
+	if r.policyStore != nil {
+		return r.policyStore
+	}
+
+	r.policyStore = report.NewPolicyReportStore()
+
+	return r.policyStore
+}
+
+// PolicyReportStore resolver method
+func (r *Resolver) ClusterPolicyReportStore() *report.ClusterPolicyReportStore {
+	if r.clusterPolicyStore != nil {
+		return r.clusterPolicyStore
+	}
+
+	r.clusterPolicyStore = report.NewClusterPolicyReportStore()
+
+	return r.clusterPolicyStore
 }
 
 // PolicyReportClient resolver method
@@ -73,6 +106,7 @@ func (r *Resolver) PolicyReportClient(ctx context.Context) (report.PolicyClient,
 
 	client := kubernetes.NewPolicyReportClient(
 		policyAPI,
+		r.PolicyReportStore(),
 		mapper,
 		time.Now(),
 	)
@@ -98,15 +132,14 @@ func (r *Resolver) ClusterPolicyReportClient(ctx context.Context) (report.Cluste
 		return nil, err
 	}
 
-	client := kubernetes.NewClusterPolicyReportClient(
+	r.clusterPolicyClient = kubernetes.NewClusterPolicyReportClient(
 		policyAPI,
+		r.ClusterPolicyReportStore(),
 		mapper,
 		time.Now(),
 	)
 
-	r.clusterPolicyClient = client
-
-	return client, nil
+	return r.clusterPolicyClient, nil
 }
 
 // Mapper resolver method

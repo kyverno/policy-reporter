@@ -27,6 +27,7 @@ func loadConfig(cmd *cobra.Command) (*config.Config, error) {
 	v := viper.New()
 
 	v.SetDefault("namespace", "policy-reporter")
+	v.SetDefault("api.port", 8080)
 
 	cfgFile := ""
 
@@ -60,6 +61,11 @@ func loadConfig(cmd *cobra.Command) (*config.Config, error) {
 
 	if flag := cmd.Flags().Lookup("kubeconfig"); flag != nil {
 		v.BindPFlag("kubeconfig", flag)
+	}
+
+	if flag := cmd.Flags().Lookup("apiPort"); flag != nil {
+		v.BindPFlag("api.port", flag)
+		v.BindPFlag("api.enabled", flag)
 	}
 
 	c := &config.Config{}

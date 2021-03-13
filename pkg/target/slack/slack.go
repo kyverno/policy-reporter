@@ -180,6 +180,14 @@ func (s *client) SkipExistingOnStartup() bool {
 	return s.skipExistingOnStartup
 }
 
+func (s *client) Name() string {
+	return "Slack"
+}
+
+func (s *client) MinimumPriority() string {
+	return s.minimumPriority
+}
+
 // NewClient creates a new slack.client to send Results to Loki
 func NewClient(host, minimumPriority string, skipExistingOnStartup bool, httpClient httpClient) target.Client {
 	return &client{
