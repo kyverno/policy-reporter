@@ -10,11 +10,11 @@ deployment:
 
 resources:
   requests:
-    memory: 50Mi
-    cpu: 10m
+    memory: 20Mi
+    cpu: 5m
   limits:
-    memory: 100Mi
-    cpu: 50m
+    memory: 30Mi
+    cpu: 10m
 
 monitoring:
   enabled: false
