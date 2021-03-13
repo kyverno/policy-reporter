@@ -239,7 +239,7 @@ If you are not using the MonitoringStack you can import the dashboards from [Gra
 
 ## Policy Report UI
 
-If you don't have any supported Monitoring solution running, you can use the standalone Policy Report UI.
+If you don't have any supported Monitoring solution running, you can use the standalone [Policy Report UI](https://github.com/fjogeleit/policy-reporter-ui).
 
 The UI is provided as optional Helm Sub Chart and can be enabled by setting `ui.enabled` to `true`. 
 
