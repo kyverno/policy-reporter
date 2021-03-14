@@ -257,7 +257,7 @@ kubectl port-forward service/policy-reporter-ui 8082:8080 -n policy-reporter
 
 Open `http://localhost:8082/` in your browser.
 
-### Exmaple
+### Example
 
 The UI is an optional application and provides three different views with informations about the validation status of your audit policies.
 
