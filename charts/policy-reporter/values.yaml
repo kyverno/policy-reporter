@@ -16,7 +16,7 @@ deploymentStrategy: {}
 # Key/value pairs that are attached to Deployment.
 annotations: {}
 
-# Create ClusterRole
+# Create cluster role policies
 rbac:
   enabled: true
 
@@ -54,8 +54,6 @@ podAnnotations: {}
 # Key/value pairs that are attached to pods.
 podLabels: {}
 
-
-
 resources: {}
   # We usually recommend not to specify default resources and to leave this as a conscious
   # choice for the user. This also increases chances charts run on environments with little
@@ -67,7 +65,6 @@ resources: {}
   # requests:
   #   memory: 20Mi
   #   cpu: 5m
-
 
 monitoring:
   enabled: false
@@ -113,9 +110,9 @@ slack:
 
 discord:
   # discord app webhook address
-  webhook: "dd"
+  webhook: ""
   # minimum priority "" < info < warning < error
-  minimumPriority: "sa"
+  minimumPriority: ""
   # Skip already existing PolicyReportResults on startup
   skipExistingOnStartup: true
 
