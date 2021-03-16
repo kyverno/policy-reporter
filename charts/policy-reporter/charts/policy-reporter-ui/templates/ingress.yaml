@@ -1,6 +1,6 @@
-{{- if .Values.application.ingress.enabled -}}
-{{- $fullName := include "app.fullname" . -}}
-{{- $servicePort := .Values.application.service.port -}}
+{{- if .Values.ingress.enabled -}}
+{{- $fullName := include "ui.fullname" . -}}
+{{- $servicePort := .Values.service.port -}}
 {{- if semverCompare ">=1.14-0" .Capabilities.KubeVersion.GitVersion -}}
 apiVersion: networking.k8s.io/v1beta1
 {{- else -}}
@@ -8,20 +8,20 @@ apiVersion: extensions/v1beta1
 {{- end }}
 kind: Ingress
 metadata:
-  name: {{ include "app.fullname" . }}
+  name: {{ include "ui.fullname" . }}
   labels:
-    {{- include "app.selectorLabels" . | nindent 4 }}
-{{- range $key, $value := $.Values.application.ingress.labels }}
+    {{- include "ui.selectorLabels" . | nindent 4 }}
+{{- range $key, $value := $.Values.ingress.labels }}
     {{ $key }}: {{ $value | quote }}
 {{- end }}
   annotations:
-{{- range $key, $value := $.Values.application.ingress.annotations }}
+{{- range $key, $value := $.Values.ingress.annotations }}
     {{ $key }}: {{ $value | quote }}
 {{- end }}
 spec:
-  {{- if .Values.application.ingress.tls }}
+  {{- if .Values.ingress.tls }}
   tls:
-    {{- range .Values.application.ingress.tls }}
+    {{- range .Values.ingress.tls }}
     - hosts:
         {{- range .hosts }}
         - {{ . | quote }}
@@ -30,7 +30,7 @@ spec:
     {{- end }}
   {{- end }}
   rules:
-    {{- range .Values.application.ingress.hosts }}
+    {{- range .Values.ingress.hosts }}
     - host: {{ .host | quote }}
       http:
         paths:
