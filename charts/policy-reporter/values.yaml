@@ -5,16 +5,69 @@ image:
 
 imagePullSecrets: []
 
-deployment:
-  annotations: {}
+replicaCount: 1
 
-resources:
-  requests:
-    memory: 20Mi
-    cpu: 5m
-  limits:
-    memory: 30Mi
-    cpu: 10m
+deploymentStrategy: {}
+  # rollingUpdate:
+  #  maxSurge: 25%
+  #  maxUnavailable: 25%
+  # type: RollingUpdate
+
+# Key/value pairs that are attached to Deployment.
+annotations: {}
+
+# Create ClusterRole
+rbac:
+  enabled: true
+
+serviceAccount:
+  # Specifies whether a service account should be created
+  create: true
+  # Annotations to add to the service account
+  annotations: {}
+  # The name of the service account to use.
+  # If not set and create is true, a name is generated using the fullname template
+  name: ""
+
+service:
+  enabled: false
+  ## configuration of service
+  # key/value
+  annotations: {}
+  # key/value
+  labels: {}
+  type: ClusterIP
+  # integer nubmer. This is port for service
+  port: 2112
+
+securityContext: {}
+  # capabilities:
+  #   drop:
+  #   - ALL
+  # readOnlyRootFilesystem: true
+  # runAsNonRoot: true
+  # runAsUser: 1000
+
+# Key/value pairs that are attached to pods.
+podAnnotations: {}
+
+# Key/value pairs that are attached to pods.
+podLabels: {}
+
+
+
+resources: {}
+  # We usually recommend not to specify default resources and to leave this as a conscious
+  # choice for the user. This also increases chances charts run on environments with little
+  # resources, such as Minikube. If you do want to specify resources, uncomment the following
+  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+  # limits:
+  #   memory: 30Mi
+  #   cpu: 10m
+  # requests:
+  #   memory: 20Mi
+  #   cpu: 5m
+
 
 monitoring:
   enabled: false
@@ -26,6 +79,8 @@ monitoring:
 
 api:
   enabled: false
+  # Service Port number
+  port: 8080
 
 loki:
   # loki host address
@@ -58,8 +113,23 @@ slack:
 
 discord:
   # discord app webhook address
-  webhook: ""
+  webhook: "dd"
   # minimum priority "" < info < warning < error
-  minimumPriority: ""
+  minimumPriority: "sa"
   # Skip already existing PolicyReportResults on startup
   skipExistingOnStartup: true
+
+# Node labels for pod assignment
+# ref: https://kubernetes.io/docs/user-guide/node-selection/
+nodeSelector: {}
+
+# Tolerations for pod assignment
+# ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
+tolerations: []
+
+# Anti-affinity to disallow deploying client and master nodes on the same worker node
+affinity: {}
+
+# enable policy-report-ui
+ui:
+  enabled: false

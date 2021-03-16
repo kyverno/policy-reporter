@@ -1,21 +1,30 @@
+{{- if .Values.service.enabled -}}
 apiVersion: v1
 kind: Service
 metadata:
   name: {{ include "policyreporter.fullname" . }}
   labels:
     {{- include "policyreporter.labels" . | nindent 4 }}
+{{- range $key, $value := $.Values.service.labels }}
+    {{ $key }}: {{ $value | quote }}
+{{- end }}
+  annotations:
+{{- range $key, $value := $.Values.service.annotations }}
+    {{ $key }}: {{ $value | quote }}
+{{- end }}
 spec:
-  type: ClusterIP
+  type: {{ .Values.service.type }}
   ports:
-    - port: 2112
+    - port: {{ .Values.service.port }}
       targetPort: http
       protocol: TCP
       name: http
     {{- if or .Values.api.enabled .Values.ui.enabled }}
-    - port: 8080
+    - port: {{ .Values.api.port }}
       targetPort: rest
       protocol: TCP
       name: rest
     {{- end }}
   selector:
     {{- include "policyreporter.selectorLabels" . | nindent 4 }}
+{{- end }}
