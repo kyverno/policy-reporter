@@ -83,6 +83,10 @@ global:
 api:
   enabled: false
 
+# Policy Priorities
+policyPriorities:
+  enabled: false
+
 loki:
   # loki host address
   host: ""
