@@ -4,12 +4,16 @@ metadata:
   name: {{ include "policyreporter.fullname" . }}
   labels:
     {{- include "policyreporter.labels" . | nindent 4 }}
-  {{- if .Values.deployment.annotations }}
+  {{- if .Values.annotations }}
   annotations:
-    {{- toYaml .Values.deployment.annotations | nindent 4 }} 
+    {{- toYaml .Values.annotations | nindent 4 }}
   {{- end }}
 spec:
-  replicas: 1
+  replicas: {{ .Values.replicaCount }}
+  {{- if .Values.deploymentStrategy }}
+  strategy:
+    {{- toYaml .Values.deploymentStrategy | nindent 4 }}
+  {{- end }}
   selector:
     matchLabels:
       {{- include "policyreporter.selectorLabels" . | nindent 6 }}
@@ -17,8 +21,14 @@ spec:
     metadata:
       labels:
         {{- include "policyreporter.selectorLabels" . | nindent 8 }}
+{{- range $key, $value := $.Values.podLabels }}
+        {{ $key }}: {{ $value | quote }}
+{{- end }}
       annotations:
-        checksum/secret: {{ include (print $.Template.BasePath "/targetssecret.yaml") . | sha256sum }}
+        checksum/secret: {{ include (print $.Template.BasePath "/targetssecret.yaml") . | sha256sum | quote }}
+{{- range $key, $value := $.Values.podAnnotations }}
+        {{ $key }}: {{ $value | quote }}
+{{- end }}
     spec:
       {{- with .Values.imagePullSecrets }}
       imagePullSecrets:
@@ -30,6 +40,10 @@ spec:
         - name: {{ .Chart.Name }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
+          {{- if .Values.securityContext }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          {{- end }}
           args:
             - --config=/app/config.yaml
             {{- if or .Values.api.enabled .Values.ui.enabled }}
@@ -66,3 +80,15 @@ spec:
         secret:
           secretName: {{ include "policyreporter.fullname" . }}-targets
           optional: true
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+    {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+    {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}

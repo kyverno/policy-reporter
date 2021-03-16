@@ -3,5 +3,5 @@ name: policy-reporter-ui
 description: Policy Reporter UI
 
 type: application
-version: 0.3.0
+version: 0.3.1
 appVersion: 0.3.0
