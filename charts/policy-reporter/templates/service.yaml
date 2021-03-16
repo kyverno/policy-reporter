@@ -1,3 +1,5 @@
+{{- $apiEnabled := .Values.api.enabled -}}
+{{- $uiEnabled := .Values.ui.enabled -}}
 {{- if .Values.service.enabled -}}
 apiVersion: v1
 kind: Service
@@ -19,7 +21,7 @@ spec:
       targetPort: http
       protocol: TCP
       name: http
-    {{- if or .Values.api.enabled .Values.ui.enabled }}
+    {{- if or $apiEnabled $uiEnabled }}
     - port: {{ .Values.api.port }}
       targetPort: rest
       protocol: TCP
