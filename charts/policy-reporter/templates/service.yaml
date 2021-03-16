@@ -22,7 +22,7 @@ spec:
       protocol: TCP
       name: http
     {{- if or $apiEnabled $uiEnabled }}
-    - port: {{ .Values.api.port }}
+    - port: {{ .Values.global.port }}
       targetPort: rest
       protocol: TCP
       name: rest

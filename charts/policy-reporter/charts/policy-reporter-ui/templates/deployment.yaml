@@ -42,7 +42,7 @@ spec:
             {{- toYaml .Values.securityContext | nindent 12 }}
           {{- end }}
           args:
-            - -backend={{ .Values.backend }}
+            - -backend=http://{{ .Values.global.backend }}:{{ .Values.global.port }}
           ports:
             - name: http
               containerPort: 8080

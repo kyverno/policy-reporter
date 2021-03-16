@@ -30,7 +30,7 @@ serviceAccount:
   name: ""
 
 service:
-  enabled: false
+  enabled: true
   ## configuration of service
   # key/value
   annotations: {}
@@ -74,10 +74,14 @@ monitoring:
     # labels to match the serviceMonitorSelector of the Prometheus Resource
     labels: {}
 
-api:
-  enabled: false
+global:
+  # The name of service policy-report. If you changed ReleaseName you have to replace it
+  backend: policy-reporter
   # Service Port number
   port: 8080
+
+api:
+  enabled: false
 
 loki:
   # loki host address

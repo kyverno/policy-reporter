@@ -15,8 +15,6 @@ deploymentStrategy: {}
   #  maxUnavailable: 25%
   # type: RollingUpdate
 
-backend: http://policy-reporter:8080
-
 securityContext: {}
   # capabilities:
   #   drop:
