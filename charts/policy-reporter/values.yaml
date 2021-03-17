@@ -6,7 +6,7 @@ image:
 imagePullSecrets: []
 
 # Deploy not more than one replica
-# Policy Reporter doesn't scale yet. 
+# Policy Reporter doesn't scale yet.
 # Each pod will report each change.
 replicaCount: 1
 
