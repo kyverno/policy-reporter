@@ -93,6 +93,12 @@ api:
 # Policy Priorities
 policyPriorities:
   enabled: false
+  # configure mappings from policy to priority
+  # you can use default to configure a default priority not passing results
+  # example mapping
+  #   default: warning
+  #   require-ns-labels: error
+  mapping: {}
 
 # Supported targets for new PolicyReport Results
 target:
