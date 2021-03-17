@@ -15,6 +15,10 @@ on:
       - README.md
       - charts/**
 
+  pull_request:
+    branches:
+      - main
+
 jobs:
   test:
     runs-on: ubuntu-latest

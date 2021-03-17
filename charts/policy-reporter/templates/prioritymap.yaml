@@ -1,0 +1,12 @@
+{{- if and .Values.policyPriorities.enabled .Values.policyPriorities.mapping -}}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: policy-reporter-priorities
+  labels:
+    {{- include "policyreporter.labels" . | nindent 4 }}
+data:
+  {{- with .Values.policyPriorities.mapping }}
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+{{- end }}
