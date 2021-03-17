@@ -277,6 +277,78 @@ The UI is an optional application and provides three different views with inform
 
 ![ClusterPolicyReports](https://github.com/fjogeleit/policy-reporter-ui/blob/main/docs/images/cluster-policy-report.png?raw=true)
 
+## Example Helm values.yaml
+
+Example Helm `values.yaml` with the integrated Policy Reporter UI, Loki as target and customized Grafana Dashboards enabled.
+
+```yaml
+ui:
+  enabled: true
+
+policyPriorities:
+  enabled: true
+
+target:
+  loki:
+    host: "http://loki.loki-stack.svc.cluster.local:3100"
+    minimumPriority: "warning"
+    skipExistingOnStartup: true
+
+monitoring:
+  enabled: true
+
+  policyReportDetails:
+    firstStatusRow:
+      height: 6
+    secondStatusRow:
+      enabled: false
+      height: 2
+    statusTimeline:
+      enabled: true
+      height: 8
+    passTable:
+      enabled: true
+      height: 8
+    failTable:
+      enabled: true
+      height: 8
+    warningTable:
+      enabled: false
+      height: 4
+    errorTable:
+      enabled: false
+      height: 4
+
+  clusterPolicyReportDetails:
+    statusRow:
+      height: 6
+    statusTimeline:
+      enabled: true
+      height: 8
+    passTable:
+      enabled: true
+      height: 8
+    failTable:
+      enabled: true
+      height: 8
+    warningTable:
+      enabled: false
+      height: 4
+    errorTable:
+      enabled: false
+      height: 4
+
+  policyReportOverview:
+    failingSummaryRow:
+      height: 8
+    failingTimeline:
+      height: 10
+    failingPolicyRuleTable:
+      height: 10
+    failingClusterPolicyRuleTable:
+      height: 10
+```
+
 # Todos
 * ~~Support for ClusterPolicyReports~~
 * ~~Additional Targets~~
