@@ -5,6 +5,9 @@ image:
 
 imagePullSecrets: []
 
+# Deploy not more than one replica
+# Policy Reporter doesn't scale yet. 
+# Each pod will report each change.
 replicaCount: 1
 
 deploymentStrategy: {}
@@ -66,6 +69,10 @@ resources: {}
   #   memory: 20Mi
   #   cpu: 5m
 
+# enable policy-report-ui
+ui:
+  enabled: false
+
 monitoring:
   enabled: false
   namespace: cattle-dashboards
@@ -87,42 +94,44 @@ api:
 policyPriorities:
   enabled: false
 
-loki:
-  # loki host address
-  host: ""
-  # minimum priority "" < info < warning < error
-  minimumPriority: ""
-  # Skip already existing PolicyReportResults on startup
-  skipExistingOnStartup: true
+# Supported targets for new PolicyReport Results
+target:
+  loki:
+    # loki host address
+    host: ""
+    # minimum priority "" < info < warning < error
+    minimumPriority: ""
+    # Skip already existing PolicyReportResults on startup
+    skipExistingOnStartup: true
 
-elasticsearch:
-  # elasticsearch host address
-  host: ""
-  # elasticsearch index (default: policy-reporter)
-  index: ""
-  # elasticsearch index rotation and index suffix
-  # possible values: dayli, monthly, annually, none (default: dayli)
-  rotation: ""
-  # minimum priority "" < info < warning < error
-  minimumPriority: ""
-  # Skip already existing PolicyReportResults on startup
-  skipExistingOnStartup: true
+  elasticsearch:
+    # elasticsearch host address
+    host: ""
+    # elasticsearch index (default: policy-reporter)
+    index: ""
+    # elasticsearch index rotation and index suffix
+    # possible values: dayli, monthly, annually, none (default: dayli)
+    rotation: ""
+    # minimum priority "" < info < warning < error
+    minimumPriority: ""
+    # Skip already existing PolicyReportResults on startup
+    skipExistingOnStartup: true
 
-slack:
-  # slack app webhook address
-  webhook: ""
-  # minimum priority "" < info < warning < error
-  minimumPriority: ""
-  # Skip already existing PolicyReportResults on startup
-  skipExistingOnStartup: true
+  slack:
+    # slack app webhook address
+    webhook: ""
+    # minimum priority "" < info < warning < error
+    minimumPriority: ""
+    # Skip already existing PolicyReportResults on startup
+    skipExistingOnStartup: true
 
-discord:
-  # discord app webhook address
-  webhook: ""
-  # minimum priority "" < info < warning < error
-  minimumPriority: ""
-  # Skip already existing PolicyReportResults on startup
-  skipExistingOnStartup: true
+  discord:
+    # discord app webhook address
+    webhook: ""
+    # minimum priority "" < info < warning < error
+    minimumPriority: ""
+    # Skip already existing PolicyReportResults on startup
+    skipExistingOnStartup: true
 
 # Node labels for pod assignment
 # ref: https://kubernetes.io/docs/user-guide/node-selection/
@@ -134,7 +143,3 @@ tolerations: []
 
 # Anti-affinity to disallow deploying client and master nodes on the same worker node
 affinity: {}
-
-# enable policy-report-ui
-ui:
-  enabled: false

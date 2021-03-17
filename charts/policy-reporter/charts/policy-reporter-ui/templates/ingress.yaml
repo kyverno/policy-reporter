@@ -11,13 +11,13 @@ metadata:
   name: {{ include "ui.fullname" . }}
   labels:
     {{- include "ui.selectorLabels" . | nindent 4 }}
-{{- range $key, $value := $.Values.ingress.labels }}
-    {{ $key }}: {{ $value | quote }}
-{{- end }}
+    {{- with .Values.ingress.labels }}
+      {{- toYaml . | nindent 4 }}
+    {{- end }}
+  {{- with .Values.ingress.annotations }}
   annotations:
-{{- range $key, $value := $.Values.ingress.annotations }}
-    {{ $key }}: {{ $value | quote }}
-{{- end }}
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
 spec:
   {{- if .Values.ingress.tls }}
   tls:

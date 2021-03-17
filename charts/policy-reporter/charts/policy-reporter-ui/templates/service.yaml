@@ -5,13 +5,13 @@ metadata:
   name: {{ include "ui.fullname" . }}
   labels:
     {{- include "ui.labels" . | nindent 4 }}
-{{- range $key, $value := $.Values.service.labels }}
-    {{ $key }}: {{ $value | quote }}
-{{- end }}
+    {{- with .Values.service.labels }}
+      {{- toYaml . | nindent 4 }}
+    {{- end }}
+  {{- with .Values.service.annotations }}
   annotations:
-{{- range $key, $value := $.Values.service.annotations }}
-    {{ $key }}: {{ $value | quote }}
-{{- end }}
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
 spec:
   type: {{ .Values.service.type }}
   ports:

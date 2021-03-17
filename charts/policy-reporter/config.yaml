@@ -1,0 +1,21 @@
+loki:
+  host: {{ .Values.target.loki.host | quote }}
+  minimumPriority: {{ .Values.target.loki.minimumPriority | quote }}
+  skipExistingOnStartup: {{ .Values.target.loki.skipExistingOnStartup }}
+
+elasticsearch:
+  host: {{ .Values.target.elasticsearch.host | quote }}
+  index: {{ .Values.target.elasticsearch.index | default "policy-reporter" | quote }}
+  rotation: {{ .Values.target.elasticsearch.rotation | default "dayli" | quote }}
+  minimumPriority: {{ .Values.target.elasticsearch.minimumPriority | quote }}
+  skipExistingOnStartup: {{ .Values.target.elasticsearch.skipExistingOnStartup }}
+
+slack:
+  webhook: {{ .Values.target.slack.webhook | quote }}
+  minimumPriority: {{ .Values.target.slack.minimumPriority | quote }}
+  skipExistingOnStartup: {{ .Values.target.slack.skipExistingOnStartup }}
+
+discord:
+  webhook: {{ .Values.target.discord.webhook | quote }}
+  minimumPriority: {{ .Values.target.discord.minimumPriority | quote }}
+  skipExistingOnStartup: {{ .Values.target.discord.skipExistingOnStartup }}
