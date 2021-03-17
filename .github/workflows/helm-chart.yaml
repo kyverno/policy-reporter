@@ -24,15 +24,6 @@ jobs:
       - name: chart-testing (ct lint)
         uses: helm/chart-testing-action@v2.0.1
 
-      - name: Helm Chart(helm)
-        uses: azure/setup-helm@v1
-        with:
-          version: v3.5.2
-
-      - uses: lra/setup-kubeval@v1
-        with:
-          version: 0.15.0
-
       - name: Run Helm Chart lint
         run: |
             ct lint --lint-conf=.github/ct_lintconf.yaml \
