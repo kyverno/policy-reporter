@@ -3,6 +3,27 @@ entries:
   policy-reporter:
   - apiVersion: v2
     appVersion: 0.12.0
+    created: "2021-03-17T11:52:40.675122+01:00"
+    dependencies:
+    - condition: monitoring.enabled
+      name: monitoring
+      repository: ""
+      version: 0.3.0
+    - condition: ui.enabled
+      name: policy-reporter-ui
+      repository: ""
+      version: 0.3.1
+    description: 'K8s PolicyReporter watches for wgpolicyk8s.io/v1alpha1.PolicyReport
+      resources. It creates Prometheus Metrics and can send rule validation events
+      to different targets like Loki, Elasticsearch, Slack or Discord '
+    digest: 8ec27ebeddfca3529716b9eb73355eb6f65cb9ba0f161d1cd41213c4c8bc23c7
+    name: policy-reporter
+    type: application
+    urls:
+    - https://github.com/fjogeleit/policy-reporter/releases/download/policy-reporter-0.19.0/policy-reporter-0.19.0.tgz
+    version: 0.19.0
+  - apiVersion: v2
+    appVersion: 0.12.0
     created: "2021-03-17T02:03:49.692081+01:00"
     dependencies:
     - condition: monitoring.enabled
@@ -363,4 +384,4 @@ entries:
     urls:
     - https://github.com/fjogeleit/policy-reporter/releases/download/policy-reporter-0.2.0/policy-reporter-0.2.0.tgz
     version: 0.2.0
-generated: "2021-03-17T02:03:49.692274+01:00"
+generated: "2021-03-17T11:52:40.675328+01:00"
