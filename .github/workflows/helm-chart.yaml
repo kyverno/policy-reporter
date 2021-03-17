@@ -7,7 +7,7 @@ on:
       - main
       - development
     paths:
-      - "charts/**"     
+      - "charts/**"
   pull_request:
     paths:
       - "charts/**"
@@ -35,7 +35,7 @@ jobs:
 
       - name: Run Helm Chart lint
         run: |
-            ct lint --lint-conf=.github/ct_conf.yaml \
+            ct lint --lint-conf=.github/ct_lintconf.yaml \
                     --chart-yaml-schema=.github/ct_chart_schema.yaml \
                     --target-branch=main --validate-maintainers=false \
                     --chart-dirs charts
