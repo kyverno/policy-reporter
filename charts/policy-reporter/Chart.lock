@@ -1,0 +1,9 @@
+dependencies:
+- name: monitoring
+  repository: ""
+  version: 0.3.0
+- name: policy-reporter-ui
+  repository: ""
+  version: 0.3.1
+digest: sha256:e97dcecd7cb9a7270e6a644513aebc689fd4ddd01f373af066e53183b7607baf
+generated: "2021-03-17T01:40:03.488467+02:00"

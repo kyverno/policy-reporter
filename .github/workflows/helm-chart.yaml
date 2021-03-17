@@ -1,0 +1,32 @@
+name: Lint helm chart
+
+on:
+  push:
+    # run pipeline on push on master
+    branches:
+      - main
+      - development
+    paths:
+      - "charts/**"
+  pull_request:
+    paths:
+      - "charts/**"
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: "0"
+
+      - name: chart-testing (ct lint)
+        uses: helm/chart-testing-action@v2.0.1
+
+      - name: Run Helm Chart lint
+        run: |
+            ct lint --lint-conf=.github/ct_lintconf.yaml \
+                    --chart-yaml-schema=.github/ct_chart_schema.yaml \
+                    --target-branch=main --validate-maintainers=false \
+                    --chart-dirs charts
