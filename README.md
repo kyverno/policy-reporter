@@ -42,18 +42,19 @@ helm install policy-reporter policy-reporter/policy-reporter -n policy-reporter 
 ### Installation with Loki
 
 ```bash
-helm install policy-reporter policy-reporter/policy-reporter --set loki.host=http://loki:3100 -n policy-reporter --create-namespace
+helm install policy-reporter policy-reporter/policy-reporter --set target.loki.host=http://loki:3100 -n policy-reporter --create-namespace
 ```
 #### Additional configurations for Loki
 
-* Configure `loki.minimumPriority` to send only results with the configured minimumPriority or above, empty means all results. (info < warning < error)
-* Configure `loki.skipExistingOnStartup` to skip all results who already existed before the PolicyReporter started (default: `true`).
+* Configure `target.loki.minimumPriority` to send only results with the configured minimumPriority or above, empty means all results. (info < warning < error)
+* Configure `target.loki.skipExistingOnStartup` to skip all results who already existed before the PolicyReporter started (default: `true`).
 
 ```yaml
-loki:
-  host: ""
-  minimumPriority: ""
-  skipExistingOnStartup: true
+target:
+  loki:
+    host: ""
+    minimumPriority: ""
+    skipExistingOnStartup: true
 ```
 
 #### Example
@@ -63,23 +64,24 @@ loki:
 ### Installation with Elasticsearch
 
 ```bash
-helm install policy-reporter policy-reporter/policy-reporter --set elasticsearch.host=http://elasticsearch:3100 -n policy-reporter --create-namespace
+helm install policy-reporter policy-reporter/policy-reporter --set target.elasticsearch.host=http://elasticsearch:3100 -n policy-reporter --create-namespace
 ```
 
 #### Additional configurations for Elasticsearch
 
-* Configure `elasticsearch.index` to customize the elasticsearch index.
-* Configure `elasticsearch.rotation` is added as suffix to the index. Possible values are `daily`, `monthly`, `annually` and `none`.
-* Configure `elasticsearch.minimumPriority` to send only results with the configured minimumPriority or above, empty means all results. (info < warning < error)
-* Configure `elasticsearch.skipExistingOnStartup` to skip all results who already existed before the PolicyReporter started (default: `true`).
+* Configure `target.elasticsearch.index` to customize the elasticsearch index.
+* Configure `target.elasticsearch.rotation` is added as suffix to the index. Possible values are `daily`, `monthly`, `annually` and `none`.
+* Configure `target.elasticsearch.minimumPriority` to send only results with the configured minimumPriority or above, empty means all results. (info < warning < error)
+* Configure `target.elasticsearch.skipExistingOnStartup` to skip all results who already existed before the PolicyReporter started (default: `true`).
 
 ```yaml
-elasticsearch:
-  host: ""
-  index: "policy-reporter"
-  rotation: "daily"
-  minimumPriority: ""
-  skipExistingOnStartup: true
+target:
+  elasticsearch:
+    host: ""
+    index: "policy-reporter"
+    rotation: "daily"
+    minimumPriority: ""
+    skipExistingOnStartup: true
 ```
 
 #### Example
@@ -89,19 +91,20 @@ elasticsearch:
 ### Installation with Slack
 
 ```bash
-helm install policy-reporter policy-reporter/policy-reporter --set slack.webhook=http://hook.slack -n policy-reporter --create-namespace
+helm install policy-reporter policy-reporter/policy-reporter --set target.slack.webhook=http://hook.slack -n policy-reporter --create-namespace
 ```
 
 #### Additional configurations for Slack
 
-* Configure `slack.minimumPriority` to send only results with the configured minimumPriority or above, empty means all results. (info < warning < error)
-* Configure `slack.skipExistingOnStartup` to skip all results who already existed before the PolicyReporter started (default: `true`).
+* Configure `target.slack.minimumPriority` to send only results with the configured minimumPriority or above, empty means all results. (info < warning < error)
+* Configure `target.slack.skipExistingOnStartup` to skip all results who already existed before the PolicyReporter started (default: `true`).
 
 ```yaml
-slack:
-  webhook: ""
-  minimumPriority: ""
-  skipExistingOnStartup: true
+target:
+  slack:
+    webhook: ""
+    minimumPriority: ""
+    skipExistingOnStartup: true
 ```
 
 #### Example
@@ -111,19 +114,20 @@ slack:
 ### Installation with Discord
 
 ```bash
-helm install policy-reporter policy-reporter/policy-reporter --set discord.webhook=http://hook.discord -n policy-reporter --create-namespace
+helm install policy-reporter policy-reporter/policy-reporter --set target.discord.webhook=http://hook.discord -n policy-reporter --create-namespace
 ```
 
 #### Additional configurations for Discord
 
-* Configure `discord.minimumPriority` to send only results with the configured minimumPriority or above, empty means all results. (info < warning < error)
-* Configure `discord.skipExistingOnStartup` to skip all results who already existed before the PolicyReporter started (default: `true`).
+* Configure `target.discord.minimumPriority` to send only results with the configured minimumPriority or above, empty means all results. (info < warning < error)
+* Configure `target.discord.skipExistingOnStartup` to skip all results who already existed before the PolicyReporter started (default: `true`).
 
 ```yaml
-discord:
-  webhook: ""
-  minimumPriority: ""
-  skipExistingOnStartup: true
+target:
+  discord:
+    webhook: ""
+    minimumPriority: ""
+    skipExistingOnStartup: true
 ```
 
 #### Example
@@ -136,11 +140,17 @@ You can combine multiple targets by setting the required `host` or `webhook` con
 
 ## Configure Policy Priorities
 
-By default kyverno PolicyReports has no priority or severity for policies. So every passed rule validation will be processed as notice, a failed validation is processed as error. To customize this you can configure a mapping from policies to fail priorities. So you can send them as debug, info or warnings instead of errors. To configure the priorities create a ConfigMap in the `policy-reporter` namespace with the name `policy-reporter-priorities`. Configure each priority as value with the __Policyname__ as key and the __Priority__ as value. This Configuration is loaded and synchronized during runtime. Any change to this configmap will automaticly synchronized, no new deployment needed.
+By default kyverno PolicyReports has no priority or severity for policies. So every passed rule validation will be processed as notice, a failed validation is processed as error. To customize this you can configure a mapping from policies to fail priorities. So you can send them as debug, info or warnings instead of errors. To configure the priorities enale the required `Role` and `RoleBinding` by setting `policyPriorities.enabled` to `true` and create a ConfigMap in the `policy-reporter` namespace with the name `policy-reporter-priorities`. Configure each priority as value with the __Policyname__ as key and the __Priority__ as value. This Configuration is loaded and synchronized during runtime. Any change to this configmap will automaticly synchronized, no new deployment needed.
 
-A special Policyname `default` is supported. The `default` configuration can be used to set a global default priority instead of `error`. 
+A special Policyname `default` is supported. The `default` configuration can be used to set a global default priority instead of `error`.
 
-###
+### Enable the required Role and RoleBinding
+
+```bash
+helm install policy-reporter policy-reporter/policy-reporter --set policyPriorities.enabled=true -n policy-reporter --create-namespace
+```
+
+### Create the ConfigMap
 ```bash
 kubectl create configmap policy-reporter-priorities --from-literal check-label-app=warning --from-literal require-ns-labels=warning -n policy-reporter
 ```
@@ -176,7 +186,7 @@ The Monitoring Subchart offers several values for changing the height or disabli
 
 To change a value of this subchart you have to prefix each option with `monitoring.`
 
-Example
+#### Example
 
 ```bash
 helm install policy-reporter policy-reporter/policy-reporter --set monitoring.enabled=true --set monitoring.policyReportDetails.secondStatusRow.enabled=false -n policy-reporter --create-namespace
@@ -266,6 +276,78 @@ The UI is an optional application and provides three different views with inform
 ![Policy Reports](https://github.com/fjogeleit/policy-reporter-ui/blob/main/docs/images/policy-report.png?raw=true)
 
 ![ClusterPolicyReports](https://github.com/fjogeleit/policy-reporter-ui/blob/main/docs/images/cluster-policy-report.png?raw=true)
+
+## Example Helm values.yaml
+
+Example Helm `values.yaml` with the integrated Policy Reporter UI, Loki as target and customized Grafana Dashboards enabled.
+
+```yaml
+ui:
+  enabled: true
+
+policyPriorities:
+  enabled: true
+
+target:
+  loki:
+    host: "http://loki.loki-stack.svc.cluster.local:3100"
+    minimumPriority: "warning"
+    skipExistingOnStartup: true
+
+monitoring:
+  enabled: true
+
+  policyReportDetails:
+    firstStatusRow:
+      height: 6
+    secondStatusRow:
+      enabled: false
+      height: 2
+    statusTimeline:
+      enabled: true
+      height: 8
+    passTable:
+      enabled: true
+      height: 8
+    failTable:
+      enabled: true
+      height: 8
+    warningTable:
+      enabled: false
+      height: 4
+    errorTable:
+      enabled: false
+      height: 4
+
+  clusterPolicyReportDetails:
+    statusRow:
+      height: 6
+    statusTimeline:
+      enabled: true
+      height: 8
+    passTable:
+      enabled: true
+      height: 8
+    failTable:
+      enabled: true
+      height: 8
+    warningTable:
+      enabled: false
+      height: 4
+    errorTable:
+      enabled: false
+      height: 4
+
+  policyReportOverview:
+    failingSummaryRow:
+      height: 8
+    failingTimeline:
+      height: 10
+    failingPolicyRuleTable:
+      height: 10
+    failingClusterPolicyRuleTable:
+      height: 10
+```
 
 # Todos
 * ~~Support for ClusterPolicyReports~~
