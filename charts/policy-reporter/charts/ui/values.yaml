@@ -66,6 +66,8 @@ service:
 ingress:
   enabled: false
   # key/value
+  labels: {}
+  # key/value
   annotations: {}
     # kubernetes.io/ingress.class: nginx
     # kubernetes.io/tls-acme: "true"

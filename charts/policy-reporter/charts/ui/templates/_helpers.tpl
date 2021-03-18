@@ -5,15 +5,15 @@ If release name contains chart name it will be used as a full name.
 */}}
 {{- define "ui.fullname" -}}
 {{- $name := .Chart.Name }}
-{{- if contains .Release.Name $name }}
-{{- $name | trunc 63 | trimSuffix "-" }}
+{{- if contains $name .Release.Name }}
+{{- .Release.Name | trunc 63 | trimSuffix "-" }}
 {{- else }}
 {{- printf "%s-%s" .Release.Name $name | trunc 63 | trimSuffix "-" }}
 {{- end }}
 {{- end }}
 
 {{- define "ui.name" -}}
-{{- "policy-reporter-ui" }}
+{{- "ui" }}
 {{- end }}
 
 {{/*

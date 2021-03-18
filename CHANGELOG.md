@@ -1,5 +1,26 @@
 # Changelog
 
+## 0.20.0
+
+* [Breaking Change] rename policy-reporter-ui Subchart to ui
+    * Simplify the customization by configure all PolicyReporter UI values under `ui`
+
+## 0.19.0
+
+* PolicyResult Priority mapping is now configurable over the Helm Chart
+
+## 0.18.0
+
+* Helm Chart updates [#16](https://github.com/fjogeleit/policy-reporter/pull/16) fixes [#14](https://github.com/fjogeleit/policy-reporter/issues/14)
+    * Target Configuration are now configured under `target` in the HelmChart `values.yaml`
+    * config.yaml are now deployed as Secret with encoded data body (plain stringData before)
+
+## 0.17.0
+
+* New Helm Linting Workflow by kolikons [#15](https://github.com/fjogeleit/policy-reporter/pull/15)
+* Improved Helm Chart by kolikons [#13](https://github.com/fjogeleit/policy-reporter/pull/13)
+    * More configuration possibilities like UI Ingress, ReplicaCount
+    * Role and RoleBindings for ConfigMaps are now optional (required for Priority configuration)
 ## 0.16.0
 
 * New Optional REST API
