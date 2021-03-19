@@ -20,7 +20,6 @@ You can find detailed Information about Features and Configurations in the [Docu
 Installation via Helm Repository
 
 ### Add the Helm repository
-
 ```bash
 helm repo add policy-reporter https://fjogeleit.github.io/policy-reporter
 helm repo update
@@ -46,14 +45,13 @@ Check the [Documentation](https://github.com/fjogeleit/policy-reporter/wiki/poli
 
 ## Targets
 
-Policy Reporter supports the following Targets to send new (Cluster)PolicyReport Results too:
+Policy Reporter supports the following [Targets](https://github.com/fjogeleit/policy-reporter/wiki/targets) to send new (Cluster)PolicyReport Results too:
 * [Grafana Loki](https://github.com/fjogeleit/policy-reporter/wiki/grafana-loki)
 * [Elasticsearch](https://github.com/fjogeleit/policy-reporter/wiki/elasticsearch)
 * [Slack](https://github.com/fjogeleit/policy-reporter/wiki/slack)
 * [Discord](https://github.com/fjogeleit/policy-reporter/wiki/discord)
 * [MS Teams](https://github.com/fjogeleit/policy-reporter/wiki/ms-teams)
 
-Check the Documentation for details about the usage and configuration of each target.
 
 ## Monitoring
 
