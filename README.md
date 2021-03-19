@@ -11,7 +11,7 @@ This project is in an early stage. Please let me know if anything did not work a
 
 ## Documentation
 
-You can find detailed Information about Features and Configurations in the [Documentation](https://github.com/fjogeleit/policy-reporter/wiki).
+You can find detailed Information and Screens about Features and Configurations in the [Documentation](https://github.com/fjogeleit/policy-reporter/wiki).
 
 ## Getting Started
 
