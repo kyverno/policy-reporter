@@ -126,6 +126,7 @@ func (s *client) Send(result report.Result) {
 	}
 
 	req.Header.Add("Content-Type", "application/json; charset=utf-8")
+	req.Header.Add("User-Agent", "Policy-Reporter")
 
 	resp, err := s.client.Do(req)
 	helper.HandleHTTPResponse("TEAMS", resp, err)
