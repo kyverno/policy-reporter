@@ -188,7 +188,7 @@ func (s *client) MinimumPriority() string {
 	return s.minimumPriority
 }
 
-// NewClient creates a new slack.client to send Results to Loki
+// NewClient creates a new slack.client to send Results to Slack
 func NewClient(host, minimumPriority string, skipExistingOnStartup bool, httpClient httpClient) target.Client {
 	return &client{
 		host,

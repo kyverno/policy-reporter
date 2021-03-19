@@ -31,6 +31,11 @@ var testConfig = &config.Config{
 		SkipExisting:    true,
 		MinimumPriority: "debug",
 	},
+	Teams: config.Teams{
+		Webhook:         "http://hook.teams:80",
+		SkipExisting:    true,
+		MinimumPriority: "debug",
+	},
 }
 
 func Test_ResolveTarget(t *testing.T) {
@@ -80,14 +85,25 @@ func Test_ResolveTarget(t *testing.T) {
 			t.Error("Error: Should reuse first instance")
 		}
 	})
+	t.Run("Teams", func(t *testing.T) {
+		client := resolver.TeamsClient()
+		if client == nil {
+			t.Error("Expected Client, got nil")
+		}
+
+		client2 := resolver.TeamsClient()
+		if client != client2 {
+			t.Error("Error: Should reuse first instance")
+		}
+	})
 }
 
 func Test_ResolveTargets(t *testing.T) {
 	resolver := config.NewResolver(testConfig, nil)
 
 	clients := resolver.TargetClients()
-	if count := len(clients); count != 4 {
-		t.Errorf("Expected 4 Clients, got %d", count)
+	if count := len(clients); count != 5 {
+		t.Errorf("Expected 5 Clients, got %d", count)
 	}
 }
 
@@ -150,6 +166,11 @@ func Test_ResolveTargetWithoutHost(t *testing.T) {
 			SkipExisting:    true,
 			MinimumPriority: "debug",
 		},
+		Teams: config.Teams{
+			Webhook:         "",
+			SkipExisting:    true,
+			MinimumPriority: "debug",
+		},
 	}
 
 	t.Run("Loki", func(t *testing.T) {
@@ -177,6 +198,13 @@ func Test_ResolveTargetWithoutHost(t *testing.T) {
 		resolver := config.NewResolver(config2, nil)
 
 		if resolver.DiscordClient() != nil {
+			t.Error("Expected Client to be nil if no host is configured")
+		}
+	})
+	t.Run("Teams", func(t *testing.T) {
+		resolver := config.NewResolver(config2, nil)
+
+		if resolver.TeamsClient() != nil {
 			t.Error("Expected Client to be nil if no host is configured")
 		}
 	})

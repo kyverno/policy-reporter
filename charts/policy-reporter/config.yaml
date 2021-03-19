@@ -19,3 +19,8 @@ discord:
   webhook: {{ .Values.target.discord.webhook | quote }}
   minimumPriority: {{ .Values.target.discord.minimumPriority | quote }}
   skipExistingOnStartup: {{ .Values.target.discord.skipExistingOnStartup }}
+
+teams:
+  webhook: {{ .Values.target.teams.webhook | quote }}
+  minimumPriority: {{ .Values.target.teams.minimumPriority | quote }}
+  skipExistingOnStartup: {{ .Values.target.teams.skipExistingOnStartup }}

@@ -1,7 +1,7 @@
 image:
   repository: fjogeleit/policy-reporter
   pullPolicy: IfNotPresent
-  tag: 0.12.0
+  tag: 0.13.0
 
 imagePullSecrets: []
 
@@ -133,6 +133,14 @@ target:
 
   discord:
     # discord app webhook address
+    webhook: ""
+    # minimum priority "" < info < warning < error
+    minimumPriority: ""
+    # Skip already existing PolicyReportResults on startup
+    skipExistingOnStartup: true
+
+  teams:
+    # teams webhook address
     webhook: ""
     # minimum priority "" < info < warning < error
     minimumPriority: ""

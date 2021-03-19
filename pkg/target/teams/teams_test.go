@@ -1,11 +1,11 @@
-package slack_test
+package teams_test
 
 import (
 	"net/http"
 	"testing"
 
 	"github.com/fjogeleit/policy-reporter/pkg/report"
-	"github.com/fjogeleit/policy-reporter/pkg/target/slack"
+	"github.com/fjogeleit/policy-reporter/pkg/target/teams"
 )
 
 var completeResult = report.Result{
@@ -49,7 +49,7 @@ func (c testClient) Do(req *http.Request) (*http.Response, error) {
 	}, nil
 }
 
-func Test_SlackTarget(t *testing.T) {
+func Test_TeamsTarget(t *testing.T) {
 	t.Run("Send Complete Result", func(t *testing.T) {
 		callback := func(req *http.Request) {
 			if contentType := req.Header.Get("Content-Type"); contentType != "application/json; charset=utf-8" {
@@ -60,12 +60,12 @@ func Test_SlackTarget(t *testing.T) {
 				t.Errorf("Unexpected Host: %s", agend)
 			}
 
-			if url := req.URL.String(); url != "http://hook.slack:80" {
+			if url := req.URL.String(); url != "http://hook.teams:80" {
 				t.Errorf("Unexpected Host: %s", url)
 			}
 		}
 
-		client := slack.NewClient("http://hook.slack:80", "", false, testClient{callback, 200})
+		client := teams.NewClient("http://hook.teams:80", "", false, testClient{callback, 200})
 		client.Send(completeResult)
 	})
 
@@ -79,12 +79,12 @@ func Test_SlackTarget(t *testing.T) {
 				t.Errorf("Unexpected Host: %s", agend)
 			}
 
-			if url := req.URL.String(); url != "http://hook.slack:80" {
+			if url := req.URL.String(); url != "http://hook.teams:80" {
 				t.Errorf("Unexpected Host: %s", url)
 			}
 		}
 
-		client := slack.NewClient("http://hook.slack:80", "", false, testClient{callback, 200})
+		client := teams.NewClient("http://hook.teams:80", "", false, testClient{callback, 200})
 		client.Send(minimalResult)
 	})
 	t.Run("Send with ingored Priority", func(t *testing.T) {
@@ -92,7 +92,7 @@ func Test_SlackTarget(t *testing.T) {
 			t.Errorf("Unexpected Call")
 		}
 
-		client := slack.NewClient("http://localhost:9200", "error", false, testClient{callback, 200})
+		client := teams.NewClient("http://localhost:9200", "error", false, testClient{callback, 200})
 		client.Send(completeResult)
 	})
 	t.Run("SkipExistingOnStartup", func(t *testing.T) {
@@ -100,21 +100,21 @@ func Test_SlackTarget(t *testing.T) {
 			t.Errorf("Unexpected Call")
 		}
 
-		client := slack.NewClient("http://localhost:9200", "", true, testClient{callback, 200})
+		client := teams.NewClient("http://localhost:9200", "", true, testClient{callback, 200})
 
 		if !client.SkipExistingOnStartup() {
 			t.Error("Should return configured SkipExistingOnStartup")
 		}
 	})
 	t.Run("Name", func(t *testing.T) {
-		client := slack.NewClient("http://localhost:9200", "", true, testClient{})
+		client := teams.NewClient("http://localhost:9200", "", true, testClient{})
 
-		if client.Name() != "Slack" {
+		if client.Name() != "Teams" {
 			t.Errorf("Unexpected Name %s", client.Name())
 		}
 	})
 	t.Run("MinimumPriority", func(t *testing.T) {
-		client := slack.NewClient("http://localhost:9200", "debug", true, testClient{})
+		client := teams.NewClient("http://localhost:9200", "debug", true, testClient{})
 
 		if client.MinimumPriority() != "debug" {
 			t.Errorf("Unexpected MinimumPriority %s", client.MinimumPriority())

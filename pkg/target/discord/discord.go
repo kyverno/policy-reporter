@@ -135,7 +135,7 @@ func (d *client) MinimumPriority() string {
 	return d.minimumPriority
 }
 
-// NewClient creates a new loki.client to send Results to Loki
+// NewClient creates a new loki.client to send Results to Discord
 func NewClient(webhook, minimumPriority string, skipExistingOnStartup bool, httpClient httpClient) target.Client {
 	return &client{
 		webhook,
