@@ -15,7 +15,7 @@ You can find detailed Information about Features and Configurations in the [Docu
 
 ## Getting Started
 * [Installation with Helm v3](#installation-with-helm-v3)
-* [Policy Report UI](#policy-report-ui)
+* [Policy Reporter UI](#policy-reporter-ui)
 * [Targets](#targets)
 * [Monitoring](#monitoring)
 
@@ -40,9 +40,9 @@ helm install policy-reporter policy-reporter/policy-reporter -n policy-reporter 
 
 ![Prometheus Metrics](https://github.com/fjogeleit/policy-reporter/blob/main/docs/images/prometheus.png?raw=true)
 
-## Policy Report UI
+## Policy Reporter UI
 
-You can use the Policy Reporter as standalone Application along with the [Policy Report UI](https://github.com/fjogeleit/policy-reporter-ui).
+You can use the Policy Reporter as standalone Application along with the [Policy Reporter UI](https://github.com/fjogeleit/policy-reporter-ui).
 
 The UI is provided as optional Helm Sub Chart and can be enabled by setting `ui.enabled` to `true`. 
 
