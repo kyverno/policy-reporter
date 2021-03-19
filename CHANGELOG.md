@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.20.1
+## 0.20.2
 
 * Policy Reporter UI update
   * Select All option for Policy Filter
