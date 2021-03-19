@@ -14,10 +14,6 @@ This project is in an early stage. Please let me know if anything did not work a
 You can find detailed Information about Features and Configurations in the [Documentation](https://github.com/fjogeleit/policy-reporter/wiki).
 
 ## Getting Started
-* [Installation with Helm v3](#installation-with-helm-v3)
-* [Policy Reporter UI](#policy-reporter-ui)
-* [Targets](#targets)
-* [Monitoring](#monitoring)
 
 ## Installation with Helm v3
 
@@ -31,51 +27,22 @@ helm repo update
 ```
 
 ### Basic Installation - Provides Prometheus Metrics
-
 ```bash
 helm install policy-reporter policy-reporter/policy-reporter -n policy-reporter --create-namespace
 ```
 
-### Example
-
-![Prometheus Metrics](https://github.com/fjogeleit/policy-reporter/blob/main/docs/images/prometheus.png?raw=true)
-
 ## Policy Reporter UI
 
-You can use the Policy Reporter as standalone Application along with the [Policy Reporter UI](https://github.com/fjogeleit/policy-reporter-ui).
+You can use the Policy Reporter as standalone Application along with the optional UI SubChart.
 
-The UI is provided as optional Helm Sub Chart and can be enabled by setting `ui.enabled` to `true`. 
-
-### Installation
-
+### Installation with Policy Reporter UI enabled
 ```bash
 helm install policy-reporter policy-reporter/policy-reporter --set ui.enabled=true -n policy-reporter --create-namespace
-```
-
-### Access it with Port Forward on localhost
-
-```bash
 kubectl port-forward service/policy-reporter-ui 8082:8080 -n policy-reporter
 ```
-
 Open `http://localhost:8082/` in your browser.
 
-### Example
-
-The UI is an optional application and provides three different views with informations about the validation status of your audit policies.
-
-<kbd>
-<img src="https://github.com/fjogeleit/policy-reporter-ui/blob/main/docs/images/dashboard.png?raw=true" alt="Policy Reporter UI - Dashboard">
-</kbd>
-<br><br>
-<kbd>
-<img src="https://github.com/fjogeleit/policy-reporter-ui/blob/main/docs/images/policy-report.png?raw=true" alt="Policy Reporter UI - PolicyReport Details">
-</kbd>
-<br><br>
-<kbd>
-<img src="https://github.com/fjogeleit/policy-reporter-ui/blob/main/docs/images/cluster-policy-report.png?raw=true" alt="Policy Reporter UI - ClusterPolicyReport Details">
-</kbd>
-<br><br>
+Check the [Documentation](https://github.com/fjogeleit/policy-reporter/wiki/policy-reporter-ui) for Screens and additional Information
 
 ## Targets
 
@@ -86,54 +53,14 @@ Policy Reporter supports the following Targets to send new (Cluster)PolicyReport
 * [Discord](https://github.com/fjogeleit/policy-reporter/wiki/discord)
 * [MS Teams](https://github.com/fjogeleit/policy-reporter/wiki/ms-teams)
 
-Use the documentation for details about the usage and configuration of each target.
-
-### Screenshots
-
-#### Loki
-<kbd>
-<img src="https://github.com/fjogeleit/policy-reporter/blob/main/docs/images/grafana-loki.png?raw=true" alt="Grafana Loki">
-</kbd>
-<br><br>
-
-#### Elasticsearch
-<kbd>
-<img src="https://github.com/fjogeleit/policy-reporter/blob/main/docs/images/elasticsearch.png?raw=true" alt="Elasticsearch">
-</kbd>
-<br><br>
-
-#### Slack
-<kbd>
-<img src="https://github.com/fjogeleit/policy-reporter/blob/main/docs/images/slack.png?raw=true" alt="Slack">
-</kbd>
-<br><br>
-
-#### Discord
-<kbd>
-<img src="https://github.com/fjogeleit/policy-reporter/blob/main/docs/images/discord.png?raw=true" alt="Discord">
-</kbd>
-<br><br>
-
-#### MS Teams
-<kbd>
-<img src="https://github.com/fjogeleit/policy-reporter/blob/main/docs/images/ms-teams.png?raw=true" alt="MS Teams">
-</kbd>
-<br><br>
+Check the Documentation for details about the usage and configuration of each target.
 
 ## Monitoring
 
-The Helm Chart includes optional Sub Chart for [Prometheus Operator](https://github.com/prometheus-community/helm-charts/tree/main/charts/kube-prometheus-stack) Integration. The provided Dashboards working without Loki and are only based on the Prometheus Metrics.
+The Helm Chart includes optional SubChart for [Prometheus Operator](https://github.com/prometheus-community/helm-charts/tree/main/charts/kube-prometheus-stack) Integration. The provided Dashboards working without Loki and are only based on the Prometheus Metrics.
 
 Have a look into the [Documentation](https://github.com/fjogeleit/policy-reporter/wiki/prometheus-operator-integration) for details.
 
 ### Grafana Dashboard Import
 
 If you are not using the MonitoringStack you can import the dashboards from [Grafana](https://grafana.com/orgs/policyreporter/dashboards)
-
-### Dashboard Preview
-
-![PolicyReporter Grafana Dashboard](https://github.com/fjogeleit/policy-reporter/blob/main/docs/images/policy-reports-dashboard.png?raw=true)
-
-![PolicyReporter Details Grafana Dashboard](https://github.com/fjogeleit/policy-reporter/blob/main/docs/images/policy-details.png?raw=true)
-
-![ClusterPolicyReporter Details Grafana Dashboard](https://github.com/fjogeleit/policy-reporter/blob/main/docs/images/cluster-policy-details.png?raw=true)
