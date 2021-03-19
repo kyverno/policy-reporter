@@ -49,7 +49,7 @@ func (c testClient) Do(req *http.Request) (*http.Response, error) {
 	}, nil
 }
 
-func Test_LokiTarget(t *testing.T) {
+func Test_SlackTarget(t *testing.T) {
 	t.Run("Send Complete Result", func(t *testing.T) {
 		callback := func(req *http.Request) {
 			if contentType := req.Header.Get("Content-Type"); contentType != "application/json; charset=utf-8" {

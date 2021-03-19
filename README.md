@@ -13,6 +13,7 @@ This project is in an early stage. Please let me know if anything did not work a
   * [Elasticsearch](#installation-with-elasticsearch)
   * [Slack](#installation-with-slack)
   * [Discord](#installation-with-discord)
+  * [MS Teams](#installation-with-ms-teams)
   * [Customization](#customization)
 * [Configure Policy Priorities](#configure-policy-priorities)
 * [Configure Monitoring](#monitoring)
@@ -133,6 +134,29 @@ target:
 #### Example
 
 ![Discord](https://github.com/fjogeleit/policy-reporter/blob/main/docs/images/discord.png?raw=true)
+
+### Installation with MS Teams
+
+```bash
+helm install policy-reporter policy-reporter/policy-reporter --set target.teams.webhook=http://hook.teams -n policy-reporter --create-namespace
+```
+
+#### Additional configurations for MS Teams
+
+* Configure `target.teams.minimumPriority` to send only results with the configured minimumPriority or above, empty means all results. (info < warning < error)
+* Configure `target.teams.skipExistingOnStartup` to skip all results who already existed before the PolicyReporter started (default: `true`).
+
+```yaml
+target:
+  teams:
+    webhook: ""
+    minimumPriority: ""
+    skipExistingOnStartup: true
+```
+
+#### Example
+
+![MS Teams](https://github.com/fjogeleit/policy-reporter/blob/main/docs/images/ms-teams.png?raw=true)
 
 ### Customization
 

@@ -14,6 +14,7 @@ import (
 	"github.com/fjogeleit/policy-reporter/pkg/target/elasticsearch"
 	"github.com/fjogeleit/policy-reporter/pkg/target/loki"
 	"github.com/fjogeleit/policy-reporter/pkg/target/slack"
+	"github.com/fjogeleit/policy-reporter/pkg/target/teams"
 	"k8s.io/client-go/dynamic"
 	v1 "k8s.io/client-go/kubernetes/typed/core/v1"
 	"k8s.io/client-go/rest"
@@ -33,6 +34,7 @@ type Resolver struct {
 	elasticsearchClient target.Client
 	slackClient         target.Client
 	discordClient       target.Client
+	teamsClient         target.Client
 }
 
 // APIServer resolver method
@@ -258,6 +260,28 @@ func (r *Resolver) DiscordClient() target.Client {
 	return r.discordClient
 }
 
+// TeamsClient resolver method
+func (r *Resolver) TeamsClient() target.Client {
+	if r.teamsClient != nil {
+		return r.teamsClient
+	}
+
+	if r.config.Teams.Webhook == "" {
+		return nil
+	}
+
+	r.teamsClient = teams.NewClient(
+		r.config.Teams.Webhook,
+		r.config.Teams.MinimumPriority,
+		r.config.Teams.SkipExisting,
+		&http.Client{},
+	)
+
+	log.Println("[INFO] Teams configured")
+
+	return r.teamsClient
+}
+
 func (r *Resolver) TargetClients() []target.Client {
 	clients := make([]target.Client, 0)
 
@@ -275,6 +299,10 @@ func (r *Resolver) TargetClients() []target.Client {
 
 	if discord := r.DiscordClient(); discord != nil {
 		clients = append(clients, discord)
+	}
+
+	if teams := r.TeamsClient(); teams != nil {
+		clients = append(clients, teams)
 	}
 
 	return clients

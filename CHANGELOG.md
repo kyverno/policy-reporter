@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.21.0
+
+* New Target MS Teams
+
 ## 0.20.2
 
 * Policy Reporter UI update

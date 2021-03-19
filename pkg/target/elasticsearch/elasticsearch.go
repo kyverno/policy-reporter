@@ -84,7 +84,7 @@ func (e *client) MinimumPriority() string {
 	return e.minimumPriority
 }
 
-// NewClient creates a new loki.client to send Results to Loki
+// NewClient creates a new loki.client to send Results to Elasticsearch
 func NewClient(host, index, rotation, minimumPriority string, skipExistingOnStartup bool, httpClient httpClient) target.Client {
 	return &client{
 		host,

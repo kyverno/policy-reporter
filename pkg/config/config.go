@@ -30,6 +30,13 @@ type Discord struct {
 	MinimumPriority string `mapstructure:"minimumPriority"`
 }
 
+// Teams configuration
+type Teams struct {
+	Webhook         string `mapstructure:"webhook"`
+	SkipExisting    bool   `mapstructure:"skipExistingOnStartup"`
+	MinimumPriority string `mapstructure:"minimumPriority"`
+}
+
 // Server configuration
 type API struct {
 	Enabled bool `mapstructure:"enabled"`
@@ -42,6 +49,7 @@ type Config struct {
 	Elasticsearch Elasticsearch `mapstructure:"elasticsearch"`
 	Slack         Slack         `mapstructure:"slack"`
 	Discord       Discord       `mapstructure:"discord"`
+	Teams         Teams         `mapstructure:"teams"`
 	API           API           `mapstructure:"api"`
 	Kubeconfig    string        `mapstructure:"kubeconfig"`
 	Namespace     string        `mapstructure:"namespace"`
