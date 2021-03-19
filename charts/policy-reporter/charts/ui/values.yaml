@@ -3,7 +3,7 @@ enabled: false
 image:
   repository: fjogeleit/policy-reporter-ui
   pullPolicy: IfNotPresent
-  tag: 0.3.0
+  tag: 0.4.0
 
 imagePullSecrets: []
 

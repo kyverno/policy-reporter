@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.20.1
+
+* Policy Reporter UI update
+  * Select All option for Policy Filter
+  * New Namespace Filter for PolicyReport View
+
 ## 0.20.0
 
 * [Breaking Change] rename policy-reporter-ui Subchart to ui
