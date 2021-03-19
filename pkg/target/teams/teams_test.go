@@ -1,6 +1,7 @@
 package teams_test
 
 import (
+	"encoding/json"
 	"net/http"
 	"testing"
 
@@ -31,7 +32,23 @@ var completeResult = report.Result{
 var minimalResult = report.Result{
 	Message:  "validation error: label required. Rule app-label-required failed at path /spec/template/spec/containers/0/resources/requests/",
 	Policy:   "app-label-requirement",
-	Priority: report.WarningPriority,
+	Priority: report.ErrorPriority,
+	Status:   report.Fail,
+	Scored:   true,
+}
+
+var minimalInfoResult = report.Result{
+	Message:  "validation error: label required. Rule app-label-required failed at path /spec/template/spec/containers/0/resources/requests/",
+	Policy:   "app-label-requirement",
+	Priority: report.InfoPriority,
+	Status:   report.Fail,
+	Scored:   true,
+}
+
+var minimalDebugResult = report.Result{
+	Message:  "validation error: label required. Rule app-label-required failed at path /spec/template/spec/containers/0/resources/requests/",
+	Policy:   "app-label-requirement",
+	Priority: report.DebugPriority,
 	Status:   report.Fail,
 	Scored:   true,
 }
@@ -63,6 +80,17 @@ func Test_TeamsTarget(t *testing.T) {
 			if url := req.URL.String(); url != "http://hook.teams:80" {
 				t.Errorf("Unexpected Host: %s", url)
 			}
+
+			payload := make(map[string]interface{})
+
+			err := json.NewDecoder(req.Body).Decode(&payload)
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			if payload["themeColor"] != "f2c744" {
+				t.Errorf("Unexpected ThemeColor %s", payload["themeColor"])
+			}
 		}
 
 		client := teams.NewClient("http://hook.teams:80", "", false, testClient{callback, 200})
@@ -82,10 +110,67 @@ func Test_TeamsTarget(t *testing.T) {
 			if url := req.URL.String(); url != "http://hook.teams:80" {
 				t.Errorf("Unexpected Host: %s", url)
 			}
+
+			payload := make(map[string]interface{})
+
+			err := json.NewDecoder(req.Body).Decode(&payload)
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			if payload["themeColor"] != "e20b0b" {
+				t.Errorf("Unexpected ThemeColor %s", payload["themeColor"])
+			}
 		}
 
 		client := teams.NewClient("http://hook.teams:80", "", false, testClient{callback, 200})
 		client.Send(minimalResult)
+	})
+	t.Run("Send Minimal InfoResult", func(t *testing.T) {
+		callback := func(req *http.Request) {
+			payload := make(map[string]interface{})
+
+			err := json.NewDecoder(req.Body).Decode(&payload)
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			if payload["themeColor"] != "36a64f" {
+				t.Errorf("Unexpected ThemeColor %s", payload["themeColor"])
+			}
+		}
+
+		client := teams.NewClient("http://hook.teams:80", "", false, testClient{callback, 200})
+		client.Send(minimalInfoResult)
+	})
+	t.Run("Send Minimal Debug Result", func(t *testing.T) {
+		callback := func(req *http.Request) {
+			if contentType := req.Header.Get("Content-Type"); contentType != "application/json; charset=utf-8" {
+				t.Errorf("Unexpected Content-Type: %s", contentType)
+			}
+
+			if agend := req.Header.Get("User-Agent"); agend != "Policy-Reporter" {
+				t.Errorf("Unexpected Host: %s", agend)
+			}
+
+			if url := req.URL.String(); url != "http://hook.teams:80" {
+				t.Errorf("Unexpected Host: %s", url)
+			}
+
+			payload := make(map[string]interface{})
+
+			err := json.NewDecoder(req.Body).Decode(&payload)
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			if payload["themeColor"] != "68c2ff" {
+				t.Errorf("Unexpected ThemeColor %s", payload["themeColor"])
+			}
+		}
+
+		client := teams.NewClient("http://hook.teams:80", "", false, testClient{callback, 200})
+		client.Send(minimalDebugResult)
 	})
 	t.Run("Send with ingored Priority", func(t *testing.T) {
 		callback := func(req *http.Request) {
