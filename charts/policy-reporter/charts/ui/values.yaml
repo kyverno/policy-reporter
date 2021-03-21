@@ -1,6 +1,7 @@
 enabled: false
 
 log:
+  # holds the latest 200 validation results in the UI Log
   size: 200
 
 image:
