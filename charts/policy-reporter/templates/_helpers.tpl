@@ -53,3 +53,15 @@ Create the name of the service account to use
 {{- default "default" .Values.serviceAccount.name }}
 {{- end }}
 {{- end }}
+
+{{/*
+Create UI target host based on configuration
+*/}}
+{{- define "policyreporter.uihost" -}}
+{{ if .Values.target.ui.host }}
+{{- else if .Values.ui.enabled }}
+{{- printf "http://%s-ui:%s" .Release.Name (.Values.ui.service.port | toString) }}
+{{- else }}
+{{- "" }}
+{{- end }}
+{{- end }}

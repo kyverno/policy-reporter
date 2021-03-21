@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.22.0
+
+* New Target Policy Reporter UI
+  * New Log View in the Policy Reporter UI to see the latest log entries
+  * Default: latest 200 logs with priority >= warning
+
 ## 0.21.0
 
 * New Target MS Teams

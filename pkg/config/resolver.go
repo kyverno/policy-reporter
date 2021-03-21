@@ -15,6 +15,7 @@ import (
 	"github.com/fjogeleit/policy-reporter/pkg/target/loki"
 	"github.com/fjogeleit/policy-reporter/pkg/target/slack"
 	"github.com/fjogeleit/policy-reporter/pkg/target/teams"
+	"github.com/fjogeleit/policy-reporter/pkg/target/ui"
 	"k8s.io/client-go/dynamic"
 	v1 "k8s.io/client-go/kubernetes/typed/core/v1"
 	"k8s.io/client-go/rest"
@@ -35,6 +36,7 @@ type Resolver struct {
 	slackClient         target.Client
 	discordClient       target.Client
 	teamsClient         target.Client
+	uiClient            target.Client
 }
 
 // APIServer resolver method
@@ -282,6 +284,28 @@ func (r *Resolver) TeamsClient() target.Client {
 	return r.teamsClient
 }
 
+// UIClient resolver method
+func (r *Resolver) UIClient() target.Client {
+	if r.uiClient != nil {
+		return r.uiClient
+	}
+
+	if r.config.UI.Host == "" {
+		return nil
+	}
+
+	r.uiClient = ui.NewClient(
+		r.config.UI.Host,
+		r.config.UI.MinimumPriority,
+		r.config.UI.SkipExisting,
+		&http.Client{},
+	)
+
+	log.Println("[INFO] UI configured")
+
+	return r.uiClient
+}
+
 func (r *Resolver) TargetClients() []target.Client {
 	clients := make([]target.Client, 0)
 
@@ -303,6 +327,10 @@ func (r *Resolver) TargetClients() []target.Client {
 
 	if teams := r.TeamsClient(); teams != nil {
 		clients = append(clients, teams)
+	}
+
+	if ui := r.UIClient(); ui != nil {
+		clients = append(clients, ui)
 	}
 
 	return clients

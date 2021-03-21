@@ -1,7 +1,7 @@
 image:
   repository: fjogeleit/policy-reporter
   pullPolicy: IfNotPresent
-  tag: 0.13.0
+  tag: 0.14.0
 
 imagePullSecrets: []
 
@@ -144,6 +144,14 @@ target:
     webhook: ""
     # minimum priority "" < info < warning < error
     minimumPriority: ""
+    # Skip already existing PolicyReportResults on startup
+    skipExistingOnStartup: true
+
+  ui:
+    # teams webhook address
+    host: ""
+    # minimum priority "" < info < warning < error
+    minimumPriority: "warning"
     # Skip already existing PolicyReportResults on startup
     skipExistingOnStartup: true
 
