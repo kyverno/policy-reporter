@@ -51,6 +51,7 @@ Policy Reporter supports the following [Targets](https://github.com/fjogeleit/po
 * [Slack](https://github.com/fjogeleit/policy-reporter/wiki/slack)
 * [Discord](https://github.com/fjogeleit/policy-reporter/wiki/discord)
 * [MS Teams](https://github.com/fjogeleit/policy-reporter/wiki/ms-teams)
+* [Policy Reporter UI](https://github.com/fjogeleit/policy-reporter/wiki/policy-reporter-ui-log)
 
 
 ## Monitoring
