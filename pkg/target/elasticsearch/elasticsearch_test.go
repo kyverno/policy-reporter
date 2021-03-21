@@ -91,7 +91,7 @@ func Test_ElasticsearchTarget(t *testing.T) {
 		client := elasticsearch.NewClient("http://localhost:9200", "policy-reporter", "none", "", false, testClient{callback, 200})
 		client.Send(completeResult)
 	})
-	t.Run("Send with ingored Priority", func(t *testing.T) {
+	t.Run("Send with ignored Priority", func(t *testing.T) {
 		callback := func(req *http.Request) {
 			t.Errorf("Unexpected Call")
 		}

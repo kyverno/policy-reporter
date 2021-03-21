@@ -3,7 +3,6 @@ package ui_test
 import (
 	"net/http"
 	"testing"
-	"time"
 
 	"github.com/fjogeleit/policy-reporter/pkg/report"
 	"github.com/fjogeleit/policy-reporter/pkg/target/ui"
@@ -53,7 +52,7 @@ func Test_UITarget(t *testing.T) {
 				t.Errorf("Unexpected Host: %s", agend)
 			}
 
-			if url := req.URL.String(); url != "http://localhost:9200/policy-reporter-"+time.Now().Format("2006")+"/event" {
+			if url := req.URL.String(); url != "http://localhost:8080/api/push" {
 				t.Errorf("Unexpected Host: %s", url)
 			}
 		}
@@ -61,12 +60,12 @@ func Test_UITarget(t *testing.T) {
 		client := ui.NewClient("http://localhost:8080", "", false, testClient{callback, 200})
 		client.Send(completeResult)
 	})
-	t.Run("Send with ingored Priority", func(t *testing.T) {
+	t.Run("Send with ignored Priority", func(t *testing.T) {
 		callback := func(req *http.Request) {
 			t.Errorf("Unexpected Call")
 		}
 
-		client := ui.NewClient("http://localhost:8080", "", false, testClient{callback, 200})
+		client := ui.NewClient("http://localhost:8080", "error", false, testClient{callback, 200})
 		client.Send(completeResult)
 	})
 	t.Run("SkipExistingOnStartup", func(t *testing.T) {
@@ -74,7 +73,7 @@ func Test_UITarget(t *testing.T) {
 			t.Errorf("Unexpected Call")
 		}
 
-		client := ui.NewClient("http://localhost:8080", "", false, testClient{callback, 200})
+		client := ui.NewClient("http://localhost:8080", "", true, testClient{callback, 200})
 
 		if !client.SkipExistingOnStartup() {
 			t.Error("Should return configured SkipExistingOnStartup")
