@@ -24,3 +24,8 @@ teams:
   webhook: {{ .Values.target.teams.webhook | quote }}
   minimumPriority: {{ .Values.target.teams.minimumPriority | quote }}
   skipExistingOnStartup: {{ .Values.target.teams.skipExistingOnStartup }}
+
+ui:
+  host: {{ include "policyreporter.uihost" . }}
+  minimumPriority: {{ .Values.target.ui.minimumPriority | quote }}
+  skipExistingOnStartup: {{ .Values.target.ui.skipExistingOnStartup }}

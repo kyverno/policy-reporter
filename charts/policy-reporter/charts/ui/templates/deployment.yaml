@@ -43,6 +43,7 @@ spec:
           {{- end }}
           args:
             - -backend=http://{{ .Values.global.backend }}:{{ .Values.global.port }}
+            - -log-size={{ .Values.log.size }}
           ports:
             - name: http
               containerPort: 8080
