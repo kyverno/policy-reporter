@@ -18,6 +18,7 @@ var cresult1 = report.Result{
 	Rule:     "ns-label-required",
 	Priority: report.ErrorPriority,
 	Status:   report.Fail,
+	Severity: report.High,
 	Category: "resources",
 	Scored:   true,
 	Resources: []report.Resource{
@@ -32,9 +33,9 @@ var cresult1 = report.Result{
 
 var cresult2 = report.Result{
 	Message:  "validation error: Namespace label missing",
-	Policy:   "ns-label-env-required",
-	Rule:     "ns-label-required",
-	Priority: report.ErrorPriority,
+	Policy:   "ns-label-env-check",
+	Rule:     "ns-label-check",
+	Priority: report.WarningPriority,
 	Status:   report.Pass,
 	Category: "resources",
 	Scored:   true,
@@ -43,7 +44,7 @@ var cresult2 = report.Result{
 			APIVersion: "v1",
 			Kind:       "Namespace",
 			Name:       "stage",
-			UID:        "536ab69f-1b3c-4bd9-9ba4-274a56188419",
+			UID:        "532ab69f-1b3c-4bd9-9ba4-274a56188419",
 		},
 	},
 }
@@ -108,10 +109,10 @@ func Test_ClusterPolicyReportMetricGeneration(t *testing.T) {
 		}
 
 		metrics = results.GetMetric()
-		if err = testClusterResultMetricLabels(metrics[0], result1); err != nil {
+		if err = testClusterResultMetricLabels(metrics[0], result2); err != nil {
 			t.Error(err)
 		}
-		if err = testClusterResultMetricLabels(metrics[1], result2); err != nil {
+		if err = testClusterResultMetricLabels(metrics[1], result1); err != nil {
 			t.Error(err)
 		}
 	})
@@ -246,10 +247,17 @@ func testClusterResultMetricLabels(metric *io_prometheus_client.Metric, result r
 		return fmt.Errorf("Unexpected Rule Label Value: %s", value)
 	}
 
-	if name := *metric.Label[5].Name; name != "status" {
+	if name := *metric.Label[5].Name; name != "severity" {
 		return fmt.Errorf("Unexpected Name Label: %s", name)
 	}
-	if value := *metric.Label[5].Value; value != result.Status {
+	if value := *metric.Label[5].Value; value != result.Severity {
+		return fmt.Errorf("Unexpected Severity Label Value: %s", value)
+	}
+
+	if name := *metric.Label[6].Name; name != "status" {
+		return fmt.Errorf("Unexpected Name Label: %s", name)
+	}
+	if value := *metric.Label[6].Value; value != result.Status {
 		return fmt.Errorf("Unexpected Status Label Value: %s", value)
 	}
 

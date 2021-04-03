@@ -15,6 +15,7 @@ var result1 = report.Result{
 	Priority: report.ErrorPriority,
 	Status:   report.Fail,
 	Category: "resources",
+	Severity: report.High,
 	Scored:   true,
 	Resources: []report.Resource{
 		{
@@ -124,25 +125,28 @@ func Test_MarshalPriority(t *testing.T) {
 
 func Test_Priorities(t *testing.T) {
 	t.Run("Priority.String", func(t *testing.T) {
-		if prio := report.Priority(0).String(); prio != "" {
+		if prio := report.Priority(report.DefaultPriority).String(); prio != "" {
 			t.Errorf("Expected Priority to be '' (actual %s)", prio)
 		}
-		if prio := report.Priority(1).String(); prio != "debug" {
+		if prio := report.Priority(report.DebugPriority).String(); prio != "debug" {
 			t.Errorf("Expected Priority to be debug (actual %s)", prio)
 		}
-		if prio := report.Priority(2).String(); prio != "info" {
+		if prio := report.Priority(report.InfoPriority).String(); prio != "info" {
 			t.Errorf("Expected Priority to be debug (actual %s)", prio)
 		}
-		if prio := report.Priority(3).String(); prio != "warning" {
+		if prio := report.Priority(report.WarningPriority).String(); prio != "warning" {
 			t.Errorf("Expected Priority to be debug (actual %s)", prio)
 		}
-		if prio := report.Priority(4).String(); prio != "error" {
+		if prio := report.Priority(report.ErrorPriority).String(); prio != "error" {
+			t.Errorf("Expected Priority to be debug (actual %s)", prio)
+		}
+		if prio := report.Priority(report.CriticalPriority).String(); prio != "critical" {
 			t.Errorf("Expected Priority to be debug (actual %s)", prio)
 		}
 	})
 	t.Run("PriorityFromStatus", func(t *testing.T) {
-		if prio := report.PriorityFromStatus(report.Fail); prio != report.ErrorPriority {
-			t.Errorf("Expected Priority to be %d (actual %d)", report.ErrorPriority, prio)
+		if prio := report.PriorityFromStatus(report.Fail); prio != report.CriticalPriority {
+			t.Errorf("Expected Priority to be %d (actual %d)", report.CriticalPriority, prio)
 		}
 		if prio := report.PriorityFromStatus(report.Error); prio != report.ErrorPriority {
 			t.Errorf("Expected Priority to be %d (actual %d)", report.ErrorPriority, prio)
@@ -157,11 +161,14 @@ func Test_Priorities(t *testing.T) {
 			t.Errorf("Expected Priority to be %d (actual %d)", report.WarningPriority, prio)
 		}
 	})
-	t.Run("PriorityFromStatus", func(t *testing.T) {
+	t.Run("NewPriority", func(t *testing.T) {
 		if prio := report.NewPriority(""); prio != report.DefaultPriority {
 			t.Errorf("Expected Priority to be %d (actual %d)", report.DefaultPriority, prio)
 		}
 		if prio := report.NewPriority("error"); prio != report.ErrorPriority {
+			t.Errorf("Expected Priority to be %d (actual %d)", report.ErrorPriority, prio)
+		}
+		if prio := report.NewPriority("critical"); prio != report.CriticalPriority {
 			t.Errorf("Expected Priority to be %d (actual %d)", report.ErrorPriority, prio)
 		}
 		if prio := report.NewPriority("warning"); prio != report.WarningPriority {
@@ -172,6 +179,17 @@ func Test_Priorities(t *testing.T) {
 		}
 		if prio := report.NewPriority("debug"); prio != report.DebugPriority {
 			t.Errorf("Expected Priority to be %d (actual %d)", report.DebugPriority, prio)
+		}
+	})
+	t.Run("PriorityFromSeverity", func(t *testing.T) {
+		if prio := report.PriorityFromSeverity(report.High); prio != report.CriticalPriority {
+			t.Errorf("Expected Priority to be %d (actual %d)", report.CriticalPriority, prio)
+		}
+		if prio := report.PriorityFromSeverity(report.Medium); prio != report.WarningPriority {
+			t.Errorf("Expected Priority to be %d (actual %d)", report.WarningPriority, prio)
+		}
+		if prio := report.PriorityFromSeverity(report.Low); prio != report.InfoPriority {
+			t.Errorf("Expected Priority to be %d (actual %d)", report.InfoPriority, prio)
 		}
 	})
 }

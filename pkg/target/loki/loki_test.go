@@ -17,7 +17,7 @@ var completeResult = report.Result{
 	Rule:     "autogen-check-for-requests-and-limits",
 	Priority: report.WarningPriority,
 	Status:   report.Fail,
-	Severity: report.Heigh,
+	Severity: report.High,
 	Category: "resources",
 	Scored:   true,
 	Resources: []report.Resource{

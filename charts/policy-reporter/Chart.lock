@@ -1,9 +1,9 @@
 dependencies:
 - name: monitoring
   repository: ""
-  version: 0.3.0
+  version: 1.0.0
 - name: ui
   repository: ""
-  version: 0.5.0
-digest: sha256:15549ff4f94ac43da2be66e8d332bfa2be05d4c13bc0820eb908a6341c1e32c0
-generated: "2021-03-21T18:20:41.565564+01:00"
+  version: 1.0.0
+digest: sha256:fb651a8155fa0d875e5cf260b34dc7bdd4b0331f93f58fa560139861d6988b02
+generated: "2021-04-02T11:55:33.612666+02:00"

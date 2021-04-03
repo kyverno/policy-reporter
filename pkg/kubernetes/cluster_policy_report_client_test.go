@@ -346,7 +346,7 @@ func Test_WatchModifiedEvent(t *testing.T) {
 				"policy":   "required-label",
 				"rule":     "app-label-required",
 				"category": "test",
-				"severity": "low",
+				"severity": "high",
 				"resources": []interface{}{
 					map[string]interface{}{
 						"apiVersion": "v1",

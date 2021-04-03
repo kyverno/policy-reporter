@@ -32,6 +32,8 @@ type embedField struct {
 func newPayload(result report.Result) payload {
 	var color string
 	switch result.Priority {
+	case report.CriticalPriority:
+		color = "15158332"
 	case report.ErrorPriority:
 		color = "15158332"
 	case report.WarningPriority:
