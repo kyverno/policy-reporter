@@ -105,7 +105,7 @@ target:
   loki:
     # loki host address
     host: ""
-    # minimum priority "" < info < warning < error
+    # minimum priority "" < info < warning < critical < error
     minimumPriority: ""
     # Skip already existing PolicyReportResults on startup
     skipExistingOnStartup: true
@@ -118,7 +118,7 @@ target:
     # elasticsearch index rotation and index suffix
     # possible values: dayli, monthly, annually, none (default: dayli)
     rotation: ""
-    # minimum priority "" < info < warning < error
+    # minimum priority "" < info < warning < critical < error
     minimumPriority: ""
     # Skip already existing PolicyReportResults on startup
     skipExistingOnStartup: true
@@ -126,7 +126,7 @@ target:
   slack:
     # slack app webhook address
     webhook: ""
-    # minimum priority "" < info < warning < error
+    # minimum priority "" < info < warning < critical < error
     minimumPriority: ""
     # Skip already existing PolicyReportResults on startup
     skipExistingOnStartup: true
@@ -134,7 +134,7 @@ target:
   discord:
     # discord app webhook address
     webhook: ""
-    # minimum priority "" < info < warning < error
+    # minimum priority "" < info < warning < critical < error
     minimumPriority: ""
     # Skip already existing PolicyReportResults on startup
     skipExistingOnStartup: true
@@ -142,7 +142,7 @@ target:
   teams:
     # teams webhook address
     webhook: ""
-    # minimum priority "" < info < warning < error
+    # minimum priority "" < info < warning < critical < error
     minimumPriority: ""
     # Skip already existing PolicyReportResults on startup
     skipExistingOnStartup: true
@@ -150,7 +150,7 @@ target:
   ui:
     # teams webhook address
     host: ""
-    # minimum priority "" < info < warning < error
+    # minimum priority "" < info < warning < critical < error
     minimumPriority: "warning"
     # Skip already existing PolicyReportResults on startup
     skipExistingOnStartup: true

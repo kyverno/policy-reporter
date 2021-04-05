@@ -74,7 +74,7 @@ func newSendCMD() *cobra.Command {
 	cmd.PersistentFlags().StringP("config", "c", "", "target configuration file")
 
 	cmd.PersistentFlags().String("loki", "", "loki host: http://loki:3100")
-	cmd.PersistentFlags().String("loki-minimum-priority", "", "Minimum Priority to send Results to Loki (info < warning < error)")
+	cmd.PersistentFlags().String("loki-minimum-priority", "", "Minimum Priority to send Results to Loki (info < warning < critical < error)")
 
 	flag.Parse()
 

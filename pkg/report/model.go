@@ -38,8 +38,8 @@ const (
 	DebugPriority
 	InfoPriority
 	WarningPriority
-	ErrorPriority
 	CriticalPriority
+	ErrorPriority
 )
 
 // Priority Enum for internal Result weighting
