@@ -24,7 +24,7 @@ var configMap = &v1.ConfigMap{
 		Name: "policy-reporter-priorities",
 	},
 	Data: map[string]string{
-		"default": "warning",
+		"default": "critical",
 	},
 }
 
@@ -42,7 +42,7 @@ func Test_GetConfigMap(t *testing.T) {
 	if cm.Name != "policy-reporter-priorities" {
 		t.Error("Unexpted ConfigMapReturned")
 	}
-	if priority, ok := cm.Data["default"]; !ok || priority != "warning" {
+	if priority, ok := cm.Data["default"]; !ok || priority != "critical" {
 		t.Error("Unexpted default priority")
 	}
 }
@@ -64,7 +64,7 @@ func Test_WatchConfigMap(t *testing.T) {
 		if cm.Name != "policy-reporter-priorities" {
 			t.Error("Unexpted ConfigMapReturned")
 		}
-		if priority, ok := cm.Data["default"]; !ok || priority != "warning" {
+		if priority, ok := cm.Data["default"]; !ok || priority != "critical" {
 			t.Error("Unexpted default priority")
 		}
 	})

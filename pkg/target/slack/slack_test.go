@@ -14,7 +14,7 @@ var completeResult = report.Result{
 	Rule:     "autogen-check-for-requests-and-limits",
 	Priority: report.WarningPriority,
 	Status:   report.Fail,
-	Severity: report.Heigh,
+	Severity: report.High,
 	Category: "resources",
 	Scored:   true,
 	Resources: []report.Resource{
@@ -32,6 +32,30 @@ var minimalResult = report.Result{
 	Message:  "validation error: label required. Rule app-label-required failed at path /spec/template/spec/containers/0/resources/requests/",
 	Policy:   "app-label-requirement",
 	Priority: report.WarningPriority,
+	Status:   report.Fail,
+	Scored:   true,
+}
+
+var minimalErrorResult = report.Result{
+	Message:  "validation error: label required. Rule app-label-required failed at path /spec/template/spec/containers/0/resources/requests/",
+	Policy:   "app-label-requirement",
+	Priority: report.ErrorPriority,
+	Status:   report.Fail,
+	Scored:   true,
+}
+
+var minimalDebugResult = report.Result{
+	Message:  "validation error: label required. Rule app-label-required failed at path /spec/template/spec/containers/0/resources/requests/",
+	Policy:   "app-label-requirement",
+	Priority: report.DebugPriority,
+	Status:   report.Fail,
+	Scored:   true,
+}
+
+var minimalCriticalResult = report.Result{
+	Message:  "validation error: label required. Rule app-label-required failed at path /spec/template/spec/containers/0/resources/requests/",
+	Policy:   "app-label-requirement",
+	Priority: report.CriticalPriority,
 	Status:   report.Fail,
 	Scored:   true,
 }

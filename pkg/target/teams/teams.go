@@ -37,6 +37,9 @@ type payload struct {
 }
 
 func colorFromPriority(p report.Priority) string {
+	if p == report.CriticalPriority {
+		return "b80707"
+	}
 	if p == report.ErrorPriority {
 		return "e20b0b"
 	}

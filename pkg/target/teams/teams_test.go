@@ -15,7 +15,7 @@ var completeResult = report.Result{
 	Rule:     "autogen-check-for-requests-and-limits",
 	Priority: report.WarningPriority,
 	Status:   report.Fail,
-	Severity: report.Heigh,
+	Severity: report.High,
 	Category: "resources",
 	Scored:   true,
 	Resources: []report.Resource{
@@ -29,10 +29,18 @@ var completeResult = report.Result{
 	},
 }
 
-var minimalResult = report.Result{
+var minimalErrorResult = report.Result{
 	Message:  "validation error: label required. Rule app-label-required failed at path /spec/template/spec/containers/0/resources/requests/",
 	Policy:   "app-label-requirement",
 	Priority: report.ErrorPriority,
+	Status:   report.Fail,
+	Scored:   true,
+}
+
+var minimalResult = report.Result{
+	Message:  "validation error: label required. Rule app-label-required failed at path /spec/template/spec/containers/0/resources/requests/",
+	Policy:   "app-label-requirement",
+	Priority: report.CriticalPriority,
 	Status:   report.Fail,
 	Scored:   true,
 }
@@ -118,7 +126,7 @@ func Test_TeamsTarget(t *testing.T) {
 				t.Fatal(err)
 			}
 
-			if payload["themeColor"] != "e20b0b" {
+			if payload["themeColor"] != "b80707" {
 				t.Errorf("Unexpected ThemeColor %s", payload["themeColor"])
 			}
 		}
@@ -142,6 +150,23 @@ func Test_TeamsTarget(t *testing.T) {
 
 		client := teams.NewClient("http://hook.teams:80", "", false, testClient{callback, 200})
 		client.Send(minimalInfoResult)
+	})
+	t.Run("Send Minimal ErrorResult", func(t *testing.T) {
+		callback := func(req *http.Request) {
+			payload := make(map[string]interface{})
+
+			err := json.NewDecoder(req.Body).Decode(&payload)
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			if payload["themeColor"] != "e20b0b" {
+				t.Errorf("Unexpected ThemeColor %s", payload["themeColor"])
+			}
+		}
+
+		client := teams.NewClient("http://hook.teams:80", "", false, testClient{callback, 200})
+		client.Send(minimalErrorResult)
 	})
 	t.Run("Send Minimal Debug Result", func(t *testing.T) {
 		callback := func(req *http.Request) {

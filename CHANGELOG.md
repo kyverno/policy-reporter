@@ -1,5 +1,16 @@
 # Changelog
 
+## 1.0.0
+
+* Support Priority by Severity
+    * high -> critical
+    * medium -> warning
+    * low -> information
+* Severity is added as label to result metrics
+* Severity is added in Policy Reporter UI tables
+* Add "Critical" as new Priority to differ between Errored Policies and Failed priorities with High Severity
+* Use "Warning" as new default Priority instead of Error which should now used for Policies in Error Status
+
 ## 0.22.0
 
 * New Target Policy Reporter UI

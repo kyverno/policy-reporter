@@ -18,6 +18,7 @@ var result1 = report.Result{
 	Rule:     "autogen-check-for-requests-and-limits",
 	Priority: report.ErrorPriority,
 	Status:   report.Fail,
+	Severity: report.High,
 	Category: "resources",
 	Scored:   true,
 	Resources: []report.Resource{
@@ -33,9 +34,9 @@ var result1 = report.Result{
 
 var result2 = report.Result{
 	Message:  "validation error: requests and limits required. Rule autogen-check-for-requests-and-limits failed at path /spec/template/spec/containers/0/resources/requests/",
-	Policy:   "require-requests-and-limits-required",
-	Rule:     "autogen-check-for-requests-and-limits",
-	Priority: report.ErrorPriority,
+	Policy:   "check-requests-and-limits-required",
+	Rule:     "check-for-requests-and-limits",
+	Priority: report.WarningPriority,
 	Status:   report.Pass,
 	Category: "resources",
 	Scored:   true,
@@ -45,7 +46,7 @@ var result2 = report.Result{
 			Kind:       "Deployment",
 			Name:       "nginx",
 			Namespace:  "test",
-			UID:        "536ab69f-1b3c-4bd9-9ba4-274a56188419",
+			UID:        "535ab69f-1b3c-4bd9-9ba4-274a56188419",
 		},
 	},
 }
@@ -111,10 +112,10 @@ func Test_PolicyReportMetricGeneration(t *testing.T) {
 		}
 
 		metrics = results.GetMetric()
-		if err = testResultMetricLabels(metrics[0], result1); err != nil {
+		if err = testResultMetricLabels(metrics[0], result2); err != nil {
 			t.Error(err)
 		}
-		if err = testResultMetricLabels(metrics[1], result2); err != nil {
+		if err = testResultMetricLabels(metrics[1], result1); err != nil {
 			t.Error(err)
 		}
 	})
@@ -262,10 +263,17 @@ func testResultMetricLabels(metric *io_prometheus_client.Metric, result report.R
 		return fmt.Errorf("Unexpected Rule Label Value: %s", value)
 	}
 
-	if name := *metric.Label[6].Name; name != "status" {
+	if name := *metric.Label[6].Name; name != "severity" {
 		return fmt.Errorf("Unexpected Name Label: %s", name)
 	}
-	if value := *metric.Label[6].Value; value != result.Status {
+	if value := *metric.Label[6].Value; value != result.Severity {
+		return fmt.Errorf("Unexpected Severity Label Value: %s", value)
+	}
+
+	if name := *metric.Label[7].Name; name != "status" {
+		return fmt.Errorf("Unexpected Name Label: %s", name)
+	}
+	if value := *metric.Label[7].Value; value != result.Status {
 		return fmt.Errorf("Unexpected Status Label Value: %s", value)
 	}
 

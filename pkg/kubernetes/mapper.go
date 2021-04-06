@@ -148,8 +148,12 @@ func (m *mapper) mapResult(result map[string]interface{}) report.Result {
 		Resources: resources,
 	}
 
+	if severity, ok := result["severity"]; ok {
+		r.Severity = severity.(report.Severity)
+	}
+
 	if r.Status == report.Error || r.Status == report.Fail {
-		r.Priority = m.resolvePriority(r.Policy)
+		r.Priority = m.resolvePriority(r.Policy, r.Severity)
 	}
 
 	if rule, ok := result["rule"]; ok {
@@ -160,23 +164,23 @@ func (m *mapper) mapResult(result map[string]interface{}) report.Result {
 		r.Category = category.(string)
 	}
 
-	if severity, ok := result["severity"]; ok {
-		r.Severity = severity.(report.Severity)
-	}
-
 	return r
 }
 
-func (m *mapper) resolvePriority(policy string) report.Priority {
+func (m *mapper) resolvePriority(policy string, severity report.Severity) report.Priority {
 	if priority, ok := m.priorityMap[policy]; ok {
 		return report.NewPriority(priority)
+	}
+
+	if severity != "" {
+		return report.PriorityFromSeverity(severity)
 	}
 
 	if priority, ok := m.priorityMap["default"]; ok {
 		return report.NewPriority(priority)
 	}
 
-	return report.Priority(report.ErrorPriority)
+	return report.Priority(report.WarningPriority)
 }
 
 func (m *mapper) FetchPriorities(ctx context.Context) error {

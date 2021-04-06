@@ -98,7 +98,7 @@ func newRunCMD() *cobra.Command {
 	cmd.PersistentFlags().IntP("apiPort", "a", 0, "http port for the optional rest api")
 
 	cmd.PersistentFlags().String("loki", "", "loki host: http://loki:3100")
-	cmd.PersistentFlags().String("loki-minimum-priority", "", "Minimum Priority to send Results to Loki (info < warning < error)")
+	cmd.PersistentFlags().String("loki-minimum-priority", "", "Minimum Priority to send Results to Loki (info < warning < critical < error)")
 	cmd.PersistentFlags().Bool("loki-skip-existing-on-startup", false, "Skip Results created before PolicyReporter started. Prevent duplicated sending after new deployment")
 
 	flag.Parse()

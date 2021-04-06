@@ -34,7 +34,7 @@ var policyMap = map[string]interface{}{
 			"policy":   "required-label",
 			"rule":     "app-label-required",
 			"category": "test",
-			"severity": "low",
+			"severity": "high",
 			"resources": []interface{}{
 				map[string]interface{}{
 					"apiVersion": "v1",
@@ -83,7 +83,7 @@ var clusterPolicyMap = map[string]interface{}{
 			"policy":   "required-label",
 			"rule":     "app-label-required",
 			"category": "test",
-			"severity": "low",
+			"severity": "high",
 			"resources": []interface{}{
 				map[string]interface{}{
 					"apiVersion": "v1",
@@ -145,8 +145,8 @@ func Test_MapPolicyReport(t *testing.T) {
 	if result1.Status != report.Fail {
 		t.Errorf("Expected Message '%s' (acutal %s)", report.Fail, result1.Status)
 	}
-	if result1.Priority != report.ErrorPriority {
-		t.Errorf("Expected Priority '%d' (acutal %d)", report.ErrorPriority, result1.Priority)
+	if result1.Priority != report.CriticalPriority {
+		t.Errorf("Expected Priority '%d' (acutal %d)", report.CriticalPriority, result1.Priority)
 	}
 	if !result1.Scored {
 		t.Errorf("Expected Scored to be true")
@@ -160,8 +160,8 @@ func Test_MapPolicyReport(t *testing.T) {
 	if result1.Category != "test" {
 		t.Errorf("Expected Category 'test' (acutal %s)", result1.Category)
 	}
-	if result1.Severity != report.Low {
-		t.Errorf("Expected Severity '%s' (acutal %s)", report.Low, result1.Severity)
+	if result1.Severity != report.High {
+		t.Errorf("Expected Severity '%s' (acutal %s)", report.High, result1.Severity)
 	}
 
 	resource := result1.Resources[0]
@@ -290,10 +290,10 @@ func Test_PriorityMap(t *testing.T) {
 
 		preport := mapper.MapPolicyReport(policyMap)
 
-		result1 := preport.Results["required-label__app-label-required__fail__dfd57c50-f30c-4729-b63f-b1954d8988d1"]
+		result := preport.Results["required-label__app-label-required__fail__dfd57c50-f30c-4729-b63f-b1954d8988d1"]
 
-		if result1.Priority != report.DebugPriority {
-			t.Errorf("Expected Policy '%d' (acutal %d)", report.DebugPriority, result1.Priority)
+		if result.Priority != report.DebugPriority {
+			t.Errorf("Expected Policy '%d' (acutal %d)", report.DebugPriority, result.Priority)
 		}
 	})
 
@@ -302,10 +302,10 @@ func Test_PriorityMap(t *testing.T) {
 
 		preport := mapper.MapPolicyReport(policyMap)
 
-		result1 := preport.Results["required-label__app-label-required__fail__dfd57c50-f30c-4729-b63f-b1954d8988d1"]
+		result := preport.Results["required-label__app-label-required__fail__dfd57c50-f30c-4729-b63f-b1954d8988d1"]
 
-		if result1.Priority != report.DebugPriority {
-			t.Errorf("Expected Policy '%d' (acutal %d)", report.DebugPriority, result1.Priority)
+		if result.Priority != report.DebugPriority {
+			t.Errorf("Expected Policy '%d' (acutal %d)", report.DebugPriority, result.Priority)
 		}
 	})
 
@@ -314,10 +314,10 @@ func Test_PriorityMap(t *testing.T) {
 
 		preport := mapper.MapPolicyReport(policyMap)
 
-		result1 := preport.Results["required-label__app-label-required__fail__dfd57c50-f30c-4729-b63f-b1954d8988d1"]
+		result := preport.Results["priority-test____fail"]
 
-		if result1.Priority != report.WarningPriority {
-			t.Errorf("Expected Policy '%d' (acutal %d)", report.WarningPriority, result1.Priority)
+		if result.Priority != report.WarningPriority {
+			t.Errorf("Expected Policy '%d' (acutal %d)", report.WarningPriority, result.Priority)
 		}
 	})
 }
@@ -328,17 +328,17 @@ func Test_PriorityFetch(t *testing.T) {
 	mapper := kubernetes.NewMapper(make(map[string]string), kubernetes.NewConfigMapAdapter(cmAPI))
 
 	preport1 := mapper.MapPolicyReport(policyMap)
-	result1 := preport1.Results["required-label__app-label-required__fail__dfd57c50-f30c-4729-b63f-b1954d8988d1"]
+	result1 := preport1.Results["priority-test____fail"]
 
-	if result1.Priority != report.ErrorPriority {
-		t.Errorf("Default Priority should be Error")
+	if result1.Priority != report.WarningPriority {
+		t.Errorf("Default Priority should be Warning")
 	}
 
 	mapper.FetchPriorities(context.Background())
 	preport2 := mapper.MapPolicyReport(policyMap)
-	result2 := preport2.Results["required-label__app-label-required__fail__dfd57c50-f30c-4729-b63f-b1954d8988d1"]
-	if result2.Priority != report.WarningPriority {
-		t.Errorf("Default Priority should be Warning after ConigMap fetch")
+	result2 := preport2.Results["priority-test____fail"]
+	if result2.Priority != report.CriticalPriority {
+		t.Errorf("Default Priority should be Critical after ConigMap fetch")
 	}
 }
 
@@ -348,9 +348,9 @@ func Test_PriorityFetchError(t *testing.T) {
 
 	mapper.FetchPriorities(context.Background())
 	preport := mapper.MapPolicyReport(policyMap)
-	result := preport.Results["required-label__app-label-required__fail__dfd57c50-f30c-4729-b63f-b1954d8988d1"]
-	if result.Priority != report.ErrorPriority {
-		t.Errorf("Fetch Error should not effect the functionality and continue using Error as default")
+	result := preport.Results["priority-test____fail"]
+	if result.Priority != report.WarningPriority {
+		t.Errorf("Fetch Error should not effect the functionality and continue using Warning as default")
 	}
 }
 
@@ -362,10 +362,10 @@ func Test_PrioritySync(t *testing.T) {
 	mapper := kubernetes.NewMapper(make(map[string]string), kubernetes.NewConfigMapAdapter(cmAPI))
 
 	preport1 := mapper.MapPolicyReport(policyMap)
-	result1 := preport1.Results["required-label__app-label-required__fail__dfd57c50-f30c-4729-b63f-b1954d8988d1"]
+	result1 := preport1.Results["priority-test____fail"]
 
-	if result1.Priority != report.ErrorPriority {
-		t.Errorf("Default Priority should be Error")
+	if result1.Priority != report.WarningPriority {
+		t.Errorf("Default Priority should be Warning")
 	}
 
 	go mapper.SyncPriorities(context.Background())
@@ -373,9 +373,9 @@ func Test_PrioritySync(t *testing.T) {
 	watcher.Add(configMap)
 
 	preport2 := mapper.MapPolicyReport(policyMap)
-	result2 := preport2.Results["required-label__app-label-required__fail__dfd57c50-f30c-4729-b63f-b1954d8988d1"]
-	if result2.Priority != report.WarningPriority {
-		t.Errorf("Default Priority should be Warning after ConigMap add sync")
+	result2 := preport2.Results["priority-test____fail"]
+	if result2.Priority != report.CriticalPriority {
+		t.Errorf("Default Priority should be Critical after ConigMap add sync")
 	}
 
 	configMap2 := &v1.ConfigMap{
@@ -396,7 +396,7 @@ func Test_PrioritySync(t *testing.T) {
 	time.Sleep(100 * time.Millisecond)
 
 	preport3 := mapper.MapPolicyReport(policyMap)
-	result3 := preport3.Results["required-label__app-label-required__fail__dfd57c50-f30c-4729-b63f-b1954d8988d1"]
+	result3 := preport3.Results["priority-test____fail"]
 	if result3.Priority != report.DebugPriority {
 		t.Errorf("Default Priority should be Debug after ConigMap modify sync")
 	}
@@ -406,8 +406,8 @@ func Test_PrioritySync(t *testing.T) {
 	time.Sleep(100 * time.Millisecond)
 
 	preport4 := mapper.MapPolicyReport(policyMap)
-	result4 := preport4.Results["required-label__app-label-required__fail__dfd57c50-f30c-4729-b63f-b1954d8988d1"]
-	if result4.Priority != report.ErrorPriority {
-		t.Errorf("Default Priority should be fallback to Error after ConigMap delete sync")
+	result4 := preport4.Results["priority-test____fail"]
+	if result4.Priority != report.WarningPriority {
+		t.Errorf("Default Priority should be fallback to Warning after ConigMap delete sync")
 	}
 }

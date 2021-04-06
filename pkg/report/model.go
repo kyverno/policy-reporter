@@ -22,13 +22,14 @@ const (
 
 	Low    Severity = "low"
 	Medium Severity = "medium"
-	Heigh  Severity = "heigh"
+	High   Severity = "high"
 
-	defaultString = ""
-	debugString   = "debug"
-	infoString    = "info"
-	warningString = "warning"
-	errorString   = "error"
+	defaultString  = ""
+	debugString    = "debug"
+	infoString     = "info"
+	warningString  = "warning"
+	errorString    = "error"
+	criticalString = "critical"
 )
 
 // Internal Priority definitions and weighting
@@ -37,6 +38,7 @@ const (
 	DebugPriority
 	InfoPriority
 	WarningPriority
+	CriticalPriority
 	ErrorPriority
 )
 
@@ -54,6 +56,8 @@ func (p Priority) String() string {
 		return warningString
 	case ErrorPriority:
 		return errorString
+	case CriticalPriority:
+		return criticalString
 	default:
 		return defaultString
 	}
@@ -69,10 +73,10 @@ func (p Priority) MarshalJSON() ([]byte, error) {
 }
 
 // PriorityFromStatus creates a Priority based on a Status
-func PriorityFromStatus(p Status) Priority {
-	switch p {
+func PriorityFromStatus(s Status) Priority {
+	switch s {
 	case Fail:
-		return ErrorPriority
+		return CriticalPriority
 	case Error:
 		return ErrorPriority
 	case Warn:
@@ -81,6 +85,18 @@ func PriorityFromStatus(p Status) Priority {
 		return InfoPriority
 	default:
 		return DefaultPriority
+	}
+}
+
+// PriorityFromSeverity creates a Priority based on a Severity
+func PriorityFromSeverity(s Severity) Priority {
+	switch s {
+	case High:
+		return CriticalPriority
+	case Medium:
+		return WarningPriority
+	default:
+		return InfoPriority
 	}
 }
 
@@ -95,6 +111,8 @@ func NewPriority(p string) Priority {
 		return WarningPriority
 	case errorString:
 		return ErrorPriority
+	case criticalString:
+		return CriticalPriority
 	default:
 		return DefaultPriority
 	}
