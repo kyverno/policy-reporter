@@ -341,7 +341,7 @@ data:
         "steppedLine": false,
         "targets": [
             {
-            "expr": "sum(cluster_policy_report_result{policy=~\"$policy\", category=~\"$category\", severity=~\"$severity\", kind=~\"$kind\", exported_namespace=~\"$namespace\"} > 0) by (status)",
+            "expr": "sum(cluster_policy_report_result{policy=~\"$policy\", category=~\"$category\", severity=~\"$severity\", kind=~\"$kind\"} > 0) by (status)",
             "interval": "",
             "legendFormat": "{{`{{ status }}`}}",
             "refId": "A"
