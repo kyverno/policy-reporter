@@ -17,7 +17,7 @@ func CreatePolicyReportMetricsCallback() report.PolicyReportCallback {
 	ruleGauge := promauto.NewGaugeVec(prometheus.GaugeOpts{
 		Name: "policy_report_result",
 		Help: "List of all PolicyReport Results",
-	}, []string{"namespace", "rule", "policy", "report", "kind", "name", "status", "severity"})
+	}, []string{"namespace", "rule", "policy", "report", "kind", "name", "status", "severity", "category"})
 
 	prometheus.Register(policyGauge)
 	prometheus.Register(ruleGauge)
@@ -39,6 +39,7 @@ func CreatePolicyReportMetricsCallback() report.PolicyReportCallback {
 						res.Name,
 						rule.Status,
 						rule.Severity,
+						rule.Category,
 					).
 					Set(1)
 			}
@@ -56,6 +57,7 @@ func CreatePolicyReportMetricsCallback() report.PolicyReportCallback {
 					res.Name,
 					rule.Status,
 					rule.Severity,
+					rule.Category,
 				)
 			}
 
@@ -71,6 +73,7 @@ func CreatePolicyReportMetricsCallback() report.PolicyReportCallback {
 						res.Name,
 						rule.Status,
 						rule.Severity,
+						rule.Category,
 					).
 					Set(1)
 			}
@@ -93,6 +96,7 @@ func CreatePolicyReportMetricsCallback() report.PolicyReportCallback {
 					res.Name,
 					rule.Status,
 					rule.Severity,
+					rule.Category,
 				)
 			}
 		}

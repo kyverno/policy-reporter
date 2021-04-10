@@ -112,7 +112,7 @@ data:
         "pluginVersion": "7.1.5",
         "targets": [
             {
-            "expr": "sum(cluster_policy_report_result{policy=~\"$policy\", status=\"pass\"})",
+            "expr": "sum(cluster_policy_report_result{policy=~\"$policy\", category=~\"$category\", severity=~\"$severity\", kind=~\"$kind\", status=\"pass\"})",
             "instant": true,
             "interval": "",
             "legendFormat": "",
@@ -168,7 +168,7 @@ data:
         "pluginVersion": "7.1.5",
         "targets": [
             {
-            "expr": "sum(policy_report_result{policy=~\"$policy\", status=\"warn\"})",
+            "expr": "sum(policy_report_result{policy=~\"$policy\", category=~\"$category\", severity=~\"$severity\", kind=~\"$kind\", status=\"warn\"})",
             "instant": true,
             "interval": "",
             "legendFormat": "",
@@ -224,7 +224,7 @@ data:
         "pluginVersion": "7.1.5",
         "targets": [
             {
-            "expr": "sum(cluster_policy_report_result{policy=~\"$policy\", status=\"fail\"})",
+            "expr": "sum(cluster_policy_report_result{policy=~\"$policy\", category=~\"$category\", severity=~\"$severity\", kind=~\"$kind\", status=\"fail\"})",
             "instant": true,
             "interval": "",
             "legendFormat": "",
@@ -280,7 +280,7 @@ data:
         "pluginVersion": "7.1.5",
         "targets": [
             {
-            "expr": "sum(cluster_policy_report_result{policy=~\"$policy\", status=\"error\"})",
+            "expr": "sum(cluster_policy_report_result{policy=~\"$policy\", category=~\"$category\", severity=~\"$severity\", kind=~\"$kind\", status=\"error\"})",
             "instant": true,
             "interval": "",
             "legendFormat": "",
@@ -341,7 +341,7 @@ data:
         "steppedLine": false,
         "targets": [
             {
-            "expr": "sum(cluster_policy_report_result{policy=~\"$policy\"} > 0) by (status)",
+            "expr": "sum(cluster_policy_report_result{policy=~\"$policy\", category=~\"$category\", severity=~\"$severity\", kind=~\"$kind\"} > 0) by (status)",
             "interval": "",
             "legendFormat": "{{`{{ status }}`}}",
             "refId": "A"
@@ -428,7 +428,7 @@ data:
         "pluginVersion": "7.1.5",
         "targets": [
             {
-            "expr": "sum(cluster_policy_report_result{policy=~\"$policy\", status=\"pass\"}) by (policy,rule,kind,name,status)",
+            "expr": "sum(cluster_policy_report_result{policy=~\"$policy\", category=~\"$category\", severity=~\"$severity\", kind=~\"$kind\", status=\"pass\"}) by (policy,rule,kind,name,status,severity,category)",
             "format": "table",
             "instant": true,
             "interval": "",
@@ -448,7 +448,17 @@ data:
                 "Value": true,
                 "status": false
                 },
-                "indexByName": {},
+                "indexByName": {
+                    "Time": 0,
+                    "Value": 8,
+                    "category": 1,
+                    "kind": 3,
+                    "name": 4,
+                    "policy": 5,
+                    "rule": 6,
+                    "severity": 2,
+                    "status": 7
+                },
                 "renameByName": {
                 "exported_namespace": "namespace"
                 }
@@ -495,7 +505,7 @@ data:
         "pluginVersion": "7.1.5",
         "targets": [
             {
-            "expr": "sum(cluster_policy_report_result{policy=~\"$policy\", status=\"fail\"}) by (policy,rule,kind,name,status)",
+            "expr": "sum(cluster_policy_report_result{policy=~\"$policy\", category=~\"$category\", severity=~\"$severity\", kind=~\"$kind\", status=\"fail\"}) by (policy,rule,kind,name,status,severity,category)",
             "format": "table",
             "instant": true,
             "interval": "",
@@ -515,7 +525,17 @@ data:
                 "Value": true,
                 "status": false
                 },
-                "indexByName": {},
+                "indexByName": {
+                    "Time": 0,
+                    "Value": 8,
+                    "category": 1,
+                    "kind": 3,
+                    "name": 4,
+                    "policy": 5,
+                    "rule": 6,
+                    "severity": 2,
+                    "status": 7
+                },
                 "renameByName": {
                 "exported_namespace": "namespace"
                 }
@@ -559,7 +579,7 @@ data:
         "pluginVersion": "7.1.5",
         "targets": [
             {
-            "expr": "sum(cluster_policy_report_result{policy=~\"$policy\", status=\"warn\"}) by (policy,rule,kind,name,status)",
+            "expr": "sum(cluster_policy_report_result{policy=~\"$policy\", category=~\"$category\", severity=~\"$severity\", kind=~\"$kind\", status=\"warn\"}) by (policy,rule,kind,name,status,severity,category)",
             "format": "table",
             "instant": true,
             "interval": "",
@@ -579,7 +599,17 @@ data:
                 "Value": true,
                 "status": false
                 },
-                "indexByName": {},
+                "indexByName": {
+                    "Time": 0,
+                    "Value": 8,
+                    "category": 1,
+                    "kind": 3,
+                    "name": 4,
+                    "policy": 5,
+                    "rule": 6,
+                    "severity": 2,
+                    "status": 7
+                },
                 "renameByName": {
                 "exported_namespace": "namespace"
                 }
@@ -623,7 +653,7 @@ data:
         "pluginVersion": "7.1.5",
         "targets": [
             {
-            "expr": "sum(cluster_policy_report_result{policy=~\"$policy\", status=\"error\"}) by (policy,rule,kind,name,status)",
+            "expr": "sum(cluster_policy_report_result{policy=~\"$policy\", category=~\"$category\", severity=~\"$severity\", kind=~\"$kind\", status=\"error\"}) by (policy,rule,kind,name,status,severity,category)",
             "format": "table",
             "instant": true,
             "interval": "",
@@ -643,7 +673,17 @@ data:
                 "Value": true,
                 "status": false
                 },
-                "indexByName": {},
+                "indexByName": {
+                    "Time": 0,
+                    "Value": 8,
+                    "category": 1,
+                    "kind": 3,
+                    "name": 4,
+                    "policy": 5,
+                    "rule": 6,
+                    "severity": 2,
+                    "status": 7
+                },
                 "renameByName": {
                 "exported_namespace": "namespace"
                 }
@@ -662,16 +702,76 @@ data:
     "templating": {
         "list": [
         {
-            "allValue": null,
+            "allValue": ".*",
             "current": {},
             "definition": "label_values(cluster_policy_report_result, policy)",
             "hide": 0,
-            "includeAll": false,
+            "includeAll": true,
             "label": "Policy",
             "multi": true,
             "name": "policy",
             "options": [],
             "query": "label_values(cluster_policy_report_result, policy)",
+            "refresh": 2,
+            "regex": "",
+            "skipUrlSync": false,
+            "sort": 5,
+            "tagValuesQuery": "",
+            "tags": [],
+            "tagsQuery": "",
+            "type": "query",
+            "useTags": false
+        },
+        {
+            "allValue": ".*",
+            "definition": "label_values(cluster_policy_report_result, category)",
+            "hide": 0,
+            "includeAll": true,
+            "label": "Category",
+            "multi": true,
+            "name": "category",
+            "options": [],
+            "query": "label_values(cluster_policy_report_result, category)",
+            "refresh": 2,
+            "regex": "",
+            "skipUrlSync": false,
+            "sort": 5,
+            "tagValuesQuery": "",
+            "tags": [],
+            "tagsQuery": "",
+            "type": "query",
+            "useTags": false
+        },
+        {
+            "allValue": ".*",
+            "definition": "label_values(cluster_policy_report_result, severity)",
+            "hide": 0,
+            "includeAll": true,
+            "label": "Severity",
+            "multi": true,
+            "name": "severity",
+            "options": [],
+            "query": "label_values(cluster_policy_report_result, severity)",
+            "refresh": 2,
+            "regex": "",
+            "skipUrlSync": false,
+            "sort": 5,
+            "tagValuesQuery": "",
+            "tags": [],
+            "tagsQuery": "",
+            "type": "query",
+            "useTags": false
+        },
+        {
+            "allValue": ".*",
+            "definition": "label_values(cluster_policy_report_result, kind)",
+            "hide": 0,
+            "includeAll": true,
+            "label": "Kind",
+            "multi": true,
+            "name": "kind",
+            "options": [],
+            "query": "label_values(cluster_policy_report_result, kind)",
             "refresh": 2,
             "regex": "",
             "skipUrlSync": false,
