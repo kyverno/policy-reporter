@@ -17,7 +17,7 @@ func CreateClusterPolicyReportMetricsCallback() report.ClusterPolicyReportCallba
 	ruleGauge := promauto.NewGaugeVec(prometheus.GaugeOpts{
 		Name: "cluster_policy_report_result",
 		Help: "List of all ClusterPolicyReport Results",
-	}, []string{"rule", "policy", "report", "kind", "name", "status", "severity"})
+	}, []string{"rule", "policy", "report", "kind", "name", "status", "severity", "category"})
 
 	prometheus.Register(policyGauge)
 	prometheus.Register(ruleGauge)
@@ -37,6 +37,7 @@ func CreateClusterPolicyReportMetricsCallback() report.ClusterPolicyReportCallba
 					res.Name,
 					rule.Status,
 					rule.Severity,
+					rule.Category,
 				).Set(1)
 			}
 		case watch.Modified:
@@ -52,6 +53,7 @@ func CreateClusterPolicyReportMetricsCallback() report.ClusterPolicyReportCallba
 					res.Name,
 					rule.Status,
 					rule.Severity,
+					rule.Category,
 				)
 			}
 
@@ -66,6 +68,7 @@ func CreateClusterPolicyReportMetricsCallback() report.ClusterPolicyReportCallba
 						res.Name,
 						rule.Status,
 						rule.Severity,
+						rule.Category,
 					).
 					Set(1)
 			}
@@ -86,6 +89,7 @@ func CreateClusterPolicyReportMetricsCallback() report.ClusterPolicyReportCallba
 					res.Name,
 					rule.Status,
 					rule.Severity,
+					rule.Category,
 				)
 			}
 		}

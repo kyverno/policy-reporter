@@ -214,50 +214,56 @@ func testClusterSummaryMetricLabels(
 }
 
 func testClusterResultMetricLabels(metric *io_prometheus_client.Metric, result report.Result) error {
-	if name := *metric.Label[0].Name; name != "kind" {
+	if name := *metric.Label[0].Name; name != "category" {
 		return fmt.Errorf("Unexpected Name Label: %s", name)
 	}
-	if value := *metric.Label[0].Value; value != result.Resources[0].Kind {
+	if value := *metric.Label[0].Value; value != result.Category {
+		return fmt.Errorf("Unexpected Category Label Value: %s", value)
+	}
+
+	if name := *metric.Label[1].Name; name != "kind" {
+		return fmt.Errorf("Unexpected Name Label: %s", name)
+	}
+	if value := *metric.Label[1].Value; value != result.Resources[0].Kind {
 		return fmt.Errorf("Unexpected Kind Label Value: %s", value)
 	}
 
-	if name := *metric.Label[1].Name; name != "name" {
+	if name := *metric.Label[2].Name; name != "name" {
 		return fmt.Errorf("Unexpected Name Label: %s", name)
 	}
-	if value := *metric.Label[1].Value; value != result.Resources[0].Name {
+	if value := *metric.Label[2].Value; value != result.Resources[0].Name {
 		return fmt.Errorf("Unexpected Name Label Value: %s", value)
 	}
 
-	if name := *metric.Label[2].Name; name != "policy" {
+	if name := *metric.Label[3].Name; name != "policy" {
 		return fmt.Errorf("Unexpected Name Label: %s", name)
 	}
-
-	if value := *metric.Label[2].Value; value != result.Policy {
+	if value := *metric.Label[3].Value; value != result.Policy {
 		return fmt.Errorf("Unexpected Policy Label Value: %s", value)
 	}
 
-	if name := *metric.Label[3].Name; name != "report" {
+	if name := *metric.Label[4].Name; name != "report" {
 		return fmt.Errorf("Unexpected Name Label: %s", name)
 	}
 
-	if name := *metric.Label[4].Name; name != "rule" {
+	if name := *metric.Label[5].Name; name != "rule" {
 		return fmt.Errorf("Unexpected Name Label: %s", name)
 	}
-	if value := *metric.Label[4].Value; value != result.Rule {
+	if value := *metric.Label[5].Value; value != result.Rule {
 		return fmt.Errorf("Unexpected Rule Label Value: %s", value)
 	}
 
-	if name := *metric.Label[5].Name; name != "severity" {
+	if name := *metric.Label[6].Name; name != "severity" {
 		return fmt.Errorf("Unexpected Name Label: %s", name)
 	}
-	if value := *metric.Label[5].Value; value != result.Severity {
+	if value := *metric.Label[6].Value; value != result.Severity {
 		return fmt.Errorf("Unexpected Severity Label Value: %s", value)
 	}
 
-	if name := *metric.Label[6].Name; name != "status" {
+	if name := *metric.Label[7].Name; name != "status" {
 		return fmt.Errorf("Unexpected Name Label: %s", name)
 	}
-	if value := *metric.Label[6].Value; value != result.Status {
+	if value := *metric.Label[7].Value; value != result.Status {
 		return fmt.Errorf("Unexpected Status Label Value: %s", value)
 	}
 

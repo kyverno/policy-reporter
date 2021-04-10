@@ -1,5 +1,19 @@
 # Changelog
 
+## 1.1.0
+
+* Added PolicyReport Category to Metrics
+* New (Cluster)PolicyReport filter for Grafana Dashboards
+    * Add __All__ Selection for Policy Filter
+    * Category Filter
+    * Severity Filter
+    * Kind Filter
+    * Namespacefilter (PolicyReports only)
+* New (Cluster)PolicyReport filter for Policy Reporter UI
+    * Category Filter
+    * Severity Filter
+    * Kind Filter
+
 ## 1.0.0
 
 * Support Priority by Severity
