@@ -32,7 +32,12 @@ type entry struct {
 }
 
 func newLokiPayload(result report.Result) payload {
-	le := entry{Ts: time.Now().Format(time.RFC3339), Line: "[" + strings.ToUpper(result.Priority.String()) + "] " + result.Message}
+	timestamp := time.Now()
+	if !result.Timestamp.IsZero() {
+		timestamp = result.Timestamp
+	}
+
+	le := entry{Ts: timestamp.Format(time.RFC3339), Line: "[" + strings.ToUpper(result.Priority.String()) + "] " + result.Message}
 	ls := stream{Entries: []entry{le}}
 
 	res := report.Resource{}
@@ -63,6 +68,10 @@ func newLokiPayload(result report.Result) payload {
 		labels = append(labels, "apiVersion=\""+res.APIVersion+"\"")
 		labels = append(labels, "uid=\""+res.UID+"\"")
 		labels = append(labels, "namespace=\""+res.Namespace+"\"")
+	}
+
+	for property, value := range result.Properties {
+		labels = append(labels, property+"=\""+strings.ReplaceAll(value, "\"", "")+"\"")
 	}
 
 	ls.Labels = "{" + strings.Join(labels, ",") + "}"

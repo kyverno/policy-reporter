@@ -129,15 +129,17 @@ type Resource struct {
 
 // Result from the PolicyReport spec wgpolicyk8s.io/v1alpha1.PolicyReportResult
 type Result struct {
-	Message   string
-	Policy    string
-	Rule      string
-	Priority  Priority
-	Status    Status
-	Severity  Severity `json:",omitempty"`
-	Category  string   `json:",omitempty"`
-	Scored    bool
-	Resources []Resource
+	Message    string
+	Policy     string
+	Rule       string
+	Priority   Priority
+	Status     Status
+	Severity   Severity `json:",omitempty"`
+	Category   string   `json:",omitempty"`
+	Scored     bool
+	Timestamp  time.Time
+	Resources  []Resource
+	Properties map[string]string
 }
 
 // GetIdentifier returns a global unique Result identifier

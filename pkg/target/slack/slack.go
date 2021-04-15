@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
+	"strings"
 
 	"github.com/fjogeleit/policy-reporter/pkg/report"
 	"github.com/fjogeleit/policy-reporter/pkg/target"
@@ -146,6 +147,24 @@ func (s *client) newPayload(result report.Result) payload {
 
 	if res.Namespace != "" {
 		att.Blocks = append(att.Blocks, block{Type: "section", Fields: []field{{Type: "mrkdwn", Text: "*Namespace*\n" + res.Namespace}}})
+	}
+
+	if len(result.Properties) > 0 {
+		att.Blocks = append(
+			att.Blocks,
+			block{Type: "section", Text: &text{Type: "mrkdwn", Text: "*Properties*"}},
+		)
+
+		propBlock := block{
+			Type:   "section",
+			Fields: []field{},
+		}
+
+		for property, value := range result.Properties {
+			propBlock.Fields = append(propBlock.Fields, field{Type: "mrkdwn", Text: "*" + strings.Title(property) + "*\n" + value})
+		}
+
+		att.Blocks = append(att.Blocks, propBlock)
 	}
 
 	p.Attachments = append(p.Attachments, att)

@@ -28,54 +28,17 @@ func CreatePolicyReportMetricsCallback() report.PolicyReportCallback {
 			updatePolicyGauge(policyGauge, report)
 
 			for _, rule := range report.Results {
-				res := rule.Resources[0]
-				ruleGauge.
-					WithLabelValues(
-						report.Namespace,
-						rule.Rule,
-						rule.Policy,
-						report.Name,
-						res.Kind,
-						res.Name,
-						rule.Status,
-						rule.Severity,
-						rule.Category,
-					).
-					Set(1)
+				ruleGauge.With(generateResultLabels(report, rule)).Set(1)
 			}
 		case watch.Modified:
 			updatePolicyGauge(policyGauge, report)
 
 			for _, rule := range oldReport.Results {
-				res := rule.Resources[0]
-				ruleGauge.DeleteLabelValues(
-					report.Namespace,
-					rule.Rule,
-					rule.Policy,
-					report.Name,
-					res.Kind,
-					res.Name,
-					rule.Status,
-					rule.Severity,
-					rule.Category,
-				)
+				ruleGauge.Delete(generateResultLabels(oldReport, rule))
 			}
 
 			for _, rule := range report.Results {
-				res := rule.Resources[0]
-				ruleGauge.
-					WithLabelValues(
-						report.Namespace,
-						rule.Rule,
-						rule.Policy,
-						report.Name,
-						res.Kind,
-						res.Name,
-						rule.Status,
-						rule.Severity,
-						rule.Category,
-					).
-					Set(1)
+				ruleGauge.With(generateResultLabels(report, rule)).Set(1)
 			}
 		case watch.Deleted:
 			policyGauge.DeleteLabelValues(report.Namespace, report.Name, "Pass")
@@ -85,22 +48,33 @@ func CreatePolicyReportMetricsCallback() report.PolicyReportCallback {
 			policyGauge.DeleteLabelValues(report.Namespace, report.Name, "Skip")
 
 			for _, rule := range report.Results {
-				res := rule.Resources[0]
-
-				ruleGauge.DeleteLabelValues(
-					report.Namespace,
-					rule.Rule,
-					rule.Policy,
-					report.Name,
-					res.Kind,
-					res.Name,
-					rule.Status,
-					rule.Severity,
-					rule.Category,
-				)
+				ruleGauge.Delete(generateResultLabels(report, rule))
 			}
 		}
 	}
+}
+
+func generateResultLabels(report report.PolicyReport, result report.Result) prometheus.Labels {
+	labels := prometheus.Labels{
+		"namespace": report.Namespace,
+		"rule":      result.Rule,
+		"policy":    result.Policy,
+		"report":    report.Name,
+		"kind":      "",
+		"name":      "",
+		"status":    result.Status,
+		"severity":  result.Severity,
+		"category":  result.Category,
+	}
+
+	if len(result.Resources) > 0 {
+		res := result.Resources[0]
+
+		labels["kind"] = res.Kind
+		labels["name"] = res.Name
+	}
+
+	return labels
 }
 
 func updatePolicyGauge(policyGauge *prometheus.GaugeVec, report report.PolicyReport) {

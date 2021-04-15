@@ -140,12 +140,13 @@ func (m *mapper) mapResult(result map[string]interface{}) report.Result {
 	status := result["status"].(report.Status)
 
 	r := report.Result{
-		Message:   result["message"].(string),
-		Policy:    result["policy"].(string),
-		Status:    status,
-		Scored:    result["scored"].(bool),
-		Priority:  report.PriorityFromStatus(status),
-		Resources: resources,
+		Message:    result["message"].(string),
+		Policy:     result["policy"].(string),
+		Status:     status,
+		Scored:     result["scored"].(bool),
+		Priority:   report.PriorityFromStatus(status),
+		Resources:  resources,
+		Properties: make(map[string]string, 0),
 	}
 
 	if severity, ok := result["severity"]; ok {
@@ -162,6 +163,21 @@ func (m *mapper) mapResult(result map[string]interface{}) report.Result {
 
 	if category, ok := result["category"]; ok {
 		r.Category = category.(string)
+	}
+
+	if created, ok := result["timestamp"]; ok {
+		time, err := time.Parse("2006-01-02T15:04:05Z", created.(string))
+		if err == nil {
+			r.Timestamp = time
+		}
+	}
+
+	if props, ok := result["properties"]; ok {
+		if properties, ok := props.(map[string]interface{}); ok {
+			for property, value := range properties {
+				r.Properties[property] = value.(string)
+			}
+		}
 	}
 
 	return r
