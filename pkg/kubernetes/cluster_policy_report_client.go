@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/fjogeleit/policy-reporter/pkg/report"
+	"github.com/mitchellh/hashstructure/v2"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/watch"
 )
@@ -20,6 +21,7 @@ type clusterPolicyReportClient struct {
 	startUp         time.Time
 	skipExisting    bool
 	started         bool
+	modifyHash      map[string]uint64
 }
 
 func (c *clusterPolicyReportClient) RegisterCallback(cb report.ClusterPolicyReportCallback) {
@@ -125,6 +127,14 @@ func (c *clusterPolicyReportClient) RegisterPolicyResultWatcher(skipExisting boo
 	c.RegisterCallback(func(s watch.EventType, cpr report.ClusterPolicyReport, opr report.ClusterPolicyReport) {
 		switch s {
 		case watch.Added:
+			if len(cpr.Results) == 0 {
+				break
+			}
+
+			if hash, err := hashstructure.Hash(cpr.Results, hashstructure.FormatV2, nil); err == nil {
+				c.modifyHash[cpr.GetIdentifier()] = hash
+			}
+
 			preExisted := cpr.CreationTimestamp.Before(c.startUp)
 
 			if c.skipExisting && preExisted {
@@ -145,6 +155,18 @@ func (c *clusterPolicyReportClient) RegisterPolicyResultWatcher(skipExisting boo
 
 			wg.Wait()
 		case watch.Modified:
+			if len(cpr.Results) == 0 {
+				break
+			}
+
+			newHash, err := hashstructure.Hash(cpr.Results, hashstructure.FormatV2, nil)
+
+			if hash, ok := c.modifyHash[cpr.GetIdentifier()]; ok && err == nil {
+				if newHash == hash {
+					break
+				}
+			}
+
 			diff := cpr.GetNewResults(opr)
 
 			wg := sync.WaitGroup{}
@@ -160,6 +182,14 @@ func (c *clusterPolicyReportClient) RegisterPolicyResultWatcher(skipExisting boo
 			}
 
 			wg.Wait()
+
+			if err == nil {
+				c.modifyHash[cpr.GetIdentifier()] = newHash
+			}
+		case watch.Deleted:
+			if _, ok := c.modifyHash[cpr.GetIdentifier()]; ok {
+				delete(c.modifyHash, cpr.GetIdentifier())
+			}
 		}
 	})
 }
@@ -167,9 +197,10 @@ func (c *clusterPolicyReportClient) RegisterPolicyResultWatcher(skipExisting boo
 // NewPolicyReportClient creates a new PolicyReportClient based on the kubernetes go-client
 func NewClusterPolicyReportClient(client PolicyReportAdapter, store *report.ClusterPolicyReportStore, mapper Mapper, startUp time.Time) report.ClusterPolicyClient {
 	return &clusterPolicyReportClient{
-		policyAPI: client,
-		store:     store,
-		mapper:    mapper,
-		startUp:   startUp,
+		policyAPI:  client,
+		store:      store,
+		mapper:     mapper,
+		startUp:    startUp,
+		modifyHash: make(map[string]uint64),
 	}
 }
