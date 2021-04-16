@@ -2,7 +2,6 @@ package kubernetes
 
 import (
 	"errors"
-	"fmt"
 	"log"
 	"sync"
 	"time"
@@ -159,9 +158,7 @@ func (c *policyReportClient) RegisterPolicyResultWatcher(skipExisting bool) {
 				}
 
 				newHash := pr.ResultHash()
-				fmt.Printf("New Hash %d\n", newHash)
 				if hash, ok := c.modifyHash[pr.GetIdentifier()]; ok {
-					fmt.Printf("Old Hash %d\n", hash)
 					if newHash == hash {
 						break
 					}
