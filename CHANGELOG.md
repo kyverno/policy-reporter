@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.2.0
+
+* Support for (Cluster)PolicyReport CRD Properties in Target Output
+* Support for (Cluster)PolicyReport CRD Timestamp in Target Output
+* Fix resend violations after Kyverno Cleanup with ResultHashes
+
 ## 1.1.0
 
 * Added PolicyReport Category to Metrics
