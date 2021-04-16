@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"github.com/fjogeleit/policy-reporter/pkg/report"
-	"github.com/mitchellh/hashstructure/v2"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/watch"
 )
@@ -131,9 +130,7 @@ func (c *clusterPolicyReportClient) RegisterPolicyResultWatcher(skipExisting boo
 				break
 			}
 
-			if hash, err := hashstructure.Hash(cpr.Results, hashstructure.FormatV2, nil); err == nil {
-				c.modifyHash[cpr.GetIdentifier()] = hash
-			}
+			c.modifyHash[cpr.GetIdentifier()] = cpr.ResultHash()
 
 			preExisted := cpr.CreationTimestamp.Before(c.startUp)
 
@@ -159,13 +156,14 @@ func (c *clusterPolicyReportClient) RegisterPolicyResultWatcher(skipExisting boo
 				break
 			}
 
-			newHash, err := hashstructure.Hash(cpr.Results, hashstructure.FormatV2, nil)
-
-			if hash, ok := c.modifyHash[cpr.GetIdentifier()]; ok && err == nil {
+			newHash := cpr.ResultHash()
+			if hash, ok := c.modifyHash[cpr.GetIdentifier()]; ok {
 				if newHash == hash {
 					break
 				}
 			}
+
+			c.modifyHash[cpr.GetIdentifier()] = newHash
 
 			diff := cpr.GetNewResults(opr)
 
@@ -182,10 +180,6 @@ func (c *clusterPolicyReportClient) RegisterPolicyResultWatcher(skipExisting boo
 			}
 
 			wg.Wait()
-
-			if err == nil {
-				c.modifyHash[cpr.GetIdentifier()] = newHash
-			}
 		case watch.Deleted:
 			if _, ok := c.modifyHash[cpr.GetIdentifier()]; ok {
 				delete(c.modifyHash, cpr.GetIdentifier())

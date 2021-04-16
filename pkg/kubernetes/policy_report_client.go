@@ -2,12 +2,12 @@ package kubernetes
 
 import (
 	"errors"
+	"fmt"
 	"log"
 	"sync"
 	"time"
 
 	"github.com/fjogeleit/policy-reporter/pkg/report"
-	"github.com/mitchellh/hashstructure/v2"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/watch"
 )
@@ -132,9 +132,7 @@ func (c *policyReportClient) RegisterPolicyResultWatcher(skipExisting bool) {
 					break
 				}
 
-				if hash, err := hashstructure.Hash(pr.Results, hashstructure.FormatV2, nil); err == nil {
-					c.modifyHash[pr.GetIdentifier()] = hash
-				}
+				c.modifyHash[pr.GetIdentifier()] = pr.ResultHash()
 
 				preExisted := pr.CreationTimestamp.Before(c.startUp)
 
@@ -155,22 +153,21 @@ func (c *policyReportClient) RegisterPolicyResultWatcher(skipExisting bool) {
 				}
 
 				wg.Wait()
-
-				if hash, err := hashstructure.Hash(pr.Results, hashstructure.FormatV2, nil); err == nil {
-					c.modifyHash[pr.GetIdentifier()] = hash
-				}
 			case watch.Modified:
 				if len(pr.Results) == 0 {
 					break
 				}
 
-				newHash, err := hashstructure.Hash(pr.Results, hashstructure.FormatV2, nil)
-
-				if hash, ok := c.modifyHash[pr.GetIdentifier()]; ok && err == nil {
+				newHash := pr.ResultHash()
+				fmt.Printf("New Hash %d\n", newHash)
+				if hash, ok := c.modifyHash[pr.GetIdentifier()]; ok {
+					fmt.Printf("Old Hash %d\n", hash)
 					if newHash == hash {
 						break
 					}
 				}
+
+				c.modifyHash[pr.GetIdentifier()] = newHash
 
 				diff := pr.GetNewResults(or)
 
@@ -187,10 +184,6 @@ func (c *policyReportClient) RegisterPolicyResultWatcher(skipExisting bool) {
 				}
 
 				wg.Wait()
-
-				if err == nil {
-					c.modifyHash[pr.GetIdentifier()] = newHash
-				}
 			case watch.Deleted:
 				if _, ok := c.modifyHash[pr.GetIdentifier()]; ok {
 					delete(c.modifyHash, pr.GetIdentifier())

@@ -83,6 +83,28 @@ func Test_PolicyReport(t *testing.T) {
 			t.Error("Expected 1 new result in diff")
 		}
 	})
+
+	t.Run("Check PolicyReport.ResultHash", func(t *testing.T) {
+		preport := preport
+		preport.Results = map[string]report.Result{result1.GetIdentifier(): result1, result2.GetIdentifier(): result2}
+
+		hash := preport.ResultHash()
+		if hash != 5971778764232883205 {
+			t.Error("Expected '5971778764232883205' new result in diff")
+		}
+	})
+
+	t.Run("Check PolicyReport.ResultHash same with different order", func(t *testing.T) {
+		preport1 := preport
+		preport2 := preport
+
+		preport1.Results = map[string]report.Result{result2.GetIdentifier(): result2, result1.GetIdentifier(): result1}
+		preport2.Results = map[string]report.Result{result1.GetIdentifier(): result1, result2.GetIdentifier(): result2}
+
+		if preport2.ResultHash() != preport1.ResultHash() {
+			t.Error("Expected same hash with different order")
+		}
+	})
 }
 
 func Test_ClusterPolicyReport(t *testing.T) {
@@ -102,6 +124,28 @@ func Test_ClusterPolicyReport(t *testing.T) {
 		diff := creport2.GetNewResults(creport1)
 		if len(diff) != 1 {
 			t.Error("Expected 1 new result in diff")
+		}
+	})
+
+	t.Run("Check PolicyReport.ResultHash", func(t *testing.T) {
+		report1 := creport
+		report1.Results = map[string]report.Result{result1.GetIdentifier(): result1, result2.GetIdentifier(): result2}
+
+		hash := report1.ResultHash()
+		if hash != 5971778764232883205 {
+			t.Error("Expected '5971778764232883205' new result in diff")
+		}
+	})
+
+	t.Run("Check PolicyReport.ResultHash same with different order", func(t *testing.T) {
+		report1 := creport
+		report2 := creport
+
+		report1.Results = map[string]report.Result{result2.GetIdentifier(): result2, result1.GetIdentifier(): result1}
+		report2.Results = map[string]report.Result{result1.GetIdentifier(): result1, result2.GetIdentifier(): result2}
+
+		if report2.ResultHash() != report1.ResultHash() {
+			t.Error("Expected same hash with different order")
 		}
 	})
 }
