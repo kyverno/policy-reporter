@@ -174,9 +174,9 @@ func Test_ResultClient_SkipReportsWithoutResults(t *testing.T) {
 	client.RegisterPolicyResultWatcher(false)
 
 	wg := sync.WaitGroup{}
-	wg.Add(2)
+	wg.Add(3)
 
-	results := make([]report.Result, 0, 2)
+	results := make([]report.Result, 0, 3)
 
 	client.RegisterPolicyResultCallback(func(r report.Result, b bool) {
 		results = append(results, r)
@@ -214,18 +214,7 @@ func Test_ResultClient_SkipReportsWithoutResults(t *testing.T) {
 			"fail":  int64(0),
 			"error": int64(0),
 		},
-		"results": []interface{}{
-			map[string]interface{}{
-				"message":   "message",
-				"status":    "fail",
-				"scored":    true,
-				"policy":    "required-label",
-				"rule":      "app-label-required",
-				"category":  "test",
-				"severity":  "high",
-				"resources": []interface{}{},
-			},
-		},
+		"results": []interface{}{},
 	}
 
 	fakeAdapter.clusterPolicyWatcher.Add(&unstructured.Unstructured{Object: clusterPolicyMap2})
@@ -238,8 +227,8 @@ func Test_ResultClient_SkipReportsWithoutResults(t *testing.T) {
 
 	wg.Wait()
 
-	if len(results) != 2 {
-		t.Error("Should receive 2 Result from none empty PolicyReport Modify")
+	if len(results) != 3 {
+		t.Error("Should receive 3 Result from none empty PolicyReport and ClusterPolicyReport Modify")
 	}
 }
 
