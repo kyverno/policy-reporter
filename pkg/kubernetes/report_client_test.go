@@ -158,3 +158,149 @@ func Test_ResultClient_RegisterPolicyResultWatcher(t *testing.T) {
 		t.Error("Should receive 3 Result from all PolicyReports")
 	}
 }
+
+func Test_ResultClient_SkipReportsWithoutResults(t *testing.T) {
+	_, k8sCMClient := newFakeAPI()
+	k8sCMClient.Create(context.Background(), configMap, metav1.CreateOptions{})
+	fakeAdapter := NewPolicyReportAdapter()
+
+	mapper := NewMapper(k8sCMClient)
+
+	pClient := kubernetes.NewPolicyReportClient(fakeAdapter, report.NewPolicyReportStore(), mapper, time.Now())
+	cpClient := kubernetes.NewClusterPolicyReportClient(fakeAdapter, report.NewClusterPolicyReportStore(), mapper, time.Now())
+
+	client := kubernetes.NewPolicyResultClient(pClient, cpClient)
+
+	client.RegisterPolicyResultWatcher(false)
+
+	wg := sync.WaitGroup{}
+	wg.Add(3)
+
+	results := make([]report.Result, 0, 3)
+
+	client.RegisterPolicyResultCallback(func(r report.Result, b bool) {
+		results = append(results, r)
+		wg.Done()
+	})
+
+	go pClient.StartWatching()
+	go cpClient.StartWatching()
+
+	var policyMap2 = map[string]interface{}{
+		"metadata": map[string]interface{}{
+			"name":              "policy-report",
+			"namespace":         "test",
+			"creationTimestamp": "2021-02-23T15:00:00Z",
+		},
+		"summary": map[string]interface{}{
+			"pass":  int64(1),
+			"skip":  int64(2),
+			"warn":  int64(3),
+			"fail":  int64(4),
+			"error": int64(5),
+		},
+		"results": []interface{}{},
+	}
+
+	var clusterPolicyMap2 = map[string]interface{}{
+		"metadata": map[string]interface{}{
+			"name":              "clusterpolicy-report",
+			"creationTimestamp": "2021-02-23T15:00:00Z",
+		},
+		"summary": map[string]interface{}{
+			"pass":  int64(0),
+			"skip":  int64(0),
+			"warn":  int64(0),
+			"fail":  int64(0),
+			"error": int64(0),
+		},
+		"results": []interface{}{},
+	}
+
+	fakeAdapter.clusterPolicyWatcher.Add(&unstructured.Unstructured{Object: clusterPolicyMap2})
+	fakeAdapter.clusterPolicyWatcher.Modify(&unstructured.Unstructured{Object: clusterPolicyMap2})
+	fakeAdapter.clusterPolicyWatcher.Modify(&unstructured.Unstructured{Object: clusterPolicyMap})
+
+	fakeAdapter.policyWatcher.Add(&unstructured.Unstructured{Object: policyMap2})
+	fakeAdapter.policyWatcher.Modify(&unstructured.Unstructured{Object: policyMap2})
+	fakeAdapter.policyWatcher.Modify(&unstructured.Unstructured{Object: policyMap})
+
+	wg.Wait()
+
+	if len(results) != 3 {
+		t.Error("Should receive 3 Result from none empty PolicyReport and ClusterPolicyReport Modify")
+	}
+}
+
+func Test_ResultClient_SkipReportsCleanUpEvents(t *testing.T) {
+	_, k8sCMClient := newFakeAPI()
+	k8sCMClient.Create(context.Background(), configMap, metav1.CreateOptions{})
+	fakeAdapter := NewPolicyReportAdapter()
+
+	mapper := NewMapper(k8sCMClient)
+
+	pClient := kubernetes.NewPolicyReportClient(fakeAdapter, report.NewPolicyReportStore(), mapper, time.Now())
+	cpClient := kubernetes.NewClusterPolicyReportClient(fakeAdapter, report.NewClusterPolicyReportStore(), mapper, time.Now())
+
+	client := kubernetes.NewPolicyResultClient(pClient, cpClient)
+
+	client.RegisterPolicyResultWatcher(false)
+
+	wg := sync.WaitGroup{}
+	wg.Add(3)
+
+	results := make([]report.Result, 0, 3)
+
+	client.RegisterPolicyResultCallback(func(r report.Result, b bool) {
+		results = append(results, r)
+		wg.Done()
+	})
+
+	go pClient.StartWatching()
+	go cpClient.StartWatching()
+
+	var policyMap2 = map[string]interface{}{
+		"metadata": map[string]interface{}{
+			"name":              "policy-report",
+			"namespace":         "test",
+			"creationTimestamp": "2021-02-23T15:00:00Z",
+		},
+		"summary": map[string]interface{}{
+			"pass":  int64(0),
+			"skip":  int64(0),
+			"warn":  int64(0),
+			"fail":  int64(0),
+			"error": int64(0),
+		},
+		"results": []interface{}{},
+	}
+
+	var clusterPolicyMap2 = map[string]interface{}{
+		"metadata": map[string]interface{}{
+			"name":              "clusterpolicy-report",
+			"creationTimestamp": "2021-02-23T15:00:00Z",
+		},
+		"summary": map[string]interface{}{
+			"pass":  int64(0),
+			"skip":  int64(0),
+			"warn":  int64(0),
+			"fail":  int64(0),
+			"error": int64(0),
+		},
+		"results": []interface{}{},
+	}
+
+	fakeAdapter.clusterPolicyWatcher.Add(&unstructured.Unstructured{Object: clusterPolicyMap})
+	fakeAdapter.clusterPolicyWatcher.Modify(&unstructured.Unstructured{Object: clusterPolicyMap2})
+	fakeAdapter.clusterPolicyWatcher.Modify(&unstructured.Unstructured{Object: clusterPolicyMap})
+
+	fakeAdapter.policyWatcher.Add(&unstructured.Unstructured{Object: policyMap})
+	fakeAdapter.policyWatcher.Modify(&unstructured.Unstructured{Object: policyMap2})
+	fakeAdapter.policyWatcher.Modify(&unstructured.Unstructured{Object: policyMap})
+
+	wg.Wait()
+
+	if len(results) != 3 {
+		t.Error("Should receive 3 Results from the initial add events, not from the cleanup modify events")
+	}
+}

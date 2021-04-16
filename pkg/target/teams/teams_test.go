@@ -4,20 +4,22 @@ import (
 	"encoding/json"
 	"net/http"
 	"testing"
+	"time"
 
 	"github.com/fjogeleit/policy-reporter/pkg/report"
 	"github.com/fjogeleit/policy-reporter/pkg/target/teams"
 )
 
 var completeResult = report.Result{
-	Message:  "validation error: requests and limits required. Rule autogen-check-for-requests-and-limits failed at path /spec/template/spec/containers/0/resources/requests/",
-	Policy:   "require-requests-and-limits-required",
-	Rule:     "autogen-check-for-requests-and-limits",
-	Priority: report.WarningPriority,
-	Status:   report.Fail,
-	Severity: report.High,
-	Category: "resources",
-	Scored:   true,
+	Message:   "validation error: requests and limits required. Rule autogen-check-for-requests-and-limits failed at path /spec/template/spec/containers/0/resources/requests/",
+	Policy:    "require-requests-and-limits-required",
+	Rule:      "autogen-check-for-requests-and-limits",
+	Priority:  report.WarningPriority,
+	Status:    report.Fail,
+	Severity:  report.High,
+	Timestamp: time.Date(2021, time.February, 23, 15, 10, 0, 0, time.UTC),
+	Category:  "resources",
+	Scored:    true,
 	Resources: []report.Resource{
 		{
 			APIVersion: "v1",
@@ -27,6 +29,7 @@ var completeResult = report.Result{
 			UID:        "536ab69f-1b3c-4bd9-9ba4-274a56188409",
 		},
 	},
+	Properties: map[string]string{"version": "1.2.0"},
 }
 
 var minimalErrorResult = report.Result{

@@ -20,6 +20,7 @@ type clusterPolicyReportClient struct {
 	startUp         time.Time
 	skipExisting    bool
 	started         bool
+	modifyHash      map[string]uint64
 }
 
 func (c *clusterPolicyReportClient) RegisterCallback(cb report.ClusterPolicyReportCallback) {
@@ -125,6 +126,12 @@ func (c *clusterPolicyReportClient) RegisterPolicyResultWatcher(skipExisting boo
 	c.RegisterCallback(func(s watch.EventType, cpr report.ClusterPolicyReport, opr report.ClusterPolicyReport) {
 		switch s {
 		case watch.Added:
+			if len(cpr.Results) == 0 {
+				break
+			}
+
+			c.modifyHash[cpr.GetIdentifier()] = cpr.ResultHash()
+
 			preExisted := cpr.CreationTimestamp.Before(c.startUp)
 
 			if c.skipExisting && preExisted {
@@ -145,6 +152,19 @@ func (c *clusterPolicyReportClient) RegisterPolicyResultWatcher(skipExisting boo
 
 			wg.Wait()
 		case watch.Modified:
+			if len(cpr.Results) == 0 {
+				break
+			}
+
+			newHash := cpr.ResultHash()
+			if hash, ok := c.modifyHash[cpr.GetIdentifier()]; ok {
+				if newHash == hash {
+					break
+				}
+			}
+
+			c.modifyHash[cpr.GetIdentifier()] = newHash
+
 			diff := cpr.GetNewResults(opr)
 
 			wg := sync.WaitGroup{}
@@ -160,6 +180,10 @@ func (c *clusterPolicyReportClient) RegisterPolicyResultWatcher(skipExisting boo
 			}
 
 			wg.Wait()
+		case watch.Deleted:
+			if _, ok := c.modifyHash[cpr.GetIdentifier()]; ok {
+				delete(c.modifyHash, cpr.GetIdentifier())
+			}
 		}
 	})
 }
@@ -167,9 +191,10 @@ func (c *clusterPolicyReportClient) RegisterPolicyResultWatcher(skipExisting boo
 // NewPolicyReportClient creates a new PolicyReportClient based on the kubernetes go-client
 func NewClusterPolicyReportClient(client PolicyReportAdapter, store *report.ClusterPolicyReportStore, mapper Mapper, startUp time.Time) report.ClusterPolicyClient {
 	return &clusterPolicyReportClient{
-		policyAPI: client,
-		store:     store,
-		mapper:    mapper,
-		startUp:   startUp,
+		policyAPI:  client,
+		store:      store,
+		mapper:     mapper,
+		startUp:    startUp,
+		modifyHash: make(map[string]uint64),
 	}
 }

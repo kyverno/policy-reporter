@@ -28,13 +28,14 @@ var policyMap = map[string]interface{}{
 	},
 	"results": []interface{}{
 		map[string]interface{}{
-			"message":  "message",
-			"status":   "fail",
-			"scored":   true,
-			"policy":   "required-label",
-			"rule":     "app-label-required",
-			"category": "test",
-			"severity": "high",
+			"message":   "message",
+			"status":    "fail",
+			"scored":    true,
+			"policy":    "required-label",
+			"rule":      "app-label-required",
+			"timestamp": "2021-02-23T15:10:00Z",
+			"category":  "test",
+			"severity":  "high",
 			"resources": []interface{}{
 				map[string]interface{}{
 					"apiVersion": "v1",
@@ -43,6 +44,9 @@ var policyMap = map[string]interface{}{
 					"namespace":  "test",
 					"uid":        "dfd57c50-f30c-4729-b63f-b1954d8988d1",
 				},
+			},
+			"properties": map[string]interface{}{
+				"version": "1.2.0",
 			},
 		},
 		map[string]interface{}{
@@ -162,6 +166,12 @@ func Test_MapPolicyReport(t *testing.T) {
 	}
 	if result1.Severity != report.High {
 		t.Errorf("Expected Severity '%s' (acutal %s)", report.High, result1.Severity)
+	}
+	if result1.Timestamp.Format("2006-01-02T15:04:05Z") != "2021-02-23T15:10:00Z" {
+		t.Errorf("Expected Timestamp '2021-02-23T15:10:00Z' (acutal %s)", result1.Timestamp.Format("2006-01-02T15:04:05Z"))
+	}
+	if result1.Properties["version"] != "1.2.0" {
+		t.Errorf("Expected Property '1.2.0' (acutal %s)", result1.Properties["version"])
 	}
 
 	resource := result1.Resources[0]

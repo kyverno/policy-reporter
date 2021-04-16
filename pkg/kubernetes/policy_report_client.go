@@ -20,6 +20,7 @@ type policyReportClient struct {
 	startUp         time.Time
 	skipExisting    bool
 	started         bool
+	modifyHash      map[string]uint64
 }
 
 func (c *policyReportClient) RegisterCallback(cb report.PolicyReportCallback) {
@@ -126,23 +127,63 @@ func (c *policyReportClient) RegisterPolicyResultWatcher(skipExisting bool) {
 		func(e watch.EventType, pr report.PolicyReport, or report.PolicyReport) {
 			switch e {
 			case watch.Added:
+				if len(pr.Results) == 0 {
+					break
+				}
+
+				c.modifyHash[pr.GetIdentifier()] = pr.ResultHash()
+
 				preExisted := pr.CreationTimestamp.Before(c.startUp)
 
 				if c.skipExisting && preExisted {
 					break
 				}
 
-				for _, result := range pr.Results {
+				wg := sync.WaitGroup{}
+				wg.Add(len(pr.Results) * len(c.resultCallbacks))
+
+				for _, r := range pr.Results {
 					for _, cb := range c.resultCallbacks {
-						cb(result, preExisted)
+						go func(callback report.PolicyResultCallback, result report.Result) {
+							callback(result, preExisted)
+							wg.Done()
+						}(cb, r)
 					}
 				}
+
+				wg.Wait()
 			case watch.Modified:
-				diff := pr.GetNewResults(or)
-				for _, result := range diff {
-					for _, cb := range c.resultCallbacks {
-						cb(result, false)
+				if len(pr.Results) == 0 {
+					break
+				}
+
+				newHash := pr.ResultHash()
+				if hash, ok := c.modifyHash[pr.GetIdentifier()]; ok {
+					if newHash == hash {
+						break
 					}
+				}
+
+				c.modifyHash[pr.GetIdentifier()] = newHash
+
+				diff := pr.GetNewResults(or)
+
+				wg := sync.WaitGroup{}
+				wg.Add(len(diff) * len(c.resultCallbacks))
+
+				for _, r := range diff {
+					for _, cb := range c.resultCallbacks {
+						go func(callback report.PolicyResultCallback, result report.Result) {
+							callback(result, false)
+							wg.Done()
+						}(cb, r)
+					}
+				}
+
+				wg.Wait()
+			case watch.Deleted:
+				if _, ok := c.modifyHash[pr.GetIdentifier()]; ok {
+					delete(c.modifyHash, pr.GetIdentifier())
 				}
 			}
 		})
@@ -151,9 +192,10 @@ func (c *policyReportClient) RegisterPolicyResultWatcher(skipExisting bool) {
 // NewPolicyReportClient creates a new PolicyReportClient based on the kubernetes go-client
 func NewPolicyReportClient(client PolicyReportAdapter, store *report.PolicyReportStore, mapper Mapper, startUp time.Time) report.PolicyClient {
 	return &policyReportClient{
-		policyAPI: client,
-		store:     store,
-		mapper:    mapper,
-		startUp:   startUp,
+		policyAPI:  client,
+		store:      store,
+		mapper:     mapper,
+		startUp:    startUp,
+		modifyHash: make(map[string]uint64),
 	}
 }

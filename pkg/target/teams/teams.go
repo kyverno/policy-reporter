@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/fjogeleit/policy-reporter/pkg/report"
@@ -85,10 +86,19 @@ func newPayload(result report.Result) payload {
 		facts = append(facts, fact{"API Version", res.APIVersion})
 	}
 
+	for property, value := range result.Properties {
+		facts = append(facts, fact{strings.Title(property), value})
+	}
+
+	timestamp := time.Now()
+	if !result.Timestamp.IsZero() {
+		timestamp = result.Timestamp
+	}
+
 	sections := make([]section, 0, 1)
 	sections = append(sections, section{
 		Title:    "New Policy Report Result",
-		SubTitle: time.Now().Format(time.RFC3339),
+		SubTitle: timestamp.Format(time.RFC3339),
 		Text:     result.Message,
 		Facts:    facts,
 	})

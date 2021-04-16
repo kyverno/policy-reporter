@@ -28,49 +28,17 @@ func CreateClusterPolicyReportMetricsCallback() report.ClusterPolicyReportCallba
 			updateClusterPolicyGauge(policyGauge, report)
 
 			for _, rule := range report.Results {
-				res := rule.Resources[0]
-				ruleGauge.WithLabelValues(
-					rule.Rule,
-					rule.Policy,
-					report.Name,
-					res.Kind,
-					res.Name,
-					rule.Status,
-					rule.Severity,
-					rule.Category,
-				).Set(1)
+				ruleGauge.With(generateClusterResultLabels(report, rule)).Set(1)
 			}
 		case watch.Modified:
 			updateClusterPolicyGauge(policyGauge, report)
 
 			for _, rule := range oldReport.Results {
-				res := rule.Resources[0]
-				ruleGauge.DeleteLabelValues(
-					rule.Rule,
-					rule.Policy,
-					report.Name,
-					res.Kind,
-					res.Name,
-					rule.Status,
-					rule.Severity,
-					rule.Category,
-				)
+				ruleGauge.Delete(generateClusterResultLabels(oldReport, rule))
 			}
 
 			for _, rule := range report.Results {
-				res := rule.Resources[0]
-				ruleGauge.
-					WithLabelValues(
-						rule.Rule,
-						rule.Policy,
-						report.Name,
-						res.Kind,
-						res.Name,
-						rule.Status,
-						rule.Severity,
-						rule.Category,
-					).
-					Set(1)
+				ruleGauge.With(generateClusterResultLabels(report, rule)).Set(1)
 			}
 		case watch.Deleted:
 			policyGauge.DeleteLabelValues(report.Name, "Pass")
@@ -80,20 +48,32 @@ func CreateClusterPolicyReportMetricsCallback() report.ClusterPolicyReportCallba
 			policyGauge.DeleteLabelValues(report.Name, "Skip")
 
 			for _, rule := range report.Results {
-				res := rule.Resources[0]
-				ruleGauge.DeleteLabelValues(
-					rule.Rule,
-					rule.Policy,
-					report.Name,
-					res.Kind,
-					res.Name,
-					rule.Status,
-					rule.Severity,
-					rule.Category,
-				)
+				ruleGauge.Delete(generateClusterResultLabels(report, rule))
 			}
 		}
 	}
+}
+
+func generateClusterResultLabels(report report.ClusterPolicyReport, result report.Result) prometheus.Labels {
+	labels := prometheus.Labels{
+		"rule":     result.Rule,
+		"policy":   result.Policy,
+		"report":   report.Name,
+		"kind":     "",
+		"name":     "",
+		"status":   result.Status,
+		"severity": result.Severity,
+		"category": result.Category,
+	}
+
+	if len(result.Resources) > 0 {
+		res := result.Resources[0]
+
+		labels["kind"] = res.Kind
+		labels["name"] = res.Name
+	}
+
+	return labels
 }
 
 func updateClusterPolicyGauge(policyGauge *prometheus.GaugeVec, report report.ClusterPolicyReport) {

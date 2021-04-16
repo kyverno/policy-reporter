@@ -3,7 +3,10 @@ package report
 import (
 	"bytes"
 	"fmt"
+	"sort"
 	"time"
+
+	"github.com/mitchellh/hashstructure/v2"
 )
 
 // Status Enum defined for PolicyReport
@@ -129,15 +132,17 @@ type Resource struct {
 
 // Result from the PolicyReport spec wgpolicyk8s.io/v1alpha1.PolicyReportResult
 type Result struct {
-	Message   string
-	Policy    string
-	Rule      string
-	Priority  Priority
-	Status    Status
-	Severity  Severity `json:",omitempty"`
-	Category  string   `json:",omitempty"`
-	Scored    bool
-	Resources []Resource
+	Message    string
+	Policy     string
+	Rule       string
+	Priority   Priority
+	Status     Status
+	Severity   Severity `json:",omitempty"`
+	Category   string   `json:",omitempty"`
+	Scored     bool
+	Timestamp  time.Time
+	Resources  []Resource
+	Properties map[string]string
 }
 
 // GetIdentifier returns a global unique Result identifier
@@ -171,6 +176,24 @@ type PolicyReport struct {
 // GetIdentifier returns a global unique PolicyReport identifier
 func (pr PolicyReport) GetIdentifier() string {
 	return fmt.Sprintf("%s__%s", pr.Namespace, pr.Name)
+}
+
+// ResultHash generates a has of the current result set
+func (pr PolicyReport) ResultHash() uint64 {
+	list := make([]string, 0, len(pr.Results))
+
+	for id := range pr.Results {
+		list = append(list, id)
+	}
+
+	sort.Strings(list)
+
+	hash, err := hashstructure.Hash(list, hashstructure.FormatV2, nil)
+	if err != nil {
+		return 0
+	}
+
+	return hash
 }
 
 // GetNewResults filters already existing Results from the old PolicyReport and returns only the diff with new Results
@@ -214,4 +237,22 @@ func (cr ClusterPolicyReport) GetNewResults(cor ClusterPolicyReport) []Result {
 	}
 
 	return diff
+}
+
+// ResultHash generates a has of the current result set
+func (cr ClusterPolicyReport) ResultHash() uint64 {
+	list := make([]string, 0, len(cr.Results))
+
+	for id := range cr.Results {
+		list = append(list, id)
+	}
+
+	sort.Strings(list)
+
+	hash, err := hashstructure.Hash(list, hashstructure.FormatV2, nil)
+	if err != nil {
+		return 0
+	}
+
+	return hash
 }

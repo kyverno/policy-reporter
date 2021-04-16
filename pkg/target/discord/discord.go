@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
+	"strings"
 
 	"github.com/fjogeleit/policy-reporter/pkg/report"
 	"github.com/fjogeleit/policy-reporter/pkg/target"
@@ -72,6 +73,10 @@ func newPayload(result report.Result) payload {
 			embedFields = append(embedFields, embedField{"Namespace", res.Namespace, true})
 		}
 		embedFields = append(embedFields, embedField{"API Version", res.APIVersion, true})
+	}
+
+	for property, value := range result.Properties {
+		embedFields = append(embedFields, embedField{strings.Title(property), value, true})
 	}
 
 	embeds := make([]embed, 0, 1)
