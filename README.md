@@ -63,3 +63,8 @@ Have a look into the [Documentation](https://github.com/fjogeleit/policy-reporte
 ### Grafana Dashboard Import
 
 If you are not using the MonitoringStack you can import the dashboards from [Grafana](https://grafana.com/orgs/policyreporter/dashboards)
+
+## Resources
+
+* [[Video] Rawkode Live: Hands on Policy Reporter](https://www.youtube.com/watch?v=ZrOtTELNLyg)
+* [[Blog] Monitor Security and Best Practices with Kyverno and Policy Reporte](https://blog.webdev-jogeleit.de/blog/monitor-security-with-kyverno-and-policy-reporter/)
