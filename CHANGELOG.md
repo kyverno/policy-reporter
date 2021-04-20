@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.2.2
+
+* Fix PolicyReportResult.timestamp parsing
+
+## 1.2.1
+
+* Support PolicyReportResult.status as well as PolicyReportResult.result for newer CRD versions
+
 ## 1.2.0
 
 * Support for (Cluster)PolicyReport CRD Properties in Target Output

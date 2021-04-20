@@ -172,12 +172,7 @@ func (m *mapper) mapResult(result map[string]interface{}) report.Result {
 		r.Category = category.(string)
 	}
 
-	if created, ok := result["timestamp"]; ok {
-		time, err := time.Parse("2006-01-02T15:04:05Z", created.(string))
-		if err == nil {
-			r.Timestamp = time
-		}
-	}
+	r.Timestamp = convertTimestamp(result)
 
 	if props, ok := result["properties"]; ok {
 		if properties, ok := props.(map[string]interface{}); ok {
@@ -188,6 +183,24 @@ func (m *mapper) mapResult(result map[string]interface{}) report.Result {
 	}
 
 	return r
+}
+
+func convertTimestamp(result map[string]interface{}) time.Time {
+	timestamp, ok := result["timestamp"]
+	if !ok {
+		return time.Now().UTC()
+	}
+
+	seconds, ok := timestamp.(map[string]interface{})["seconds"]
+
+	switch s := seconds.(type) {
+	case int64:
+		return time.Unix(s, 0).UTC()
+	case int:
+		return time.Unix(int64(s), 0).UTC()
+	default:
+		return time.Now().UTC()
+	}
 }
 
 func (m *mapper) resolvePriority(policy string, severity report.Severity) report.Priority {
