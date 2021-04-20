@@ -28,14 +28,16 @@ var policyMap = map[string]interface{}{
 	},
 	"results": []interface{}{
 		map[string]interface{}{
-			"message":   "message",
-			"status":    "fail",
-			"scored":    true,
-			"policy":    "required-label",
-			"rule":      "app-label-required",
-			"timestamp": "2021-02-23T15:10:00Z",
-			"category":  "test",
-			"severity":  "high",
+			"message": "message",
+			"status":  "fail",
+			"scored":  true,
+			"policy":  "required-label",
+			"rule":    "app-label-required",
+			"timestamp": map[string]interface{}{
+				"seconds": 1614093000,
+			},
+			"category": "test",
+			"severity": "high",
 			"resources": []interface{}{
 				map[string]interface{}{
 					"apiVersion": "v1",
@@ -50,9 +52,12 @@ var policyMap = map[string]interface{}{
 			},
 		},
 		map[string]interface{}{
-			"message":   "message 2",
-			"status":    "fail",
-			"scored":    true,
+			"message": "message 2",
+			"status":  "fail",
+			"scored":  true,
+			"timestamp": map[string]interface{}{
+				"seconds": int64(1614093000),
+			},
 			"policy":    "priority-test",
 			"resources": []interface{}{},
 		},
@@ -81,13 +86,14 @@ var clusterPolicyMap = map[string]interface{}{
 	},
 	"results": []interface{}{
 		map[string]interface{}{
-			"message":  "message",
-			"result":   "fail",
-			"scored":   true,
-			"policy":   "required-label",
-			"rule":     "app-label-required",
-			"category": "test",
-			"severity": "high",
+			"message":   "message",
+			"result":    "fail",
+			"scored":    true,
+			"policy":    "required-label",
+			"rule":      "app-label-required",
+			"category":  "test",
+			"severity":  "high",
+			"timestamp": map[string]interface{}{"seconds": ""},
 			"resources": []interface{}{
 				map[string]interface{}{
 					"apiVersion": "v1",
