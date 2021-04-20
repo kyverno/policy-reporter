@@ -1,0 +1,1791 @@
+---
+# Source: policy-reporter/templates/serviceaccount.yaml
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: RELEASE-NAME-policy-reporter
+  labels:
+    helm.sh/chart: policy-reporter-0.21.0
+    app.kubernetes.io/name: policy-reporter
+    app.kubernetes.io/instance: RELEASE-NAME
+    app.kubernetes.io/version: "0.13.0"
+    app.kubernetes.io/managed-by: Helm
+---
+# Source: policy-reporter/templates/targetssecret.yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: RELEASE-NAME-policy-reporter-targets
+  labels:
+    helm.sh/chart: policy-reporter-0.21.0
+    app.kubernetes.io/name: policy-reporter
+    app.kubernetes.io/instance: RELEASE-NAME
+    app.kubernetes.io/version: "0.13.0"
+    app.kubernetes.io/managed-by: Helm
+type: Opaque
+data:
+  config.yaml: bG9raToKICBob3N0OiAiaHR0cDovL2xva2kubG9raS1zdGFjay5zdmMuY2x1c3Rlci5sb2NhbDozMTAwIgogIG1pbmltdW1Qcmlvcml0eTogIndhcm5pbmciCiAgc2tpcEV4aXN0aW5nT25TdGFydHVwOiB0cnVlCgplbGFzdGljc2VhcmNoOgogIGhvc3Q6ICIiCiAgaW5kZXg6ICJwb2xpY3ktcmVwb3J0ZXIiCiAgcm90YXRpb246ICJkYXlsaSIKICBtaW5pbXVtUHJpb3JpdHk6ICIiCiAgc2tpcEV4aXN0aW5nT25TdGFydHVwOiB0cnVlCgpzbGFjazoKICB3ZWJob29rOiAiIgogIG1pbmltdW1Qcmlvcml0eTogIiIKICBza2lwRXhpc3RpbmdPblN0YXJ0dXA6IHRydWUKCmRpc2NvcmQ6CiAgd2ViaG9vazogIiIKICBtaW5pbXVtUHJpb3JpdHk6ICIiCiAgc2tpcEV4aXN0aW5nT25TdGFydHVwOiB0cnVlCgp0ZWFtczoKICB3ZWJob29rOiAiIgogIG1pbmltdW1Qcmlvcml0eTogIiIKICBza2lwRXhpc3RpbmdPblN0YXJ0dXA6IHRydWUKCnVpOgogIGhvc3Q6IGh0dC4vL1JFTEVBU0UtTkFNRS11aTo4MDgwCiAgbWluaW11bVByaW9yaXR5OiAid2FybmluZyIKICBza2lwRXhpc3RpbmdPblN0YXJ0dXA6IHRydWUK
+---
+# Source: policy-reporter/charts/monitoring/templates/clusterpolicy-details.dashboard.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: RELEASE-NAME-monitoring-clusterpolicy-details-dashboard
+  namespace: cattle-dashboards
+  labels:
+    grafana_dashboard: "1"
+data:
+  cluster-policy-reporter-details-dashboard.json: |
+    {
+    "__inputs": [
+        {
+        "name": "DS_PROMETHEUS",
+        "label": "Prometheus",
+        "description": "",
+        "type": "datasource",
+        "pluginId": "prometheus",
+        "pluginName": "Prometheus"
+        }
+    ],
+    "__requires": [
+        {
+        "type": "grafana",
+        "id": "grafana",
+        "name": "Grafana",
+        "version": "7.1.5"
+        },
+        {
+        "type": "panel",
+        "id": "graph",
+        "name": "Graph",
+        "version": ""
+        },
+        {
+        "type": "datasource",
+        "id": "prometheus",
+        "name": "Prometheus",
+        "version": "1.0.0"
+        },
+        {
+        "type": "panel",
+        "id": "stat",
+        "name": "Stat",
+        "version": ""
+        },
+        {
+        "type": "panel",
+        "id": "table",
+        "name": "Table",
+        "version": ""
+        }
+    ],
+    "annotations": {
+        "list": [
+        {
+            "builtIn": 1,
+            "datasource": "-- Grafana --",
+            "enable": true,
+            "hide": true,
+            "iconColor": "rgba(0, 211, 255, 1)",
+            "name": "Annotations & Alerts",
+            "type": "dashboard"
+        }
+        ]
+    },
+    "editable": true,
+    "gnetId": null,
+    "graphTooltip": 0,
+    "links": [],
+    "panels": [
+        {
+        "fieldConfig": {
+            "defaults": {
+            "custom": {},
+            "decimals": 0,
+            "mappings": [],
+            "min": 0,
+            "noValue": "0",
+            "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                {
+                    "color": "green",
+                    "value": null
+                }
+                ]
+            }
+            },
+            "overrides": []
+        },
+        "gridPos": {
+            "h": 6,
+            "w": 6,
+            "x": 0,
+            "y": 0
+        },
+        "id": 3,
+        "options": {
+            "colorMode": "value",
+            "graphMode": "area",
+            "justifyMode": "auto",
+            "orientation": "horizontal",
+            "reduceOptions": {
+            "calcs": [
+                "last"
+            ],
+            "fields": "",
+            "values": false
+            },
+            "textMode": "auto"
+        },
+        "pluginVersion": "7.1.5",
+        "targets": [
+            {
+            "expr": "sum(cluster_policy_report_result{policy=~\"$policy\", status=\"pass\"})",
+            "instant": true,
+            "interval": "",
+            "legendFormat": "",
+            "refId": "A"
+            }
+        ],
+        "timeFrom": null,
+        "timeShift": null,
+        "title": "Policy Pass Status",
+        "type": "stat"
+        },
+        {
+        "fieldConfig": {
+            "defaults": {
+            "custom": {},
+            "decimals": 0,
+            "mappings": [],
+            "min": 0,
+            "noValue": "0",
+            "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                {
+                    "color": "orange",
+                    "value": null
+                }
+                ]
+            }
+            },
+            "overrides": []
+        },
+        "gridPos": {
+            "h": 6,
+            "w": 6,
+            "x": 6,
+            "y": 0
+        },
+        "id": 4,
+        "options": {
+            "colorMode": "value",
+            "graphMode": "area",
+            "justifyMode": "auto",
+            "orientation": "horizontal",
+            "reduceOptions": {
+            "calcs": [
+                "last"
+            ],
+            "fields": "",
+            "values": false
+            },
+            "textMode": "auto"
+        },
+        "pluginVersion": "7.1.5",
+        "targets": [
+            {
+            "expr": "sum(policy_report_result{policy=~\"$policy\", status=\"warn\"})",
+            "instant": true,
+            "interval": "",
+            "legendFormat": "",
+            "refId": "A"
+            }
+        ],
+        "timeFrom": null,
+        "timeShift": null,
+        "title": "Policy Warning Status",
+        "type": "stat"
+        },
+        {
+        "fieldConfig": {
+            "defaults": {
+            "custom": {},
+            "decimals": 0,
+            "mappings": [],
+            "min": 0,
+            "noValue": "0",
+            "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                {
+                    "color": "red",
+                    "value": null
+                }
+                ]
+            }
+            },
+            "overrides": []
+        },
+        "gridPos": {
+            "h": 6,
+            "w": 6,
+            "x": 12,
+            "y": 0
+        },
+        "id": 5,
+        "options": {
+            "colorMode": "value",
+            "graphMode": "area",
+            "justifyMode": "auto",
+            "orientation": "horizontal",
+            "reduceOptions": {
+            "calcs": [
+                "last"
+            ],
+            "fields": "",
+            "values": false
+            },
+            "textMode": "auto"
+        },
+        "pluginVersion": "7.1.5",
+        "targets": [
+            {
+            "expr": "sum(cluster_policy_report_result{policy=~\"$policy\", status=\"fail\"})",
+            "instant": true,
+            "interval": "",
+            "legendFormat": "",
+            "refId": "A"
+            }
+        ],
+        "timeFrom": null,
+        "timeShift": null,
+        "title": "Policy Fail Status",
+        "type": "stat"
+        },
+        {
+        "fieldConfig": {
+            "defaults": {
+            "custom": {},
+            "decimals": 0,
+            "mappings": [],
+            "min": 0,
+            "noValue": "0",
+            "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                {
+                    "color": "dark-red",
+                    "value": null
+                }
+                ]
+            }
+            },
+            "overrides": []
+        },
+        "gridPos": {
+            "h": 6,
+            "w": 6,
+            "x": 18,
+            "y": 0
+        },
+        "id": 6,
+        "options": {
+            "colorMode": "value",
+            "graphMode": "area",
+            "justifyMode": "auto",
+            "orientation": "horizontal",
+            "reduceOptions": {
+            "calcs": [
+                "last"
+            ],
+            "fields": "",
+            "values": false
+            },
+            "textMode": "auto"
+        },
+        "pluginVersion": "7.1.5",
+        "targets": [
+            {
+            "expr": "sum(cluster_policy_report_result{policy=~\"$policy\", status=\"error\"})",
+            "instant": true,
+            "interval": "",
+            "legendFormat": "",
+            "refId": "A"
+            }
+        ],
+        "timeFrom": null,
+        "timeShift": null,
+        "title": "Policy Error Status",
+        "type": "stat"
+        }
+        ,{
+        "aliasColors": {},
+        "bars": false,
+        "dashLength": 10,
+        "dashes": false,
+        "fieldConfig": {
+            "defaults": {
+            "custom": {}
+            },
+            "overrides": []
+        },
+        "fill": 1,
+        "fillGradient": 0,
+        "gridPos": {
+            "h": 8,
+            "w": 24,
+            "x": 0,
+            "y": 7
+        },
+        "hiddenSeries": false,
+        "id": 13,
+        "legend": {
+            "alignAsTable": true,
+            "avg": false,
+            "current": true,
+            "hideEmpty": true,
+            "hideZero": true,
+            "max": false,
+            "min": false,
+            "rightSide": true,
+            "show": true,
+            "total": false,
+            "values": true
+        },
+        "lines": true,
+        "linewidth": 1,
+        "nullPointMode": "null as zero",
+        "percentage": false,
+        "pluginVersion": "7.1.5",
+        "pointradius": 2,
+        "points": false,
+        "renderer": "flot",
+        "seriesOverrides": [],
+        "spaceLength": 10,
+        "stack": false,
+        "steppedLine": false,
+        "targets": [
+            {
+            "expr": "sum(cluster_policy_report_result{policy=~\"$policy\"} > 0) by (status)",
+            "interval": "",
+            "legendFormat": "{{ status }}",
+            "refId": "A"
+            }
+        ],
+        "thresholds": [],
+        "timeFrom": null,
+        "timeRegions": [],
+        "timeShift": null,
+        "title": "Status Timeline",
+        "tooltip": {
+            "shared": true,
+            "sort": 0,
+            "value_type": "individual"
+        },
+        "type": "graph",
+        "xaxis": {
+            "buckets": null,
+            "mode": "time",
+            "name": null,
+            "show": true,
+            "values": []
+        },
+        "yaxes": [
+            {
+            "decimals": 0,
+            "format": "none",
+            "label": null,
+            "logBase": 1,
+            "max": null,
+            "min": "0",
+            "show": true
+            },
+            {
+            "decimals": 0,
+            "format": "short",
+            "label": null,
+            "logBase": 1,
+            "max": null,
+            "min": null,
+            "show": true
+            }
+        ],
+        "yaxis": {
+            "align": false,
+            "alignLevel": null
+        }
+        }
+        ,{
+        "fieldConfig": {
+            "defaults": {
+            "custom": {
+                "align": null
+            },
+            "mappings": [],
+            "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                {
+                    "color": "green",
+                    "value": null
+                },
+                {
+                    "color": "red",
+                    "value": 80
+                }
+                ]
+            }
+            },
+            "overrides": []
+        },
+        "gridPos": {
+            "h": 8,
+            "w": 24,
+            "x": 0,
+            "y": 15
+        },
+        "id": 8,
+        "options": {
+            "showHeader": true
+        },
+        "pluginVersion": "7.1.5",
+        "targets": [
+            {
+            "expr": "sum(cluster_policy_report_result{policy=~\"$policy\", status=\"pass\"}) by (policy,rule,kind,name,status)",
+            "format": "table",
+            "instant": true,
+            "interval": "",
+            "legendFormat": "",
+            "refId": "A"
+            }
+        ],
+        "timeFrom": null,
+        "timeShift": null,
+        "title": "Passed Resources",
+        "transformations": [
+            {
+            "id": "organize",
+            "options": {
+                "excludeByName": {
+                "Time": true,
+                "Value": true,
+                "status": false
+                },
+                "indexByName": {},
+                "renameByName": {
+                "exported_namespace": "namespace"
+                }
+            }
+            }
+        ],
+        "type": "table"
+        }
+        ,{
+        "fieldConfig": {
+            "defaults": {
+            "custom": {
+                "align": null
+            },
+            "mappings": [],
+            "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                {
+                    "color": "green",
+                    "value": null
+                },
+                {
+                    "color": "red",
+                    "value": 80
+                }
+                ]
+            }
+            },
+            "overrides": []
+        },
+        "gridPos": {
+            "h": 8,
+            "w": 24,
+            "x": 0,
+            "y": 23
+        },
+        "id": 9,
+        "options": {
+            "showHeader": true
+        },
+        "pluginVersion": "7.1.5",
+        "targets": [
+            {
+            "expr": "sum(cluster_policy_report_result{policy=~\"$policy\", status=\"fail\"}) by (policy,rule,kind,name,status)",
+            "format": "table",
+            "instant": true,
+            "interval": "",
+            "legendFormat": "",
+            "refId": "A"
+            }
+        ],
+        "timeFrom": null,
+        "timeShift": null,
+        "title": "Failed Resources",
+        "transformations": [
+            {
+            "id": "organize",
+            "options": {
+                "excludeByName": {
+                "Time": true,
+                "Value": true,
+                "status": false
+                },
+                "indexByName": {},
+                "renameByName": {
+                "exported_namespace": "namespace"
+                }
+            }
+            }
+        ],
+        "type": "table"
+        }
+    ],
+    "schemaVersion": 26,
+    "style": "dark",
+    "tags": [
+        "Policy Reporter"
+    ],
+    "templating": {
+        "list": [
+        {
+            "allValue": null,
+            "current": {},
+            "definition": "label_values(cluster_policy_report_result, policy)",
+            "hide": 0,
+            "includeAll": false,
+            "label": "Policy",
+            "multi": true,
+            "name": "policy",
+            "options": [],
+            "query": "label_values(cluster_policy_report_result, policy)",
+            "refresh": 2,
+            "regex": "",
+            "skipUrlSync": false,
+            "sort": 5,
+            "tagValuesQuery": "",
+            "tags": [],
+            "tagsQuery": "",
+            "type": "query",
+            "useTags": false
+        }
+        ]
+    },
+    "time": {
+        "from": "now-5m",
+        "to": "now"
+    },
+    "timepicker": {
+        "refresh_intervals": [
+        "5s",
+        "10s",
+        "30s",
+        "1m",
+        "5m",
+        "15m",
+        "30m",
+        "1h",
+        "2h",
+        "1d"
+        ]
+    },
+    "timezone": "",
+    "title": "ClusterPolicyReport Details",
+    "uid": "iyJszGUMk",
+    "version": 1
+    }
+---
+# Source: policy-reporter/charts/monitoring/templates/overview.dashboard.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: RELEASE-NAME-monitoring-overview-dashboard
+  namespace: cattle-dashboards
+  labels:
+    grafana_dashboard: "1"
+data:
+  policy-reporter-dashboard.json: |
+    {
+    "__inputs": [	
+        {	
+            "name": "DS_PROMETHEUS",	
+            "label": "prometheus",	
+            "description": "",	
+            "type": "datasource",	
+            "pluginId": "prometheus",	
+            "pluginName": "Prometheus"	
+        }	
+    ],	
+    "__requires": [	
+        {	
+            "type": "grafana",	
+            "id": "grafana",	
+            "name": "Grafana",	
+            "version": "7.1.5"	
+        },	
+        {	
+            "type": "datasource",	
+            "id": "prometheus",	
+            "name": "Prometheus",	
+            "version": "1.0.0"	
+        }	
+    ],
+    "annotations": {
+        "list": [
+        {
+            "builtIn": 1,
+            "datasource": "-- Grafana --",
+            "enable": true,
+            "hide": true,
+            "iconColor": "rgba(0, 211, 255, 1)",
+            "name": "Annotations & Alerts",
+            "type": "dashboard"
+        }
+        ]
+    },
+    "editable": true,
+    "gnetId": null,
+    "graphTooltip": 0,
+    "id": 66,
+    "links": [],
+    "panels": [
+        {
+        "datasource": null,
+        "fieldConfig": {
+            "defaults": {
+            "custom": {
+                "align": null
+            },
+            "decimals": 0,
+            "mappings": [],
+            "min": 0,
+            "noValue": "0",
+            "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                {
+                    "color": "green",
+                    "value": null
+                },
+                {
+                    "color": "#EAB839",
+                    "value": 1
+                }
+                ]
+            },
+            "unit": "none"
+            },
+            "overrides": []
+        },
+        "gridPos": {
+            "h": 8,
+            "w": 15,
+            "x": 0,
+            "y": 0
+        },
+        "id": 4,
+        "options": {
+            "displayMode": "gradient",
+            "orientation": "horizontal",
+            "reduceOptions": {
+            "calcs": [
+                "last"
+            ],
+            "fields": "",
+            "values": false
+            },
+            "showUnfilled": true
+        },
+        "pluginVersion": "7.1.5",
+        "targets": [
+            {
+            "expr": "sum(policy_report_summary{status=\"Fail\"} > 0) by (exported_namespace)",
+            "instant": true,
+            "interval": "",
+            "legendFormat": "{{ exported_namespace }}",
+            "refId": "A"
+            }
+        ],
+        "timeFrom": null,
+        "timeShift": null,
+        "title": "Failing Policies by Namespace",
+        "type": "bargauge"
+        },
+        {
+        "datasource": null,
+        "fieldConfig": {
+            "defaults": {
+            "custom": {},
+            "decimals": 0,
+            "mappings": [],
+            "min": 0,
+            "noValue": "0",
+            "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                {
+                    "color": "green",
+                    "value": null
+                },
+                {
+                    "color": "#EAB839",
+                    "value": 3
+                }
+                ]
+            }
+            },
+            "overrides": []
+        },
+        "gridPos": {
+            "h": 8,
+            "w": 9,
+            "x": 15,
+            "y": 0
+        },
+        "id": 5,
+        "options": {
+            "colorMode": "value",
+            "graphMode": "area",
+            "justifyMode": "center",
+            "orientation": "vertical",
+            "reduceOptions": {
+            "calcs": [
+                "last"
+            ],
+            "fields": "",
+            "values": false
+            },
+            "textMode": "auto"
+        },
+        "pluginVersion": "7.1.5",
+        "targets": [
+            {
+            "expr": "sum(cluster_policy_report_summary{status=~\"Fail|Error\"} > 0) by (status)",
+            "format": "time_series",
+            "interval": "",
+            "intervalFactor": 1,
+            "legendFormat": "{{ status }}",
+            "refId": "A"
+            }
+        ],
+        "timeFrom": null,
+        "timeShift": null,
+        "title": "Failing ClusterPolicies",
+        "type": "stat"
+        },
+        {
+        "aliasColors": {},
+        "bars": false,
+        "dashLength": 10,
+        "dashes": false,
+        "datasource": null,
+        "fieldConfig": {
+            "defaults": {
+            "custom": {}
+            },
+            "overrides": []
+        },
+        "fill": 1,
+        "fillGradient": 0,
+        "gridPos": {
+            "h": 10,
+            "w": 24,
+            "x": 0,
+            "y": 10
+        },
+        "hiddenSeries": false,
+        "id": 11,
+        "legend": {
+            "alignAsTable": true,
+            "avg": false,
+            "current": true,
+            "hideEmpty": true,
+            "hideZero": true,
+            "max": false,
+            "min": false,
+            "rightSide": true,
+            "show": true,
+            "total": false,
+            "values": true
+        },
+        "lines": true,
+        "linewidth": 1,
+        "nullPointMode": "null as zero",
+        "percentage": false,
+        "pluginVersion": "7.1.5",
+        "pointradius": 2,
+        "points": false,
+        "renderer": "flot",
+        "seriesOverrides": [],
+        "spaceLength": 10,
+        "stack": false,
+        "steppedLine": false,
+        "targets": [
+            {
+            "expr": "sum(cluster_policy_report_result{status=~\"fail|error\"} > 0) by (policy)",
+            "interval": "",
+            "legendFormat": "{{ policy }}",
+            "refId": "A"
+            },
+            {
+            "expr": "sum(policy_report_result{status=~\"fail|error\"} > 0) by (policy)",
+            "interval": "",
+            "legendFormat": "{{ policy }}",
+            "refId": "B"
+            }
+        ],
+        "thresholds": [],
+        "timeFrom": null,
+        "timeRegions": [],
+        "timeShift": null,
+        "title": "Failing Policies Graph",
+        "tooltip": {
+            "shared": true,
+            "sort": 0,
+            "value_type": "individual"
+        },
+        "type": "graph",
+        "xaxis": {
+            "buckets": null,
+            "mode": "time",
+            "name": null,
+            "show": true,
+            "values": []
+        },
+        "yaxes": [
+            {
+            "decimals": 0,
+            "format": "short",
+            "label": null,
+            "logBase": 1,
+            "max": null,
+            "min": "0",
+            "show": true
+            },
+            {
+            "format": "short",
+            "label": null,
+            "logBase": 1,
+            "max": null,
+            "min": null,
+            "show": true
+            }
+        ],
+        "yaxis": {
+            "align": false,
+            "alignLevel": null
+        }
+        },
+        {
+        "datasource": null,
+        "fieldConfig": {
+            "defaults": {
+            "custom": {
+                "align": null
+            },
+            "mappings": [],
+            "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                {
+                    "color": "green",
+                    "value": null
+                },
+                {
+                    "color": "red",
+                    "value": 80
+                }
+                ]
+            }
+            },
+            "overrides": []
+        },
+        "gridPos": {
+            "h": 10,
+            "w": 24,
+            "x": 0,
+            "y": 18
+        },
+        "id": 7,
+        "options": {
+            "showHeader": true
+        },
+        "pluginVersion": "7.1.5",
+        "targets": [
+            {
+            "expr": "sum(policy_report_result{status=~\"fail|error\"}) by (exported_namespace,policy,rule,kind,name,status)",
+            "format": "table",
+            "instant": true,
+            "interval": "",
+            "legendFormat": "{{ exported_namespace }}: {{ policy }}",
+            "refId": "A"
+            }
+        ],
+        "timeFrom": null,
+        "timeShift": null,
+        "title": "Failing PolicyRules",
+        "transformations": [
+            {
+            "id": "organize",
+            "options": {
+                "excludeByName": {
+                "Time": true,
+                "Value": true
+                },
+                "indexByName": {
+                "Time": 0,
+                "Value": 6,
+                "exported_namespace": 1,
+                "kind": 2,
+                "name": 3,
+                "policy": 4,
+                "rule": 5,
+                "status": 7
+                },
+                "renameByName": {
+                "exported_namespace": "namespace"
+                }
+            }
+            }
+        ],
+        "type": "table"
+        },
+        {
+        "datasource": null,
+        "fieldConfig": {
+            "defaults": {
+            "custom": {
+                "align": null
+            },
+            "mappings": [],
+            "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                {
+                    "color": "green",
+                    "value": null
+                },
+                {
+                    "color": "red",
+                    "value": 80
+                }
+                ]
+            }
+            },
+            "overrides": []
+        },
+        "gridPos": {
+            "h": 10,
+            "w": 24,
+            "x": 0,
+            "y": 28
+        },
+        "id": 9,
+        "options": {
+            "showHeader": true
+        },
+        "pluginVersion": "7.1.5",
+        "targets": [
+            {
+            "expr": "cluster_policy_report_result > 0",
+            "format": "table",
+            "instant": true,
+            "interval": "",
+            "legendFormat": "{{ kind }}: {{ name }} - {{ policy }}",
+            "refId": "A"
+            }
+        ],
+        "timeFrom": null,
+        "timeShift": null,
+        "title": "Failing ClusterPolicyRules",
+        "transformations": [
+            {
+            "id": "organize",
+            "options": {
+                "excludeByName": {
+                "Time": true,
+                "Value": true,
+                "__name__": true,
+                "endpoint": true,
+                "instance": true,
+                "job": true,
+                "namespace": true,
+                "pod": true,
+                "report": true,
+                "service": true
+                },
+                "indexByName": {
+                "Time": 0,
+                "Value": 14,
+                "__name__": 1,
+                "endpoint": 2,
+                "instance": 3,
+                "job": 4,
+                "kind": 9,
+                "name": 10,
+                "namespace": 5,
+                "pod": 6,
+                "policy": 11,
+                "report": 7,
+                "rule": 12,
+                "service": 8,
+                "status": 13
+                },
+                "renameByName": {
+                "__name__": ""
+                }
+            }
+            }
+        ],
+        "type": "table"
+        }
+    ],
+    "schemaVersion": 26,
+    "style": "dark",
+    "tags": [
+        "Policy Reporter"
+    ],
+    "templating": {
+        "list": []
+    },
+    "time": {
+        "from": "now-30m",
+        "to": "now"
+    },
+    "timepicker": {
+        "refresh_intervals": [
+        "5s",
+        "10s",
+        "30s",
+        "1m",
+        "5m",
+        "15m",
+        "30m",
+        "1h",
+        "2h",
+        "1d"
+        ]
+    },
+    "timezone": "",
+    "title": "PolicyReports",
+    "version": 1
+    }
+---
+# Source: policy-reporter/charts/monitoring/templates/policy-details.dashboard.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: RELEASE-NAME-monitoring-policy-details-dashboard
+  namespace: cattle-dashboards
+  labels:
+    grafana_dashboard: "1"
+data:
+  policy-reporter-details-dashboard.json: |
+    {
+    "__inputs": [
+        {
+        "name": "DS_PROMETHEUS",
+        "label": "Prometheus",
+        "description": "",
+        "type": "datasource",
+        "pluginId": "prometheus",
+        "pluginName": "Prometheus"
+        }
+    ],
+    "__requires": [
+        {
+        "type": "panel",
+        "id": "bargauge",
+        "name": "Bar gauge",
+        "version": ""
+        },
+        {
+        "type": "grafana",
+        "id": "grafana",
+        "name": "Grafana",
+        "version": "7.1.5"
+        },
+        {
+        "type": "panel",
+        "id": "graph",
+        "name": "Graph",
+        "version": ""
+        },
+        {
+        "type": "datasource",
+        "id": "prometheus",
+        "name": "Prometheus",
+        "version": "1.0.0"
+        },
+        {
+        "type": "panel",
+        "id": "table",
+        "name": "Table",
+        "version": ""
+        }
+    ],
+    "annotations": {
+        "list": [
+        {
+            "builtIn": 1,
+            "datasource": "-- Grafana --",
+            "enable": true,
+            "hide": true,
+            "iconColor": "rgba(0, 211, 255, 1)",
+            "name": "Annotations & Alerts",
+            "type": "dashboard"
+        }
+        ]
+    },
+    "editable": true,
+    "gnetId": null,
+    "graphTooltip": 0,
+    "links": [],
+    "panels": [
+        {
+        "fieldConfig": {
+            "defaults": {
+            "custom": {},
+            "decimals": 0,
+            "mappings": [],
+            "min": 0,
+            "noValue": "0",
+            "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                {
+                    "color": "green",
+                    "value": null
+                }
+                ]
+            }
+            },
+            "overrides": []
+        },
+        "gridPos": {
+            "h": 6,
+            "w": 12,
+            "x": 0,
+            "y": 0
+        },
+        "id": 3,
+        "options": {
+            "displayMode": "gradient",
+            "orientation": "horizontal",
+            "reduceOptions": {
+            "calcs": [
+                "last"
+            ],
+            "fields": "",
+            "values": false
+            },
+            "showUnfilled": true
+        },
+        "pluginVersion": "7.1.5",
+        "targets": [
+            {
+            "expr": "sum(policy_report_result{policy=~\"$policy\", status=\"pass\"} > 0) by (exported_namespace)",
+            "instant": true,
+            "interval": "",
+            "legendFormat": "{{ exported_namespace }}",
+            "refId": "A"
+            }
+        ],
+        "timeFrom": null,
+        "timeShift": null,
+        "title": "Policy Pass Status",
+        "type": "bargauge"
+        },
+        {
+        "fieldConfig": {
+            "defaults": {
+            "custom": {},
+            "decimals": 0,
+            "mappings": [],
+            "min": 0,
+            "noValue": "0",
+            "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                {
+                    "color": "red",
+                    "value": null
+                }
+                ]
+            }
+            },
+            "overrides": []
+        },
+        "gridPos": {
+            "h": 6,
+            "w": 12,
+            "x": 12,
+            "y": 0
+        },
+        "id": 5,
+        "options": {
+            "displayMode": "gradient",
+            "orientation": "horizontal",
+            "reduceOptions": {
+            "calcs": [
+                "last"
+            ],
+            "fields": "",
+            "values": false
+            },
+            "showUnfilled": true
+        },
+        "pluginVersion": "7.1.5",
+        "targets": [
+            {
+            "expr": "sum(policy_report_result{policy=~\"$policy\", status=\"fail\"} > 0) by (exported_namespace)",
+            "instant": true,
+            "interval": "",
+            "legendFormat": "{{ exported_namespace }}",
+            "refId": "A"
+            }
+        ],
+        "timeFrom": null,
+        "timeShift": null,
+        "title": "Policy Fail Status",
+        "type": "bargauge"
+        }
+        ,{
+        "aliasColors": {},
+        "bars": false,
+        "dashLength": 10,
+        "dashes": false,
+        "fieldConfig": {
+            "defaults": {
+            "custom": {}
+            },
+            "overrides": []
+        },
+        "fill": 1,
+        "fillGradient": 0,
+        "gridPos": {
+            "h": 8,
+            "w": 24,
+            "x": 0,
+            "y": 11
+        },
+        "hiddenSeries": false,
+        "id": 13,
+        "legend": {
+            "alignAsTable": true,
+            "avg": false,
+            "current": true,
+            "hideEmpty": true,
+            "hideZero": true,
+            "max": false,
+            "min": false,
+            "rightSide": true,
+            "show": true,
+            "total": false,
+            "values": true
+        },
+        "lines": true,
+        "linewidth": 1,
+        "nullPointMode": "null as zero",
+        "percentage": false,
+        "pluginVersion": "7.1.5",
+        "pointradius": 2,
+        "points": false,
+        "renderer": "flot",
+        "seriesOverrides": [],
+        "spaceLength": 10,
+        "stack": false,
+        "steppedLine": false,
+        "targets": [
+            {
+            "expr": "sum(policy_report_result{policy=~\"$policy\"} > 0) by (status, exported_namespace)",
+            "interval": "",
+            "legendFormat": "{{ exported_namespace }} {{ status }}",
+            "refId": "A"
+            }
+        ],
+        "thresholds": [],
+        "timeFrom": null,
+        "timeRegions": [],
+        "timeShift": null,
+        "title": "Status Timeline",
+        "tooltip": {
+            "shared": true,
+            "sort": 0,
+            "value_type": "individual"
+        },
+        "type": "graph",
+        "xaxis": {
+            "buckets": null,
+            "mode": "time",
+            "name": null,
+            "show": true,
+            "values": []
+        },
+        "yaxes": [
+            {
+            "decimals": 0,
+            "format": "none",
+            "label": null,
+            "logBase": 1,
+            "max": null,
+            "min": "0",
+            "show": true
+            },
+            {
+            "decimals": 0,
+            "format": "short",
+            "label": null,
+            "logBase": 1,
+            "max": null,
+            "min": null,
+            "show": true
+            }
+        ],
+        "yaxis": {
+            "align": false,
+            "alignLevel": null
+        }
+        }
+        ,{
+        "fieldConfig": {
+            "defaults": {
+            "custom": {
+                "align": null
+            },
+            "mappings": [],
+            "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                {
+                    "color": "green",
+                    "value": null
+                },
+                {
+                    "color": "red",
+                    "value": 80
+                }
+                ]
+            }
+            },
+            "overrides": []
+        },
+        "gridPos": {
+            "h": 8,
+            "w": 24,
+            "x": 0,
+            "y": 19
+        },
+        "id": 8,
+        "options": {
+            "showHeader": true
+        },
+        "pluginVersion": "7.1.5",
+        "targets": [
+            {
+            "expr": "sum(policy_report_result{policy=~\"$policy\", status=\"pass\"}) by (exported_namespace,policy,rule,kind,name,status)",
+            "format": "table",
+            "instant": true,
+            "interval": "",
+            "legendFormat": "",
+            "refId": "A"
+            }
+        ],
+        "timeFrom": null,
+        "timeShift": null,
+        "title": "Passed Resources",
+        "transformations": [
+            {
+            "id": "organize",
+            "options": {
+                "excludeByName": {
+                "Time": true,
+                "Value": true,
+                "status": false
+                },
+                "indexByName": {},
+                "renameByName": {
+                "exported_namespace": "namespace"
+                }
+            }
+            }
+        ],
+        "type": "table"
+        }
+        ,{
+        "fieldConfig": {
+            "defaults": {
+            "custom": {
+                "align": null
+            },
+            "mappings": [],
+            "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                {
+                    "color": "green",
+                    "value": null
+                },
+                {
+                    "color": "red",
+                    "value": 80
+                }
+                ]
+            }
+            },
+            "overrides": []
+        },
+        "gridPos": {
+            "h": 8,
+            "w": 24,
+            "x": 0,
+            "y": 27
+        },
+        "id": 9,
+        "options": {
+            "showHeader": true
+        },
+        "pluginVersion": "7.1.5",
+        "targets": [
+            {
+            "expr": "sum(policy_report_result{policy=~\"$policy\", status=\"fail\"}) by (exported_namespace,policy,rule,kind,name,status)",
+            "format": "table",
+            "instant": true,
+            "interval": "",
+            "legendFormat": "",
+            "refId": "A"
+            }
+        ],
+        "timeFrom": null,
+        "timeShift": null,
+        "title": "Failed Resources",
+        "transformations": [
+            {
+            "id": "organize",
+            "options": {
+                "excludeByName": {
+                "Time": true,
+                "Value": true,
+                "status": false
+                },
+                "indexByName": {},
+                "renameByName": {
+                "exported_namespace": "namespace"
+                }
+            }
+            }
+        ],
+        "type": "table"
+        }
+    ],
+    "schemaVersion": 26,
+    "style": "dark",
+    "tags": [
+        "Policy Reporter"
+    ],
+    "templating": {
+        "list": [
+        {
+            "allValue": null,
+            "definition": "label_values(policy_report_result, policy)",
+            "hide": 0,
+            "includeAll": false,
+            "label": "Policy",
+            "multi": true,
+            "name": "policy",
+            "options": [],
+            "query": "label_values(policy_report_result, policy)",
+            "refresh": 2,
+            "regex": "",
+            "skipUrlSync": false,
+            "sort": 5,
+            "tagValuesQuery": "",
+            "tags": [],
+            "tagsQuery": "",
+            "type": "query",
+            "useTags": false
+        }
+        ]
+    },
+    "time": {
+        "from": "now-5m",
+        "to": "now"
+    },
+    "timepicker": {
+        "refresh_intervals": [
+        "5s",
+        "10s",
+        "30s",
+        "1m",
+        "5m",
+        "15m",
+        "30m",
+        "1h",
+        "2h",
+        "1d"
+        ]
+    },
+    "timezone": "",
+    "title": "PolicyReport Details",
+    "uid": "Tf1skG8Mz",
+    "version": 1
+    }
+---
+# Source: policy-reporter/templates/prioritymap.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: policy-reporter-priorities
+  labels:
+    helm.sh/chart: policy-reporter-0.21.0
+    app.kubernetes.io/name: policy-reporter
+    app.kubernetes.io/instance: RELEASE-NAME
+    app.kubernetes.io/version: "0.13.0"
+    app.kubernetes.io/managed-by: Helm
+data:
+    default: warning
+    require-ns-labels: error
+    require-requests-and-limits-required: error
+---
+# Source: policy-reporter/templates/clusterrole.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  labels:
+    rbac.authorization.k8s.io/aggregate-to-admin: "true"
+  name: RELEASE-NAME-policy-reporter
+rules:
+- apiGroups:
+  - '*'
+  resources:
+  - policyreports
+  - policyreports/status
+  - clusterpolicyreports
+  - clusterpolicyreports/status
+  verbs:
+  - get
+  - list
+  - watch
+---
+# Source: policy-reporter/templates/clusterrolebinding.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: RELEASE-NAME-policy-reporter
+roleRef:
+  kind: ClusterRole
+  name: RELEASE-NAME-policy-reporter
+  apiGroup: rbac.authorization.k8s.io
+subjects:
+- kind: "ServiceAccount"
+  name: RELEASE-NAME-policy-reporter
+  namespace: policy-reporter
+---
+# Source: policy-reporter/templates/role.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: RELEASE-NAME-policy-reporter
+rules:
+- apiGroups:
+  - ''
+  resources:
+  - configmaps
+  verbs:
+  - get
+  - list
+  - watch
+---
+# Source: policy-reporter/templates/rolebinding.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: RELEASE-NAME-policy-reporter
+roleRef:
+  kind: Role
+  name: RELEASE-NAME-policy-reporter
+  apiGroup: rbac.authorization.k8s.io
+subjects:
+- kind: "ServiceAccount"
+  name: RELEASE-NAME-policy-reporter
+  namespace: policy-reporter
+---
+# Source: policy-reporter/charts/ui/templates/service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: RELEASE-NAME-ui
+  labels:
+    helm.sh/chart: ui-0.4.1
+    app.kubernetes.io/name: ui
+    app.kubernetes.io/instance: RELEASE-NAME
+    app.kubernetes.io/version: "0.4.1"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  type: ClusterIP
+  ports:
+    - port: 8080
+      targetPort: http
+      protocol: TCP
+      name: http
+  selector:
+    app.kubernetes.io/name: ui
+    app.kubernetes.io/instance: RELEASE-NAME
+---
+# Source: policy-reporter/templates/service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: RELEASE-NAME-policy-reporter
+  labels:
+    helm.sh/chart: policy-reporter-0.21.0
+    app.kubernetes.io/name: policy-reporter
+    app.kubernetes.io/instance: RELEASE-NAME
+    app.kubernetes.io/version: "0.13.0"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  type: ClusterIP
+  ports:
+    - port: 2112
+      targetPort: http
+      protocol: TCP
+      name: http
+    - port: 8080
+      targetPort: rest
+      protocol: TCP
+      name: rest
+  selector:
+    app.kubernetes.io/name: policy-reporter
+    app.kubernetes.io/instance: RELEASE-NAME
+---
+# Source: policy-reporter/charts/ui/templates/deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: RELEASE-NAME-ui
+  labels:
+    helm.sh/chart: ui-0.4.1
+    app.kubernetes.io/name: ui
+    app.kubernetes.io/instance: RELEASE-NAME
+    app.kubernetes.io/version: "0.4.1"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: ui
+      app.kubernetes.io/instance: RELEASE-NAME
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: ui
+        app.kubernetes.io/instance: RELEASE-NAME
+    spec:
+      serviceAccountName: default
+      automountServiceAccountToken: true
+      containers:
+        - name: ui
+          image: "fjogeleit/policy-reporter-ui:0.4.1"
+          imagePullPolicy: IfNotPresent
+          args:
+            - -backend=http://policy-reporter:8080
+          ports:
+            - name: http
+              containerPort: 8080
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /
+              port: http
+          readinessProbe:
+            httpGet:
+              path: /
+              port: http
+          resources:
+            {}
+---
+# Source: policy-reporter/templates/deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: RELEASE-NAME-policy-reporter
+  labels:
+    helm.sh/chart: policy-reporter-0.21.0
+    app.kubernetes.io/name: policy-reporter
+    app.kubernetes.io/instance: RELEASE-NAME
+    app.kubernetes.io/version: "0.13.0"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: policy-reporter
+      app.kubernetes.io/instance: RELEASE-NAME
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: policy-reporter
+        app.kubernetes.io/instance: RELEASE-NAME
+      annotations:
+        checksum/secret: "12db2d5ddb1e429820b4f9a93f12a39028678fae54fd34709b72e7ff8aeab2f0"
+        policy-priorities/enabled: "true"
+    spec:
+      serviceAccountName: RELEASE-NAME-policy-reporter
+      automountServiceAccountToken: true
+      containers:
+        - name: policy-reporter
+          image: "fjogeleit/policy-reporter:0.13.0"
+          imagePullPolicy: IfNotPresent
+          args:
+            - --config=/app/config.yaml
+            - --apiPort=8080
+          ports:
+            - name: http
+              containerPort: 2112
+              protocol: TCP
+            - name: rest
+              containerPort: 8080
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /metrics
+              port: http
+          readinessProbe:
+            httpGet:
+              path: /metrics
+              port: http
+          resources:
+            {}
+          volumeMounts:
+          - name: config-file
+            mountPath: /app/config.yaml
+            subPath: config.yaml
+          env:
+          - name: NAMESPACE
+            value: policy-reporter
+      volumes:
+      - name: config-file
+        secret:
+          secretName: RELEASE-NAME-policy-reporter-targets
+          optional: true
+---
+# Source: policy-reporter/charts/monitoring/templates/servicemonitor.yaml
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: RELEASE-NAME-monitoring
+spec:
+  selector:
+    matchLabels:
+        app.kubernetes.io/name: policy-reporter
+        app.kubernetes.io/instance: RELEASE-NAME
+  endpoints:
+  - port: http
