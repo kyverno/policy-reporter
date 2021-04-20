@@ -137,7 +137,14 @@ func (m *mapper) mapResult(result map[string]interface{}) report.Result {
 		}
 	}
 
-	status := result["status"].(report.Status)
+	var status report.Status
+
+	if s, ok := result["status"]; ok {
+		status = s.(report.Status)
+	}
+	if r, ok := result["result"]; ok {
+		status = r.(report.Status)
+	}
 
 	r := report.Result{
 		Message:    result["message"].(string),
