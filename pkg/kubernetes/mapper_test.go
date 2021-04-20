@@ -82,7 +82,7 @@ var clusterPolicyMap = map[string]interface{}{
 	"results": []interface{}{
 		map[string]interface{}{
 			"message":  "message",
-			"status":   "fail",
+			"result":   "fail",
 			"scored":   true,
 			"policy":   "required-label",
 			"rule":     "app-label-required",
