@@ -304,3 +304,43 @@ func Test_ResultClient_SkipReportsCleanUpEvents(t *testing.T) {
 		t.Error("Should receive 3 Results from the initial add events, not from the cleanup modify events")
 	}
 }
+
+func Test_ResultClient_SkipReportsReconnectEvents(t *testing.T) {
+	_, k8sCMClient := newFakeAPI()
+	k8sCMClient.Create(context.Background(), configMap, metav1.CreateOptions{})
+	fakeAdapter := NewPolicyReportAdapter()
+
+	mapper := NewMapper(k8sCMClient)
+
+	pClient := kubernetes.NewPolicyReportClient(fakeAdapter, report.NewPolicyReportStore(), mapper, time.Now())
+	cpClient := kubernetes.NewClusterPolicyReportClient(fakeAdapter, report.NewClusterPolicyReportStore(), mapper, time.Now())
+
+	client := kubernetes.NewPolicyResultClient(pClient, cpClient)
+
+	client.RegisterPolicyResultWatcher(false)
+
+	wg := sync.WaitGroup{}
+	wg.Add(3)
+
+	results := make([]report.Result, 0, 3)
+
+	client.RegisterPolicyResultCallback(func(r report.Result, b bool) {
+		results = append(results, r)
+		wg.Done()
+	})
+
+	go pClient.StartWatching()
+	go cpClient.StartWatching()
+
+	fakeAdapter.clusterPolicyWatcher.Add(&unstructured.Unstructured{Object: clusterPolicyMap})
+	fakeAdapter.clusterPolicyWatcher.Add(&unstructured.Unstructured{Object: clusterPolicyMap})
+
+	fakeAdapter.policyWatcher.Add(&unstructured.Unstructured{Object: policyMap})
+	fakeAdapter.policyWatcher.Add(&unstructured.Unstructured{Object: policyMap})
+
+	wg.Wait()
+
+	if len(results) != 3 {
+		t.Error("Should receive 3 Results from the initial add events, not from the restart events")
+	}
+}
