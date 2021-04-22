@@ -63,6 +63,10 @@ func loadConfig(cmd *cobra.Command) (*config.Config, error) {
 		v.BindPFlag("kubeconfig", flag)
 	}
 
+	if flag := cmd.Flags().Lookup("crd-version"); flag != nil {
+		v.BindPFlag("crdVersion", flag)
+	}
+
 	if flag := cmd.Flags().Lookup("apiPort"); flag != nil {
 		v.BindPFlag("api.port", flag)
 		v.BindPFlag("api.enabled", flag)

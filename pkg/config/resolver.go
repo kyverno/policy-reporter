@@ -371,7 +371,7 @@ func (r *Resolver) policyReportAPI() (kubernetes.PolicyReportAdapter, error) {
 	if err != nil {
 		return nil, err
 	}
-	return kubernetes.NewPolicyReportAdapter(client), nil
+	return kubernetes.NewPolicyReportAdapter(client, r.config.CRDVersion), nil
 }
 
 // NewResolver constructor function

@@ -61,4 +61,5 @@ type Config struct {
 	API           API           `mapstructure:"api"`
 	Kubeconfig    string        `mapstructure:"kubeconfig"`
 	Namespace     string        `mapstructure:"namespace"`
+	CRDVersion    string        `mapstructure:"crdVersion"`
 }

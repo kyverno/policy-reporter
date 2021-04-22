@@ -95,6 +95,7 @@ func newRunCMD() *cobra.Command {
 	// For local usage
 	cmd.PersistentFlags().StringP("kubeconfig", "k", "", "absolute path to the kubeconfig file")
 	cmd.PersistentFlags().StringP("config", "c", "", "target configuration file")
+	cmd.PersistentFlags().StringP("crd-version", "v", "v1alpha1", "Policy Reporter CRD Version")
 	cmd.PersistentFlags().IntP("apiPort", "a", 0, "http port for the optional rest api")
 
 	cmd.PersistentFlags().String("loki", "", "loki host: http://loki:3100")
