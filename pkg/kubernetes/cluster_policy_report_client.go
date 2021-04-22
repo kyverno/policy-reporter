@@ -130,7 +130,14 @@ func (c *clusterPolicyReportClient) RegisterPolicyResultWatcher(skipExisting boo
 				break
 			}
 
-			c.modifyHash[cpr.GetIdentifier()] = cpr.ResultHash()
+			newHash := cpr.ResultHash()
+			if hash, ok := c.modifyHash[cpr.GetIdentifier()]; ok {
+				if newHash == hash {
+					break
+				}
+			}
+
+			c.modifyHash[cpr.GetIdentifier()] = newHash
 
 			preExisted := cpr.CreationTimestamp.Before(c.startUp)
 

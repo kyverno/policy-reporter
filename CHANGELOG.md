@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.2.3
+
+* Fix resend violations after KubeAPI reconnect
+
 ## 1.2.2
 
 * Fix PolicyReportResult.timestamp parsing
