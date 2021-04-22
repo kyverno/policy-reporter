@@ -90,9 +90,9 @@ func (c *clusterPolicyReportClient) StartWatching() error {
 }
 
 func (c *clusterPolicyReportClient) executeClusterPolicyReportHandler(e watch.EventType, cpr report.ClusterPolicyReport) {
-	opr := report.ClusterPolicyReport{}
-	if e != watch.Added {
-		opr, _ = c.store.Get(cpr.GetIdentifier())
+	opr, ok := c.store.Get(cpr.GetIdentifier())
+	if !ok {
+		opr = report.ClusterPolicyReport{}
 	}
 
 	wg := sync.WaitGroup{}
@@ -145,10 +145,12 @@ func (c *clusterPolicyReportClient) RegisterPolicyResultWatcher(skipExisting boo
 				break
 			}
 
-			wg := sync.WaitGroup{}
-			wg.Add(len(cpr.Results) * len(c.resultCallbacks))
+			diff := cpr.GetNewResults(opr)
 
-			for _, r := range cpr.Results {
+			wg := sync.WaitGroup{}
+			wg.Add(len(diff) * len(c.resultCallbacks))
+
+			for _, r := range diff {
 				for _, cb := range c.resultCallbacks {
 					go func(callback report.PolicyResultCallback, result report.Result) {
 						callback(result, preExisted)

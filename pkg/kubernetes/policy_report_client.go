@@ -90,9 +90,9 @@ func (c *policyReportClient) StartWatching() error {
 }
 
 func (c *policyReportClient) executePolicyReportHandler(e watch.EventType, pr report.PolicyReport) {
-	opr := report.PolicyReport{}
-	if e != watch.Added {
-		opr, _ = c.store.Get(pr.GetIdentifier())
+	opr, ok := c.store.Get(pr.GetIdentifier())
+	if !ok {
+		opr = report.PolicyReport{}
 	}
 
 	wg := sync.WaitGroup{}
@@ -146,10 +146,12 @@ func (c *policyReportClient) RegisterPolicyResultWatcher(skipExisting bool) {
 					break
 				}
 
-				wg := sync.WaitGroup{}
-				wg.Add(len(pr.Results) * len(c.resultCallbacks))
+				diff := pr.GetNewResults(or)
 
-				for _, r := range pr.Results {
+				wg := sync.WaitGroup{}
+				wg.Add(len(diff) * len(c.resultCallbacks))
+
+				for _, r := range diff {
 					for _, cb := range c.resultCallbacks {
 						go func(callback report.PolicyResultCallback, result report.Result) {
 							callback(result, preExisted)
