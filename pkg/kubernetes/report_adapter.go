@@ -10,11 +10,6 @@ import (
 	"k8s.io/client-go/dynamic"
 )
 
-var (
-	PolicyReports        = schema.GroupVersionResource{Group: "wgpolicyk8s.io", Version: "v1alpha1", Resource: "policyreports"}
-	ClusterPolicyReports = schema.GroupVersionResource{Group: "wgpolicyk8s.io", Version: "v1alpha1", Resource: "clusterpolicyreports"}
-)
-
 type PolicyReportAdapter interface {
 	ListClusterPolicyReports() (*unstructured.UnstructuredList, error)
 	ListPolicyReports() (*unstructured.UnstructuredList, error)
@@ -23,25 +18,44 @@ type PolicyReportAdapter interface {
 }
 
 type k8sPolicyReportAdapter struct {
-	client dynamic.Interface
+	client               dynamic.Interface
+	policyReports        schema.GroupVersionResource
+	clusterPolicyReports schema.GroupVersionResource
 }
 
 func (k *k8sPolicyReportAdapter) ListClusterPolicyReports() (*unstructured.UnstructuredList, error) {
-	return k.client.Resource(ClusterPolicyReports).List(context.Background(), metav1.ListOptions{})
+	return k.client.Resource(k.clusterPolicyReports).List(context.Background(), metav1.ListOptions{})
 }
 
 func (k *k8sPolicyReportAdapter) ListPolicyReports() (*unstructured.UnstructuredList, error) {
-	return k.client.Resource(PolicyReports).List(context.Background(), metav1.ListOptions{})
+	return k.client.Resource(k.policyReports).List(context.Background(), metav1.ListOptions{})
 }
 
 func (k *k8sPolicyReportAdapter) WatchClusterPolicyReports() (watch.Interface, error) {
-	return k.client.Resource(ClusterPolicyReports).Watch(context.Background(), metav1.ListOptions{})
+	return k.client.Resource(k.clusterPolicyReports).Watch(context.Background(), metav1.ListOptions{})
 }
 
 func (k *k8sPolicyReportAdapter) WatchPolicyReports() (watch.Interface, error) {
-	return k.client.Resource(PolicyReports).Watch(context.Background(), metav1.ListOptions{})
+	return k.client.Resource(k.policyReports).Watch(context.Background(), metav1.ListOptions{})
 }
 
-func NewPolicyReportAdapter(dynamic dynamic.Interface) PolicyReportAdapter {
-	return &k8sPolicyReportAdapter{dynamic}
+// NewPolicyReportAdapter new Adapter for Policy Report Kubernetes API
+func NewPolicyReportAdapter(dynamic dynamic.Interface, version string) PolicyReportAdapter {
+	if version == "" {
+		version = "v1alpha1"
+	}
+
+	return &k8sPolicyReportAdapter{
+		client: dynamic,
+		policyReports: schema.GroupVersionResource{
+			Group:    "wgpolicyk8s.io",
+			Version:  version,
+			Resource: "policyreports",
+		},
+		clusterPolicyReports: schema.GroupVersionResource{
+			Group:    "wgpolicyk8s.io",
+			Version:  version,
+			Resource: "clusterpolicyreports",
+		},
+	}
 }

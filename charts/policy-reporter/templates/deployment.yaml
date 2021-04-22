@@ -47,6 +47,7 @@ spec:
           {{- end }}
           args:
             - --config=/app/config.yaml
+            - --crd-version={{ .Values.crdVersion }}
             {{- if or .Values.api.enabled .Values.ui.enabled }}
             - --apiPort=8080
             {{- end }}

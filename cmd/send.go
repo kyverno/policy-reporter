@@ -72,6 +72,7 @@ func newSendCMD() *cobra.Command {
 	// For local usage
 	cmd.PersistentFlags().StringP("kubeconfig", "k", "", "absolute path to the kubeconfig file")
 	cmd.PersistentFlags().StringP("config", "c", "", "target configuration file")
+	cmd.PersistentFlags().StringP("crd-version", "v", "v1alpha1", "Policy Reporter CRD Version")
 
 	cmd.PersistentFlags().String("loki", "", "loki host: http://loki:3100")
 	cmd.PersistentFlags().String("loki-minimum-priority", "", "Minimum Priority to send Results to Loki (info < warning < critical < error)")
