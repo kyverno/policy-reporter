@@ -131,7 +131,14 @@ func (c *policyReportClient) RegisterPolicyResultWatcher(skipExisting bool) {
 					break
 				}
 
-				c.modifyHash[pr.GetIdentifier()] = pr.ResultHash()
+				newHash := pr.ResultHash()
+				if hash, ok := c.modifyHash[pr.GetIdentifier()]; ok {
+					if newHash == hash {
+						break
+					}
+				}
+
+				c.modifyHash[pr.GetIdentifier()] = newHash
 
 				preExisted := pr.CreationTimestamp.Before(c.startUp)
 
