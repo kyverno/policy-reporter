@@ -2,6 +2,11 @@
 
 ## 1.2.3
 
+* New Helm Configuration
+    * `crdVersion` changes the version of the PolicyReporter CRD - v1alpha1 is the current default
+
+## 1.2.3
+
 * Fix resend violations after KubeAPI reconnect
 
 ## 1.2.2
