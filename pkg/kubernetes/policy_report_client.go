@@ -11,6 +11,53 @@ import (
 	"k8s.io/apimachinery/pkg/watch"
 )
 
+type policyReportEvent struct {
+	report    report.PolicyReport
+	eventType watch.EventType
+}
+
+type policyReportEventDebouncer struct {
+	events  map[string]policyReportEvent
+	channel chan<- policyReportEvent
+	mutx    *sync.Mutex
+}
+
+func (d *policyReportEventDebouncer) Add(e policyReportEvent) {
+	if e.eventType != watch.Modified {
+		d.channel <- e
+		return
+	}
+
+	_, ok := d.events[e.report.GetIdentifier()]
+
+	if len(e.report.Results) == 0 && !ok {
+		d.mutx.Lock()
+		d.events[e.report.GetIdentifier()] = e
+		d.mutx.Unlock()
+
+		go func() {
+			time.Sleep(10 * time.Second)
+
+			d.mutx.Lock()
+			d.channel <- d.events[e.report.GetIdentifier()]
+			delete(d.events, e.report.GetIdentifier())
+			d.mutx.Unlock()
+		}()
+
+		return
+	}
+
+	if ok {
+		d.mutx.Lock()
+		d.events[e.report.GetIdentifier()] = e
+		d.mutx.Unlock()
+
+		return
+	}
+
+	d.channel <- e
+}
+
 type policyReportClient struct {
 	policyAPI       PolicyReportAdapter
 	store           *report.PolicyReportStore
@@ -20,7 +67,7 @@ type policyReportClient struct {
 	startUp         time.Time
 	skipExisting    bool
 	started         bool
-	modifyHash      map[string]uint64
+	modifyHash      map[string]string
 }
 
 func (c *policyReportClient) RegisterCallback(cb report.PolicyReportCallback) {
@@ -70,28 +117,51 @@ func (c *policyReportClient) StartWatching() error {
 	}
 
 	c.started = true
+	reportChan := make(chan policyReportEvent)
+	errorChan := make(chan error)
 
-	for {
-		result, err := c.policyAPI.WatchPolicyReports()
-		if err != nil {
-			c.started = false
-			return err
-		}
-
-		for result := range result.ResultChan() {
-			if item, ok := result.Object.(*unstructured.Unstructured); ok {
-				c.executePolicyReportHandler(result.Type, c.mapper.MapPolicyReport(item.Object))
+	go func() {
+		for {
+			result, err := c.policyAPI.WatchPolicyReports()
+			if err != nil {
+				c.started = false
+				errorChan <- err
 			}
+
+			debouncer := policyReportEventDebouncer{
+				events:  make(map[string]policyReportEvent, 0),
+				mutx:    new(sync.Mutex),
+				channel: reportChan,
+			}
+
+			for result := range result.ResultChan() {
+				if item, ok := result.Object.(*unstructured.Unstructured); ok {
+					report := c.mapper.MapPolicyReport(item.Object)
+					debouncer.Add(policyReportEvent{report, result.Type})
+				}
+			}
+
+			// skip existing results when the watcher restarts
+			c.skipExisting = true
+		}
+	}()
+
+	go func() {
+		for event := range reportChan {
+			c.executePolicyReportHandler(event.eventType, event.report)
 		}
 
-		// skip existing results when the watcher restarts
-		c.skipExisting = true
-	}
+		errorChan <- errors.New("Report Channel closed")
+	}()
+
+	return <-errorChan
 }
 
 func (c *policyReportClient) executePolicyReportHandler(e watch.EventType, pr report.PolicyReport) {
+	log.Printf("[INFO] New Event %s for %s", e, pr.Name)
 	opr, ok := c.store.Get(pr.GetIdentifier())
 	if !ok {
+		log.Printf("[INFO] No previous Report for %s found", pr.Name)
 		opr = report.PolicyReport{}
 	}
 
@@ -205,6 +275,6 @@ func NewPolicyReportClient(client PolicyReportAdapter, store *report.PolicyRepor
 		store:      store,
 		mapper:     mapper,
 		startUp:    startUp,
-		modifyHash: make(map[string]uint64),
+		modifyHash: make(map[string]string),
 	}
 }
