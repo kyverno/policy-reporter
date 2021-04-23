@@ -36,6 +36,11 @@ var testConfig = &config.Config{
 		SkipExisting:    true,
 		MinimumPriority: "debug",
 	},
+	UI: config.UI{
+		Host:            "http://localhost:8080",
+		SkipExisting:    true,
+		MinimumPriority: "debug",
+	},
 }
 
 func Test_ResolveTarget(t *testing.T) {
@@ -102,8 +107,8 @@ func Test_ResolveTargets(t *testing.T) {
 	resolver := config.NewResolver(testConfig, nil)
 
 	clients := resolver.TargetClients()
-	if count := len(clients); count != 5 {
-		t.Errorf("Expected 5 Clients, got %d", count)
+	if count := len(clients); count != 6 {
+		t.Errorf("Expected 6 Clients, got %d", count)
 	}
 }
 
