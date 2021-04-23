@@ -11,6 +11,7 @@ import (
 	"github.com/fjogeleit/policy-reporter/pkg/report"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
+	"k8s.io/apimachinery/pkg/watch"
 )
 
 func Test_FetchPolicyReports(t *testing.T) {
@@ -296,6 +297,67 @@ func Test_PolicyWatchDeleteEvent(t *testing.T) {
 	if len(results) != 2 {
 		t.Error("Should receive initial 2 and no result from deletion")
 	}
+}
+
+func Test_PolicyDelayReset(t *testing.T) {
+	_, k8sCMClient := newFakeAPI()
+	k8sCMClient.Create(context.Background(), configMap, metav1.CreateOptions{})
+	fakeAdapter := NewPolicyReportAdapter()
+
+	client := kubernetes.NewPolicyReportClient(
+		fakeAdapter,
+		report.NewPolicyReportStore(),
+		NewMapper(k8sCMClient),
+		time.Now(),
+	)
+
+	client.RegisterPolicyResultWatcher(false)
+
+	wg := sync.WaitGroup{}
+	wg.Add(2)
+
+	client.RegisterCallback(func(e watch.EventType, r report.PolicyReport, o report.PolicyReport) {
+		wg.Done()
+	})
+
+	go client.StartWatching()
+
+	fakeAdapter.policyWatcher.Add(&unstructured.Unstructured{Object: policyMap})
+	fakeAdapter.policyWatcher.Modify(&unstructured.Unstructured{Object: minPolicyMap})
+	fakeAdapter.policyWatcher.Modify(&unstructured.Unstructured{Object: policyMap})
+	fakeAdapter.policyWatcher.Delete(&unstructured.Unstructured{Object: policyMap})
+
+	wg.Wait()
+}
+
+func Test_PolicyDelayWithoutClearEvent(t *testing.T) {
+	_, k8sCMClient := newFakeAPI()
+	k8sCMClient.Create(context.Background(), configMap, metav1.CreateOptions{})
+	fakeAdapter := NewPolicyReportAdapter()
+
+	client := kubernetes.NewPolicyReportClient(
+		fakeAdapter,
+		report.NewPolicyReportStore(),
+		NewMapper(k8sCMClient),
+		time.Now(),
+	)
+
+	client.RegisterPolicyResultWatcher(false)
+
+	wg := sync.WaitGroup{}
+	wg.Add(3)
+
+	client.RegisterCallback(func(e watch.EventType, r report.PolicyReport, o report.PolicyReport) {
+		wg.Done()
+	})
+
+	go client.StartWatching()
+
+	fakeAdapter.policyWatcher.Add(&unstructured.Unstructured{Object: policyMap})
+	fakeAdapter.policyWatcher.Modify(&unstructured.Unstructured{Object: policyMap})
+	fakeAdapter.policyWatcher.Delete(&unstructured.Unstructured{Object: policyMap})
+
+	wg.Wait()
 }
 
 func Test_PolicyWatchModifiedEvent(t *testing.T) {

@@ -23,12 +23,17 @@ type policyReportEventDebouncer struct {
 }
 
 func (d *policyReportEventDebouncer) Add(e policyReportEvent) {
+	_, ok := d.events[e.report.GetIdentifier()]
+	if e.eventType != watch.Modified && ok {
+		d.mutx.Lock()
+		delete(d.events, e.report.GetIdentifier())
+		d.mutx.Unlock()
+	}
+
 	if e.eventType != watch.Modified {
 		d.channel <- e
 		return
 	}
-
-	_, ok := d.events[e.report.GetIdentifier()]
 
 	if len(e.report.Results) == 0 && !ok {
 		d.mutx.Lock()
@@ -39,8 +44,10 @@ func (d *policyReportEventDebouncer) Add(e policyReportEvent) {
 			time.Sleep(10 * time.Second)
 
 			d.mutx.Lock()
-			d.channel <- d.events[e.report.GetIdentifier()]
-			delete(d.events, e.report.GetIdentifier())
+			if event, ok := d.events[e.report.GetIdentifier()]; ok {
+				d.channel <- event
+				delete(d.events, e.report.GetIdentifier())
+			}
 			d.mutx.Unlock()
 		}()
 

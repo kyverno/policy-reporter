@@ -299,6 +299,67 @@ func Test_WatchDeleteEvent(t *testing.T) {
 	}
 }
 
+func Test_WatchDelayEvents(t *testing.T) {
+	_, k8sCMClient := newFakeAPI()
+	k8sCMClient.Create(context.Background(), configMap, metav1.CreateOptions{})
+	fakeAdapter := NewPolicyReportAdapter()
+
+	client := kubernetes.NewClusterPolicyReportClient(
+		fakeAdapter,
+		report.NewClusterPolicyReportStore(),
+		NewMapper(k8sCMClient),
+		time.Now(),
+	)
+
+	client.RegisterPolicyResultWatcher(false)
+
+	wg := sync.WaitGroup{}
+	wg.Add(2)
+
+	client.RegisterCallback(func(e watch.EventType, r report.ClusterPolicyReport, o report.ClusterPolicyReport) {
+		wg.Done()
+	})
+
+	go client.StartWatching()
+
+	fakeAdapter.clusterPolicyWatcher.Add(&unstructured.Unstructured{Object: clusterPolicyMap})
+	fakeAdapter.clusterPolicyWatcher.Modify(&unstructured.Unstructured{Object: minClusterPolicyMap})
+	fakeAdapter.clusterPolicyWatcher.Modify(&unstructured.Unstructured{Object: clusterPolicyMap})
+	fakeAdapter.clusterPolicyWatcher.Delete(&unstructured.Unstructured{Object: clusterPolicyMap})
+
+	wg.Wait()
+}
+
+func Test_WatchDelayEventsWithoutClearEvent(t *testing.T) {
+	_, k8sCMClient := newFakeAPI()
+	k8sCMClient.Create(context.Background(), configMap, metav1.CreateOptions{})
+	fakeAdapter := NewPolicyReportAdapter()
+
+	client := kubernetes.NewClusterPolicyReportClient(
+		fakeAdapter,
+		report.NewClusterPolicyReportStore(),
+		NewMapper(k8sCMClient),
+		time.Now(),
+	)
+
+	client.RegisterPolicyResultWatcher(false)
+
+	wg := sync.WaitGroup{}
+	wg.Add(3)
+
+	client.RegisterCallback(func(e watch.EventType, r report.ClusterPolicyReport, o report.ClusterPolicyReport) {
+		wg.Done()
+	})
+
+	go client.StartWatching()
+
+	fakeAdapter.clusterPolicyWatcher.Add(&unstructured.Unstructured{Object: clusterPolicyMap})
+	fakeAdapter.clusterPolicyWatcher.Modify(&unstructured.Unstructured{Object: clusterPolicyMap})
+	fakeAdapter.clusterPolicyWatcher.Delete(&unstructured.Unstructured{Object: clusterPolicyMap})
+
+	wg.Wait()
+}
+
 func Test_WatchModifiedEvent(t *testing.T) {
 	_, k8sCMClient := newFakeAPI()
 	k8sCMClient.Create(context.Background(), configMap, metav1.CreateOptions{})
