@@ -2,11 +2,12 @@ package report
 
 import (
 	"bytes"
+	"crypto/sha1"
+	"encoding/hex"
 	"fmt"
 	"sort"
+	"strings"
 	"time"
-
-	"github.com/mitchellh/hashstructure/v2"
 )
 
 // Status Enum defined for PolicyReport
@@ -179,7 +180,7 @@ func (pr PolicyReport) GetIdentifier() string {
 }
 
 // ResultHash generates a has of the current result set
-func (pr PolicyReport) ResultHash() uint64 {
+func (pr PolicyReport) ResultHash() string {
 	list := make([]string, 0, len(pr.Results))
 
 	for id := range pr.Results {
@@ -188,12 +189,10 @@ func (pr PolicyReport) ResultHash() uint64 {
 
 	sort.Strings(list)
 
-	hash, err := hashstructure.Hash(list, hashstructure.FormatV2, nil)
-	if err != nil {
-		return 0
-	}
+	h := sha1.New()
+	h.Write([]byte(strings.Join(list, "")))
 
-	return hash
+	return hex.EncodeToString(h.Sum(nil))
 }
 
 // GetNewResults filters already existing Results from the old PolicyReport and returns only the diff with new Results
@@ -240,7 +239,7 @@ func (cr ClusterPolicyReport) GetNewResults(cor ClusterPolicyReport) []Result {
 }
 
 // ResultHash generates a has of the current result set
-func (cr ClusterPolicyReport) ResultHash() uint64 {
+func (cr ClusterPolicyReport) ResultHash() string {
 	list := make([]string, 0, len(cr.Results))
 
 	for id := range cr.Results {
@@ -249,10 +248,8 @@ func (cr ClusterPolicyReport) ResultHash() uint64 {
 
 	sort.Strings(list)
 
-	hash, err := hashstructure.Hash(list, hashstructure.FormatV2, nil)
-	if err != nil {
-		return 0
-	}
+	h := sha1.New()
+	h.Write([]byte(strings.Join(list, "")))
 
-	return hash
+	return hex.EncodeToString(h.Sum(nil))
 }

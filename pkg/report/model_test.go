@@ -89,8 +89,8 @@ func Test_PolicyReport(t *testing.T) {
 		preport.Results = map[string]report.Result{result1.GetIdentifier(): result1, result2.GetIdentifier(): result2}
 
 		hash := preport.ResultHash()
-		if hash != 5971778764232883205 {
-			t.Error("Expected '5971778764232883205' new result in diff")
+		if hash != "cd4a0ebefa915f33649db99063c182488403bb4c" {
+			t.Errorf("Expected 'cd4a0ebefa915f33649db99063c182488403bb4c', got %s", hash)
 		}
 	})
 
@@ -132,8 +132,8 @@ func Test_ClusterPolicyReport(t *testing.T) {
 		report1.Results = map[string]report.Result{result1.GetIdentifier(): result1, result2.GetIdentifier(): result2}
 
 		hash := report1.ResultHash()
-		if hash != 5971778764232883205 {
-			t.Error("Expected '5971778764232883205' new result in diff")
+		if hash != "cd4a0ebefa915f33649db99063c182488403bb4c" {
+			t.Errorf("Expected 'cd4a0ebefa915f33649db99063c182488403bb4c', got %s", hash)
 		}
 	})
 

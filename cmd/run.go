@@ -11,7 +11,6 @@ import (
 	"github.com/fjogeleit/policy-reporter/pkg/target"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/spf13/cobra"
-	"golang.org/x/sync/errgroup"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
 )
@@ -74,21 +73,22 @@ func newRunCMD() *cobra.Command {
 				rClient.RegisterPolicyResultWatcher(resolver.SkipExistingOnStartup())
 			}
 
-			g := new(errgroup.Group)
+			errorChan := make(chan error)
 
 			if c.API.Enabled {
-				g.Go(resolver.APIServer().Start)
+				go func() { errorChan <- resolver.APIServer().Start() }()
 			}
 
-			g.Go(cpClient.StartWatching)
-			g.Go(pClient.StartWatching)
-			g.Go(func() error {
+			go func() { errorChan <- cpClient.StartWatching() }()
+			go func() { errorChan <- pClient.StartWatching() }()
+
+			go func() {
 				http.Handle("/metrics", promhttp.Handler())
 
-				return http.ListenAndServe(":2112", nil)
-			})
+				errorChan <- http.ListenAndServe(":2112", nil)
+			}()
 
-			return g.Wait()
+			return <-errorChan
 		},
 	}
 
