@@ -1,6 +1,10 @@
 # Changelog
 
-## 1.2.3
+## 1.3.1
+
+* Debounce reconcile modification events for 10s to prevent resending violations
+
+## 1.3.0
 
 * New Helm Configuration
     * `crdVersion` changes the version of the PolicyReporter CRD - v1alpha1 is the current default
