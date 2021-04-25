@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.3.2
+
+* Compress REST API with GZIP
+* Update Policy Reporter UI to 0.8.0
+    * Support for GZIP Responses
+
 ## 1.3.1
 
 * Debounce reconcile modification events for 10s to prevent resending violations

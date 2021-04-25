@@ -4,6 +4,6 @@ dependencies:
   version: 1.1.0
 - name: ui
   repository: ""
-  version: 1.1.0
-digest: sha256:0240e537ce9603e3d2b8edf73ac16e547f7169edbeb7ba76b70cdaf3feab34d1
-generated: "2021-04-10T10:51:37.534358+02:00"
+  version: 1.2.0
+digest: sha256:830488c5f8aa663dbd956542997a90bff7a4e157ce3df2be3628ca6bfb8352ed
+generated: "2021-04-25T12:07:33.278698+02:00"
