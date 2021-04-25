@@ -38,7 +38,7 @@ func Test_GzipCompression(t *testing.T) {
 			t.Errorf("handler returned unexpected body: got %v want %v", buf.String(), expected)
 		}
 	})
-	t.Run("UNcompressed Respose", func(t *testing.T) {
+	t.Run("Uncompressed Respose", func(t *testing.T) {
 		req, err := http.NewRequest("GET", "/targets", nil)
 		if err != nil {
 			t.Fatal(err)
