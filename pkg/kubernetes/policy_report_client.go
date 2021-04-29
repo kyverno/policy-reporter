@@ -165,10 +165,8 @@ func (c *policyReportClient) StartWatching() error {
 }
 
 func (c *policyReportClient) executePolicyReportHandler(e watch.EventType, pr report.PolicyReport) {
-	log.Printf("[INFO] New Event %s for %s", e, pr.Name)
 	opr, ok := c.store.Get(pr.GetIdentifier())
 	if !ok {
-		log.Printf("[INFO] No previous Report for %s found", pr.Name)
 		opr = report.PolicyReport{}
 	}
 
