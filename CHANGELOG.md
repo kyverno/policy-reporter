@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.3.3
+
+* Update Policy Reporter UI to v0.9.0
+    * expand Tables with Validation Message
+* Reduce log messages
+
 ## 1.3.2
 
 * Compress REST API with GZIP

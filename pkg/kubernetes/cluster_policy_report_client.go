@@ -165,10 +165,8 @@ func (c *clusterPolicyReportClient) StartWatching() error {
 }
 
 func (c *clusterPolicyReportClient) executeClusterPolicyReportHandler(e watch.EventType, cpr report.ClusterPolicyReport) {
-	log.Printf("[INFO] New Event %s for %s", e, cpr.Name)
 	opr, ok := c.store.Get(cpr.GetIdentifier())
 	if !ok {
-		log.Printf("[INFO] No previous Report for %s found", cpr.Name)
 		opr = report.ClusterPolicyReport{}
 	}
 

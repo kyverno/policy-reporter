@@ -7,7 +7,7 @@ log:
 image:
   repository: fjogeleit/policy-reporter-ui
   pullPolicy: IfNotPresent
-  tag: 0.8.0
+  tag: 0.9.0
 
 imagePullSecrets: []
 
