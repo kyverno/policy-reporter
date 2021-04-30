@@ -52,14 +52,15 @@ type API struct {
 
 // Config of the PolicyReporter
 type Config struct {
-	Loki          Loki          `mapstructure:"loki"`
-	Elasticsearch Elasticsearch `mapstructure:"elasticsearch"`
-	Slack         Slack         `mapstructure:"slack"`
-	Discord       Discord       `mapstructure:"discord"`
-	Teams         Teams         `mapstructure:"teams"`
-	UI            UI            `mapstructure:"ui"`
-	API           API           `mapstructure:"api"`
-	Kubeconfig    string        `mapstructure:"kubeconfig"`
-	Namespace     string        `mapstructure:"namespace"`
-	CRDVersion    string        `mapstructure:"crdVersion"`
+	Loki                Loki          `mapstructure:"loki"`
+	Elasticsearch       Elasticsearch `mapstructure:"elasticsearch"`
+	Slack               Slack         `mapstructure:"slack"`
+	Discord             Discord       `mapstructure:"discord"`
+	Teams               Teams         `mapstructure:"teams"`
+	UI                  UI            `mapstructure:"ui"`
+	API                 API           `mapstructure:"api"`
+	Kubeconfig          string        `mapstructure:"kubeconfig"`
+	Namespace           string        `mapstructure:"namespace"`
+	CRDVersion          string        `mapstructure:"crdVersion"`
+	CleanupDebounceTime int           `mapstructure:"cleanupDebounceTime"`
 }

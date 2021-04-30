@@ -25,6 +25,7 @@ func Test_FetchPolicyReports(t *testing.T) {
 		report.NewPolicyReportStore(),
 		NewMapper(k8sCMClient),
 		time.Now(),
+		10,
 	)
 
 	fakeAdapter.policies = append(fakeAdapter.policies, unstructured.Unstructured{Object: policyMap})
@@ -58,6 +59,7 @@ func Test_FetchPolicyReportsError(t *testing.T) {
 		report.NewPolicyReportStore(),
 		NewMapper(k8sCMClient),
 		time.Now(),
+		10,
 	)
 
 	_, err := client.FetchPolicyReports()
@@ -77,6 +79,7 @@ func Test_FetchPolicyResults(t *testing.T) {
 		report.NewPolicyReportStore(),
 		NewMapper(k8sCMClient),
 		time.Now(),
+		10,
 	)
 
 	fakeAdapter.policies = append(fakeAdapter.policies, unstructured.Unstructured{Object: policyMap})
@@ -102,6 +105,7 @@ func Test_FetchPolicyResultsError(t *testing.T) {
 		report.NewPolicyReportStore(),
 		NewMapper(k8sCMClient),
 		time.Now(),
+		10,
 	)
 
 	_, err := client.FetchPolicyResults()
@@ -120,6 +124,7 @@ func Test_PolicyWatcher(t *testing.T) {
 		report.NewPolicyReportStore(),
 		NewMapper(k8sCMClient),
 		time.Now(),
+		10,
 	)
 
 	client.RegisterPolicyResultWatcher(false)
@@ -155,6 +160,7 @@ func Test_PolicyWatcherTwice(t *testing.T) {
 		report.NewPolicyReportStore(),
 		NewMapper(k8sCMClient),
 		time.Now(),
+		10,
 	)
 
 	go client.StartWatching()
@@ -212,6 +218,7 @@ func Test_PolicySkipExisting(t *testing.T) {
 		report.NewPolicyReportStore(),
 		NewMapper(k8sCMClient),
 		time.Now(),
+		10,
 	)
 
 	client.RegisterPolicyResultWatcher(true)
@@ -253,6 +260,7 @@ func Test_PolicyWatcherError(t *testing.T) {
 		report.NewPolicyReportStore(),
 		NewMapper(k8sCMClient),
 		time.Now(),
+		10,
 	)
 
 	client.RegisterPolicyResultWatcher(false)
@@ -273,6 +281,7 @@ func Test_PolicyWatchDeleteEvent(t *testing.T) {
 		report.NewPolicyReportStore(),
 		NewMapper(k8sCMClient),
 		time.Now(),
+		10,
 	)
 
 	client.RegisterPolicyResultWatcher(false)
@@ -309,6 +318,7 @@ func Test_PolicyDelayReset(t *testing.T) {
 		report.NewPolicyReportStore(),
 		NewMapper(k8sCMClient),
 		time.Now(),
+		10,
 	)
 
 	client.RegisterPolicyResultWatcher(false)
@@ -340,6 +350,7 @@ func Test_PolicyDelayWithoutClearEvent(t *testing.T) {
 		report.NewPolicyReportStore(),
 		NewMapper(k8sCMClient),
 		time.Now(),
+		10,
 	)
 
 	client.RegisterPolicyResultWatcher(false)
@@ -370,6 +381,7 @@ func Test_PolicyWatchModifiedEvent(t *testing.T) {
 		report.NewPolicyReportStore(),
 		NewMapper(k8sCMClient),
 		time.Now(),
+		10,
 	)
 
 	client.RegisterPolicyResultWatcher(false)
