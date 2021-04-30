@@ -113,6 +113,7 @@ func (r *Resolver) PolicyReportClient(ctx context.Context) (report.PolicyClient,
 		r.PolicyReportStore(),
 		mapper,
 		time.Now(),
+		time.Duration(r.config.CleanupDebounceTime),
 	)
 
 	r.policyClient = client
@@ -141,6 +142,7 @@ func (r *Resolver) ClusterPolicyReportClient(ctx context.Context) (report.Cluste
 		r.ClusterPolicyReportStore(),
 		mapper,
 		time.Now(),
+		time.Duration(r.config.CleanupDebounceTime),
 	)
 
 	return r.clusterPolicyClient, nil

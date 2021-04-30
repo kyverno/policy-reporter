@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.3.4
+
+* Configure Debounce Time in seconds for Cleanup Events over Helm Chart
+    * Helm Value `cleanupDebounceTime` - default: 20
+* Improved securityContext defaults
+
 ## 1.3.3
 
 * Update Policy Reporter UI to v0.9.0

@@ -67,6 +67,10 @@ func loadConfig(cmd *cobra.Command) (*config.Config, error) {
 		v.BindPFlag("crdVersion", flag)
 	}
 
+	if flag := cmd.Flags().Lookup("cleanup-debounce-time"); flag != nil {
+		v.BindPFlag("cleanupDebounceTime", flag)
+	}
+
 	if flag := cmd.Flags().Lookup("apiPort"); flag != nil {
 		v.BindPFlag("api.port", flag)
 		v.BindPFlag("api.enabled", flag)

@@ -17,9 +17,10 @@ type clusterPolicyReportEvent struct {
 }
 
 type clusterPolicyReportEventDebouncer struct {
-	events  map[string]clusterPolicyReportEvent
-	channel chan<- clusterPolicyReportEvent
-	mutx    *sync.Mutex
+	events       map[string]clusterPolicyReportEvent
+	channel      chan clusterPolicyReportEvent
+	mutx         *sync.Mutex
+	debounceTime time.Duration
 }
 
 func (d *clusterPolicyReportEventDebouncer) Add(e clusterPolicyReportEvent) {
@@ -41,7 +42,7 @@ func (d *clusterPolicyReportEventDebouncer) Add(e clusterPolicyReportEvent) {
 		d.mutx.Unlock()
 
 		go func() {
-			time.Sleep(10 * time.Second)
+			time.Sleep(d.debounceTime * time.Second)
 
 			d.mutx.Lock()
 			if event, ok := d.events[e.report.GetIdentifier()]; ok {
@@ -65,6 +66,16 @@ func (d *clusterPolicyReportEventDebouncer) Add(e clusterPolicyReportEvent) {
 	d.channel <- e
 }
 
+func (d *clusterPolicyReportEventDebouncer) Reset() {
+	d.mutx.Lock()
+	d.events = make(map[string]clusterPolicyReportEvent)
+	d.mutx.Unlock()
+}
+
+func (d *clusterPolicyReportEventDebouncer) ReportChan() chan clusterPolicyReportEvent {
+	return d.channel
+}
+
 type clusterPolicyReportClient struct {
 	policyAPI       PolicyReportAdapter
 	store           *report.ClusterPolicyReportStore
@@ -75,6 +86,7 @@ type clusterPolicyReportClient struct {
 	skipExisting    bool
 	started         bool
 	modifyHash      map[string]string
+	debouncer       clusterPolicyReportEventDebouncer
 }
 
 func (c *clusterPolicyReportClient) RegisterCallback(cb report.ClusterPolicyReportCallback) {
@@ -124,8 +136,6 @@ func (c *clusterPolicyReportClient) StartWatching() error {
 	}
 
 	c.started = true
-	reportChan := make(chan clusterPolicyReportEvent)
-
 	errorChan := make(chan error)
 	go func() {
 		for {
@@ -135,16 +145,12 @@ func (c *clusterPolicyReportClient) StartWatching() error {
 				errorChan <- err
 			}
 
-			debouncer := clusterPolicyReportEventDebouncer{
-				events:  make(map[string]clusterPolicyReportEvent, 0),
-				mutx:    new(sync.Mutex),
-				channel: reportChan,
-			}
+			c.debouncer.Reset()
 
 			for result := range result.ResultChan() {
 				if item, ok := result.Object.(*unstructured.Unstructured); ok {
 					report := c.mapper.MapClusterPolicyReport(item.Object)
-					debouncer.Add(clusterPolicyReportEvent{report, result.Type})
+					c.debouncer.Add(clusterPolicyReportEvent{report, result.Type})
 				}
 			}
 
@@ -154,7 +160,7 @@ func (c *clusterPolicyReportClient) StartWatching() error {
 	}()
 
 	go func() {
-		for event := range reportChan {
+		for event := range c.debouncer.ReportChan() {
 			c.executeClusterPolicyReportHandler(event.eventType, event.report)
 		}
 
@@ -273,12 +279,24 @@ func (c *clusterPolicyReportClient) RegisterPolicyResultWatcher(skipExisting boo
 }
 
 // NewPolicyReportClient creates a new PolicyReportClient based on the kubernetes go-client
-func NewClusterPolicyReportClient(client PolicyReportAdapter, store *report.ClusterPolicyReportStore, mapper Mapper, startUp time.Time) report.ClusterPolicyClient {
+func NewClusterPolicyReportClient(
+	client PolicyReportAdapter,
+	store *report.ClusterPolicyReportStore,
+	mapper Mapper,
+	startUp time.Time,
+	debounceTime time.Duration,
+) report.ClusterPolicyClient {
 	return &clusterPolicyReportClient{
 		policyAPI:  client,
 		store:      store,
 		mapper:     mapper,
 		startUp:    startUp,
 		modifyHash: make(map[string]string),
+		debouncer: clusterPolicyReportEventDebouncer{
+			events:       make(map[string]clusterPolicyReportEvent, 0),
+			mutx:         new(sync.Mutex),
+			channel:      make(chan clusterPolicyReportEvent),
+			debounceTime: debounceTime,
+		},
 	}
 }

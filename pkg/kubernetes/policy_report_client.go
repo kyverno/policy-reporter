@@ -17,9 +17,10 @@ type policyReportEvent struct {
 }
 
 type policyReportEventDebouncer struct {
-	events  map[string]policyReportEvent
-	channel chan<- policyReportEvent
-	mutx    *sync.Mutex
+	events       map[string]policyReportEvent
+	channel      chan policyReportEvent
+	mutx         *sync.Mutex
+	debounceTime time.Duration
 }
 
 func (d *policyReportEventDebouncer) Add(e policyReportEvent) {
@@ -41,7 +42,7 @@ func (d *policyReportEventDebouncer) Add(e policyReportEvent) {
 		d.mutx.Unlock()
 
 		go func() {
-			time.Sleep(10 * time.Second)
+			time.Sleep(d.debounceTime * time.Second)
 
 			d.mutx.Lock()
 			if event, ok := d.events[e.report.GetIdentifier()]; ok {
@@ -65,6 +66,16 @@ func (d *policyReportEventDebouncer) Add(e policyReportEvent) {
 	d.channel <- e
 }
 
+func (d *policyReportEventDebouncer) Reset() {
+	d.mutx.Lock()
+	d.events = make(map[string]policyReportEvent)
+	d.mutx.Unlock()
+}
+
+func (d *policyReportEventDebouncer) ReportChan() chan policyReportEvent {
+	return d.channel
+}
+
 type policyReportClient struct {
 	policyAPI       PolicyReportAdapter
 	store           *report.PolicyReportStore
@@ -75,6 +86,7 @@ type policyReportClient struct {
 	skipExisting    bool
 	started         bool
 	modifyHash      map[string]string
+	debouncer       policyReportEventDebouncer
 }
 
 func (c *policyReportClient) RegisterCallback(cb report.PolicyReportCallback) {
@@ -124,7 +136,6 @@ func (c *policyReportClient) StartWatching() error {
 	}
 
 	c.started = true
-	reportChan := make(chan policyReportEvent)
 	errorChan := make(chan error)
 
 	go func() {
@@ -135,16 +146,12 @@ func (c *policyReportClient) StartWatching() error {
 				errorChan <- err
 			}
 
-			debouncer := policyReportEventDebouncer{
-				events:  make(map[string]policyReportEvent, 0),
-				mutx:    new(sync.Mutex),
-				channel: reportChan,
-			}
+			c.debouncer.Reset()
 
 			for result := range result.ResultChan() {
 				if item, ok := result.Object.(*unstructured.Unstructured); ok {
 					report := c.mapper.MapPolicyReport(item.Object)
-					debouncer.Add(policyReportEvent{report, result.Type})
+					c.debouncer.Add(policyReportEvent{report, result.Type})
 				}
 			}
 
@@ -154,7 +161,7 @@ func (c *policyReportClient) StartWatching() error {
 	}()
 
 	go func() {
-		for event := range reportChan {
+		for event := range c.debouncer.ReportChan() {
 			c.executePolicyReportHandler(event.eventType, event.report)
 		}
 
@@ -274,12 +281,24 @@ func (c *policyReportClient) RegisterPolicyResultWatcher(skipExisting bool) {
 }
 
 // NewPolicyReportClient creates a new PolicyReportClient based on the kubernetes go-client
-func NewPolicyReportClient(client PolicyReportAdapter, store *report.PolicyReportStore, mapper Mapper, startUp time.Time) report.PolicyClient {
+func NewPolicyReportClient(
+	client PolicyReportAdapter,
+	store *report.PolicyReportStore,
+	mapper Mapper,
+	startUp time.Time,
+	debounceTime time.Duration,
+) report.PolicyClient {
 	return &policyReportClient{
 		policyAPI:  client,
 		store:      store,
 		mapper:     mapper,
 		startUp:    startUp,
 		modifyHash: make(map[string]string),
+		debouncer: policyReportEventDebouncer{
+			events:       make(map[string]policyReportEvent, 0),
+			mutx:         new(sync.Mutex),
+			channel:      make(chan policyReportEvent),
+			debounceTime: debounceTime,
+		},
 	}
 }

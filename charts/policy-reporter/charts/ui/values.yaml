@@ -19,13 +19,15 @@ deploymentStrategy: {}
   #  maxUnavailable: 25%
   # type: RollingUpdate
 
-securityContext: {}
-  # capabilities:
-  #   drop:
-  #   - ALL
-  # readOnlyRootFilesystem: true
-  # runAsNonRoot: true
-  # runAsUser: 1000
+securityContext:
+  runAsUser: 1234
+  runAsNonRoot: true
+  privileged: false
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: true
+  capabilities:
+    drop:
+      - all
 
 # Key/value pairs that are attached to pods.
 podAnnotations: {}

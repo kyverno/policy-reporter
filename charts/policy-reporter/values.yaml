@@ -1,7 +1,7 @@
 image:
   repository: fjogeleit/policy-reporter
   pullPolicy: IfNotPresent
-  tag: 1.3.2
+  tag: 1.3.4
 
 imagePullSecrets: []
 
@@ -43,13 +43,15 @@ service:
   # integer nubmer. This is port for service
   port: 2112
 
-securityContext: {}
-  # capabilities:
-  #   drop:
-  #   - ALL
-  # readOnlyRootFilesystem: true
-  # runAsNonRoot: true
-  # runAsUser: 1000
+securityContext:
+  runAsUser: 1234
+  runAsNonRoot: true
+  privileged: false
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: true
+  capabilities:
+    drop:
+      - all
 
 # Key/value pairs that are attached to pods.
 podAnnotations: {}
@@ -89,6 +91,13 @@ global:
 
 # PolicyReport CRD Version to use
 crdVersion: v1alpha1
+
+# Dounce Time in seconds for Modify Events after a cleanup event (Report with 0 Results)
+# Used to prevent Policy Reporter from resending existing violations after Kyverno recreates PolicyReports
+# When an existing Report get an Modify Event with 0 results it waits for the defined amount of time
+# for new Report Events and process the latest incomming Event for this Report which should be the complete recreated Report
+# the required amount of time can be different depending on the amount of validated resources and policies
+cleanupDebounceTime: 20
 
 api:
   enabled: false

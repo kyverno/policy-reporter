@@ -3,6 +3,7 @@ package cmd
 import (
 	"context"
 	"flag"
+	"log"
 	"net/http"
 
 	"github.com/fjogeleit/policy-reporter/pkg/config"
@@ -24,6 +25,8 @@ func newRunCMD() *cobra.Command {
 			if err != nil {
 				return err
 			}
+
+			log.Printf("[INFO] Configured DebounceTime %d", c.CleanupDebounceTime)
 
 			var k8sConfig *rest.Config
 			if c.Kubeconfig != "" {
@@ -96,6 +99,7 @@ func newRunCMD() *cobra.Command {
 	cmd.PersistentFlags().StringP("kubeconfig", "k", "", "absolute path to the kubeconfig file")
 	cmd.PersistentFlags().StringP("config", "c", "", "target configuration file")
 	cmd.PersistentFlags().StringP("crd-version", "v", "v1alpha1", "Policy Reporter CRD Version")
+	cmd.PersistentFlags().IntP("cleanup-debounce-time", "t", 20, "DebounceTime in Seconds after a Report cleanup started.")
 	cmd.PersistentFlags().IntP("apiPort", "a", 0, "http port for the optional rest api")
 
 	cmd.PersistentFlags().String("loki", "", "loki host: http://loki:3100")
