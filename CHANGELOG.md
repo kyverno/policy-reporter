@@ -4,6 +4,7 @@
 
 * Configure Debounce Time in seconds for Cleanup Events over Helm Chart
     * Helm Value `cleanupDebounceTime` - default: 20
+* Improved securityContext defaults
 
 ## 1.3.3
 
