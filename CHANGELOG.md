@@ -1,5 +1,8 @@
 # Changelog
 
+# 1.4.0
+* Add Kyverno Plugins to the Helm Chart
+
 ## 1.3.4
 
 * Configure Debounce Time in seconds for Cleanup Events over Helm Chart

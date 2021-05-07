@@ -84,6 +84,10 @@ monitoring:
     labels: {}
 
 global:
+  # availale plugins
+  plugins:
+    # enable kyverno for Policy Reporter UI and monitoring
+    keyverno: false
   # The name of service policy-report. If you changed ReleaseName you have to replace it
   backend: policy-reporter
   # Service Port number

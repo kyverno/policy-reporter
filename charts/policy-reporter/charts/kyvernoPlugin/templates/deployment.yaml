@@ -1,9 +1,9 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "ui.fullname" . }}
+  name: {{ include "kyvernoplugin.fullname" . }}
   labels:
-    {{- include "ui.labels" . | nindent 4 }}
+    {{- include "kyvernoplugin.labels" . | nindent 4 }}
 spec:
   replicas: {{ .Values.replicaCount }}
   {{- if .Values.deploymentStrategy }}
@@ -12,11 +12,11 @@ spec:
   {{- end }}
   selector:
     matchLabels:
-      {{- include "ui.selectorLabels" . | nindent 6 }}
+      {{- include "kyvernoplugin.selectorLabels" . | nindent 6 }}
   template:
     metadata:
       labels:
-        {{- include "ui.selectorLabels" . | nindent 8 }}
+        {{- include "kyvernoplugin.selectorLabels" . | nindent 8 }}
         {{- with .Values.podLabels }}
           {{- toYaml . | nindent 8 }}
         {{- end }}
@@ -31,10 +31,10 @@ spec:
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      serviceAccountName: {{ include "ui.serviceAccountName" . }}
+      serviceAccountName: {{ include "kyvernoplugin.serviceAccountName" . }}
       automountServiceAccountToken: true
       containers:
-        - name: {{ .Chart.Name }}
+        - name: "kyverno-plugin"
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           {{- if .Values.securityContext }}
@@ -42,23 +42,22 @@ spec:
             {{- toYaml .Values.securityContext | nindent 12 }}
           {{- end }}
           args:
-            - -backend=http://{{ .Values.global.backend }}:{{ .Values.global.port }}
-            - -log-size={{ .Values.log.size }}
-            {{- if or .Values.plugins.kyverno .Values.global.plugins.kyverno -}}
-            - -kyverno-plugin=http://policy-reporter-kyverno-plugin:8080
-            {{- end }}
+            - --apiPort=8080
           ports:
             - name: http
+              containerPort: 2113
+              protocol: TCP
+            - name: rest
               containerPort: 8080
               protocol: TCP
           livenessProbe:
             httpGet:
-              path: /
-              port: http
+              path: /policies
+              port: rest
           readinessProbe:
             httpGet:
-              path: /
-              port: http
+              path: /policies
+              port: rest
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
       {{- with .Values.nodeSelector }}
