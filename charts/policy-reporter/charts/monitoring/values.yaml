@@ -1,5 +1,8 @@
 namespace: cattle-dashboards
 
+plugins:
+  kyverno: false
+
 serviceMonitor:
   # labels to match the serviceMonitorSelector of the Prometheus Resource
   labels: {}
