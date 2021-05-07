@@ -44,7 +44,7 @@ spec:
           args:
             - -backend=http://{{ .Values.global.backend }}:{{ .Values.global.port }}
             - -log-size={{ .Values.log.size }}
-            {{- if or .Values.plugins.kyverno .Values.global.plugins.kyverno -}}
+            {{- if or .Values.plugins.kyverno .Values.global.plugins.kyverno }}
             - -kyverno-plugin=http://policy-reporter-kyverno-plugin:8080
             {{- end }}
           ports:
