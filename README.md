@@ -34,9 +34,9 @@ helm install policy-reporter policy-reporter/policy-reporter -n policy-reporter 
 
 You can use the Policy Reporter as standalone Application along with the optional UI SubChart.
 
-### Installation with Policy Reporter UI enabled
+### Installation with Policy Reporter UI and Kyverno Plugin enabled
 ```bash
-helm install policy-reporter policy-reporter/policy-reporter --set ui.enabled=true -n policy-reporter --create-namespace
+helm install policy-reporter policy-reporter/policy-reporter --set kyvernoPlugin.enabled=true --set ui.enabled=true --set ui.plugins.kyverno=true -n policy-reporter --create-namespace
 kubectl port-forward service/policy-reporter-ui 8082:8080 -n policy-reporter
 ```
 Open `http://localhost:8082/` in your browser.
