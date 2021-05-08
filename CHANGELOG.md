@@ -1,5 +1,11 @@
 # Changelog
 
+# 1.4.1
+* Update Kyverno Plugin
+    * Fix Rule Type mapping
+* Update Policy Reporter UI
+    * Fix Chart rerender when values are the same
+
 # 1.4.0
 * Add Kyverno Plugins to the Helm Chart
 
