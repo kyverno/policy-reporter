@@ -5,7 +5,7 @@
 
 Kyverno ships with two types of validation. You can either enforce a rule or audit it. If you don't want to block developers or if you want to try out a new rule, you can use the audit functionality. The audit configuration creates [PolicyReports](https://kyverno.io/docs/policy-reports/) which you can access with `kubectl`. Because I can't find a simple solution to get a general overview of this PolicyReports and PolicyReportResults, I created this tool to send information about PolicyReports to different targets like [Grafana Loki](https://grafana.com/oss/loki/), [Elasticsearch](https://www.elastic.co/de/elasticsearch/) or [Slack](https://slack.com/). 
 
-Policy Reporter provides also a Prometheus Metrics API as well as an standalone mode along with the [Policy Reporter UI](#policy-report-ui).
+Policy Reporter provides also a Prometheus Metrics API as well as an standalone mode along with the [Policy Reporter UI](https://github.com/fjogeleit/policy-reporter/wiki/policy-reporter-ui).
 
 This project is in an early stage. Please let me know if anything did not work as expected or if you want to send your audits to unsupported targets.
 
