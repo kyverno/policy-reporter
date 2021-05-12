@@ -72,11 +72,11 @@ func newPayload(result report.Result) payload {
 		facts = append(facts, fact{"Severity", result.Severity})
 	}
 	res := report.Resource{}
-
-	if len(result.Resources) > 0 {
-		res = result.Resources[0]
+	if result.Resource.UID != "" {
+		res = result.Resource
 	}
-	if res.Kind != "" {
+
+	if res.UID != "" {
 		facts = append(facts, fact{"Kind", res.Kind})
 		facts = append(facts, fact{"Name", res.Name})
 		facts = append(facts, fact{"UID", res.UID})

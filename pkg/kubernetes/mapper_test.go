@@ -180,7 +180,7 @@ func Test_MapPolicyReport(t *testing.T) {
 		t.Errorf("Expected Property '1.2.0' (acutal %s)", result1.Properties["version"])
 	}
 
-	resource := result1.Resources[0]
+	resource := result1.Resource
 	if resource.APIVersion != "v1" {
 		t.Errorf("Expected Resource.APIVersion 'v1' (acutal %s)", resource.APIVersion)
 	}

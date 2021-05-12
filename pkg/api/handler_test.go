@@ -91,14 +91,12 @@ func Test_PolicyReportAPI(t *testing.T) {
 			Status:   report.Fail,
 			Category: "resources",
 			Scored:   true,
-			Resources: []report.Resource{
-				{
-					APIVersion: "v1",
-					Kind:       "Deployment",
-					Name:       "nginx",
-					Namespace:  "test",
-					UID:        "536ab69f-1b3c-4bd9-9ba4-274a56188409",
-				},
+			Resource: report.Resource{
+				APIVersion: "v1",
+				Kind:       "Deployment",
+				Name:       "nginx",
+				Namespace:  "test",
+				UID:        "536ab69f-1b3c-4bd9-9ba4-274a56188409",
 			},
 		}
 
@@ -164,13 +162,11 @@ func Test_ClusterPolicyReportAPI(t *testing.T) {
 			Status:   report.Fail,
 			Category: "resources",
 			Scored:   true,
-			Resources: []report.Resource{
-				{
-					APIVersion: "v1",
-					Kind:       "Namespace",
-					Name:       "dev",
-					UID:        "536ab69f-1b3c-4bd9-9ba4-274a56188409",
-				},
+			Resource: report.Resource{
+				APIVersion: "v1",
+				Kind:       "Namespace",
+				Name:       "dev",
+				UID:        "536ab69f-1b3c-4bd9-9ba4-274a56188409",
 			},
 		}
 

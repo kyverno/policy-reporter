@@ -61,18 +61,14 @@ func newPayload(result report.Result) payload {
 	if result.Severity != "" {
 		embedFields = append(embedFields, embedField{"Severity", result.Severity, true})
 	}
-	res := report.Resource{}
 
-	if len(result.Resources) > 0 {
-		res = result.Resources[0]
-	}
-	if res.Kind != "" {
-		embedFields = append(embedFields, embedField{"Kind", res.Kind, true})
-		embedFields = append(embedFields, embedField{"Name", res.Name, true})
-		if res.Namespace != "" {
-			embedFields = append(embedFields, embedField{"Namespace", res.Namespace, true})
+	if result.HasResource() {
+		embedFields = append(embedFields, embedField{"Kind", result.Resource.Kind, true})
+		embedFields = append(embedFields, embedField{"Name", result.Resource.Name, true})
+		if result.Resource.Namespace != "" {
+			embedFields = append(embedFields, embedField{"Namespace", result.Resource.Namespace, true})
 		}
-		embedFields = append(embedFields, embedField{"API Version", res.APIVersion, true})
+		embedFields = append(embedFields, embedField{"API Version", result.Resource.APIVersion, true})
 	}
 
 	for property, value := range result.Properties {

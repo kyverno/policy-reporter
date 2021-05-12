@@ -17,14 +17,12 @@ var result1 = report.Result{
 	Category: "resources",
 	Severity: report.High,
 	Scored:   true,
-	Resources: []report.Resource{
-		{
-			APIVersion: "v1",
-			Kind:       "Deployment",
-			Name:       "nginx",
-			Namespace:  "test",
-			UID:        "536ab69f-1b3c-4bd9-9ba4-274a56188409",
-		},
+	Resource: report.Resource{
+		APIVersion: "v1",
+		Kind:       "Deployment",
+		Name:       "nginx",
+		Namespace:  "test",
+		UID:        "536ab69f-1b3c-4bd9-9ba4-274a56188409",
 	},
 }
 
@@ -36,14 +34,12 @@ var result2 = report.Result{
 	Status:   report.Fail,
 	Category: "resources",
 	Scored:   true,
-	Resources: []report.Resource{
-		{
-			APIVersion: "v1",
-			Kind:       "Deployment",
-			Name:       "nginx",
-			Namespace:  "test",
-			UID:        "536ab69f-1b3c-4bd9-9ba4-274a56188419",
-		},
+	Resource: report.Resource{
+		APIVersion: "v1",
+		Kind:       "Deployment",
+		Name:       "nginx",
+		Namespace:  "test",
+		UID:        "536ab69f-1b3c-4bd9-9ba4-274a56188419",
 	},
 }
 
@@ -152,7 +148,7 @@ func Test_ClusterPolicyReport(t *testing.T) {
 
 func Test_Result(t *testing.T) {
 	t.Run("Check Result.GetIdentifier", func(t *testing.T) {
-		expected := fmt.Sprintf("%s__%s__%s__%s", result1.Policy, result1.Rule, result1.Status, result1.Resources[0].UID)
+		expected := fmt.Sprintf("%s__%s__%s__%s", result1.Policy, result1.Rule, result1.Status, result1.Resource.UID)
 
 		if result1.GetIdentifier() != expected {
 			t.Errorf("Expected ClusterPolicyReport.GetIdentifier() to be %s (actual: %s)", expected, creport.GetIdentifier())

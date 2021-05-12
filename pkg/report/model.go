@@ -142,18 +142,23 @@ type Result struct {
 	Category   string   `json:",omitempty"`
 	Scored     bool
 	Timestamp  time.Time
-	Resources  []Resource
+	Resource   Resource
 	Properties map[string]string
 }
 
 // GetIdentifier returns a global unique Result identifier
 func (r Result) GetIdentifier() string {
 	suffix := ""
-	if len(r.Resources) > 0 {
-		suffix = "__" + r.Resources[0].UID
+	if r.Resource.UID != "" {
+		suffix = "__" + r.Resource.UID
 	}
 
 	return fmt.Sprintf("%s__%s__%s%s", r.Policy, r.Rule, r.Status, suffix)
+}
+
+// HasResource checks if the result has an valid Resource
+func (r Result) HasResource() bool {
+	return r.Resource.UID != ""
 }
 
 // Summary from the PolicyReport spec wgpolicyk8s.io/v1alpha1.PolicyReportSummary

@@ -67,11 +67,9 @@ func generateResultLabels(report report.PolicyReport, result report.Result) prom
 		"category":  result.Category,
 	}
 
-	if len(result.Resources) > 0 {
-		res := result.Resources[0]
-
-		labels["kind"] = res.Kind
-		labels["name"] = res.Name
+	if result.HasResource() {
+		labels["kind"] = result.Resource.Kind
+		labels["name"] = result.Resource.Name
 	}
 
 	return labels
