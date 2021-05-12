@@ -57,8 +57,10 @@ func (m *mapper) MapPolicyReport(reportMap map[string]interface{}) report.Policy
 
 	if rs, ok := reportMap["results"].([]interface{}); ok {
 		for _, resultItem := range rs {
-			res := m.mapResult(resultItem.(map[string]interface{}))
-			r.Results[res.GetIdentifier()] = res
+			resources := m.mapResult(resultItem.(map[string]interface{}))
+			for _, resource := range resources {
+				r.Results[resource.GetIdentifier()] = resource
+			}
 		}
 	}
 
@@ -91,8 +93,10 @@ func (m *mapper) MapClusterPolicyReport(reportMap map[string]interface{}) report
 
 	if rs, ok := reportMap["results"].([]interface{}); ok {
 		for _, resultItem := range rs {
-			res := m.mapResult(resultItem.(map[string]interface{}))
-			r.Results[res.GetIdentifier()] = res
+			resources := m.mapResult(resultItem.(map[string]interface{}))
+			for _, resource := range resources {
+				r.Results[resource.GetIdentifier()] = resource
+			}
 		}
 	}
 
@@ -115,7 +119,7 @@ func (m *mapper) mapCreationTime(result map[string]interface{}) (time.Time, erro
 	return time.Time{}, errors.New("No metadata provided")
 }
 
-func (m *mapper) mapResult(result map[string]interface{}) report.Result {
+func (m *mapper) mapResult(result map[string]interface{}) []report.Result {
 	var resources []report.Resource
 
 	if ress, ok := result["resources"].([]interface{}); ok {
@@ -146,43 +150,57 @@ func (m *mapper) mapResult(result map[string]interface{}) report.Result {
 		status = r.(report.Status)
 	}
 
-	r := report.Result{
-		Message:    result["message"].(string),
-		Policy:     result["policy"].(string),
-		Status:     status,
-		Scored:     result["scored"].(bool),
-		Priority:   report.PriorityFromStatus(status),
-		Resources:  resources,
-		Properties: make(map[string]string, 0),
-	}
+	var results = []report.Result{}
 
-	if severity, ok := result["severity"]; ok {
-		r.Severity = severity.(report.Severity)
-	}
+	factory := func(res report.Resource) report.Result {
+		r := report.Result{
+			Message:    result["message"].(string),
+			Policy:     result["policy"].(string),
+			Status:     status,
+			Scored:     result["scored"].(bool),
+			Priority:   report.PriorityFromStatus(status),
+			Resource:   res,
+			Properties: make(map[string]string, 0),
+		}
 
-	if r.Status == report.Error || r.Status == report.Fail {
-		r.Priority = m.resolvePriority(r.Policy, r.Severity)
-	}
+		if severity, ok := result["severity"]; ok {
+			r.Severity = severity.(report.Severity)
+		}
 
-	if rule, ok := result["rule"]; ok {
-		r.Rule = rule.(string)
-	}
+		if r.Status == report.Error || r.Status == report.Fail {
+			r.Priority = m.resolvePriority(r.Policy, r.Severity)
+		}
 
-	if category, ok := result["category"]; ok {
-		r.Category = category.(string)
-	}
+		if rule, ok := result["rule"]; ok {
+			r.Rule = rule.(string)
+		}
 
-	r.Timestamp = convertTimestamp(result)
+		if category, ok := result["category"]; ok {
+			r.Category = category.(string)
+		}
 
-	if props, ok := result["properties"]; ok {
-		if properties, ok := props.(map[string]interface{}); ok {
-			for property, value := range properties {
-				r.Properties[property] = value.(string)
+		r.Timestamp = convertTimestamp(result)
+
+		if props, ok := result["properties"]; ok {
+			if properties, ok := props.(map[string]interface{}); ok {
+				for property, value := range properties {
+					r.Properties[property] = value.(string)
+				}
 			}
 		}
+
+		return r
 	}
 
-	return r
+	for _, resource := range resources {
+		results = append(results, factory(resource))
+	}
+
+	if len(results) == 0 {
+		results = append(results, factory(report.Resource{}))
+	}
+
+	return results
 }
 
 func convertTimestamp(result map[string]interface{}) time.Time {

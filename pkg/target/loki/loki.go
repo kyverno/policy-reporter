@@ -40,12 +40,6 @@ func newLokiPayload(result report.Result) payload {
 	le := entry{Ts: timestamp.Format(time.RFC3339), Line: "[" + strings.ToUpper(result.Priority.String()) + "] " + result.Message}
 	ls := stream{Entries: []entry{le}}
 
-	res := report.Resource{}
-
-	if len(result.Resources) > 0 {
-		res = result.Resources[0]
-	}
-
 	var labels = []string{
 		"status=\"" + result.Status + "\"",
 		"policy=\"" + result.Policy + "\"",
@@ -62,12 +56,12 @@ func newLokiPayload(result report.Result) payload {
 	if result.Severity != "" {
 		labels = append(labels, "severity=\""+result.Severity+"\"")
 	}
-	if res.Kind != "" {
-		labels = append(labels, "kind=\""+res.Kind+"\"")
-		labels = append(labels, "name=\""+res.Name+"\"")
-		labels = append(labels, "apiVersion=\""+res.APIVersion+"\"")
-		labels = append(labels, "uid=\""+res.UID+"\"")
-		labels = append(labels, "namespace=\""+res.Namespace+"\"")
+	if result.HasResource() {
+		labels = append(labels, "kind=\""+result.Resource.Kind+"\"")
+		labels = append(labels, "name=\""+result.Resource.Name+"\"")
+		labels = append(labels, "apiVersion=\""+result.Resource.APIVersion+"\"")
+		labels = append(labels, "uid=\""+result.Resource.UID+"\"")
+		labels = append(labels, "namespace=\""+result.Resource.Namespace+"\"")
 	}
 
 	for property, value := range result.Properties {

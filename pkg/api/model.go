@@ -18,15 +18,15 @@ type Resource struct {
 
 // Result API Model
 type Result struct {
-	Message  string   `json:"message"`
-	Policy   string   `json:"policy"`
-	Rule     string   `json:"rule"`
-	Priority string   `json:"priority"`
-	Status   string   `json:"status"`
-	Severity string   `json:"severity,omitempty"`
-	Category string   `json:"category,omitempty"`
-	Scored   bool     `json:"scored"`
-	Resource Resource `json:"resource"`
+	Message  string    `json:"message"`
+	Policy   string    `json:"policy"`
+	Rule     string    `json:"rule"`
+	Priority string    `json:"priority"`
+	Status   string    `json:"status"`
+	Severity string    `json:"severity,omitempty"`
+	Category string    `json:"category,omitempty"`
+	Scored   bool      `json:"scored"`
+	Resource *Resource `json:"resource,omitempty"`
 }
 
 // Summary API Model
@@ -59,8 +59,7 @@ func mapPolicyReport(p report.PolicyReport) PolicyReport {
 	results := make([]Result, 0, len(p.Results))
 
 	for _, r := range p.Results {
-
-		results = append(results, Result{
+		result := Result{
 			Message:  r.Message,
 			Policy:   r.Policy,
 			Rule:     r.Rule,
@@ -69,14 +68,19 @@ func mapPolicyReport(p report.PolicyReport) PolicyReport {
 			Severity: r.Severity,
 			Category: r.Category,
 			Scored:   r.Scored,
-			Resource: Resource{
-				Namespace:  r.Resources[0].Namespace,
-				APIVersion: r.Resources[0].APIVersion,
-				Kind:       r.Resources[0].Kind,
-				Name:       r.Resources[0].Name,
-				UID:        r.Resources[0].UID,
-			},
-		})
+		}
+
+		if r.HasResource() {
+			result.Resource = &Resource{
+				Namespace:  r.Resource.Namespace,
+				APIVersion: r.Resource.APIVersion,
+				Kind:       r.Resource.Kind,
+				Name:       r.Resource.Name,
+				UID:        r.Resource.UID,
+			}
+		}
+
+		results = append(results, result)
 	}
 
 	return PolicyReport{
@@ -98,7 +102,7 @@ func mapClusterPolicyReport(c report.ClusterPolicyReport) ClusterPolicyReport {
 	results := make([]Result, 0, len(c.Results))
 
 	for _, r := range c.Results {
-		results = append(results, Result{
+		result := Result{
 			Message:  r.Message,
 			Policy:   r.Policy,
 			Rule:     r.Rule,
@@ -107,14 +111,19 @@ func mapClusterPolicyReport(c report.ClusterPolicyReport) ClusterPolicyReport {
 			Severity: r.Severity,
 			Category: r.Category,
 			Scored:   r.Scored,
-			Resource: Resource{
-				Namespace:  r.Resources[0].Namespace,
-				APIVersion: r.Resources[0].APIVersion,
-				Kind:       r.Resources[0].Kind,
-				Name:       r.Resources[0].Name,
-				UID:        r.Resources[0].UID,
-			},
-		})
+		}
+
+		if r.HasResource() {
+			result.Resource = &Resource{
+				Namespace:  r.Resource.Namespace,
+				APIVersion: r.Resource.APIVersion,
+				Kind:       r.Resource.Kind,
+				Name:       r.Resource.Name,
+				UID:        r.Resource.UID,
+			}
+		}
+
+		results = append(results, result)
 	}
 
 	return ClusterPolicyReport{

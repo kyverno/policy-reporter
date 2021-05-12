@@ -120,11 +120,11 @@ func (s *client) newPayload(result report.Result) payload {
 	}
 
 	res := report.Resource{}
-
-	if len(result.Resources) > 0 {
-		res = result.Resources[0]
+	if result.Resource.UID != "" {
+		res = result.Resource
 	}
-	if res.Kind != "" {
+
+	if res.UID != "" {
 		att.Blocks = append(
 			att.Blocks,
 			block{Type: "section", Text: &text{Type: "mrkdwn", Text: "*Resource*"}},

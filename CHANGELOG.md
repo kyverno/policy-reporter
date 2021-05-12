@@ -1,5 +1,10 @@
 # Changelog
 
+# 1.5.0
+* Support multiple Resources for a single Result
+    * Mapping Result with multiple Resources in multiple Results with a single Resource
+    * Upate UI handling with Results without Resources
+
 # 1.4.1
 * Update Kyverno Plugin
     * Fix Rule Type mapping

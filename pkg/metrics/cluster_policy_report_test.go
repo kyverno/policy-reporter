@@ -21,13 +21,11 @@ var cresult1 = report.Result{
 	Severity: report.High,
 	Category: "resources",
 	Scored:   true,
-	Resources: []report.Resource{
-		{
-			APIVersion: "v1",
-			Kind:       "Namespace",
-			Name:       "dev",
-			UID:        "536ab69f-1b3c-4bd9-9ba4-274a56188409",
-		},
+	Resource: report.Resource{
+		APIVersion: "v1",
+		Kind:       "Namespace",
+		Name:       "dev",
+		UID:        "536ab69f-1b3c-4bd9-9ba4-274a56188409",
 	},
 }
 
@@ -39,13 +37,11 @@ var cresult2 = report.Result{
 	Status:   report.Pass,
 	Category: "resources",
 	Scored:   true,
-	Resources: []report.Resource{
-		{
-			APIVersion: "v1",
-			Kind:       "Namespace",
-			Name:       "stage",
-			UID:        "532ab69f-1b3c-4bd9-9ba4-274a56188419",
-		},
+	Resource: report.Resource{
+		APIVersion: "v1",
+		Kind:       "Namespace",
+		Name:       "stage",
+		UID:        "532ab69f-1b3c-4bd9-9ba4-274a56188419",
 	},
 }
 
@@ -224,14 +220,14 @@ func testClusterResultMetricLabels(metric *io_prometheus_client.Metric, result r
 	if name := *metric.Label[1].Name; name != "kind" {
 		return fmt.Errorf("Unexpected Name Label: %s", name)
 	}
-	if value := *metric.Label[1].Value; value != result.Resources[0].Kind {
+	if value := *metric.Label[1].Value; value != result.Resource.Kind {
 		return fmt.Errorf("Unexpected Kind Label Value: %s", value)
 	}
 
 	if name := *metric.Label[2].Name; name != "name" {
 		return fmt.Errorf("Unexpected Name Label: %s", name)
 	}
-	if value := *metric.Label[2].Value; value != result.Resources[0].Name {
+	if value := *metric.Label[2].Value; value != result.Resource.Name {
 		return fmt.Errorf("Unexpected Name Label Value: %s", value)
 	}
 

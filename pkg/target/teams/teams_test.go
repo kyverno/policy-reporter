@@ -20,14 +20,12 @@ var completeResult = report.Result{
 	Timestamp: time.Date(2021, time.February, 23, 15, 10, 0, 0, time.UTC),
 	Category:  "resources",
 	Scored:    true,
-	Resources: []report.Resource{
-		{
-			APIVersion: "v1",
-			Kind:       "Deployment",
-			Name:       "nginx",
-			Namespace:  "default",
-			UID:        "536ab69f-1b3c-4bd9-9ba4-274a56188409",
-		},
+	Resource: report.Resource{
+		APIVersion: "v1",
+		Kind:       "Deployment",
+		Name:       "nginx",
+		Namespace:  "default",
+		UID:        "536ab69f-1b3c-4bd9-9ba4-274a56188409",
 	},
 	Properties: map[string]string{"version": "1.2.0"},
 }

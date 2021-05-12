@@ -55,11 +55,11 @@ func newPayload(r report.Result) result {
 		Category: r.Category,
 		Scored:   r.Scored,
 		Resource: resource{
-			Namespace:  r.Resources[0].Namespace,
-			APIVersion: r.Resources[0].APIVersion,
-			Kind:       r.Resources[0].Kind,
-			Name:       r.Resources[0].Name,
-			UID:        r.Resources[0].UID,
+			Namespace:  r.Resource.Namespace,
+			APIVersion: r.Resource.APIVersion,
+			Kind:       r.Resource.Kind,
+			Name:       r.Resource.Name,
+			UID:        r.Resource.UID,
 		},
 		CreationTimestamp: time.Now(),
 	}
