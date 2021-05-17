@@ -2,7 +2,6 @@ package kubernetes_test
 
 import (
 	"context"
-	"errors"
 	"sync"
 	"testing"
 	"time"
@@ -17,40 +16,40 @@ import (
 )
 
 type fakeClient struct {
-	policies             []unstructured.Unstructured
-	clusterPolicies      []unstructured.Unstructured
-	policyWatcher        *watch.FakeWatcher
-	clusterPolicyWatcher *watch.FakeWatcher
-	policyError          error
-	clusterPolicyError   error
+	List    []report.PolicyReport
+	Watcher *watch.FakeWatcher
+	Error   error
+	mapper  kubernetes.Mapper
 }
 
-func (f *fakeClient) ListClusterPolicyReports() (*unstructured.UnstructuredList, error) {
-	return &unstructured.UnstructuredList{
-		Items: f.clusterPolicies,
-	}, f.clusterPolicyError
+func (f *fakeClient) ListPolicyReports() ([]report.PolicyReport, error) {
+	return f.List, f.Error
 }
 
-func (f *fakeClient) ListPolicyReports() (*unstructured.UnstructuredList, error) {
-	return &unstructured.UnstructuredList{
-		Items: f.policies,
-	}, f.policyError
+func (f *fakeClient) ListClusterPolicyReports() ([]report.PolicyReport, error) {
+	return f.List, f.Error
 }
 
-func (f *fakeClient) WatchClusterPolicyReports() (watch.Interface, error) {
-	return f.clusterPolicyWatcher, f.clusterPolicyError
+func (f *fakeClient) WatchPolicyReports() (chan kubernetes.WatchEvent, error) {
+	channel := make(chan kubernetes.WatchEvent)
+
+	go func() {
+		for result := range f.Watcher.ResultChan() {
+			if item, ok := result.Object.(*unstructured.Unstructured); ok {
+				report := f.mapper.MapPolicyReport(item.Object)
+				channel <- kubernetes.WatchEvent{report, result.Type}
+			}
+		}
+	}()
+
+	return channel, f.Error
 }
 
-func (f *fakeClient) WatchPolicyReports() (watch.Interface, error) {
-	return f.policyWatcher, f.policyError
-}
-
-func NewPolicyReportAdapter() *fakeClient {
+func NewPolicyReportAdapter(mapper kubernetes.Mapper) *fakeClient {
 	return &fakeClient{
-		policies:             make([]unstructured.Unstructured, 0),
-		clusterPolicies:      make([]unstructured.Unstructured, 0),
-		policyWatcher:        watch.NewFake(),
-		clusterPolicyWatcher: watch.NewFake(),
+		List:    make([]report.PolicyReport, 0),
+		Watcher: watch.NewFake(),
+		mapper:  mapper,
 	}
 }
 
@@ -58,82 +57,12 @@ func NewMapper(k8sCMClient v1.ConfigMapInterface) kubernetes.Mapper {
 	return kubernetes.NewMapper(make(map[string]string), kubernetes.NewConfigMapAdapter(k8sCMClient))
 }
 
-func Test_ResultClient_FetchPolicyResults(t *testing.T) {
-	_, k8sCMClient := newFakeAPI()
-	k8sCMClient.Create(context.Background(), configMap, metav1.CreateOptions{})
-
-	fakeAdapter := NewPolicyReportAdapter()
-	mapper := NewMapper(k8sCMClient)
-
-	client := kubernetes.NewPolicyResultClient(
-		kubernetes.NewPolicyReportClient(fakeAdapter, report.NewPolicyReportStore(), mapper, time.Now(), 5, cache.New(cache.DefaultExpiration, time.Minute*5)),
-		kubernetes.NewClusterPolicyReportClient(fakeAdapter, report.NewClusterPolicyReportStore(), mapper, time.Now(), 5, cache.New(cache.DefaultExpiration, time.Minute*5)),
-	)
-
-	fakeAdapter.policies = append(fakeAdapter.policies, unstructured.Unstructured{Object: policyMap})
-	fakeAdapter.clusterPolicies = append(fakeAdapter.clusterPolicies, unstructured.Unstructured{Object: clusterPolicyMap})
-
-	results, err := client.FetchPolicyResults()
-	if err != nil {
-		t.Fatalf("Unexpected Error: %s", err)
-	}
-
-	if len(results) != 3 {
-		t.Fatalf("Expected 3 Results, got %d", len(results))
-	}
-}
-
-func Test_ResultClient_FetchPolicyResultsPolicyReportError(t *testing.T) {
-	_, k8sCMClient := newFakeAPI()
-	k8sCMClient.Create(context.Background(), configMap, metav1.CreateOptions{})
-
-	fakeAdapter := NewPolicyReportAdapter()
-	fakeAdapter.policyError = errors.New("")
-
-	mapper := NewMapper(k8sCMClient)
-
-	client := kubernetes.NewPolicyResultClient(
-		kubernetes.NewPolicyReportClient(fakeAdapter, report.NewPolicyReportStore(), mapper, time.Now(), 5, cache.New(cache.DefaultExpiration, time.Minute*5)),
-		kubernetes.NewClusterPolicyReportClient(fakeAdapter, report.NewClusterPolicyReportStore(), mapper, time.Now(), 5, cache.New(cache.DefaultExpiration, time.Minute*5)),
-	)
-
-	_, err := client.FetchPolicyResults()
-	if err == nil {
-		t.Error("PolicyFetch Error should be returned by FetchPolicyResults")
-	}
-}
-
-func Test_ResultClient_FetchPolicyResultsClusterPolicyReportError(t *testing.T) {
-	_, k8sCMClient := newFakeAPI()
-	k8sCMClient.Create(context.Background(), configMap, metav1.CreateOptions{})
-
-	fakeAdapter := NewPolicyReportAdapter()
-	fakeAdapter.clusterPolicyError = errors.New("")
-
-	mapper := NewMapper(k8sCMClient)
-
-	client := kubernetes.NewPolicyResultClient(
-		kubernetes.NewPolicyReportClient(fakeAdapter, report.NewPolicyReportStore(), mapper, time.Now(), 5, cache.New(cache.DefaultExpiration, time.Minute*5)),
-		kubernetes.NewClusterPolicyReportClient(fakeAdapter, report.NewClusterPolicyReportStore(), mapper, time.Now(), 5, cache.New(cache.DefaultExpiration, time.Minute*5)),
-	)
-
-	_, err := client.FetchPolicyResults()
-	if err == nil {
-		t.Error("ClusterPolicyFetch Error should be returned by FetchPolicyResults")
-	}
-}
-
 func Test_ResultClient_RegisterPolicyResultWatcher(t *testing.T) {
 	_, k8sCMClient := newFakeAPI()
 	k8sCMClient.Create(context.Background(), configMap, metav1.CreateOptions{})
-	fakeAdapter := NewPolicyReportAdapter()
 
-	mapper := NewMapper(k8sCMClient)
-
-	pClient := kubernetes.NewPolicyReportClient(fakeAdapter, report.NewPolicyReportStore(), mapper, time.Now(), 5, cache.New(cache.DefaultExpiration, time.Minute*5))
-	cpClient := kubernetes.NewClusterPolicyReportClient(fakeAdapter, report.NewClusterPolicyReportStore(), mapper, time.Now(), 5, cache.New(cache.DefaultExpiration, time.Minute*5))
-
-	client := kubernetes.NewPolicyResultClient(pClient, cpClient)
+	fakeAdapter := NewPolicyReportAdapter(NewMapper(k8sCMClient))
+	client := kubernetes.NewPolicyReportClient(fakeAdapter, report.NewPolicyReportStore(), time.Now(), cache.New(cache.DefaultExpiration, time.Minute*5))
 
 	client.RegisterPolicyResultWatcher(false)
 
@@ -147,11 +76,10 @@ func Test_ResultClient_RegisterPolicyResultWatcher(t *testing.T) {
 		wg.Done()
 	})
 
-	go pClient.StartWatching()
-	go cpClient.StartWatching()
+	go client.StartWatching()
 
-	fakeAdapter.clusterPolicyWatcher.Add(&unstructured.Unstructured{Object: clusterPolicyMap})
-	fakeAdapter.policyWatcher.Add(&unstructured.Unstructured{Object: policyMap})
+	fakeAdapter.Watcher.Add(&unstructured.Unstructured{Object: clusterPolicyMap})
+	fakeAdapter.Watcher.Add(&unstructured.Unstructured{Object: policyMap})
 
 	wg.Wait()
 
@@ -160,90 +88,12 @@ func Test_ResultClient_RegisterPolicyResultWatcher(t *testing.T) {
 	}
 }
 
-func Test_ResultClient_SkipReportsWithoutResults(t *testing.T) {
-	_, k8sCMClient := newFakeAPI()
-	k8sCMClient.Create(context.Background(), configMap, metav1.CreateOptions{})
-	fakeAdapter := NewPolicyReportAdapter()
-
-	mapper := NewMapper(k8sCMClient)
-
-	pClient := kubernetes.NewPolicyReportClient(fakeAdapter, report.NewPolicyReportStore(), mapper, time.Now(), 5, cache.New(cache.DefaultExpiration, time.Minute*5))
-	cpClient := kubernetes.NewClusterPolicyReportClient(fakeAdapter, report.NewClusterPolicyReportStore(), mapper, time.Now(), 5, cache.New(cache.DefaultExpiration, time.Minute*5))
-
-	client := kubernetes.NewPolicyResultClient(pClient, cpClient)
-
-	client.RegisterPolicyResultWatcher(false)
-
-	wg := sync.WaitGroup{}
-	wg.Add(3)
-
-	results := make([]report.Result, 0, 3)
-
-	client.RegisterPolicyResultCallback(func(r report.Result, b bool) {
-		results = append(results, r)
-		wg.Done()
-	})
-
-	go pClient.StartWatching()
-	go cpClient.StartWatching()
-
-	var policyMap2 = map[string]interface{}{
-		"metadata": map[string]interface{}{
-			"name":              "policy-report",
-			"namespace":         "test",
-			"creationTimestamp": "2021-02-23T15:00:00Z",
-		},
-		"summary": map[string]interface{}{
-			"pass":  int64(1),
-			"skip":  int64(2),
-			"warn":  int64(3),
-			"fail":  int64(4),
-			"error": int64(5),
-		},
-		"results": []interface{}{},
-	}
-
-	var clusterPolicyMap2 = map[string]interface{}{
-		"metadata": map[string]interface{}{
-			"name":              "clusterpolicy-report",
-			"creationTimestamp": "2021-02-23T15:00:00Z",
-		},
-		"summary": map[string]interface{}{
-			"pass":  int64(0),
-			"skip":  int64(0),
-			"warn":  int64(0),
-			"fail":  int64(0),
-			"error": int64(0),
-		},
-		"results": []interface{}{},
-	}
-
-	fakeAdapter.clusterPolicyWatcher.Add(&unstructured.Unstructured{Object: clusterPolicyMap2})
-	fakeAdapter.clusterPolicyWatcher.Modify(&unstructured.Unstructured{Object: clusterPolicyMap2})
-	fakeAdapter.clusterPolicyWatcher.Modify(&unstructured.Unstructured{Object: clusterPolicyMap})
-
-	fakeAdapter.policyWatcher.Add(&unstructured.Unstructured{Object: policyMap2})
-	fakeAdapter.policyWatcher.Modify(&unstructured.Unstructured{Object: policyMap2})
-	fakeAdapter.policyWatcher.Modify(&unstructured.Unstructured{Object: policyMap})
-
-	wg.Wait()
-
-	if len(results) != 3 {
-		t.Error("Should receive 3 Result from none empty PolicyReport and ClusterPolicyReport Modify")
-	}
-}
-
 func Test_ResultClient_SkipCachedResults(t *testing.T) {
 	_, k8sCMClient := newFakeAPI()
 	k8sCMClient.Create(context.Background(), configMap, metav1.CreateOptions{})
-	fakeAdapter := NewPolicyReportAdapter()
 
-	mapper := NewMapper(k8sCMClient)
-
-	pClient := kubernetes.NewPolicyReportClient(fakeAdapter, report.NewPolicyReportStore(), mapper, time.Now(), 1, cache.New(cache.DefaultExpiration, time.Minute*5))
-	cpClient := kubernetes.NewClusterPolicyReportClient(fakeAdapter, report.NewClusterPolicyReportStore(), mapper, time.Now(), 1, cache.New(cache.DefaultExpiration, time.Minute*5))
-
-	client := kubernetes.NewPolicyResultClient(pClient, cpClient)
+	fakeAdapter := NewPolicyReportAdapter(NewMapper(k8sCMClient))
+	client := kubernetes.NewPolicyReportClient(fakeAdapter, report.NewPolicyReportStore(), time.Now(), cache.New(cache.DefaultExpiration, time.Minute*5))
 
 	client.RegisterPolicyResultWatcher(false)
 
@@ -257,8 +107,7 @@ func Test_ResultClient_SkipCachedResults(t *testing.T) {
 		wg.Done()
 	})
 
-	go pClient.StartWatching()
-	go cpClient.StartWatching()
+	go client.StartWatching()
 
 	var policyMap1 = map[string]interface{}{
 		"metadata": map[string]interface{}{
@@ -342,17 +191,14 @@ func Test_ResultClient_SkipCachedResults(t *testing.T) {
 		"results": []interface{}{},
 	}
 
-	fakeAdapter.clusterPolicyWatcher.Add(&unstructured.Unstructured{Object: clusterPolicyMap})
-	fakeAdapter.clusterPolicyWatcher.Modify(&unstructured.Unstructured{Object: clusterPolicyMap2})
-	time.Sleep(time.Second * 2)
-	fakeAdapter.clusterPolicyWatcher.Modify(&unstructured.Unstructured{Object: clusterPolicyMap})
+	fakeAdapter.Watcher.Add(&unstructured.Unstructured{Object: clusterPolicyMap})
+	fakeAdapter.Watcher.Modify(&unstructured.Unstructured{Object: clusterPolicyMap2})
+	fakeAdapter.Watcher.Modify(&unstructured.Unstructured{Object: clusterPolicyMap})
 
-	fakeAdapter.policyWatcher.Add(&unstructured.Unstructured{Object: policyMap})
-	fakeAdapter.policyWatcher.Modify(&unstructured.Unstructured{Object: policyMap2})
-	time.Sleep(time.Second * 2)
-	fakeAdapter.policyWatcher.Modify(&unstructured.Unstructured{Object: policyMap1})
-	time.Sleep(time.Second * 2)
-	fakeAdapter.policyWatcher.Modify(&unstructured.Unstructured{Object: policyMap})
+	fakeAdapter.Watcher.Add(&unstructured.Unstructured{Object: policyMap})
+	fakeAdapter.Watcher.Modify(&unstructured.Unstructured{Object: policyMap2})
+	fakeAdapter.Watcher.Modify(&unstructured.Unstructured{Object: policyMap1})
+	fakeAdapter.Watcher.Modify(&unstructured.Unstructured{Object: policyMap})
 
 	wg.Wait()
 
@@ -364,14 +210,9 @@ func Test_ResultClient_SkipCachedResults(t *testing.T) {
 func Test_ResultClient_SkipReportsCleanUpEvents(t *testing.T) {
 	_, k8sCMClient := newFakeAPI()
 	k8sCMClient.Create(context.Background(), configMap, metav1.CreateOptions{})
-	fakeAdapter := NewPolicyReportAdapter()
 
-	mapper := NewMapper(k8sCMClient)
-
-	pClient := kubernetes.NewPolicyReportClient(fakeAdapter, report.NewPolicyReportStore(), mapper, time.Now(), 5, cache.New(cache.DefaultExpiration, time.Minute*5))
-	cpClient := kubernetes.NewClusterPolicyReportClient(fakeAdapter, report.NewClusterPolicyReportStore(), mapper, time.Now(), 5, cache.New(cache.DefaultExpiration, time.Minute*5))
-
-	client := kubernetes.NewPolicyResultClient(pClient, cpClient)
+	fakeAdapter := NewPolicyReportAdapter(NewMapper(k8sCMClient))
+	client := kubernetes.NewPolicyReportClient(fakeAdapter, report.NewPolicyReportStore(), time.Now(), cache.New(cache.DefaultExpiration, time.Minute*5))
 
 	client.RegisterPolicyResultWatcher(false)
 
@@ -385,8 +226,7 @@ func Test_ResultClient_SkipReportsCleanUpEvents(t *testing.T) {
 		wg.Done()
 	})
 
-	go pClient.StartWatching()
-	go cpClient.StartWatching()
+	go client.StartWatching()
 
 	var policyMap2 = map[string]interface{}{
 		"metadata": map[string]interface{}{
@@ -419,13 +259,13 @@ func Test_ResultClient_SkipReportsCleanUpEvents(t *testing.T) {
 		"results": []interface{}{},
 	}
 
-	fakeAdapter.clusterPolicyWatcher.Add(&unstructured.Unstructured{Object: clusterPolicyMap})
-	fakeAdapter.clusterPolicyWatcher.Modify(&unstructured.Unstructured{Object: clusterPolicyMap2})
-	fakeAdapter.clusterPolicyWatcher.Modify(&unstructured.Unstructured{Object: clusterPolicyMap})
+	fakeAdapter.Watcher.Add(&unstructured.Unstructured{Object: clusterPolicyMap})
+	fakeAdapter.Watcher.Modify(&unstructured.Unstructured{Object: clusterPolicyMap2})
+	fakeAdapter.Watcher.Modify(&unstructured.Unstructured{Object: clusterPolicyMap})
 
-	fakeAdapter.policyWatcher.Add(&unstructured.Unstructured{Object: policyMap})
-	fakeAdapter.policyWatcher.Modify(&unstructured.Unstructured{Object: policyMap2})
-	fakeAdapter.policyWatcher.Modify(&unstructured.Unstructured{Object: policyMap})
+	fakeAdapter.Watcher.Add(&unstructured.Unstructured{Object: policyMap})
+	fakeAdapter.Watcher.Modify(&unstructured.Unstructured{Object: policyMap2})
+	fakeAdapter.Watcher.Modify(&unstructured.Unstructured{Object: policyMap})
 
 	wg.Wait()
 
@@ -437,14 +277,9 @@ func Test_ResultClient_SkipReportsCleanUpEvents(t *testing.T) {
 func Test_ResultClient_SkipReportsReconnectEvents(t *testing.T) {
 	_, k8sCMClient := newFakeAPI()
 	k8sCMClient.Create(context.Background(), configMap, metav1.CreateOptions{})
-	fakeAdapter := NewPolicyReportAdapter()
 
-	mapper := NewMapper(k8sCMClient)
-
-	pClient := kubernetes.NewPolicyReportClient(fakeAdapter, report.NewPolicyReportStore(), mapper, time.Now(), 5, cache.New(cache.DefaultExpiration, time.Minute*5))
-	cpClient := kubernetes.NewClusterPolicyReportClient(fakeAdapter, report.NewClusterPolicyReportStore(), mapper, time.Now(), 5, cache.New(cache.DefaultExpiration, time.Minute*5))
-
-	client := kubernetes.NewPolicyResultClient(pClient, cpClient)
+	fakeAdapter := NewPolicyReportAdapter(NewMapper(k8sCMClient))
+	client := kubernetes.NewPolicyReportClient(fakeAdapter, report.NewPolicyReportStore(), time.Now(), cache.New(cache.DefaultExpiration, time.Minute*5))
 
 	client.RegisterPolicyResultWatcher(false)
 
@@ -458,14 +293,13 @@ func Test_ResultClient_SkipReportsReconnectEvents(t *testing.T) {
 		wg.Done()
 	})
 
-	go pClient.StartWatching()
-	go cpClient.StartWatching()
+	go client.StartWatching()
 
-	fakeAdapter.clusterPolicyWatcher.Add(&unstructured.Unstructured{Object: clusterPolicyMap})
-	fakeAdapter.clusterPolicyWatcher.Add(&unstructured.Unstructured{Object: clusterPolicyMap})
+	fakeAdapter.Watcher.Add(&unstructured.Unstructured{Object: clusterPolicyMap})
+	fakeAdapter.Watcher.Add(&unstructured.Unstructured{Object: clusterPolicyMap})
 
-	fakeAdapter.policyWatcher.Add(&unstructured.Unstructured{Object: policyMap})
-	fakeAdapter.policyWatcher.Add(&unstructured.Unstructured{Object: policyMap})
+	fakeAdapter.Watcher.Add(&unstructured.Unstructured{Object: policyMap})
+	fakeAdapter.Watcher.Add(&unstructured.Unstructured{Object: policyMap})
 
 	wg.Wait()
 

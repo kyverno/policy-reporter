@@ -2,13 +2,11 @@ package kubernetes
 
 import (
 	"errors"
-	"log"
 	"sync"
 	"time"
 
 	"github.com/fjogeleit/policy-reporter/pkg/report"
 	"github.com/patrickmn/go-cache"
-	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/watch"
 )
 
@@ -17,11 +15,9 @@ type policyReportClient struct {
 	store           *report.PolicyReportStore
 	callbacks       []report.PolicyReportCallback
 	resultCallbacks []report.PolicyResultCallback
-	mapper          Mapper
 	startUp         time.Time
 	skipExisting    bool
 	started         bool
-	debouncer       policyReportEventDebouncer
 	resultCache     *cache.Cache
 }
 
@@ -33,93 +29,39 @@ func (c *policyReportClient) RegisterPolicyResultCallback(cb report.PolicyResult
 	c.resultCallbacks = append(c.resultCallbacks, cb)
 }
 
-func (c *policyReportClient) FetchPolicyReports() ([]report.PolicyReport, error) {
-	var reports []report.PolicyReport
-
-	result, err := c.policyAPI.ListPolicyReports()
-	if err != nil {
-		log.Printf("K8s List Error: %s\n", err.Error())
-		return reports, err
-	}
-
-	for _, item := range result.Items {
-		reports = append(reports, c.mapper.MapPolicyReport(item.Object))
-	}
-
-	return reports, nil
-}
-
-func (c *policyReportClient) FetchPolicyResults() ([]report.Result, error) {
-	var results []report.Result
-
-	reports, err := c.FetchPolicyReports()
-	if err != nil {
-		return results, err
-	}
-
-	for _, clusterReport := range reports {
-		for _, result := range clusterReport.Results {
-			results = append(results, result)
-		}
-	}
-
-	return results, nil
-}
-
 func (c *policyReportClient) StartWatching() error {
 	if c.started {
-		return errors.New("PolicyClient.StartWatching was already started")
+		return errors.New("StartWatching was already started")
 	}
 
 	c.started = true
-	errorChan := make(chan error)
 
-	go func() {
-		for {
-			result, err := c.policyAPI.WatchPolicyReports()
-			if err != nil {
-				c.started = false
-				errorChan <- err
-			}
+	events, err := c.policyAPI.WatchPolicyReports()
+	if err != nil {
+		c.started = false
+		return err
+	}
 
-			c.debouncer.Reset()
+	for event := range events {
+		c.executeReportHandler(event.Type, event.Report)
+	}
 
-			for result := range result.ResultChan() {
-				if item, ok := result.Object.(*unstructured.Unstructured); ok {
-					report := c.mapper.MapPolicyReport(item.Object)
-					c.debouncer.Add(policyReportEvent{report, result.Type})
-				}
-			}
-
-			// skip existing results when the watcher restarts
-			c.skipExisting = true
-		}
-	}()
-
-	go func() {
-		for event := range c.debouncer.ReportChan() {
-			c.executePolicyReportHandler(event.eventType, event.report)
-		}
-
-		errorChan <- errors.New("Report Channel closed")
-	}()
-
-	return <-errorChan
+	return errors.New("Watching stopped")
 }
 
 func (c *policyReportClient) cacheResults(opr report.PolicyReport) {
-	for id := range opr.Results {
+	for id := range opr.GetResults() {
 		c.resultCache.SetDefault(id, true)
 	}
 }
 
-func (c *policyReportClient) executePolicyReportHandler(e watch.EventType, pr report.PolicyReport) {
-	opr, ok := c.store.Get(pr.GetIdentifier())
+func (c *policyReportClient) executeReportHandler(e watch.EventType, pr report.PolicyReport) {
+	opr, ok := c.store.Get(pr.GetType(), pr.GetIdentifier())
 	if !ok {
 		opr = report.PolicyReport{}
 	}
 
-	if e == watch.Modified {
+	if len(opr.GetResults()) > 0 {
 		c.cacheResults(opr)
 	}
 
@@ -141,7 +83,7 @@ func (c *policyReportClient) executePolicyReportHandler(e watch.EventType, pr re
 	wg.Wait()
 
 	if e == watch.Deleted {
-		c.store.Remove(pr.GetIdentifier())
+		c.store.Remove(pr.GetType(), pr.GetIdentifier())
 		return
 	}
 
@@ -155,11 +97,11 @@ func (c *policyReportClient) RegisterPolicyResultWatcher(skipExisting bool) {
 		func(e watch.EventType, pr report.PolicyReport, or report.PolicyReport) {
 			switch e {
 			case watch.Added:
-				if len(pr.Results) == 0 {
+				if len(pr.GetResults()) == 0 {
 					break
 				}
 
-				preExisted := pr.CreationTimestamp.Before(c.startUp)
+				preExisted := pr.GetCreationTimestamp().Before(c.startUp)
 
 				if c.skipExisting && preExisted {
 					break
@@ -186,7 +128,7 @@ func (c *policyReportClient) RegisterPolicyResultWatcher(skipExisting bool) {
 
 				wg.Wait()
 			case watch.Modified:
-				if len(pr.Results) == 0 {
+				if len(pr.GetResults()) == 0 {
 					break
 				}
 
@@ -218,22 +160,13 @@ func (c *policyReportClient) RegisterPolicyResultWatcher(skipExisting bool) {
 func NewPolicyReportClient(
 	client PolicyReportAdapter,
 	store *report.PolicyReportStore,
-	mapper Mapper,
 	startUp time.Time,
-	debounceTime time.Duration,
 	resultCache *cache.Cache,
-) report.PolicyClient {
+) report.PolicyResultClient {
 	return &policyReportClient{
-		policyAPI: client,
-		store:     store,
-		mapper:    mapper,
-		startUp:   startUp,
-		debouncer: policyReportEventDebouncer{
-			events:       make(map[string]policyReportEvent, 0),
-			mutx:         new(sync.Mutex),
-			channel:      make(chan policyReportEvent),
-			debounceTime: debounceTime,
-		},
+		policyAPI:   client,
+		store:       store,
+		startUp:     startUp,
 		resultCache: resultCache,
 	}
 }

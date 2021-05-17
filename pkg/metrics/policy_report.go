@@ -7,8 +7,7 @@ import (
 	"k8s.io/apimachinery/pkg/watch"
 )
 
-// CreatePolicyMetricsCallback for PolicyReport watch.Events
-func CreatePolicyReportMetricsCallback() report.PolicyReportCallback {
+func createPolicyReportMetricsCallback() report.PolicyReportCallback {
 	policyGauge := promauto.NewGaugeVec(prometheus.GaugeOpts{
 		Name: "policy_report_summary",
 		Help: "Summary of all PolicyReports",

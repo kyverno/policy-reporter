@@ -45,7 +45,7 @@ var cresult2 = report.Result{
 	},
 }
 
-var creport = report.ClusterPolicyReport{
+var creport = report.PolicyReport{
 	Name:              "cpolr-test",
 	Results:           make(map[string]report.Result, 0),
 	Summary:           report.Summary{},
@@ -66,10 +66,10 @@ func Test_ClusterPolicyReportMetricGeneration(t *testing.T) {
 		result1.GetIdentifier(): result1,
 	}
 
-	handler := metrics.CreateClusterPolicyReportMetricsCallback()
+	handler := metrics.CreateMetricsCallback()
 
 	t.Run("Added Metric", func(t *testing.T) {
-		handler(watch.Added, report1, report.ClusterPolicyReport{})
+		handler(watch.Added, report1, report.PolicyReport{})
 
 		metricFam, err := prometheus.DefaultGatherer.Gather()
 		if err != nil {
@@ -114,7 +114,7 @@ func Test_ClusterPolicyReportMetricGeneration(t *testing.T) {
 	})
 
 	t.Run("Modified Metric", func(t *testing.T) {
-		handler(watch.Added, report1, report.ClusterPolicyReport{})
+		handler(watch.Added, report1, report.PolicyReport{})
 		handler(watch.Modified, report2, report1)
 
 		metricFam, err := prometheus.DefaultGatherer.Gather()
@@ -160,7 +160,7 @@ func Test_ClusterPolicyReportMetricGeneration(t *testing.T) {
 	})
 
 	t.Run("Deleted Metric", func(t *testing.T) {
-		handler(watch.Added, report1, report.ClusterPolicyReport{})
+		handler(watch.Added, report1, report.PolicyReport{})
 		handler(watch.Modified, report2, report1)
 		handler(watch.Deleted, report2, report2)
 
@@ -184,7 +184,7 @@ func Test_ClusterPolicyReportMetricGeneration(t *testing.T) {
 
 func testClusterSummaryMetricLabels(
 	metric *io_prometheus_client.Metric,
-	preport report.ClusterPolicyReport,
+	preport report.PolicyReport,
 	status string,
 	gauge float64,
 ) error {

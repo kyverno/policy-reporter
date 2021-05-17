@@ -51,7 +51,7 @@ var preport = report.PolicyReport{
 	CreationTimestamp: time.Now(),
 }
 
-var creport = report.ClusterPolicyReport{
+var creport = report.PolicyReport{
 	Name:              "cpolr-test",
 	Results:           make(map[string]report.Result, 0),
 	Summary:           report.Summary{},

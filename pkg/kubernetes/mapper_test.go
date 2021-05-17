@@ -89,8 +89,8 @@ var clusterPolicyMap = map[string]interface{}{
 			"message":   "message",
 			"result":    "fail",
 			"scored":    true,
-			"policy":    "required-label",
-			"rule":      "app-label-required",
+			"policy":    "cluster-required-label",
+			"rule":      "ns-label-required",
 			"category":  "test",
 			"severity":  "high",
 			"timestamp": map[string]interface{}{"seconds": ""},
@@ -236,52 +236,6 @@ func Test_MapMinPolicyReport(t *testing.T) {
 	}
 	if report.Namespace != "test" {
 		t.Errorf("Expected Name 'test' (acutal %s)", report.Namespace)
-	}
-	if report.Summary.Pass != 0 {
-		t.Errorf("Unexpected Summary.Pass value %d (expected 0)", report.Summary.Pass)
-	}
-	if report.Summary.Skip != 0 {
-		t.Errorf("Unexpected Summary.Skip value %d (expected 0)", report.Summary.Skip)
-	}
-	if report.Summary.Warn != 0 {
-		t.Errorf("Unexpected Summary.Warn value %d (expected 0)", report.Summary.Warn)
-	}
-	if report.Summary.Fail != 0 {
-		t.Errorf("Unexpected Summary.Fail value %d (expected 0)", report.Summary.Fail)
-	}
-	if report.Summary.Error != 0 {
-		t.Errorf("Unexpected Summary.Error value %d (expected 0)", report.Summary.Error)
-	}
-}
-
-func Test_MapClusterPolicyReport(t *testing.T) {
-	report := mapper.MapClusterPolicyReport(clusterPolicyMap)
-
-	if report.Name != "clusterpolicy-report" {
-		t.Errorf("Expected Name 'clusterpolicy-report' (acutal %s)", report.Name)
-	}
-	if report.Summary.Pass != 1 {
-		t.Errorf("Unexpected Summary.Pass value %d (expected 1)", report.Summary.Pass)
-	}
-	if report.Summary.Skip != 2 {
-		t.Errorf("Unexpected Summary.Skip value %d (expected 2)", report.Summary.Skip)
-	}
-	if report.Summary.Warn != 3 {
-		t.Errorf("Unexpected Summary.Warn value %d (expected 3)", report.Summary.Warn)
-	}
-	if report.Summary.Fail != 4 {
-		t.Errorf("Unexpected Summary.Fail value %d (expected 4)", report.Summary.Fail)
-	}
-	if report.Summary.Error != 5 {
-		t.Errorf("Unexpected Summary.Error value %d (expected 5)", report.Summary.Error)
-	}
-}
-
-func Test_MapMinClusterPolicyReport(t *testing.T) {
-	report := mapper.MapClusterPolicyReport(minClusterPolicyMap)
-
-	if report.Name != "clusterpolicy-report" {
-		t.Errorf("Expected Name 'clusterpolicy-report' (acutal %s)", report.Name)
 	}
 	if report.Summary.Pass != 0 {
 		t.Errorf("Unexpected Summary.Pass value %d (expected 0)", report.Summary.Pass)

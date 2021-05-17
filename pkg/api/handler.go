@@ -14,7 +14,7 @@ func PolicyReportHandler(s *report.PolicyReportStore) http.HandlerFunc {
 		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 		w.WriteHeader(http.StatusOK)
 
-		reports := s.List()
+		reports := s.List("PolicyReport")
 		if len(reports) == 0 {
 			fmt.Fprint(w, "[]")
 
@@ -34,21 +34,21 @@ func PolicyReportHandler(s *report.PolicyReportStore) http.HandlerFunc {
 }
 
 // ClusterPolicyReportHandler for the ClusterPolicyReport REST API
-func ClusterPolicyReportHandler(s *report.ClusterPolicyReportStore) http.HandlerFunc {
+func ClusterPolicyReportHandler(s *report.PolicyReportStore) http.HandlerFunc {
 	return func(w http.ResponseWriter, req *http.Request) {
 		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 		w.WriteHeader(http.StatusOK)
 
-		reports := s.List()
+		reports := s.List(report.ClusterPolicyReportType)
 		if len(reports) == 0 {
 			fmt.Fprint(w, "[]")
 
 			return
 		}
 
-		apiReports := make([]ClusterPolicyReport, 0, len(reports))
+		apiReports := make([]PolicyReport, 0, len(reports))
 		for _, r := range reports {
-			apiReports = append(apiReports, mapClusterPolicyReport(r))
+			apiReports = append(apiReports, mapPolicyReport(r))
 		}
 
 		if err := json.NewEncoder(w).Encode(apiReports); err != nil {

@@ -135,7 +135,7 @@ func Test_ClusterPolicyReportAPI(t *testing.T) {
 		}
 
 		rr := httptest.NewRecorder()
-		handler := http.HandlerFunc(api.ClusterPolicyReportHandler(report.NewClusterPolicyReportStore()))
+		handler := http.HandlerFunc(api.ClusterPolicyReportHandler(report.NewPolicyReportStore()))
 
 		handler.ServeHTTP(rr, req)
 
@@ -170,14 +170,14 @@ func Test_ClusterPolicyReportAPI(t *testing.T) {
 			},
 		}
 
-		creport := report.ClusterPolicyReport{
+		creport := report.PolicyReport{
 			Name:              "cpolr-test",
 			Summary:           report.Summary{},
 			CreationTimestamp: time.Now(),
 			Results:           map[string]report.Result{"": result},
 		}
 
-		store := report.NewClusterPolicyReportStore()
+		store := report.NewPolicyReportStore()
 		store.Add(creport)
 
 		rr := httptest.NewRecorder()

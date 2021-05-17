@@ -15,8 +15,6 @@ import (
 type Mapper interface {
 	// MapPolicyReport maps a map into a PolicyReport
 	MapPolicyReport(reportMap map[string]interface{}) report.PolicyReport
-	// MapClusterPolicyReport maps a map into a ClusterPolicyReport
-	MapClusterPolicyReport(reportMap map[string]interface{}) report.ClusterPolicyReport
 	// SetPriorityMap updates the policy/status to priority mapping
 	SetPriorityMap(map[string]string)
 	// SyncPriorities when ConfigMap has changed
@@ -41,47 +39,16 @@ func (m *mapper) MapPolicyReport(reportMap map[string]interface{}) report.Policy
 		summary.Fail = int(s["fail"].(int64))
 	}
 
+	metadata := reportMap["metadata"].(map[string]interface{})
+
 	r := report.PolicyReport{
-		Name:      reportMap["metadata"].(map[string]interface{})["name"].(string),
-		Namespace: reportMap["metadata"].(map[string]interface{})["namespace"].(string),
-		Summary:   summary,
-		Results:   make(map[string]report.Result),
-	}
-
-	creationTimestamp, err := m.mapCreationTime(reportMap)
-	if err == nil {
-		r.CreationTimestamp = creationTimestamp
-	} else {
-		r.CreationTimestamp = time.Now()
-	}
-
-	if rs, ok := reportMap["results"].([]interface{}); ok {
-		for _, resultItem := range rs {
-			resources := m.mapResult(resultItem.(map[string]interface{}))
-			for _, resource := range resources {
-				r.Results[resource.GetIdentifier()] = resource
-			}
-		}
-	}
-
-	return r
-}
-
-func (m *mapper) MapClusterPolicyReport(reportMap map[string]interface{}) report.ClusterPolicyReport {
-	summary := report.Summary{}
-
-	if s, ok := reportMap["summary"].(map[string]interface{}); ok {
-		summary.Pass = int(s["pass"].(int64))
-		summary.Skip = int(s["skip"].(int64))
-		summary.Warn = int(s["warn"].(int64))
-		summary.Error = int(s["error"].(int64))
-		summary.Fail = int(s["fail"].(int64))
-	}
-
-	r := report.ClusterPolicyReport{
-		Name:    reportMap["metadata"].(map[string]interface{})["name"].(string),
+		Name:    metadata["name"].(string),
 		Summary: summary,
 		Results: make(map[string]report.Result),
+	}
+
+	if ns, ok := metadata["namespace"]; ok {
+		r.Namespace = ns.(string)
 	}
 
 	creationTimestamp, err := m.mapCreationTime(reportMap)

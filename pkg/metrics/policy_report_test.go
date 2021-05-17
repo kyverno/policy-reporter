@@ -69,7 +69,7 @@ func Test_PolicyReportMetricGeneration(t *testing.T) {
 		result1.GetIdentifier(): result1,
 	}
 
-	handler := metrics.CreatePolicyReportMetricsCallback()
+	handler := metrics.CreateMetricsCallback()
 
 	t.Run("Added Metric", func(t *testing.T) {
 		handler(watch.Added, report1, report.PolicyReport{})
