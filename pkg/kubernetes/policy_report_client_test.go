@@ -9,6 +9,7 @@ import (
 
 	"github.com/fjogeleit/policy-reporter/pkg/kubernetes"
 	"github.com/fjogeleit/policy-reporter/pkg/report"
+	"github.com/patrickmn/go-cache"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/watch"
@@ -26,6 +27,7 @@ func Test_FetchPolicyReports(t *testing.T) {
 		NewMapper(k8sCMClient),
 		time.Now(),
 		10,
+		cache.New(cache.DefaultExpiration, time.Minute*5),
 	)
 
 	fakeAdapter.policies = append(fakeAdapter.policies, unstructured.Unstructured{Object: policyMap})
@@ -60,6 +62,7 @@ func Test_FetchPolicyReportsError(t *testing.T) {
 		NewMapper(k8sCMClient),
 		time.Now(),
 		10,
+		cache.New(cache.DefaultExpiration, time.Minute*5),
 	)
 
 	_, err := client.FetchPolicyReports()
@@ -80,6 +83,7 @@ func Test_FetchPolicyResults(t *testing.T) {
 		NewMapper(k8sCMClient),
 		time.Now(),
 		10,
+		cache.New(cache.DefaultExpiration, time.Minute*5),
 	)
 
 	fakeAdapter.policies = append(fakeAdapter.policies, unstructured.Unstructured{Object: policyMap})
@@ -106,6 +110,7 @@ func Test_FetchPolicyResultsError(t *testing.T) {
 		NewMapper(k8sCMClient),
 		time.Now(),
 		10,
+		cache.New(cache.DefaultExpiration, time.Minute*5),
 	)
 
 	_, err := client.FetchPolicyResults()
@@ -125,6 +130,7 @@ func Test_PolicyWatcher(t *testing.T) {
 		NewMapper(k8sCMClient),
 		time.Now(),
 		10,
+		cache.New(cache.DefaultExpiration, time.Minute*5),
 	)
 
 	client.RegisterPolicyResultWatcher(false)
@@ -161,6 +167,7 @@ func Test_PolicyWatcherTwice(t *testing.T) {
 		NewMapper(k8sCMClient),
 		time.Now(),
 		10,
+		cache.New(cache.DefaultExpiration, time.Minute*5),
 	)
 
 	go client.StartWatching()
@@ -219,6 +226,7 @@ func Test_PolicySkipExisting(t *testing.T) {
 		NewMapper(k8sCMClient),
 		time.Now(),
 		10,
+		cache.New(cache.DefaultExpiration, time.Minute*5),
 	)
 
 	client.RegisterPolicyResultWatcher(true)
@@ -261,6 +269,7 @@ func Test_PolicyWatcherError(t *testing.T) {
 		NewMapper(k8sCMClient),
 		time.Now(),
 		10,
+		cache.New(cache.DefaultExpiration, time.Minute*5),
 	)
 
 	client.RegisterPolicyResultWatcher(false)
@@ -282,6 +291,7 @@ func Test_PolicyWatchDeleteEvent(t *testing.T) {
 		NewMapper(k8sCMClient),
 		time.Now(),
 		10,
+		cache.New(cache.DefaultExpiration, time.Minute*5),
 	)
 
 	client.RegisterPolicyResultWatcher(false)
@@ -319,6 +329,7 @@ func Test_PolicyDelayReset(t *testing.T) {
 		NewMapper(k8sCMClient),
 		time.Now(),
 		10,
+		cache.New(cache.DefaultExpiration, time.Minute*5),
 	)
 
 	client.RegisterPolicyResultWatcher(false)
@@ -351,6 +362,7 @@ func Test_PolicyDelayWithoutClearEvent(t *testing.T) {
 		NewMapper(k8sCMClient),
 		time.Now(),
 		10,
+		cache.New(cache.DefaultExpiration, time.Minute*5),
 	)
 
 	client.RegisterPolicyResultWatcher(false)
@@ -382,6 +394,7 @@ func Test_PolicyWatchModifiedEvent(t *testing.T) {
 		NewMapper(k8sCMClient),
 		time.Now(),
 		10,
+		cache.New(cache.DefaultExpiration, time.Minute*5),
 	)
 
 	client.RegisterPolicyResultWatcher(false)

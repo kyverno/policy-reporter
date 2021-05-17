@@ -16,6 +16,7 @@ import (
 	"github.com/fjogeleit/policy-reporter/pkg/target/slack"
 	"github.com/fjogeleit/policy-reporter/pkg/target/teams"
 	"github.com/fjogeleit/policy-reporter/pkg/target/ui"
+	"github.com/patrickmn/go-cache"
 	"k8s.io/client-go/dynamic"
 	v1 "k8s.io/client-go/kubernetes/typed/core/v1"
 	"k8s.io/client-go/rest"
@@ -37,6 +38,7 @@ type Resolver struct {
 	discordClient       target.Client
 	teamsClient         target.Client
 	uiClient            target.Client
+	resultCache         *cache.Cache
 }
 
 // APIServer resolver method
@@ -114,6 +116,7 @@ func (r *Resolver) PolicyReportClient(ctx context.Context) (report.PolicyClient,
 		mapper,
 		time.Now(),
 		time.Duration(r.config.CleanupDebounceTime),
+		r.ResultCache(),
 	)
 
 	r.policyClient = client
@@ -143,6 +146,7 @@ func (r *Resolver) ClusterPolicyReportClient(ctx context.Context) (report.Cluste
 		mapper,
 		time.Now(),
 		time.Duration(r.config.CleanupDebounceTime),
+		r.ResultCache(),
 	)
 
 	return r.clusterPolicyClient, nil
@@ -374,6 +378,15 @@ func (r *Resolver) policyReportAPI() (kubernetes.PolicyReportAdapter, error) {
 		return nil, err
 	}
 	return kubernetes.NewPolicyReportAdapter(client, r.config.CRDVersion), nil
+}
+
+func (r *Resolver) ResultCache() *cache.Cache {
+	if r.resultCache != nil {
+		return r.resultCache
+	}
+	r.resultCache = cache.New(time.Minute*30, time.Minute*45)
+
+	return r.resultCache
 }
 
 // NewResolver constructor function

@@ -7,74 +7,10 @@ import (
 	"time"
 
 	"github.com/fjogeleit/policy-reporter/pkg/report"
+	"github.com/patrickmn/go-cache"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/watch"
 )
-
-type clusterPolicyReportEvent struct {
-	report    report.ClusterPolicyReport
-	eventType watch.EventType
-}
-
-type clusterPolicyReportEventDebouncer struct {
-	events       map[string]clusterPolicyReportEvent
-	channel      chan clusterPolicyReportEvent
-	mutx         *sync.Mutex
-	debounceTime time.Duration
-}
-
-func (d *clusterPolicyReportEventDebouncer) Add(e clusterPolicyReportEvent) {
-	_, ok := d.events[e.report.GetIdentifier()]
-	if e.eventType != watch.Modified && ok {
-		d.mutx.Lock()
-		delete(d.events, e.report.GetIdentifier())
-		d.mutx.Unlock()
-	}
-
-	if e.eventType != watch.Modified {
-		d.channel <- e
-		return
-	}
-
-	if len(e.report.Results) == 0 && !ok {
-		d.mutx.Lock()
-		d.events[e.report.GetIdentifier()] = e
-		d.mutx.Unlock()
-
-		go func() {
-			time.Sleep(d.debounceTime * time.Second)
-
-			d.mutx.Lock()
-			if event, ok := d.events[e.report.GetIdentifier()]; ok {
-				d.channel <- event
-				delete(d.events, e.report.GetIdentifier())
-			}
-			d.mutx.Unlock()
-		}()
-
-		return
-	}
-
-	if ok {
-		d.mutx.Lock()
-		d.events[e.report.GetIdentifier()] = e
-		d.mutx.Unlock()
-
-		return
-	}
-
-	d.channel <- e
-}
-
-func (d *clusterPolicyReportEventDebouncer) Reset() {
-	d.mutx.Lock()
-	d.events = make(map[string]clusterPolicyReportEvent)
-	d.mutx.Unlock()
-}
-
-func (d *clusterPolicyReportEventDebouncer) ReportChan() chan clusterPolicyReportEvent {
-	return d.channel
-}
 
 type clusterPolicyReportClient struct {
 	policyAPI       PolicyReportAdapter
@@ -85,8 +21,8 @@ type clusterPolicyReportClient struct {
 	startUp         time.Time
 	skipExisting    bool
 	started         bool
-	modifyHash      map[string]string
 	debouncer       clusterPolicyReportEventDebouncer
+	resultCache     *cache.Cache
 }
 
 func (c *clusterPolicyReportClient) RegisterCallback(cb report.ClusterPolicyReportCallback) {
@@ -170,10 +106,20 @@ func (c *clusterPolicyReportClient) StartWatching() error {
 	return <-errorChan
 }
 
+func (c *clusterPolicyReportClient) cacheResults(opr report.ClusterPolicyReport) {
+	for id := range opr.Results {
+		c.resultCache.SetDefault(id, true)
+	}
+}
+
 func (c *clusterPolicyReportClient) executeClusterPolicyReportHandler(e watch.EventType, cpr report.ClusterPolicyReport) {
 	opr, ok := c.store.Get(cpr.GetIdentifier())
 	if !ok {
 		opr = report.ClusterPolicyReport{}
+	}
+
+	if e == watch.Modified {
+		c.cacheResults(opr)
 	}
 
 	wg := sync.WaitGroup{}
@@ -211,15 +157,6 @@ func (c *clusterPolicyReportClient) RegisterPolicyResultWatcher(skipExisting boo
 				break
 			}
 
-			newHash := cpr.ResultHash()
-			if hash, ok := c.modifyHash[cpr.GetIdentifier()]; ok {
-				if newHash == hash {
-					break
-				}
-			}
-
-			c.modifyHash[cpr.GetIdentifier()] = newHash
-
 			preExisted := cpr.CreationTimestamp.Before(c.startUp)
 
 			if c.skipExisting && preExisted {
@@ -229,9 +166,14 @@ func (c *clusterPolicyReportClient) RegisterPolicyResultWatcher(skipExisting boo
 			diff := cpr.GetNewResults(opr)
 
 			wg := sync.WaitGroup{}
-			wg.Add(len(diff) * len(c.resultCallbacks))
 
 			for _, r := range diff {
+				if _, found := c.resultCache.Get(r.GetIdentifier()); found {
+					continue
+				}
+
+				wg.Add(len(c.resultCallbacks))
+
 				for _, cb := range c.resultCallbacks {
 					go func(callback report.PolicyResultCallback, result report.Result) {
 						callback(result, preExisted)
@@ -246,21 +188,17 @@ func (c *clusterPolicyReportClient) RegisterPolicyResultWatcher(skipExisting boo
 				break
 			}
 
-			newHash := cpr.ResultHash()
-			if hash, ok := c.modifyHash[cpr.GetIdentifier()]; ok {
-				if newHash == hash {
-					break
-				}
-			}
-
-			c.modifyHash[cpr.GetIdentifier()] = newHash
-
 			diff := cpr.GetNewResults(opr)
 
 			wg := sync.WaitGroup{}
-			wg.Add(len(diff) * len(c.resultCallbacks))
 
 			for _, r := range diff {
+				if _, found := c.resultCache.Get(r.GetIdentifier()); found {
+					continue
+				}
+
+				wg.Add(len(c.resultCallbacks))
+
 				for _, cb := range c.resultCallbacks {
 					go func(callback report.PolicyResultCallback, result report.Result) {
 						callback(result, false)
@@ -270,10 +208,6 @@ func (c *clusterPolicyReportClient) RegisterPolicyResultWatcher(skipExisting boo
 			}
 
 			wg.Wait()
-		case watch.Deleted:
-			if _, ok := c.modifyHash[cpr.GetIdentifier()]; ok {
-				delete(c.modifyHash, cpr.GetIdentifier())
-			}
 		}
 	})
 }
@@ -285,18 +219,19 @@ func NewClusterPolicyReportClient(
 	mapper Mapper,
 	startUp time.Time,
 	debounceTime time.Duration,
+	resultCache *cache.Cache,
 ) report.ClusterPolicyClient {
 	return &clusterPolicyReportClient{
-		policyAPI:  client,
-		store:      store,
-		mapper:     mapper,
-		startUp:    startUp,
-		modifyHash: make(map[string]string),
+		policyAPI: client,
+		store:     store,
+		mapper:    mapper,
+		startUp:   startUp,
 		debouncer: clusterPolicyReportEventDebouncer{
 			events:       make(map[string]clusterPolicyReportEvent, 0),
 			mutx:         new(sync.Mutex),
 			channel:      make(chan clusterPolicyReportEvent),
 			debounceTime: debounceTime,
 		},
+		resultCache: resultCache,
 	}
 }

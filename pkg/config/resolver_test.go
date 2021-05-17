@@ -266,6 +266,20 @@ func Test_ResolveAPIServer(t *testing.T) {
 	}
 }
 
+func Test_ResolveCache(t *testing.T) {
+	resolver := config.NewResolver(testConfig, &rest.Config{})
+
+	cache1 := resolver.ResultCache()
+	if cache1 == nil {
+		t.Error("Error: Should return ResultCache")
+	}
+
+	cache2 := resolver.ResultCache()
+	if cache1 != cache2 {
+		t.Error("A second call resolver.ResultCache() should return the cached first cache")
+	}
+}
+
 func Test_ResolveClientWithInvalidK8sConfig(t *testing.T) {
 	k8sConfig := &rest.Config{}
 	k8sConfig.Host = "invalid/url"
