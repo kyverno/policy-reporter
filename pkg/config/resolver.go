@@ -318,7 +318,7 @@ func (r *Resolver) ResultCache() *cache.Cache {
 	if r.resultCache != nil {
 		return r.resultCache
 	}
-	r.resultCache = cache.New(time.Minute*30, time.Minute*45)
+	r.resultCache = cache.New(time.Minute*30, time.Minute*15)
 
 	return r.resultCache
 }

@@ -1,7 +1,7 @@
 image:
   repository: fjogeleit/policy-reporter
   pullPolicy: IfNotPresent
-  tag: 1.5.0
+  tag: 1.6.0
 
 imagePullSecrets: []
 
@@ -93,14 +93,12 @@ global:
   # Service Port number
   port: 8080
 
-# PolicyReport CRD Version to use
+# DEPRECTED - Can be removed
+# Policy Reporter watches now for both existing versions by default
 crdVersion: v1alpha1
 
-# Dounce Time in seconds for Modify Events after a cleanup event (Report with 0 Results)
-# Used to prevent Policy Reporter from resending existing violations after Kyverno recreates PolicyReports
-# When an existing Report get an Modify Event with 0 results it waits for the defined amount of time
-# for new Report Events and process the latest incomming Event for this Report which should be the complete recreated Report
-# the required amount of time can be different depending on the amount of validated resources and policies
+# DEPRECTED - Can be removed
+# Policy Reporter uses a new internal cache instead
 cleanupDebounceTime: 20
 
 api:
