@@ -5,10 +5,19 @@ import (
 	"k8s.io/apimachinery/pkg/watch"
 )
 
+var (
+	pCallback report.PolicyReportCallback
+	cCallback report.PolicyReportCallback
+)
+
 // CreateMetricsCallback for PolicyReport watch.Events
 func CreateMetricsCallback() report.PolicyReportCallback {
-	pCallback := createPolicyReportMetricsCallback()
-	cCallback := createClusterPolicyReportMetricsCallback()
+	if pCallback == nil {
+		pCallback = createPolicyReportMetricsCallback()
+	}
+	if cCallback == nil {
+		cCallback = createClusterPolicyReportMetricsCallback()
+	}
 
 	return func(et watch.EventType, pr, opr report.PolicyReport) {
 		if pr.Namespace == "" {
