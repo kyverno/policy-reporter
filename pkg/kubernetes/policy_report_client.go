@@ -61,7 +61,7 @@ func (c *policyReportClient) StartWatching() error {
 }
 
 func (c *policyReportClient) cacheResults(opr report.PolicyReport) {
-	for id := range opr.GetResults() {
+	for id := range opr.Results {
 		c.resultCache.SetDefault(id, true)
 	}
 }
@@ -72,7 +72,7 @@ func (c *policyReportClient) executeReportHandler(e watch.EventType, pr report.P
 		opr = report.PolicyReport{}
 	}
 
-	if len(opr.GetResults()) > 0 {
+	if len(opr.Results) > 0 {
 		c.cacheResults(opr)
 	}
 
@@ -108,11 +108,11 @@ func (c *policyReportClient) RegisterPolicyResultWatcher(skipExisting bool) {
 		func(e watch.EventType, pr report.PolicyReport, or report.PolicyReport) {
 			switch e {
 			case watch.Added:
-				if len(pr.GetResults()) == 0 {
+				if len(pr.Results) == 0 {
 					break
 				}
 
-				preExisted := pr.GetCreationTimestamp().Before(c.startUp)
+				preExisted := pr.CreationTimestamp.Before(c.startUp)
 
 				if c.skipExisting && preExisted {
 					break
@@ -139,7 +139,7 @@ func (c *policyReportClient) RegisterPolicyResultWatcher(skipExisting bool) {
 
 				wg.Wait()
 			case watch.Modified:
-				if len(pr.GetResults()) == 0 {
+				if len(pr.Results) == 0 {
 					break
 				}
 

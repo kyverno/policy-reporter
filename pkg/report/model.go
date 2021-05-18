@@ -212,10 +212,6 @@ func (pr PolicyReport) ResultHash() string {
 	return hex.EncodeToString(h.Sum(nil))
 }
 
-func (pr PolicyReport) GetResults() map[string]Result {
-	return pr.Results
-}
-
 func (pr PolicyReport) HasResult(id string) bool {
 	_, ok := pr.Results[id]
 
@@ -228,10 +224,6 @@ func (pr PolicyReport) GetType() ReportType {
 	}
 
 	return PolicyReportType
-}
-
-func (pr PolicyReport) GetCreationTimestamp() time.Time {
-	return pr.CreationTimestamp
 }
 
 // GetNewResults filters already existing Results from the old PolicyReport and returns only the diff with new Results

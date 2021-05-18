@@ -109,6 +109,11 @@ func Test_ClusterPolicyReport(t *testing.T) {
 			t.Errorf("Expected ClusterPolicyReport.GetIdentifier() to be %s (actual: %s)", creport.Name, creport.GetIdentifier())
 		}
 	})
+	t.Run("Check ClusterPolicyReport.GetType", func(t *testing.T) {
+		if creport.GetType() != report.ClusterPolicyReportType {
+			t.Errorf("Expected ClusterPolicyReport.GetType() to be %s (actual: %s)", report.ClusterPolicyReportType, creport.GetType())
+		}
+	})
 
 	t.Run("Check ClusterPolicyReport.GetNewResults", func(t *testing.T) {
 		creport1 := creport
@@ -154,6 +159,12 @@ func Test_Result(t *testing.T) {
 			t.Errorf("Expected ClusterPolicyReport.GetIdentifier() to be %s (actual: %s)", expected, creport.GetIdentifier())
 		}
 	})
+	t.Run("Check Result.HasResource", func(t *testing.T) {
+		if result1.HasResource() == false {
+			t.Errorf("Expected result1.HasResource() to be true (actual: %v)", result1.HasResource())
+		}
+	})
+
 }
 
 func Test_MarshalPriority(t *testing.T) {
