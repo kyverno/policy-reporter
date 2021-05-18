@@ -1,5 +1,11 @@
 # Changelog
 
+# 1.6.0
+* Internal refactoring
+    * Unification of PolicyReports and ClusterPolicyReports processing, APIs still stable
+    * DEPRECETED `crdVersion`, Policy Reporter handels now both versions by default
+    * DEPRECETED `cleanupDebounceTime`, new internal caching replaced the debounce mechanism, debounce still exist with a fixed period to improve stable metric values.
+
 # 1.5.0
 * Support multiple Resources for a single Result
     * Mapping Result with multiple Resources in multiple Results with a single Resource

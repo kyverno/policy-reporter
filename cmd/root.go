@@ -18,7 +18,6 @@ func NewCLI() *cobra.Command {
 	}
 
 	rootCmd.AddCommand(newRunCMD())
-	rootCmd.AddCommand(newSendCMD())
 
 	return rootCmd
 }

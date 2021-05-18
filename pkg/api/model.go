@@ -41,15 +41,7 @@ type Summary struct {
 // PolicyReport API Model
 type PolicyReport struct {
 	Name              string    `json:"name"`
-	Namespace         string    `json:"namespace"`
-	Results           []Result  `json:"results"`
-	Summary           Summary   `json:"summary"`
-	CreationTimestamp time.Time `json:"creationTimestamp"`
-}
-
-// ClusterPolicyReport API Model
-type ClusterPolicyReport struct {
-	Name              string    `json:"name"`
+	Namespace         string    `json:"namespace,omitempty"`
 	Results           []Result  `json:"results"`
 	Summary           Summary   `json:"summary"`
 	CreationTimestamp time.Time `json:"creationTimestamp"`
@@ -93,48 +85,6 @@ func mapPolicyReport(p report.PolicyReport) PolicyReport {
 			Warn:  p.Summary.Warn,
 			Fail:  p.Summary.Fail,
 			Error: p.Summary.Error,
-		},
-		Results: results,
-	}
-}
-
-func mapClusterPolicyReport(c report.ClusterPolicyReport) ClusterPolicyReport {
-	results := make([]Result, 0, len(c.Results))
-
-	for _, r := range c.Results {
-		result := Result{
-			Message:  r.Message,
-			Policy:   r.Policy,
-			Rule:     r.Rule,
-			Priority: r.Priority.String(),
-			Status:   r.Status,
-			Severity: r.Severity,
-			Category: r.Category,
-			Scored:   r.Scored,
-		}
-
-		if r.HasResource() {
-			result.Resource = &Resource{
-				Namespace:  r.Resource.Namespace,
-				APIVersion: r.Resource.APIVersion,
-				Kind:       r.Resource.Kind,
-				Name:       r.Resource.Name,
-				UID:        r.Resource.UID,
-			}
-		}
-
-		results = append(results, result)
-	}
-
-	return ClusterPolicyReport{
-		Name:              c.Name,
-		CreationTimestamp: c.CreationTimestamp,
-		Summary: Summary{
-			Skip:  c.Summary.Skip,
-			Pass:  c.Summary.Pass,
-			Warn:  c.Summary.Warn,
-			Fail:  c.Summary.Fail,
-			Error: c.Summary.Error,
 		},
 		Results: results,
 	}

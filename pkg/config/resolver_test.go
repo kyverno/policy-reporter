@@ -215,20 +215,6 @@ func Test_ResolveTargetWithoutHost(t *testing.T) {
 	})
 }
 
-func Test_ResolveResultClient(t *testing.T) {
-	resolver := config.NewResolver(&config.Config{}, &rest.Config{})
-
-	client1, err := resolver.PolicyResultClient(context.Background())
-	if err != nil {
-		t.Errorf("Unexpected Error: %s", err)
-	}
-
-	client2, err := resolver.PolicyResultClient(context.Background())
-	if client1 != client2 {
-		t.Error("A second call resolver.PolicyResultClient() should return the cached first client")
-	}
-}
-
 func Test_ResolvePolicyClient(t *testing.T) {
 	resolver := config.NewResolver(&config.Config{}, &rest.Config{})
 
@@ -243,26 +229,26 @@ func Test_ResolvePolicyClient(t *testing.T) {
 	}
 }
 
-func Test_ResolveClusterPolicyClient(t *testing.T) {
-	resolver := config.NewResolver(&config.Config{}, &rest.Config{})
-
-	client1, err := resolver.ClusterPolicyReportClient(context.Background())
-	if err != nil {
-		t.Errorf("Unexpected Error: %s", err)
-	}
-
-	client2, err := resolver.ClusterPolicyReportClient(context.Background())
-	if client1 != client2 {
-		t.Error("A second call resolver.ClusterPolicyReportClient() should return the cached first client")
-	}
-}
-
 func Test_ResolveAPIServer(t *testing.T) {
 	resolver := config.NewResolver(testConfig, &rest.Config{})
 
 	server := resolver.APIServer()
 	if server == nil {
 		t.Error("Error: Should return API Server")
+	}
+}
+
+func Test_ResolveCache(t *testing.T) {
+	resolver := config.NewResolver(testConfig, &rest.Config{})
+
+	cache1 := resolver.ResultCache()
+	if cache1 == nil {
+		t.Error("Error: Should return ResultCache")
+	}
+
+	cache2 := resolver.ResultCache()
+	if cache1 != cache2 {
+		t.Error("A second call resolver.ResultCache() should return the cached first cache")
 	}
 }
 

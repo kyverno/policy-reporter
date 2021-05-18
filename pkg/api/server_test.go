@@ -14,7 +14,6 @@ import (
 func Test_NewServer(t *testing.T) {
 	server := api.NewServer(
 		report.NewPolicyReportStore(),
-		report.NewClusterPolicyReportStore(),
 		[]target.Client{
 			loki.NewClient("http://localhost:3100", "debug", true, &http.Client{}),
 			discord.NewClient("http://webhook:2000", "", false, &http.Client{}),

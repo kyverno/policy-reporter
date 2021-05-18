@@ -7,8 +7,7 @@ import (
 	"k8s.io/apimachinery/pkg/watch"
 )
 
-// CreateClusterPolicyReportMetricsCallback for ClusterPolicy watch.Events
-func CreateClusterPolicyReportMetricsCallback() report.ClusterPolicyReportCallback {
+func createClusterPolicyReportMetricsCallback() report.PolicyReportCallback {
 	policyGauge := promauto.NewGaugeVec(prometheus.GaugeOpts{
 		Name: "cluster_policy_report_summary",
 		Help: "Summary of all ClusterPolicyReports",
@@ -22,7 +21,7 @@ func CreateClusterPolicyReportMetricsCallback() report.ClusterPolicyReportCallba
 	prometheus.Register(policyGauge)
 	prometheus.Register(ruleGauge)
 
-	return func(event watch.EventType, report report.ClusterPolicyReport, oldReport report.ClusterPolicyReport) {
+	return func(event watch.EventType, report report.PolicyReport, oldReport report.PolicyReport) {
 		switch event {
 		case watch.Added:
 			updateClusterPolicyGauge(policyGauge, report)
@@ -54,7 +53,7 @@ func CreateClusterPolicyReportMetricsCallback() report.ClusterPolicyReportCallba
 	}
 }
 
-func generateClusterResultLabels(report report.ClusterPolicyReport, result report.Result) prometheus.Labels {
+func generateClusterResultLabels(report report.PolicyReport, result report.Result) prometheus.Labels {
 	labels := prometheus.Labels{
 		"rule":     result.Rule,
 		"policy":   result.Policy,
@@ -74,7 +73,7 @@ func generateClusterResultLabels(report report.ClusterPolicyReport, result repor
 	return labels
 }
 
-func updateClusterPolicyGauge(policyGauge *prometheus.GaugeVec, report report.ClusterPolicyReport) {
+func updateClusterPolicyGauge(policyGauge *prometheus.GaugeVec, report report.PolicyReport) {
 	policyGauge.
 		WithLabelValues(report.Name, "Pass").
 		Set(float64(report.Summary.Pass))

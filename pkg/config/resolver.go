@@ -16,6 +16,7 @@ import (
 	"github.com/fjogeleit/policy-reporter/pkg/target/slack"
 	"github.com/fjogeleit/policy-reporter/pkg/target/teams"
 	"github.com/fjogeleit/policy-reporter/pkg/target/ui"
+	"github.com/patrickmn/go-cache"
 	"k8s.io/client-go/dynamic"
 	v1 "k8s.io/client-go/kubernetes/typed/core/v1"
 	"k8s.io/client-go/rest"
@@ -27,47 +28,23 @@ type Resolver struct {
 	k8sConfig           *rest.Config
 	mapper              kubernetes.Mapper
 	policyStore         *report.PolicyReportStore
-	clusterPolicyStore  *report.ClusterPolicyReportStore
-	resultClient        report.ResultClient
-	policyClient        report.PolicyClient
-	clusterPolicyClient report.ClusterPolicyClient
+	policyClient        report.PolicyResultClient
 	lokiClient          target.Client
 	elasticsearchClient target.Client
 	slackClient         target.Client
 	discordClient       target.Client
 	teamsClient         target.Client
 	uiClient            target.Client
+	resultCache         *cache.Cache
 }
 
 // APIServer resolver method
 func (r *Resolver) APIServer() api.Server {
 	return api.NewServer(
 		r.PolicyReportStore(),
-		r.ClusterPolicyReportStore(),
 		r.TargetClients(),
 		r.config.API.Port,
 	)
-}
-
-// PolicyResultClient resolver method
-func (r *Resolver) PolicyResultClient(ctx context.Context) (report.ResultClient, error) {
-	if r.resultClient != nil {
-		return r.resultClient, nil
-	}
-
-	pClient, err := r.PolicyReportClient(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	cpClient, err := r.ClusterPolicyReportClient(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	r.resultClient = kubernetes.NewPolicyResultClient(pClient, cpClient)
-
-	return r.resultClient, nil
 }
 
 // PolicyReportStore resolver method
@@ -81,29 +58,13 @@ func (r *Resolver) PolicyReportStore() *report.PolicyReportStore {
 	return r.policyStore
 }
 
-// PolicyReportStore resolver method
-func (r *Resolver) ClusterPolicyReportStore() *report.ClusterPolicyReportStore {
-	if r.clusterPolicyStore != nil {
-		return r.clusterPolicyStore
-	}
-
-	r.clusterPolicyStore = report.NewClusterPolicyReportStore()
-
-	return r.clusterPolicyStore
-}
-
 // PolicyReportClient resolver method
-func (r *Resolver) PolicyReportClient(ctx context.Context) (report.PolicyClient, error) {
+func (r *Resolver) PolicyReportClient(ctx context.Context) (report.PolicyResultClient, error) {
 	if r.policyClient != nil {
 		return r.policyClient, nil
 	}
 
-	mapper, err := r.Mapper(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	policyAPI, err := r.policyReportAPI()
+	policyAPI, err := r.policyReportAPI(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -111,41 +72,13 @@ func (r *Resolver) PolicyReportClient(ctx context.Context) (report.PolicyClient,
 	client := kubernetes.NewPolicyReportClient(
 		policyAPI,
 		r.PolicyReportStore(),
-		mapper,
 		time.Now(),
-		time.Duration(r.config.CleanupDebounceTime),
+		r.ResultCache(),
 	)
 
 	r.policyClient = client
 
 	return client, nil
-}
-
-// ClusterPolicyReportClient resolver method
-func (r *Resolver) ClusterPolicyReportClient(ctx context.Context) (report.ClusterPolicyClient, error) {
-	if r.clusterPolicyClient != nil {
-		return r.clusterPolicyClient, nil
-	}
-
-	mapper, err := r.Mapper(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	policyAPI, err := r.policyReportAPI()
-	if err != nil {
-		return nil, err
-	}
-
-	r.clusterPolicyClient = kubernetes.NewClusterPolicyReportClient(
-		policyAPI,
-		r.ClusterPolicyReportStore(),
-		mapper,
-		time.Now(),
-		time.Duration(r.config.CleanupDebounceTime),
-	)
-
-	return r.clusterPolicyClient, nil
 }
 
 // Mapper resolver method
@@ -368,12 +301,26 @@ func (r *Resolver) configMapAPI() (kubernetes.ConfigMapAdapter, error) {
 	return kubernetes.NewConfigMapAdapter(client), nil
 }
 
-func (r *Resolver) policyReportAPI() (kubernetes.PolicyReportAdapter, error) {
+func (r *Resolver) policyReportAPI(ctx context.Context) (kubernetes.PolicyReportAdapter, error) {
 	client, err := dynamic.NewForConfig(r.k8sConfig)
 	if err != nil {
 		return nil, err
 	}
-	return kubernetes.NewPolicyReportAdapter(client, r.config.CRDVersion), nil
+	mapper, err := r.Mapper(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	return kubernetes.NewPolicyReportAdapter(client, mapper), nil
+}
+
+func (r *Resolver) ResultCache() *cache.Cache {
+	if r.resultCache != nil {
+		return r.resultCache
+	}
+	r.resultCache = cache.New(time.Minute*30, time.Minute*15)
+
+	return r.resultCache
 }
 
 // NewResolver constructor function

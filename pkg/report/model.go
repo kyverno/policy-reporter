@@ -36,6 +36,14 @@ const (
 	criticalString = "critical"
 )
 
+// ReportType Enum defined for PolicyReport
+type ReportType = string
+
+const (
+	PolicyReportType        ReportType = "PolicyReport"
+	ClusterPolicyReportType ReportType = "ClusterPolicyReport"
+)
+
 // Internal Priority definitions and weighting
 const (
 	DefaultPriority = iota
@@ -181,6 +189,10 @@ type PolicyReport struct {
 
 // GetIdentifier returns a global unique PolicyReport identifier
 func (pr PolicyReport) GetIdentifier() string {
+	if pr.Namespace == "" {
+		return pr.Name
+	}
+
 	return fmt.Sprintf("%s__%s", pr.Namespace, pr.Name)
 }
 
@@ -200,12 +212,26 @@ func (pr PolicyReport) ResultHash() string {
 	return hex.EncodeToString(h.Sum(nil))
 }
 
+func (pr PolicyReport) HasResult(id string) bool {
+	_, ok := pr.Results[id]
+
+	return ok
+}
+
+func (pr PolicyReport) GetType() ReportType {
+	if pr.Namespace == "" {
+		return ClusterPolicyReportType
+	}
+
+	return PolicyReportType
+}
+
 // GetNewResults filters already existing Results from the old PolicyReport and returns only the diff with new Results
 func (pr PolicyReport) GetNewResults(or PolicyReport) []Result {
 	diff := make([]Result, 0)
 
 	for _, r := range pr.Results {
-		if _, ok := or.Results[r.GetIdentifier()]; ok {
+		if or.HasResult(r.GetIdentifier()) {
 			continue
 		}
 
@@ -213,48 +239,4 @@ func (pr PolicyReport) GetNewResults(or PolicyReport) []Result {
 	}
 
 	return diff
-}
-
-// ClusterPolicyReport from the PolicyReport spec wgpolicyk8s.io/v1alpha1.ClusterPolicyReport
-type ClusterPolicyReport struct {
-	Name              string
-	Results           map[string]Result
-	Summary           Summary
-	CreationTimestamp time.Time
-}
-
-// GetIdentifier returns a global unique ClusterPolicyReport identifier
-func (cr ClusterPolicyReport) GetIdentifier() string {
-	return cr.Name
-}
-
-// GetNewResults filters already existing Results from the old PolicyReport and returns only the diff with new Results
-func (cr ClusterPolicyReport) GetNewResults(cor ClusterPolicyReport) []Result {
-	diff := make([]Result, 0)
-
-	for _, r := range cr.Results {
-		if _, ok := cor.Results[r.GetIdentifier()]; ok {
-			continue
-		}
-
-		diff = append(diff, r)
-	}
-
-	return diff
-}
-
-// ResultHash generates a has of the current result set
-func (cr ClusterPolicyReport) ResultHash() string {
-	list := make([]string, 0, len(cr.Results))
-
-	for id := range cr.Results {
-		list = append(list, id)
-	}
-
-	sort.Strings(list)
-
-	h := sha1.New()
-	h.Write([]byte(strings.Join(list, "")))
-
-	return hex.EncodeToString(h.Sum(nil))
 }
