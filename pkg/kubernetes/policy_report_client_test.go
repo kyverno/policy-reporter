@@ -12,6 +12,7 @@ import (
 	"github.com/patrickmn/go-cache"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
+	"k8s.io/apimachinery/pkg/watch"
 )
 
 func Test_PolicyWatcher(t *testing.T) {
@@ -257,4 +258,30 @@ func Test_PolicyWatchModifiedEvent(t *testing.T) {
 	if len(results) != 3 {
 		t.Error("Should receive initial 2 and 1 modification")
 	}
+}
+
+func Test_PolicyDelayReset(t *testing.T) {
+	_, k8sCMClient := newFakeAPI()
+	k8sCMClient.Create(context.Background(), configMap, metav1.CreateOptions{})
+
+	fakeAdapter := NewPolicyReportAdapter(NewMapper(k8sCMClient))
+	client := kubernetes.NewPolicyReportClient(fakeAdapter, report.NewPolicyReportStore(), time.Now(), cache.New(cache.DefaultExpiration, time.Minute*5))
+
+	client.RegisterPolicyResultWatcher(false)
+
+	wg := sync.WaitGroup{}
+	wg.Add(2)
+
+	client.RegisterCallback(func(e watch.EventType, r report.PolicyReport, o report.PolicyReport) {
+		wg.Done()
+	})
+
+	go client.StartWatching()
+
+	fakeAdapter.Watcher.Add(&unstructured.Unstructured{Object: policyMap})
+	fakeAdapter.Watcher.Modify(&unstructured.Unstructured{Object: minPolicyMap})
+	fakeAdapter.Watcher.Modify(&unstructured.Unstructured{Object: policyMap})
+	fakeAdapter.Watcher.Delete(&unstructured.Unstructured{Object: policyMap})
+
+	wg.Wait()
 }

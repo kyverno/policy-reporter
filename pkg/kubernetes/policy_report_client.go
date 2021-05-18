@@ -15,6 +15,7 @@ type policyReportClient struct {
 	store           *report.PolicyReportStore
 	callbacks       []report.PolicyReportCallback
 	resultCallbacks []report.PolicyResultCallback
+	debouncer       *debouncer
 	startUp         time.Time
 	skipExisting    bool
 	started         bool
@@ -42,9 +43,19 @@ func (c *policyReportClient) StartWatching() error {
 		return err
 	}
 
-	for event := range events {
+	go func() {
+		for event := range events {
+			c.debouncer.Add(event)
+		}
+
+		close(c.debouncer.channel)
+	}()
+
+	for event := range c.debouncer.ReportChan() {
 		c.executeReportHandler(event.Type, event.Report)
 	}
+
+	c.started = false
 
 	return errors.New("Watching stopped")
 }
@@ -168,5 +179,6 @@ func NewPolicyReportClient(
 		store:       store,
 		startUp:     startUp,
 		resultCache: resultCache,
+		debouncer:   newDebouncer(),
 	}
 }
