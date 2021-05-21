@@ -30,6 +30,10 @@ helm repo update
 helm install policy-reporter policy-reporter/policy-reporter -n policy-reporter --create-namespace
 ```
 
+### Installation without Helm or Kustomize
+
+To install Policy Reporter without Helm or Kustomize have a look at [manifests](https://github.com/fjogeleit/policy-reporter/tree/main/manifest).
+
 ## Policy Reporter UI
 
 You can use the Policy Reporter as standalone Application along with the optional UI SubChart.

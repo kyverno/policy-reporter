@@ -5,7 +5,9 @@ If release name contains chart name it will be used as a full name.
 */}}
 {{- define "ui.fullname" -}}
 {{- $name := .Chart.Name }}
-{{- if contains $name .Release.Name }}
+{{- if .Values.global.fullnameOverride }}
+{{- printf "%s-%s" .Values.global.fullnameOverride $name | trunc 63 | trimSuffix "-" }}
+{{- else if contains $name .Release.Name }}
 {{- .Release.Name | trunc 63 | trimSuffix "-" }}
 {{- else }}
 {{- printf "%s-%s" .Release.Name $name | trunc 63 | trimSuffix "-" }}
@@ -51,5 +53,25 @@ Create the name of the service account to use
 {{- default (include "ui.fullname" .) .Values.serviceAccount.name }}
 {{- else }}
 {{- default "default" .Values.serviceAccount.name }}
+{{- end }}
+{{- end }}
+
+{{- define "ui.kyvernoPluginServiceName" -}}
+{{- $name := "kyverno-plugin" }}
+{{- if .Values.global.fullnameOverride }}
+{{- printf "%s-%s" .Values.global.fullnameOverride $name | trunc 63 | trimSuffix "-" }}
+{{- else if contains $name .Release.Name }}
+{{- .Release.Name | trunc 63 | trimSuffix "-" }}
+{{- else }}
+{{- printf "%s-%s" .Release.Name $name | trunc 63 | trimSuffix "-" }}
+{{- end }}
+{{- end }}
+
+{{- define "ui.policyReportServiceName" -}}
+{{- $name := .Chart.Name }}
+{{- if .Values.global.fullnameOverride }}
+{{- .Values.global.fullnameOverride }}
+{{- else }}
+{{- .Values.global.backend }}
 {{- end }}
 {{- end }}

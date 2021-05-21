@@ -92,6 +92,7 @@ global:
   backend: policy-reporter
   # Service Port number
   port: 8080
+  fullnameOverride: ""
 
 # DEPRECTED - Can be removed
 # Policy Reporter watches now for both existing versions by default

@@ -1,0 +1,333 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: policy-reporter
+spec: {}
+status: {}
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: policy-reporter
+  namespace: policy-reporter
+  labels:
+    app.kubernetes.io/name: policy-reporter
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  labels:
+    rbac.authorization.k8s.io/aggregate-to-admin: "true"
+  name: policy-reporter
+rules:
+- apiGroups:
+  - '*'
+  resources:
+  - policyreports
+  - policyreports/status
+  - clusterpolicyreports
+  - clusterpolicyreports/status
+  verbs:
+  - get
+  - list
+  - watch
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: policy-reporter
+roleRef:
+  kind: ClusterRole
+  name: policy-reporter
+  apiGroup: rbac.authorization.k8s.io
+subjects:
+- kind: "ServiceAccount"
+  name: policy-reporter
+  namespace: policy-reporter
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: policy-reporter-kyverno-plugin
+  namespace: policy-reporter
+  labels:
+    app.kubernetes.io/name: kyverno-plugin
+    app.kubernetes.io/instance: policy-reporter
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: policy-reporter-targets
+  namespace: policy-reporter
+  labels:
+    helm.sh/chart: policy-reporter-1.6.0
+    app.kubernetes.io/name: policy-reporter
+    app.kubernetes.io/instance: policy-reporter
+    app.kubernetes.io/version: "1.6.0"
+    app.kubernetes.io/managed-by: Helm
+type: Opaque
+data:
+  config.yaml: bG9raToKICBob3N0OiAiIgogIG1pbmltdW1Qcmlvcml0eTogIiIKICBza2lwRXhpc3RpbmdPblN0YXJ0dXA6IHRydWUKCmVsYXN0aWNzZWFyY2g6CiAgaG9zdDogIiIKICBpbmRleDogInBvbGljeS1yZXBvcnRlciIKICByb3RhdGlvbjogImRheWxpIgogIG1pbmltdW1Qcmlvcml0eTogIiIKICBza2lwRXhpc3RpbmdPblN0YXJ0dXA6IHRydWUKCnNsYWNrOgogIHdlYmhvb2s6ICIiCiAgbWluaW11bVByaW9yaXR5OiAiIgogIHNraXBFeGlzdGluZ09uU3RhcnR1cDogdHJ1ZQoKZGlzY29yZDoKICB3ZWJob29rOiAiIgogIG1pbmltdW1Qcmlvcml0eTogIiIKICBza2lwRXhpc3RpbmdPblN0YXJ0dXA6IHRydWUKCnRlYW1zOgogIHdlYmhvb2s6ICIiCiAgbWluaW11bVByaW9yaXR5OiAiIgogIHNraXBFeGlzdGluZ09uU3RhcnR1cDogdHJ1ZQoKdWk6CiAgaG9zdDogaHR0cDovL3BvbGljeS1yZXBvcnRlci11aTo4MDgwCiAgbWluaW11bVByaW9yaXR5OiAid2FybmluZyIKICBza2lwRXhpc3RpbmdPblN0YXJ0dXA6IHRydWUK
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  labels:
+    rbac.authorization.k8s.io/aggregate-to-admin: "true"
+  name: policy-reporter-kyverno-plugin
+rules:
+- apiGroups:
+  - '*'
+  resources:
+  - policies
+  - policies/status
+  - clusterpolicies
+  - clusterpolicies/status
+  verbs:
+  - get
+  - list
+  - watch
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: policy-reporter-kyverno-plugin
+roleRef:
+  kind: ClusterRole
+  name: policy-reporter-kyverno-plugin
+  apiGroup: rbac.authorization.k8s.io
+subjects:
+- kind: "ServiceAccount"
+  name: policy-reporter-kyverno-plugin
+  namespace: policy-reporter
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: policy-reporter-kyverno-plugin
+  namespace: policy-reporter
+  labels:
+    app.kubernetes.io/name: kyverno-plugin
+    app.kubernetes.io/instance: policy-reporter
+spec:
+  type: ClusterIP
+  ports:
+    - port: 2113
+      targetPort: http
+      protocol: TCP
+      name: http
+    - port: 8080
+      targetPort: rest
+      protocol: TCP
+      name: rest
+  selector:
+    app.kubernetes.io/name: kyverno-plugin
+    app.kubernetes.io/instance: policy-reporter
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: policy-reporter-ui
+  namespace: policy-reporter
+  labels:
+    app.kubernetes.io/name: policy-reporter-ui
+spec:
+  type: ClusterIP
+  ports:
+    - port: 8080
+      targetPort: http
+      protocol: TCP
+      name: http
+  selector:
+    app.kubernetes.io/name: policy-reporter-ui
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: policy-reporter
+  namespace: policy-reporter
+  labels:
+    app.kubernetes.io/name: policy-reporter
+spec:
+  type: ClusterIP
+  ports:
+    - port: 2112
+      targetPort: http
+      protocol: TCP
+      name: http
+    - port: 8080
+      targetPort: rest
+      protocol: TCP
+      name: rest
+  selector:
+    app.kubernetes.io/name: policy-reporter
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: policy-reporter-kyverno-plugin
+  namespace: policy-reporter
+  labels:
+    app.kubernetes.io/name: kyverno-plugin
+    app.kubernetes.io/instance: policy-reporter
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: kyverno-plugin
+      app.kubernetes.io/instance: policy-reporter
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: kyverno-plugin
+        app.kubernetes.io/instance: policy-reporter
+    spec:
+      serviceAccountName: policy-reporter-kyverno-plugin
+      automountServiceAccountToken: true
+      containers:
+        - name: "kyverno-plugin"
+          image: "fjogeleit/policy-reporter-kyverno-plugin:0.1.1"
+          imagePullPolicy: IfNotPresent
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+              - all
+            privileged: false
+            readOnlyRootFilesystem: true
+            runAsNonRoot: true
+            runAsUser: 1234
+          args:
+            - --apiPort=8080
+          ports:
+            - name: http
+              containerPort: 2113
+              protocol: TCP
+            - name: rest
+              containerPort: 8080
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /policies
+              port: rest
+          readinessProbe:
+            httpGet:
+              path: /policies
+              port: rest
+          resources:
+            {}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: policy-reporter-ui
+  namespace: policy-reporter
+  labels:
+    app.kubernetes.io/name: policy-reporter-ui
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: policy-reporter-ui
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: policy-reporter-ui
+    spec:
+      containers:
+        - name: ui
+          image: "fjogeleit/policy-reporter-ui:0.10.2"
+          imagePullPolicy: IfNotPresent
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+              - all
+            privileged: false
+            readOnlyRootFilesystem: true
+            runAsNonRoot: true
+            runAsUser: 1234
+          args:
+            - -backend=http://policy-reporter:8080
+            - -log-size=200
+            - -kyverno-plugin=http://policy-reporter-kyverno-plugin:8080
+          ports:
+            - name: http
+              containerPort: 8080
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /
+              port: http
+          readinessProbe:
+            httpGet:
+              path: /
+              port: http
+          resources:
+            {}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: policy-reporter
+  namespace: policy-reporter
+  labels:
+    app.kubernetes.io/name: policy-reporter
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: policy-reporter
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: policy-reporter
+    spec:
+      serviceAccountName: policy-reporter
+      automountServiceAccountToken: true
+      containers:
+        - name: policy-reporter
+          image: "fjogeleit/policy-reporter:1.6.0"
+          imagePullPolicy: IfNotPresent
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+              - all
+            privileged: false
+            readOnlyRootFilesystem: true
+            runAsNonRoot: true
+            runAsUser: 1234
+          args:
+            - --config=/app/config.yaml
+            - --apiPort=8080
+          ports:
+            - name: http
+              containerPort: 2112
+              protocol: TCP
+            - name: rest
+              containerPort: 8080
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /metrics
+              port: http
+          readinessProbe:
+            httpGet:
+              path: /metrics
+              port: http
+          resources:
+            {}
+          volumeMounts:
+          - name: config-file
+            mountPath: /app/config.yaml
+            subPath: config.yaml
+          env:
+          - name: NAMESPACE
+            value: policy-reporter
+      volumes:
+      - name: config-file
+        secret:
+          secretName: policy-reporter-targets
+          optional: true
