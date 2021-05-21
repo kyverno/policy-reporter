@@ -42,10 +42,10 @@ spec:
             {{- toYaml .Values.securityContext | nindent 12 }}
           {{- end }}
           args:
-            - -backend=http://{{ .Values.global.backend }}:{{ .Values.global.port }}
+            - -backend=http://{{ include "ui.policyReportServiceName" . }}:{{ .Values.global.port }}
             - -log-size={{ .Values.log.size }}
             {{- if or .Values.plugins.kyverno .Values.global.plugins.kyverno }}
-            - -kyverno-plugin=http://policy-reporter-kyverno-plugin:8080
+            - -kyverno-plugin=http://{{ include "ui.kyvernoPluginServiceName" . }}:8080
             {{- end }}
           ports:
             - name: http

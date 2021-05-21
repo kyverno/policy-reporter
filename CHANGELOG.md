@@ -1,5 +1,9 @@
 # Changelog
 
+# 1.6.1
+* Add .global.fullnameOverride as new configuration for Policy Reporter Helm Chart
+* Add static manifests to install Policy Reporter without Helm or Kustomize
+
 # 1.6.0
 * Internal refactoring
     * Unification of PolicyReports and ClusterPolicyReports processing, APIs still stable

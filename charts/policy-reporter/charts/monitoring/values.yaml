@@ -1,5 +1,7 @@
 namespace: cattle-dashboards
 
+fullnameOverride: ""
+
 plugins:
   kyverno: false
 
