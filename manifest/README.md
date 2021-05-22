@@ -27,6 +27,7 @@ Configures Policy Reporter UI as Target for Policy Reporter.
 ### Installation
 
 ```bash
+kubectl apply -f ./manifest/kyverno-policy-reporter-ui/target-secret.yaml
 kubectl apply -f ./manifest/default-policy-reporter-ui/install.yaml
 ```
 
@@ -46,5 +47,49 @@ Configures Policy Reporter UI as Target for Policy Reporter and enables the Kyve
 ### Installation
 
 ```bash
+kubectl apply -f ./manifest/kyverno-policy-reporter-ui/target-secret.yaml
 kubectl apply -f ./manifest/kyverno-policy-reporter-ui/install.yaml
 ```
+
+## Target Configuration
+
+To configure your notification targets for Policy Reporter create a secret called `policy-reporter-targets` in the `policy-reporter` namespace with an key `config.yaml` as key and the following structure as value:
+
+```yaml
+loki:
+  host: ""
+  minimumPriority: ""
+  skipExistingOnStartup: true
+
+elasticsearch:
+  host: ""
+  index: "policy-reporter"
+  rotation: "dayli"
+  minimumPriority: ""
+  skipExistingOnStartup: true
+
+slack:
+  webhook: ""
+  minimumPriority: ""
+  skipExistingOnStartup: true
+
+discord:
+  webhook: ""
+  minimumPriority: ""
+  skipExistingOnStartup: true
+
+teams:
+  webhook: ""
+  minimumPriority: ""
+  skipExistingOnStartup: true
+
+ui:
+  host: ""
+  minimumPriority: ""
+  skipExistingOnStartup: true
+
+```
+
+The `kyverno-policy-reporter-ui` and `default-policy-reporter-ui` installation has an optional preconfigured `target-security.yaml` to apply. This secret configures the Policy Reporter UI as target for Policy Reporter.
+
+When you change the secret while Policy Reporter is already running, you have to delete the current `policy-reporter` Pod.

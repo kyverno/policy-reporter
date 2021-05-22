@@ -14,17 +14,6 @@ metadata:
   labels:
     app.kubernetes.io/name: policy-reporter
 ---
-apiVersion: v1
-kind: Secret
-metadata:
-  name: policy-reporter-targets
-  namespace: policy-reporter
-  labels:
-    app.kubernetes.io/name: policy-reporter
-type: Opaque
-data:
-  config.yaml: bG9raToKICBob3N0OiAiIgogIG1pbmltdW1Qcmlvcml0eTogIiIKICBza2lwRXhpc3RpbmdPblN0YXJ0dXA6IHRydWUKCmVsYXN0aWNzZWFyY2g6CiAgaG9zdDogIiIKICBpbmRleDogInBvbGljeS1yZXBvcnRlciIKICByb3RhdGlvbjogImRheWxpIgogIG1pbmltdW1Qcmlvcml0eTogIiIKICBza2lwRXhpc3RpbmdPblN0YXJ0dXA6IHRydWUKCnNsYWNrOgogIHdlYmhvb2s6ICIiCiAgbWluaW11bVByaW9yaXR5OiAiIgogIHNraXBFeGlzdGluZ09uU3RhcnR1cDogdHJ1ZQoKZGlzY29yZDoKICB3ZWJob29rOiAiIgogIG1pbmltdW1Qcmlvcml0eTogIiIKICBza2lwRXhpc3RpbmdPblN0YXJ0dXA6IHRydWUKCnRlYW1zOgogIHdlYmhvb2s6ICIiCiAgbWluaW11bVByaW9yaXR5OiAiIgogIHNraXBFeGlzdGluZ09uU3RhcnR1cDogdHJ1ZQoKdWk6CiAgaG9zdDogCiAgbWluaW11bVByaW9yaXR5OiAid2FybmluZyIKICBza2lwRXhpc3RpbmdPblN0YXJ0dXA6IHRydWUK
----
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
