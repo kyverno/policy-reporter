@@ -34,7 +34,7 @@ kubectl apply -f ./manifest/default-policy-reporter-ui/install.yaml
 
 ## Kyverno Policy Reporter UI
 
-The `default-policy-reporter-ui` folder is the extended Policy Reporter, Policy Reporter Kyverno Plugin and the extended Policy Reporter UI installation. 
+The `kyverno-policy-reporter-ui` folder is the extended Policy Reporter, Policy Reporter Kyverno Plugin and the extended Policy Reporter UI installation. 
 
 Enables:
 * Policy Reporter REST API (`http://policy-reporter:8080`)
