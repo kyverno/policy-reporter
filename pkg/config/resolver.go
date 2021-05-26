@@ -241,6 +241,7 @@ func (r *Resolver) UIClient() target.Client {
 	return r.uiClient
 }
 
+// TargetClients resolver method
 func (r *Resolver) TargetClients() []target.Client {
 	clients := make([]target.Client, 0)
 
@@ -271,6 +272,7 @@ func (r *Resolver) TargetClients() []target.Client {
 	return clients
 }
 
+// SkipExistingOnStartup config method
 func (r *Resolver) SkipExistingOnStartup() bool {
 	for _, client := range r.TargetClients() {
 		if !client.SkipExistingOnStartup() {
@@ -281,6 +283,7 @@ func (r *Resolver) SkipExistingOnStartup() bool {
 	return true
 }
 
+// ConfigMapClient resolver method
 func (r *Resolver) ConfigMapClient() (v1.ConfigMapInterface, error) {
 	var err error
 
@@ -314,11 +317,12 @@ func (r *Resolver) policyReportAPI(ctx context.Context) (kubernetes.PolicyReport
 	return kubernetes.NewPolicyReportAdapter(client, mapper), nil
 }
 
+// ResultCache resolver method
 func (r *Resolver) ResultCache() *cache.Cache {
 	if r.resultCache != nil {
 		return r.resultCache
 	}
-	r.resultCache = cache.New(time.Minute*30, time.Minute*15)
+	r.resultCache = cache.New(time.Minute*150, time.Minute*15)
 
 	return r.resultCache
 }

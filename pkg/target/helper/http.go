@@ -7,6 +7,7 @@ import (
 	"net/http"
 )
 
+// HandleHTTPResponse Logs Error or Success messages
 func HandleHTTPResponse(target string, resp *http.Response, err error) {
 	defer func() {
 		if resp != nil && resp.Body != nil {

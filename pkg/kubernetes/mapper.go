@@ -176,7 +176,7 @@ func convertTimestamp(result map[string]interface{}) time.Time {
 		return time.Now().UTC()
 	}
 
-	seconds, ok := timestamp.(map[string]interface{})["seconds"]
+	seconds, _ := timestamp.(map[string]interface{})["seconds"]
 
 	switch s := seconds.(type) {
 	case int64:

@@ -12,6 +12,7 @@ import (
 	"github.com/fjogeleit/policy-reporter/pkg/target/helper"
 )
 
+// Rotating Enum
 type Rotation = string
 
 // Elasticsearch Index Rotation

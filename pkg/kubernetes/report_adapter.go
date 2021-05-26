@@ -36,10 +36,13 @@ var (
 	}
 )
 
+// WatchEvent of PolicyReports
 type WatchEvent struct {
 	Report report.PolicyReport
 	Type   watch.EventType
 }
+
+// PolicyReportAdapter translates API responses to an internal struct
 type PolicyReportAdapter interface {
 	WatchPolicyReports() (chan WatchEvent, error)
 }

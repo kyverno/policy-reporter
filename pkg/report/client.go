@@ -10,6 +10,7 @@ type PolicyReportCallback = func(watch.EventType, PolicyReport, PolicyReport)
 // PolicyResultCallback is called whenver a new PolicyResult comes in
 type PolicyResultCallback = func(Result, bool)
 
+// PolicyResultClient watches for PolicyReport Events and executes registered callback
 type PolicyResultClient interface {
 	// RegisterPolicyReportCallback register Handlers called on each PolicyReport watch.Event
 	RegisterCallback(PolicyReportCallback)

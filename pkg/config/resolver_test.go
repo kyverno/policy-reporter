@@ -223,7 +223,7 @@ func Test_ResolvePolicyClient(t *testing.T) {
 		t.Errorf("Unexpected Error: %s", err)
 	}
 
-	client2, err := resolver.PolicyReportClient(context.Background())
+	client2, _ := resolver.PolicyReportClient(context.Background())
 	if client1 != client2 {
 		t.Error("A second call resolver.PolicyReportClient() should return the cached first client")
 	}

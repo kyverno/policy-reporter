@@ -39,6 +39,7 @@ const (
 // ReportType Enum defined for PolicyReport
 type ReportType = string
 
+// ReportType Enum
 const (
 	PolicyReportType        ReportType = "PolicyReport"
 	ClusterPolicyReportType ReportType = "ClusterPolicyReport"
@@ -212,12 +213,14 @@ func (pr PolicyReport) ResultHash() string {
 	return hex.EncodeToString(h.Sum(nil))
 }
 
+// HasResult returns if the Report has an Rusult with the given ID
 func (pr PolicyReport) HasResult(id string) bool {
 	_, ok := pr.Results[id]
 
 	return ok
 }
 
+// GetType returns the Type of the Report
 func (pr PolicyReport) GetType() ReportType {
 	if pr.Namespace == "" {
 		return ClusterPolicyReportType

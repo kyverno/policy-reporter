@@ -44,7 +44,7 @@ type UI struct {
 	MinimumPriority string `mapstructure:"minimumPriority"`
 }
 
-// Server configuration
+// API configuration
 type API struct {
 	Enabled bool `mapstructure:"enabled"`
 	Port    int  `mapstructure:"port"`
