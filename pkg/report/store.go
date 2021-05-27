@@ -2,6 +2,7 @@ package report
 
 import "sync"
 
+// PolicyReportStore caches the latest version of an PolicyReport
 type PolicyReportStore struct {
 	store map[string]map[string]PolicyReport
 	rwm   *sync.RWMutex
