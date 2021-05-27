@@ -148,7 +148,7 @@ spec:
       automountServiceAccountToken: true
       containers:
         - name: policy-reporter
-          image: "fjogeleit/policy-reporter:1.6.0"
+          image: "fjogeleit/policy-reporter:1.6.1"
           imagePullPolicy: IfNotPresent
           securityContext:
             allowPrivilegeEscalation: false
