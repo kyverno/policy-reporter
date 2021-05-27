@@ -1,5 +1,10 @@
 # Changelog
 
+
+# 1.6.2
+* Increase Result Caching Time to handle Kyverno issues with Policy reconcilation [Issue](https://github.com/kyverno/kyverno/issues/1921)
+* Fix golint errors
+
 # 1.6.1
 * Add .global.fullnameOverride as new configuration for Policy Reporter Helm Chart
 * Add static manifests to install Policy Reporter without Helm or Kustomize
