@@ -4,6 +4,7 @@ kind: ClusterRole
 metadata:
   labels:
     rbac.authorization.k8s.io/aggregate-to-admin: "true"
+    {{- include "kyvernoplugin.labels" . | nindent 4 }}
   name: {{ include "kyvernoplugin.fullname" . }}
 rules:
 - apiGroups:

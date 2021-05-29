@@ -1,6 +1,13 @@
 # Changelog
 
 
+# 1.7.0
+* Enable REST API by default
+    * Add `/healthz` and `/ready` APIs as new endpoints for readinessProbe and livenessProbe
+* Helm Chart Updates
+    * Add `global.labels` to add `labels` on every resource created
+    * Add default labels on every resource
+
 # 1.6.2
 * Increase Result Caching Time to handle Kyverno issues with Policy reconcilation [Issue](https://github.com/kyverno/kyverno/issues/1921)
 * Fix golint errors

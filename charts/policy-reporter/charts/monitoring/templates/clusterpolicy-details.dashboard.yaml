@@ -5,6 +5,7 @@ metadata:
   namespace: {{ .Values.namespace }}
   labels:
     grafana_dashboard: "1"
+    {{- include "monitoring.labels" . | nindent 4 }}
 data:
   cluster-policy-reporter-details-dashboard.json: |
     {

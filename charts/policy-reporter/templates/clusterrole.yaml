@@ -4,6 +4,7 @@ kind: ClusterRole
 metadata:
   labels:
     rbac.authorization.k8s.io/aggregate-to-admin: "true"
+    {{- include "policyreporter.labels" . | nindent 4 }}
   name: {{ include "policyreporter.fullname" . }}
 rules:
 - apiGroups:
