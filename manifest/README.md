@@ -27,8 +27,8 @@ Configures Policy Reporter UI as Target for Policy Reporter.
 ### Installation
 
 ```bash
-kubectl apply -f https://raw.githubusercontent.com/fjogeleit/policy-reporter/main/manifest/kyverno-policy-reporter-ui/namespace.yaml
-kubectl apply -f https://raw.githubusercontent.com/fjogeleit/policy-reporter/main/manifest/kyverno-policy-reporter-ui/target-secret.yaml
+kubectl apply -f https://raw.githubusercontent.com/fjogeleit/policy-reporter/main/manifest/default-policy-reporter-ui/namespace.yaml
+kubectl apply -f https://raw.githubusercontent.com/fjogeleit/policy-reporter/main/manifest/default-policy-reporter-ui/target-secret.yaml
 kubectl apply -f https://raw.githubusercontent.com/fjogeleit/policy-reporter/main/manifest/default-policy-reporter-ui/install.yaml
 ```
 
