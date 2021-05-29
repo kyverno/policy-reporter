@@ -66,9 +66,7 @@ func newRunCMD() *cobra.Command {
 
 			errorChan := make(chan error)
 
-			if c.API.Enabled {
-				go func() { errorChan <- resolver.APIServer().Start() }()
-			}
+			go func() { errorChan <- resolver.APIServer().Start() }()
 
 			go func() { errorChan <- client.StartWatching() }()
 
@@ -85,7 +83,7 @@ func newRunCMD() *cobra.Command {
 	// For local usage
 	cmd.PersistentFlags().StringP("kubeconfig", "k", "", "absolute path to the kubeconfig file")
 	cmd.PersistentFlags().StringP("config", "c", "", "target configuration file")
-	cmd.PersistentFlags().IntP("apiPort", "a", 0, "http port for the optional rest api")
+	cmd.PersistentFlags().IntP("apiPort", "a", 8080, "http port for the optional rest api")
 
 	flag.Parse()
 

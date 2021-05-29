@@ -3,6 +3,8 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
   name: {{ include "policyreporter.fullname" . }}
+  labels:
+    {{- include "policyreporter.labels" . | nindent 4 }}
 roleRef:
   kind: Role
   name: {{ include "policyreporter.fullname" . }}

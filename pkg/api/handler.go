@@ -8,6 +8,34 @@ import (
 	"github.com/fjogeleit/policy-reporter/pkg/report"
 )
 
+// HealthzHandler for the Halthz REST API
+func HealthzHandler() http.HandlerFunc {
+	return func(w http.ResponseWriter, req *http.Request) {
+		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+		w.WriteHeader(http.StatusOK)
+		fmt.Fprint(w, "{}")
+	}
+}
+
+// ReadyHandler for the Halthz REST API
+func ReadyHandler(s *report.PolicyReportStore) http.HandlerFunc {
+	return func(w http.ResponseWriter, req *http.Request) {
+		if len(s.List(report.PolicyReportType))+len(s.List(report.ClusterPolicyReportType)) == 0 {
+			w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+			w.WriteHeader(http.StatusServiceUnavailable)
+
+			fmt.Fprint(w, "{}")
+
+			return
+		}
+
+		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+		w.WriteHeader(http.StatusOK)
+
+		fmt.Fprint(w, "{}")
+	}
+}
+
 // PolicyReportHandler for the PolicyReport REST API
 func PolicyReportHandler(s *report.PolicyReportStore) http.HandlerFunc {
 	return func(w http.ResponseWriter, req *http.Request) {

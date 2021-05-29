@@ -10,7 +10,7 @@ kind: Ingress
 metadata:
   name: {{ include "ui.fullname" . }}
   labels:
-    {{- include "ui.selectorLabels" . | nindent 4 }}
+    {{- include "ui.labels" . | nindent 4 }}
     {{- with .Values.ingress.labels }}
       {{- toYaml . | nindent 4 }}
     {{- end }}

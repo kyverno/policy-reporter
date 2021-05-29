@@ -148,7 +148,7 @@ spec:
       automountServiceAccountToken: true
       containers:
         - name: policy-reporter
-          image: "fjogeleit/policy-reporter:1.6.1"
+          image: "fjogeleit/policy-reporter:1.7.0"
           imagePullPolicy: IfNotPresent
           securityContext:
             allowPrivilegeEscalation: false
@@ -161,7 +161,6 @@ spec:
             runAsUser: 1234
           args:
             - --config=/app/config.yaml
-            - --apiPort=8080
           ports:
             - name: http
               containerPort: 2112
@@ -171,12 +170,12 @@ spec:
               protocol: TCP
           livenessProbe:
             httpGet:
-              path: /metrics
-              port: http
+              path: /healthz
+              port: rest
           readinessProbe:
             httpGet:
-              path: /metrics
-              port: http
+              path: /ready
+              port: rest
           resources:
             {}
           volumeMounts:

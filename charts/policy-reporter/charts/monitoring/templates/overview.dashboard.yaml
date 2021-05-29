@@ -5,6 +5,10 @@ metadata:
   namespace: {{ .Values.namespace }}
   labels:
     grafana_dashboard: "1"
+    {{- with .Values.serviceMonitor.labels }}
+        {{- toYaml . | nindent 4 }}
+    {{- end }}
+    {{- include "monitoring.labels" . | nindent 4 }}
 data:
   policy-reporter-dashboard.json: |
     {

@@ -24,6 +24,9 @@ spec:
         {{- with .Values.podLabels }}
           {{- toYaml . | nindent 8 }}
         {{- end }}
+        {{- with .Values.global.labels }}
+          {{- toYaml . | nindent 8 }}
+        {{- end }}
       annotations:
         checksum/secret: {{ include (print .Template.BasePath "/targetssecret.yaml") . | sha256sum | quote }}
         policy-priorities/enabled: {{ .Values.policyPriorities.enabled | quote }}

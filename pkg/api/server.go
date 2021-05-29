@@ -25,6 +25,8 @@ func (s *httpServer) registerHandler() {
 	s.mux.HandleFunc("/policy-reports", Gzip(PolicyReportHandler(s.store)))
 	s.mux.HandleFunc("/cluster-policy-reports", Gzip(ClusterPolicyReportHandler(s.store)))
 	s.mux.HandleFunc("/targets", Gzip(TargetsHandler(s.targets)))
+	s.mux.HandleFunc("/healthz", HealthzHandler())
+	s.mux.HandleFunc("/ready", ReadyHandler(s.store))
 }
 
 func (s *httpServer) Start() error {

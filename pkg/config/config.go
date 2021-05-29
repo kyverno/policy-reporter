@@ -46,8 +46,7 @@ type UI struct {
 
 // API configuration
 type API struct {
-	Enabled bool `mapstructure:"enabled"`
-	Port    int  `mapstructure:"port"`
+	Port int `mapstructure:"port"`
 }
 
 // Config of the PolicyReporter
