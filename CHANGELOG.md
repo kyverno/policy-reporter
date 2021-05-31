@@ -1,6 +1,9 @@
 # Changelog
 
 
+# 1.7.1
+* Fix HelmChart - Deployment Probes for Policy Reporter
+
 # 1.7.0
 * Enable REST API by default
     * Add `/healthz` and `/ready` APIs as new endpoints for readinessProbe and livenessProbe

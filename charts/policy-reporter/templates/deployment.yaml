@@ -57,19 +57,17 @@ spec:
             - name: http
               containerPort: 2112
               protocol: TCP
-            {{- if or .Values.api.enabled .Values.ui.enabled }}
             - name: rest
               containerPort: 8080
               protocol: TCP
-            {{- end }}
           livenessProbe:
             httpGet:
-              path: /metrics
-              port: http
+              path: /ready
+              port: rest
           readinessProbe:
             httpGet:
-              path: /metrics
-              port: http
+              path: /healthz
+              port: rest
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
           volumeMounts:
