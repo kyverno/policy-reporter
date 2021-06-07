@@ -71,4 +71,4 @@ If you are not using the MonitoringStack you can import the dashboards from [Gra
 ## Resources
 
 * [[Video] Rawkode Live: Hands on Policy Reporter](https://www.youtube.com/watch?v=ZrOtTELNLyg)
-* [[Blog] Monitor Security and Best Practices with Kyverno and Policy Reporte](https://blog.webdev-jogeleit.de/blog/monitor-security-with-kyverno-and-policy-reporter/)
+* [[Blog] Monitor Security and Best Practices with Kyverno and Policy Reporter](https://blog.webdev-jogeleit.de/blog/monitor-security-with-kyverno-and-policy-reporter/)
