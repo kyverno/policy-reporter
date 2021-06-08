@@ -1,5 +1,8 @@
 # Changelog
 
+# 1.7.2
+* Update Policy Reporter - Kyverno Plugin to 0.1.2
+    * Fix Handling of Validations with empty messages
 
 # 1.7.1
 * Fix HelmChart - Deployment Probes for Policy Reporter
