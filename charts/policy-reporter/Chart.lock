@@ -7,6 +7,6 @@ dependencies:
   version: 1.7.0
 - name: kyvernoPlugin
   repository: ""
-  version: 0.3.1
-digest: sha256:a2f9397f0a35fc18fb90a7bc6ca31478bb52d576f55d137e9e162ec7d88ae2c1
-generated: "2021-06-08T17:04:02.529256+02:00"
+  version: 0.4.0
+digest: sha256:821f124786b218565a1d8473ed7331f2c84aa9cc7a271660f2702881fb85c1d4
+generated: "2021-06-10T12:13:32.300743+02:00"

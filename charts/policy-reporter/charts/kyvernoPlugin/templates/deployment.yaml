@@ -55,11 +55,11 @@ spec:
               protocol: TCP
           livenessProbe:
             httpGet:
-              path: /policies
+              path: /healthz
               port: rest
           readinessProbe:
             httpGet:
-              path: /policies
+              path: /ready
               port: rest
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
