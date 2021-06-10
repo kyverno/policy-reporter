@@ -1,5 +1,9 @@
 # Changelog
 
+# 1.7.3
+* Update Policy Reporter - Kyverno Plugin to 0.2.0
+    * New APIs for Liveness and Readiness Probes
+
 # 1.7.2
 * Update Policy Reporter - Kyverno Plugin to 0.1.2
     * Fix Handling of Validations with empty messages
