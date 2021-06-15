@@ -25,7 +25,10 @@ helm repo add policy-reporter https://fjogeleit.github.io/policy-reporter
 helm repo update
 ```
 
-### Basic Installation - Provides Prometheus Metrics
+### Basic Installation
+
+The basic installation provides an Prometheus Metrics Endpoint and different REST APIs, for more details have a look at the [Documentation](https://github.com/fjogeleit/policy-reporter/wiki/getting-started).
+
 ```bash
 helm install policy-reporter policy-reporter/policy-reporter -n policy-reporter --create-namespace
 ```
