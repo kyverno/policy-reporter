@@ -15,7 +15,7 @@ grafana:
     # Annotation to enable folder storage using the k8s sidecar
     annotation: grafana_folder
     # Grafana folder in which to store the dashboards
-    name: kyverno
+    name: Policy Reporter
 
 policyReportDetails:
   firstStatusRow:
