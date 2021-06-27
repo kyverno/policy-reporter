@@ -1,5 +1,9 @@
 # Changelog
 
+# 1.8.1
+* Customize label and annotation for Grafana dashboards [#43](https://github.com/fjogeleit/policy-reporter/pull/43) by [nlamirault](https://github.com/nlamirault)
+* ARM64 Support for all Components
+
 # 1.7.3
 * Update Policy Reporter - Kyverno Plugin to 0.2.0
     * New APIs for Liveness and Readiness Probes
