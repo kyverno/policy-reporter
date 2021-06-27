@@ -18,15 +18,17 @@ type Resource struct {
 
 // Result API Model
 type Result struct {
-	Message  string    `json:"message"`
-	Policy   string    `json:"policy"`
-	Rule     string    `json:"rule"`
-	Priority string    `json:"priority"`
-	Status   string    `json:"status"`
-	Severity string    `json:"severity,omitempty"`
-	Category string    `json:"category,omitempty"`
-	Scored   bool      `json:"scored"`
-	Resource *Resource `json:"resource,omitempty"`
+	Message    string            `json:"message"`
+	Policy     string            `json:"policy"`
+	Rule       string            `json:"rule"`
+	Priority   string            `json:"priority"`
+	Status     string            `json:"status"`
+	Severity   string            `json:"severity,omitempty"`
+	Category   string            `json:"category,omitempty"`
+	Scored     bool              `json:"scored"`
+	Properties map[string]string `json:"properties,omitempty"`
+	Source     string            `json:"source,omitempty"`
+	Resource   *Resource         `json:"resource,omitempty"`
 }
 
 // Summary API Model
@@ -52,14 +54,16 @@ func mapPolicyReport(p report.PolicyReport) PolicyReport {
 
 	for _, r := range p.Results {
 		result := Result{
-			Message:  r.Message,
-			Policy:   r.Policy,
-			Rule:     r.Rule,
-			Priority: r.Priority.String(),
-			Status:   r.Status,
-			Severity: r.Severity,
-			Category: r.Category,
-			Scored:   r.Scored,
+			Message:    r.Message,
+			Policy:     r.Policy,
+			Rule:       r.Rule,
+			Priority:   r.Priority.String(),
+			Status:     r.Status,
+			Severity:   r.Severity,
+			Category:   r.Category,
+			Scored:     r.Scored,
+			Properties: r.Properties,
+			Source:     r.Source,
 		}
 
 		if r.HasResource() {

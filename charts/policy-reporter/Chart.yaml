@@ -5,8 +5,8 @@ description: |
   It creates Prometheus Metrics and can send rule validation events to different targets like Loki, Elasticsearch, Slack or Discord
 
 type: application
-version: 1.8.1
-appVersion: 1.8.0
+version: 1.8.2
+appVersion: 1.8.2
 
 dependencies:
   - name: monitoring
