@@ -149,6 +149,7 @@ type Result struct {
 	Status     Status
 	Severity   Severity `json:",omitempty"`
 	Category   string   `json:",omitempty"`
+	Source     string   `json:"source,omitempty"`
 	Scored     bool
 	Timestamp  time.Time
 	Resource   Resource

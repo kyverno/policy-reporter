@@ -36,6 +36,7 @@ var policyMap = map[string]interface{}{
 			"timestamp": map[string]interface{}{
 				"seconds": 1614093000,
 			},
+			"source":   "test",
 			"category": "test",
 			"severity": "high",
 			"resources": []interface{}{
@@ -169,6 +170,9 @@ func Test_MapPolicyReport(t *testing.T) {
 	}
 	if result1.Category != "test" {
 		t.Errorf("Expected Category 'test' (acutal %s)", result1.Category)
+	}
+	if result1.Source != "test" {
+		t.Errorf("Expected Source 'test' (acutal %s)", result1.Source)
 	}
 	if result1.Severity != report.High {
 		t.Errorf("Expected Severity '%s' (acutal %s)", report.High, result1.Severity)
