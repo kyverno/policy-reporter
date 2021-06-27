@@ -3,8 +3,10 @@ kind: ConfigMap
 metadata:
   name: {{ include "monitoring.fullname" . }}-clusterpolicy-details-dashboard
   namespace: {{ .Values.namespace }}
+  annotations:
+    {{ .Values.grafana.folder.annotation }}: {{ .Values.grafana.folder.name }}
   labels:
-    grafana_dashboard: "1"
+    {{ .Values.grafana.dashboards.label }}: "1"
     {{- include "monitoring.labels" . | nindent 4 }}
 data:
   cluster-policy-reporter-details-dashboard.json: |

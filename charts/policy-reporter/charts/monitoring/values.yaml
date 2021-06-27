@@ -7,6 +7,16 @@ serviceMonitor:
   # labels to match the serviceMonitorSelector of the Prometheus Resource
   labels: {}
 
+grafana:
+  dashboards:
+    # Label to find dashboards using the k8s sidecar
+    label: grafana_dashboard
+  folder:
+    # Annotation to enable folder storage using the k8s sidecar
+    annotation: grafana_folder
+    # Grafana folder in which to store the dashboards
+    name: Policy Reporter
+
 policyReportDetails:
   firstStatusRow:
     height: 8
