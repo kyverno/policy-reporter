@@ -16,7 +16,7 @@ dependencies:
   - name: ui
     condition: ui.enabled
     repository: ""
-    version: "1.8.0"
+    version: "1.8.2"
   - name: kyvernoPlugin
     condition: kyvernoPlugin.enabled
     repository: ""

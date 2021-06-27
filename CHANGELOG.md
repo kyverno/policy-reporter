@@ -4,6 +4,7 @@
 * Fix `scored` mapping for `v1alpha2/policyreports`
 * Disable KyvernPlugin as default as expected
 * Support `source` and `properties` for `policyreports/v1alpha2` in Policy Reporter UI
+    * Update Policy Reporter UI to `0.12.0`
 
 # 1.8.1
 * Customize label and annotation for Grafana dashboards [#43](https://github.com/fjogeleit/policy-reporter/pull/43) by [nlamirault](https://github.com/nlamirault)
