@@ -1,5 +1,10 @@
 # Changelog
 
+# 1.8.3
+* Update Policy Reporter UI to 0.13.0
+    * Change Result Grouping between by Status and by Category
+    * Add source filter to ClusterPolicyReports
+
 # 1.8.2
 * Fix `scored` mapping for `v1alpha2/policyreports`
 * Disable KyvernPlugin as default as expected
