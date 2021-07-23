@@ -4,11 +4,11 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/fjogeleit/policy-reporter/pkg/api"
-	"github.com/fjogeleit/policy-reporter/pkg/report"
-	"github.com/fjogeleit/policy-reporter/pkg/target"
-	"github.com/fjogeleit/policy-reporter/pkg/target/discord"
-	"github.com/fjogeleit/policy-reporter/pkg/target/loki"
+	"github.com/kyverno/policy-reporter/pkg/api"
+	"github.com/kyverno/policy-reporter/pkg/report"
+	"github.com/kyverno/policy-reporter/pkg/target"
+	"github.com/kyverno/policy-reporter/pkg/target/discord"
+	"github.com/kyverno/policy-reporter/pkg/target/loki"
 )
 
 func Test_NewServer(t *testing.T) {

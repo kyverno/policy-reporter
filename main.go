@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/fjogeleit/policy-reporter/cmd"
+	"github.com/kyverno/policy-reporter/cmd"
 )
 
 func main() {

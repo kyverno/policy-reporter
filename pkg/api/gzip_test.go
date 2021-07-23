@@ -7,7 +7,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/fjogeleit/policy-reporter/pkg/api"
+	"github.com/kyverno/policy-reporter/pkg/api"
 )
 
 func Test_GzipCompression(t *testing.T) {
