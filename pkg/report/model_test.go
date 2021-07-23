@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/fjogeleit/policy-reporter/pkg/report"
+	"github.com/kyverno/policy-reporter/pkg/report"
 )
 
 var result1 = report.Result{

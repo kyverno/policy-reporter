@@ -1,4 +1,4 @@
-module github.com/fjogeleit/policy-reporter
+module github.com/kyverno/policy-reporter
 
 go 1.15
 

@@ -3,7 +3,7 @@ package report_test
 import (
 	"testing"
 
-	"github.com/fjogeleit/policy-reporter/pkg/report"
+	"github.com/kyverno/policy-reporter/pkg/report"
 )
 
 func Test_PolicyReportStore(t *testing.T) {

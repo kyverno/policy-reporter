@@ -8,8 +8,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/fjogeleit/policy-reporter/pkg/report"
-	"github.com/fjogeleit/policy-reporter/pkg/target/loki"
+	"github.com/kyverno/policy-reporter/pkg/report"
+	"github.com/kyverno/policy-reporter/pkg/target/loki"
 )
 
 var completeResult = report.Result{

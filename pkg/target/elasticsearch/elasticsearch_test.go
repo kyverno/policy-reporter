@@ -5,8 +5,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/fjogeleit/policy-reporter/pkg/report"
-	"github.com/fjogeleit/policy-reporter/pkg/target/elasticsearch"
+	"github.com/kyverno/policy-reporter/pkg/report"
+	"github.com/kyverno/policy-reporter/pkg/target/elasticsearch"
 )
 
 var completeResult = report.Result{

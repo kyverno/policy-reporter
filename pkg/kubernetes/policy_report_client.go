@@ -5,7 +5,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/fjogeleit/policy-reporter/pkg/report"
+	"github.com/kyverno/policy-reporter/pkg/report"
 	"github.com/patrickmn/go-cache"
 	"k8s.io/apimachinery/pkg/watch"
 )

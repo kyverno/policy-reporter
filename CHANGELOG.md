@@ -12,7 +12,7 @@
     * Update Policy Reporter UI to `0.12.0`
 
 # 1.8.1
-* Customize label and annotation for Grafana dashboards [#43](https://github.com/fjogeleit/policy-reporter/pull/43) by [nlamirault](https://github.com/nlamirault)
+* Customize label and annotation for Grafana dashboards [#43](https://github.com/kyverno/policy-reporter/pull/43) by [nlamirault](https://github.com/nlamirault)
 * ARM64 Support for all Components
 
 # 1.7.3
@@ -158,14 +158,14 @@
 
 ## 0.18.0
 
-* Helm Chart updates [#16](https://github.com/fjogeleit/policy-reporter/pull/16) fixes [#14](https://github.com/fjogeleit/policy-reporter/issues/14)
+* Helm Chart updates [#16](https://github.com/kyverno/policy-reporter/pull/16) fixes [#14](https://github.com/kyverno/policy-reporter/issues/14)
     * Target Configuration are now configured under `target` in the HelmChart `values.yaml`
     * config.yaml are now deployed as Secret with encoded data body (plain stringData before)
 
 ## 0.17.0
 
-* New Helm Linting Workflow by kolikons [#15](https://github.com/fjogeleit/policy-reporter/pull/15)
-* Improved Helm Chart by kolikons [#13](https://github.com/fjogeleit/policy-reporter/pull/13)
+* New Helm Linting Workflow by kolikons [#15](https://github.com/kyverno/policy-reporter/pull/15)
+* Improved Helm Chart by kolikons [#13](https://github.com/kyverno/policy-reporter/pull/13)
     * More configuration possibilities like UI Ingress, ReplicaCount
     * Role and RoleBindings for ConfigMaps are now optional (required for Priority configuration)
 ## 0.16.0

@@ -7,9 +7,9 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/fjogeleit/policy-reporter/pkg/report"
-	"github.com/fjogeleit/policy-reporter/pkg/target"
-	"github.com/fjogeleit/policy-reporter/pkg/target/helper"
+	"github.com/kyverno/policy-reporter/pkg/report"
+	"github.com/kyverno/policy-reporter/pkg/target"
+	"github.com/kyverno/policy-reporter/pkg/target/helper"
 )
 
 type payload struct {
