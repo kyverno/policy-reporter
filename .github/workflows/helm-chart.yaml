@@ -8,9 +8,6 @@ on:
       - development
     paths:
       - "charts/**"
-  pull_request:
-    paths:
-      - "charts/**"
 
 jobs:
   lint:
