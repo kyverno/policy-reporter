@@ -4,7 +4,7 @@ import (
 	"context"
 	"testing"
 
-	"github.com/fjogeleit/policy-reporter/pkg/kubernetes"
+	"github.com/kyverno/policy-reporter/pkg/kubernetes"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"

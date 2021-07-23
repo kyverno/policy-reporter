@@ -5,8 +5,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/fjogeleit/policy-reporter/pkg/metrics"
-	"github.com/fjogeleit/policy-reporter/pkg/report"
+	"github.com/kyverno/policy-reporter/pkg/metrics"
+	"github.com/kyverno/policy-reporter/pkg/report"
 	"github.com/prometheus/client_golang/prometheus"
 	io_prometheus_client "github.com/prometheus/client_model/go"
 	"k8s.io/apimachinery/pkg/watch"

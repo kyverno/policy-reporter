@@ -4,8 +4,8 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/fjogeleit/policy-reporter/pkg/report"
-	"github.com/fjogeleit/policy-reporter/pkg/target/ui"
+	"github.com/kyverno/policy-reporter/pkg/report"
+	"github.com/kyverno/policy-reporter/pkg/target/ui"
 )
 
 var completeResult = report.Result{

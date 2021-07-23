@@ -4,7 +4,7 @@ import (
 	"context"
 	"testing"
 
-	"github.com/fjogeleit/policy-reporter/pkg/config"
+	"github.com/kyverno/policy-reporter/pkg/config"
 	"k8s.io/client-go/rest"
 )
 

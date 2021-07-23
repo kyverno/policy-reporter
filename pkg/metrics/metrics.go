@@ -1,7 +1,7 @@
 package metrics
 
 import (
-	"github.com/fjogeleit/policy-reporter/pkg/report"
+	"github.com/kyverno/policy-reporter/pkg/report"
 	"k8s.io/apimachinery/pkg/watch"
 )
 

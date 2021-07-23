@@ -7,8 +7,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/fjogeleit/policy-reporter/pkg/api"
-	"github.com/fjogeleit/policy-reporter/pkg/report"
+	"github.com/kyverno/policy-reporter/pkg/api"
+	"github.com/kyverno/policy-reporter/pkg/report"
 )
 
 func Test_TargetsAPI(t *testing.T) {
