@@ -1,5 +1,11 @@
 # Changelog
 
+# 1.8.5
+* Added trusted root CA's [#52](https://github.com/kyverno/policy-reporter/pull/52) by [frezbo](https://github.com/frezbo)
+
+# 1.8.4
+* Changed Organization
+
 # 1.8.3
 * Update Policy Reporter UI to 0.13.0
     * Change Result Grouping between by Status and by Category
