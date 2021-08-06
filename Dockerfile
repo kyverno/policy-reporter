@@ -25,6 +25,8 @@ USER 1234
 
 COPY --from=builder /app/LICENSE.md .
 COPY --from=builder /app/build/policyreporter /app/policyreporter
+# copy the debian's trusted root CA's to the final image
+COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
 
 EXPOSE 2112
 
