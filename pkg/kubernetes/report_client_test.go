@@ -22,6 +22,10 @@ type fakeClient struct {
 	mapper  kubernetes.Mapper
 }
 
+func (f *fakeClient) GetFoundResources() map[string]string {
+	return make(map[string]string)
+}
+
 func (f *fakeClient) ListPolicyReports() ([]report.PolicyReport, error) {
 	return f.List, f.Error
 }

@@ -232,7 +232,7 @@ func Test_ResolvePolicyClient(t *testing.T) {
 func Test_ResolveAPIServer(t *testing.T) {
 	resolver := config.NewResolver(testConfig, &rest.Config{})
 
-	server := resolver.APIServer()
+	server := resolver.APIServer(context.Background())
 	if server == nil {
 		t.Error("Error: Should return API Server")
 	}

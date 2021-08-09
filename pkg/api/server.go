@@ -15,18 +15,19 @@ type Server interface {
 }
 
 type httpServer struct {
-	port    int
-	mux     *http.ServeMux
-	store   *report.PolicyReportStore
-	targets []Target
+	port           int
+	mux            *http.ServeMux
+	store          *report.PolicyReportStore
+	targets        []Target
+	foundResources map[string]string
 }
 
 func (s *httpServer) registerHandler() {
 	s.mux.HandleFunc("/policy-reports", Gzip(PolicyReportHandler(s.store)))
 	s.mux.HandleFunc("/cluster-policy-reports", Gzip(ClusterPolicyReportHandler(s.store)))
 	s.mux.HandleFunc("/targets", Gzip(TargetsHandler(s.targets)))
-	s.mux.HandleFunc("/healthz", HealthzHandler())
-	s.mux.HandleFunc("/ready", ReadyHandler(s.store))
+	s.mux.HandleFunc("/healthz", HealthzHandler(s.foundResources))
+	s.mux.HandleFunc("/ready", ReadyHandler())
 }
 
 func (s *httpServer) Start() error {
@@ -39,17 +40,18 @@ func (s *httpServer) Start() error {
 }
 
 // NewServer constructor for a new API Server
-func NewServer(store *report.PolicyReportStore, targets []target.Client, port int) Server {
+func NewServer(store *report.PolicyReportStore, targets []target.Client, port int, foundResources map[string]string) Server {
 	apiTargets := make([]Target, 0, len(targets))
 	for _, t := range targets {
 		apiTargets = append(apiTargets, mapTarget(t))
 	}
 
 	s := &httpServer{
-		port:    port,
-		targets: apiTargets,
-		store:   store,
-		mux:     http.NewServeMux(),
+		port:           port,
+		targets:        apiTargets,
+		store:          store,
+		mux:            http.NewServeMux(),
+		foundResources: foundResources,
 	}
 
 	s.registerHandler()

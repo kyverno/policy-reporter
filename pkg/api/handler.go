@@ -9,22 +9,13 @@ import (
 )
 
 // HealthzHandler for the Halthz REST API
-func HealthzHandler() http.HandlerFunc {
+func HealthzHandler(found map[string]string) http.HandlerFunc {
 	return func(w http.ResponseWriter, req *http.Request) {
-		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
-		w.WriteHeader(http.StatusOK)
-		fmt.Fprint(w, "{}")
-	}
-}
-
-// ReadyHandler for the Halthz REST API
-func ReadyHandler(s *report.PolicyReportStore) http.HandlerFunc {
-	return func(w http.ResponseWriter, req *http.Request) {
-		if len(s.List(report.PolicyReportType))+len(s.List(report.ClusterPolicyReportType)) == 0 {
+		if len(found) == 0 {
 			w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 			w.WriteHeader(http.StatusServiceUnavailable)
 
-			fmt.Fprint(w, "{}")
+			fmt.Fprint(w, `{ "error": "No PolicyReport CRDs found" }`)
 
 			return
 		}
@@ -32,6 +23,15 @@ func ReadyHandler(s *report.PolicyReportStore) http.HandlerFunc {
 		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 		w.WriteHeader(http.StatusOK)
 
+		fmt.Fprint(w, "{}")
+	}
+}
+
+// ReadyHandler for the Halthz REST API
+func ReadyHandler() http.HandlerFunc {
+	return func(w http.ResponseWriter, req *http.Request) {
+		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+		w.WriteHeader(http.StatusOK)
 		fmt.Fprint(w, "{}")
 	}
 }

@@ -3,6 +3,7 @@ package kubernetes
 import (
 	"context"
 	"log"
+	"sync"
 
 	"github.com/kyverno/policy-reporter/pkg/report"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -45,13 +46,18 @@ type WatchEvent struct {
 // PolicyReportAdapter translates API responses to an internal struct
 type PolicyReportAdapter interface {
 	WatchPolicyReports() (chan WatchEvent, error)
+	GetFoundResources() map[string]string
 }
 
 type k8sPolicyReportAdapter struct {
-	client               dynamic.Interface
-	policyReports        schema.GroupVersionResource
-	clusterPolicyReports schema.GroupVersionResource
-	mapper               Mapper
+	client dynamic.Interface
+	found  map[string]string
+	mapper Mapper
+	mx     *sync.Mutex
+}
+
+func (k *k8sPolicyReportAdapter) GetFoundResources() map[string]string {
+	return k.found
 }
 
 func (k *k8sPolicyReportAdapter) WatchPolicyReports() (chan WatchEvent, error) {
@@ -70,8 +76,15 @@ func (k *k8sPolicyReportAdapter) WatchPolicyReports() (chan WatchEvent, error) {
 				w, err := k.client.Resource(r).Watch(context.Background(), metav1.ListOptions{})
 				if err != nil {
 					log.Printf("[INFO] Resource not Found: %s\n", r.String())
+					k.mx.Lock()
+					delete(k.found, r.String())
+					k.mx.Unlock()
 					return
 				}
+
+				k.mx.Lock()
+				k.found[r.String()] = r.String()
+				k.mx.Unlock()
 
 				for result := range w.ResultChan() {
 					if item, ok := result.Object.(*unstructured.Unstructured); ok {
@@ -91,5 +104,7 @@ func NewPolicyReportAdapter(dynamic dynamic.Interface, mapper Mapper) PolicyRepo
 	return &k8sPolicyReportAdapter{
 		client: dynamic,
 		mapper: mapper,
+		mx:     &sync.Mutex{},
+		found:  make(map[string]string),
 	}
 }

@@ -39,11 +39,19 @@ type Resolver struct {
 }
 
 // APIServer resolver method
-func (r *Resolver) APIServer() api.Server {
+func (r *Resolver) APIServer(ctx context.Context) api.Server {
+	foundResources := make(map[string]string, 0)
+
+	client, err := r.PolicyReportClient(ctx)
+	if err != nil {
+		foundResources = client.GetFoundResources()
+	}
+
 	return api.NewServer(
 		r.PolicyReportStore(),
 		r.TargetClients(),
 		r.config.API.Port,
+		foundResources,
 	)
 }
 

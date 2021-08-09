@@ -66,9 +66,9 @@ func newRunCMD() *cobra.Command {
 
 			errorChan := make(chan error)
 
-			go func() { errorChan <- resolver.APIServer().Start() }()
-
 			go func() { errorChan <- client.StartWatching() }()
+
+			go func() { errorChan <- resolver.APIServer(ctx).Start() }()
 
 			go func() {
 				http.Handle("/metrics", promhttp.Handler())

@@ -30,6 +30,10 @@ func (c *policyReportClient) RegisterPolicyResultCallback(cb report.PolicyResult
 	c.resultCallbacks = append(c.resultCallbacks, cb)
 }
 
+func (c *policyReportClient) GetFoundResources() map[string]string {
+	return c.policyAPI.GetFoundResources()
+}
+
 func (c *policyReportClient) StartWatching() error {
 	if c.started {
 		return errors.New("StartWatching was already started")
