@@ -3,6 +3,7 @@ package api
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 
 	"github.com/kyverno/policy-reporter/pkg/report"
@@ -14,6 +15,8 @@ func HealthzHandler(found map[string]string) http.HandlerFunc {
 		if len(found) == 0 {
 			w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 			w.WriteHeader(http.StatusServiceUnavailable)
+
+			log.Println("[ERROR] No PolicyReport CRDs found")
 
 			fmt.Fprint(w, `{ "error": "No PolicyReport CRDs found" }`)
 

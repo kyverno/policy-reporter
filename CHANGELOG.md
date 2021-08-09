@@ -1,5 +1,13 @@
 # Changelog
 
+# 1.8.6
+* Update Policy Reporter UI to 0.13.1
+    * Hide Rule Chips if rule name is empty
+* Update Policy Reporter Kyvern Plugin to 0.3.2
+    * Improved LivenessProbe, checks now if Kyverno CRDs are available
+* Update Policy Reporter to 1.8.4
+    * Improved LivenessProbe, checks now if any PolicyReport CRD is available
+
 # 1.8.5
 * Added trusted root CA's [#52](https://github.com/kyverno/policy-reporter/pull/52) by [frezbo](https://github.com/frezbo)
 

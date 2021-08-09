@@ -1,7 +1,7 @@
 image:
   repository: fjogeleit/policy-reporter-kyverno-plugin
   pullPolicy: IfNotPresent
-  tag: 0.3.1
+  tag: 0.3.2
 
 imagePullSecrets: []
 
