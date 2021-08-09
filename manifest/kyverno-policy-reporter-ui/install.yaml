@@ -165,7 +165,7 @@ spec:
       automountServiceAccountToken: true
       containers:
         - name: "kyverno-plugin"
-          image: "fjogeleit/policy-reporter-kyverno-plugin:0.3.1"
+          image: "fjogeleit/policy-reporter-kyverno-plugin:0.3.2"
           imagePullPolicy: IfNotPresent
           securityContext:
             allowPrivilegeEscalation: false
@@ -215,7 +215,7 @@ spec:
     spec:
       containers:
         - name: ui
-          image: "fjogeleit/policy-reporter-ui:0.12.0"
+          image: "fjogeleit/policy-reporter-ui:0.13.1"
           imagePullPolicy: IfNotPresent
           securityContext:
             allowPrivilegeEscalation: false
@@ -266,7 +266,7 @@ spec:
       automountServiceAccountToken: true
       containers:
         - name: policy-reporter
-          image: "fjogeleit/policy-reporter:1.8.3"
+          image: "fjogeleit/policy-reporter:1.8.4"
           imagePullPolicy: IfNotPresent
           securityContext:
             allowPrivilegeEscalation: false
