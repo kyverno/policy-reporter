@@ -20,4 +20,6 @@ type PolicyResultClient interface {
 	RegisterPolicyResultWatcher(skipExisting bool)
 	// StartWatching calls the WatchAPI, waiting for incoming PolicyReport watch.Events and call the registered Handlers
 	StartWatching() error
+	// GetFoundResources as Map of Names
+	GetFoundResources() map[string]string
 }

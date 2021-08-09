@@ -204,12 +204,28 @@ func Test_HealthzAPI(t *testing.T) {
 		}
 
 		rr := httptest.NewRecorder()
-		handler := http.HandlerFunc(api.HealthzHandler())
+		handler := http.HandlerFunc(api.HealthzHandler(map[string]string{"wgpolicyk8s.io/v1alpha2": "wgpolicyk8s.io/v1alpha2"}))
 
 		handler.ServeHTTP(rr, req)
 
 		if status := rr.Code; status != http.StatusOK {
 			t.Errorf("handler returned wrong status code: got %v want %v", status, http.StatusOK)
+		}
+	})
+
+	t.Run("Unavailable Respose", func(t *testing.T) {
+		req, err := http.NewRequest("GET", "/healthz", nil)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		rr := httptest.NewRecorder()
+		handler := http.HandlerFunc(api.HealthzHandler(map[string]string{}))
+
+		handler.ServeHTTP(rr, req)
+
+		if status := rr.Code; status != http.StatusServiceUnavailable {
+			t.Errorf("handler returned wrong status code: got %v want %v", status, http.StatusServiceUnavailable)
 		}
 	})
 }
@@ -221,59 +237,13 @@ func Test_ReadyAPI(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		result := report.Result{
-			Message:  "validation error: requests and limits required. Rule autogen-check-for-requests-and-limits failed at path /spec/template/spec/containers/0/resources/requests/",
-			Policy:   "require-requests-and-limits-required",
-			Rule:     "autogen-check-for-requests-and-limits",
-			Priority: report.ErrorPriority,
-			Status:   report.Fail,
-			Category: "resources",
-			Scored:   true,
-			Resource: report.Resource{
-				APIVersion: "v1",
-				Kind:       "Deployment",
-				Name:       "nginx",
-				Namespace:  "test",
-				UID:        "536ab69f-1b3c-4bd9-9ba4-274a56188409",
-			},
-		}
-
-		preport := report.PolicyReport{
-			Name:              "polr-test",
-			Namespace:         "test",
-			Results:           map[string]report.Result{"": result},
-			Summary:           report.Summary{},
-			CreationTimestamp: time.Now(),
-		}
-
-		store := report.NewPolicyReportStore()
-		store.Add(preport)
-
 		rr := httptest.NewRecorder()
-		handler := http.HandlerFunc(api.ReadyHandler(store))
+		handler := http.HandlerFunc(api.ReadyHandler())
 
 		handler.ServeHTTP(rr, req)
 
 		if status := rr.Code; status != http.StatusOK {
 			t.Errorf("handler returned wrong status code: got %v want %v", status, http.StatusOK)
-		}
-	})
-
-	t.Run("Unavailable Respose", func(t *testing.T) {
-		req, err := http.NewRequest("GET", "/ready", nil)
-		if err != nil {
-			t.Fatal(err)
-		}
-
-		store := report.NewPolicyReportStore()
-
-		rr := httptest.NewRecorder()
-		handler := http.HandlerFunc(api.ReadyHandler(store))
-
-		handler.ServeHTTP(rr, req)
-
-		if status := rr.Code; status != http.StatusServiceUnavailable {
-			t.Errorf("handler returned wrong status code: got %v want %v", status, http.StatusServiceUnavailable)
 		}
 	})
 }

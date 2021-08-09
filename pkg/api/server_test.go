@@ -19,6 +19,7 @@ func Test_NewServer(t *testing.T) {
 			discord.NewClient("http://webhook:2000", "", false, &http.Client{}),
 		},
 		8080,
+		make(map[string]string),
 	)
 
 	go server.Start()

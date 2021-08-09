@@ -27,6 +27,7 @@ type Resolver struct {
 	config              *Config
 	k8sConfig           *rest.Config
 	mapper              kubernetes.Mapper
+	policyAdapter       kubernetes.PolicyReportAdapter
 	policyStore         *report.PolicyReportStore
 	policyClient        report.PolicyResultClient
 	lokiClient          target.Client
@@ -40,10 +41,18 @@ type Resolver struct {
 
 // APIServer resolver method
 func (r *Resolver) APIServer() api.Server {
+	foundResources := make(map[string]string, 0)
+
+	client := r.policyClient
+	if client != nil {
+		foundResources = client.GetFoundResources()
+	}
+
 	return api.NewServer(
 		r.PolicyReportStore(),
 		r.TargetClients(),
 		r.config.API.Port,
+		foundResources,
 	)
 }
 
@@ -305,6 +314,10 @@ func (r *Resolver) configMapAPI() (kubernetes.ConfigMapAdapter, error) {
 }
 
 func (r *Resolver) policyReportAPI(ctx context.Context) (kubernetes.PolicyReportAdapter, error) {
+	if r.policyAdapter != nil {
+		return r.policyAdapter, nil
+	}
+
 	client, err := dynamic.NewForConfig(r.k8sConfig)
 	if err != nil {
 		return nil, err
@@ -314,7 +327,9 @@ func (r *Resolver) policyReportAPI(ctx context.Context) (kubernetes.PolicyReport
 		return nil, err
 	}
 
-	return kubernetes.NewPolicyReportAdapter(client, mapper), nil
+	r.policyAdapter = kubernetes.NewPolicyReportAdapter(client, mapper)
+
+	return r.policyAdapter, nil
 }
 
 // ResultCache resolver method

@@ -1,7 +1,7 @@
 image:
   repository: fjogeleit/policy-reporter
   pullPolicy: IfNotPresent
-  tag: 1.8.3
+  tag: 1.8.4
 
 imagePullSecrets: []
 
