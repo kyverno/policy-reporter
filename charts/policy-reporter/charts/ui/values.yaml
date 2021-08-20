@@ -10,7 +10,7 @@ plugins:
 image:
   repository: fjogeleit/policy-reporter-ui
   pullPolicy: IfNotPresent
-  tag: 0.13.1
+  tag: 0.13.2
 
 imagePullSecrets: []
 
@@ -74,6 +74,7 @@ service:
 # ref to: https://kubernetes.io/docs/concepts/services-networking/ingress/
 ingress:
   enabled: false
+  className: ""
   # key/value
   labels: {}
   # key/value

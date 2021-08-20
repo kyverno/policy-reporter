@@ -4,6 +4,7 @@ import (
 	"context"
 	"log"
 	"sync"
+	"time"
 
 	"github.com/kyverno/policy-reporter/pkg/report"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -75,12 +76,19 @@ func (k *k8sPolicyReportAdapter) WatchPolicyReports() (chan WatchEvent, error) {
 			for {
 				w, err := k.client.Resource(r).Watch(context.Background(), metav1.ListOptions{})
 				if err != nil {
-					log.Printf("[INFO] Resource not Found: %s\n", r.String())
 					k.mx.Lock()
 					delete(k.found, r.String())
 					k.mx.Unlock()
+
+					if len(k.found) < 2 {
+						time.Sleep(time.Second)
+						continue
+					}
+
 					return
 				}
+
+				log.Printf("[INFO] Resource Found: %s\n", r.String())
 
 				k.mx.Lock()
 				k.found[r.String()] = r.String()

@@ -38,6 +38,9 @@ app.kubernetes.io/managed-by: {{ .Release.Service }}
 {{- with .Values.global.labels }}
 {{ toYaml . }}
 {{- end -}}
+{{- with .Values.ingress.labels }}
+{{ toYaml . }}
+{{- end -}}
 {{- end }}
 
 {{/*

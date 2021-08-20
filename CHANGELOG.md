@@ -1,5 +1,12 @@
 # Changelog
 
+# 1.8.7
+* Update Policy Reporter UI to 0.14.0
+    * Colored Diagrams
+    * Suppport SubPath Configuration
+* Restart CRD Watches when no CRDs are found
+* Fix Ingress Resource in the UI Subchart
+
 # 1.8.6
 * Update Policy Reporter UI to 0.13.1
     * Hide Rule Chips if rule name is empty
