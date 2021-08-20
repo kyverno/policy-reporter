@@ -6,6 +6,7 @@
     * Suppport SubPath Configuration
 * Restart CRD Watches when no CRDs are found
 * Fix Ingress Resource in the UI Subchart
+* Allow to override namespace for serviceMonitor [[#57](https://github.com/kyverno/policy-reporter/pull/57) by [Issif](https://github.com/Issif)]
 
 # 1.8.6
 * Update Policy Reporter UI to 0.13.1
@@ -16,7 +17,7 @@
     * Improved LivenessProbe, checks now if any PolicyReport CRD is available
 
 # 1.8.5
-* Added trusted root CA's [#52](https://github.com/kyverno/policy-reporter/pull/52) by [frezbo](https://github.com/frezbo)
+* Added trusted root CA's [[#52](https://github.com/kyverno/policy-reporter/pull/52) by [frezbo](https://github.com/frezbo)]
 
 # 1.8.4
 * Changed Organization
@@ -33,7 +34,7 @@
     * Update Policy Reporter UI to `0.12.0`
 
 # 1.8.1
-* Customize label and annotation for Grafana dashboards [#43](https://github.com/kyverno/policy-reporter/pull/43) by [nlamirault](https://github.com/nlamirault)
+* Customize label and annotation for Grafana dashboards [[#43](https://github.com/kyverno/policy-reporter/pull/43) by [nlamirault](https://github.com/nlamirault)]
 * ARM64 Support for all Components
 
 # 1.7.3
