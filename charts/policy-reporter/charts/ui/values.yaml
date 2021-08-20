@@ -10,7 +10,7 @@ plugins:
 image:
   repository: fjogeleit/policy-reporter-ui
   pullPolicy: IfNotPresent
-  tag: 0.13.2
+  tag: 0.14.0
 
 imagePullSecrets: []
 
