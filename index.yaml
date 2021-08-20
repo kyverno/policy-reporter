@@ -2,6 +2,31 @@ apiVersion: v1
 entries:
   policy-reporter:
   - apiVersion: v2
+    appVersion: 1.8.5
+    created: "2021-08-20T10:51:34.036311+02:00"
+    dependencies:
+    - condition: monitoring.enabled
+      name: monitoring
+      repository: ""
+      version: 1.4.1
+    - condition: ui.enabled
+      name: ui
+      repository: ""
+      version: 1.8.5
+    - condition: kyvernoPlugin.enabled
+      name: kyvernoPlugin
+      repository: ""
+      version: 0.5.2
+    description: 'K8s PolicyReporter watches for wgpolicyk8s.io/v1alpha1.PolicyReport
+      resources. It creates Prometheus Metrics and can send rule validation events
+      to different targets like Loki, Elasticsearch, Slack or Discord '
+    digest: ff15ec06245a296b6fc8450159fe185c8f918b7e7a8461c0814289927d848523
+    name: policy-reporter
+    type: application
+    urls:
+    - https://github.com/kyverno/policy-reporter/releases/download/policy-reporter-1.8.7/policy-reporter-1.8.7.tgz
+    version: 1.8.7
+  - apiVersion: v2
     appVersion: 1.8.4
     created: "2021-08-09T20:54:02.337676+02:00"
     dependencies:
@@ -1099,4 +1124,4 @@ entries:
     urls:
     - https://github.com/kyverno/policy-reporter/releases/download/policy-reporter-0.2.0/policy-reporter-0.2.0.tgz
     version: 0.2.0
-generated: "2021-08-09T20:54:02.338579+02:00"
+generated: "2021-08-20T10:51:34.037114+02:00"
