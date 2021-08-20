@@ -97,7 +97,7 @@ spec:
       automountServiceAccountToken: false
       containers:
         - name: ui
-          image: "fjogeleit/policy-reporter-ui:0.13.1"
+          image: "fjogeleit/policy-reporter-ui:0.14.0"
           imagePullPolicy: IfNotPresent
           securityContext:
             allowPrivilegeEscalation: false
@@ -148,7 +148,7 @@ spec:
       automountServiceAccountToken: true
       containers:
         - name: policy-reporter
-          image: "fjogeleit/policy-reporter:1.8.4"
+          image: "fjogeleit/policy-reporter:1.8.5"
           imagePullPolicy: IfNotPresent
           securityContext:
             allowPrivilegeEscalation: false
