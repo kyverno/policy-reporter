@@ -1,5 +1,12 @@
 # Changelog
 
+# 18.9
+* Ensure Backward Compatibility for `monitoring.namespace` configuration
+
+# 1.8.8
+* Optional Namespace Configuration for Monitoring ServiceMonitor
+* Separat Namespace Configuration for Monitoring ConfigMaps with `monitoring.grafana.namespace`
+
 # 1.8.7
 * Update Policy Reporter UI to 0.14.0
     * Colored Diagrams

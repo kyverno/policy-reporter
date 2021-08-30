@@ -1,5 +1,5 @@
 # allow to override the namespace for serviceMonitor
-namespace:
+namespace: cattle-dashboards
 
 plugins:
   kyverno: false
@@ -10,7 +10,7 @@ serviceMonitor:
 
 grafana:
   # namespace for configMap of grafana dashboards
-  namespace: cattle-dashboards
+  namespace:
   dashboards:
     # Label to find dashboards using the k8s sidecar
     label: grafana_dashboard
