@@ -44,7 +44,9 @@ app.kubernetes.io/instance: {{ .Release.Name }}
 {{- define "monitoring.namespace" -}}
 {{-  if .Values.grafana.namespace -}}
 {{- .Values.grafana.namespace -}}
-{{- else -}}
+{{- else if .Values.namespace  -}}
 {{- .Values.namespace -}}
+{{- else -}}
+{{- .Release.Namespace -}}
 {{- end }}
 {{- end }}
