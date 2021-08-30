@@ -40,3 +40,11 @@ app.kubernetes.io/instance: {{ .Release.Name }}
 {{- define "monitoring.name" -}}
 {{- "monitoring" }}
 {{- end }}
+
+{{- define "monitoring.namespace" -}}
+{{-  if .Values.grafana.namespace -}}
+{{- .Values.grafana.namespace -}}
+{{- else -}}
+{{- .Values.namespace -}}
+{{- end }}
+{{- end }}
