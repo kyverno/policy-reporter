@@ -74,6 +74,9 @@ resources: {}
 # enable policy-report-ui
 ui:
   enabled: false
+  # Network Policy support, useful when running on a cluster configured with default deny policy
+  networkPolicy:
+    enabled: false
 
 kyvernoPlugin:
   enabled: false
