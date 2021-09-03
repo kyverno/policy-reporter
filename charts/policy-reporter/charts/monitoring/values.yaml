@@ -1,10 +1,12 @@
-# allow to override the namespace for serviceMonitor
+# monitoring namespace for Dashboard Configurations
 namespace: cattle-dashboards
 
 plugins:
   kyverno: false
 
 serviceMonitor:
+  # allow to override the namespace for serviceMonitor  
+  namespace:
   # labels to match the serviceMonitorSelector of the Prometheus Resource
   labels: {}
 
