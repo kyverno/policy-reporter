@@ -3,8 +3,8 @@ apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
   name: {{ include "monitoring.fullname" . }}-kyverno-plugin
-  {{ if .Values.namespace }}
-  namespace: {{ .Values.namespace }}
+  {{ if .Values.serviceMonitor.namespace }}
+  namespace: {{ .Values.serviceMonitor.namespace }}
   {{ end }}
   labels:
     {{- with .Values.serviceMonitor.labels }}

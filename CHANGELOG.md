@@ -1,4 +1,6 @@
 # Changelog
+# 18.10
+* Fix ServiceMonitor Namespace overwrite with `monitoring.serviceMonitor.namespace` instead of `monitoring.namespace`
 
 # 18.9
 * Ensure Backward Compatibility for `monitoring.namespace` configuration
