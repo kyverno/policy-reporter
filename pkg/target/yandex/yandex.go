@@ -24,7 +24,9 @@ type httpClient interface {
 
 
 type client struct {
-	
+	sess AWSSession,
+	prefix string,
+	bucket string,
 	minimumPriority       string
 	skipExistingOnStartup bool
 	client                httpClient
@@ -42,11 +44,20 @@ func (y *client) Send(result report.Result) {
 		log.Printf("[ERROR] YandexS3 : %v\n", err.Error())
 		return
 	}
-	/*
+	
+	key := fmt.Sprintf("%s/%s/%s.json", y.prefix, t.Format("2006-01-02"), t.Format(time.RFC3339Nano))
+	_, err := s3.New(y.sess).PutObject(&s3.PutObjectInput{
+		Bucket: aws.String(y.bucket),
+		Key:    aws.String(key),
+		Body:   body,
+	})
+	
+	req.Header.Add("Content-Type", "application/json; charset=utf-8")
+	req.Header.Add("User-Agent", "Policy-Reporter")
 
-	TDB
-	*/
-
+	resp, err := y.client.Do(req)
+	helper.HandleHTTPResponse("YANDEXS3", resp, err)
+	
 }
 
 func (s *client) SkipExistingOnStartup() bool {
@@ -64,14 +75,16 @@ func (s *client) MinimumPriority() string {
 /
 
 // NewClient creates a new Yandex.client to send Results to S3. It doesnt' work right now
-func NewClient(sess, minimumPriority string, skipExistingOnStartup bool, s3client s3client) target.Client {
+func NewClient(sess AWSSession, prefix string, bucket string, minimumPriority string, skipExistingOnStartup bool, httpClient httpClient) target.Client {
 
 
 	
 	return &client{
 		sess,
+		prefix,
+		bucket,
 		minimumPriority,
 		skipExistingOnStartup,
-		s3client,
+		httpClient,
 	}
 }
