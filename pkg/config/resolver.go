@@ -6,6 +6,10 @@ import (
 	"net/http"
 	"time"
 
+	"policy-reporter/pkg/target/yandex"
+
+	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/kyverno/policy-reporter/pkg/api"
 	"github.com/kyverno/policy-reporter/pkg/kubernetes"
 	"github.com/kyverno/policy-reporter/pkg/report"
@@ -19,6 +23,8 @@ import (
 	"github.com/patrickmn/go-cache"
 	"k8s.io/client-go/dynamic"
 	v1 "k8s.io/client-go/kubernetes/typed/core/v1"
+
+	"github.com/aws/aws-sdk-go/aws/credentials"
 	"k8s.io/client-go/rest"
 )
 
@@ -36,6 +42,7 @@ type Resolver struct {
 	discordClient       target.Client
 	teamsClient         target.Client
 	uiClient            target.Client
+	yandexS3Client      target.Client
 	resultCache         *cache.Cache
 }
 
@@ -250,6 +257,43 @@ func (r *Resolver) UIClient() target.Client {
 	return r.uiClient
 }
 
+func (r *Resolver) YandexS3Client() target.Client {
+	if r.yandexS3Client != nil {
+		return r.yandexS3Client
+	}
+
+	sess, err := session.NewSession(&aws.Config{
+		Region:      aws.String(r.config.Yandex.Region),
+		Endpoint:    aws.String(r.config.Yandex.Endpoint),
+		Credentials: credentials.NewStaticCredentials(r.config.Yandex.AccessKeyID, r.config.Yandex.SecretAccessKey, ""),
+	})
+	if err != nil {
+		log.Printf("[ERROR] : Yandex - %v\n", "Error while creating Yandex Session")
+		return nil
+	}
+	log.Printf("[INFO] : Yandex Session has been configured successfully")
+	if r.config.Yandex.Bucket == "" {
+		log.Printf("[ERROR] : Bucket has not been declared")
+		return nil
+	}
+	if r.config.Yandex.Prefix == "" {
+		log.Printf("[INFO] : Prefix has not been declared using policy-reporter prefix")
+		r.config.Yandex.Prefix = "policy-reporter/"
+	}
+	r.YandexS3Client = yandex.NewClient(
+		sess,
+		r.config.yandex.Prefix,
+		r.config.yandex.Bucket,
+		r.config.yandex.MinimumPriority,
+		r.config.yandex.SkipExisting,
+		&http.Client{},
+	)
+
+	log.Println("[INFO] Yandex Session configured")
+
+	return r.YandexS3Client
+}
+
 // TargetClients resolver method
 func (r *Resolver) TargetClients() []target.Client {
 	clients := make([]target.Client, 0)
@@ -276,6 +320,10 @@ func (r *Resolver) TargetClients() []target.Client {
 
 	if ui := r.UIClient(); ui != nil {
 		clients = append(clients, ui)
+	}
+
+	if yandex := r.YandexS3Client(); yandex != nil {
+		clients = append(clients, yandex)
 	}
 
 	return clients

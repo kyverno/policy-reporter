@@ -44,6 +44,17 @@ type UI struct {
 	MinimumPriority string `mapstructure:"minimumPriority"`
 }
 
+type YandexS3 struct {
+	AccessKeyID     string `mapstructure:"accessKeyID"`
+	SecretAccessKey string `mapstructure:"SecretAccessKey"`
+	SkipExisting    bool   `mapstructure:"skipExistingOnStartup"`
+	Region          string `mapstructure:"Region"`
+	Endpoint        string `mapstructure:"Endpoint"`
+	Prefix          string `mapstructure:"Prefix"`
+	Bucket          string `mapstructure:"Bucket"`
+	MinimumPriority string `mapstructure:"MinimumPriority"`
+}
+
 // API configuration
 type API struct {
 	Port int `mapstructure:"port"`
@@ -56,6 +67,7 @@ type Config struct {
 	Slack         Slack         `mapstructure:"slack"`
 	Discord       Discord       `mapstructure:"discord"`
 	Teams         Teams         `mapstructure:"teams"`
+	YandexS3      YandexS3      `mapstructure:"yandexS3"`
 	UI            UI            `mapstructure:"ui"`
 	API           API           `mapstructure:"api"`
 	Kubeconfig    string        `mapstructure:"kubeconfig"`
