@@ -18,7 +18,7 @@ spec:
   - from:
     ports:
     - protocol: TCP
-      port: 2112
+      port: {{ .Values.service.port }}
   egress:
   - to:
     - podSelector:
