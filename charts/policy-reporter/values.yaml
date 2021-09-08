@@ -185,3 +185,15 @@ tolerations: []
 
 # Anti-affinity to disallow deploying client and master nodes on the same worker node
 affinity: {}
+
+# livenessProbe for policy-reporter
+livenessProbe:
+  httpGet:
+    path: /ready
+    port: rest
+
+# readinessProbe for policy-reporter
+readinessProbe:
+  httpGet:
+    path: /healthz
+    port: rest

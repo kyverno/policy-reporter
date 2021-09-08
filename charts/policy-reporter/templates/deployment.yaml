@@ -58,21 +58,15 @@ spec:
               containerPort: 8080
               protocol: TCP
           livenessProbe:
-          {{- if .Values.livenessProbe }}
             {{- toYaml .Values.livenessProbe | nindent 12 }}
-          {{- else }}
             httpGet:
               path: /ready
               port: rest
-          {{- end }}
           readinessProbe:
-          {{- if .Values.readinessProbe }}
             {{- toYaml .Values.readinessProbe | nindent 12 }}
-          {{- else }}
             httpGet:
               path: /healthz
               port: rest
-          {{- end }}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
           volumeMounts:
