@@ -59,14 +59,8 @@ spec:
               protocol: TCP
           livenessProbe:
             {{- toYaml .Values.livenessProbe | nindent 12 }}
-            httpGet:
-              path: /ready
-              port: rest
           readinessProbe:
             {{- toYaml .Values.readinessProbe | nindent 12 }}
-            httpGet:
-              path: /healthz
-              port: rest
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
           volumeMounts:
