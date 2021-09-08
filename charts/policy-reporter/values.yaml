@@ -75,6 +75,7 @@ resources: {}
 # used and configured in a default-deny fashion.
 networkPolicy:
   enabled: false
+  egress: []
 
 # enable policy-report-ui
 ui:
@@ -193,12 +194,14 @@ affinity: {}
 
 # livenessProbe for policy-reporter
 livenessProbe:
+  initialDelaySeconds: 10
   httpGet:
     path: /ready
     port: rest
 
 # readinessProbe for policy-reporter
 readinessProbe:
+  initialDelaySeconds: 10
   httpGet:
     path: /healthz
     port: rest

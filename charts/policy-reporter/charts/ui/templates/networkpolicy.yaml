@@ -14,10 +14,10 @@ spec:
   - from:
     ports:
     - protocol: TCP
-      port: {{ .Values.service.port }} 
+      port: {{ .Values.global.port }}
   egress:
   - to:
     ports:
     - protocol: TCP
-      port: {{ .Values.service.port }} 
+      port: {{ .Values.service.port }}
 {{- end }}

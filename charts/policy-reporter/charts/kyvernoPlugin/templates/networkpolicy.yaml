@@ -9,13 +9,19 @@ spec:
     matchLabels: {{- include "kyvernoplugin.selectorLabels" . | nindent 6 }}
   policyTypes:
   - Ingress
+  - Egress
   ingress:
   - from:
     ports:
     - protocol: TCP
-      port: {{ .Values.global.port }} 
+      port: 8080
   - from:
     ports:
     - protocol: TCP
       port: 2113
+  egress:
+  - to:
+    ports:
+    - protocol: TCP
+      port: 6443
 {{- end }}

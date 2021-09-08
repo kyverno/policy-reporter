@@ -16,7 +16,7 @@ func HealthzHandler(found map[string]string) http.HandlerFunc {
 			w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 			w.WriteHeader(http.StatusServiceUnavailable)
 
-			log.Println("[ERROR] No PolicyReport CRDs found")
+			log.Println("[WARNING] - Healthz Check: No policyreport.wgpolicyk8s.io and clusterpolicyreport.wgpolicyk8s.io crds are found")
 
 			fmt.Fprint(w, `{ "error": "No PolicyReport CRDs found" }`)
 
