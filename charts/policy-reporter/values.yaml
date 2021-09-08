@@ -71,21 +71,17 @@ resources: {}
   #   memory: 20Mi
   #   cpu: 5m
 
+# Enable a NetworkPolicy for this chart. Useful on clusters where Network Policies are
+# used and configured in a default-deny fashion.
 networkPolicy:
   enabled: false
 
 # enable policy-report-ui
 ui:
   enabled: false
-  # Set this to true when enabling the UI and networkPolicy.enabled is true.
-  networkPolicy:
-    enabled: false
 
 kyvernoPlugin:
   enabled: false
-  # Set this to true when networkPolicy.enabled is true.
-  networkPolicy:
-    enabled: false
 
 monitoring:
   enabled: false
