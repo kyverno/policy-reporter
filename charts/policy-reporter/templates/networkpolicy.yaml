@@ -14,14 +14,23 @@ spec:
   - from:
     ports:
     - protocol: TCP
-      port: {{ .Values.global.port }} 
+      port: {{ .Values.global.port }}
   - from:
     ports:
     - protocol: TCP
-      port: {{ .Values.service.port }} 
+      port: {{ .Values.service.port }}
   egress:
+  - to:
+    - podSelector:
+        matchLabels: {{- include "ui.selectorLabels" . | nindent 10 }}
+    ports:
+    - protocol: TCP
+      port: {{ .Values.ui.service.port }}
   - to:
     ports:
     - protocol: TCP
-      port: {{ .Values.service.port }} 
+      port: 6443
+  {{- with .Values.networkPolicy.egress }}
+    {{- toYaml . | nindent 2 }}
+  {{- end }}
 {{- end }}

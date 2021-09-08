@@ -75,6 +75,7 @@ resources: {}
 # used and configured in a default-deny fashion.
 networkPolicy:
   enabled: false
+  egress: []
 
 # enable policy-report-ui
 ui:

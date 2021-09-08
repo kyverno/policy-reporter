@@ -1,8 +1,13 @@
 # Changelog
-# 18.10
+
+# 1.9.0
+* Implement NetworkPolicy for Policy Reporter and related Components [[#68](https://github.com/kyverno/policy-reporter/pull/68) by [windowsrefund](https://github.com/windowsrefund)]
+* Customize liveness- and readinessProbe for Policy Reporter [[#67](https://github.com/kyverno/policy-reporter/pull/67) by [windowsrefund](https://github.com/windowsrefund)]
+
+# 1.8.10
 * Fix ServiceMonitor Namespace overwrite with `monitoring.serviceMonitor.namespace` instead of `monitoring.namespace`
 
-# 18.9
+# 1.8.9
 * Ensure Backward Compatibility for `monitoring.namespace` configuration
 
 # 1.8.8
