@@ -23,5 +23,5 @@ spec:
   - to:
     ports:
     - protocol: TCP
-      port: 6443
+      port: {{  .Values.networkPolicy.kubernetesApiPort }}
 {{- end }}

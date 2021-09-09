@@ -76,6 +76,7 @@ resources: {}
 networkPolicy:
   enabled: false
   egress: []
+  kubernetesApiPort: 6443
 
 # enable policy-report-ui
 ui:

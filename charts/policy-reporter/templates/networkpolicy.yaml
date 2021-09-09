@@ -29,7 +29,7 @@ spec:
   - to:
     ports:
     - protocol: TCP
-      port: 6443
+      port: {{  .Values.networkPolicy.kubernetesApiPort }}
   {{- with .Values.networkPolicy.egress }}
     {{- toYaml . | nindent 2 }}
   {{- end }}
