@@ -1,7 +1,10 @@
 # Changelog
 
+# 1.9.2
+* Add additional egress rules to kyvernoPlugin and UI subchart with `networkPolicy.egress`
+
 # 1.9.1
-* Configure the Kubernetes API Port for NetworkPolicy
+* Configure the Kubernetes API Port for NetworkPolicy with `networkPolicy.kubernetesApiPort`
 
 # 1.9.0
 * Implement NetworkPolicy for Policy Reporter and related Components [[#68](https://github.com/kyverno/policy-reporter/pull/68) by [windowsrefund](https://github.com/windowsrefund)]

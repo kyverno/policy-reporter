@@ -85,3 +85,4 @@ affinity: {}
 networkPolicy:
   enabled: false
   kubernetesApiPort: 6443
+  egress: []

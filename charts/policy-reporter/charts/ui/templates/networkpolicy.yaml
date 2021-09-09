@@ -20,4 +20,7 @@ spec:
     ports:
     - protocol: TCP
       port: {{ .Values.global.port }}
+  {{- with .Values.networkPolicy.egress }}
+    {{- toYaml . | nindent 2 }}
+  {{- end }}
 {{- end }}
