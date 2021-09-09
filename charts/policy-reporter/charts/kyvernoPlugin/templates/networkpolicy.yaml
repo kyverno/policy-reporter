@@ -23,5 +23,5 @@ spec:
   - to:
     ports:
     - protocol: TCP
-      port: {{  .Values.networkPolicy.kubernetesApiPort }}
+      port: {{ .Values.networkPolicy.kubernetesApiPort }}
 {{- end }}

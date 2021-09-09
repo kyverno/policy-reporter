@@ -29,7 +29,7 @@ spec:
   - to:
     ports:
     - protocol: TCP
-      port: {{  .Values.networkPolicy.kubernetesApiPort }}
+      port: {{ .Values.networkPolicy.kubernetesApiPort }}
   {{- with .Values.networkPolicy.egress }}
     {{- toYaml . | nindent 2 }}
   {{- end }}
