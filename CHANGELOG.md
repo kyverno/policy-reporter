@@ -1,5 +1,8 @@
 # Changelog
 
+# 1.9.1
+* Configure the Kubernetes API Port for NetworkPolicy
+
 # 1.9.0
 * Implement NetworkPolicy for Policy Reporter and related Components [[#68](https://github.com/kyverno/policy-reporter/pull/68) by [windowsrefund](https://github.com/windowsrefund)]
 * Customize liveness- and readinessProbe for Policy Reporter [[#67](https://github.com/kyverno/policy-reporter/pull/67) by [windowsrefund](https://github.com/windowsrefund)]
