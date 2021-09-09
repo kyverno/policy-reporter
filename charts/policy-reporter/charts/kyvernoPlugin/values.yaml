@@ -84,3 +84,4 @@ affinity: {}
 # used and configured in a default-deny fashion.
 networkPolicy:
   enabled: false
+  kubernetesApiPort: 6443
