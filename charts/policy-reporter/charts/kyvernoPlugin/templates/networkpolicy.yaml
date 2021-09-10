@@ -25,6 +25,6 @@ spec:
     - protocol: TCP
       port: {{ .Values.networkPolicy.kubernetesApiPort }}
   {{- with .Values.networkPolicy.egress }}
-    {{- toYaml . | nindent 2 }}
+    {{- toYaml . | nindent 4 }}
   {{- end }}
 {{- end }}
