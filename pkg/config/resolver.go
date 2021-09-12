@@ -6,10 +6,6 @@ import (
 	"net/http"
 	"time"
 
-	"policy-reporter/pkg/target/yandex"
-
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/kyverno/policy-reporter/pkg/api"
 	"github.com/kyverno/policy-reporter/pkg/kubernetes"
 	"github.com/kyverno/policy-reporter/pkg/report"
@@ -20,11 +16,12 @@ import (
 	"github.com/kyverno/policy-reporter/pkg/target/slack"
 	"github.com/kyverno/policy-reporter/pkg/target/teams"
 	"github.com/kyverno/policy-reporter/pkg/target/ui"
+	"github.com/kyverno/policy-reporter/pkg/target/yandex"
+
 	"github.com/patrickmn/go-cache"
 	"k8s.io/client-go/dynamic"
 	v1 "k8s.io/client-go/kubernetes/typed/core/v1"
 
-	"github.com/aws/aws-sdk-go/aws/credentials"
 	"k8s.io/client-go/rest"
 )
 
@@ -42,7 +39,7 @@ type Resolver struct {
 	discordClient       target.Client
 	teamsClient         target.Client
 	uiClient            target.Client
-	yandexS3Client      target.Client
+	yandexClient        target.Client
 	resultCache         *cache.Cache
 }
 
@@ -257,41 +254,44 @@ func (r *Resolver) UIClient() target.Client {
 	return r.uiClient
 }
 
-func (r *Resolver) YandexS3Client() target.Client {
-	if r.yandexS3Client != nil {
-		return r.yandexS3Client
+func (r *Resolver) YandexClient() target.Client {
+	if r.yandexClient != nil {
+		return r.yandexClient
 	}
-
-	sess, err := session.NewSession(&aws.Config{
-		Region:      aws.String(r.config.Yandex.Region),
-		Endpoint:    aws.String(r.config.Yandex.Endpoint),
-		Credentials: credentials.NewStaticCredentials(r.config.Yandex.AccessKeyID, r.config.Yandex.SecretAccessKey, ""),
-	})
-	if err != nil {
-		log.Printf("[ERROR] : Yandex - %v\n", "Error while creating Yandex Session")
-		return nil
+	if r.config.Yandex.Region == "" {
+		log.Printf("[INFO] Yandex.Region has not been declared using ru-central1")
+		r.config.Yandex.Region = "ru-central1"
 	}
-	log.Printf("[INFO] : Yandex Session has been configured successfully")
-	if r.config.Yandex.Bucket == "" {
-		log.Printf("[ERROR] : Bucket has not been declared")
-		return nil
+	if r.config.Yandex.Endpoint == "" {
+		log.Printf("[INFO] Yandex.Endpoint has not been declared using ru-central1")
+		r.config.Yandex.Endpoint = "https://storage.yandexcloud.net"
 	}
 	if r.config.Yandex.Prefix == "" {
-		log.Printf("[INFO] : Prefix has not been declared using policy-reporter prefix")
+		log.Printf("[INFO] Yandex.Prefix has not been declared using policy-reporter prefix")
 		r.config.Yandex.Prefix = "policy-reporter/"
 	}
-	r.YandexS3Client = yandex.NewClient(
-		sess,
-		r.config.yandex.Prefix,
-		r.config.yandex.Bucket,
-		r.config.yandex.MinimumPriority,
-		r.config.yandex.SkipExisting,
+
+	log.Printf("[INFO] Yandex Session has been configured successfully")
+	if r.config.Yandex.Bucket == "" || r.config.Yandex.AccessKeyID == "" || r.config.Yandex.SecretAccessKey == "" {
+		log.Printf("[ERROR] One of Yandex.Bucket,Yandex.AccessKeyID or Yandex.SecretAccessKey  has not been declared")
+		return nil
+	}
+
+	r.yandexClient = yandex.NewClient(
+		r.config.Yandex.AccessKeyID,
+		r.config.Yandex.SecretAccessKey,
+		r.config.Yandex.Region,
+		r.config.Yandex.Endpoint,
+		r.config.Yandex.Prefix,
+		r.config.Yandex.Bucket,
+		r.config.Yandex.MinimumPriority,
+		r.config.Yandex.SkipExisting,
 		&http.Client{},
 	)
 
 	log.Println("[INFO] Yandex Session configured")
 
-	return r.YandexS3Client
+	return r.yandexClient
 }
 
 // TargetClients resolver method
@@ -322,8 +322,8 @@ func (r *Resolver) TargetClients() []target.Client {
 		clients = append(clients, ui)
 	}
 
-	if yandex := r.YandexS3Client(); yandex != nil {
-		clients = append(clients, yandex)
+	if Yandex := r.YandexClient(); Yandex != nil {
+		clients = append(clients, Yandex)
 	}
 
 	return clients

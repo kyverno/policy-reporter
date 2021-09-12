@@ -44,7 +44,7 @@ type UI struct {
 	MinimumPriority string `mapstructure:"minimumPriority"`
 }
 
-type YandexS3 struct {
+type Yandex struct {
 	AccessKeyID     string `mapstructure:"accessKeyID"`
 	SecretAccessKey string `mapstructure:"SecretAccessKey"`
 	SkipExisting    bool   `mapstructure:"skipExistingOnStartup"`
@@ -67,7 +67,7 @@ type Config struct {
 	Slack         Slack         `mapstructure:"slack"`
 	Discord       Discord       `mapstructure:"discord"`
 	Teams         Teams         `mapstructure:"teams"`
-	YandexS3      YandexS3      `mapstructure:"yandexS3"`
+	Yandex        Yandex        `mapstructure:"yandex"`
 	UI            UI            `mapstructure:"ui"`
 	API           API           `mapstructure:"api"`
 	Kubeconfig    string        `mapstructure:"kubeconfig"`

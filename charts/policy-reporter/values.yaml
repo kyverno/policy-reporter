@@ -175,7 +175,7 @@ target:
     # Skip already existing PolicyReportResults on startup
     skipExistingOnStartup: true
   
-  yandexs3:
+  yandex:
     accesskeyid: ""  # yandex access key
     secretaccesskey: ""  # yandex secret access key
     region: ""  # yandex storage region (default: ru-central-1)

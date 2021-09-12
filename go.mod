@@ -3,6 +3,7 @@ module github.com/kyverno/policy-reporter
 go 1.15
 
 require (
+	github.com/aws/aws-sdk-go v1.27.0
 	github.com/gogo/protobuf v1.3.2 // indirect
 	github.com/google/gofuzz v1.2.0 // indirect
 	github.com/magiconair/properties v1.8.4 // indirect

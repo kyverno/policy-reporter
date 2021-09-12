@@ -30,14 +30,14 @@ ui:
   minimumPriority: {{ .Values.target.ui.minimumPriority | quote }}
   skipExistingOnStartup: {{ .Values.target.ui.skipExistingOnStartup }}
 
-yandexS3:
-  accesskeyid: {{ .Values.target.yandexS3.accesskeyid }}
-  secretaccesskey:  {{ .Values.target.yandexS3.secretaccesskey }}
-  region: {{ .Values.target.yandexS3.region }}
-  endpoint: {{ .Values.target.yandexS3.endpoint }}
-  bucket: {{ .Values.target.yandexS3.bucket }}
-  prefix: {{ .Values.target.yandexS3.prefix }}
-  minimumpriority: {{ .Values.target.yandexS3.minimumpriority }}
-  skipExistingOnStartup: {{ .Values.target.yandexS3.skipExistingOnStartup }}
+yandex:
+  accesskeyid: {{ .Values.target.yandex.accesskeyid }}
+  secretaccesskey:  {{ .Values.target.yandex.secretaccesskey }}
+  region: {{ .Values.target.yandex.region }}
+  endpoint: {{ .Values.target.yandex.endpoint }}
+  bucket: {{ .Values.target.yandex.bucket }}
+  prefix: {{ .Values.target.yandex.prefix }}
+  minimumpriority: {{ .Values.target.yandex.minimumpriority }}
+  skipExistingOnStartup: {{ .Values.target.yandex.skipExistingOnStartup }}
 
   
