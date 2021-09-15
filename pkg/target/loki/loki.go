@@ -65,7 +65,7 @@ func newLokiPayload(result report.Result) payload {
 	}
 
 	for property, value := range result.Properties {
-		labels = append(labels, property+"=\""+strings.ReplaceAll(value, "\"", "")+"\"")
+		labels = append(labels, strings.ReplaceAll(property, ".", "_")+"=\""+strings.ReplaceAll(value, "\"", "")+"\"")
 	}
 
 	ls.Labels = "{" + strings.Join(labels, ",") + "}"
