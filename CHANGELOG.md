@@ -1,5 +1,8 @@
 # Changelog
 
+# 1.9.3
+* Fix loki target messages for labels with dots
+
 # 1.9.2
 * Add additional egress rules to kyvernoPlugin and UI subchart with `networkPolicy.egress`
 
