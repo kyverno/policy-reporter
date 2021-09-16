@@ -1,5 +1,8 @@
 # Changelog
 
+# 1.9.4
+* Make the Image Registry configurable with `image.registry` [[#74](https://github.com/kyverno/policy-reporter/pull/74) by [stone-z](https://github.com/stone-z)]
+
 # 1.9.3
 * Fix loki target messages for labels with dots
 
