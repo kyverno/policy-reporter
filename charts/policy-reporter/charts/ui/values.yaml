@@ -8,6 +8,7 @@ plugins:
   kyverno: false
 
 image:
+  registry: docker.io
   repository: fjogeleit/policy-reporter-ui
   pullPolicy: IfNotPresent
   tag: 0.14.0
