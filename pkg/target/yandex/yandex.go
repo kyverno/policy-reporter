@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
-	"net/http"
 	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -17,17 +16,12 @@ import (
 	"github.com/kyverno/policy-reporter/pkg/target"
 )
 
-type httpClient interface {
-	Do(req *http.Request) (*http.Response, error)
-}
-
 type client struct {
 	sess                  *session.Session
 	prefix                string
 	bucket                string
 	minimumPriority       string
 	skipExistingOnStartup bool
-	client                httpClient
 }
 
 func (y *client) Send(result report.Result) {
@@ -38,10 +32,9 @@ func (y *client) Send(result report.Result) {
 	body := new(bytes.Buffer)
 
 	if err := json.NewEncoder(body).Encode(result); err != nil {
-		log.Printf("[ERROR] YandexS3 : %v\n", err.Error())
+		log.Printf("[ERROR] :  Yandex: %v\n", err.Error())
 		return
 	}
-	//foo := bufio.NewReader(body)
 	t := time.Now()
 	uploader := s3manager.NewUploader(y.sess)
 	key := fmt.Sprintf("%s/%s/%s.json", y.prefix, t.Format("2006-01-02"), t.Format(time.RFC3339Nano))
@@ -52,16 +45,9 @@ func (y *client) Send(result report.Result) {
 		Body:   body,
 	})
 	if err != nil {
-		log.Printf("[ERROR] : Yandex Upload error %v  - %v\n", err.Error())
+		log.Printf("[ERROR] : Yandex S3 Upload error %v  - %v\n", err.Error())
 		return
 	}
-	/*
-		_, err := s3.New(y.sess).PutObject(&s3.PutObjectInput{
-			Bucket: aws.String(y.bucket),
-			Key:    aws.String(key),
-			Body:   *foo,
-		})
-	*/
 
 }
 
@@ -78,7 +64,7 @@ func (y *client) MinimumPriority() string {
 }
 
 // NewClient creates a new Yandex.client to send Results to S3. It doesnt' work right now
-func NewClient(AccessKeyID string, SecretAccessKey string, Region string, Endpoint, prefix string, bucket string, minimumPriority string, skipExistingOnStartup bool, httpClient httpClient) target.Client {
+func NewClient(AccessKeyID string, SecretAccessKey string, Region string, Endpoint, prefix string, bucket string, minimumPriority string, skipExistingOnStartup bool) target.Client {
 
 	sess, err := session.NewSession(&aws.Config{
 		Region:      aws.String(Region),
@@ -96,6 +82,5 @@ func NewClient(AccessKeyID string, SecretAccessKey string, Region string, Endpoi
 		bucket,
 		minimumPriority,
 		skipExistingOnStartup,
-		httpClient,
 	}
 }

@@ -286,7 +286,6 @@ func (r *Resolver) YandexClient() target.Client {
 		r.config.Yandex.Bucket,
 		r.config.Yandex.MinimumPriority,
 		r.config.Yandex.SkipExisting,
-		&http.Client{},
 	)
 
 	log.Println("[INFO] Yandex Session configured")
