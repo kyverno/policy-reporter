@@ -1,5 +1,11 @@
 # Changelog
 
+# 1.10.0
+* Update Policy Reporter UI to v0.15.0
+    * Add Filters as Query Parameters, make them shareable over links
+* Hosting all new Images on the GitHub Container Registry instead of DockerHub
+* Go Version updates to Go 1.17 of all components
+
 # 1.9.4
 * Make the Image Registry configurable with `image.registry` [[#74](https://github.com/kyverno/policy-reporter/pull/74) by [stone-z](https://github.com/stone-z)]
 

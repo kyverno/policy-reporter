@@ -1,6 +1,6 @@
 image:
-  registry: docker.io
-  repository: fjogeleit/policy-reporter-kyverno-plugin
+  registry: ghcr.io
+  repository: kyverno/policy-reporter-kyverno-plugin
   pullPolicy: IfNotPresent
   tag: 0.3.2
 

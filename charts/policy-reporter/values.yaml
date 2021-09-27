@@ -1,8 +1,8 @@
 image:
-  registry: docker.io
-  repository: fjogeleit/policy-reporter
+  registry: ghcr.io
+  repository: kyverno/policy-reporter
   pullPolicy: IfNotPresent
-  tag: 1.8.6
+  tag: 1.8.7
 
 imagePullSecrets: []
 
