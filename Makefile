@@ -1,7 +1,7 @@
 GO ?= go
 BUILD ?= build
 REPO ?= ghcr.io/kyverno/policy-reporter
-IMAGE_TAG ?= 1.8.6
+IMAGE_TAG ?= 1.8.7
 LD_FLAGS="-s -w"
 
 all: build
