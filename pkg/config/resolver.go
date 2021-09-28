@@ -258,6 +258,10 @@ func (r *Resolver) YandexClient() target.Client {
 	if r.yandexClient != nil {
 		return r.yandexClient
 	}
+	if r.config.Yandex.AccessKeyID == "" && r.config.Yandex.SecretAccessKey == "" {
+		return nil
+	}
+
 	if r.config.Yandex.Region == "" {
 		log.Printf("[INFO] Yandex.Region has not been declared using ru-central1")
 		r.config.Yandex.Region = "ru-central1"
@@ -321,8 +325,8 @@ func (r *Resolver) TargetClients() []target.Client {
 		clients = append(clients, ui)
 	}
 
-	if Yandex := r.YandexClient(); Yandex != nil {
-		clients = append(clients, Yandex)
+	if yandex := r.YandexClient(); yandex != nil {
+		clients = append(clients, yandex)
 	}
 
 	return clients
