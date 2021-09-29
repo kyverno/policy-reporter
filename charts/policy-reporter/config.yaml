@@ -29,3 +29,15 @@ ui:
   host: {{ include "policyreporter.uihost" . }}
   minimumPriority: {{ .Values.target.ui.minimumPriority | quote }}
   skipExistingOnStartup: {{ .Values.target.ui.skipExistingOnStartup }}
+
+yandex:
+  accesskeyid: {{ .Values.target.yandex.accesskeyid }}
+  secretaccesskey:  {{ .Values.target.yandex.secretaccesskey }}
+  region: {{ .Values.target.yandex.region }}
+  endpoint: {{ .Values.target.yandex.endpoint }}
+  bucket: {{ .Values.target.yandex.bucket }}
+  prefix: {{ .Values.target.yandex.prefix }}
+  minimumpriority: {{ .Values.target.yandex.minimumpriority }}
+  skipExistingOnStartup: {{ .Values.target.yandex.skipExistingOnStartup }}
+
+  

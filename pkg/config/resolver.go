@@ -16,9 +16,12 @@ import (
 	"github.com/kyverno/policy-reporter/pkg/target/slack"
 	"github.com/kyverno/policy-reporter/pkg/target/teams"
 	"github.com/kyverno/policy-reporter/pkg/target/ui"
+	"github.com/kyverno/policy-reporter/pkg/target/yandex"
+
 	"github.com/patrickmn/go-cache"
 	"k8s.io/client-go/dynamic"
 	v1 "k8s.io/client-go/kubernetes/typed/core/v1"
+
 	"k8s.io/client-go/rest"
 )
 
@@ -36,6 +39,7 @@ type Resolver struct {
 	discordClient       target.Client
 	teamsClient         target.Client
 	uiClient            target.Client
+	yandexClient        target.Client
 	resultCache         *cache.Cache
 }
 
@@ -250,6 +254,49 @@ func (r *Resolver) UIClient() target.Client {
 	return r.uiClient
 }
 
+func (r *Resolver) YandexClient() target.Client {
+	if r.yandexClient != nil {
+		return r.yandexClient
+	}
+	if r.config.Yandex.AccessKeyID == "" && r.config.Yandex.SecretAccessKey == "" {
+		return nil
+	}
+
+	if r.config.Yandex.Region == "" {
+		log.Printf("[INFO] Yandex.Region has not been declared using ru-central1")
+		r.config.Yandex.Region = "ru-central1"
+	}
+	if r.config.Yandex.Endpoint == "" {
+		log.Printf("[INFO] Yandex.Endpoint has not been declared using ru-central1")
+		r.config.Yandex.Endpoint = "https://storage.yandexcloud.net"
+	}
+	if r.config.Yandex.Prefix == "" {
+		log.Printf("[INFO] Yandex.Prefix has not been declared using policy-reporter prefix")
+		r.config.Yandex.Prefix = "policy-reporter/"
+	}
+
+	log.Printf("[INFO] Yandex Session has been configured successfully")
+	if r.config.Yandex.Bucket == "" || r.config.Yandex.AccessKeyID == "" || r.config.Yandex.SecretAccessKey == "" {
+		log.Printf("[ERROR] One of Yandex.Bucket,Yandex.AccessKeyID or Yandex.SecretAccessKey  has not been declared")
+		return nil
+	}
+
+	r.yandexClient = yandex.NewClient(
+		r.config.Yandex.AccessKeyID,
+		r.config.Yandex.SecretAccessKey,
+		r.config.Yandex.Region,
+		r.config.Yandex.Endpoint,
+		r.config.Yandex.Prefix,
+		r.config.Yandex.Bucket,
+		r.config.Yandex.MinimumPriority,
+		r.config.Yandex.SkipExisting,
+	)
+
+	log.Println("[INFO] Yandex Session configured")
+
+	return r.yandexClient
+}
+
 // TargetClients resolver method
 func (r *Resolver) TargetClients() []target.Client {
 	clients := make([]target.Client, 0)
@@ -276,6 +323,10 @@ func (r *Resolver) TargetClients() []target.Client {
 
 	if ui := r.UIClient(); ui != nil {
 		clients = append(clients, ui)
+	}
+
+	if yandex := r.YandexClient(); yandex != nil {
+		clients = append(clients, yandex)
 	}
 
 	return clients
