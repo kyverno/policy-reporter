@@ -182,7 +182,7 @@ target:
     minimumPriority: "warning"
     # Skip already existing PolicyReportResults on startup
     skipExistingOnStartup: true
-  
+
   yandex:
     accessKeyID: ""  # yandex access key
     secretAccessKey: ""  # yandex secret access key
