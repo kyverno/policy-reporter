@@ -41,6 +41,13 @@ var testConfig = &config.Config{
 		SkipExisting:    true,
 		MinimumPriority: "debug",
 	},
+	Yandex: config.Yandex{
+		AccessKeyID:     "AccessKey",
+		SecretAccessKey: "SecretAccessKey",
+		Bucket:          "test",
+		SkipExisting:    true,
+		MinimumPriority: "debug",
+	},
 }
 
 func Test_ResolveTarget(t *testing.T) {
@@ -101,14 +108,25 @@ func Test_ResolveTarget(t *testing.T) {
 			t.Error("Error: Should reuse first instance")
 		}
 	})
+	t.Run("Yandex", func(t *testing.T) {
+		client := resolver.YandexClient()
+		if client == nil {
+			t.Error("Expected Client, got nil")
+		}
+
+		client2 := resolver.YandexClient()
+		if client != client2 {
+			t.Error("Error: Should reuse first instance")
+		}
+	})
 }
 
 func Test_ResolveTargets(t *testing.T) {
 	resolver := config.NewResolver(testConfig, nil)
 
 	clients := resolver.TargetClients()
-	if count := len(clients); count != 6 {
-		t.Errorf("Expected 6 Clients, got %d", count)
+	if count := len(clients); count != 7 {
+		t.Errorf("Expected 7 Clients, got %d", count)
 	}
 }
 
@@ -176,6 +194,13 @@ func Test_ResolveTargetWithoutHost(t *testing.T) {
 			SkipExisting:    true,
 			MinimumPriority: "debug",
 		},
+		Yandex: config.Yandex{
+			AccessKeyID:     "",
+			SecretAccessKey: "",
+			Bucket:          "test",
+			SkipExisting:    true,
+			MinimumPriority: "debug",
+		},
 	}
 
 	t.Run("Loki", func(t *testing.T) {
@@ -210,6 +235,13 @@ func Test_ResolveTargetWithoutHost(t *testing.T) {
 		resolver := config.NewResolver(config2, nil)
 
 		if resolver.TeamsClient() != nil {
+			t.Error("Expected Client to be nil if no host is configured")
+		}
+	})
+	t.Run("Yandex", func(t *testing.T) {
+		resolver := config.NewResolver(config2, nil)
+
+		if resolver.YandexClient() != nil {
 			t.Error("Expected Client to be nil if no host is configured")
 		}
 	})

@@ -12,6 +12,7 @@ import (
 	"github.com/kyverno/policy-reporter/pkg/target"
 	"github.com/kyverno/policy-reporter/pkg/target/discord"
 	"github.com/kyverno/policy-reporter/pkg/target/elasticsearch"
+	"github.com/kyverno/policy-reporter/pkg/target/helper"
 	"github.com/kyverno/policy-reporter/pkg/target/loki"
 	"github.com/kyverno/policy-reporter/pkg/target/slack"
 	"github.com/kyverno/policy-reporter/pkg/target/teams"
@@ -45,7 +46,7 @@ type Resolver struct {
 
 // APIServer resolver method
 func (r *Resolver) APIServer() api.Server {
-	foundResources := make(map[string]string, 0)
+	foundResources := make(map[string]string)
 
 	client := r.policyClient
 	if client != nil {
@@ -258,7 +259,7 @@ func (r *Resolver) YandexClient() target.Client {
 	if r.yandexClient != nil {
 		return r.yandexClient
 	}
-	if r.config.Yandex.AccessKeyID == "" && r.config.Yandex.SecretAccessKey == "" {
+	if r.config.Yandex.AccessKeyID == "" || r.config.Yandex.SecretAccessKey == "" {
 		return nil
 	}
 
@@ -267,32 +268,34 @@ func (r *Resolver) YandexClient() target.Client {
 		r.config.Yandex.Region = "ru-central1"
 	}
 	if r.config.Yandex.Endpoint == "" {
-		log.Printf("[INFO] Yandex.Endpoint has not been declared using ru-central1")
+		log.Printf("[INFO] Yandex.Endpoint has not been declared using https://storage.yandexcloud.net")
 		r.config.Yandex.Endpoint = "https://storage.yandexcloud.net"
 	}
 	if r.config.Yandex.Prefix == "" {
 		log.Printf("[INFO] Yandex.Prefix has not been declared using policy-reporter prefix")
 		r.config.Yandex.Prefix = "policy-reporter/"
 	}
-
-	log.Printf("[INFO] Yandex Session has been configured successfully")
-	if r.config.Yandex.Bucket == "" || r.config.Yandex.AccessKeyID == "" || r.config.Yandex.SecretAccessKey == "" {
-		log.Printf("[ERROR] One of Yandex.Bucket,Yandex.AccessKeyID or Yandex.SecretAccessKey  has not been declared")
+	if r.config.Yandex.Bucket == "" {
+		log.Printf("[ERROR] Yandex : Bucket has to be declared")
 		return nil
 	}
 
-	r.yandexClient = yandex.NewClient(
+	s3Client := helper.NewClient(
 		r.config.Yandex.AccessKeyID,
 		r.config.Yandex.SecretAccessKey,
 		r.config.Yandex.Region,
 		r.config.Yandex.Endpoint,
-		r.config.Yandex.Prefix,
 		r.config.Yandex.Bucket,
+	)
+
+	r.yandexClient = yandex.NewClient(
+		s3Client,
+		r.config.Yandex.Prefix,
 		r.config.Yandex.MinimumPriority,
 		r.config.Yandex.SkipExisting,
 	)
 
-	log.Println("[INFO] Yandex Session configured")
+	log.Println("[INFO] Yandex configured")
 
 	return r.yandexClient
 }

@@ -46,13 +46,13 @@ type UI struct {
 
 type Yandex struct {
 	AccessKeyID     string `mapstructure:"accessKeyID"`
-	SecretAccessKey string `mapstructure:"SecretAccessKey"`
+	SecretAccessKey string `mapstructure:"secretAccessKey"`
+	Region          string `mapstructure:"region"`
+	Endpoint        string `mapstructure:"endpoint"`
+	Prefix          string `mapstructure:"prefix"`
+	Bucket          string `mapstructure:"bucket"`
 	SkipExisting    bool   `mapstructure:"skipExistingOnStartup"`
-	Region          string `mapstructure:"Region"`
-	Endpoint        string `mapstructure:"Endpoint"`
-	Prefix          string `mapstructure:"Prefix"`
-	Bucket          string `mapstructure:"Bucket"`
-	MinimumPriority string `mapstructure:"MinimumPriority"`
+	MinimumPriority string `mapstructure:"minimumPriority"`
 }
 
 // API configuration

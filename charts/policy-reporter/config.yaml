@@ -31,13 +31,11 @@ ui:
   skipExistingOnStartup: {{ .Values.target.ui.skipExistingOnStartup }}
 
 yandex:
-  accesskeyid: {{ .Values.target.yandex.accesskeyid }}
-  secretaccesskey:  {{ .Values.target.yandex.secretaccesskey }}
+  accessKeyID: {{ .Values.target.yandex.accessKeyID }}
+  secretAccessKey:  {{ .Values.target.yandex.secretAccessKey }}
   region: {{ .Values.target.yandex.region }}
   endpoint: {{ .Values.target.yandex.endpoint }}
   bucket: {{ .Values.target.yandex.bucket }}
   prefix: {{ .Values.target.yandex.prefix }}
-  minimumpriority: {{ .Values.target.yandex.minimumpriority }}
+  minimumPriority: {{ .Values.target.yandex.minimumPriority | quote }}
   skipExistingOnStartup: {{ .Values.target.yandex.skipExistingOnStartup }}
-
-  
