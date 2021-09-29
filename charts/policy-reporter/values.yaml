@@ -2,7 +2,7 @@ image:
   registry: ghcr.io
   repository: kyverno/policy-reporter
   pullPolicy: IfNotPresent
-  tag: 1.8.7
+  tag: 1.9.0
 
 imagePullSecrets: []
 
@@ -182,19 +182,16 @@ target:
     minimumPriority: "warning"
     # Skip already existing PolicyReportResults on startup
     skipExistingOnStartup: true
-  
+
   yandex:
-    accesskeyid: ""  # yandex access key
-    secretaccesskey: ""  # yandex secret access key
+    accessKeyID: ""  # yandex access key
+    secretAccessKey: ""  # yandex secret access key
     region: ""  # yandex storage region (default: ru-central-1)
     endpoint: ""  # yandex storage endpoint (default: https://storage.yandexcloud.net)
     bucket: ""  # Yandex storage, bucket name
     prefix: ""  # name of prefix, keys will have format: s3://<bucket>/<prefix>/YYYY-MM-DD/YYYY-MM-DDTHH:mm:ss.s+01:00.json
-    minimumpriority: ""   # minimum priority "" < info < warning < critical < error
+    minimumPriority: ""   # minimum priority "" < info < warning < critical < error
     skipExistingOnStartup: true  # Skip already existing PolicyReportResults on startup
-
-
-
 
 # Node labels for pod assignment
 # ref: https://kubernetes.io/docs/user-guide/node-selection/

@@ -1,5 +1,8 @@
 # Changelog
 
+# 1.11.0
+* Add Yandex as new Target for Policy Reporter
+
 # 1.10.0
 * Update Policy Reporter UI to v0.15.0
     * Add Filters as Query Parameters, make them shareable over links
