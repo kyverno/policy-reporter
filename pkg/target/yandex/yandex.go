@@ -45,7 +45,7 @@ func (y *client) Send(result report.Result) {
 		Body:   body,
 	})
 	if err != nil {
-		log.Printf("[ERROR] : Yandex S3 Upload error %v  - %v\n", err.Error())
+		log.Printf("[ERROR] : Yandex S3 Upload error %v \n", err.Error())
 		return
 	}
 
