@@ -41,7 +41,7 @@ service:
   # key/value
   labels: {}
   type: ClusterIP
-  # integer nubmer. This is port for service
+  # integer number. This is port for service
   port: 2112
 
 securityContext:
@@ -95,7 +95,7 @@ monitoring:
     labels: {}
 
 global:
-  # availale plugins
+  # available plugins
   plugins:
     # enable kyverno for Policy Reporter UI and monitoring
     keyverno: false
@@ -144,7 +144,7 @@ target:
     # elasticsearch index (default: policy-reporter)
     index: ""
     # elasticsearch index rotation and index suffix
-    # possible values: dayli, monthly, annually, none (default: dayli)
+    # possible values: daily, monthly, annually, none (default: daily)
     rotation: ""
     # minimum priority "" < info < warning < critical < error
     minimumPriority: ""
