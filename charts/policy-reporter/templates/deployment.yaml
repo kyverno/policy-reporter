@@ -66,15 +66,23 @@ spec:
           volumeMounts:
           - name: config-file
             mountPath: /app/config.yaml
+            {{- if and .Values.existingTargetConfig.enabled .Values.existingTargetConfig.subPath }}
+            subPath: {{ .Values.existingTargetConfig.subPath }}
+            {{- else }}
             subPath: config.yaml
+            {{- end }}
           env:
           - name: NAMESPACE
             value: {{ .Release.Namespace }}
       volumes:
       - name: config-file
         secret:
+          {{- if and .Values.existingTargetConfig.enabled .Values.existingTargetConfig.name }}
+          secretName: {{ .Values.existingTargetConfig.name }}
+          {{- else }}
           secretName: {{ include "policyreporter.fullname" . }}-targets
-          optional: true
+          {{- end }}
+          optional: true   
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}

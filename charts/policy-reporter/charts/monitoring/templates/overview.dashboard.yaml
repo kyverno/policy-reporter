@@ -1,3 +1,4 @@
+{{- if $.Values.grafana.dashboards.enabled }}
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -478,3 +479,4 @@ data:
     "title": "PolicyReports",
     "version": 1
     }
+{{- end }}
