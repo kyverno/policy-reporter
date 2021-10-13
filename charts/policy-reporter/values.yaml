@@ -129,7 +129,7 @@ policyPriorities:
   mapping: {}
 
 # Reference a configuration which already exists instead of creating one
-existingTargetConfig: 
+existingTargetConfig:
   enabled: false
   # Name of the secret with the config
   name: ""
