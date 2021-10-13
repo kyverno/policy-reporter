@@ -128,6 +128,14 @@ policyPriorities:
   #   require-ns-labels: error
   mapping: {}
 
+# Reference a configuration which already exists instead of creating one
+existingTargetConfig: 
+  enabled: false
+  # Name of the secret with the config
+  name: ""
+  # subPath within the secret (defaults to config.yaml)
+  subPath: ""
+
 # Supported targets for new PolicyReport Results
 target:
   loki:
