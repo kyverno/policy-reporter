@@ -1,5 +1,9 @@
 # Changelog
 
+# 1.12.0
+* New Helm Chart Value `monitoring.grafana.dashboards.enabled` to enable/disable the included Grafana Dashboard ConfigMaps [[#81](https://github.com/kyverno/policy-reporter/pull/81) by [oliverbaehler](https://github.com/oliverbaehler)]
+* New Helm Chart Value `existingTargetConfig` to enable and configure your own custom Targets Configuration Secret [[#81](https://github.com/kyverno/policy-reporter/pull/81) by [oliverbaehler](https://github.com/oliverbaehler)]
+
 # 1.11.0
 * Add Yandex as new Target for Policy Reporter
 
