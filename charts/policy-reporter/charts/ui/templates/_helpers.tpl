@@ -74,7 +74,7 @@ Create the name of the service account to use
 {{- end }}
 
 {{- define "ui.policyReportServiceName" -}}
-{{- $name := .Chart.Name }}
+{{- $name := "policy-reporter" }}
 {{- if .Values.global.backend }}
 {{- .Values.global.backend }}
 {{- else if .Values.global.fullnameOverride }}
