@@ -1,12 +1,19 @@
 apiVersion: v2
 name: policy-reporter
 description: |
-  K8s PolicyReporter watches for wgpolicyk8s.io/v1alpha1.PolicyReport resources.
+  Policy Reporter watches for PolicyReport Resources.
   It creates Prometheus Metrics and can send rule validation events to different targets like Loki, Elasticsearch, Slack or Discord
 
 type: application
 version: 1.12.2
 appVersion: 1.10.1
+
+icon: https://github.com/kyverno/kyverno/raw/main/img/logo.png
+home: https://github.com/kyverno/policy-reporter/wiki
+sources:
+  - https://github.com/kyverno/policy-reporter
+maintainers:
+  - name: Frank Jogeleit
 
 dependencies:
   - name: monitoring
