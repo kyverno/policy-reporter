@@ -1,7 +1,7 @@
 GO ?= go
 BUILD ?= build
-REPO ?= ghcr.io/kyverno/policy-reporter
-IMAGE_TAG ?= 1.10.0
+REPO ?= fjogeleit/policy-reporter
+IMAGE_TAG ?= 1.10.1
 LD_FLAGS="-s -w"
 
 all: build
@@ -37,4 +37,4 @@ docker-push:
 
 .PHONY: docker-push-dev
 docker-push-dev:
-	@docker buildx build --progress plane --platform linux/arm64,linux/amd64 --tag $(REPO):dev . --build-arg LD_FLAGS=$(LD_FLAGS) --push
+	@docker buildx build --progress plane --platform linux/amd64 --tag $(REPO):dev . --build-arg LD_FLAGS=$(LD_FLAGS) --push
