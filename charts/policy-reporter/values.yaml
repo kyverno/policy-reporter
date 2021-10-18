@@ -99,8 +99,8 @@ global:
   plugins:
     # enable kyverno for Policy Reporter UI and monitoring
     keyverno: false
-  # The name of service policy-report. If you changed ReleaseName you have to replace it
-  backend: policy-reporter
+  # The name of service policy-report. Defaults to ReleaseName.
+  backend: ""
   # Service Port number
   port: 8080
   fullnameOverride: ""
