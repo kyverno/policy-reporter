@@ -1,6 +1,7 @@
 package kubernetes
 
 import (
+	"context"
 	"errors"
 	"sync"
 	"time"
@@ -34,14 +35,14 @@ func (c *policyReportClient) GetFoundResources() map[string]string {
 	return c.policyAPI.GetFoundResources()
 }
 
-func (c *policyReportClient) StartWatching() error {
+func (c *policyReportClient) StartWatching(ctx context.Context) error {
 	if c.started {
 		return errors.New("StartWatching was already started")
 	}
 
 	c.started = true
 
-	events, err := c.policyAPI.WatchPolicyReports()
+	events, err := c.policyAPI.WatchPolicyReports(ctx)
 	if err != nil {
 		c.started = false
 		return err
@@ -61,7 +62,7 @@ func (c *policyReportClient) StartWatching() error {
 
 	c.started = false
 
-	return errors.New("Watching stopped")
+	return errors.New("watching stopped")
 }
 
 func (c *policyReportClient) cacheResults(opr report.PolicyReport) {

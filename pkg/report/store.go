@@ -9,7 +9,7 @@ type PolicyReportStore struct {
 }
 
 // Get an PolicyReport by Type and ID
-func (s *PolicyReportStore) Get(rType ReportType, id string) (PolicyReport, bool) {
+func (s *PolicyReportStore) Get(rType Type, id string) (PolicyReport, bool) {
 	s.rwm.RLock()
 	r, ok := s.store[rType][id]
 	s.rwm.RUnlock()
@@ -18,7 +18,7 @@ func (s *PolicyReportStore) Get(rType ReportType, id string) (PolicyReport, bool
 }
 
 // List all PolicyReports of the given Type
-func (s *PolicyReportStore) List(rType ReportType) []PolicyReport {
+func (s *PolicyReportStore) List(rType Type) []PolicyReport {
 	s.rwm.RLock()
 	list := make([]PolicyReport, 0, len(s.store))
 
@@ -38,7 +38,7 @@ func (s *PolicyReportStore) Add(r PolicyReport) {
 }
 
 // Remove a PolicyReport with the given Type and ID from the Store
-func (s *PolicyReportStore) Remove(rType ReportType, id string) {
+func (s *PolicyReportStore) Remove(rType Type, id string) {
 	s.rwm.Lock()
 	delete(s.store[rType], id)
 	s.rwm.Unlock()
@@ -47,7 +47,7 @@ func (s *PolicyReportStore) Remove(rType ReportType, id string) {
 // NewPolicyReportStore construct a PolicyReportStore
 func NewPolicyReportStore() *PolicyReportStore {
 	return &PolicyReportStore{
-		store: map[ReportType]map[string]PolicyReport{
+		store: map[Type]map[string]PolicyReport{
 			PolicyReportType:        {},
 			ClusterPolicyReportType: {},
 		},

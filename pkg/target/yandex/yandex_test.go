@@ -32,7 +32,7 @@ type testClient struct {
 	callback func(body *bytes.Buffer, key string)
 }
 
-func (c *testClient) Upload(body *bytes.Buffer, key string) error {
+func (c *testClient) Upload(_ *bytes.Buffer, _ string) error {
 	return c.err
 }
 

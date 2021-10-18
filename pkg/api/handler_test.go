@@ -19,7 +19,7 @@ func Test_TargetsAPI(t *testing.T) {
 		}
 
 		rr := httptest.NewRecorder()
-		handler := http.HandlerFunc(api.TargetsHandler(make([]api.Target, 0)))
+		handler := api.TargetsHandler(make([]api.Target, 0))
 
 		handler.ServeHTTP(rr, req)
 
@@ -39,9 +39,9 @@ func Test_TargetsAPI(t *testing.T) {
 		}
 
 		rr := httptest.NewRecorder()
-		handler := http.HandlerFunc(api.TargetsHandler([]api.Target{
+		handler := api.TargetsHandler([]api.Target{
 			{Name: "Loki", MinimumPriority: "debug", SkipExistingOnStartup: true},
-		}))
+		})
 
 		handler.ServeHTTP(rr, req)
 
@@ -64,7 +64,7 @@ func Test_PolicyReportAPI(t *testing.T) {
 		}
 
 		rr := httptest.NewRecorder()
-		handler := http.HandlerFunc(api.PolicyReportHandler(report.NewPolicyReportStore()))
+		handler := api.PolicyReportHandler(report.NewPolicyReportStore())
 
 		handler.ServeHTTP(rr, req)
 
@@ -112,7 +112,7 @@ func Test_PolicyReportAPI(t *testing.T) {
 		store.Add(preport)
 
 		rr := httptest.NewRecorder()
-		handler := http.HandlerFunc(api.PolicyReportHandler(store))
+		handler := api.PolicyReportHandler(store)
 
 		handler.ServeHTTP(rr, req)
 
@@ -135,7 +135,7 @@ func Test_ClusterPolicyReportAPI(t *testing.T) {
 		}
 
 		rr := httptest.NewRecorder()
-		handler := http.HandlerFunc(api.ClusterPolicyReportHandler(report.NewPolicyReportStore()))
+		handler := api.ClusterPolicyReportHandler(report.NewPolicyReportStore())
 
 		handler.ServeHTTP(rr, req)
 
@@ -181,7 +181,7 @@ func Test_ClusterPolicyReportAPI(t *testing.T) {
 		store.Add(creport)
 
 		rr := httptest.NewRecorder()
-		handler := http.HandlerFunc(api.ClusterPolicyReportHandler(store))
+		handler := api.ClusterPolicyReportHandler(store)
 
 		handler.ServeHTTP(rr, req)
 
@@ -204,7 +204,7 @@ func Test_HealthzAPI(t *testing.T) {
 		}
 
 		rr := httptest.NewRecorder()
-		handler := http.HandlerFunc(api.HealthzHandler(map[string]string{"wgpolicyk8s.io/v1alpha2": "wgpolicyk8s.io/v1alpha2"}))
+		handler := api.HealthzHandler(map[string]string{"wgpolicyk8s.io/v1alpha2": "wgpolicyk8s.io/v1alpha2"})
 
 		handler.ServeHTTP(rr, req)
 
@@ -220,7 +220,7 @@ func Test_HealthzAPI(t *testing.T) {
 		}
 
 		rr := httptest.NewRecorder()
-		handler := http.HandlerFunc(api.HealthzHandler(map[string]string{}))
+		handler := api.HealthzHandler(map[string]string{})
 
 		handler.ServeHTTP(rr, req)
 
@@ -238,7 +238,7 @@ func Test_ReadyAPI(t *testing.T) {
 		}
 
 		rr := httptest.NewRecorder()
-		handler := http.HandlerFunc(api.ReadyHandler())
+		handler := api.ReadyHandler()
 
 		handler.ServeHTTP(rr, req)
 

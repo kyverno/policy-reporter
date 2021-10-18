@@ -107,13 +107,6 @@ var clusterPolicyMap = map[string]interface{}{
 	},
 }
 
-var minClusterPolicyMap = map[string]interface{}{
-	"metadata": map[string]interface{}{
-		"name": "clusterpolicy-report",
-	},
-	"results": []interface{}{},
-}
-
 var priorityMap = map[string]string{
 	"priority-test": "warning",
 }

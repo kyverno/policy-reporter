@@ -46,7 +46,7 @@ type WatchEvent struct {
 
 // PolicyReportAdapter translates API responses to an internal struct
 type PolicyReportAdapter interface {
-	WatchPolicyReports() (chan WatchEvent, error)
+	WatchPolicyReports(ctx context.Context) (chan WatchEvent, error)
 	GetFoundResources() map[string]string
 }
 
@@ -61,7 +61,7 @@ func (k *k8sPolicyReportAdapter) GetFoundResources() map[string]string {
 	return k.found
 }
 
-func (k *k8sPolicyReportAdapter) WatchPolicyReports() (chan WatchEvent, error) {
+func (k *k8sPolicyReportAdapter) WatchPolicyReports(ctx context.Context) (chan WatchEvent, error) {
 	events := make(chan WatchEvent)
 
 	resources := []schema.GroupVersionResource{
@@ -74,21 +74,16 @@ func (k *k8sPolicyReportAdapter) WatchPolicyReports() (chan WatchEvent, error) {
 	for _, resource := range resources {
 		go func(r schema.GroupVersionResource) {
 			for {
-				w, err := k.client.Resource(r).Watch(context.Background(), metav1.ListOptions{})
+				w, err := k.client.Resource(r).Watch(ctx, metav1.ListOptions{})
 				if err != nil {
 					k.mx.Lock()
 					delete(k.found, r.String())
 					k.mx.Unlock()
 
-					if len(k.found) < 2 {
-						time.Sleep(time.Second)
-						continue
-					}
-
-					return
+					time.Sleep(time.Second * 10)
 				}
 
-				log.Printf("[INFO] Resource Found: %s\n", r.String())
+				log.Printf("[INFO] Resource registered: %s\n", r.String())
 
 				k.mx.Lock()
 				k.found[r.String()] = r.String()
@@ -96,8 +91,8 @@ func (k *k8sPolicyReportAdapter) WatchPolicyReports() (chan WatchEvent, error) {
 
 				for result := range w.ResultChan() {
 					if item, ok := result.Object.(*unstructured.Unstructured); ok {
-						report := k.mapper.MapPolicyReport(item.Object)
-						events <- WatchEvent{report, result.Type}
+						preport := k.mapper.MapPolicyReport(item.Object)
+						events <- WatchEvent{preport, result.Type}
 					}
 				}
 			}

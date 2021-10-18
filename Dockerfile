@@ -17,7 +17,7 @@ RUN go get -d -v \
 RUN CGO_ENABLED=0 go build -ldflags="${LD_FLAGS}" -o /app/build/policyreporter -v
 
 FROM scratch
-LABEL MAINTAINER "Frank Jogeleit <frank.jogeleit@gweb.de>"
+LABEL MAINTAINER="Frank Jogeleit <frank.jogeleit@gweb.de>"
 
 WORKDIR /app
 

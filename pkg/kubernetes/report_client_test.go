@@ -34,14 +34,16 @@ func (f *fakeClient) ListClusterPolicyReports() ([]report.PolicyReport, error) {
 	return f.List, f.Error
 }
 
-func (f *fakeClient) WatchPolicyReports() (chan kubernetes.WatchEvent, error) {
+func (f *fakeClient) WatchPolicyReports(_ context.Context) (chan kubernetes.WatchEvent, error) {
 	channel := make(chan kubernetes.WatchEvent)
 
 	go func() {
 		for result := range f.Watcher.ResultChan() {
 			if item, ok := result.Object.(*unstructured.Unstructured); ok {
-				report := f.mapper.MapPolicyReport(item.Object)
-				channel <- kubernetes.WatchEvent{report, result.Type}
+				channel <- kubernetes.WatchEvent{
+					Report: f.mapper.MapPolicyReport(item.Object),
+					Type: result.Type,
+				}
 			}
 		}
 	}()
@@ -62,8 +64,10 @@ func NewMapper(k8sCMClient v1.ConfigMapInterface) kubernetes.Mapper {
 }
 
 func Test_ResultClient_RegisterPolicyResultWatcher(t *testing.T) {
+	ctx := context.Background()
+
 	_, k8sCMClient := newFakeAPI()
-	k8sCMClient.Create(context.Background(), configMap, metav1.CreateOptions{})
+	k8sCMClient.Create(ctx, configMap, metav1.CreateOptions{})
 
 	fakeAdapter := NewPolicyReportAdapter(NewMapper(k8sCMClient))
 	client := kubernetes.NewPolicyReportClient(fakeAdapter, report.NewPolicyReportStore(), time.Now(), cache.New(cache.DefaultExpiration, time.Minute*5))
@@ -80,7 +84,7 @@ func Test_ResultClient_RegisterPolicyResultWatcher(t *testing.T) {
 		wg.Done()
 	})
 
-	go client.StartWatching()
+	go client.StartWatching(ctx)
 
 	fakeAdapter.Watcher.Add(&unstructured.Unstructured{Object: clusterPolicyMap})
 	fakeAdapter.Watcher.Add(&unstructured.Unstructured{Object: policyMap})
@@ -93,8 +97,10 @@ func Test_ResultClient_RegisterPolicyResultWatcher(t *testing.T) {
 }
 
 func Test_ResultClient_SkipCachedResults(t *testing.T) {
+	ctx := context.Background()
+
 	_, k8sCMClient := newFakeAPI()
-	k8sCMClient.Create(context.Background(), configMap, metav1.CreateOptions{})
+	k8sCMClient.Create(ctx, configMap, metav1.CreateOptions{})
 
 	fakeAdapter := NewPolicyReportAdapter(NewMapper(k8sCMClient))
 	client := kubernetes.NewPolicyReportClient(fakeAdapter, report.NewPolicyReportStore(), time.Now(), cache.New(cache.DefaultExpiration, time.Minute*5))
@@ -111,7 +117,7 @@ func Test_ResultClient_SkipCachedResults(t *testing.T) {
 		wg.Done()
 	})
 
-	go client.StartWatching()
+	go client.StartWatching(ctx)
 
 	var policyMap1 = map[string]interface{}{
 		"metadata": map[string]interface{}{
@@ -212,8 +218,10 @@ func Test_ResultClient_SkipCachedResults(t *testing.T) {
 }
 
 func Test_ResultClient_SkipReportsCleanUpEvents(t *testing.T) {
+	ctx := context.Background()
+
 	_, k8sCMClient := newFakeAPI()
-	k8sCMClient.Create(context.Background(), configMap, metav1.CreateOptions{})
+	k8sCMClient.Create(ctx, configMap, metav1.CreateOptions{})
 
 	fakeAdapter := NewPolicyReportAdapter(NewMapper(k8sCMClient))
 	client := kubernetes.NewPolicyReportClient(fakeAdapter, report.NewPolicyReportStore(), time.Now(), cache.New(cache.DefaultExpiration, time.Minute*5))
@@ -230,7 +238,7 @@ func Test_ResultClient_SkipReportsCleanUpEvents(t *testing.T) {
 		wg.Done()
 	})
 
-	go client.StartWatching()
+	go client.StartWatching(ctx)
 
 	var policyMap2 = map[string]interface{}{
 		"metadata": map[string]interface{}{
@@ -279,8 +287,10 @@ func Test_ResultClient_SkipReportsCleanUpEvents(t *testing.T) {
 }
 
 func Test_ResultClient_SkipReportsReconnectEvents(t *testing.T) {
+	ctx := context.Background()
+
 	_, k8sCMClient := newFakeAPI()
-	k8sCMClient.Create(context.Background(), configMap, metav1.CreateOptions{})
+	k8sCMClient.Create(ctx, configMap, metav1.CreateOptions{})
 
 	fakeAdapter := NewPolicyReportAdapter(NewMapper(k8sCMClient))
 	client := kubernetes.NewPolicyReportClient(fakeAdapter, report.NewPolicyReportStore(), time.Now(), cache.New(cache.DefaultExpiration, time.Minute*5))
@@ -297,7 +307,7 @@ func Test_ResultClient_SkipReportsReconnectEvents(t *testing.T) {
 		wg.Done()
 	})
 
-	go client.StartWatching()
+	go client.StartWatching(ctx)
 
 	fakeAdapter.Watcher.Add(&unstructured.Unstructured{Object: clusterPolicyMap})
 	fakeAdapter.Watcher.Add(&unstructured.Unstructured{Object: clusterPolicyMap})

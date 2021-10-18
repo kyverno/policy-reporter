@@ -37,30 +37,6 @@ var minimalResult = report.Result{
 	Scored:   true,
 }
 
-var minimalErrorResult = report.Result{
-	Message:  "validation error: label required. Rule app-label-required failed at path /spec/template/spec/containers/0/resources/requests/",
-	Policy:   "app-label-requirement",
-	Priority: report.ErrorPriority,
-	Status:   report.Fail,
-	Scored:   true,
-}
-
-var minimalDebugResult = report.Result{
-	Message:  "validation error: label required. Rule app-label-required failed at path /spec/template/spec/containers/0/resources/requests/",
-	Policy:   "app-label-requirement",
-	Priority: report.DebugPriority,
-	Status:   report.Fail,
-	Scored:   true,
-}
-
-var minimalCriticalResult = report.Result{
-	Message:  "validation error: label required. Rule app-label-required failed at path /spec/template/spec/containers/0/resources/requests/",
-	Policy:   "app-label-requirement",
-	Priority: report.CriticalPriority,
-	Status:   report.Fail,
-	Scored:   true,
-}
-
 type testClient struct {
 	callback   func(req *http.Request)
 	statusCode int
