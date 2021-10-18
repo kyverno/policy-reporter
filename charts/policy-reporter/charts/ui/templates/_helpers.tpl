@@ -77,7 +77,9 @@ Create the name of the service account to use
 {{- $name := .Chart.Name }}
 {{- if .Values.global.fullnameOverride }}
 {{- .Values.global.fullnameOverride }}
+{{- else if contains $name .Release.Name }}
+{{- .Release.Name | trunc 63 | trimSuffix "-" }}
 {{- else }}
-{{- .Values.global.backend }}
+{{- printf "%s-%s" .Release.Name $name | trunc 63 | trimSuffix "-" }}
 {{- end }}
 {{- end }}
