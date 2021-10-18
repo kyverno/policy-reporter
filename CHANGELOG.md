@@ -1,7 +1,7 @@
 # Changelog
 
-# 1.12.1
-* Remove CRD registration limitation
+# 1.12.2
+* Fix CRD registration for PolicyReport and ClusterPolicyReport
 
 # 1.12.0
 * Add Yandex as new Target for Policy Reporter
