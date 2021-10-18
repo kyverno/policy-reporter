@@ -1,6 +1,6 @@
 GO ?= go
 BUILD ?= build
-REPO ?= fjogeleit/policy-reporter
+REPO ?= ghcr.io/kyverno/policy-reporter
 IMAGE_TAG ?= 1.10.1
 LD_FLAGS="-s -w"
 
