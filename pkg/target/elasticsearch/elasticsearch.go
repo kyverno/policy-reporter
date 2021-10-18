@@ -90,7 +90,7 @@ func NewClient(host, index, rotation, minimumPriority string, skipExistingOnStar
 	return &client{
 		host,
 		index,
-		Rotation(rotation),
+		rotation,
 		minimumPriority,
 		skipExistingOnStartup,
 		httpClient,

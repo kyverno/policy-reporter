@@ -16,8 +16,10 @@ import (
 )
 
 func Test_PolicyWatcher(t *testing.T) {
+	ctx := context.Background()
+
 	_, k8sCMClient := newFakeAPI()
-	k8sCMClient.Create(context.Background(), configMap, metav1.CreateOptions{})
+	k8sCMClient.Create(ctx, configMap, metav1.CreateOptions{})
 
 	fakeAdapter := NewPolicyReportAdapter(NewMapper(k8sCMClient))
 	client := kubernetes.NewPolicyReportClient(fakeAdapter, report.NewPolicyReportStore(), time.Now(), cache.New(cache.DefaultExpiration, time.Minute*5))
@@ -34,7 +36,7 @@ func Test_PolicyWatcher(t *testing.T) {
 		wg.Done()
 	})
 
-	go client.StartWatching()
+	go client.StartWatching(ctx)
 
 	fakeAdapter.Watcher.Add(&unstructured.Unstructured{Object: policyMap})
 
@@ -46,17 +48,19 @@ func Test_PolicyWatcher(t *testing.T) {
 }
 
 func Test_PolicyWatcherTwice(t *testing.T) {
+	ctx := context.Background()
+
 	_, k8sCMClient := newFakeAPI()
-	k8sCMClient.Create(context.Background(), configMap, metav1.CreateOptions{})
+	k8sCMClient.Create(ctx, configMap, metav1.CreateOptions{})
 
 	fakeAdapter := NewPolicyReportAdapter(NewMapper(k8sCMClient))
 	client := kubernetes.NewPolicyReportClient(fakeAdapter, report.NewPolicyReportStore(), time.Now(), cache.New(cache.DefaultExpiration, time.Minute*5))
 
-	go client.StartWatching()
+	go client.StartWatching(ctx)
 
 	time.Sleep(10 * time.Millisecond)
 
-	err := client.StartWatching()
+	err := client.StartWatching(ctx)
 	if err == nil {
 		t.Error("Second StartWatching call should return immediately with error")
 	}
@@ -98,8 +102,10 @@ var notSkippedPolicyMap = map[string]interface{}{
 }
 
 func Test_PolicySkipExisting(t *testing.T) {
+	ctx := context.Background()
+
 	_, k8sCMClient := newFakeAPI()
-	k8sCMClient.Create(context.Background(), configMap, metav1.CreateOptions{})
+	k8sCMClient.Create(ctx, configMap, metav1.CreateOptions{})
 
 	fakeAdapter := NewPolicyReportAdapter(NewMapper(k8sCMClient))
 	client := kubernetes.NewPolicyReportClient(fakeAdapter, report.NewPolicyReportStore(), time.Now(), cache.New(cache.DefaultExpiration, time.Minute*5))
@@ -116,7 +122,7 @@ func Test_PolicySkipExisting(t *testing.T) {
 		wg.Done()
 	})
 
-	go client.StartWatching()
+	go client.StartWatching(ctx)
 
 	fakeAdapter.Watcher.Add(&unstructured.Unstructured{Object: policyMap})
 	fakeAdapter.Watcher.Add(&unstructured.Unstructured{Object: notSkippedPolicyMap})
@@ -133,8 +139,10 @@ func Test_PolicySkipExisting(t *testing.T) {
 }
 
 func Test_PolicyWatcherError(t *testing.T) {
+	ctx := context.Background()
+
 	_, k8sCMClient := newFakeAPI()
-	k8sCMClient.Create(context.Background(), configMap, metav1.CreateOptions{})
+	k8sCMClient.Create(ctx, configMap, metav1.CreateOptions{})
 
 	fakeAdapter := NewPolicyReportAdapter(NewMapper(k8sCMClient))
 	fakeAdapter.Error = errors.New("")
@@ -143,15 +151,17 @@ func Test_PolicyWatcherError(t *testing.T) {
 
 	client.RegisterPolicyResultWatcher(false)
 
-	err := client.StartWatching()
+	err := client.StartWatching(ctx)
 	if err == nil {
 		t.Error("Shoud stop execution when error is returned")
 	}
 }
 
 func Test_PolicyWatchDeleteEvent(t *testing.T) {
+	ctx := context.Background()
+
 	_, k8sCMClient := newFakeAPI()
-	k8sCMClient.Create(context.Background(), configMap, metav1.CreateOptions{})
+	k8sCMClient.Create(ctx, configMap, metav1.CreateOptions{})
 
 	fakeAdapter := NewPolicyReportAdapter(NewMapper(k8sCMClient))
 	client := kubernetes.NewPolicyReportClient(fakeAdapter, report.NewPolicyReportStore(), time.Now(), cache.New(cache.DefaultExpiration, time.Minute*5))
@@ -168,7 +178,7 @@ func Test_PolicyWatchDeleteEvent(t *testing.T) {
 		wg.Done()
 	})
 
-	go client.StartWatching()
+	go client.StartWatching(ctx)
 
 	fakeAdapter.Watcher.Add(&unstructured.Unstructured{Object: policyMap})
 	fakeAdapter.Watcher.Delete(&unstructured.Unstructured{Object: policyMap})
@@ -181,8 +191,10 @@ func Test_PolicyWatchDeleteEvent(t *testing.T) {
 }
 
 func Test_PolicyWatchModifiedEvent(t *testing.T) {
+	ctx := context.Background()
+
 	_, k8sCMClient := newFakeAPI()
-	k8sCMClient.Create(context.Background(), configMap, metav1.CreateOptions{})
+	k8sCMClient.Create(ctx, configMap, metav1.CreateOptions{})
 
 	fakeAdapter := NewPolicyReportAdapter(NewMapper(k8sCMClient))
 	client := kubernetes.NewPolicyReportClient(fakeAdapter, report.NewPolicyReportStore(), time.Now(), cache.New(cache.DefaultExpiration, time.Minute*5))
@@ -198,7 +210,7 @@ func Test_PolicyWatchModifiedEvent(t *testing.T) {
 		wg.Done()
 	})
 
-	go client.StartWatching()
+	go client.StartWatching(ctx)
 
 	fakeAdapter.Watcher.Add(&unstructured.Unstructured{Object: policyMap})
 
@@ -261,8 +273,10 @@ func Test_PolicyWatchModifiedEvent(t *testing.T) {
 }
 
 func Test_PolicyDelayReset(t *testing.T) {
+	ctx := context.Background()
+
 	_, k8sCMClient := newFakeAPI()
-	k8sCMClient.Create(context.Background(), configMap, metav1.CreateOptions{})
+	k8sCMClient.Create(ctx, configMap, metav1.CreateOptions{})
 
 	fakeAdapter := NewPolicyReportAdapter(NewMapper(k8sCMClient))
 	client := kubernetes.NewPolicyReportClient(fakeAdapter, report.NewPolicyReportStore(), time.Now(), cache.New(cache.DefaultExpiration, time.Minute*5))
@@ -276,7 +290,7 @@ func Test_PolicyDelayReset(t *testing.T) {
 		wg.Done()
 	})
 
-	go client.StartWatching()
+	go client.StartWatching(ctx)
 
 	fakeAdapter.Watcher.Add(&unstructured.Unstructured{Object: policyMap})
 	fakeAdapter.Watcher.Modify(&unstructured.Unstructured{Object: minPolicyMap})

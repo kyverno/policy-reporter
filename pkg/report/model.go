@@ -36,13 +36,13 @@ const (
 	criticalString = "critical"
 )
 
-// ReportType Enum defined for PolicyReport
-type ReportType = string
+// Type Enum defined for PolicyReport
+type Type = string
 
 // ReportType Enum
 const (
-	PolicyReportType        ReportType = "PolicyReport"
-	ClusterPolicyReportType ReportType = "ClusterPolicyReport"
+	PolicyReportType        Type = "PolicyReport"
+	ClusterPolicyReportType Type = "ClusterPolicyReport"
 )
 
 // Internal Priority definitions and weighting
@@ -222,7 +222,7 @@ func (pr PolicyReport) HasResult(id string) bool {
 }
 
 // GetType returns the Type of the Report
-func (pr PolicyReport) GetType() ReportType {
+func (pr PolicyReport) GetType() Type {
 	if pr.Namespace == "" {
 		return ClusterPolicyReportType
 	}

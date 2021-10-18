@@ -3,6 +3,7 @@ package cmd
 import (
 	"context"
 	"flag"
+	"golang.org/x/sync/errgroup"
 	"net/http"
 
 	"github.com/kyverno/policy-reporter/pkg/config"
@@ -64,19 +65,21 @@ func newRunCMD() *cobra.Command {
 				client.RegisterPolicyResultWatcher(resolver.SkipExistingOnStartup())
 			}
 
-			errorChan := make(chan error)
+			g := &errgroup.Group{}
 
-			go func() { errorChan <- client.StartWatching() }()
+			g.Go(func() error {
+				return client.StartWatching(ctx)
+			})
 
-			go func() { errorChan <- resolver.APIServer().Start() }()
+			g.Go(resolver.APIServer().Start)
 
-			go func() {
+			g.Go(func() error {
 				http.Handle("/metrics", promhttp.Handler())
 
-				errorChan <- http.ListenAndServe(":2112", nil)
-			}()
+				return http.ListenAndServe(":2112", nil)
+			})
 
-			return <-errorChan
+			return g.Wait()
 		},
 	}
 

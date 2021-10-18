@@ -8,7 +8,7 @@ import (
 	"github.com/kyverno/policy-reporter/pkg/metrics"
 	"github.com/kyverno/policy-reporter/pkg/report"
 	"github.com/prometheus/client_golang/prometheus"
-	io_prometheus_client "github.com/prometheus/client_model/go"
+	ioprometheusclient "github.com/prometheus/client_model/go"
 	"k8s.io/apimachinery/pkg/watch"
 )
 
@@ -76,7 +76,7 @@ func Test_PolicyReportMetricGeneration(t *testing.T) {
 
 		metricFam, err := prometheus.DefaultGatherer.Gather()
 		if err != nil {
-			t.Errorf("Unexpected Error: %s", err)
+			t.Errorf("unexpected Error: %s", err)
 		}
 
 		summary := findMetric(metricFam, "policy_report_summary")
@@ -122,7 +122,7 @@ func Test_PolicyReportMetricGeneration(t *testing.T) {
 
 		metricFam, err := prometheus.DefaultGatherer.Gather()
 		if err != nil {
-			t.Errorf("Unexpected Error: %s", err)
+			t.Errorf("unexpected Error: %s", err)
 		}
 
 		summary := findMetric(metricFam, "policy_report_summary")
@@ -169,7 +169,7 @@ func Test_PolicyReportMetricGeneration(t *testing.T) {
 
 		metricFam, err := prometheus.DefaultGatherer.Gather()
 		if err != nil {
-			t.Errorf("Unexpected Error: %s", err)
+			t.Errorf("unexpected Error: %s", err)
 		}
 
 		summary := findMetric(metricFam, "policy_report_summary")
@@ -185,108 +185,108 @@ func Test_PolicyReportMetricGeneration(t *testing.T) {
 }
 
 func testSummaryMetricLabels(
-	metric *io_prometheus_client.Metric,
+	metric *ioprometheusclient.Metric,
 	preport report.PolicyReport,
 	status string,
 	gauge float64,
 ) error {
 	if name := *metric.Label[0].Name; name != "name" {
-		return fmt.Errorf("Unexpected Name Label: %s", name)
+		return fmt.Errorf("unexpected Name Label: %s", name)
 	}
 	if value := *metric.Label[0].Value; value != preport.Name {
-		return fmt.Errorf("Unexpected Name Label Value: %s", value)
+		return fmt.Errorf("unexpected Name Label Value: %s", value)
 	}
 
 	if name := *metric.Label[1].Name; name != "namespace" {
-		return fmt.Errorf("Unexpected Name Label: %s", name)
+		return fmt.Errorf("unexpected Name Label: %s", name)
 	}
 	if value := *metric.Label[1].Value; value != preport.Namespace {
-		return fmt.Errorf("Unexpected Namespace Label Value: %s", value)
+		return fmt.Errorf("unexpected Namespace Label Value: %s", value)
 	}
 
 	if name := *metric.Label[2].Name; name != "status" {
-		return fmt.Errorf("Unexpected Name Label: %s", name)
+		return fmt.Errorf("unexpected Name Label: %s", name)
 	}
 	if value := *metric.Label[2].Value; value != status {
-		return fmt.Errorf("Unexpected Status Label Value: %s", value)
+		return fmt.Errorf("unexpected Status Label Value: %s", value)
 	}
 
 	if value := metric.Gauge.GetValue(); value != gauge {
-		return fmt.Errorf("Unexpected Metric Value: %v", value)
+		return fmt.Errorf("unexpected Metric Value: %v", value)
 	}
 
 	return nil
 }
 
-func testResultMetricLabels(metric *io_prometheus_client.Metric, result report.Result) error {
+func testResultMetricLabels(metric *ioprometheusclient.Metric, result report.Result) error {
 	if name := *metric.Label[0].Name; name != "category" {
-		return fmt.Errorf("Unexpected Name Label: %s", name)
+		return fmt.Errorf("unexpected Name Label: %s", name)
 	}
 	if value := *metric.Label[0].Value; value != result.Category {
-		return fmt.Errorf("Unexpected Category Label Value: %s", value)
+		return fmt.Errorf("unexpected Category Label Value: %s", value)
 	}
 
 	if name := *metric.Label[1].Name; name != "kind" {
-		return fmt.Errorf("Unexpected Name Label: %s", name)
+		return fmt.Errorf("unexpected Name Label: %s", name)
 	}
 	if value := *metric.Label[1].Value; value != result.Resource.Kind {
-		return fmt.Errorf("Unexpected Kind Label Value: %s", value)
+		return fmt.Errorf("unexpected Kind Label Value: %s", value)
 	}
 
 	if name := *metric.Label[2].Name; name != "name" {
-		return fmt.Errorf("Unexpected Name Label: %s", name)
+		return fmt.Errorf("unexpected Name Label: %s", name)
 	}
 	if value := *metric.Label[2].Value; value != result.Resource.Name {
-		return fmt.Errorf("Unexpected Name Label Value: %s", value)
+		return fmt.Errorf("unexpected Name Label Value: %s", value)
 	}
 
 	if name := *metric.Label[3].Name; name != "namespace" {
-		return fmt.Errorf("Unexpected Name Label: %s", name)
+		return fmt.Errorf("unexpected Name Label: %s", name)
 	}
 	if value := *metric.Label[3].Value; value != result.Resource.Namespace {
-		return fmt.Errorf("Unexpected Namespace Label Value: %s", value)
+		return fmt.Errorf("unexpected Namespace Label Value: %s", value)
 	}
 
 	if name := *metric.Label[4].Name; name != "policy" {
-		return fmt.Errorf("Unexpected Name Label: %s", name)
+		return fmt.Errorf("unexpected Name Label: %s", name)
 	}
 	if value := *metric.Label[4].Value; value != result.Policy {
-		return fmt.Errorf("Unexpected Policy Label Value: %s", value)
+		return fmt.Errorf("unexpected Policy Label Value: %s", value)
 	}
 
 	if name := *metric.Label[5].Name; name != "report" {
-		return fmt.Errorf("Unexpected Name Label: %s", name)
+		return fmt.Errorf("unexpected Name Label: %s", name)
 	}
 
 	if name := *metric.Label[6].Name; name != "rule" {
-		return fmt.Errorf("Unexpected Name Label: %s", name)
+		return fmt.Errorf("unexpected Name Label: %s", name)
 	}
 	if value := *metric.Label[6].Value; value != result.Rule {
-		return fmt.Errorf("Unexpected Rule Label Value: %s", value)
+		return fmt.Errorf("unexpected Rule Label Value: %s", value)
 	}
 
 	if name := *metric.Label[7].Name; name != "severity" {
-		return fmt.Errorf("Unexpected Name Label: %s", name)
+		return fmt.Errorf("unexpected Name Label: %s", name)
 	}
 	if value := *metric.Label[7].Value; value != result.Severity {
-		return fmt.Errorf("Unexpected Severity Label Value: %s", value)
+		return fmt.Errorf("unexpected Severity Label Value: %s", value)
 	}
 
 	if name := *metric.Label[8].Name; name != "status" {
-		return fmt.Errorf("Unexpected Name Label: %s", name)
+		return fmt.Errorf("unexpected Name Label: %s", name)
 	}
 	if value := *metric.Label[8].Value; value != result.Status {
-		return fmt.Errorf("Unexpected Status Label Value: %s", value)
+		return fmt.Errorf("unexpected Status Label Value: %s", value)
 	}
 
 	if value := metric.Gauge.GetValue(); value != 1 {
-		return fmt.Errorf("Unexpected Metric Value: %v", value)
+		return fmt.Errorf("unexpected Metric Value: %v", value)
 	}
 
 	return nil
 }
 
-func findMetric(metrics []*io_prometheus_client.MetricFamily, name string) *io_prometheus_client.MetricFamily {
+func findMetric(metrics []*ioprometheusclient.MetricFamily, name string) *ioprometheusclient.MetricFamily {
 	for _, metric := range metrics {
 		if *metric.Name == name {
 			return metric

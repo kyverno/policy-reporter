@@ -80,10 +80,10 @@ func (m *mapper) mapCreationTime(result map[string]interface{}) (time.Time, erro
 			return time.Parse("2006-01-02T15:04:05Z", created)
 		}
 
-		return time.Time{}, errors.New("No creationTimestamp provided")
+		return time.Time{}, errors.New("no creationTimestamp provided")
 	}
 
-	return time.Time{}, errors.New("No metadata provided")
+	return time.Time{}, errors.New("no metadata provided")
 }
 
 func (m *mapper) mapResult(result map[string]interface{}) []report.Result {
@@ -117,7 +117,7 @@ func (m *mapper) mapResult(result map[string]interface{}) []report.Result {
 		status = r.(report.Status)
 	}
 
-	var results = []report.Result{}
+	var results []report.Result
 
 	factory := func(res report.Resource) report.Result {
 		r := report.Result{
