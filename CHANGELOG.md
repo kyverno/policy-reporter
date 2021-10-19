@@ -1,5 +1,8 @@
 # Changelog
 
+# 1.12.4
+* Fix policy-reporter-ui ServiceName function [[#87](https://github.com/kyverno/policy-reporter/pull/87) by [m-yosefpor](https://github.com/m-yosefpor)]
+
 # 1.12.3
 * Fix policy-reporter-ui backend name [[#85](https://github.com/kyverno/policy-reporter/pull/85) by [m-yosefpor](https://github.com/m-yosefpor)]
 
