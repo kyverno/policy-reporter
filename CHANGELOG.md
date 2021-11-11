@@ -1,5 +1,11 @@
 # Changelog
 
+# 1.12.6
+* Update Go Base Image for all Components
+    * Policy Reporter [[#90](https://github.com/kyverno/policy-reporter-ui/pull/90) by [fjogeleit](https://github.com/fjogeleit)]
+    * Policy Reporter UI [[#11](https://github.com/kyverno/policy-reporter-ui/pull/11) by [realshuting](https://github.com/realshuting)]
+    * Policy Reporter Kyverno Plugin [[#9](https://github.com/kyverno/policy-reporter-ui/pull/9) by [realshuting](https://github.com/realshuting)]
+
 # 1.12.5
 * Dependency Update
 
