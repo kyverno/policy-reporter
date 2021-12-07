@@ -1,0 +1,12 @@
+{
+  "title": "Policy Reporter",
+  "url": "https://kyverno.github.io/policy-reporter",
+  "defaultDir": "frontend",
+  "logo": {
+    "light": "logo-light.png",
+    "dark": "logo-dark.png"
+  },
+  "github": "kyverno/policy-reporter",
+  "defaultBranch": "gh-pages",
+  "menuTitle": "Policy Reporter"
+}

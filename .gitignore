@@ -1,1 +1,4 @@
 .deploy
+.dist
+config.yaml
+values.yaml

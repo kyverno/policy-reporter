@@ -1,0 +1,14 @@
+pre.highlight-pre-container {
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+.code-group pre.highlight-pre-container {
+    border-top-left-radius: 0 !important;
+    border-top-right-radius: 0 !important;
+}
+
+body .nuxt-content .nuxt-content-highlight > .copy {
+    margin-right: 0.45rem;
+    margin-bottom: 0.45rem;
+}
