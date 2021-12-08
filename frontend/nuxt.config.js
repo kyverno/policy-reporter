@@ -41,6 +41,11 @@ const config = theme({
         }]
       ]
     }
+  },
+  head: {
+    link: [
+      { rel: 'icon', type: 'image/x-icon', href: 'https://kyverno.github.io/policy-reporter/favicon.ico' }
+    ]
   }
 })
 
