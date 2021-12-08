@@ -19,16 +19,16 @@ Policy Reporter helps with this problems by providing different features based o
 
 ### Policy Reporter UI
 
-<img src="screenshots/dashboard-light.png" style="border: 1px solid #ccc" class="light-img" alt="Dashboard light" />
-<img src="screenshots/dashboard-dark.png" style="border: 1px solid #555" class="dark-img" alt="Dashboard dark" />
+<img src="/images/screenshots/dashboard-light.png" style="border: 1px solid #ccc" class="light-img" alt="Dashboard light" />
+<img src="/images/screenshots/dashboard-dark.png" style="border: 1px solid #555" class="dark-img" alt="Dashboard dark" />
 
 ### Grafana
 
-<img src="screenshots/grafana.png" style="border: 1px solid #555" alt="Grafana: Policy Report Details" />
+<img src="/images/screenshots/grafana.png" style="border: 1px solid #555" alt="Grafana: Policy Report Details" />
 
 ### Discord
 
-<img src="screenshots/discord.png" style="border: 1px solid #555" alt="Discord: Policy Report Alert" />
+<img src="/images/screenshots/discord.png" style="border: 1px solid #555" alt="Discord: Policy Report Alert" />
 
 ## Resources
 

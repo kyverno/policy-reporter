@@ -34,8 +34,8 @@ loki:
 ```
 
 ### Screenshot
-<a href="targets/grafana-loki.png" target="_blank">
-    <img src="../targets/grafana-loki.png" style="border: 1px solid #555" alt="Grafana Loki Screenshot with PolicyReportResults" />
+<a href="/images/targets/grafana-loki.png" target="_blank">
+    <img src="/images/targets/grafana-loki.png" style="border: 1px solid #555" alt="Grafana Loki Screenshot with PolicyReportResults" />
 </a>
 
 ## Elasticsearch
@@ -63,8 +63,8 @@ elasticsearch:
 
 ### Screenshot
 
-<a href="/targets/elasticsearch.png" target="_blank">
-    <img src="../targets/elasticsearch.png" style="border: 1px solid #555" alt="Elasticvue Screenshot with PolicyReportResults" />
+<a href="/images/targets/elasticsearch.png" target="_blank">
+    <img src="/images/targets/elasticsearch.png" style="border: 1px solid #555" alt="Elasticvue Screenshot with PolicyReportResults" />
 </a>
 
 ## Microsoft Teams
@@ -85,8 +85,8 @@ teams:
 ```
 
 ### Screenshot
-<a href="/targets/ms-teams.png" target="_blank">
-    <img src="../targets/ms-teams.png" style="border: 1px solid #555" alt="MS Teams Notification for a PolicyReportResult" />
+<a href="/images/targets/ms-teams.png" target="_blank">
+    <img src="/images/targets/ms-teams.png" style="border: 1px solid #555" alt="MS Teams Notification for a PolicyReportResult" />
 </a>
 
 ## Slack
@@ -107,8 +107,8 @@ slack:
 ```
 
 ### Screenshot
-<a href="/targets/slack.png" target="_blank">
-    <img src="../targets/slack.png" style="border: 1px solid #555" alt="Slack Notification for a PolicyReportResult" />
+<a href="/images/targets/slack.png" target="_blank">
+    <img src="/images/targets/slack.png" style="border: 1px solid #555" alt="Slack Notification for a PolicyReportResult" />
 </a>
 
 ## Discord
@@ -129,8 +129,8 @@ discord:
 ```
 
 ### Screenshot
-<a href="/targets/discord.png" target="_blank">
-    <img src="../targets/discord.png" style="border: 1px solid #555" alt="Discord Notification for a PolicyReportResult" />
+<a href="/images/targets/discord.png" target="_blank">
+    <img src="/images/targets/discord.png" style="border: 1px solid #555" alt="Discord Notification for a PolicyReportResult" />
 </a>
 
 ## Policy Reporter UI
@@ -153,12 +153,12 @@ ui:
 ```
 
 ### Screenshot
-<a href="/targets/policy-reporter-log-dark.png" target="_blank" class="dark-img">
-    <img src="../targets/policy-reporter-log-dark.png" style="border: 1px solid #555" alt="Policy Reporter UI - Logs View dark mode" />
+<a href="/images/targets/policy-reporter-log-dark.png" target="_blank" class="dark-img">
+    <img src="/images/targets/policy-reporter-log-dark.png" style="border: 1px solid #555" alt="Policy Reporter UI - Logs View dark mode" />
 </a>
 
-<a href="/targets/policy-reporter-log-light.png" target="_blank" class="light-img">
-    <img src="../targets/policy-reporter-log-light.png" style="border: 1px solid #555" alt="Policy Reporter UI - Logs View light mode" />
+<a href="/images/targets/policy-reporter-log-light.png" target="_blank" class="light-img">
+    <img src="/images/targets/policy-reporter-log-light.png" style="border: 1px solid #555" alt="Policy Reporter UI - Logs View light mode" />
 </a>
 
 ## S3 compatible Storage

@@ -7,7 +7,7 @@ category: 'Guide'
 
 Policy Reporter consists of up to 3 components.
 
-<img src="../policy-reporter.svg" style="background-color: #fff; padding: 15px; width: 100%;">
+<img src="/images/policy-reporter.svg" style="background-color: #fff; padding: 15px; width: 100%;">
 
 ## Policy Reporter
 

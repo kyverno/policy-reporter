@@ -79,8 +79,8 @@ Access Policy Reporter on <a href="http://localhost:8081" target="_blank">http:/
 kubectl port-forward service/policy-reporter-ui 8081:8080 -n policy-reporter
 ```
 
-<img src="../screenshots/basic-ui-light.png" style="border: 1px solid #ccc" class="light-img" alt="Dashboard light" />
-<img src="../screenshots/basic-ui-dark.png" style="border: 1px solid #555" class="dark-img" alt="Dashboard dark" />
+<img src="/images/screenshots/basic-ui-light.png" style="border: 1px solid #ccc" class="light-img" alt="Dashboard light" />
+<img src="/images/screenshots/basic-ui-dark.png" style="border: 1px solid #555" class="dark-img" alt="Dashboard dark" />
 
 ### Core + Policy Reporter UI + Kyverno Plugin
 
@@ -111,8 +111,8 @@ Access Policy Reporter on <a href="http://localhost:8081" target="_blank">http:/
 kubectl port-forward service/policy-reporter-ui 8081:8080 -n policy-reporter
 ```
 
-<img src="../screenshots/kyverno-dashboard-light.png" style="border: 1px solid #ccc" class="light-img" alt="Kyverno Policy Dashboard light" />
-<img src="../screenshots/kyverno-dashboard-dark.png" style="border: 1px solid #555" class="dark-img" alt="Kyverno Policy Dashboard dark" />
+<img src="/images/screenshots/kyverno-dashboard-light.png" style="border: 1px solid #ccc" class="light-img" alt="Kyverno Policy Dashboard light" />
+<img src="/images/screenshots/kyverno-dashboard-dark.png" style="border: 1px solid #555" class="dark-img" alt="Kyverno Policy Dashboard dark" />
 
 ### Policy Reporter + Prometheus Operator
 
@@ -124,6 +124,6 @@ See <a href="/guide/04-helm-chart-core#configure-the-servicemonitor" target="_bl
 helm upgrade --install policy-reporter policy-reporter/policy-reporter --set monitoring.enabled=true --set monitoring.grafana.namespace=monitoring --set monitoring.serviceMonitor.labels.release=monitoring -n policy-reporter --create-namespace
 ```
 
-<img src="../screenshots/grafana-policy-reports-dashboard.png" style="border: 1px solid #555" alt="Grafana Policy Reports Dashboard" />
-<img src="../screenshots/grafana-policy-reports-details.png" style="border: 1px solid #555" alt="Grafana Policy Reports Dashboard" />
-<img src="../screenshots/grafana-cluster-policy-reports-details.png" style="border: 1px solid #555" alt="Grafana Policy Reports Dashboard" />
+<img src="/images/screenshots/grafana-policy-reports-dashboard.png" style="border: 1px solid #555" alt="Grafana Policy Reports Dashboard" />
+<img src="/images/screenshots/grafana-policy-reports-details.png" style="border: 1px solid #555" alt="Grafana Policy Reports Dashboard" />
+<img src="/images/screenshots/grafana-cluster-policy-reports-details.png" style="border: 1px solid #555" alt="Grafana Policy Reports Dashboard" />

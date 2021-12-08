@@ -3,8 +3,8 @@
   "url": "https://kyverno.github.io/policy-reporter",
   "defaultDir": "frontend",
   "logo": {
-    "light": "logo-light.png",
-    "dark": "logo-dark.png"
+    "light": "https://kyverno.github.io/policy-reporter/images/logo-light.png",
+    "dark": "https://kyverno.github.io/policy-reporter/images/logo-dark.png"
   },
   "github": "kyverno/policy-reporter",
   "defaultBranch": "gh-pages",

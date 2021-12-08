@@ -1,5 +1,8 @@
 import theme from '@nuxt/content-theme-docs'
 import highlightjs from 'highlight.js'
+import path from 'path'
+
+const baseURL = process.env.NODE_ENV === 'production' ? '/policy-reporter/' : ''
 
 const config = theme({
   css: [
@@ -19,7 +22,7 @@ const config = theme({
     }
   },
   router: {
-    base: process.env.NODE_ENV === 'production' ? '/policy-reporter/' : ''
+    base: baseURL
   },
   generate: {
     dir: '../docs'
@@ -27,6 +30,16 @@ const config = theme({
   hooks: {
     "vue-renderer:ssr:templateParams": function (params) {
       params.HEAD = params.HEAD.replace('<base href="/policy-reporter/">', "");
+    }
+  },
+  content: {
+    markdown: {
+      rehypePlugins: [
+        ['rehype-urls', (url) => {
+          if (!baseURL) return;
+          if (url.href && url.href.startsWith('/images/')) return path.join(baseURL, url.href);
+        }]
+      ]
     }
   }
 })
