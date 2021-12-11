@@ -1,4 +1,4 @@
-name: Docs
+name: Copy Helm Files
 
 on:
   push:
@@ -12,22 +12,10 @@ jobs:
       - name: Checkout
         uses: actions/checkout@master
 
-      - name: Setup node env
-        uses: actions/setup-node@v2.1.2
-        with:
-          node-version: 16
-
-      - name: Install dependencies
-        run: cd frontend && npm install
-
-      - name: Generate
-        run: cd frontend && npm run generate
-
       - name: Copy Helm files
         run: |
           cp index.yaml ./docs/index.yaml
           cp artifacthub-repo.yml ./docs/artifacthub-repo.yml
-
 
       - name: Deploy
         uses: EndBug/add-and-commit@v7
@@ -35,6 +23,5 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           add: docs
           branch: gh-pages
-          message: generate docs
+          message: Update Helm Repository Files
           push: true
-
