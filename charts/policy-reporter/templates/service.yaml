@@ -1,5 +1,3 @@
-{{- $apiEnabled := .Values.api.enabled -}}
-{{- $uiEnabled := .Values.ui.enabled -}}
 {{- if .Values.service.enabled -}}
 apiVersion: v1
 kind: Service
@@ -21,12 +19,6 @@ spec:
       targetPort: http
       protocol: TCP
       name: http
-    {{- if or $apiEnabled $uiEnabled }}
-    - port: {{ .Values.global.port }}
-      targetPort: rest
-      protocol: TCP
-      name: rest
-    {{- end }}
   selector:
     {{- include "policyreporter.selectorLabels" . | nindent 4 }}
 {{- end }}

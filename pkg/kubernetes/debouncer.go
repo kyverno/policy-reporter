@@ -4,40 +4,47 @@ import (
 	"sync"
 	"time"
 
-	"k8s.io/apimachinery/pkg/watch"
+	"github.com/kyverno/policy-reporter/pkg/report"
 )
 
-type debouncer struct {
-	events  map[string]WatchEvent
-	channel chan WatchEvent
-	mutx    *sync.Mutex
+type Debouncer interface {
+	Add(e report.LifecycleEvent)
+	ReportChan() <-chan report.LifecycleEvent
+	Close()
 }
 
-func (d *debouncer) Add(e WatchEvent) {
-	_, ok := d.events[e.Report.GetIdentifier()]
-	if e.Type != watch.Modified && ok {
+type debouncer struct {
+	waitDuration time.Duration
+	events       map[string]report.LifecycleEvent
+	channel      chan report.LifecycleEvent
+	mutx         *sync.Mutex
+}
+
+func (d *debouncer) Add(event report.LifecycleEvent) {
+	_, ok := d.events[event.NewPolicyReport.GetIdentifier()]
+	if event.Type != report.Updated && ok {
 		d.mutx.Lock()
-		delete(d.events, e.Report.GetIdentifier())
+		delete(d.events, event.NewPolicyReport.GetIdentifier())
 		d.mutx.Unlock()
 	}
 
-	if e.Type != watch.Modified {
-		d.channel <- e
+	if event.Type != report.Updated {
+		d.channel <- event
 		return
 	}
 
-	if len(e.Report.Results) == 0 && !ok {
+	if len(event.NewPolicyReport.Results) == 0 && !ok {
 		d.mutx.Lock()
-		d.events[e.Report.GetIdentifier()] = e
+		d.events[event.NewPolicyReport.GetIdentifier()] = event
 		d.mutx.Unlock()
 
 		go func() {
-			time.Sleep(1 * time.Minute)
+			time.Sleep(d.waitDuration)
 
 			d.mutx.Lock()
-			if event, ok := d.events[e.Report.GetIdentifier()]; ok {
+			if event, ok := d.events[event.NewPolicyReport.GetIdentifier()]; ok {
 				d.channel <- event
-				delete(d.events, e.Report.GetIdentifier())
+				delete(d.events, event.NewPolicyReport.GetIdentifier())
 			}
 			d.mutx.Unlock()
 		}()
@@ -47,23 +54,28 @@ func (d *debouncer) Add(e WatchEvent) {
 
 	if ok {
 		d.mutx.Lock()
-		d.events[e.Report.GetIdentifier()] = e
+		d.events[event.NewPolicyReport.GetIdentifier()] = event
 		d.mutx.Unlock()
 
 		return
 	}
 
-	d.channel <- e
+	d.channel <- event
 }
 
-func (d *debouncer) ReportChan() chan WatchEvent {
+func (d *debouncer) ReportChan() <-chan report.LifecycleEvent {
 	return d.channel
 }
 
-func newDebouncer() *debouncer {
+func (d *debouncer) Close() {
+	close(d.channel)
+}
+
+func NewDebouncer(waitDuration time.Duration) Debouncer {
 	return &debouncer{
-		events:  make(map[string]WatchEvent),
-		mutx:    new(sync.Mutex),
-		channel: make(chan WatchEvent),
+		waitDuration: waitDuration,
+		events:       make(map[string]report.LifecycleEvent),
+		mutx:         new(sync.Mutex),
+		channel:      make(chan report.LifecycleEvent),
 	}
 }

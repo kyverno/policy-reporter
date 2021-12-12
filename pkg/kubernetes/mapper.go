@@ -1,35 +1,24 @@
 package kubernetes
 
 import (
-	"context"
 	"errors"
-	"log"
 	"time"
 
 	"github.com/kyverno/policy-reporter/pkg/report"
-	v1 "k8s.io/api/core/v1"
-	"k8s.io/apimachinery/pkg/watch"
 )
 
 // Mapper converts maps into report structs
 type Mapper interface {
 	// MapPolicyReport maps a map into a PolicyReport
-	MapPolicyReport(reportMap map[string]interface{}) report.PolicyReport
-	// SetPriorityMap updates the policy/status to priority mapping
-	SetPriorityMap(map[string]string)
-	// SyncPriorities when ConfigMap has changed
-	SyncPriorities(ctx context.Context) error
-	// FetchPriorities from ConfigMap
-	FetchPriorities(ctx context.Context) error
+	MapPolicyReport(reportMap map[string]interface{}) *report.PolicyReport
 }
 
 type mapper struct {
 	priorityMap map[string]string
-	cmAdapter   ConfigMapAdapter
 }
 
-func (m *mapper) MapPolicyReport(reportMap map[string]interface{}) report.PolicyReport {
-	summary := report.Summary{}
+func (m *mapper) MapPolicyReport(reportMap map[string]interface{}) *report.PolicyReport {
+	summary := &report.Summary{}
 
 	if s, ok := reportMap["summary"].(map[string]interface{}); ok {
 		summary.Pass = int(s["pass"].(int64))
@@ -39,12 +28,15 @@ func (m *mapper) MapPolicyReport(reportMap map[string]interface{}) report.Policy
 		summary.Fail = int(s["fail"].(int64))
 	}
 
-	metadata := reportMap["metadata"].(map[string]interface{})
+	metadata, ok := reportMap["metadata"].(map[string]interface{})
+	if !ok {
+		return &report.PolicyReport{}
+	}
 
-	r := report.PolicyReport{
+	r := &report.PolicyReport{
 		Name:    metadata["name"].(string),
 		Summary: summary,
-		Results: make(map[string]report.Result),
+		Results: make(map[string]*report.Result),
 	}
 
 	if ns, ok := metadata["namespace"]; ok {
@@ -60,12 +52,14 @@ func (m *mapper) MapPolicyReport(reportMap map[string]interface{}) report.Policy
 
 	if rs, ok := reportMap["results"].([]interface{}); ok {
 		for _, resultItem := range rs {
-			resources := m.mapResult(resultItem.(map[string]interface{}))
-			for _, resource := range resources {
-				r.Results[resource.GetIdentifier()] = resource
+			results := m.mapResult(resultItem.(map[string]interface{}))
+			for _, result := range results {
+				r.Results[result.GetIdentifier()] = result
 			}
 		}
 	}
+
+	r.ID = report.GeneratePolicyReportID(r.Name, r.Namespace)
 
 	return r
 }
@@ -75,24 +69,21 @@ func (m *mapper) SetPriorityMap(priorityMap map[string]string) {
 }
 
 func (m *mapper) mapCreationTime(result map[string]interface{}) (time.Time, error) {
-	if metadata, ok := result["metadata"].(map[string]interface{}); ok {
-		if created, ok2 := metadata["creationTimestamp"].(string); ok2 {
-			return time.Parse("2006-01-02T15:04:05Z", created)
-		}
-
-		return time.Time{}, errors.New("no creationTimestamp provided")
+	metadata := result["metadata"].(map[string]interface{})
+	if created, ok2 := metadata["creationTimestamp"].(string); ok2 {
+		return time.Parse("2006-01-02T15:04:05Z", created)
 	}
 
-	return time.Time{}, errors.New("no metadata provided")
+	return time.Time{}, errors.New("no creationTimestamp provided")
 }
 
-func (m *mapper) mapResult(result map[string]interface{}) []report.Result {
-	var resources []report.Resource
+func (m *mapper) mapResult(result map[string]interface{}) []*report.Result {
+	var resources []*report.Resource
 
 	if ress, ok := result["resources"].([]interface{}); ok {
 		for _, res := range ress {
 			if resMap, ok := res.(map[string]interface{}); ok {
-				r := report.Resource{
+				r := &report.Resource{
 					APIVersion: resMap["apiVersion"].(string),
 					Kind:       resMap["kind"].(string),
 					Name:       resMap["name"].(string),
@@ -117,16 +108,19 @@ func (m *mapper) mapResult(result map[string]interface{}) []report.Result {
 		status = r.(report.Status)
 	}
 
-	var results []report.Result
+	var results []*report.Result
 
-	factory := func(res report.Resource) report.Result {
-		r := report.Result{
-			Message:    result["message"].(string),
+	factory := func(res *report.Resource) *report.Result {
+		r := &report.Result{
 			Policy:     result["policy"].(string),
 			Status:     status,
 			Priority:   report.PriorityFromStatus(status),
 			Resource:   res,
 			Properties: make(map[string]string, 0),
+		}
+
+		if message, ok := result["message"].(string); ok {
+			r.Message = message
 		}
 
 		if scored, ok := result["scored"]; ok {
@@ -137,7 +131,7 @@ func (m *mapper) mapResult(result map[string]interface{}) []report.Result {
 			r.Severity = severity.(report.Severity)
 		}
 
-		if r.Status == report.Error || r.Status == report.Fail {
+		if r.Status == report.Fail {
 			r.Priority = m.resolvePriority(r.Policy, r.Severity)
 		}
 
@@ -166,6 +160,8 @@ func (m *mapper) mapResult(result map[string]interface{}) []report.Result {
 			}
 		}
 
+		r.ID = report.GeneratePolicyReportResultID(r.Resource.UID, r.Policy, r.Rule, r.Status, r.Message)
+
 		return r
 	}
 
@@ -174,7 +170,7 @@ func (m *mapper) mapResult(result map[string]interface{}) []report.Result {
 	}
 
 	if len(results) == 0 {
-		results = append(results, factory(report.Resource{}))
+		results = append(results, factory(&report.Resource{}))
 	}
 
 	return results
@@ -214,48 +210,9 @@ func (m *mapper) resolvePriority(policy string, severity report.Severity) report
 	return report.Priority(report.WarningPriority)
 }
 
-func (m *mapper) FetchPriorities(ctx context.Context) error {
-	cm, err := m.cmAdapter.GetConfig(ctx, prioriyConfig)
-	if err != nil {
-		return err
-	}
-
-	if cm != nil {
-		m.SetPriorityMap(cm.Data)
-		log.Println("[INFO] Priorities loaded")
-	}
-
-	return nil
-}
-
-func (m *mapper) SyncPriorities(ctx context.Context) error {
-	err := m.cmAdapter.WatchConfigs(ctx, func(e watch.EventType, cm *v1.ConfigMap) {
-		if cm.Name != prioriyConfig {
-			return
-		}
-
-		switch e {
-		case watch.Added:
-			m.SetPriorityMap(cm.Data)
-		case watch.Modified:
-			m.SetPriorityMap(cm.Data)
-		case watch.Deleted:
-			m.SetPriorityMap(map[string]string{})
-		}
-
-		log.Println("[INFO] Priorities synchronized")
-	})
-
-	if err != nil {
-		log.Printf("[INFO] Unable to sync Priorities: %s", err.Error())
-	}
-
-	return err
-}
-
 // NewMapper creates an new Mapper instance
-func NewMapper(priorities map[string]string, cmAdapter ConfigMapAdapter) Mapper {
-	m := &mapper{cmAdapter: cmAdapter}
+func NewMapper(priorities map[string]string) Mapper {
+	m := &mapper{}
 	m.SetPriorityMap(priorities)
 
 	return m

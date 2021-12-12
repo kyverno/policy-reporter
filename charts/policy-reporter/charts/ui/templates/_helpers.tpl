@@ -52,6 +52,22 @@ app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}
 
 {{/*
+Policy Reporter Selector labels
+*/}}
+{{- define "policyreporter.selectorLabels" -}}
+app.kubernetes.io/name: policy-reporter
+app.kubernetes.io/instance: {{ .Release.Name }}
+{{- end }}
+
+{{/*
+Kyverno Plugin Selector labels
+*/}}
+{{- define "kyvernoplugin.selectorLabels" -}}
+app.kubernetes.io/name: kyverno-plugin
+app.kubernetes.io/instance: {{ .Release.Name }}
+{{- end }}
+
+{{/*
 Create the name of the service account to use
 */}}
 {{- define "ui.serviceAccountName" -}}

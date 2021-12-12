@@ -1,14 +1,14 @@
 package report_test
 
 import (
-	"fmt"
 	"testing"
 	"time"
 
 	"github.com/kyverno/policy-reporter/pkg/report"
 )
 
-var result1 = report.Result{
+var result1 = &report.Result{
+	ID:       "e0659854c6ee5c1a4df9242b2eb8b40919967842",
 	Message:  "validation error: requests and limits required. Rule autogen-check-for-requests-and-limits failed at path /spec/template/spec/containers/0/resources/requests/",
 	Policy:   "require-requests-and-limits-required",
 	Rule:     "autogen-check-for-requests-and-limits",
@@ -17,7 +17,7 @@ var result1 = report.Result{
 	Category: "resources",
 	Severity: report.High,
 	Scored:   true,
-	Resource: report.Resource{
+	Resource: &report.Resource{
 		APIVersion: "v1",
 		Kind:       "Deployment",
 		Name:       "nginx",
@@ -26,7 +26,8 @@ var result1 = report.Result{
 	},
 }
 
-var result2 = report.Result{
+var result2 = &report.Result{
+	ID:       "2",
 	Message:  "validation error: requests and limits required. Rule autogen-check-for-requests-and-limits failed at path /spec/template/spec/containers/0/resources/requests/",
 	Policy:   "require-requests-and-limits-required",
 	Rule:     "autogen-check-for-requests-and-limits",
@@ -34,7 +35,7 @@ var result2 = report.Result{
 	Status:   report.Fail,
 	Category: "resources",
 	Scored:   true,
-	Resource: report.Resource{
+	Resource: &report.Resource{
 		APIVersion: "v1",
 		Kind:       "Deployment",
 		Name:       "nginx",
@@ -43,24 +44,26 @@ var result2 = report.Result{
 	},
 }
 
-var preport = report.PolicyReport{
+var preport = &report.PolicyReport{
+	ID:                "24cfa233af033d104cd6ce0ff9a5a875c71a5844",
 	Name:              "polr-test",
 	Namespace:         "test",
-	Results:           make(map[string]report.Result, 0),
-	Summary:           report.Summary{},
+	Results:           make(map[string]*report.Result),
+	Summary:           &report.Summary{},
 	CreationTimestamp: time.Now(),
 }
 
-var creport = report.PolicyReport{
+var creport = &report.PolicyReport{
+	ID:                "57e1551475e17740bacc3640d2412b1a6aad6a93",
 	Name:              "cpolr-test",
-	Results:           make(map[string]report.Result, 0),
-	Summary:           report.Summary{},
+	Results:           make(map[string]*report.Result),
+	Summary:           &report.Summary{},
 	CreationTimestamp: time.Now(),
 }
 
 func Test_PolicyReport(t *testing.T) {
 	t.Run("Check PolicyReport.GetIdentifier", func(t *testing.T) {
-		expected := fmt.Sprintf("%s__%s", preport.Namespace, preport.Name)
+		expected := report.GeneratePolicyReportID(preport.Name, preport.Namespace)
 
 		if preport.GetIdentifier() != expected {
 			t.Errorf("Expected PolicyReport.GetIdentifier() to be %s (actual: %s)", expected, preport.GetIdentifier())
@@ -68,45 +71,36 @@ func Test_PolicyReport(t *testing.T) {
 	})
 
 	t.Run("Check PolicyReport.GetNewResults", func(t *testing.T) {
-		preport1 := preport
-		preport2 := preport
-
-		preport1.Results = map[string]report.Result{result1.GetIdentifier(): result1}
-		preport2.Results = map[string]report.Result{result1.GetIdentifier(): result1, result2.GetIdentifier(): result2}
+		preport1 := &report.PolicyReport{
+			ID:                "24cfa233af033d104cd6ce0ff9a5a875c71a5844",
+			Name:              "polr-test",
+			Namespace:         "test",
+			Summary:           &report.Summary{},
+			CreationTimestamp: time.Now(),
+			Results:           map[string]*report.Result{result1.GetIdentifier(): result1},
+		}
+		preport2 := &report.PolicyReport{
+			ID:                "24cfa233af033d104cd6ce0ff9a5a875c71a5844",
+			Name:              "polr-test",
+			Namespace:         "test",
+			Summary:           &report.Summary{},
+			CreationTimestamp: time.Now(),
+			Results:           map[string]*report.Result{result1.GetIdentifier(): result1, result2.GetIdentifier(): result2},
+		}
 
 		diff := preport2.GetNewResults(preport1)
 		if len(diff) != 1 {
 			t.Error("Expected 1 new result in diff")
 		}
 	})
-
-	t.Run("Check PolicyReport.ResultHash", func(t *testing.T) {
-		preport := preport
-		preport.Results = map[string]report.Result{result1.GetIdentifier(): result1, result2.GetIdentifier(): result2}
-
-		hash := preport.ResultHash()
-		if hash != "cd4a0ebefa915f33649db99063c182488403bb4c" {
-			t.Errorf("Expected 'cd4a0ebefa915f33649db99063c182488403bb4c', got %s", hash)
-		}
-	})
-
-	t.Run("Check PolicyReport.ResultHash same with different order", func(t *testing.T) {
-		preport1 := preport
-		preport2 := preport
-
-		preport1.Results = map[string]report.Result{result2.GetIdentifier(): result2, result1.GetIdentifier(): result1}
-		preport2.Results = map[string]report.Result{result1.GetIdentifier(): result1, result2.GetIdentifier(): result2}
-
-		if preport2.ResultHash() != preport1.ResultHash() {
-			t.Error("Expected same hash with different order")
-		}
-	})
 }
 
 func Test_ClusterPolicyReport(t *testing.T) {
 	t.Run("Check ClusterPolicyReport.GetIdentifier", func(t *testing.T) {
-		if creport.GetIdentifier() != creport.Name {
-			t.Errorf("Expected ClusterPolicyReport.GetIdentifier() to be %s (actual: %s)", creport.Name, creport.GetIdentifier())
+		expected := report.GeneratePolicyReportID(creport.Name, creport.Namespace)
+
+		if creport.GetIdentifier() != expected {
+			t.Errorf("Expected ClusterPolicyReport.GetIdentifier() to be %s (actual: %s)", expected, creport.GetIdentifier())
 		}
 	})
 	t.Run("Check ClusterPolicyReport.GetType", func(t *testing.T) {
@@ -116,52 +110,47 @@ func Test_ClusterPolicyReport(t *testing.T) {
 	})
 
 	t.Run("Check ClusterPolicyReport.GetNewResults", func(t *testing.T) {
-		creport1 := creport
-		creport2 := creport
+		creport1 := &report.PolicyReport{
+			ID:                "57e1551475e17740bacc3640d2412b1a6aad6a93",
+			Name:              "cpolr-test",
+			Summary:           &report.Summary{},
+			CreationTimestamp: time.Now(),
+			Results:           map[string]*report.Result{result1.GetIdentifier(): result1},
+		}
 
-		creport1.Results = map[string]report.Result{result1.GetIdentifier(): result1}
-		creport2.Results = map[string]report.Result{result1.GetIdentifier(): result1, result2.GetIdentifier(): result2}
+		creport2 := &report.PolicyReport{
+			ID:                "57e1551475e17740bacc3640d2412b1a6aad6a93",
+			Name:              "cpolr-test",
+			Summary:           &report.Summary{},
+			CreationTimestamp: time.Now(),
+			Results:           map[string]*report.Result{result1.GetIdentifier(): result1, result2.GetIdentifier(): result2},
+		}
 
 		diff := creport2.GetNewResults(creport1)
 		if len(diff) != 1 {
 			t.Error("Expected 1 new result in diff")
 		}
 	})
-
-	t.Run("Check PolicyReport.ResultHash", func(t *testing.T) {
-		report1 := creport
-		report1.Results = map[string]report.Result{result1.GetIdentifier(): result1, result2.GetIdentifier(): result2}
-
-		hash := report1.ResultHash()
-		if hash != "cd4a0ebefa915f33649db99063c182488403bb4c" {
-			t.Errorf("Expected 'cd4a0ebefa915f33649db99063c182488403bb4c', got %s", hash)
-		}
-	})
-
-	t.Run("Check PolicyReport.ResultHash same with different order", func(t *testing.T) {
-		report1 := creport
-		report2 := creport
-
-		report1.Results = map[string]report.Result{result2.GetIdentifier(): result2, result1.GetIdentifier(): result1}
-		report2.Results = map[string]report.Result{result1.GetIdentifier(): result1, result2.GetIdentifier(): result2}
-
-		if report2.ResultHash() != report1.ResultHash() {
-			t.Error("Expected same hash with different order")
-		}
-	})
 }
 
 func Test_Result(t *testing.T) {
 	t.Run("Check Result.GetIdentifier", func(t *testing.T) {
-		expected := fmt.Sprintf("%s__%s__%s__%s", result1.Policy, result1.Rule, result1.Status, result1.Resource.UID)
+		expected := report.GeneratePolicyReportResultID(result1.Resource.UID, result1.Policy, result1.Rule, result1.Status, "")
 
 		if result1.GetIdentifier() != expected {
 			t.Errorf("Expected ClusterPolicyReport.GetIdentifier() to be %s (actual: %s)", expected, creport.GetIdentifier())
 		}
 	})
-	t.Run("Check Result.HasResource", func(t *testing.T) {
+	t.Run("Check Result.HasResource with Resource", func(t *testing.T) {
 		if result1.HasResource() == false {
 			t.Errorf("Expected result1.HasResource() to be true (actual: %v)", result1.HasResource())
+		}
+	})
+	t.Run("Check Result.HasResource without Resource", func(t *testing.T) {
+		result := report.Result{}
+
+		if result.HasResource() == true {
+			t.Errorf("Expected result.HasResource() to be false without a Resource (actual: %v)", result1.HasResource())
 		}
 	})
 

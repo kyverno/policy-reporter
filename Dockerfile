@@ -14,7 +14,7 @@ RUN go env
 RUN go get -d -v \
     && go install -v
 
-RUN CGO_ENABLED=0 go build -ldflags="${LD_FLAGS}" -o /app/build/policyreporter -v
+RUN CGO_ENABLED=1 go build -ldflags="${LD_FLAGS}" -o /app/build/policyreporter -v
 
 FROM scratch
 LABEL MAINTAINER="Frank Jogeleit <frank.jogeleit@gweb.de>"

@@ -3,12 +3,26 @@ package report
 import (
 	"bytes"
 	"crypto/sha1"
-	"encoding/hex"
 	"fmt"
-	"sort"
-	"strings"
 	"time"
 )
+
+// Event Enum
+type Event = int
+
+// Possible PolicyReport Event Enums
+const (
+	Added Event = iota
+	Updated
+	Deleted
+)
+
+// LifecycleEvent of PolicyReports
+type LifecycleEvent struct {
+	Type            Event
+	NewPolicyReport *PolicyReport
+	OldPolicyReport *PolicyReport
+}
 
 // Status Enum defined for PolicyReport
 type Status = string
@@ -36,18 +50,18 @@ const (
 	criticalString = "critical"
 )
 
-// Type Enum defined for PolicyReport
-type Type = string
+// ResourceType Enum defined for PolicyReport
+type ResourceType = string
 
 // ReportType Enum
 const (
-	PolicyReportType        Type = "PolicyReport"
-	ClusterPolicyReportType Type = "ClusterPolicyReport"
+	PolicyReportType        ResourceType = "PolicyReport"
+	ClusterPolicyReportType ResourceType = "ClusterPolicyReport"
 )
 
 // Internal Priority definitions and weighting
 const (
-	DefaultPriority = iota
+	DefaultPriority Priority = iota
 	DebugPriority
 	InfoPriority
 	WarningPriority
@@ -142,6 +156,7 @@ type Resource struct {
 
 // Result from the PolicyReport spec wgpolicyk8s.io/v1alpha1.PolicyReportResult
 type Result struct {
+	ID         string `json:"-"`
 	Message    string
 	Policy     string
 	Rule       string
@@ -149,25 +164,24 @@ type Result struct {
 	Status     Status
 	Severity   Severity `json:",omitempty"`
 	Category   string   `json:",omitempty"`
-	Source     string   `json:"source,omitempty"`
+	Source     string   `json:",omitempty"`
 	Scored     bool
 	Timestamp  time.Time
-	Resource   Resource
+	Resource   *Resource
 	Properties map[string]string
 }
 
 // GetIdentifier returns a global unique Result identifier
 func (r Result) GetIdentifier() string {
-	suffix := ""
-	if r.Resource.UID != "" {
-		suffix = "__" + r.Resource.UID
-	}
-
-	return fmt.Sprintf("%s__%s__%s%s", r.Policy, r.Rule, r.Status, suffix)
+	return r.ID
 }
 
 // HasResource checks if the result has an valid Resource
 func (r Result) HasResource() bool {
+	if r.Resource == nil {
+		return false
+	}
+
 	return r.Resource.UID != ""
 }
 
@@ -182,36 +196,17 @@ type Summary struct {
 
 // PolicyReport from the PolicyReport spec wgpolicyk8s.io/v1alpha1.PolicyReport
 type PolicyReport struct {
+	ID                string
 	Name              string
 	Namespace         string
-	Results           map[string]Result
-	Summary           Summary
+	Results           map[string]*Result
+	Summary           *Summary
 	CreationTimestamp time.Time
 }
 
 // GetIdentifier returns a global unique PolicyReport identifier
 func (pr PolicyReport) GetIdentifier() string {
-	if pr.Namespace == "" {
-		return pr.Name
-	}
-
-	return fmt.Sprintf("%s__%s", pr.Namespace, pr.Name)
-}
-
-// ResultHash generates a has of the current result set
-func (pr PolicyReport) ResultHash() string {
-	list := make([]string, 0, len(pr.Results))
-
-	for id := range pr.Results {
-		list = append(list, id)
-	}
-
-	sort.Strings(list)
-
-	h := sha1.New()
-	h.Write([]byte(strings.Join(list, "")))
-
-	return hex.EncodeToString(h.Sum(nil))
+	return pr.ID
 }
 
 // HasResult returns if the Report has an Rusult with the given ID
@@ -222,7 +217,7 @@ func (pr PolicyReport) HasResult(id string) bool {
 }
 
 // GetType returns the Type of the Report
-func (pr PolicyReport) GetType() Type {
+func (pr PolicyReport) GetType() ResourceType {
 	if pr.Namespace == "" {
 		return ClusterPolicyReportType
 	}
@@ -231,8 +226,8 @@ func (pr PolicyReport) GetType() Type {
 }
 
 // GetNewResults filters already existing Results from the old PolicyReport and returns only the diff with new Results
-func (pr PolicyReport) GetNewResults(or PolicyReport) []Result {
-	diff := make([]Result, 0)
+func (pr PolicyReport) GetNewResults(or *PolicyReport) []*Result {
+	diff := make([]*Result, 0)
 
 	for _, r := range pr.Results {
 		if or.HasResult(r.GetIdentifier()) {
@@ -243,4 +238,31 @@ func (pr PolicyReport) GetNewResults(or PolicyReport) []Result {
 	}
 
 	return diff
+}
+
+func GeneratePolicyReportID(name, namespace string) string {
+	id := name
+
+	if namespace != "" {
+		id = fmt.Sprintf("%s__%s", namespace, name)
+	}
+
+	h := sha1.New()
+
+	h.Write([]byte(id))
+
+	return fmt.Sprintf("%x", h.Sum(nil))
+}
+
+func GeneratePolicyReportResultID(uid, policy, rule, status, suffix string) string {
+	if uid != "" {
+		suffix = "__" + uid
+	}
+
+	id := fmt.Sprintf("%s__%s__%s%s", policy, rule, status, suffix)
+
+	h := sha1.New()
+	h.Write([]byte(id))
+
+	return fmt.Sprintf("%x", h.Sum(nil))
 }

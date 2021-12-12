@@ -45,7 +45,9 @@ spec:
             {{- toYaml .Values.securityContext | nindent 12 }}
           {{- end }}
           args:
-            - --apiPort=8080
+            - --port=8080
+            - --metrics-enabled={{ .Values.metrics.enabled }}
+            - --rest-enabled={{ .Values.rest.enabled }}
           ports:
             - name: http
               containerPort: 2113

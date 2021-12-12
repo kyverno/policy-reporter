@@ -58,3 +58,11 @@ Create the name of the service account to use
 {{- default "default" .Values.serviceAccount.name }}
 {{- end }}
 {{- end }}
+
+{{/*
+Selector labels
+*/}}
+{{- define "ui.selectorLabels" -}}
+app.kubernetes.io/name: ui
+app.kubernetes.io/instance: {{ .Release.Name }}
+{{- end }}

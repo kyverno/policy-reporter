@@ -1,15 +1,12 @@
 package elasticsearch
 
 import (
-	"bytes"
-	"encoding/json"
-	"log"
 	"net/http"
 	"time"
 
+	"github.com/kyverno/policy-reporter/pkg/helper"
 	"github.com/kyverno/policy-reporter/pkg/report"
 	"github.com/kyverno/policy-reporter/pkg/target"
-	"github.com/kyverno/policy-reporter/pkg/target/helper"
 )
 
 // Rotation Enum
@@ -28,26 +25,14 @@ type httpClient interface {
 }
 
 type client struct {
-	host                  string
-	index                 string
-	rotation              Rotation
-	minimumPriority       string
-	skipExistingOnStartup bool
-	client                httpClient
+	target.BaseClient
+	host     string
+	index    string
+	rotation Rotation
+	client   httpClient
 }
 
-func (e *client) Send(result report.Result) {
-	if result.Priority < report.NewPriority(e.minimumPriority) {
-		return
-	}
-
-	body := new(bytes.Buffer)
-
-	if err := json.NewEncoder(body).Encode(result); err != nil {
-		log.Printf("[ERROR] ELASTICSEARCH : %v\n", err.Error())
-		return
-	}
-
+func (e *client) Send(result *report.Result) {
 	var host string
 	switch e.rotation {
 	case None:
@@ -60,9 +45,8 @@ func (e *client) Send(result report.Result) {
 		host = e.host + "/" + e.index + "-" + time.Now().Format("2006.01.02") + "/event"
 	}
 
-	req, err := http.NewRequest("POST", host, body)
+	req, err := helper.CreateJSONRequest(e.Name(), "POST", host, result)
 	if err != nil {
-		log.Printf("[ERROR] ELASTICSEARCH : %v\n", err.Error())
 		return
 	}
 
@@ -70,29 +54,20 @@ func (e *client) Send(result report.Result) {
 	req.Header.Add("User-Agent", "Policy-Reporter")
 
 	resp, err := e.client.Do(req)
-	helper.HandleHTTPResponse("ELASTICSEARCH", resp, err)
-}
-
-func (e *client) SkipExistingOnStartup() bool {
-	return e.skipExistingOnStartup
+	helper.ProcessHTTPResponse(e.Name(), resp, err)
 }
 
 func (e *client) Name() string {
 	return "Elasticsearch"
 }
 
-func (e *client) MinimumPriority() string {
-	return e.minimumPriority
-}
-
 // NewClient creates a new loki.client to send Results to Elasticsearch
-func NewClient(host, index, rotation, minimumPriority string, skipExistingOnStartup bool, httpClient httpClient) target.Client {
+func NewClient(host, index, rotation, minimumPriority string, sources []string, skipExistingOnStartup bool, httpClient httpClient) target.Client {
 	return &client{
+		target.NewBaseClient(minimumPriority, sources, skipExistingOnStartup),
 		host,
 		index,
 		rotation,
-		minimumPriority,
-		skipExistingOnStartup,
 		httpClient,
 	}
 }

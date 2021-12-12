@@ -1,6 +1,3 @@
-# monitoring namespace for Dashboard Configurations
-namespace: cattle-dashboards
-
 plugins:
   kyverno: false
 

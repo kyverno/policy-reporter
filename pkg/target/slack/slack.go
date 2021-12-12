@@ -1,15 +1,12 @@
 package slack
 
 import (
-	"bytes"
-	"encoding/json"
-	"log"
 	"net/http"
 	"strings"
 
+	"github.com/kyverno/policy-reporter/pkg/helper"
 	"github.com/kyverno/policy-reporter/pkg/report"
 	"github.com/kyverno/policy-reporter/pkg/target"
-	"github.com/kyverno/policy-reporter/pkg/target/helper"
 )
 
 type httpClient interface {
@@ -43,36 +40,26 @@ type payload struct {
 }
 
 type client struct {
-	webhook               string
-	minimumPriority       string
-	skipExistingOnStartup bool
-	client                httpClient
+	target.BaseClient
+	webhook string
+	client  httpClient
 }
 
-func colorFromPriority(p report.Priority) string {
-	if p == report.CriticalPriority {
-		return "#b80707"
-	}
-	if p == report.ErrorPriority {
-		return "#e20b0b"
-	}
-	if p == report.WarningPriority {
-		return "#f2c744"
-	}
-	if p == report.InfoPriority {
-		return "#36a64f"
-	}
-
-	return "#68c2ff"
+var colors = map[report.Priority]string{
+	report.DebugPriority:    "#68c2ff",
+	report.InfoPriority:     "#36a64f",
+	report.WarningPriority:  "#f2c744",
+	report.CriticalPriority: "#b80707",
+	report.ErrorPriority:    "#e20b0b",
 }
 
-func (s *client) newPayload(result report.Result) payload {
+func (s *client) newPayload(result *report.Result) payload {
 	p := payload{
 		Attachments: make([]attachment, 0, 1),
 	}
 
 	att := attachment{
-		Color:  colorFromPriority(result.Priority),
+		Color:  colors[result.Priority],
 		Blocks: make([]block, 0),
 	}
 
@@ -119,8 +106,8 @@ func (s *client) newPayload(result report.Result) payload {
 		att.Blocks = append(att.Blocks, b)
 	}
 
-	res := report.Resource{}
-	if result.Resource.UID != "" {
+	res := &report.Resource{}
+	if result.HasResource() {
 		res = result.Resource
 	}
 
@@ -172,22 +159,9 @@ func (s *client) newPayload(result report.Result) payload {
 	return p
 }
 
-func (s *client) Send(result report.Result) {
-	if result.Priority < report.NewPriority(s.minimumPriority) {
-		return
-	}
-
-	payload := s.newPayload(result)
-	body := new(bytes.Buffer)
-
-	if err := json.NewEncoder(body).Encode(payload); err != nil {
-		log.Printf("[ERROR] SLACK : %v\n", err.Error())
-		return
-	}
-
-	req, err := http.NewRequest("POST", s.webhook, body)
+func (s *client) Send(result *report.Result) {
+	req, err := helper.CreateJSONRequest(s.Name(), "POST", s.webhook, s.newPayload(result))
 	if err != nil {
-		log.Printf("[ERROR] SLACK : %v\n", err.Error())
 		return
 	}
 
@@ -195,27 +169,18 @@ func (s *client) Send(result report.Result) {
 	req.Header.Add("User-Agent", "Policy-Reporter")
 
 	resp, err := s.client.Do(req)
-	helper.HandleHTTPResponse("SLACK", resp, err)
-}
-
-func (s *client) SkipExistingOnStartup() bool {
-	return s.skipExistingOnStartup
+	helper.ProcessHTTPResponse(s.Name(), resp, err)
 }
 
 func (s *client) Name() string {
 	return "Slack"
 }
 
-func (s *client) MinimumPriority() string {
-	return s.minimumPriority
-}
-
 // NewClient creates a new slack.client to send Results to Slack
-func NewClient(host, minimumPriority string, skipExistingOnStartup bool, httpClient httpClient) target.Client {
+func NewClient(host, minimumPriority string, sources []string, skipExistingOnStartup bool, httpClient httpClient) target.Client {
 	return &client{
+		target.NewBaseClient(minimumPriority, sources, skipExistingOnStartup),
 		host,
-		minimumPriority,
-		skipExistingOnStartup,
 		httpClient,
 	}
 }

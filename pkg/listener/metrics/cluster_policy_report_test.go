@@ -5,38 +5,43 @@ import (
 	"testing"
 	"time"
 
-	"github.com/kyverno/policy-reporter/pkg/metrics"
+	"github.com/kyverno/policy-reporter/pkg/listener/metrics"
 	"github.com/kyverno/policy-reporter/pkg/report"
 	"github.com/prometheus/client_golang/prometheus"
 	ioprometheusclient "github.com/prometheus/client_model/go"
-	"k8s.io/apimachinery/pkg/watch"
 )
 
-var creport = report.PolicyReport{
+var creport = &report.PolicyReport{
 	Name:              "cpolr-test",
-	Results:           make(map[string]report.Result, 0),
-	Summary:           report.Summary{},
+	Results:           make(map[string]*report.Result),
+	Summary:           &report.Summary{},
 	CreationTimestamp: time.Now(),
 }
 
 func Test_ClusterPolicyReportMetricGeneration(t *testing.T) {
-	report1 := creport
-	report1.Summary = report.Summary{Pass: 1, Fail: 1}
-	report1.Results = map[string]report.Result{
-		result1.GetIdentifier(): result1,
-		result2.GetIdentifier(): result2,
+	report1 := &report.PolicyReport{
+		Name:              "cpolr-test",
+		Summary:           &report.Summary{Pass: 1, Fail: 1},
+		CreationTimestamp: time.Now(),
+		Results: map[string]*report.Result{
+			result1.GetIdentifier(): result1,
+			result2.GetIdentifier(): result2,
+		},
 	}
 
-	report2 := creport
-	report2.Summary = report.Summary{Pass: 0, Fail: 1}
-	report2.Results = map[string]report.Result{
-		result1.GetIdentifier(): result1,
+	report2 := &report.PolicyReport{
+		Name:              "cpolr-test",
+		Summary:           &report.Summary{Pass: 0, Fail: 1},
+		CreationTimestamp: time.Now(),
+		Results: map[string]*report.Result{
+			result1.GetIdentifier(): result1,
+		},
 	}
 
-	handler := metrics.CreateMetricsCallback()
+	handler := metrics.CreateClusterPolicyReportMetricsListener()
 
 	t.Run("Added Metric", func(t *testing.T) {
-		handler(watch.Added, report1, report.PolicyReport{})
+		handler(report.LifecycleEvent{Type: report.Added, NewPolicyReport: report1, OldPolicyReport: &report.PolicyReport{}})
 
 		metricFam, err := prometheus.DefaultGatherer.Gather()
 		if err != nil {
@@ -81,8 +86,8 @@ func Test_ClusterPolicyReportMetricGeneration(t *testing.T) {
 	})
 
 	t.Run("Modified Metric", func(t *testing.T) {
-		handler(watch.Added, report1, report.PolicyReport{})
-		handler(watch.Modified, report2, report1)
+		handler(report.LifecycleEvent{Type: report.Added, NewPolicyReport: report1, OldPolicyReport: &report.PolicyReport{}})
+		handler(report.LifecycleEvent{Type: report.Updated, NewPolicyReport: report2, OldPolicyReport: report1})
 
 		metricFam, err := prometheus.DefaultGatherer.Gather()
 		if err != nil {
@@ -127,9 +132,9 @@ func Test_ClusterPolicyReportMetricGeneration(t *testing.T) {
 	})
 
 	t.Run("Deleted Metric", func(t *testing.T) {
-		handler(watch.Added, report1, report.PolicyReport{})
-		handler(watch.Modified, report2, report1)
-		handler(watch.Deleted, report2, report2)
+		handler(report.LifecycleEvent{Type: report.Added, NewPolicyReport: report1, OldPolicyReport: &report.PolicyReport{}})
+		handler(report.LifecycleEvent{Type: report.Updated, NewPolicyReport: report2, OldPolicyReport: report1})
+		handler(report.LifecycleEvent{Type: report.Deleted, NewPolicyReport: report2, OldPolicyReport: &report.PolicyReport{}})
 
 		metricFam, err := prometheus.DefaultGatherer.Gather()
 		if err != nil {
@@ -151,7 +156,7 @@ func Test_ClusterPolicyReportMetricGeneration(t *testing.T) {
 
 func testClusterSummaryMetricLabels(
 	metric *ioprometheusclient.Metric,
-	preport report.PolicyReport,
+	preport *report.PolicyReport,
 	status string,
 	gauge float64,
 ) error {
@@ -176,7 +181,7 @@ func testClusterSummaryMetricLabels(
 	return nil
 }
 
-func testClusterResultMetricLabels(metric *ioprometheusclient.Metric, result report.Result) error {
+func testClusterResultMetricLabels(metric *ioprometheusclient.Metric, result *report.Result) error {
 	if name := *metric.Label[0].Name; name != "category" {
 		return fmt.Errorf("unexpected Name Label: %s", name)
 	}

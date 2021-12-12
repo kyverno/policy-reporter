@@ -1,4 +1,8 @@
+.deploy
 config.yaml
 build
 README.md
 docs
+**/test.db
+sqlite-database.db
+values.yaml

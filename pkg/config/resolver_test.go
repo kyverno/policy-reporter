@@ -1,10 +1,10 @@
 package config_test
 
 import (
-	"context"
 	"testing"
 
 	"github.com/kyverno/policy-reporter/pkg/config"
+	"github.com/kyverno/policy-reporter/pkg/report"
 	"k8s.io/client-go/rest"
 )
 
@@ -41,12 +41,14 @@ var testConfig = &config.Config{
 		SkipExisting:    true,
 		MinimumPriority: "debug",
 	},
-	Yandex: config.Yandex{
+	S3: config.S3{
 		AccessKeyID:     "AccessKey",
 		SecretAccessKey: "SecretAccessKey",
 		Bucket:          "test",
 		SkipExisting:    true,
 		MinimumPriority: "debug",
+		Endpoint:        "https://storage.yandexcloud.net",
+		Region:          "ru-central1",
 	},
 }
 
@@ -108,13 +110,13 @@ func Test_ResolveTarget(t *testing.T) {
 			t.Error("Error: Should reuse first instance")
 		}
 	})
-	t.Run("Yandex", func(t *testing.T) {
-		client := resolver.YandexClient()
+	t.Run("S3", func(t *testing.T) {
+		client := resolver.S3Client()
 		if client == nil {
 			t.Error("Expected Client, got nil")
 		}
 
-		client2 := resolver.YandexClient()
+		client2 := resolver.S3Client()
 		if client != client2 {
 			t.Error("Error: Should reuse first instance")
 		}
@@ -194,10 +196,12 @@ func Test_ResolveTargetWithoutHost(t *testing.T) {
 			SkipExisting:    true,
 			MinimumPriority: "debug",
 		},
-		Yandex: config.Yandex{
+		S3: config.S3{
+			Endpoint:        "",
+			Region:          "",
 			AccessKeyID:     "",
 			SecretAccessKey: "",
-			Bucket:          "test",
+			Bucket:          "",
 			SkipExisting:    true,
 			MinimumPriority: "debug",
 		},
@@ -238,33 +242,94 @@ func Test_ResolveTargetWithoutHost(t *testing.T) {
 			t.Error("Expected Client to be nil if no host is configured")
 		}
 	})
-	t.Run("Yandex", func(t *testing.T) {
+	t.Run("S3.Endoint", func(t *testing.T) {
 		resolver := config.NewResolver(config2, nil)
 
-		if resolver.YandexClient() != nil {
-			t.Error("Expected Client to be nil if no host is configured")
+		if resolver.S3Client() != nil {
+			t.Error("Expected Client to be nil if no endpoint is configured")
+		}
+	})
+	t.Run("S3.AccessKey", func(t *testing.T) {
+		config2.S3.Endpoint = "https://storage.yandexcloud.net"
+
+		resolver := config.NewResolver(config2, nil)
+
+		if resolver.S3Client() != nil {
+			t.Error("Expected Client to be nil if no accessKey is configured")
+		}
+	})
+	t.Run("S3.AccessKey", func(t *testing.T) {
+		config2.S3.Endpoint = "https://storage.yandexcloud.net"
+
+		resolver := config.NewResolver(config2, nil)
+
+		if resolver.S3Client() != nil {
+			t.Error("Expected Client to be nil if no accessKey is configured")
+		}
+	})
+	t.Run("S3.SecretAccessKey", func(t *testing.T) {
+		config2.S3.AccessKeyID = "access"
+
+		resolver := config.NewResolver(config2, nil)
+
+		if resolver.S3Client() != nil {
+			t.Error("Expected Client to be nil if no secretAccessKey is configured")
+		}
+	})
+	t.Run("S3.Region", func(t *testing.T) {
+		config2.S3.SecretAccessKey = "secret"
+
+		resolver := config.NewResolver(config2, nil)
+
+		if resolver.S3Client() != nil {
+			t.Error("Expected Client to be nil if no region is configured")
+		}
+	})
+	t.Run("S3.Bucket", func(t *testing.T) {
+		config2.S3.Region = "ru-central1"
+
+		resolver := config.NewResolver(config2, nil)
+
+		if resolver.S3Client() != nil {
+			t.Error("Expected Client to be nil if no bucket is configured")
 		}
 	})
 }
 
 func Test_ResolvePolicyClient(t *testing.T) {
-	resolver := config.NewResolver(&config.Config{}, &rest.Config{})
+	resolver := config.NewResolver(&config.Config{DBFile: "test.db"}, &rest.Config{})
 
-	client1, err := resolver.PolicyReportClient(context.Background())
+	client1, err := resolver.PolicyReportClient()
 	if err != nil {
 		t.Errorf("Unexpected Error: %s", err)
 	}
 
-	client2, _ := resolver.PolicyReportClient(context.Background())
+	client2, _ := resolver.PolicyReportClient()
 	if client1 != client2 {
 		t.Error("A second call resolver.PolicyReportClient() should return the cached first client")
 	}
 }
 
-func Test_ResolveAPIServer(t *testing.T) {
-	resolver := config.NewResolver(testConfig, &rest.Config{})
+func Test_ResolvePolicyStore(t *testing.T) {
+	resolver := config.NewResolver(&config.Config{DBFile: "test.db"}, &rest.Config{})
+	db, _ := resolver.Database()
+	defer db.Close()
 
-	server := resolver.APIServer()
+	store1, err := resolver.PolicyReportStore(db)
+	if err != nil {
+		t.Errorf("Unexpected Error: %s", err)
+	}
+
+	store2, _ := resolver.PolicyReportStore(db)
+	if store1 != store2 {
+		t.Error("A second call resolver.PolicyReportClient() should return the cached first client")
+	}
+}
+
+func Test_ResolveAPIServer(t *testing.T) {
+	resolver := config.NewResolver(&config.Config{}, &rest.Config{})
+
+	server := resolver.APIServer(make(map[string]string))
 	if server == nil {
 		t.Error("Error: Should return API Server")
 	}
@@ -284,14 +349,70 @@ func Test_ResolveCache(t *testing.T) {
 	}
 }
 
+func Test_ResolveMapper(t *testing.T) {
+	resolver := config.NewResolver(testConfig, &rest.Config{})
+
+	mapper1 := resolver.Mapper()
+	if mapper1 == nil {
+		t.Error("Error: Should return Mapper")
+	}
+
+	mapper2 := resolver.Mapper()
+	if mapper1 != mapper2 {
+		t.Error("A second call resolver.Mapper() should return the cached first cache")
+	}
+}
+
 func Test_ResolveClientWithInvalidK8sConfig(t *testing.T) {
 	k8sConfig := &rest.Config{}
 	k8sConfig.Host = "invalid/url"
 
-	resolver := config.NewResolver(&config.Config{}, k8sConfig)
+	resolver := config.NewResolver(testConfig, k8sConfig)
 
-	_, err := resolver.PolicyReportClient(context.Background())
+	_, err := resolver.PolicyReportClient()
 	if err == nil {
 		t.Error("Error: 'host must be a URL or a host:port pair' was expected")
 	}
+}
+
+func Test_RegisterStoreListener(t *testing.T) {
+	t.Run("Register StoreListener", func(t *testing.T) {
+		resolver := config.NewResolver(testConfig, &rest.Config{})
+		resolver.RegisterStoreListener(report.NewPolicyReportStore())
+
+		if len(resolver.EventPublisher().GetListener()) != 1 {
+			t.Error("Expected one Listener to be registered")
+		}
+	})
+}
+
+func Test_RegisterMetricsListener(t *testing.T) {
+	t.Run("Register MetricsListener", func(t *testing.T) {
+		resolver := config.NewResolver(testConfig, &rest.Config{})
+		resolver.RegisterMetricsListener()
+
+		if len(resolver.EventPublisher().GetListener()) != 1 {
+			t.Error("Expected one Listener to be registered")
+		}
+	})
+}
+
+func Test_RegisterSendResultListener(t *testing.T) {
+	t.Run("Register SendResultListener with Targets", func(t *testing.T) {
+		resolver := config.NewResolver(testConfig, &rest.Config{})
+		resolver.RegisterSendResultListener()
+
+		if len(resolver.EventPublisher().GetListener()) != 1 {
+			t.Error("Expected one Listener to be registered")
+		}
+	})
+	t.Run("Register SendResultListener without Targets", func(t *testing.T) {
+		resolver := config.NewResolver(&config.Config{}, &rest.Config{})
+
+		resolver.RegisterSendResultListener()
+
+		if len(resolver.EventPublisher().GetListener()) != 0 {
+			t.Error("Expected no Listener to be registered because no target exists")
+		}
+	})
 }

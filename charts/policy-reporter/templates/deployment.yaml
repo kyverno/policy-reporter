@@ -28,8 +28,7 @@ spec:
           {{- toYaml . | nindent 8 }}
         {{- end }}
       annotations:
-        checksum/secret: {{ include (print .Template.BasePath "/targetssecret.yaml") . | sha256sum | quote }}
-        policy-priorities/enabled: {{ .Values.policyPriorities.enabled | quote }}
+        checksum/secret: {{ include (print .Template.BasePath "/config-secret.yaml") . | sha256sum | quote }}
         {{- with .Values.podAnnotations }}
           {{- toYaml . | nindent 8 }}
         {{- end }}
@@ -40,6 +39,10 @@ spec:
       {{- end }}
       serviceAccountName: {{ include "policyreporter.serviceAccountName" . }}
       automountServiceAccountToken: true
+      {{- if .Values.podSecurityContext }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      {{- end }}
       containers:
         - name: {{ .Chart.Name }}
           image: "{{ .Values.image.registry }}/{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
@@ -50,11 +53,11 @@ spec:
           {{- end }}
           args:
             - --config=/app/config.yaml
+            - --dbfile=/sqlite/database.db
+            - --metrics-enabled={{ or .Values.metrics.enabled .Values.monitoring.enabled }}
+            - --rest-enabled={{ or .Values.rest.enabled .Values.ui.enabled }}
           ports:
             - name: http
-              containerPort: 2112
-              protocol: TCP
-            - name: rest
               containerPort: 8080
               protocol: TCP
           livenessProbe:
@@ -64,6 +67,8 @@ spec:
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
           volumeMounts:
+          - name: sqlite
+            mountPath: /sqlite
           - name: config-file
             mountPath: /app/config.yaml
             {{- if and .Values.existingTargetConfig.enabled .Values.existingTargetConfig.subPath }}
@@ -75,12 +80,14 @@ spec:
           - name: NAMESPACE
             value: {{ .Release.Namespace }}
       volumes:
+      - name: sqlite
+        emptyDir: {}
       - name: config-file
         secret:
           {{- if and .Values.existingTargetConfig.enabled .Values.existingTargetConfig.name }}
           secretName: {{ .Values.existingTargetConfig.name }}
           {{- else }}
-          secretName: {{ include "policyreporter.fullname" . }}-targets
+          secretName: {{ include "policyreporter.fullname" . }}-config
           {{- end }}
           optional: true   
       {{- with .Values.nodeSelector }}

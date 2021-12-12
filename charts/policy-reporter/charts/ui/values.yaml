@@ -1,5 +1,8 @@
 enabled: false
 
+# possible default displayModes: light/dark
+displayMode: ""
+
 log:
   # holds the latest 200 validation results in the UI Log
   size: 200
@@ -11,7 +14,7 @@ image:
   registry: ghcr.io
   repository: kyverno/policy-reporter-ui
   pullPolicy: IfNotPresent
-  tag: 0.15.1
+  tag: 1.0.0
 
 imagePullSecrets: []
 
