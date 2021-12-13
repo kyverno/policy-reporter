@@ -11,7 +11,7 @@
 * Metrics now an optional feature
 * Each component expose a single Port `8080`
 
-See [Migration Docs](http://localhost:3000/guide/05-migration) for details
+See [Migration Docs](https://kyverno.github.io/policy-reporter/guide/05-migration) for details
 
 ## Policy Reporter
 * modular functions for separate activation/deactivation
