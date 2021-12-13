@@ -2,8 +2,9 @@
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
-  labels: {{ include "policyreporter.labels" . | nindent 4 }}
-  name: {{ include "policyreporter.fullname" . }}
+  name: {{ include "ui.fullname" . }}
+  labels:
+    {{- include "ui.labels" . | nindent 4 }}
 spec:
   podSelector:
     matchLabels: {{- include "ui.selectorLabels" . | nindent 6 }}
@@ -17,9 +18,21 @@ spec:
       port: {{ .Values.service.port }}
   egress:
   - to:
+    - podSelector:
+        matchLabels:
+          {{- include "policyreporter.selectorLabels" . | nindent 10 }}
     ports:
     - protocol: TCP
-      port: {{ .Values.global.port }}
+      port: 8080
+  {{- if or .Values.plugins.kyverno .Values.global.plugins.kyverno }}
+  - to:
+    - podSelector:
+        matchLabels:
+          {{- include "kyvernoplugin.selectorLabels" . | nindent 10 }}
+    ports:
+    - protocol: TCP
+      port: 8080
+  {{- end }}
   {{- with .Values.networkPolicy.egress }}
     {{- toYaml . | nindent 2 }}
   {{- end }}

@@ -1,28 +1,30 @@
 package config
 
 import (
-	"context"
+	"database/sql"
 	"log"
 	"net/http"
 	"time"
 
 	"github.com/kyverno/policy-reporter/pkg/api"
+	"github.com/kyverno/policy-reporter/pkg/helper"
 	"github.com/kyverno/policy-reporter/pkg/kubernetes"
+	"github.com/kyverno/policy-reporter/pkg/listener"
 	"github.com/kyverno/policy-reporter/pkg/report"
+	"github.com/kyverno/policy-reporter/pkg/sqlite3"
 	"github.com/kyverno/policy-reporter/pkg/target"
 	"github.com/kyverno/policy-reporter/pkg/target/discord"
 	"github.com/kyverno/policy-reporter/pkg/target/elasticsearch"
-	"github.com/kyverno/policy-reporter/pkg/target/helper"
 	"github.com/kyverno/policy-reporter/pkg/target/loki"
+	"github.com/kyverno/policy-reporter/pkg/target/s3"
 	"github.com/kyverno/policy-reporter/pkg/target/slack"
 	"github.com/kyverno/policy-reporter/pkg/target/teams"
 	"github.com/kyverno/policy-reporter/pkg/target/ui"
-	"github.com/kyverno/policy-reporter/pkg/target/yandex"
 
 	"github.com/patrickmn/go-cache"
 	"k8s.io/client-go/dynamic"
-	v1 "k8s.io/client-go/kubernetes/typed/core/v1"
 
+	_ "github.com/mattn/go-sqlite3"
 	"k8s.io/client-go/rest"
 )
 
@@ -31,88 +33,89 @@ type Resolver struct {
 	config              *Config
 	k8sConfig           *rest.Config
 	mapper              kubernetes.Mapper
-	policyAdapter       kubernetes.PolicyReportAdapter
-	policyStore         *report.PolicyReportStore
-	policyClient        report.PolicyResultClient
+	publisher           report.EventPublisher
+	policyStore         sqlite3.PolicyReportStore
+	policyReportClient  report.PolicyReportClient
 	lokiClient          target.Client
 	elasticsearchClient target.Client
 	slackClient         target.Client
 	discordClient       target.Client
 	teamsClient         target.Client
 	uiClient            target.Client
-	yandexClient        target.Client
+	s3Client            target.Client
 	resultCache         *cache.Cache
 }
 
 // APIServer resolver method
-func (r *Resolver) APIServer() api.Server {
-	foundResources := make(map[string]string)
-
-	client := r.policyClient
-	if client != nil {
-		foundResources = client.GetFoundResources()
-	}
-
+func (r *Resolver) APIServer(foundResources map[string]string) api.Server {
 	return api.NewServer(
-		r.PolicyReportStore(),
 		r.TargetClients(),
 		r.config.API.Port,
 		foundResources,
 	)
 }
 
-// PolicyReportStore resolver method
-func (r *Resolver) PolicyReportStore() *report.PolicyReportStore {
-	if r.policyStore != nil {
-		return r.policyStore
-	}
-
-	r.policyStore = report.NewPolicyReportStore()
-
-	return r.policyStore
+// Database resolver method
+func (r *Resolver) Database() (*sql.DB, error) {
+	return sqlite3.NewDatabase(r.config.DBFile)
 }
 
-// PolicyReportClient resolver method
-func (r *Resolver) PolicyReportClient(ctx context.Context) (report.PolicyResultClient, error) {
-	if r.policyClient != nil {
-		return r.policyClient, nil
+// PolicyReportStore resolver method
+func (r *Resolver) PolicyReportStore(db *sql.DB) (sqlite3.PolicyReportStore, error) {
+	if r.policyStore != nil {
+		return r.policyStore, nil
 	}
 
-	policyAPI, err := r.policyReportAPI(ctx)
-	if err != nil {
-		return nil, err
+	s, err := sqlite3.NewPolicyReportStore(db)
+	r.policyStore = s
+
+	return r.policyStore, err
+}
+
+// EventPublisher resolver method
+func (r *Resolver) EventPublisher() report.EventPublisher {
+	if r.publisher != nil {
+		return r.publisher
 	}
 
-	client := kubernetes.NewPolicyReportClient(
-		policyAPI,
-		r.PolicyReportStore(),
-		time.Now(),
-		r.ResultCache(),
-	)
+	s := report.NewEventPublisher()
+	r.publisher = s
 
-	r.policyClient = client
+	return r.publisher
+}
 
-	return client, nil
+// RegisterSendResultListener resolver method
+func (r *Resolver) RegisterSendResultListener() {
+	targets := r.TargetClients()
+	if len(targets) > 0 {
+		newResultListener := listener.NewResultListener(r.SkipExistingOnStartup(), r.ResultCache(), time.Now())
+		newResultListener.RegisterListener(listener.NewSendResultListener(targets))
+
+		r.EventPublisher().RegisterListener(newResultListener.Listen)
+	}
+}
+
+// RegisterSendResultListener resolver method
+func (r *Resolver) RegisterStoreListener(store report.PolicyReportStore) {
+	r.EventPublisher().RegisterListener(listener.NewStoreListener(store))
+}
+
+// RegisterMetricsListener resolver method
+func (r *Resolver) RegisterMetricsListener() {
+	r.EventPublisher().RegisterListener(listener.NewMetricsListener())
 }
 
 // Mapper resolver method
-func (r *Resolver) Mapper(ctx context.Context) (kubernetes.Mapper, error) {
+func (r *Resolver) Mapper() kubernetes.Mapper {
 	if r.mapper != nil {
-		return r.mapper, nil
+		return r.mapper
 	}
 
-	cmAPI, err := r.configMapAPI()
-	if err != nil {
-		return nil, err
-	}
-
-	mapper := kubernetes.NewMapper(make(map[string]string), cmAPI)
-	mapper.FetchPriorities(ctx)
-	go mapper.SyncPriorities(ctx)
+	mapper := kubernetes.NewMapper(r.config.PriorityMap)
 
 	r.mapper = mapper
 
-	return mapper, err
+	return mapper
 }
 
 // LokiClient resolver method
@@ -128,6 +131,7 @@ func (r *Resolver) LokiClient() target.Client {
 	r.lokiClient = loki.NewClient(
 		r.config.Loki.Host,
 		r.config.Loki.MinimumPriority,
+		r.config.Loki.Sources,
 		r.config.Loki.SkipExisting,
 		&http.Client{},
 	)
@@ -158,6 +162,7 @@ func (r *Resolver) ElasticsearchClient() target.Client {
 		r.config.Elasticsearch.Index,
 		r.config.Elasticsearch.Rotation,
 		r.config.Elasticsearch.MinimumPriority,
+		r.config.Elasticsearch.Sources,
 		r.config.Elasticsearch.SkipExisting,
 		&http.Client{},
 	)
@@ -180,6 +185,7 @@ func (r *Resolver) SlackClient() target.Client {
 	r.slackClient = slack.NewClient(
 		r.config.Slack.Webhook,
 		r.config.Slack.MinimumPriority,
+		r.config.Slack.Sources,
 		r.config.Slack.SkipExisting,
 		&http.Client{},
 	)
@@ -202,6 +208,7 @@ func (r *Resolver) DiscordClient() target.Client {
 	r.discordClient = discord.NewClient(
 		r.config.Discord.Webhook,
 		r.config.Discord.MinimumPriority,
+		r.config.Discord.Sources,
 		r.config.Discord.SkipExisting,
 		&http.Client{},
 	)
@@ -224,6 +231,7 @@ func (r *Resolver) TeamsClient() target.Client {
 	r.teamsClient = teams.NewClient(
 		r.config.Teams.Webhook,
 		r.config.Teams.MinimumPriority,
+		r.config.Teams.Sources,
 		r.config.Teams.SkipExisting,
 		&http.Client{},
 	)
@@ -246,6 +254,7 @@ func (r *Resolver) UIClient() target.Client {
 	r.uiClient = ui.NewClient(
 		r.config.UI.Host,
 		r.config.UI.MinimumPriority,
+		r.config.UI.Sources,
 		r.config.UI.SkipExisting,
 		&http.Client{},
 	)
@@ -255,49 +264,52 @@ func (r *Resolver) UIClient() target.Client {
 	return r.uiClient
 }
 
-func (r *Resolver) YandexClient() target.Client {
-	if r.yandexClient != nil {
-		return r.yandexClient
+func (r *Resolver) S3Client() target.Client {
+	if r.s3Client != nil {
+		return r.s3Client
 	}
-	if r.config.Yandex.AccessKeyID == "" || r.config.Yandex.SecretAccessKey == "" {
+	if r.config.S3.Endpoint == "" {
 		return nil
 	}
-
-	if r.config.Yandex.Region == "" {
-		log.Printf("[INFO] Yandex.Region has not been declared using ru-central1")
-		r.config.Yandex.Region = "ru-central1"
-	}
-	if r.config.Yandex.Endpoint == "" {
-		log.Printf("[INFO] Yandex.Endpoint has not been declared using https://storage.yandexcloud.net")
-		r.config.Yandex.Endpoint = "https://storage.yandexcloud.net"
-	}
-	if r.config.Yandex.Prefix == "" {
-		log.Printf("[INFO] Yandex.Prefix has not been declared using policy-reporter prefix")
-		r.config.Yandex.Prefix = "policy-reporter/"
-	}
-	if r.config.Yandex.Bucket == "" {
-		log.Printf("[ERROR] Yandex : Bucket has to be declared")
+	if r.config.S3.AccessKeyID == "" {
+		log.Printf("[ERROR] S3.AccessKeyID has not been declared")
 		return nil
+	}
+	if r.config.S3.SecretAccessKey == "" {
+		log.Printf("[ERROR] S3.SecretAccessKey has not been declared")
+		return nil
+	}
+	if r.config.S3.Region == "" {
+		log.Printf("[ERROR] S3.Region has not been declared")
+		return nil
+	}
+	if r.config.S3.Bucket == "" {
+		log.Printf("[ERROR] S3.Bucket has to be declared")
+		return nil
+	}
+	if r.config.S3.Prefix == "" {
+		r.config.S3.Prefix = "policy-reporter/"
 	}
 
 	s3Client := helper.NewClient(
-		r.config.Yandex.AccessKeyID,
-		r.config.Yandex.SecretAccessKey,
-		r.config.Yandex.Region,
-		r.config.Yandex.Endpoint,
-		r.config.Yandex.Bucket,
+		r.config.S3.AccessKeyID,
+		r.config.S3.SecretAccessKey,
+		r.config.S3.Region,
+		r.config.S3.Endpoint,
+		r.config.S3.Bucket,
 	)
 
-	r.yandexClient = yandex.NewClient(
+	r.s3Client = s3.NewClient(
 		s3Client,
-		r.config.Yandex.Prefix,
-		r.config.Yandex.MinimumPriority,
-		r.config.Yandex.SkipExisting,
+		r.config.S3.Prefix,
+		r.config.S3.MinimumPriority,
+		r.config.S3.Sources,
+		r.config.S3.SkipExisting,
 	)
 
-	log.Println("[INFO] Yandex configured")
+	log.Println("[INFO] S3 configured")
 
-	return r.yandexClient
+	return r.s3Client
 }
 
 // TargetClients resolver method
@@ -328,8 +340,8 @@ func (r *Resolver) TargetClients() []target.Client {
 		clients = append(clients, ui)
 	}
 
-	if yandex := r.YandexClient(); yandex != nil {
-		clients = append(clients, yandex)
+	if s3 := r.S3Client(); s3 != nil {
+		clients = append(clients, s3)
 	}
 
 	return clients
@@ -346,44 +358,19 @@ func (r *Resolver) SkipExistingOnStartup() bool {
 	return true
 }
 
-// ConfigMapClient resolver method
-func (r *Resolver) ConfigMapClient() (v1.ConfigMapInterface, error) {
-	var err error
-
-	client, err := v1.NewForConfig(r.k8sConfig)
-	if err != nil {
-		return nil, err
-	}
-
-	return client.ConfigMaps(r.config.Namespace), nil
-}
-
-func (r *Resolver) configMapAPI() (kubernetes.ConfigMapAdapter, error) {
-	client, err := r.ConfigMapClient()
-	if err != nil {
-		return nil, err
-	}
-
-	return kubernetes.NewConfigMapAdapter(client), nil
-}
-
-func (r *Resolver) policyReportAPI(ctx context.Context) (kubernetes.PolicyReportAdapter, error) {
-	if r.policyAdapter != nil {
-		return r.policyAdapter, nil
+func (r *Resolver) PolicyReportClient() (report.PolicyReportClient, error) {
+	if r.policyReportClient != nil {
+		return r.policyReportClient, nil
 	}
 
 	client, err := dynamic.NewForConfig(r.k8sConfig)
 	if err != nil {
 		return nil, err
 	}
-	mapper, err := r.Mapper(ctx)
-	if err != nil {
-		return nil, err
-	}
 
-	r.policyAdapter = kubernetes.NewPolicyReportAdapter(client, mapper)
+	r.policyReportClient = kubernetes.NewPolicyReportClient(client, r.Mapper(), 5*time.Second)
 
-	return r.policyAdapter, nil
+	return r.policyReportClient, nil
 }
 
 // ResultCache resolver method

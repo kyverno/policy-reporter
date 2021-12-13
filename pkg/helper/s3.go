@@ -28,7 +28,7 @@ func (s *s3Client) Upload(body *bytes.Buffer, key string) error {
 	return err
 }
 
-// NewClient creates a new Yandex.client to send Results to S3. It doesnt' work right now
+// NewClient creates a new S3.client to send Results to S3. It doesnt' work right now
 func NewClient(accessKeyID, secretAccessKey, region, endpoint, bucket string) S3Client {
 	sess, err := session.NewSession(&aws.Config{
 		Region:      aws.String(region),

@@ -2,15 +2,12 @@ package cmd
 
 import (
 	"context"
+	"errors"
 	"flag"
+
 	"golang.org/x/sync/errgroup"
-	"net/http"
 
 	"github.com/kyverno/policy-reporter/pkg/config"
-	"github.com/kyverno/policy-reporter/pkg/metrics"
-	"github.com/kyverno/policy-reporter/pkg/report"
-	"github.com/kyverno/policy-reporter/pkg/target"
-	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/spf13/cobra"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
@@ -40,43 +37,46 @@ func newRunCMD() *cobra.Command {
 
 			resolver := config.NewResolver(c, k8sConfig)
 
-			client, err := resolver.PolicyReportClient(ctx)
+			client, err := resolver.PolicyReportClient()
 			if err != nil {
 				return err
 			}
 
-			client.RegisterCallback(metrics.CreateMetricsCallback())
-
-			targets := resolver.TargetClients()
-
-			if len(targets) > 0 {
-				client.RegisterPolicyResultCallback(func(r report.Result, e bool) {
-					for _, t := range targets {
-						go func(target target.Client, result report.Result, preExisted bool) {
-							if preExisted && target.SkipExistingOnStartup() {
-								return
-							}
-
-							target.Send(result)
-						}(t, r, e)
-					}
-				})
-
-				client.RegisterPolicyResultWatcher(resolver.SkipExistingOnStartup())
-			}
+			resolver.RegisterSendResultListener()
 
 			g := &errgroup.Group{}
 
+			server := resolver.APIServer(client.GetFoundResources())
+
+			if c.REST.Enabled {
+				db, err := resolver.Database()
+				if err != nil {
+					return err
+				}
+				defer db.Close()
+
+				store, err := resolver.PolicyReportStore(db)
+				if err != nil {
+					return err
+				}
+
+				resolver.RegisterStoreListener(store)
+				server.RegisterV1Handler(store)
+			}
+
+			if c.Metrics.Enabled {
+				resolver.RegisterMetricsListener()
+				server.RegisterMetricsHandler()
+			}
+
+			g.Go(server.Start)
+
 			g.Go(func() error {
-				return client.StartWatching(ctx)
-			})
+				eventChan := client.WatchPolicyReports(ctx)
 
-			g.Go(resolver.APIServer().Start)
+				resolver.EventPublisher().Publish(eventChan)
 
-			g.Go(func() error {
-				http.Handle("/metrics", promhttp.Handler())
-
-				return http.ListenAndServe(":2112", nil)
+				return errors.New("event publisher stoped")
 			})
 
 			return g.Wait()
@@ -86,7 +86,10 @@ func newRunCMD() *cobra.Command {
 	// For local usage
 	cmd.PersistentFlags().StringP("kubeconfig", "k", "", "absolute path to the kubeconfig file")
 	cmd.PersistentFlags().StringP("config", "c", "", "target configuration file")
-	cmd.PersistentFlags().IntP("apiPort", "a", 8080, "http port for the optional rest api")
+	cmd.PersistentFlags().IntP("port", "p", 8080, "http port for the optional rest api")
+	cmd.PersistentFlags().StringP("dbfile", "d", "sqlite-database.db", "path to the SQLite DB File")
+	cmd.PersistentFlags().BoolP("metrics-enabled", "m", false, "Enable Policy Reporter's Metrics API")
+	cmd.PersistentFlags().BoolP("rest-enabled", "r", false, "Enable Policy Reporter's REST API")
 
 	flag.Parse()
 

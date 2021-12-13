@@ -1,16 +1,13 @@
 package loki
 
 import (
-	"bytes"
-	"encoding/json"
-	"log"
 	"net/http"
 	"strings"
 	"time"
 
+	"github.com/kyverno/policy-reporter/pkg/helper"
 	"github.com/kyverno/policy-reporter/pkg/report"
 	"github.com/kyverno/policy-reporter/pkg/target"
-	"github.com/kyverno/policy-reporter/pkg/target/helper"
 )
 
 type httpClient interface {
@@ -31,7 +28,7 @@ type entry struct {
 	Line string `json:"line"`
 }
 
-func newLokiPayload(result report.Result) payload {
+func newLokiPayload(result *report.Result) payload {
 	timestamp := time.Now()
 	if !result.Timestamp.IsZero() {
 		timestamp = result.Timestamp
@@ -74,28 +71,14 @@ func newLokiPayload(result report.Result) payload {
 }
 
 type client struct {
-	host                  string
-	minimumPriority       string
-	skipExistingOnStartup bool
-	client                httpClient
+	target.BaseClient
+	host   string
+	client httpClient
 }
 
-func (l *client) Send(result report.Result) {
-	if result.Priority < report.NewPriority(l.minimumPriority) {
-		return
-	}
-
-	payload := newLokiPayload(result)
-	body := new(bytes.Buffer)
-
-	if err := json.NewEncoder(body).Encode(payload); err != nil {
-		log.Printf("[ERROR] LOKI : %v\n", err.Error())
-		return
-	}
-
-	req, err := http.NewRequest("POST", l.host, body)
+func (l *client) Send(result *report.Result) {
+	req, err := helper.CreateJSONRequest(l.Name(), "POST", l.host, newLokiPayload(result))
 	if err != nil {
-		log.Printf("[ERROR] LOKI : %v\n", err.Error())
 		return
 	}
 
@@ -103,27 +86,18 @@ func (l *client) Send(result report.Result) {
 	req.Header.Add("User-Agent", "Policy-Reporter")
 
 	resp, err := l.client.Do(req)
-	helper.HandleHTTPResponse("LOKI", resp, err)
-}
-
-func (l *client) SkipExistingOnStartup() bool {
-	return l.skipExistingOnStartup
+	helper.ProcessHTTPResponse(l.Name(), resp, err)
 }
 
 func (l *client) Name() string {
 	return "Loki"
 }
 
-func (l *client) MinimumPriority() string {
-	return l.minimumPriority
-}
-
 // NewClient creates a new loki.client to send Results to Loki
-func NewClient(host, minimumPriority string, skipExistingOnStartup bool, httpClient httpClient) target.Client {
+func NewClient(host, minimumPriority string, sources []string, skipExistingOnStartup bool, httpClient httpClient) target.Client {
 	return &client{
+		target.NewBaseClient(minimumPriority, sources, skipExistingOnStartup),
 		host + "/api/prom/push",
-		minimumPriority,
-		skipExistingOnStartup,
 		httpClient,
 	}
 }

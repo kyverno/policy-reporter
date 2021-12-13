@@ -9,7 +9,7 @@ import (
 	"github.com/kyverno/policy-reporter/pkg/target/elasticsearch"
 )
 
-var completeResult = report.Result{
+var completeResult = &report.Result{
 	Message:   "validation error: requests and limits required. Rule autogen-check-for-requests-and-limits failed at path /spec/template/spec/containers/0/resources/requests/",
 	Policy:    "require-requests-and-limits-required",
 	Rule:      "autogen-check-for-requests-and-limits",
@@ -18,8 +18,9 @@ var completeResult = report.Result{
 	Status:    report.Fail,
 	Severity:  report.High,
 	Category:  "resources",
+	Source:    "Kyverno",
 	Scored:    true,
-	Resource: report.Resource{
+	Resource: &report.Resource{
 		APIVersion: "v1",
 		Kind:       "Deployment",
 		Name:       "nginx",
@@ -58,7 +59,7 @@ func Test_ElasticsearchTarget(t *testing.T) {
 			}
 		}
 
-		client := elasticsearch.NewClient("http://localhost:9200", "policy-reporter", "annually", "", false, testClient{callback, 200})
+		client := elasticsearch.NewClient("http://localhost:9200", "policy-reporter", "annually", "", []string{}, false, testClient{callback, 200})
 		client.Send(completeResult)
 	})
 	t.Run("Send with Monthly Result", func(t *testing.T) {
@@ -68,7 +69,7 @@ func Test_ElasticsearchTarget(t *testing.T) {
 			}
 		}
 
-		client := elasticsearch.NewClient("http://localhost:9200", "policy-reporter", "monthly", "", false, testClient{callback, 200})
+		client := elasticsearch.NewClient("http://localhost:9200", "policy-reporter", "monthly", "", []string{}, false, testClient{callback, 200})
 		client.Send(completeResult)
 	})
 	t.Run("Send with Monthly Result", func(t *testing.T) {
@@ -78,7 +79,7 @@ func Test_ElasticsearchTarget(t *testing.T) {
 			}
 		}
 
-		client := elasticsearch.NewClient("http://localhost:9200", "policy-reporter", "daily", "", false, testClient{callback, 200})
+		client := elasticsearch.NewClient("http://localhost:9200", "policy-reporter", "daily", "", []string{}, false, testClient{callback, 200})
 		client.Send(completeResult)
 	})
 	t.Run("Send with None Result", func(t *testing.T) {
@@ -88,40 +89,14 @@ func Test_ElasticsearchTarget(t *testing.T) {
 			}
 		}
 
-		client := elasticsearch.NewClient("http://localhost:9200", "policy-reporter", "none", "", false, testClient{callback, 200})
+		client := elasticsearch.NewClient("http://localhost:9200", "policy-reporter", "none", "", []string{}, false, testClient{callback, 200})
 		client.Send(completeResult)
-	})
-	t.Run("Send with ignored Priority", func(t *testing.T) {
-		callback := func(req *http.Request) {
-			t.Errorf("Unexpected Call")
-		}
-
-		client := elasticsearch.NewClient("http://localhost:9200", "policy-reporter", "none", "error", false, testClient{callback, 200})
-		client.Send(completeResult)
-	})
-	t.Run("SkipExistingOnStartup", func(t *testing.T) {
-		callback := func(req *http.Request) {
-			t.Errorf("Unexpected Call")
-		}
-
-		client := elasticsearch.NewClient("http://localhost:9200", "policy-reporter", "none", "", true, testClient{callback, 200})
-
-		if !client.SkipExistingOnStartup() {
-			t.Error("Should return configured SkipExistingOnStartup")
-		}
 	})
 	t.Run("Name", func(t *testing.T) {
-		client := elasticsearch.NewClient("http://localhost:9200", "policy-reporter", "none", "", true, testClient{})
+		client := elasticsearch.NewClient("http://localhost:9200", "policy-reporter", "none", "", []string{}, true, testClient{})
 
 		if client.Name() != "Elasticsearch" {
 			t.Errorf("Unexpected Name %s", client.Name())
-		}
-	})
-	t.Run("MinimumPriority", func(t *testing.T) {
-		client := elasticsearch.NewClient("http://localhost:9200", "policy-reporter", "none", "debug", true, testClient{})
-
-		if client.MinimumPriority() != "debug" {
-			t.Errorf("Unexpected MinimumPriority %s", client.MinimumPriority())
 		}
 	})
 }

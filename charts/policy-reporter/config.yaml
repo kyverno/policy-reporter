@@ -2,6 +2,10 @@ loki:
   host: {{ .Values.target.loki.host | quote }}
   minimumPriority: {{ .Values.target.loki.minimumPriority | quote }}
   skipExistingOnStartup: {{ .Values.target.loki.skipExistingOnStartup }}
+  {{- with .Values.target.loki.sources }}
+  sources:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
 
 elasticsearch:
   host: {{ .Values.target.elasticsearch.host | quote }}
@@ -9,33 +13,62 @@ elasticsearch:
   rotation: {{ .Values.target.elasticsearch.rotation | default "dayli" | quote }}
   minimumPriority: {{ .Values.target.elasticsearch.minimumPriority | quote }}
   skipExistingOnStartup: {{ .Values.target.elasticsearch.skipExistingOnStartup }}
+  {{- with .Values.target.elasticsearch.sources }}
+  sources:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
 
 slack:
   webhook: {{ .Values.target.slack.webhook | quote }}
   minimumPriority: {{ .Values.target.slack.minimumPriority | quote }}
   skipExistingOnStartup: {{ .Values.target.slack.skipExistingOnStartup }}
+  {{- with .Values.target.slack.sources }}
+  sources:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
 
 discord:
   webhook: {{ .Values.target.discord.webhook | quote }}
   minimumPriority: {{ .Values.target.discord.minimumPriority | quote }}
   skipExistingOnStartup: {{ .Values.target.discord.skipExistingOnStartup }}
+  {{- with .Values.target.discord.sources }}
+  sources:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
 
 teams:
   webhook: {{ .Values.target.teams.webhook | quote }}
   minimumPriority: {{ .Values.target.teams.minimumPriority | quote }}
   skipExistingOnStartup: {{ .Values.target.teams.skipExistingOnStartup }}
+  {{- with .Values.target.teams.sources }}
+  sources:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
 
 ui:
   host: {{ include "policyreporter.uihost" . }}
   minimumPriority: {{ .Values.target.ui.minimumPriority | quote }}
   skipExistingOnStartup: {{ .Values.target.ui.skipExistingOnStartup }}
+  {{- with .Values.target.ui.sources }}
+  sources:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
 
-yandex:
-  accessKeyID: {{ .Values.target.yandex.accessKeyID }}
-  secretAccessKey:  {{ .Values.target.yandex.secretAccessKey }}
-  region: {{ .Values.target.yandex.region }}
-  endpoint: {{ .Values.target.yandex.endpoint }}
-  bucket: {{ .Values.target.yandex.bucket }}
-  prefix: {{ .Values.target.yandex.prefix }}
-  minimumPriority: {{ .Values.target.yandex.minimumPriority | quote }}
-  skipExistingOnStartup: {{ .Values.target.yandex.skipExistingOnStartup }}
+s3:
+  accessKeyID: {{ .Values.target.s3.accessKeyID }}
+  secretAccessKey:  {{ .Values.target.s3.secretAccessKey }}
+  region: {{ .Values.target.s3.region }}
+  endpoint: {{ .Values.target.s3.endpoint }}
+  bucket: {{ .Values.target.s3.bucket }}
+  prefix: {{ .Values.target.s3.prefix }}
+  minimumPriority: {{ .Values.target.s3.minimumPriority | quote }}
+  skipExistingOnStartup: {{ .Values.target.s3.skipExistingOnStartup }}
+  {{- with .Values.target.s3.sources }}
+  sources:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+
+{{- with .Values.policyPriorities }}
+priorityMap:
+  {{- toYaml . | nindent 2 }}
+{{- end }}

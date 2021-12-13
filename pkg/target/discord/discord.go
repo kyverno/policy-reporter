@@ -1,15 +1,12 @@
 package discord
 
 import (
-	"bytes"
-	"encoding/json"
-	"log"
 	"net/http"
 	"strings"
 
+	"github.com/kyverno/policy-reporter/pkg/helper"
 	"github.com/kyverno/policy-reporter/pkg/report"
 	"github.com/kyverno/policy-reporter/pkg/target"
-	"github.com/kyverno/policy-reporter/pkg/target/helper"
 )
 
 type payload struct {
@@ -30,20 +27,16 @@ type embedField struct {
 	Inline bool   `json:"inline"`
 }
 
-func newPayload(result report.Result) payload {
-	var color string
-	switch result.Priority {
-	case report.CriticalPriority:
-		color = "15158332"
-	case report.ErrorPriority:
-		color = "15158332"
-	case report.WarningPriority:
-		color = "15105570"
-	case report.InfoPriority:
-		color = "3066993"
-	case report.DebugPriority:
-		color = "12370112"
-	}
+var colors = map[report.Priority]string{
+	report.DebugPriority:    "12370112",
+	report.InfoPriority:     "3066993",
+	report.WarningPriority:  "15105570",
+	report.CriticalPriority: "15158332",
+	report.ErrorPriority:    "15158332",
+}
+
+func newPayload(result *report.Result) payload {
+	color := colors[result.Priority]
 
 	embedFields := make([]embedField, 0)
 
@@ -94,28 +87,14 @@ type httpClient interface {
 }
 
 type client struct {
-	webhook               string
-	minimumPriority       string
-	skipExistingOnStartup bool
-	client                httpClient
+	target.BaseClient
+	webhook string
+	client  httpClient
 }
 
-func (d *client) Send(result report.Result) {
-	if result.Priority < report.NewPriority(d.minimumPriority) {
-		return
-	}
-
-	payload := newPayload(result)
-	body := new(bytes.Buffer)
-
-	if err := json.NewEncoder(body).Encode(payload); err != nil {
-		log.Printf("[ERROR] DISCORD : %v\n", err.Error())
-		return
-	}
-
-	req, err := http.NewRequest("POST", d.webhook, body)
+func (d *client) Send(result *report.Result) {
+	req, err := helper.CreateJSONRequest(d.Name(), "POST", d.webhook, newPayload(result))
 	if err != nil {
-		log.Printf("[ERROR] DISCORD : %v\n", err.Error())
 		return
 	}
 
@@ -123,27 +102,18 @@ func (d *client) Send(result report.Result) {
 	req.Header.Add("User-Agent", "Policy-Reporter")
 
 	resp, err := d.client.Do(req)
-	helper.HandleHTTPResponse("DISCORD", resp, err)
-}
-
-func (d *client) SkipExistingOnStartup() bool {
-	return d.skipExistingOnStartup
+	helper.ProcessHTTPResponse(d.Name(), resp, err)
 }
 
 func (d *client) Name() string {
 	return "Discord"
 }
 
-func (d *client) MinimumPriority() string {
-	return d.minimumPriority
-}
-
 // NewClient creates a new loki.client to send Results to Discord
-func NewClient(webhook, minimumPriority string, skipExistingOnStartup bool, httpClient httpClient) target.Client {
+func NewClient(webhook, minimumPriority string, sources []string, skipExistingOnStartup bool, httpClient httpClient) target.Client {
 	return &client{
+		target.NewBaseClient(minimumPriority, sources, skipExistingOnStartup),
 		webhook,
-		minimumPriority,
-		skipExistingOnStartup,
 		httpClient,
 	}
 }

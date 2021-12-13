@@ -10,7 +10,7 @@ import (
 	"github.com/kyverno/policy-reporter/pkg/target/teams"
 )
 
-var completeResult = report.Result{
+var completeResult = &report.Result{
 	Message:   "validation error: requests and limits required. Rule autogen-check-for-requests-and-limits failed at path /spec/template/spec/containers/0/resources/requests/",
 	Policy:    "require-requests-and-limits-required",
 	Rule:      "autogen-check-for-requests-and-limits",
@@ -20,7 +20,8 @@ var completeResult = report.Result{
 	Timestamp: time.Date(2021, time.February, 23, 15, 10, 0, 0, time.UTC),
 	Category:  "resources",
 	Scored:    true,
-	Resource: report.Resource{
+	Source:    "Kyverno",
+	Resource: &report.Resource{
 		APIVersion: "v1",
 		Kind:       "Deployment",
 		Name:       "nginx",
@@ -30,7 +31,7 @@ var completeResult = report.Result{
 	Properties: map[string]string{"version": "1.2.0"},
 }
 
-var minimalErrorResult = report.Result{
+var minimalErrorResult = &report.Result{
 	Message:  "validation error: label required. Rule app-label-required failed at path /spec/template/spec/containers/0/resources/requests/",
 	Policy:   "app-label-requirement",
 	Priority: report.ErrorPriority,
@@ -38,7 +39,7 @@ var minimalErrorResult = report.Result{
 	Scored:   true,
 }
 
-var minimalResult = report.Result{
+var minimalResult = &report.Result{
 	Message:  "validation error: label required. Rule app-label-required failed at path /spec/template/spec/containers/0/resources/requests/",
 	Policy:   "app-label-requirement",
 	Priority: report.CriticalPriority,
@@ -46,7 +47,7 @@ var minimalResult = report.Result{
 	Scored:   true,
 }
 
-var minimalInfoResult = report.Result{
+var minimalInfoResult = &report.Result{
 	Message:  "validation error: label required. Rule app-label-required failed at path /spec/template/spec/containers/0/resources/requests/",
 	Policy:   "app-label-requirement",
 	Priority: report.InfoPriority,
@@ -54,7 +55,7 @@ var minimalInfoResult = report.Result{
 	Scored:   true,
 }
 
-var minimalDebugResult = report.Result{
+var minimalDebugResult = &report.Result{
 	Message:  "validation error: label required. Rule app-label-required failed at path /spec/template/spec/containers/0/resources/requests/",
 	Policy:   "app-label-requirement",
 	Priority: report.DebugPriority,
@@ -102,7 +103,7 @@ func Test_TeamsTarget(t *testing.T) {
 			}
 		}
 
-		client := teams.NewClient("http://hook.teams:80", "", false, testClient{callback, 200})
+		client := teams.NewClient("http://hook.teams:80", "", []string{}, false, testClient{callback, 200})
 		client.Send(completeResult)
 	})
 
@@ -132,7 +133,7 @@ func Test_TeamsTarget(t *testing.T) {
 			}
 		}
 
-		client := teams.NewClient("http://hook.teams:80", "", false, testClient{callback, 200})
+		client := teams.NewClient("http://hook.teams:80", "", []string{}, false, testClient{callback, 200})
 		client.Send(minimalResult)
 	})
 	t.Run("Send Minimal InfoResult", func(t *testing.T) {
@@ -149,7 +150,7 @@ func Test_TeamsTarget(t *testing.T) {
 			}
 		}
 
-		client := teams.NewClient("http://hook.teams:80", "", false, testClient{callback, 200})
+		client := teams.NewClient("http://hook.teams:80", "", []string{}, false, testClient{callback, 200})
 		client.Send(minimalInfoResult)
 	})
 	t.Run("Send Minimal ErrorResult", func(t *testing.T) {
@@ -166,7 +167,7 @@ func Test_TeamsTarget(t *testing.T) {
 			}
 		}
 
-		client := teams.NewClient("http://hook.teams:80", "", false, testClient{callback, 200})
+		client := teams.NewClient("http://hook.teams:80", "", []string{}, false, testClient{callback, 200})
 		client.Send(minimalErrorResult)
 	})
 	t.Run("Send Minimal Debug Result", func(t *testing.T) {
@@ -195,40 +196,14 @@ func Test_TeamsTarget(t *testing.T) {
 			}
 		}
 
-		client := teams.NewClient("http://hook.teams:80", "", false, testClient{callback, 200})
+		client := teams.NewClient("http://hook.teams:80", "", []string{}, false, testClient{callback, 200})
 		client.Send(minimalDebugResult)
 	})
-	t.Run("Send with ingored Priority", func(t *testing.T) {
-		callback := func(req *http.Request) {
-			t.Errorf("Unexpected Call")
-		}
-
-		client := teams.NewClient("http://localhost:9200", "error", false, testClient{callback, 200})
-		client.Send(completeResult)
-	})
-	t.Run("SkipExistingOnStartup", func(t *testing.T) {
-		callback := func(req *http.Request) {
-			t.Errorf("Unexpected Call")
-		}
-
-		client := teams.NewClient("http://localhost:9200", "", true, testClient{callback, 200})
-
-		if !client.SkipExistingOnStartup() {
-			t.Error("Should return configured SkipExistingOnStartup")
-		}
-	})
 	t.Run("Name", func(t *testing.T) {
-		client := teams.NewClient("http://localhost:9200", "", true, testClient{})
+		client := teams.NewClient("http://localhost:9200", "", []string{}, true, testClient{})
 
 		if client.Name() != "Teams" {
 			t.Errorf("Unexpected Name %s", client.Name())
-		}
-	})
-	t.Run("MinimumPriority", func(t *testing.T) {
-		client := teams.NewClient("http://localhost:9200", "debug", true, testClient{})
-
-		if client.MinimumPriority() != "debug" {
-			t.Errorf("Unexpected MinimumPriority %s", client.MinimumPriority())
 		}
 	})
 }

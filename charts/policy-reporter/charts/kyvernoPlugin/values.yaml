@@ -2,7 +2,7 @@ image:
   registry: ghcr.io
   repository: kyverno/policy-reporter-kyverno-plugin
   pullPolicy: IfNotPresent
-  tag: 0.3.3
+  tag: 1.0.0
 
 imagePullSecrets: []
 
@@ -81,9 +81,22 @@ tolerations: []
 # Anti-affinity to disallow deploying client and master nodes on the same worker node
 affinity: {}
 
+# REST API
+rest:
+  enabled: true
+
+# Prometheus Metrics API
+metrics:
+  enabled: true
+
 # Enable a NetworkPolicy for this chart. Useful on clusters where Network Policies are
 # used and configured in a default-deny fashion.
 networkPolicy:
   enabled: false
-  kubernetesApiPort: 6443
-  egress: []
+  # Kubernetes API Server
+  egress:
+  - to:
+    ports:
+    - protocol: TCP
+      port: 6443
+  ingress: []

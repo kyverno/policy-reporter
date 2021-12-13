@@ -1,117 +1,13 @@
 package kubernetes_test
 
 import (
-	"context"
 	"testing"
-	"time"
 
 	"github.com/kyverno/policy-reporter/pkg/kubernetes"
 	"github.com/kyverno/policy-reporter/pkg/report"
-	v1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/watch"
-	testcore "k8s.io/client-go/testing"
 )
 
-var policyMap = map[string]interface{}{
-	"metadata": map[string]interface{}{
-		"name":              "policy-report",
-		"namespace":         "test",
-		"creationTimestamp": "2021-02-23T15:00:00Z",
-	},
-	"summary": map[string]interface{}{
-		"pass":  int64(1),
-		"skip":  int64(2),
-		"warn":  int64(3),
-		"fail":  int64(4),
-		"error": int64(5),
-	},
-	"results": []interface{}{
-		map[string]interface{}{
-			"message": "message",
-			"status":  "fail",
-			"scored":  true,
-			"policy":  "required-label",
-			"rule":    "app-label-required",
-			"timestamp": map[string]interface{}{
-				"seconds": 1614093000,
-			},
-			"source":   "test",
-			"category": "test",
-			"severity": "high",
-			"resources": []interface{}{
-				map[string]interface{}{
-					"apiVersion": "v1",
-					"kind":       "Deployment",
-					"name":       "nginx",
-					"namespace":  "test",
-					"uid":        "dfd57c50-f30c-4729-b63f-b1954d8988d1",
-				},
-			},
-			"properties": map[string]interface{}{
-				"version": "1.2.0",
-			},
-		},
-		map[string]interface{}{
-			"message": "message 2",
-			"status":  "fail",
-			"scored":  true,
-			"timestamp": map[string]interface{}{
-				"seconds": int64(1614093000),
-			},
-			"policy":    "priority-test",
-			"resources": []interface{}{},
-		},
-	},
-}
-
-var minPolicyMap = map[string]interface{}{
-	"metadata": map[string]interface{}{
-		"name":      "policy-report",
-		"namespace": "test",
-	},
-	"results": []interface{}{},
-}
-
-var clusterPolicyMap = map[string]interface{}{
-	"metadata": map[string]interface{}{
-		"name":              "clusterpolicy-report",
-		"creationTimestamp": "2021-02-23T15:00:00Z",
-	},
-	"summary": map[string]interface{}{
-		"pass":  int64(1),
-		"skip":  int64(2),
-		"warn":  int64(3),
-		"fail":  int64(4),
-		"error": int64(5),
-	},
-	"results": []interface{}{
-		map[string]interface{}{
-			"message":   "message",
-			"result":    "fail",
-			"scored":    true,
-			"policy":    "cluster-required-label",
-			"rule":      "ns-label-required",
-			"category":  "test",
-			"severity":  "high",
-			"timestamp": map[string]interface{}{"seconds": ""},
-			"resources": []interface{}{
-				map[string]interface{}{
-					"apiVersion": "v1",
-					"kind":       "Namespace",
-					"name":       "policy-reporter",
-					"uid":        "dfd57c50-f30c-4729-b63f-b1954d8988d1",
-				},
-			},
-		},
-	},
-}
-
-var priorityMap = map[string]string{
-	"priority-test": "warning",
-}
-
-var mapper = kubernetes.NewMapper(priorityMap, nil)
+var mapper = kubernetes.NewMapper(priorityMap)
 
 func Test_MapPolicyReport(t *testing.T) {
 	preport := mapper.MapPolicyReport(policyMap)
@@ -138,7 +34,7 @@ func Test_MapPolicyReport(t *testing.T) {
 		t.Errorf("Unexpected Summary.Error value %d (expected 5)", preport.Summary.Error)
 	}
 
-	result1, ok := preport.Results["required-label__app-label-required__fail__dfd57c50-f30c-4729-b63f-b1954d8988d1"]
+	result1, ok := preport.Results[result1ID]
 	if !ok {
 		t.Error("Expected result not found")
 	}
@@ -194,7 +90,7 @@ func Test_MapPolicyReport(t *testing.T) {
 		t.Errorf("Expected Resource.Namespace 'dfd57c50-f30c-4729-b63f-b1954d8988d1' (acutal %s)", resource.UID)
 	}
 
-	result2, ok := preport.Results["priority-test____fail"]
+	result2, ok := preport.Results[result2ID]
 	if !ok {
 		t.Error("Expected result not found")
 	}
@@ -253,11 +149,11 @@ func Test_MapMinPolicyReport(t *testing.T) {
 
 func Test_PriorityMap(t *testing.T) {
 	t.Run("Test exact match, without default", func(t *testing.T) {
-		mapper := kubernetes.NewMapper(map[string]string{"required-label": "debug"}, nil)
+		mapper := kubernetes.NewMapper(map[string]string{"required-label": "debug"})
 
 		preport := mapper.MapPolicyReport(policyMap)
 
-		result := preport.Results["required-label__app-label-required__fail__dfd57c50-f30c-4729-b63f-b1954d8988d1"]
+		result := preport.Results[result1ID]
 
 		if result.Priority != report.DebugPriority {
 			t.Errorf("Expected Policy '%d' (acutal %d)", report.DebugPriority, result.Priority)
@@ -265,11 +161,11 @@ func Test_PriorityMap(t *testing.T) {
 	})
 
 	t.Run("Test exact match handled over default", func(t *testing.T) {
-		mapper := kubernetes.NewMapper(map[string]string{"required-label": "debug", "default": "warning"}, nil)
+		mapper := kubernetes.NewMapper(map[string]string{"required-label": "debug", "default": "warning"})
 
 		preport := mapper.MapPolicyReport(policyMap)
 
-		result := preport.Results["required-label__app-label-required__fail__dfd57c50-f30c-4729-b63f-b1954d8988d1"]
+		result := preport.Results[result1ID]
 
 		if result.Priority != report.DebugPriority {
 			t.Errorf("Expected Policy '%d' (acutal %d)", report.DebugPriority, result.Priority)
@@ -277,11 +173,11 @@ func Test_PriorityMap(t *testing.T) {
 	})
 
 	t.Run("Test default expressions", func(t *testing.T) {
-		mapper := kubernetes.NewMapper(map[string]string{"default": "warning"}, nil)
+		mapper := kubernetes.NewMapper(map[string]string{"default": "warning"})
 
 		preport := mapper.MapPolicyReport(policyMap)
 
-		result := preport.Results["priority-test____fail"]
+		result := preport.Results[result2ID]
 
 		if result.Priority != report.WarningPriority {
 			t.Errorf("Expected Policy '%d' (acutal %d)", report.WarningPriority, result.Priority)
@@ -289,92 +185,67 @@ func Test_PriorityMap(t *testing.T) {
 	})
 }
 
-func Test_PriorityFetch(t *testing.T) {
-	_, cmAPI := newFakeAPI()
-	cmAPI.Create(context.Background(), configMap, metav1.CreateOptions{})
-	mapper := kubernetes.NewMapper(make(map[string]string), kubernetes.NewConfigMapAdapter(cmAPI))
+func Test_MapWithoutMetadata(t *testing.T) {
+	mapper := kubernetes.NewMapper(make(map[string]string))
 
-	preport1 := mapper.MapPolicyReport(policyMap)
-	result1 := preport1.Results["priority-test____fail"]
+	policyReport := map[string]interface{}{}
 
-	if result1.Priority != report.WarningPriority {
-		t.Errorf("Default Priority should be Warning")
+	report := mapper.MapPolicyReport(policyReport)
+
+	if report.Name != "" {
+		t.Errorf("Expected empty PolicyReport")
+	}
+}
+func Test_MapWithoutResultTimestamp(t *testing.T) {
+	mapper := kubernetes.NewMapper(make(map[string]string))
+
+	policyReport := map[string]interface{}{
+		"metadata": map[string]interface{}{
+			"name":              "policy-report",
+			"namespace":         "test",
+			"creationTimestamp": "2021-02-23T15:00:00Z",
+		},
+		"results": []interface{}{map[string]interface{}{
+			"message":   "message 2",
+			"status":    "fail",
+			"scored":    true,
+			"policy":    "priority-test",
+			"resources": []interface{}{},
+		}},
 	}
 
-	mapper.FetchPriorities(context.Background())
-	preport2 := mapper.MapPolicyReport(policyMap)
-	result2 := preport2.Results["priority-test____fail"]
-	if result2.Priority != report.CriticalPriority {
-		t.Errorf("Default Priority should be Critical after ConigMap fetch")
+	report := mapper.MapPolicyReport(policyReport)
+
+	if report.Results[result2ID].Timestamp.IsZero() {
+		t.Errorf("Expected valid Timestamp")
 	}
 }
 
-func Test_PriorityFetchError(t *testing.T) {
-	_, cmAPI := newFakeAPI()
-	mapper := kubernetes.NewMapper(make(map[string]string), kubernetes.NewConfigMapAdapter(cmAPI))
+func Test_MapTimestamoAsInt(t *testing.T) {
+	mapper := kubernetes.NewMapper(make(map[string]string))
 
-	mapper.FetchPriorities(context.Background())
-	preport := mapper.MapPolicyReport(policyMap)
-	result := preport.Results["priority-test____fail"]
-	if result.Priority != report.WarningPriority {
-		t.Errorf("Fetch Error should not effect the functionality and continue using Warning as default")
-	}
-}
-
-func Test_PrioritySync(t *testing.T) {
-	client, cmAPI := newFakeAPI()
-	watcher := watch.NewFake()
-	client.PrependWatchReactor("configmaps", testcore.DefaultWatchReactor(watcher, nil))
-
-	mapper := kubernetes.NewMapper(make(map[string]string), kubernetes.NewConfigMapAdapter(cmAPI))
-
-	preport1 := mapper.MapPolicyReport(policyMap)
-	result1 := preport1.Results["priority-test____fail"]
-
-	if result1.Priority != report.WarningPriority {
-		t.Errorf("Default Priority should be Warning")
-	}
-
-	go mapper.SyncPriorities(context.Background())
-
-	watcher.Add(configMap)
-
-	preport2 := mapper.MapPolicyReport(policyMap)
-	result2 := preport2.Results["priority-test____fail"]
-	if result2.Priority != report.CriticalPriority {
-		t.Errorf("Default Priority should be Critical after ConigMap add sync")
-	}
-
-	configMap2 := &v1.ConfigMap{
-		TypeMeta: metav1.TypeMeta{
-			Kind:       "ConfigMap",
-			APIVersion: "v1",
+	policyReport := map[string]interface{}{
+		"metadata": map[string]interface{}{
+			"name":              "policy-report",
+			"namespace":         "test",
+			"creationTimestamp": "2021-02-23T15:00:00Z",
 		},
-		ObjectMeta: metav1.ObjectMeta{
-			Name: "policy-reporter-priorities",
-		},
-		Data: map[string]string{
-			"default": "debug",
-		},
+		"results": []interface{}{map[string]interface{}{
+			"message": "message 2",
+			"status":  "fail",
+			"scored":  true,
+			"timestamp": map[string]interface{}{
+				"seconds": 1614093000,
+			},
+			"policy":    "priority-test",
+			"resources": []interface{}{},
+		}},
 	}
 
-	watcher.Modify(configMap2)
+	r := mapper.MapPolicyReport(policyReport)
+	id := report.GeneratePolicyReportResultID("", "priority-test", "", "fail", "message 2")
 
-	time.Sleep(100 * time.Millisecond)
-
-	preport3 := mapper.MapPolicyReport(policyMap)
-	result3 := preport3.Results["priority-test____fail"]
-	if result3.Priority != report.DebugPriority {
-		t.Errorf("Default Priority should be Debug after ConigMap modify sync")
-	}
-
-	watcher.Delete(configMap2)
-
-	time.Sleep(100 * time.Millisecond)
-
-	preport4 := mapper.MapPolicyReport(policyMap)
-	result4 := preport4.Results["priority-test____fail"]
-	if result4.Priority != report.WarningPriority {
-		t.Errorf("Default Priority should be fallback to Warning after ConigMap delete sync")
+	if r.Results[id].Timestamp.IsZero() {
+		t.Errorf("Expected valid Timestamp")
 	}
 }

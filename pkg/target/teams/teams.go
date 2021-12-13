@@ -1,16 +1,13 @@
 package teams
 
 import (
-	"bytes"
-	"encoding/json"
-	"log"
 	"net/http"
 	"strings"
 	"time"
 
+	"github.com/kyverno/policy-reporter/pkg/helper"
 	"github.com/kyverno/policy-reporter/pkg/report"
 	"github.com/kyverno/policy-reporter/pkg/target"
-	"github.com/kyverno/policy-reporter/pkg/target/helper"
 )
 
 type httpClient interface {
@@ -37,24 +34,15 @@ type payload struct {
 	Sections   []section `json:"sections"`
 }
 
-func colorFromPriority(p report.Priority) string {
-	if p == report.CriticalPriority {
-		return "b80707"
-	}
-	if p == report.ErrorPriority {
-		return "e20b0b"
-	}
-	if p == report.WarningPriority {
-		return "f2c744"
-	}
-	if p == report.InfoPriority {
-		return "36a64f"
-	}
-
-	return "68c2ff"
+var colors = map[report.Priority]string{
+	report.DebugPriority:    "68c2ff",
+	report.InfoPriority:     "36a64f",
+	report.WarningPriority:  "f2c744",
+	report.CriticalPriority: "b80707",
+	report.ErrorPriority:    "e20b0b",
 }
 
-func newPayload(result report.Result) payload {
+func newPayload(result *report.Result) payload {
 	facts := make([]fact, 0)
 
 	facts = append(facts, fact{"Policy", result.Policy})
@@ -71,8 +59,8 @@ func newPayload(result report.Result) payload {
 	if result.Severity != "" {
 		facts = append(facts, fact{"Severity", result.Severity})
 	}
-	res := report.Resource{}
-	if result.Resource.UID != "" {
+	res := &report.Resource{}
+	if result.HasResource() {
 		res = result.Resource
 	}
 
@@ -107,34 +95,20 @@ func newPayload(result report.Result) payload {
 		Type:       "MessageCard",
 		Context:    "http://schema.org/extensions",
 		Summary:    result.Message,
-		ThemeColor: colorFromPriority(result.Priority),
+		ThemeColor: colors[result.Priority],
 		Sections:   sections,
 	}
 }
 
 type client struct {
-	webhook               string
-	minimumPriority       string
-	skipExistingOnStartup bool
-	client                httpClient
+	target.BaseClient
+	webhook string
+	client  httpClient
 }
 
-func (s *client) Send(result report.Result) {
-	if result.Priority < report.NewPriority(s.minimumPriority) {
-		return
-	}
-
-	payload := newPayload(result)
-	body := new(bytes.Buffer)
-
-	if err := json.NewEncoder(body).Encode(payload); err != nil {
-		log.Printf("[ERROR] TEAMS : %v\n", err.Error())
-		return
-	}
-
-	req, err := http.NewRequest("POST", s.webhook, body)
+func (s *client) Send(result *report.Result) {
+	req, err := helper.CreateJSONRequest(s.Name(), "POST", s.webhook, newPayload(result))
 	if err != nil {
-		log.Printf("[ERROR] TEAMS : %v\n", err.Error())
 		return
 	}
 
@@ -142,27 +116,18 @@ func (s *client) Send(result report.Result) {
 	req.Header.Add("User-Agent", "Policy-Reporter")
 
 	resp, err := s.client.Do(req)
-	helper.HandleHTTPResponse("TEAMS", resp, err)
-}
-
-func (s *client) SkipExistingOnStartup() bool {
-	return s.skipExistingOnStartup
+	helper.ProcessHTTPResponse(s.Name(), resp, err)
 }
 
 func (s *client) Name() string {
 	return "Teams"
 }
 
-func (s *client) MinimumPriority() string {
-	return s.minimumPriority
-}
-
 // NewClient creates a new teams.client to send Results to MS Teams
-func NewClient(host, minimumPriority string, skipExistingOnStartup bool, httpClient httpClient) target.Client {
+func NewClient(host, minimumPriority string, sources []string, skipExistingOnStartup bool, httpClient httpClient) target.Client {
 	return &client{
+		target.NewBaseClient(minimumPriority, sources, skipExistingOnStartup),
 		host,
-		minimumPriority,
-		skipExistingOnStartup,
 		httpClient,
 	}
 }

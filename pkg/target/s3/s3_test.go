@@ -1,4 +1,4 @@
-package yandex_test
+package s3_test
 
 import (
 	"bytes"
@@ -6,10 +6,10 @@ import (
 	"testing"
 
 	"github.com/kyverno/policy-reporter/pkg/report"
-	"github.com/kyverno/policy-reporter/pkg/target/yandex"
+	"github.com/kyverno/policy-reporter/pkg/target/s3"
 )
 
-var completeResult = report.Result{
+var completeResult = &report.Result{
 	Message:  "validation error: requests and limits required. Rule autogen-check-for-requests-and-limits failed at path /spec/template/spec/containers/0/resources/requests/",
 	Policy:   "require-requests-and-limits-required",
 	Rule:     "autogen-check-for-requests-and-limits",
@@ -18,7 +18,7 @@ var completeResult = report.Result{
 	Severity: report.High,
 	Category: "resources",
 	Scored:   true,
-	Resource: report.Resource{
+	Resource: &report.Resource{
 		APIVersion: "v1",
 		Kind:       "Deployment",
 		Name:       "nginx",
@@ -38,7 +38,7 @@ func (c *testClient) Upload(_ *bytes.Buffer, _ string) error {
 
 var testCallback = func(body *bytes.Buffer, key string) {}
 
-func Test_YandexTarget(t *testing.T) {
+func Test_S3Target(t *testing.T) {
 	t.Run("Send", func(t *testing.T) {
 		callback := func(body *bytes.Buffer, key string) {
 			report := new(bytes.Buffer)
@@ -52,36 +52,14 @@ func Test_YandexTarget(t *testing.T) {
 			}
 		}
 
-		client := yandex.NewClient(&testClient{nil, callback}, "", "", true)
+		client := s3.NewClient(&testClient{nil, callback}, "", "", []string{}, true)
 		client.Send(completeResult)
-	})
-	t.Run("Send with ignored Priority", func(t *testing.T) {
-		callback := func(body *bytes.Buffer, key string) {
-			t.Errorf("Unexpected Call")
-		}
-
-		client := yandex.NewClient(&testClient{nil, callback}, "", "error", true)
-		client.Send(completeResult)
-	})
-	t.Run("SkipExistingOnStartup", func(t *testing.T) {
-		client := yandex.NewClient(&testClient{nil, testCallback}, "", "", true)
-
-		if !client.SkipExistingOnStartup() {
-			t.Error("Should return configured SkipExistingOnStartup")
-		}
 	})
 	t.Run("Name", func(t *testing.T) {
-		client := yandex.NewClient(&testClient{nil, testCallback}, "", "", false)
+		client := s3.NewClient(&testClient{nil, testCallback}, "", "", []string{}, false)
 
-		if client.Name() != "Yandex" {
+		if client.Name() != "S3" {
 			t.Errorf("Unexpected Name %s", client.Name())
-		}
-	})
-	t.Run("MinimumPriority", func(t *testing.T) {
-		client := yandex.NewClient(&testClient{nil, testCallback}, "", "debug", false)
-
-		if client.MinimumPriority() != "debug" {
-			t.Errorf("Unexpected MinimumPriority %s", client.MinimumPriority())
 		}
 	})
 }

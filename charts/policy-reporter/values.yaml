@@ -2,7 +2,7 @@ image:
   registry: ghcr.io
   repository: kyverno/policy-reporter
   pullPolicy: IfNotPresent
-  tag: 1.10.3
+  tag: 2.0.0
 
 imagePullSecrets: []
 
@@ -42,7 +42,10 @@ service:
   labels: {}
   type: ClusterIP
   # integer number. This is port for service
-  port: 2112
+  port: 8080
+
+podSecurityContext:
+  fsGroup: 1234
 
 securityContext:
   runAsUser: 1234
@@ -66,18 +69,31 @@ resources: {}
   # resources, such as Minikube. If you do want to specify resources, uncomment the following
   # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
   # limits:
-  #   memory: 30Mi
+  #   memory: 100Mi
   #   cpu: 10m
   # requests:
-  #   memory: 20Mi
+  #   memory: 75Mi
   #   cpu: 5m
 
 # Enable a NetworkPolicy for this chart. Useful on clusters where Network Policies are
 # used and configured in a default-deny fashion.
 networkPolicy:
   enabled: false
-  egress: []
-  kubernetesApiPort: 6443
+  # Kubernetes API Server
+  egress:
+  - to:
+    ports:
+    - protocol: TCP
+      port: 6443
+  ingress: []
+
+# REST API
+rest:
+  enabled: false
+
+# Prometheus Metrics API
+metrics:
+  enabled: false
 
 # enable policy-report-ui
 ui:
@@ -107,26 +123,12 @@ global:
   # additional labels added on each resource
   labels: {}
 
-# DEPRECTED - Can be removed
-# Policy Reporter watches now for both existing versions by default
-crdVersion: v1alpha1
-
-# DEPRECTED - Can be removed
-# Policy Reporter uses a new internal cache instead
-cleanupDebounceTime: 20
-
-api:
-  enabled: false
-
-# Policy Priorities
-policyPriorities:
-  enabled: false
-  # configure mappings from policy to priority
-  # you can use default to configure a default priority not passing results
-  # example mapping
-  #   default: warning
-  #   require-ns-labels: error
-  mapping: {}
+# configure mappings from policy to priority
+# you can use default to configure a default priority for fail results
+# example mapping
+#   default: warning
+#   require-ns-labels: error
+policyPriorities: {}
 
 # Reference a configuration which already exists instead of creating one
 existingTargetConfig:
@@ -143,6 +145,8 @@ target:
     host: ""
     # minimum priority "" < info < warning < critical < error
     minimumPriority: ""
+    # list of sources which should send to loki
+    sources: []
     # Skip already existing PolicyReportResults on startup
     skipExistingOnStartup: true
 
@@ -156,6 +160,8 @@ target:
     rotation: ""
     # minimum priority "" < info < warning < critical < error
     minimumPriority: ""
+    # list of sources which should send to elasticsearch
+    sources: []
     # Skip already existing PolicyReportResults on startup
     skipExistingOnStartup: true
 
@@ -164,6 +170,8 @@ target:
     webhook: ""
     # minimum priority "" < info < warning < critical < error
     minimumPriority: ""
+    # list of sources which should send to slack
+    sources: []
     # Skip already existing PolicyReportResults on startup
     skipExistingOnStartup: true
 
@@ -172,6 +180,8 @@ target:
     webhook: ""
     # minimum priority "" < info < warning < critical < error
     minimumPriority: ""
+    # list of sources which should send to discord
+    sources: []
     # Skip already existing PolicyReportResults on startup
     skipExistingOnStartup: true
 
@@ -180,6 +190,8 @@ target:
     webhook: ""
     # minimum priority "" < info < warning < critical < error
     minimumPriority: ""
+    # list of sources which should send to teams
+    sources: []
     # Skip already existing PolicyReportResults on startup
     skipExistingOnStartup: true
 
@@ -188,18 +200,30 @@ target:
     host: ""
     # minimum priority "" < info < warning < critical < error
     minimumPriority: "warning"
+    # list of sources which should send to the UI Log
+    sources: []
     # Skip already existing PolicyReportResults on startup
     skipExistingOnStartup: true
 
-  yandex:
-    accessKeyID: ""  # yandex access key
-    secretAccessKey: ""  # yandex secret access key
-    region: ""  # yandex storage region (default: ru-central-1)
-    endpoint: ""  # yandex storage endpoint (default: https://storage.yandexcloud.net)
-    bucket: ""  # Yandex storage, bucket name
-    prefix: ""  # name of prefix, keys will have format: s3://<bucket>/<prefix>/YYYY-MM-DD/YYYY-MM-DDTHH:mm:ss.s+01:00.json
-    minimumPriority: ""   # minimum priority "" < info < warning < critical < error
-    skipExistingOnStartup: true  # Skip already existing PolicyReportResults on startup
+  s3:
+    # S3 access key
+    accessKeyID: ""
+    # S3 secret access key
+    secretAccessKey: ""
+    # S3 storage region
+    region: ""
+    # S3 storage endpoint
+    endpoint: ""
+    # S3 storage, bucket name
+    bucket: ""
+    # name of prefix, keys will have format: s3://<bucket>/<prefix>/YYYY-MM-DD/YYYY-MM-DDTHH:mm:ss.s+01:00.json
+    prefix: ""
+    # minimum priority "" < info < warning < critical < error
+    minimumPriority: ""
+    # list of sources which should send to S3
+    sources: []
+    # Skip already existing PolicyReportResults on startup
+    skipExistingOnStartup: true
 
 # Node labels for pod assignment
 # ref: https://kubernetes.io/docs/user-guide/node-selection/
@@ -216,10 +240,10 @@ affinity: {}
 livenessProbe:
   httpGet:
     path: /ready
-    port: rest
+    port: http
 
 # readinessProbe for policy-reporter
 readinessProbe:
   httpGet:
     path: /healthz
-    port: rest
+    port: http

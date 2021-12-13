@@ -12,24 +12,23 @@ spec:
   - Egress
   ingress:
   - from:
+    - podSelector:
+        matchLabels: {{- include "ui.selectorLabels" . | nindent 10 }}
     ports:
     - protocol: TCP
-      port: {{ .Values.global.port }}
-  - from:
-    ports:
-    - protocol: TCP
-      port: {{ .Values.service.port }}
+      port: 8080
+  {{- with .Values.networkPolicy.ingress }}
+    {{- toYaml . | nindent 2 }}
+  {{- end }}
   egress:
+  {{- if .Values.ui.enabled }}
   - to:
     - podSelector:
         matchLabels: {{- include "ui.selectorLabels" . | nindent 10 }}
     ports:
     - protocol: TCP
       port: {{ .Values.ui.service.port }}
-  - to:
-    ports:
-    - protocol: TCP
-      port: {{ .Values.networkPolicy.kubernetesApiPort }}
+  {{- end }}
   {{- with .Values.networkPolicy.egress }}
     {{- toYaml . | nindent 2 }}
   {{- end }}

@@ -8,7 +8,7 @@ import (
 	"github.com/kyverno/policy-reporter/pkg/target/ui"
 )
 
-var completeResult = report.Result{
+var completeResult = &report.Result{
 	Message:  "validation error: requests and limits required. Rule autogen-check-for-requests-and-limits failed at path /spec/template/spec/containers/0/resources/requests/",
 	Policy:   "require-requests-and-limits-required",
 	Rule:     "autogen-check-for-requests-and-limits",
@@ -17,7 +17,7 @@ var completeResult = report.Result{
 	Severity: report.High,
 	Category: "resources",
 	Scored:   true,
-	Resource: report.Resource{
+	Resource: &report.Resource{
 		APIVersion: "v1",
 		Kind:       "Deployment",
 		Name:       "nginx",
@@ -55,40 +55,14 @@ func Test_UITarget(t *testing.T) {
 			}
 		}
 
-		client := ui.NewClient("http://localhost:8080", "", false, testClient{callback, 200})
+		client := ui.NewClient("http://localhost:8080", "", []string{}, false, testClient{callback, 200})
 		client.Send(completeResult)
-	})
-	t.Run("Send with ignored Priority", func(t *testing.T) {
-		callback := func(req *http.Request) {
-			t.Errorf("Unexpected Call")
-		}
-
-		client := ui.NewClient("http://localhost:8080", "error", false, testClient{callback, 200})
-		client.Send(completeResult)
-	})
-	t.Run("SkipExistingOnStartup", func(t *testing.T) {
-		callback := func(req *http.Request) {
-			t.Errorf("Unexpected Call")
-		}
-
-		client := ui.NewClient("http://localhost:8080", "", true, testClient{callback, 200})
-
-		if !client.SkipExistingOnStartup() {
-			t.Error("Should return configured SkipExistingOnStartup")
-		}
 	})
 	t.Run("Name", func(t *testing.T) {
-		client := ui.NewClient("http://localhost:8080", "", false, testClient{})
+		client := ui.NewClient("http://localhost:8080", "", []string{}, false, testClient{})
 
 		if client.Name() != "UI" {
 			t.Errorf("Unexpected Name %s", client.Name())
-		}
-	})
-	t.Run("MinimumPriority", func(t *testing.T) {
-		client := ui.NewClient("http://localhost:8080", "debug", false, testClient{})
-
-		if client.MinimumPriority() != "debug" {
-			t.Errorf("Unexpected MinimumPriority %s", client.MinimumPriority())
 		}
 	})
 }

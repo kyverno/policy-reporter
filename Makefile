@@ -1,8 +1,8 @@
 GO ?= go
 BUILD ?= build
 REPO ?= ghcr.io/kyverno/policy-reporter
-IMAGE_TAG ?= 1.10.1
-LD_FLAGS="-s -w"
+IMAGE_TAG ?= 1.11.0
+LD_FLAGS='-s -w -linkmode external -extldflags "-static"'
 
 all: build
 
@@ -16,15 +16,15 @@ prepare:
 
 .PHONY: test
 test:
-	go test -v ./... -timeout=120s
+	go test -v ./... -timeout=10s
 
 .PHONY: coverage
 coverage:
-	go test -v ./... -covermode=count -coverprofile=coverage.out -timeout=120s
+	go test -v ./... -covermode=count -coverprofile=coverage.out -timeout=30s
 
 .PHONY: build
 build: prepare
-	CGO_ENABLED=0 $(GO) build -v -ldflags="-s -w" $(GOFLAGS) -o $(BUILD)/policyreporter .
+	CGO_ENABLED=1 $(GO) build -v -ldflags="-s -w" $(GOFLAGS) -o $(BUILD)/policyreporter .
 
 .PHONY: docker-build
 docker-build:
@@ -37,4 +37,4 @@ docker-push:
 
 .PHONY: docker-push-dev
 docker-push-dev:
-	@docker buildx build --progress plane --platform linux/amd64 --tag $(REPO):dev . --build-arg LD_FLAGS=$(LD_FLAGS) --push
+	@docker buildx build --progress plane --platform linux/arm64,linux/amd64 --tag $(REPO):dev . --build-arg LD_FLAGS=$(LD_FLAGS) --push

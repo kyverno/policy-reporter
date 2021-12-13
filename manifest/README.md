@@ -6,7 +6,7 @@ The installation requires a `policy-reporter` namespace. Because the installatio
 
 ## Policy Reporter
 
-The `policy-reporter` folder is the basic installation for Policy Reporter without the UI. Includes a basic Configuration Secret `policy-reporter-targets`, empty by default and the `http://policy-reporter:2112/metrics` Endpoint.
+The `policy-reporter` folder is the basic installation for Policy Reporter without the UI. Includes a basic Configuration Secret `policy-reporter-targets`, empty by default and the `http://policy-reporter:8080/metrics` Endpoint.
 
 ### Installation
 
@@ -58,6 +58,8 @@ kubectl apply -f https://raw.githubusercontent.com/kyverno/policy-reporter/main/
 To configure your notification targets for Policy Reporter create a secret called `policy-reporter-targets` in the `policy-reporter` namespace with an key `config.yaml` as key and the following structure as value:
 
 ```yaml
+priorityMap: {}
+
 loki:
   host: ""
   minimumPriority: ""
@@ -90,6 +92,15 @@ ui:
   minimumPriority: ""
   skipExistingOnStartup: true
 
+s3:
+  endpoint: ""
+  region: ""
+  bucket: ""
+  secretAccessKey: ""
+  accessKeyID: ""
+  minimumPriority: "warning"
+  skipExistingOnStartup: true
+  sources: []
 ```
 
 The `kyverno-policy-reporter-ui` and `default-policy-reporter-ui` installation has an optional preconfigured `target-security.yaml` to apply. This secret configures the Policy Reporter UI as target for Policy Reporter.

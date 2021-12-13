@@ -1,15 +1,12 @@
 package ui
 
 import (
-	"bytes"
-	"encoding/json"
-	"log"
 	"net/http"
 	"time"
 
+	"github.com/kyverno/policy-reporter/pkg/helper"
 	"github.com/kyverno/policy-reporter/pkg/report"
 	"github.com/kyverno/policy-reporter/pkg/target"
-	"github.com/kyverno/policy-reporter/pkg/target/helper"
 )
 
 type httpClient interface {
@@ -17,10 +14,9 @@ type httpClient interface {
 }
 
 type client struct {
-	host                  string
-	minimumPriority       string
-	skipExistingOnStartup bool
-	client                httpClient
+	target.BaseClient
+	host   string
+	client httpClient
 }
 
 type resource struct {
@@ -44,7 +40,7 @@ type result struct {
 	CreationTimestamp time.Time `json:"creationTimestamp"`
 }
 
-func newPayload(r report.Result) result {
+func newPayload(r *report.Result) result {
 	return result{
 		Message:  r.Message,
 		Policy:   r.Policy,
@@ -61,25 +57,13 @@ func newPayload(r report.Result) result {
 			Name:       r.Resource.Name,
 			UID:        r.Resource.UID,
 		},
-		CreationTimestamp: time.Now(),
+		CreationTimestamp: r.Timestamp,
 	}
 }
 
-func (e *client) Send(result report.Result) {
-	if result.Priority < report.NewPriority(e.minimumPriority) {
-		return
-	}
-
-	body := new(bytes.Buffer)
-
-	if err := json.NewEncoder(body).Encode(newPayload(result)); err != nil {
-		log.Printf("[ERROR] UI : %v\n", err.Error())
-		return
-	}
-
-	req, err := http.NewRequest("POST", e.host, body)
+func (e *client) Send(result *report.Result) {
+	req, err := helper.CreateJSONRequest(e.Name(), "POST", e.host, newPayload(result))
 	if err != nil {
-		log.Printf("[ERROR] UI : %v\n", err.Error())
 		return
 	}
 
@@ -87,27 +71,18 @@ func (e *client) Send(result report.Result) {
 	req.Header.Add("User-Agent", "Policy-Reporter")
 
 	resp, err := e.client.Do(req)
-	helper.HandleHTTPResponse("UI", resp, err)
-}
-
-func (e *client) SkipExistingOnStartup() bool {
-	return e.skipExistingOnStartup
+	helper.ProcessHTTPResponse(e.Name(), resp, err)
 }
 
 func (e *client) Name() string {
 	return "UI"
 }
 
-func (e *client) MinimumPriority() string {
-	return e.minimumPriority
-}
-
 // NewClient creates a new loki.client to send Results to Elasticsearch
-func NewClient(host, minimumPriority string, skipExistingOnStartup bool, httpClient httpClient) target.Client {
+func NewClient(host, minimumPriority string, sources []string, skipExistingOnStartup bool, httpClient httpClient) target.Client {
 	return &client{
+		target.NewBaseClient(minimumPriority, sources, skipExistingOnStartup),
 		host + "/api/push",
-		minimumPriority,
-		skipExistingOnStartup,
 		httpClient,
 	}
 }

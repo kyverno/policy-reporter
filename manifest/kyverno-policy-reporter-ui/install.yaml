@@ -91,14 +91,10 @@ metadata:
 spec:
   type: ClusterIP
   ports:
-    - port: 2113
+    - port: 8080
       targetPort: http
       protocol: TCP
       name: http
-    - port: 8080
-      targetPort: rest
-      protocol: TCP
-      name: rest
   selector:
     app.kubernetes.io/name: kyverno-plugin
     app.kubernetes.io/instance: policy-reporter
@@ -130,14 +126,10 @@ metadata:
 spec:
   type: ClusterIP
   ports:
-    - port: 2112
+    - port: 8080
       targetPort: http
       protocol: TCP
       name: http
-    - port: 8080
-      targetPort: rest
-      protocol: TCP
-      name: rest
   selector:
     app.kubernetes.io/name: policy-reporter
 ---
@@ -165,7 +157,7 @@ spec:
       automountServiceAccountToken: true
       containers:
         - name: "kyverno-plugin"
-          image: "ghcr.io/kyverno/policy-reporter-kyverno-plugin:0.3.2"
+          image: "ghcr.io/kyverno/policy-reporter-kyverno-plugin:1.0.0"
           imagePullPolicy: IfNotPresent
           securityContext:
             allowPrivilegeEscalation: false
@@ -177,22 +169,19 @@ spec:
             runAsNonRoot: true
             runAsUser: 1234
           args:
-            - --apiPort=8080
+            - --rest-enabled
           ports:
             - name: http
-              containerPort: 2113
-              protocol: TCP
-            - name: rest
               containerPort: 8080
               protocol: TCP
           livenessProbe:
             httpGet:
               path: /policies
-              port: rest
+              port: http
           readinessProbe:
             httpGet:
               path: /policies
-              port: rest
+              port: http
           resources:
             {}
 ---
@@ -215,7 +204,7 @@ spec:
     spec:
       containers:
         - name: ui
-          image: "fjogeleit/policy-reporter-ui:0.14.0"
+          image: "fjogeleit/policy-reporter-ui:1.0.0"
           imagePullPolicy: IfNotPresent
           securityContext:
             allowPrivilegeEscalation: false
@@ -227,8 +216,7 @@ spec:
             runAsNonRoot: true
             runAsUser: 1234
           args:
-            - -backend=http://policy-reporter:8080
-            - -log-size=200
+            - -policy-reporter=http://policy-reporter:8080
             - -kyverno-plugin=http://policy-reporter-kyverno-plugin:8080
           ports:
             - name: http
@@ -264,9 +252,11 @@ spec:
     spec:
       serviceAccountName: policy-reporter
       automountServiceAccountToken: true
+      securityContext:
+        fsGroup: 1234
       containers:
         - name: policy-reporter
-          image: "ghcr.io/kyverno/policy-reporter:1.8.7"
+          image: "ghcr.io/kyverno/policy-reporter:2.0.0"
           imagePullPolicy: IfNotPresent
           securityContext:
             allowPrivilegeEscalation: false
@@ -279,32 +269,32 @@ spec:
             runAsUser: 1234
           args:
             - --config=/app/config.yaml
+            - --dbfile=/sqlite/database.db
+            - --rest-enabled
           ports:
             - name: http
-              containerPort: 2112
-              protocol: TCP
-            - name: rest
               containerPort: 8080
               protocol: TCP
           livenessProbe:
             httpGet:
               path: /ready
-              port: rest
+              port: http
           readinessProbe:
             httpGet:
               path: /healthz
-              port: rest
+              port: http
           resources:
             {}
           volumeMounts:
+          - name: sqlite
+            mountPath: /sqlite
           - name: config-file
             mountPath: /app/config.yaml
             subPath: config.yaml
-          env:
-          - name: NAMESPACE
-            value: policy-reporter
       volumes:
+      - name: sqlite
+        emptyDir: {}
       - name: config-file
         secret:
-          secretName: policy-reporter-targets
+          secretName: policy-reporter-config
           optional: true

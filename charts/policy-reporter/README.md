@@ -4,7 +4,7 @@ Kyverno ships with two types of validation. You can either enforce a rule or aud
 
 ## Documentation
 
-You can find detailed Information and Screens about Features and Configurations in the [Documentation](https://github.com/kyverno/policy-reporter/wiki).
+You can find detailed Information and Screens about Features and Configurations in the [Documentation](https://kyverno.github.io/policy-reporter/guide/02-getting-started#core--policy-reporter-ui).
 
 ## Getting Started
 
@@ -20,7 +20,7 @@ helm repo update
 
 ### Basic Installation
 
-The basic installation provides an Prometheus Metrics Endpoint and different REST APIs, for more details have a look at the [Documentation](https://github.com/kyverno/policy-reporter/wiki/getting-started).
+The basic installation provides an Prometheus Metrics Endpoint and different REST APIs, for more details have a look at the [Documentation](https://kyverno.github.io/policy-reporter/guide/02-getting-started).
 
 ```bash
 helm install policy-reporter policy-reporter/policy-reporter -n policy-reporter --create-namespace
@@ -37,7 +37,7 @@ kubectl port-forward service/policy-reporter-ui 8082:8080 -n policy-reporter
 ```
 Open `http://localhost:8082/` in your browser.
 
-Check the [Documentation](https://github.com/kyverno/policy-reporter/wiki/policy-reporter-ui) for Screens and additional Information
+Check the [Documentation](https://kyverno.github.io/policy-reporter/guide/02-getting-started#core--policy-reporter-ui) for Screens and additional Information
 
 ## Resources
 
