@@ -3,13 +3,15 @@
 # 2.0.0
 
 ## Chart
-* Remove deprecated values `crdVersion`, `cleanupDebounceTime`
+* Removed deprecated values `crdVersion`, `cleanupDebounceTime`
 * Simplify `policyPriorities`, `policyPriorities.enabled` was removed along with the watch feature
     * Priority determined mainly over severity
 * Add `sources` filter to target configurations
 * Improved `NetworkPolicy` configuration for all components
 * Metrics now an optional feature
 * Each component expose a single Port `8080`
+
+See [Migration Docs](http://localhost:3000/guide/05-migration) for details
 
 ## Policy Reporter
 * modular functions for separate activation/deactivation
@@ -19,6 +21,19 @@
 * PolicyReports are now stored in an internal SQLite
 * extended REST API based on the new SQLite DB for filters and grouping of data
 * metrics API is now optional
+* metrics and REST API using the same HTTP Server (were separated before)
+* improved CRD watch logic with Kubernetes client informer
+* `Yandex` changed to a general `S3` target.
+
+## Policy Reporter UI
+* Rewrite with NuxtJS
+* Simplified Proxy
+* Improved SPA file handling
+
+## Policy Reporter Kyverno Plugin
+* modular functions for separate activation/deactivation
+    * REST API
+    * Metrics API
 * metrics and REST API using the same HTTP Server (were separated before)
 * improved CRD watch logic with Kubernetes client informer
 
