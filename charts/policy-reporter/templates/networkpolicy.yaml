@@ -11,12 +11,14 @@ spec:
   - Ingress
   - Egress
   ingress:
+  {{- if .Values.ui.enabled }}
   - from:
     - podSelector:
         matchLabels: {{- include "ui.selectorLabels" . | nindent 10 }}
     ports:
     - protocol: TCP
       port: 8080
+  {{- end }}
   {{- with .Values.networkPolicy.ingress }}
     {{- toYaml . | nindent 2 }}
   {{- end }}
