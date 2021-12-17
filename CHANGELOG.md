@@ -1,5 +1,10 @@
 # Changelog
 
+# 2.0.1
+* Remove NetworkPolicy ingress rule for UI if not enabled
+* Update Policy Reporter UI
+    * Fix: Show PolicyReportResult Properties in Tables
+
 # 2.0.0
 
 ## Chart
