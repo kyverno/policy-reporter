@@ -76,6 +76,7 @@ spec:
             {{- else }}
             subPath: config.yaml
             {{- end }}
+            readOnly: true
           env:
           - name: NAMESPACE
             value: {{ .Release.Namespace }}

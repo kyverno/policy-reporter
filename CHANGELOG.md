@@ -1,5 +1,12 @@
 # Changelog
 
+# 2.1.0
+* KyvernoPlugin v1.1.0
+    * New KyvernoPlugin API - VerifyImages Rules <a href="https://kyverno.github.io/policy-reporter/guide/06-troubleshooting#readinessprobe-fails" target="_blank">details</a>
+* Policy Reporter UI v1.1.0
+    * New Kyverno VerifyImages view in Policy Reporter UI
+    * New Configurations to disable views (<a href="https://kyverno.github.io/policy-reporter/guide/04-helm-chart-core#configure-views" target="_blank">details</a>)
+
 # 2.0.1
 * Remove NetworkPolicy ingress rule for UI if not enabled
 * Update Policy Reporter UI

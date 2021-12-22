@@ -14,7 +14,7 @@ image:
   registry: ghcr.io
   repository: kyverno/policy-reporter-ui
   pullPolicy: IfNotPresent
-  tag: 1.0.1
+  tag: 1.1.0
 
 imagePullSecrets: []
 
@@ -104,8 +104,17 @@ tolerations: []
 # Anti-affinity to disallow deploying client and master nodes on the same worker node
 affinity: {}
 
-# Enable a NetworkPolicy for this chart. Useful on clusters where Network Policies are
+# enable a NetworkPolicy for this chart. Useful on clusters where Network Policies are
 # used and configured in a default-deny fashion.
 networkPolicy:
   enabled: false
   egress: []
+
+# enable/disable views as needed in the Policy Reporter UI
+# disabled log view will also disable the UI as push target
+views:
+  logs: true
+  policyReports: true
+  clusterPolicyReports: true
+  kyvernoPolicies: true
+  kyvernoVerifyImages: true
