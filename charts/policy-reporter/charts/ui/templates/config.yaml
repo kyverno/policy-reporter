@@ -8,3 +8,9 @@ data:
   config.yaml: |-
     logSize: {{ .Values.log.size }}
     displayMode: {{ .Values.displayMode | quote }}
+    views:
+      logs: {{ .Values.views.logs }}
+      policyReports: {{ .Values.views.policyReports }}
+      clusterPolicyReports: {{ .Values.views.clusterPolicyReports }}
+      kyvernoPolicies: {{ .Values.views.kyvernoPolicies }}
+      kyvernoVerifyImages: {{ .Values.views.kyvernoVerifyImages }}
