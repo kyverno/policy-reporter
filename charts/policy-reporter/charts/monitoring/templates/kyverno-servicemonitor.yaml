@@ -16,5 +16,5 @@ spec:
     matchLabels:
         {{- include "kyvernoplugin.selectorLabels" . | nindent 8 }}
   endpoints:
-  - port: http
+  - port: rest
 {{- end }}
