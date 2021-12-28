@@ -1,5 +1,9 @@
 # Changelog
 
+# 2.1.1
+* Fix KyvernoPlugin Metrics ServiceMonitor Port [[#96](https://github.com/kyverno/policy-reporter-ui/pull/96) by [z0rc](https://github.com/z0rc)]
+* Remove unused Port from KyvernoPlugin Deployment and Service
+
 # 2.1.0
 * KyvernoPlugin v1.1.0
     * New KyvernoPlugin API - VerifyImages Rules (<a href="https://kyverno.github.io/policy-reporter/guide/06-troubleshooting#readinessprobe-fails" target="_blank">details</a>)

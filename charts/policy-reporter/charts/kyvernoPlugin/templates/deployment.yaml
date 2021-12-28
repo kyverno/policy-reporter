@@ -49,9 +49,6 @@ spec:
             - --metrics-enabled={{ .Values.metrics.enabled }}
             - --rest-enabled={{ .Values.rest.enabled }}
           ports:
-            - name: http
-              containerPort: 2113
-              protocol: TCP
             - name: rest
               containerPort: 8080
               protocol: TCP
