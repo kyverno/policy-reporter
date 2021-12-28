@@ -15,10 +15,6 @@ metadata:
 spec:
   type: {{ .Values.service.type }}
   ports:
-    - port: 2113
-      targetPort: http
-      protocol: TCP
-      name: http
     - port: 8080
       targetPort: rest
       protocol: TCP
