@@ -14,7 +14,7 @@ image:
   registry: ghcr.io
   repository: kyverno/policy-reporter-ui
   pullPolicy: IfNotPresent
-  tag: 1.1.0
+  tag: 1.2.0
 
 imagePullSecrets: []
 
@@ -113,6 +113,9 @@ networkPolicy:
 # enable/disable views as needed in the Policy Reporter UI
 # disabled log view will also disable the UI as push target
 views:
+  dashboard:
+    policyReports: true
+    clusterPolicyReports: true
   logs: true
   policyReports: true
   clusterPolicyReports: true

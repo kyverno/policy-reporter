@@ -9,6 +9,9 @@ data:
     logSize: {{ .Values.log.size }}
     displayMode: {{ .Values.displayMode | quote }}
     views:
+      dashboard:
+        policyReports: {{ .Values.views.dashboard.policyReports }}
+        clusterPolicyReports: {{ .Values.views.dashboard.clusterPolicyReports }}
       logs: {{ .Values.views.logs }}
       policyReports: {{ .Values.views.policyReports }}
       clusterPolicyReports: {{ .Values.views.clusterPolicyReports }}
