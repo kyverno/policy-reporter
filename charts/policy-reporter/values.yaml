@@ -113,8 +113,8 @@ monitoring:
 global:
   # available plugins
   plugins:
-    # enable kyverno for Policy Reporter UI and monitoring
-    keyverno: false
+    # enable kyverno for Policy Reporter UI and monitoring 
+    kyverno: false
   # The name of service policy-report. Defaults to ReleaseName.
   backend: ""
   # Service Port number
