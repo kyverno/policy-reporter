@@ -1,5 +1,8 @@
 # Changelog
 
+# 2.2.1
+* Fix Typo in values.yaml [[#102](https://github.com/kyverno/policy-reporter-ui/pull/102) by [christophefromparis](https://github.com/christophefromparis)]
+
 # 2.2.0
 * Policy Reporter UI v1.2.0
     * New configurations to customize the dashboard by disable PolicyReport- or ClusterPolicyReport information
