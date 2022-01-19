@@ -102,6 +102,7 @@ ui:
 kyvernoPlugin:
   enabled: false
 
+# Settings for the monitoring subchart
 monitoring:
   enabled: false
   # DEPRECATED - only remains for backwards compatability
