@@ -1,5 +1,8 @@
 # Changelog
 
+# 2.2.2
+* Fix Helm Chart `values.yaml`. Cleanup unused default configurations. [[#103](https://github.com/kyverno/policy-reporter-ui/pull/103) by [AndersBennedsgaard](https://github.com/AndersBennedsgaard)]
+
 # 2.2.1
 * Fix Typo in values.yaml [[#102](https://github.com/kyverno/policy-reporter-ui/pull/102) by [christophefromparis](https://github.com/christophefromparis)]
 

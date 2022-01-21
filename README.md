@@ -59,7 +59,7 @@ Policy Reporter supports the following [Targets](https://kyverno.github.io/polic
 * [Discord](https://kyverno.github.io/policy-reporter/core/06-targets#discord)
 * [MS Teams](https://kyverno.github.io/policy-reporter/core/06-targets#microsoft-teams)
 * [Policy Reporter UI](https://kyverno.github.io/policy-reporter/core/06-targets#policy-reporter-ui)
-* [S3](https://kyverno.github.io/policy-reporter/core/06-targets#s3)
+* [S3](https://kyverno.github.io/policy-reporter/core/06-targets#s3-compatible-storage)
 
 
 ## Monitoring
