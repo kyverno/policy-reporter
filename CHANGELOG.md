@@ -1,5 +1,8 @@
 # Changelog
 
+# 2.2.3
+* Fix Helm Chart uihost template function.
+
 # 2.2.2
 * Fix Helm Chart `values.yaml`. Cleanup unused default configurations. [[#103](https://github.com/kyverno/policy-reporter-ui/pull/103) by [AndersBennedsgaard](https://github.com/AndersBennedsgaard)]
 
