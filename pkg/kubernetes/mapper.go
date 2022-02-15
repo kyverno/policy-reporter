@@ -34,13 +34,10 @@ func (m *mapper) MapPolicyReport(reportMap map[string]interface{}) *report.Polic
 	}
 
 	r := &report.PolicyReport{
-		Name:    metadata["name"].(string),
-		Summary: summary,
-		Results: make(map[string]*report.Result),
-	}
-
-	if ns, ok := metadata["namespace"]; ok {
-		r.Namespace = ns.(string)
+		Name:      toString(metadata["name"]),
+		Namespace: toString(metadata["namespace"]),
+		Summary:   summary,
+		Results:   make(map[string]*report.Result),
 	}
 
 	creationTimestamp, err := m.mapCreationTime(reportMap)
@@ -84,14 +81,11 @@ func (m *mapper) mapResult(result map[string]interface{}) []*report.Result {
 		for _, res := range ress {
 			if resMap, ok := res.(map[string]interface{}); ok {
 				r := &report.Resource{
-					APIVersion: resMap["apiVersion"].(string),
-					Kind:       resMap["kind"].(string),
-					Name:       resMap["name"].(string),
-					UID:        resMap["uid"].(string),
-				}
-
-				if ns, ok := resMap["namespace"]; ok {
-					r.Namespace = ns.(string)
+					Namespace:  toString(resMap["namespace"]),
+					APIVersion: toString(resMap["apiVersion"]),
+					Kind:       toString(resMap["kind"]),
+					Name:       toString(resMap["name"]),
+					UID:        toString(resMap["uid"]),
 				}
 
 				resources = append(resources, r)
@@ -112,15 +106,11 @@ func (m *mapper) mapResult(result map[string]interface{}) []*report.Result {
 
 	factory := func(res *report.Resource) *report.Result {
 		r := &report.Result{
-			Policy:     result["policy"].(string),
+			Policy:     toString(result["policy"]),
 			Status:     status,
 			Priority:   report.PriorityFromStatus(status),
 			Resource:   res,
 			Properties: make(map[string]string, 0),
-		}
-
-		if message, ok := result["message"].(string); ok {
-			r.Message = message
 		}
 
 		if scored, ok := result["scored"]; ok {
@@ -135,24 +125,16 @@ func (m *mapper) mapResult(result map[string]interface{}) []*report.Result {
 			r.Priority = m.resolvePriority(r.Policy, r.Severity)
 		}
 
-		if rule, ok := result["rule"]; ok {
-			r.Rule = rule.(string)
-		}
-
-		if category, ok := result["category"]; ok {
-			r.Category = category.(string)
-		}
-
-		if source, ok := result["source"]; ok {
-			r.Source = source.(string)
-		}
-
+		r.Message = toString(result["message"])
+		r.Rule = toString(result["rule"])
+		r.Category = toString(result["category"])
+		r.Source = toString(result["source"])
 		r.Timestamp = convertTimestamp(result)
 
 		if props, ok := result["properties"]; ok {
 			if properties, ok := props.(map[string]interface{}); ok {
 				for property, v := range properties {
-					value := v.(string)
+					value := toString(v)
 					if len(value) > 0 {
 						r.Properties[property] = value
 					}
@@ -192,6 +174,14 @@ func convertTimestamp(result map[string]interface{}) time.Time {
 	default:
 		return time.Now().UTC()
 	}
+}
+
+func toString(value interface{}) string {
+	if v, ok := value.(string); ok {
+		return v
+	}
+
+	return ""
 }
 
 func (m *mapper) resolvePriority(policy string, severity report.Severity) report.Priority {
