@@ -1,7 +1,7 @@
 GO ?= go
 BUILD ?= build
 REPO ?= ghcr.io/kyverno/policy-reporter
-IMAGE_TAG ?= 1.11.0
+IMAGE_TAG ?= 2.0.1
 LD_FLAGS='-s -w -linkmode external -extldflags "-static"'
 
 all: build

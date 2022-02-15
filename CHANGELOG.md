@@ -1,5 +1,8 @@
 # Changelog
 
+# 2.2.4
+* Fix PolicyReport Napper - string casting
+
 # 2.2.3
 * Fix Helm Chart uihost template function.
 

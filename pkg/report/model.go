@@ -182,7 +182,7 @@ func (r Result) HasResource() bool {
 		return false
 	}
 
-	return r.Resource.UID != ""
+	return r.Resource.UID != "" || r.Resource.Name != ""
 }
 
 // Summary from the PolicyReport spec wgpolicyk8s.io/v1alpha1.PolicyReportSummary
