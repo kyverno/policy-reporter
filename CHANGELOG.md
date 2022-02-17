@@ -1,5 +1,18 @@
 # Changelog
 
+# 2.2.5
+* Policy Reporter
+    * Update Go  to 1.17.6 [[#110](https://github.com/kyverno/policy-reporter/pull/110) by [realshuting](https://github.com/realshuting)]
+    * Update Helm Chart with new component versions
+    * Update dependencies
+
+* Policy Reporter UI
+    * Update Go  to 1.17.6 [[#93](https://github.com/kyverno/policy-reporter-ui/pull/93) by [realshuting](https://github.com/realshuting)]
+    * Update dependencies
+
+* Policy Reporter KyvernoPlugin
+    * Update Go  to 1.17.6 [[#12](https://github.com/kyverno/policy-reporter-kyverno-plugin/pull/12) by [realshuting](https://github.com/realshuting)]
+
 # 2.2.4
 * Fix PolicyReport Napper - string casting
 
@@ -7,7 +20,7 @@
 * Fix Helm Chart uihost template function.
 
 # 2.2.2
-* Fix Helm Chart `values.yaml`. Cleanup unused default configurations. [[#103](https://github.com/kyverno/policy-reporter-ui/pull/103) by [AndersBennedsgaard](https://github.com/AndersBennedsgaard)]
+* Fix Helm Chart `values.yaml`. Cleanup unused default configurations. [[#103](https://github.com/kyverno/policy-reporter/pull/103) by [AndersBennedsgaard](https://github.com/AndersBennedsgaard)]
 
 # 2.2.1
 * Fix Typo in values.yaml [[#102](https://github.com/kyverno/policy-reporter-ui/pull/102) by [christophefromparis](https://github.com/christophefromparis)]
