@@ -1,5 +1,8 @@
 # Changelog
 
+# 2.2.6
+* Use upper case on drop capabilities [[#113](https://github.com/kyverno/policy-reporter/pull/113) by [skuethe](https://github.com/skuethe)]
+
 # 2.2.5
 * Policy Reporter
     * Update Go  to 1.17.6 [[#110](https://github.com/kyverno/policy-reporter/pull/110) by [realshuting](https://github.com/realshuting)]
