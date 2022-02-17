@@ -34,7 +34,7 @@ securityContext:
   readOnlyRootFilesystem: true
   capabilities:
     drop:
-      - all
+      - ALL
 
 # Key/value pairs that are attached to pods.
 podAnnotations: {}
