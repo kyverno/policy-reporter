@@ -38,9 +38,9 @@ The `kyverno-policy-reporter-ui` folder is the extended Policy Reporter, Policy 
 
 Enables:
 * Policy Reporter REST API (`http://policy-reporter:8080`)
-* Policy Reporter Metrics API (`http://policy-reporter:2112/metrics`)
-* Kyverno Plugin Rest API (`http://policy-reporter-kyverno-plugin:2112/policies`)
-* Kyverno Plugin Metrics API (`http://policy-reporter-kyverno-plugin:2113/metrics`) 
+* Policy Reporter Metrics API (`http://policy-reporter:8080/metrics`)
+* Kyverno Plugin Rest API (`http://policy-reporter-kyverno-plugin:8080/policies`)
+* Kyverno Plugin Metrics API (`http://policy-reporter-kyverno-plugin:8080/metrics`) 
 * Policy Reporter UI Endpoint (`http://policy-reporter-ui:8080`). 
 
 Configures Policy Reporter UI as Target for Policy Reporter and enables the Kyverno Dashboard.
