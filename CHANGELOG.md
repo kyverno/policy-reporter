@@ -1,5 +1,15 @@
 # Changelog
 
+# 2.3.0
+* Policy Reporter
+    * Add Support for linux/s390x [[#115](https://github.com/kyverno/policy-reporter/pull/115) by [skuethe](https://github.com/skuethe)]
+
+* Policy Reporter UI
+    * Add Support for linux/s390x [[#98](https://github.com/kyverno/policy-reporter-ui/pull/98) by [skuethe](https://github.com/skuethe)]
+
+* Policy Reporter KyvernoPlugin
+    * Add Support for linux/s390x [[#13](https://github.com/kyverno/policy-reporter-kyverno-plugin/pull/13) by [skuethe](https://github.com/skuethe)]
+
 # 2.2.6
 * Use upper case on drop capabilities [[#113](https://github.com/kyverno/policy-reporter/pull/113) by [skuethe](https://github.com/skuethe)]
 
