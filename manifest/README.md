@@ -64,6 +64,8 @@ loki:
   host: ""
   minimumPriority: ""
   skipExistingOnStartup: true
+  customLabels: {}
+  sources: []
 
 elasticsearch:
   host: ""
@@ -71,26 +73,31 @@ elasticsearch:
   rotation: "dayli"
   minimumPriority: ""
   skipExistingOnStartup: true
+  sources: []
 
 slack:
   webhook: ""
   minimumPriority: ""
   skipExistingOnStartup: true
+  sources: []
 
 discord:
   webhook: ""
   minimumPriority: ""
   skipExistingOnStartup: true
+  sources: []
 
 teams:
   webhook: ""
   minimumPriority: ""
   skipExistingOnStartup: true
+  sources: []
 
 ui:
   host: ""
   minimumPriority: ""
   skipExistingOnStartup: true
+  sources: []
 
 s3:
   endpoint: ""
