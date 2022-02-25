@@ -2,7 +2,7 @@ image:
   registry: ghcr.io
   repository: kyverno/policy-reporter
   pullPolicy: IfNotPresent
-  tag: 2.1.0
+  tag: 2.2.0
 
 imagePullSecrets: []
 
@@ -145,6 +145,8 @@ target:
     sources: []
     # Skip already existing PolicyReportResults on startup
     skipExistingOnStartup: true
+    # Added as additional labels to each Loki event
+    customLabels: {}
 
   elasticsearch:
     # elasticsearch host address

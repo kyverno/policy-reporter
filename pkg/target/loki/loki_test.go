@@ -95,6 +95,9 @@ func Test_LokiTarget(t *testing.T) {
 			if !strings.Contains(labels, "severity=\""+completeResult.Severity+"\"") {
 				t.Error("Missing Content for Label 'severity'")
 			}
+			if !strings.Contains(labels, "custom=\"label\"") {
+				t.Error("Missing Content for Label 'severity'")
+			}
 
 			res := completeResult.Resource
 			if !strings.Contains(labels, "kind=\""+res.Kind+"\"") {
@@ -114,7 +117,7 @@ func Test_LokiTarget(t *testing.T) {
 			}
 		}
 
-		loki := loki.NewClient("http://localhost:3100", "", []string{}, false, testClient{callback, 200})
+		loki := loki.NewClient("http://localhost:3100", "", []string{}, false, map[string]string{"custom": "label"}, testClient{callback, 200})
 		loki.Send(completeResult)
 	})
 
@@ -172,11 +175,11 @@ func Test_LokiTarget(t *testing.T) {
 			}
 		}
 
-		loki := loki.NewClient("http://localhost:3100", "", []string{}, false, testClient{callback, 200})
+		loki := loki.NewClient("http://localhost:3100", "", []string{}, false, make(map[string]string), testClient{callback, 200})
 		loki.Send(minimalResult)
 	})
 	t.Run("Name", func(t *testing.T) {
-		client := loki.NewClient("http://localhost:9200", "", []string{}, true, testClient{})
+		client := loki.NewClient("http://localhost:9200", "", []string{}, true, make(map[string]string), testClient{})
 
 		if client.Name() != "Loki" {
 			t.Errorf("Unexpected Name %s", client.Name())

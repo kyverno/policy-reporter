@@ -133,6 +133,7 @@ func (r *Resolver) LokiClient() target.Client {
 		r.config.Loki.MinimumPriority,
 		r.config.Loki.Sources,
 		r.config.Loki.SkipExisting,
+		r.config.Loki.CustomLabels,
 		&http.Client{},
 	)
 

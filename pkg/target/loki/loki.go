@@ -28,7 +28,7 @@ type entry struct {
 	Line string `json:"line"`
 }
 
-func newLokiPayload(result *report.Result) payload {
+func newLokiPayload(result *report.Result, customLabels map[string]string) payload {
 	timestamp := time.Now()
 	if !result.Timestamp.IsZero() {
 		timestamp = result.Timestamp
@@ -65,6 +65,10 @@ func newLokiPayload(result *report.Result) payload {
 		labels = append(labels, strings.ReplaceAll(property, ".", "_")+"=\""+strings.ReplaceAll(value, "\"", "")+"\"")
 	}
 
+	for label, value := range customLabels {
+		labels = append(labels, strings.ReplaceAll(label, ".", "_")+"=\""+strings.ReplaceAll(value, "\"", "")+"\"")
+	}
+
 	ls.Labels = "{" + strings.Join(labels, ",") + "}"
 
 	return payload{Streams: []stream{ls}}
@@ -72,12 +76,13 @@ func newLokiPayload(result *report.Result) payload {
 
 type client struct {
 	target.BaseClient
-	host   string
-	client httpClient
+	host         string
+	client       httpClient
+	customLabels map[string]string
 }
 
 func (l *client) Send(result *report.Result) {
-	req, err := helper.CreateJSONRequest(l.Name(), "POST", l.host, newLokiPayload(result))
+	req, err := helper.CreateJSONRequest(l.Name(), "POST", l.host, newLokiPayload(result, l.customLabels))
 	if err != nil {
 		return
 	}
@@ -94,10 +99,11 @@ func (l *client) Name() string {
 }
 
 // NewClient creates a new loki.client to send Results to Loki
-func NewClient(host, minimumPriority string, sources []string, skipExistingOnStartup bool, httpClient httpClient) target.Client {
+func NewClient(host, minimumPriority string, sources []string, skipExistingOnStartup bool, customLabels map[string]string, httpClient httpClient) target.Client {
 	return &client{
 		target.NewBaseClient(minimumPriority, sources, skipExistingOnStartup),
 		host + "/api/prom/push",
 		httpClient,
+		customLabels,
 	}
 }

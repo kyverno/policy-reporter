@@ -1,5 +1,9 @@
 # Changelog
 
+# 2.4.0
+* Policy Reporter
+    * Add Support for custom Loki labels
+
 # 2.3.0
 * Policy Reporter
     * Add Support for linux/s390x [[#115](https://github.com/kyverno/policy-reporter/pull/115) by [skuethe](https://github.com/skuethe)]

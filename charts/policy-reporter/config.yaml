@@ -2,6 +2,10 @@ loki:
   host: {{ .Values.target.loki.host | quote }}
   minimumPriority: {{ .Values.target.loki.minimumPriority | quote }}
   skipExistingOnStartup: {{ .Values.target.loki.skipExistingOnStartup }}
+  {{- with .Values.target.loki.customLabels }}
+  customLabels:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
   {{- with .Values.target.loki.sources }}
   sources:
     {{- toYaml . | nindent 4 }}

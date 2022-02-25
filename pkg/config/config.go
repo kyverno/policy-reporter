@@ -2,10 +2,11 @@ package config
 
 // Loki configuration
 type Loki struct {
-	Host            string   `mapstructure:"host"`
-	SkipExisting    bool     `mapstructure:"skipExistingOnStartup"`
-	MinimumPriority string   `mapstructure:"minimumPriority"`
-	Sources         []string `mapstructure:"sources"`
+	Host            string            `mapstructure:"host"`
+	SkipExisting    bool              `mapstructure:"skipExistingOnStartup"`
+	MinimumPriority string            `mapstructure:"minimumPriority"`
+	Sources         []string          `mapstructure:"sources"`
+	CustomLabels    map[string]string `mapstructure:"customLabels"`
 }
 
 // Elasticsearch configuration
