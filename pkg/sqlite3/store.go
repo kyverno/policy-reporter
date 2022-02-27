@@ -191,11 +191,11 @@ func (s *policyReportStore) CleanUp() error {
 	return err
 }
 
-func (s *policyReportStore) FetchClusterPolicies(source string) ([]string, error) {
+func (s *policyReportStore) FetchClusterPolicies(filter api.Filter) ([]string, error) {
 	list := make([]string, 0)
 
-	where, args := appendSourceWhere(source)
-	if where != "" {
+	where, args := generateFilterWhere(filter, []string{"sources", "categories"})
+	if len(where) > 0 {
 		where = " AND " + where
 	}
 
@@ -217,11 +217,11 @@ func (s *policyReportStore) FetchClusterPolicies(source string) ([]string, error
 	return list, nil
 }
 
-func (s *policyReportStore) FetchNamespacedPolicies(source string) ([]string, error) {
+func (s *policyReportStore) FetchNamespacedPolicies(filter api.Filter) ([]string, error) {
 	list := make([]string, 0)
 
-	where, args := appendSourceWhere(source)
-	if where != "" {
+	where, args := generateFilterWhere(filter, []string{"sources", "categories"})
+	if len(where) > 0 {
 		where = " AND " + where
 	}
 
@@ -243,11 +243,11 @@ func (s *policyReportStore) FetchNamespacedPolicies(source string) ([]string, er
 	return list, nil
 }
 
-func (s *policyReportStore) FetchCategories(source string) ([]string, error) {
+func (s *policyReportStore) FetchCategories(filter api.Filter) ([]string, error) {
 	list := make([]string, 0)
 
-	where, args := appendSourceWhere(source)
-	if where != "" {
+	where, args := generateFilterWhere(filter, []string{"sources"})
+	if len(where) > 0 {
 		where = " AND " + where
 	}
 
@@ -269,11 +269,11 @@ func (s *policyReportStore) FetchCategories(source string) ([]string, error) {
 	return list, nil
 }
 
-func (s *policyReportStore) FetchNamespacedKinds(source string) ([]string, error) {
+func (s *policyReportStore) FetchNamespacedKinds(filter api.Filter) ([]string, error) {
 	list := make([]string, 0)
 
-	where, args := appendSourceWhere(source)
-	if where != "" {
+	where, args := generateFilterWhere(filter, []string{"sources", "categories", "policies", "namespaces"})
+	if len(where) > 0 {
 		where = " AND " + where
 	}
 
@@ -295,11 +295,11 @@ func (s *policyReportStore) FetchNamespacedKinds(source string) ([]string, error
 	return list, nil
 }
 
-func (s *policyReportStore) FetchClusterKinds(source string) ([]string, error) {
+func (s *policyReportStore) FetchClusterKinds(filter api.Filter) ([]string, error) {
 	list := make([]string, 0)
 
-	where, args := appendSourceWhere(source)
-	if where != "" {
+	where, args := generateFilterWhere(filter, []string{"sources", "categories", "policies"})
+	if len(where) > 0 {
 		where = " AND " + where
 	}
 
@@ -316,6 +316,58 @@ func (s *policyReportStore) FetchClusterKinds(source string) ([]string, error) {
 		}
 
 		list = append(list, item)
+	}
+
+	return list, nil
+}
+
+func (s *policyReportStore) FetchNamespacedResources(filter api.Filter) ([]*api.Resource, error) {
+	list := make([]*api.Resource, 0)
+
+	where, args := generateFilterWhere(filter, []string{"sources", "categories", "policies", "namespaces", "kind"})
+	if len(where) > 0 {
+		where = " AND " + where
+	}
+
+	rows, err := s.db.Query(`SELECT DISTINCT resource_kind, resource_name FROM policy_report_result WHERE resource_name != "" AND resource_namespace != ""`+where+` ORDER BY resource_kind, resource_name ASC`, args...)
+	if err != nil {
+		return list, err
+	}
+	defer rows.Close()
+	for rows.Next() {
+		var resource api.Resource
+		err := rows.Scan(&resource.Kind, &resource.Name)
+		if err != nil {
+			return list, err
+		}
+
+		list = append(list, &resource)
+	}
+
+	return list, nil
+}
+
+func (s *policyReportStore) FetchClusterResources(filter api.Filter) ([]*api.Resource, error) {
+	list := make([]*api.Resource, 0)
+
+	where, args := generateFilterWhere(filter, []string{"sources", "categories", "policies", "kind"})
+	if len(where) > 0 {
+		where = " AND " + where
+	}
+
+	rows, err := s.db.Query(`SELECT DISTINCT resource_kind, resource_name FROM policy_report_result WHERE resource_name != "" AND resource_namespace == ""`+where+` ORDER BY resource_kind, resource_name ASC`, args...)
+	if err != nil {
+		return list, err
+	}
+	defer rows.Close()
+	for rows.Next() {
+		var resource api.Resource
+		err := rows.Scan(&resource.Kind, &resource.Name)
+		if err != nil {
+			return list, err
+		}
+
+		list = append(list, &resource)
 	}
 
 	return list, nil
@@ -361,11 +413,11 @@ func (s *policyReportStore) FetchNamespacedSources() ([]string, error) {
 	return list, nil
 }
 
-func (s *policyReportStore) FetchNamespaces(source string) ([]string, error) {
+func (s *policyReportStore) FetchNamespaces(filter api.Filter) ([]string, error) {
 	list := make([]string, 0)
 
-	where, args := appendSourceWhere(source)
-	if where != "" {
+	where, args := generateFilterWhere(filter, []string{"sources", "categories", "policies"})
+	if len(where) > 0 {
 		where = " AND " + where
 	}
 
@@ -408,27 +460,14 @@ func (s *policyReportStore) FetchNamespacedStatusCounts(filter api.Filter) ([]ap
 
 	statusCounts := make([]api.NamespacedStatusCount, 0, 5)
 
-	where := make([]string, 0)
-	args := make([]interface{}, 0)
-
-	var argCounter int
-
-	argCounter, where, args = appendWhere(filter.Policies, "policy", where, args, argCounter)
-	argCounter, where, args = appendWhere(filter.Kinds, "resource_kind", where, args, argCounter)
-	argCounter, where, args = appendWhere(filter.Sources, "source", where, args, argCounter)
-	argCounter, where, args = appendWhere(filter.Categories, "category", where, args, argCounter)
-	argCounter, where, args = appendWhere(filter.Severities, "severity", where, args, argCounter)
-	argCounter, where, args = appendWhere(filter.Status, "status", where, args, argCounter)
-	_, where, args = appendWhere(filter.Namespaces, "resource_namespace", where, args, argCounter)
-
-	whereClause := ""
+	where, args := generateFilterWhere(filter, []string{"sources", "categories", "policies", "kinds", "namespaces", "status", "severities"})
 	if len(where) > 0 {
-		whereClause = " AND " + strings.Join(where, " AND ")
+		where = " AND " + where
 	}
 
 	rows, err := s.db.Query(`
 		SELECT COUNT(id) as counter, resource_namespace, status 
-		FROM policy_report_result WHERE resource_namespace != ""`+whereClause+`
+		FROM policy_report_result WHERE resource_namespace != ""`+where+`
 		GROUP BY resource_namespace, status 
 		ORDER BY resource_namespace ASC`, args...)
 
@@ -474,7 +513,7 @@ func (s *policyReportStore) FetchRuleStatusCounts(policy, rule string) ([]api.St
 	var argCounter int
 
 	argCounter, where, args = appendWhere([]string{policy}, "policy", where, args, argCounter)
-	argCounter, where, args = appendWhere([]string{rule}, "rule", where, args, argCounter)
+	_, where, args = appendWhere([]string{rule}, "rule", where, args, argCounter)
 
 	whereClause := ""
 	if len(where) > 0 {
@@ -528,26 +567,14 @@ func (s *policyReportStore) FetchStatusCounts(filter api.Filter) ([]api.StatusCo
 
 	statusCounts := make([]api.StatusCount, 0, len(list))
 
-	where := make([]string, 0)
-	args := make([]interface{}, 0)
-
-	var argCounter int
-
-	argCounter, where, args = appendWhere(filter.Policies, "policy", where, args, argCounter)
-	argCounter, where, args = appendWhere(filter.Kinds, "resource_kind", where, args, argCounter)
-	argCounter, where, args = appendWhere(filter.Sources, "source", where, args, argCounter)
-	argCounter, where, args = appendWhere(filter.Categories, "category", where, args, argCounter)
-	argCounter, where, args = appendWhere(filter.Severities, "severity", where, args, argCounter)
-	_, where, args = appendWhere(filter.Status, "status", where, args, argCounter)
-
-	whereClause := ""
+	where, args := generateFilterWhere(filter, []string{"sources", "categories", "policies", "kinds", "status", "severities"})
 	if len(where) > 0 {
-		whereClause = " AND " + strings.Join(where, " AND ")
+		where = " AND " + where
 	}
 
 	rows, err := s.db.Query(`
 		SELECT COUNT(id) as counter, status 
-		FROM policy_report_result WHERE resource_namespace = ""`+whereClause+`
+		FROM policy_report_result WHERE resource_namespace = ""`+where+`
 		GROUP BY status`, args...)
 
 	if err != nil {
@@ -574,27 +601,14 @@ func (s *policyReportStore) FetchStatusCounts(filter api.Filter) ([]api.StatusCo
 func (s *policyReportStore) FetchNamespacedResults(filter api.Filter) ([]*api.ListResult, error) {
 	list := []*api.ListResult{}
 
-	where := make([]string, 0)
-	args := make([]interface{}, 0)
-
-	var argCounter int
-
-	argCounter, where, args = appendWhere(filter.Policies, "policy", where, args, argCounter)
-	argCounter, where, args = appendWhere(filter.Kinds, "resource_kind", where, args, argCounter)
-	argCounter, where, args = appendWhere(filter.Sources, "source", where, args, argCounter)
-	argCounter, where, args = appendWhere(filter.Categories, "category", where, args, argCounter)
-	argCounter, where, args = appendWhere(filter.Severities, "severity", where, args, argCounter)
-	argCounter, where, args = appendWhere(filter.Status, "status", where, args, argCounter)
-	_, where, args = appendWhere(filter.Namespaces, "resource_namespace", where, args, argCounter)
-
-	whereClause := ""
+	where, args := generateFilterWhere(filter, []string{"sources", "categories", "policies", "kinds", "resources", "status", "severities", "namespaces"})
 	if len(where) > 0 {
-		whereClause = " AND " + strings.Join(where, " AND ")
+		where = " AND " + where
 	}
 
 	rows, err := s.db.Query(`
-		SELECT id, resource_namespace, resource_kind, resource_name, message, policy, rule, severity, properties, status 
-		FROM policy_report_result WHERE resource_namespace != ""`+whereClause+`
+		SELECT id, resource_namespace, resource_kind, resource_name, message, policy, rule, severity, properties, status, category
+		FROM policy_report_result WHERE resource_namespace != ""`+where+`
 		ORDER BY resource_namespace, resource_name, resource_uid ASC`, args...)
 
 	if err != nil {
@@ -605,7 +619,7 @@ func (s *policyReportStore) FetchNamespacedResults(filter api.Filter) ([]*api.Li
 		result := api.ListResult{}
 		var props []byte
 
-		err := rows.Scan(&result.ID, &result.Namespace, &result.Kind, &result.Name, &result.Message, &result.Policy, &result.Rule, &result.Severity, &props, &result.Status)
+		err := rows.Scan(&result.ID, &result.Namespace, &result.Kind, &result.Name, &result.Message, &result.Policy, &result.Rule, &result.Severity, &props, &result.Status, &result.Category)
 		if err != nil {
 			return list, err
 		}
@@ -621,26 +635,14 @@ func (s *policyReportStore) FetchNamespacedResults(filter api.Filter) ([]*api.Li
 func (s *policyReportStore) FetchClusterResults(filter api.Filter) ([]*api.ListResult, error) {
 	list := []*api.ListResult{}
 
-	where := make([]string, 0)
-	args := make([]interface{}, 0)
-
-	var argCounter int
-
-	argCounter, where, args = appendWhere(filter.Policies, "policy", where, args, argCounter)
-	argCounter, where, args = appendWhere(filter.Kinds, "resource_kind", where, args, argCounter)
-	argCounter, where, args = appendWhere(filter.Sources, "source", where, args, argCounter)
-	argCounter, where, args = appendWhere(filter.Categories, "category", where, args, argCounter)
-	argCounter, where, args = appendWhere(filter.Severities, "severity", where, args, argCounter)
-	_, where, args = appendWhere(filter.Status, "status", where, args, argCounter)
-
-	whereClause := ""
+	where, args := generateFilterWhere(filter, []string{"sources", "categories", "policies", "kinds", "resources", "status", "severities"})
 	if len(where) > 0 {
-		whereClause = " AND " + strings.Join(where, " AND ")
+		where = " AND " + where
 	}
 
 	rows, err := s.db.Query(`
-		SELECT id, resource_namespace, resource_kind, resource_name, message, policy, rule, severity, properties, status 
-		FROM policy_report_result WHERE resource_namespace =""`+whereClause+`
+		SELECT id, resource_namespace, resource_kind, resource_name, message, policy, rule, severity, properties, status, category
+		FROM policy_report_result WHERE resource_namespace =""`+where+`
 		ORDER BY resource_namespace, resource_name, resource_uid ASC`, args...)
 
 	if err != nil {
@@ -651,7 +653,7 @@ func (s *policyReportStore) FetchClusterResults(filter api.Filter) ([]*api.ListR
 		result := api.ListResult{}
 		var props []byte
 
-		err := rows.Scan(&result.ID, &result.Namespace, &result.Kind, &result.Name, &result.Message, &result.Policy, &result.Rule, &result.Severity, &props, &result.Status)
+		err := rows.Scan(&result.ID, &result.Namespace, &result.Kind, &result.Name, &result.Message, &result.Policy, &result.Rule, &result.Severity, &props, &result.Status, &result.Category)
 		if err != nil {
 			return list, err
 		}
@@ -814,12 +816,48 @@ func appendWhere(options []string, field string, where []string, args []interfac
 	return argCounter + length, where, args
 }
 
-func appendSourceWhere(source string) (string, []interface{}) {
-	if source == "" {
-		return "", make([]interface{}, 0)
+func generateFilterWhere(filter api.Filter, active []string) (string, []interface{}) {
+	where := make([]string, 0)
+	args := make([]interface{}, 0)
+
+	var argCounter int
+
+	if contains("namespaces", active) {
+		argCounter, where, args = appendWhere(filter.Namespaces, "resource_namespace", where, args, argCounter)
+	}
+	if contains("policies", active) {
+		argCounter, where, args = appendWhere(filter.Policies, "policy", where, args, argCounter)
+	}
+	if contains("kinds", active) {
+		argCounter, where, args = appendWhere(filter.Kinds, "resource_kind", where, args, argCounter)
+	}
+	if contains("resources", active) {
+		argCounter, where, args = appendWhere(filter.Resources, "resource_name", where, args, argCounter)
+	}
+	if contains("sources", active) {
+		argCounter, where, args = appendWhere(filter.Sources, "source", where, args, argCounter)
+	}
+	if contains("categories", active) {
+		argCounter, where, args = appendWhere(filter.Categories, "category", where, args, argCounter)
+	}
+	if contains("severities", active) {
+		argCounter, where, args = appendWhere(filter.Severities, "severity", where, args, argCounter)
+	}
+	if contains("status", active) {
+		_, where, args = appendWhere(filter.Status, "status", where, args, argCounter)
 	}
 
-	return "LOWER(source)=$1", []interface{}{strings.ToLower(source)}
+	return strings.Join(where, " AND "), args
+}
+
+func contains(source string, sources []string) bool {
+	for _, s := range sources {
+		if strings.EqualFold(s, source) {
+			return true
+		}
+	}
+
+	return false
 }
 
 // NewPolicyReportStore construct a PolicyReportStore

@@ -8,33 +8,38 @@ type Filter struct {
 	Policies   []string
 	Severities []string
 	Status     []string
+	Resources  []string
 }
 
 type PolicyReportFinder interface {
 	// FetchClusterPolicies from current PolicyReportResults
-	FetchClusterPolicies(source string) ([]string, error)
+	FetchClusterPolicies(Filter) ([]string, error)
 	// FetchNamespacedPolicies from current PolicyReportResults with a Namespace
-	FetchNamespacedPolicies(source string) ([]string, error)
+	FetchNamespacedPolicies(Filter) ([]string, error)
 	// FetchCategories from current PolicyReportResults
-	FetchCategories(source string) ([]string, error)
+	FetchCategories(Filter) ([]string, error)
 	// FetchClusterSources from current PolicyReportResults
 	FetchClusterSources() ([]string, error)
 	// FetchNamespacedSources from current PolicyReportResults with a Namespace
 	FetchNamespacedSources() ([]string, error)
 	// FetchNamespacedKinds from current PolicyReportResults with a Namespace
-	FetchNamespacedKinds(source string) ([]string, error)
+	FetchNamespacedKinds(Filter) ([]string, error)
+	// FetchNamespacedResources from current PolicyReportResults with a Namespace
+	FetchNamespacedResources(Filter) ([]*Resource, error)
+	// FetchClusterResources from current PolicyReportResults
+	FetchClusterResources(Filter) ([]*Resource, error)
 	// FetchClusterKinds from current PolicyReportResults
-	FetchClusterKinds(source string) ([]string, error)
+	FetchClusterKinds(Filter) ([]string, error)
 	// FetchNamespaces from current PolicyReports
-	FetchNamespaces(source string) ([]string, error)
+	FetchNamespaces(Filter) ([]string, error)
 	// FetchNamespacedStatusCounts from current PolicyReportResults with a Namespace
 	FetchNamespacedStatusCounts(Filter) ([]NamespacedStatusCount, error)
 	// FetchStatusCounts from current PolicyReportResults
 	FetchStatusCounts(Filter) ([]StatusCount, error)
 	// FetchNamespacedResults from current PolicyReportResults with a Namespace
-	FetchNamespacedResults(filter Filter) ([]*ListResult, error)
+	FetchNamespacedResults(Filter) ([]*ListResult, error)
 	// FetchClusterResults from current PolicyReportResults
-	FetchClusterResults(filter Filter) ([]*ListResult, error)
+	FetchClusterResults(Filter) ([]*ListResult, error)
 	// FetchRuleStatusCounts from current PolicyReportResults
 	FetchRuleStatusCounts(policy, rule string) ([]StatusCount, error)
 }

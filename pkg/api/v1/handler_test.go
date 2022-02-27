@@ -232,6 +232,46 @@ func Test_V1_API(t *testing.T) {
 		}
 	})
 
+	t.Run("ClusterResourcesListHandler", func(t *testing.T) {
+		req, err := http.NewRequest("GET", "/v1/cluster-resources/resources", nil)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		rr := httptest.NewRecorder()
+		handler := v1.ClusterResourcesListHandler(store)
+		handler.ServeHTTP(rr, req)
+
+		if status := rr.Code; status != http.StatusOK {
+			t.Errorf("handler returned wrong status code: got %v want %v", status, http.StatusOK)
+		}
+
+		expected := `[{"name":"dev","kind":"Namespace"},{"name":"test","kind":"Namespace"}]`
+		if !strings.Contains(rr.Body.String(), expected) {
+			t.Errorf("handler returned unexpected body: got %v want %v", rr.Body.String(), expected)
+		}
+	})
+
+	t.Run("NamespacedResourcesListHandler", func(t *testing.T) {
+		req, err := http.NewRequest("GET", "/v1/namespaced-resources/resources", nil)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		rr := httptest.NewRecorder()
+		handler := v1.NamespacedResourcesListHandler(store)
+		handler.ServeHTTP(rr, req)
+
+		if status := rr.Code; status != http.StatusOK {
+			t.Errorf("handler returned wrong status code: got %v want %v", status, http.StatusOK)
+		}
+
+		expected := `[{"name":"nginx","kind":"Deployment"},{"name":"nginx","kind":"Pod"}]`
+		if !strings.Contains(rr.Body.String(), expected) {
+			t.Errorf("handler returned unexpected body: got %v want %v", rr.Body.String(), expected)
+		}
+	})
+
 	t.Run("ClusterSourceListHandler", func(t *testing.T) {
 		req, err := http.NewRequest("GET", "/v1/cluster-sources", nil)
 		if err != nil {
@@ -356,7 +396,7 @@ func Test_V1_API(t *testing.T) {
 			t.Errorf("handler returned wrong status code: got %v want %v", status, http.StatusOK)
 		}
 
-		expected := `[{"id":"123","namespace":"test","kind":"Deployment","name":"nginx","message":"validation error: requests and limits required. Rule autogen-check-for-requests-and-limits failed at path /spec/template/spec/containers/0/resources/requests/","policy":"require-requests-and-limits-required","rule":"autogen-check-for-requests-and-limits","status":"fail","severity":"high"},{"id":"124","namespace":"test","kind":"Pod","name":"nginx","message":"validation error: requests and limits required. Rule autogen-check-for-requests-and-limits failed at path /spec/template/spec/containers/0/resources/requests/","policy":"require-requests-and-limits-required","rule":"autogen-check-for-requests-and-limits","status":"pass"}]`
+		expected := `[{"id":"123","namespace":"test","kind":"Deployment","name":"nginx","message":"validation error: requests and limits required. Rule autogen-check-for-requests-and-limits failed at path /spec/template/spec/containers/0/resources/requests/","category":"Best Practices","policy":"require-requests-and-limits-required","rule":"autogen-check-for-requests-and-limits","status":"fail","severity":"high"},{"id":"124","namespace":"test","kind":"Pod","name":"nginx","message":"validation error: requests and limits required. Rule autogen-check-for-requests-and-limits failed at path /spec/template/spec/containers/0/resources/requests/","category":"Best Practices","policy":"require-requests-and-limits-required","rule":"autogen-check-for-requests-and-limits","status":"pass"}]`
 		if !strings.Contains(rr.Body.String(), expected) {
 			t.Errorf("handler returned unexpected body: got %v want %v", rr.Body.String(), expected)
 		}
@@ -376,7 +416,7 @@ func Test_V1_API(t *testing.T) {
 			t.Errorf("handler returned wrong status code: got %v want %v", status, http.StatusOK)
 		}
 
-		expected := "{\"id\":\"125\",\"kind\":\"Namespace\",\"name\":\"test\",\"message\":\"validation error: The label `test` is required. Rule check-for-labels-on-namespace\",\"policy\":\"require-ns-labels\",\"rule\":\"check-for-labels-on-namespace\",\"status\":\"pass\",\"severity\":\"medium\"}"
+		expected := "{\"id\":\"125\",\"kind\":\"Namespace\",\"name\":\"test\",\"message\":\"validation error: The label `test` is required. Rule check-for-labels-on-namespace\",\"category\":\"Convention\",\"policy\":\"require-ns-labels\",\"rule\":\"check-for-labels-on-namespace\",\"status\":\"pass\",\"severity\":\"medium\"}"
 		if !strings.Contains(rr.Body.String(), expected) {
 			t.Errorf("handler returned unexpected body: got %v want %v", rr.Body.String(), expected)
 		}

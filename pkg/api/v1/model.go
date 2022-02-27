@@ -20,12 +20,18 @@ type NamespaceCount struct {
 	Count     int    `json:"count"`
 }
 
+type Resource struct {
+	Name string `json:"name"`
+	Kind string `json:"kind"`
+}
+
 type ListResult struct {
 	ID         string            `json:"id"`
 	Namespace  string            `json:"namespace,omitempty"`
 	Kind       string            `json:"kind"`
 	Name       string            `json:"name"`
 	Message    string            `json:"message"`
+	Category   string            `json:"category,omitempty"`
 	Policy     string            `json:"policy"`
 	Rule       string            `json:"rule"`
 	Status     string            `json:"status"`
