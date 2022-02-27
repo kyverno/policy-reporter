@@ -84,7 +84,7 @@ spec:
       automountServiceAccountToken: true
       containers:
         - name: policy-reporter
-          image: "ghcr.io/kyverno/policy-reporter:2.2.0"
+          image: "ghcr.io/kyverno/policy-reporter:2.3.0"
           imagePullPolicy: IfNotPresent
           securityContext:
             allowPrivilegeEscalation: false
