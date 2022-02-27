@@ -1,6 +1,10 @@
 # Changelog
 
 # 2.4.0
+* New Policy Reporter API to get a list of available resources
+* New Filter for Policies, Kinds, Categories and Results APIs
+
+# 2.4.0
 * Policy Reporter
     * Add Support for custom Loki labels
 

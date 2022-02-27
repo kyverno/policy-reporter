@@ -161,7 +161,7 @@ func Test_PolicyReportStore(t *testing.T) {
 	})
 
 	t.Run("FetchNamespacedKinds", func(t *testing.T) {
-		items, err := store.FetchNamespacedKinds("kyverno")
+		items, err := store.FetchNamespacedKinds(v1.Filter{Sources: []string{"kyverno"}})
 		if err != nil {
 			t.Fatalf("Unexpected Error: %s", err)
 		}
@@ -177,7 +177,7 @@ func Test_PolicyReportStore(t *testing.T) {
 	})
 
 	t.Run("FetchClusterKinds", func(t *testing.T) {
-		items, err := store.FetchClusterKinds("kyverno")
+		items, err := store.FetchClusterKinds(v1.Filter{Sources: []string{"kyverno"}})
 		if err != nil {
 			t.Fatalf("Unexpected Error: %s", err)
 		}
@@ -186,6 +186,38 @@ func Test_PolicyReportStore(t *testing.T) {
 		}
 		if items[0] != "Namespace" {
 			t.Errorf("Should return 'Namespace' as first result")
+		}
+	})
+
+	t.Run("FetchNamespacedResources", func(t *testing.T) {
+		items, err := store.FetchNamespacedResources(v1.Filter{Sources: []string{"kyverno"}, Kinds: []string{"pod"}})
+		if err != nil {
+			t.Fatalf("Unexpected Error: %s", err)
+		}
+		if len(items) != 2 {
+			t.Fatalf("Should Find 2 Resources with Namespace Scope")
+		}
+		if items[0].Name != "nginx" {
+			t.Errorf("Should return 'nginx' as first result, got %s", items[0].Name)
+		}
+		if items[1].Name != "nginx" {
+			t.Errorf("Should return 'nginx' as second result get %s", items[1].Name)
+		}
+	})
+
+	t.Run("FetchClusterResources", func(t *testing.T) {
+		items, err := store.FetchClusterResources(v1.Filter{Sources: []string{"kyverno"}, Kinds: []string{"namespace"}})
+		if err != nil {
+			t.Fatalf("Unexpected Error: %s", err)
+		}
+		if len(items) != 2 {
+			t.Fatalf("Should find 2 resources with cluster scope")
+		}
+		if items[0].Name != "dev" {
+			t.Errorf("Should return 'test' as first result")
+		}
+		if items[1].Name != "test" {
+			t.Errorf("Should return 'test' as second result")
 		}
 	})
 
@@ -374,7 +406,7 @@ func Test_PolicyReportStore(t *testing.T) {
 	})
 
 	t.Run("FetchNamespaces", func(t *testing.T) {
-		items, err := store.FetchNamespaces("kyverno")
+		items, err := store.FetchNamespaces(v1.Filter{Sources: []string{"kyverno"}})
 		if err != nil {
 			t.Fatalf("Unexpected Error: %s", err)
 		}
@@ -387,7 +419,7 @@ func Test_PolicyReportStore(t *testing.T) {
 	})
 
 	t.Run("FetchCategories", func(t *testing.T) {
-		items, err := store.FetchCategories("kyverno")
+		items, err := store.FetchCategories(v1.Filter{Sources: []string{"kyverno"}})
 		if err != nil {
 			t.Fatalf("Unexpected Error: %s", err)
 		}
@@ -400,7 +432,7 @@ func Test_PolicyReportStore(t *testing.T) {
 	})
 
 	t.Run("FetchClusterPolicies", func(t *testing.T) {
-		items, err := store.FetchClusterPolicies("kyverno")
+		items, err := store.FetchClusterPolicies(v1.Filter{Sources: []string{"kyverno"}})
 		if err != nil {
 			t.Fatalf("Unexpected Error: %s", err)
 		}
@@ -413,7 +445,7 @@ func Test_PolicyReportStore(t *testing.T) {
 	})
 
 	t.Run("FetchNamespacedPolicies", func(t *testing.T) {
-		items, err := store.FetchNamespacedPolicies("kyverno")
+		items, err := store.FetchNamespacedPolicies(v1.Filter{Sources: []string{"kyverno"}})
 		if err != nil {
 			t.Fatalf("Unexpected Error: %s", err)
 		}

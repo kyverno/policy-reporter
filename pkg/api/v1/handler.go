@@ -22,7 +22,10 @@ func TargetsHandler(targets []target.Client) http.HandlerFunc {
 // ClusterResourcesPolicyListHandler REST API
 func ClusterResourcesPolicyListHandler(finder PolicyReportFinder) http.HandlerFunc {
 	return func(w http.ResponseWriter, req *http.Request) {
-		list, err := finder.FetchClusterPolicies(req.URL.Query().Get("source"))
+		list, err := finder.FetchClusterPolicies(Filter{
+			Sources:    req.URL.Query()["sources"],
+			Categories: req.URL.Query()["categories"],
+		})
 		helper.SendJSONResponse(w, list, err)
 	}
 }
@@ -30,7 +33,10 @@ func ClusterResourcesPolicyListHandler(finder PolicyReportFinder) http.HandlerFu
 // NamespacedResourcesPolicyListHandler REST API
 func NamespacedResourcesPolicyListHandler(finder PolicyReportFinder) http.HandlerFunc {
 	return func(w http.ResponseWriter, req *http.Request) {
-		list, err := finder.FetchNamespacedPolicies(req.URL.Query().Get("source"))
+		list, err := finder.FetchNamespacedPolicies(Filter{
+			Sources:    req.URL.Query()["sources"],
+			Categories: req.URL.Query()["categories"],
+		})
 		helper.SendJSONResponse(w, list, err)
 	}
 }
@@ -38,7 +44,9 @@ func NamespacedResourcesPolicyListHandler(finder PolicyReportFinder) http.Handle
 // CategoryListHandler REST API
 func CategoryListHandler(finder PolicyReportFinder) http.HandlerFunc {
 	return func(w http.ResponseWriter, req *http.Request) {
-		list, err := finder.FetchCategories(req.URL.Query().Get("source"))
+		list, err := finder.FetchCategories(Filter{
+			Sources: req.URL.Query()["sources"],
+		})
 		helper.SendJSONResponse(w, list, err)
 	}
 }
@@ -46,7 +54,11 @@ func CategoryListHandler(finder PolicyReportFinder) http.HandlerFunc {
 // ClusterResourcesKindListHandler REST API
 func ClusterResourcesKindListHandler(finder PolicyReportFinder) http.HandlerFunc {
 	return func(w http.ResponseWriter, req *http.Request) {
-		list, err := finder.FetchClusterKinds(req.URL.Query().Get("source"))
+		list, err := finder.FetchClusterKinds(Filter{
+			Sources:    req.URL.Query()["sources"],
+			Categories: req.URL.Query()["categories"],
+			Policies:   req.URL.Query()["policies"],
+		})
 		helper.SendJSONResponse(w, list, err)
 	}
 }
@@ -54,7 +66,39 @@ func ClusterResourcesKindListHandler(finder PolicyReportFinder) http.HandlerFunc
 // NamespacedResourcesKindListHandler REST API
 func NamespacedResourcesKindListHandler(finder PolicyReportFinder) http.HandlerFunc {
 	return func(w http.ResponseWriter, req *http.Request) {
-		list, err := finder.FetchNamespacedKinds(req.URL.Query().Get("source"))
+		list, err := finder.FetchNamespacedKinds(Filter{
+			Sources:    req.URL.Query()["sources"],
+			Categories: req.URL.Query()["categories"],
+			Policies:   req.URL.Query()["policies"],
+			Namespaces: req.URL.Query()["namespaces"],
+		})
+		helper.SendJSONResponse(w, list, err)
+	}
+}
+
+// ClusterResourcesListHandler REST API
+func ClusterResourcesListHandler(finder PolicyReportFinder) http.HandlerFunc {
+	return func(w http.ResponseWriter, req *http.Request) {
+		list, err := finder.FetchClusterResources(Filter{
+			Sources:    req.URL.Query()["sources"],
+			Categories: req.URL.Query()["categories"],
+			Policies:   req.URL.Query()["policies"],
+			Kinds:      req.URL.Query()["kinds"],
+		})
+		helper.SendJSONResponse(w, list, err)
+	}
+}
+
+// NamespacedResourcesListHandler REST API
+func NamespacedResourcesListHandler(finder PolicyReportFinder) http.HandlerFunc {
+	return func(w http.ResponseWriter, req *http.Request) {
+		list, err := finder.FetchNamespacedResources(Filter{
+			Sources:    req.URL.Query()["sources"],
+			Categories: req.URL.Query()["categories"],
+			Policies:   req.URL.Query()["policies"],
+			Namespaces: req.URL.Query()["namespaces"],
+			Kinds:      req.URL.Query()["kinds"],
+		})
 		helper.SendJSONResponse(w, list, err)
 	}
 }
@@ -123,6 +167,7 @@ func NamespacedResourcesResultHandler(finder PolicyReportFinder) http.HandlerFun
 		list, err := finder.FetchNamespacedResults(Filter{
 			Namespaces: req.URL.Query()["namespaces"],
 			Kinds:      req.URL.Query()["kinds"],
+			Resources:  req.URL.Query()["resources"],
 			Sources:    req.URL.Query()["sources"],
 			Categories: req.URL.Query()["categories"],
 			Severities: req.URL.Query()["severities"],
@@ -138,6 +183,7 @@ func ClusterResourcesResultHandler(finder PolicyReportFinder) http.HandlerFunc {
 	return func(w http.ResponseWriter, req *http.Request) {
 		list, err := finder.FetchClusterResults(Filter{
 			Kinds:      req.URL.Query()["kinds"],
+			Resources:  req.URL.Query()["resources"],
 			Sources:    req.URL.Query()["sources"],
 			Categories: req.URL.Query()["categories"],
 			Severities: req.URL.Query()["severities"],
@@ -151,7 +197,11 @@ func ClusterResourcesResultHandler(finder PolicyReportFinder) http.HandlerFunc {
 // NamespaceListHandler REST API
 func NamespaceListHandler(finder PolicyReportFinder) http.HandlerFunc {
 	return func(w http.ResponseWriter, req *http.Request) {
-		list, err := finder.FetchNamespaces(req.URL.Query().Get("source"))
+		list, err := finder.FetchNamespaces(Filter{
+			Sources:    req.URL.Query()["sources"],
+			Categories: req.URL.Query()["categories"],
+			Policies:   req.URL.Query()["policies"],
+		})
 		helper.SendJSONResponse(w, list, err)
 	}
 }
