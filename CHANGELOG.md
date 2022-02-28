@@ -1,6 +1,9 @@
 # Changelog
 
-# 2.4.0
+# 2.6.0
+* Add seccomp profile support [[#120](https://github.com/kyverno/policy-reporter/pull/120) by [eddycharly](https://github.com/eddycharly)]
+
+# 2.5.0
 * New Policy Reporter API to get a list of available resources
 * New Filter for Policies, Kinds, Categories and Results APIs
 
