@@ -35,6 +35,8 @@ securityContext:
   capabilities:
     drop:
       - ALL
+  seccompProfile:
+    type: RuntimeDefault
 
 # Key/value pairs that are attached to pods.
 podAnnotations: {}
