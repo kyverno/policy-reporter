@@ -108,7 +108,7 @@ data:
         "pluginVersion": "7.1.5",
         "targets": [
             {
-            "expr": "sum(policy_report_summary{status=\"Fail\"} > 0) by (exported_namespace)",
+            "expr": "sum(policy_report_result{policy=~\"$policy\", category=~\"$category\", severity=~\"$severity\", kind=~\"$kind\", exported_namespace=~\"$namespace\", status=~\"fail|error\"} > 0) by (exported_namespace)",
             "instant": true,
             "interval": "",
             "legendFormat": "{{`{{ exported_namespace }}`}}",
@@ -169,7 +169,7 @@ data:
         "pluginVersion": "7.1.5",
         "targets": [
             {
-            "expr": "sum(cluster_policy_report_summary{status=~\"Fail|Error\"} > 0) by (status)",
+            "expr": "sum(cluster_policy_report_result{policy=~\"$policy\", category=~\"$category\", severity=~\"$severity\", kind=~\"$kind\", status=~\"fail|error\"} > 0) by (status)",
             "format": "time_series",
             "interval": "",
             "intervalFactor": 1,
@@ -231,13 +231,13 @@ data:
         "steppedLine": false,
         "targets": [
             {
-            "expr": "sum(cluster_policy_report_result{status=~\"fail|error\"} > 0) by (policy)",
+            "expr": "sum(cluster_policy_report_result{policy=~\"$policy\", category=~\"$category\", severity=~\"$severity\", kind=~\"$kind\", status=~\"fail|error\"} > 0) by (policy)",
             "interval": "",
             "legendFormat": "{{`{{ policy }}`}}",
             "refId": "A"
             },
             {
-            "expr": "sum(policy_report_result{status=~\"fail|error\"} > 0) by (policy)",
+            "expr": "sum(policy_report_result{policy=~\"$policy\", category=~\"$category\", severity=~\"$severity\", kind=~\"$kind\", exported_namespace=~\"$namespace\", status=~\"fail|error\"} > 0) by (policy)",
             "interval": "",
             "legendFormat": "{{`{{ policy }}`}}",
             "refId": "B"
@@ -322,7 +322,7 @@ data:
         "pluginVersion": "7.1.5",
         "targets": [
             {
-            "expr": "sum(policy_report_result{status=~\"fail|error\"}) by (exported_namespace,policy,rule,kind,name,status)",
+            "expr": "sum(policy_report_result{policy=~\"$policy\", category=~\"$category\", severity=~\"$severity\", kind=~\"$kind\", exported_namespace=~\"$namespace\", status=~\"fail|error\"}) by (exported_namespace,policy,rule,kind,name,status,category,severity)",
             "format": "table",
             "instant": true,
             "interval": "",
@@ -342,13 +342,13 @@ data:
                 "Value": true
                 },
                 "indexByName": {
-                "Time": 0,
-                "Value": 6,
-                "exported_namespace": 1,
-                "kind": 2,
-                "name": 3,
-                "policy": 4,
-                "rule": 5,
+                "category": 0,
+                "severity": 1,
+                "exported_namespace": 2,
+                "kind": 3,
+                "name": 4,
+                "policy": 5,
+                "rule": 6,
                 "status": 7
                 },
                 "renameByName": {
@@ -396,7 +396,7 @@ data:
         "pluginVersion": "7.1.5",
         "targets": [
             {
-            "expr": "cluster_policy_report_result > 0",
+            "expr": "sum(cluster_policy_report_result{policy=~\"$policy\", category=~\"$category\", severity=~\"$severity\", kind=~\"$kind\", status=~\"fail|error\"}) by (policy,rule,kind,name,status,category,severity)",
             "format": "table",
             "instant": true,
             "interval": "",
@@ -421,28 +421,19 @@ data:
                 "namespace": true,
                 "pod": true,
                 "report": true,
-                "service": true
+                "service": true,
+                "container": true
                 },
                 "indexByName": {
-                "Time": 0,
-                "Value": 14,
-                "__name__": 1,
-                "endpoint": 2,
-                "instance": 3,
-                "job": 4,
-                "kind": 9,
-                "name": 10,
-                "namespace": 5,
-                "pod": 6,
-                "policy": 11,
-                "report": 7,
-                "rule": 12,
-                "service": 8,
-                "status": 13
+                "category": 0,
+                "severity": 1,
+                "kind": 2,
+                "name": 3,
+                "policy": 4,
+                "rule": 5,
+                "status": 6
                 },
-                "renameByName": {
-                "__name__": ""
-                }
+                "renameByName": {}
             }
             }
         ],
@@ -455,7 +446,108 @@ data:
         "Policy Reporter"
     ],
     "templating": {
-        "list": []
+        "list": [
+        {
+            "allValue": ".*",
+            "definition": "label_values({__name__=~ \"policy_report_result|cluster_policy_report_result\"}, policy)",
+            "hide": 0,
+            "includeAll": true,
+            "label": "Policy",
+            "multi": true,
+            "name": "policy",
+            "options": [],
+            "query": "label_values({__name__=~ \"policy_report_result|cluster_policy_report_result\"}, policy)",
+            "refresh": 2,
+            "regex": "",
+            "skipUrlSync": false,
+            "sort": 5,
+            "tagValuesQuery": "",
+            "tags": [],
+            "tagsQuery": "",
+            "type": "query",
+            "useTags": false
+        },
+        {
+            "allValue": ".*",
+            "definition": "label_values({__name__=~ \"policy_report_result|cluster_policy_report_result\"}, category)",
+            "hide": 0,
+            "includeAll": true,
+            "label": "Category",
+            "multi": true,
+            "name": "category",
+            "options": [],
+            "query": "label_values({__name__=~ \"policy_report_result|cluster_policy_report_result\"}, category)",
+            "refresh": 2,
+            "regex": "",
+            "skipUrlSync": false,
+            "sort": 5,
+            "tagValuesQuery": "",
+            "tags": [],
+            "tagsQuery": "",
+            "type": "query",
+            "useTags": false
+        },
+        {
+            "allValue": ".*",
+            "definition": "label_values({__name__=~ \"policy_report_result|cluster_policy_report_result\"}, severity)",
+            "hide": 0,
+            "includeAll": true,
+            "label": "Severity",
+            "multi": true,
+            "name": "severity",
+            "options": [],
+            "query": "label_values({__name__=~ \"policy_report_result|cluster_policy_report_result\"}, severity)",
+            "refresh": 2,
+            "regex": "",
+            "skipUrlSync": false,
+            "sort": 5,
+            "tagValuesQuery": "",
+            "tags": [],
+            "tagsQuery": "",
+            "type": "query",
+            "useTags": false
+        },
+        {
+            "allValue": ".*",
+            "definition": "label_values(policy_report_result, exported_namespace)",
+            "hide": 0,
+            "includeAll": true,
+            "label": "Namespace",
+            "multi": true,
+            "name": "namespace",
+            "options": [],
+            "query": "label_values(policy_report_result, exported_namespace)",
+            "refresh": 2,
+            "regex": "",
+            "skipUrlSync": false,
+            "sort": 5,
+            "tagValuesQuery": "",
+            "tags": [],
+            "tagsQuery": "",
+            "type": "query",
+            "useTags": false
+        },
+        {
+            "allValue": ".*",
+            "definition": "label_values({__name__=~ \"policy_report_result|cluster_policy_report_result\"}, kind)",
+            "hide": 0,
+            "includeAll": true,
+            "label": "Kind",
+            "multi": true,
+            "name": "kind",
+            "options": [],
+            "query": "label_values({__name__=~ \"policy_report_result|cluster_policy_report_result\"}, kind)",
+            "refresh": 2,
+            "regex": "",
+            "skipUrlSync": false,
+            "sort": 5,
+            "tagValuesQuery": "",
+            "tags": [],
+            "tagsQuery": "",
+            "type": "query",
+            "useTags": false
+        }
+        ]
     },
     "time": {
         "from": "now-30m",
