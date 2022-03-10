@@ -1,5 +1,12 @@
 # Changelog
 
+# 2.6.1
+* Update Policy Reporter UI to v1.3.2
+    * Support access over Subpaths, e.g. Rancher Reverse Proxy
+* Update Policy Reporter Monitoring to v2.1.0
+    * Fix Failing ClusterPolicyRules Columns of the PolicyReports Dashboard
+    * Add Filter to the PolicyReports Dashboard
+
 # 2.6.0
 * Add seccomp profile support [[#120](https://github.com/kyverno/policy-reporter/pull/120) by [eddycharly](https://github.com/eddycharly)]
 
