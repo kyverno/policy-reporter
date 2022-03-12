@@ -1,5 +1,17 @@
 # Changelog
 
+# 2.6.2
+* Policy Reporter
+    * Update Go  to 1.17.8
+    * Add `serviceMonitor.relabelings` and `serviceMonitor.metricRelabelings` for ServiceMonitor configuration in the `monitoring` Subchart.
+    * Add `kyverno.serviceMonitor.relabelings` and `kyverno.serviceMonitor.metricRelabelings` for the KyvernoPlugin ServiceMonitor configuration in the `monitoring` Subchart.
+
+* Policy Reporter UI
+    * Update Go  to 1.17.8
+
+* Policy Reporter KyvernoPlugin
+    * Update Go  to 1.17.8
+
 # 2.6.1
 * Update Policy Reporter UI to v1.3.2
     * Support access over Subpaths, e.g. Rancher Reverse Proxy

@@ -16,3 +16,11 @@ spec:
         {{- include "policyreporter.selectorLabels" . | nindent 8 }}
   endpoints:
   - port: http
+    {{- with .Values.serviceMonitor.relabelings }}
+    relabelings:
+      {{- toYaml . | nindent 4 }}
+    {{- end }}
+    {{- with .Values.serviceMonitor.metricRelabelings }}
+    metricRelabelings:
+      {{- toYaml . | nindent 4 }}
+    {{- end }}

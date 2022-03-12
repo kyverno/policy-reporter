@@ -6,6 +6,17 @@ serviceMonitor:
   namespace:
   # labels to match the serviceMonitorSelector of the Prometheus Resource
   labels: {}
+  # https://github.com/prometheus-operator/prometheus-operator/blob/main/Documentation/api.md#relabelconfig
+  relabelings: []
+  # see serviceMonitor.relabelings
+  metricRelabelings: []
+
+kyverno:
+  serviceMonitor:
+    # see serviceMonitor.relabelings
+    relabelings: []
+    # see serviceMonitor.relabelings
+    metricRelabelings: []
 
 grafana:
   # namespace for configMap of grafana dashboards
