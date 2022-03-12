@@ -17,4 +17,12 @@ spec:
         {{- include "kyvernoplugin.selectorLabels" . | nindent 8 }}
   endpoints:
   - port: rest
+    {{- with .Values.kyverno.serviceMonitor.relabelings }}
+    relabelings:
+      {{- toYaml . | nindent 4 }}
+    {{- end }}
+    {{- with .Values.kyverno.serviceMonitor.metricRelabelings }}
+    metricRelabelings:
+      {{- toYaml . | nindent 4 }}
+    {{- end }}
 {{- end }}
