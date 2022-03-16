@@ -1,5 +1,9 @@
 # Changelog
 
+# 2.6.3
+* Policy Reporter
+    * Fix Debouncer has wrong reference to OldPolicyReport when a result was cached.
+
 # 2.6.2
 * Policy Reporter
     * Update Go  to 1.17.8
