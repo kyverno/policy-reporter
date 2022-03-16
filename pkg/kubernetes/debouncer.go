@@ -21,7 +21,7 @@ type debouncer struct {
 }
 
 func (d *debouncer) Add(event report.LifecycleEvent) {
-	_, ok := d.events[event.NewPolicyReport.GetIdentifier()]
+	cached, ok := d.events[event.NewPolicyReport.GetIdentifier()]
 	if event.Type != report.Updated && ok {
 		d.mutx.Lock()
 		delete(d.events, event.NewPolicyReport.GetIdentifier())
@@ -54,6 +54,7 @@ func (d *debouncer) Add(event report.LifecycleEvent) {
 
 	if ok {
 		d.mutx.Lock()
+		event.OldPolicyReport = cached.OldPolicyReport
 		d.events[event.NewPolicyReport.GetIdentifier()] = event
 		d.mutx.Unlock()
 
