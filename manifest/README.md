@@ -53,9 +53,9 @@ kubectl apply -f https://raw.githubusercontent.com/kyverno/policy-reporter/main/
 kubectl apply -f https://raw.githubusercontent.com/kyverno/policy-reporter/main/manifest/kyverno-policy-reporter-ui/install.yaml
 ```
 
-## Target Configuration
+## Policy Reporter Configuration
 
-To configure your notification targets for Policy Reporter create a secret called `policy-reporter-targets` in the `policy-reporter` namespace with an key `config.yaml` as key and the following structure as value:
+To configure policy-reporter, for exomaple your notification targets for Policy Reporter create a secret called `policy-reporter-targets` in the `policy-reporter` namespace with an key `config.yaml` as key and the following structure as value:
 
 ```yaml
 priorityMap: {}
@@ -108,6 +108,13 @@ s3:
   minimumPriority: "warning"
   skipExistingOnStartup: true
   sources: []
+
+reportFilter:
+  namespaces:
+    include: []
+    exclucde: []
+  clusterReports:
+    disabled: false
 ```
 
 The `kyverno-policy-reporter-ui` and `default-policy-reporter-ui` installation has an optional preconfigured `target-security.yaml` to apply. This secret configures the Policy Reporter UI as target for Policy Reporter.
