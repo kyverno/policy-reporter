@@ -46,6 +46,7 @@ type k8sPolicyReportClient struct {
 	mapper                Mapper
 	mx                    *sync.Mutex
 	restartWatchOnFailure time.Duration
+	reportFilter          report.Filter
 }
 
 func (k *k8sPolicyReportClient) GetFoundResources() map[string]string {
@@ -53,6 +54,8 @@ func (k *k8sPolicyReportClient) GetFoundResources() map[string]string {
 }
 
 func (k *k8sPolicyReportClient) WatchPolicyReports(ctx context.Context) <-chan report.LifecycleEvent {
+	schemas := [][]schema.GroupVersionResource{}
+
 	pr := []schema.GroupVersionResource{
 		policyReportAlphaV2,
 		policyReportAlphaV1,
@@ -63,7 +66,12 @@ func (k *k8sPolicyReportClient) WatchPolicyReports(ctx context.Context) <-chan r
 		clusterPolicyReportAlphaV1,
 	}
 
-	for _, versions := range [][]schema.GroupVersionResource{pr, cpor} {
+	schemas = append(schemas, pr)
+	if !k.reportFilter.DisableClusterReports() {
+		schemas = append(schemas, cpor)
+	}
+
+	for _, versions := range schemas {
 		go func(vs []schema.GroupVersionResource) {
 			for {
 				factory := dynamicinformer.NewFilteredDynamicSharedInformerFactory(k.client, 30*time.Minute, corev1.NamespaceAll, nil)
@@ -78,7 +86,9 @@ func (k *k8sPolicyReportClient) WatchPolicyReports(ctx context.Context) <-chan r
 	}
 
 	for {
-		if len(k.found) == 2 {
+		if !k.reportFilter.DisableClusterReports() && len(k.found) == 2 {
+			break
+		} else if k.reportFilter.DisableClusterReports() && len(k.found) == 1 {
 			break
 		}
 	}
@@ -106,13 +116,17 @@ func (k *k8sPolicyReportClient) watchCRD(ctx context.Context, r schema.GroupVers
 		AddFunc: func(obj interface{}) {
 			if item, ok := obj.(*unstructured.Unstructured); ok {
 				preport := k.mapper.MapPolicyReport(item.Object)
-				k.debouncer.Add(report.LifecycleEvent{NewPolicyReport: preport, OldPolicyReport: &report.PolicyReport{}, Type: report.Added})
+				if k.reportFilter.AllowReport(preport) {
+					k.debouncer.Add(report.LifecycleEvent{NewPolicyReport: preport, OldPolicyReport: &report.PolicyReport{}, Type: report.Added})
+				}
 			}
 		},
 		DeleteFunc: func(obj interface{}) {
 			if item, ok := obj.(*unstructured.Unstructured); ok {
 				preport := k.mapper.MapPolicyReport(item.Object)
-				k.debouncer.Add(report.LifecycleEvent{NewPolicyReport: preport, OldPolicyReport: &report.PolicyReport{}, Type: report.Deleted})
+				if k.reportFilter.AllowReport(preport) {
+					k.debouncer.Add(report.LifecycleEvent{NewPolicyReport: preport, OldPolicyReport: &report.PolicyReport{}, Type: report.Deleted})
+				}
 			}
 		},
 		UpdateFunc: func(oldObj, newObj interface{}) {
@@ -124,7 +138,9 @@ func (k *k8sPolicyReportClient) watchCRD(ctx context.Context, r schema.GroupVers
 					oreport = k.mapper.MapPolicyReport(oldItem.Object)
 				}
 
-				k.debouncer.Add(report.LifecycleEvent{NewPolicyReport: preport, OldPolicyReport: oreport, Type: report.Updated})
+				if k.reportFilter.AllowReport(preport) {
+					k.debouncer.Add(report.LifecycleEvent{NewPolicyReport: preport, OldPolicyReport: oreport, Type: report.Updated})
+				}
 			}
 		},
 	})
@@ -153,7 +169,7 @@ func (k *k8sPolicyReportClient) handleCRDRegistration(ctx context.Context, infor
 }
 
 // NewPolicyReportAdapter new Adapter for Policy Report Kubernetes API
-func NewPolicyReportClient(dynamic dynamic.Interface, mapper Mapper, restartWatchOnFailure time.Duration) report.PolicyReportClient {
+func NewPolicyReportClient(dynamic dynamic.Interface, mapper Mapper, restartWatchOnFailure time.Duration, reportFilter report.Filter) report.PolicyReportClient {
 	return &k8sPolicyReportClient{
 		client:                dynamic,
 		mapper:                mapper,
@@ -161,5 +177,6 @@ func NewPolicyReportClient(dynamic dynamic.Interface, mapper Mapper, restartWatc
 		found:                 make(map[string]string),
 		debouncer:             NewDebouncer(time.Minute),
 		restartWatchOnFailure: restartWatchOnFailure,
+		reportFilter:          reportFilter,
 	}
 }

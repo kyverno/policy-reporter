@@ -369,9 +369,17 @@ func (r *Resolver) PolicyReportClient() (report.PolicyReportClient, error) {
 		return nil, err
 	}
 
-	r.policyReportClient = kubernetes.NewPolicyReportClient(client, r.Mapper(), 5*time.Second)
+	r.policyReportClient = kubernetes.NewPolicyReportClient(client, r.Mapper(), 5*time.Second, r.ReportFilter())
 
 	return r.policyReportClient, nil
+}
+
+func (r *Resolver) ReportFilter() report.Filter {
+	return report.NewFilter(
+		r.config.ReportFilter.ClusterReports.Disabled,
+		r.config.ReportFilter.Namespaces.Include,
+		r.config.ReportFilter.Namespaces.Exclude,
+	)
 }
 
 // ResultCache resolver method

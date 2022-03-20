@@ -1,5 +1,11 @@
 # Changelog
 
+# 2.7.0
+* Policy Reporter
+    * PolicyReport Filter:
+        * PolicyReporter CRD Filter by Namespaces
+        * Disable ClusterPolicyReport CRD processing
+
 # 2.6.3
 * Policy Reporter
     * Fix Debouncer has wrong reference to OldPolicyReport when a result was cached.
