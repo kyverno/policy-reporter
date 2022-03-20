@@ -106,8 +106,8 @@ reportFilter:
     # exclude will be ignored if an include filter exists
     exclude: []
   clusterReports:
-    # Enable the processing of ClusterPolicyReports, enabled by default
-    enabled: true
+    # Disable the processing of ClusterPolicyReports
+    disabled: false
 
 # enable policy-report-ui
 ui:
