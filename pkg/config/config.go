@@ -80,6 +80,20 @@ type Metrics struct {
 
 type PriorityMap = map[string]string
 
+type NamespaceFilter struct {
+	Include []string `mapstructure:"include"`
+	Exclude []string `mapstructure:"exclude"`
+}
+
+type ClusterReportFilter struct {
+	Disabled bool `mapstructure:"disabled"`
+}
+
+type ReportFilter struct {
+	Namespaces     NamespaceFilter     `mapstructure:"namespaces"`
+	ClusterReports ClusterReportFilter `mapstructure:"clusterReports"`
+}
+
 // Config of the PolicyReporter
 type Config struct {
 	Loki          Loki          `mapstructure:"loki"`
@@ -95,4 +109,5 @@ type Config struct {
 	Metrics       Metrics       `mapstructure:"metrics"`
 	REST          REST          `mapstructure:"rest"`
 	PriorityMap   PriorityMap   `mapstructure:"priorityMap"`
+	ReportFilter  ReportFilter  `mapstructure:"reportFilter"`
 }

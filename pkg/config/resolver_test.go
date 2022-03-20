@@ -363,6 +363,15 @@ func Test_ResolveMapper(t *testing.T) {
 	}
 }
 
+func Test_ResolveReportFilter(t *testing.T) {
+	resolver := config.NewResolver(testConfig, &rest.Config{})
+
+	filter := resolver.ReportFilter()
+	if filter == nil {
+		t.Error("Error: Should return Filter")
+	}
+}
+
 func Test_ResolveClientWithInvalidK8sConfig(t *testing.T) {
 	k8sConfig := &rest.Config{}
 	k8sConfig.Host = "invalid/url"

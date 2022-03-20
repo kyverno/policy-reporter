@@ -76,3 +76,16 @@ s3:
 priorityMap:
   {{- toYaml . | nindent 2 }}
 {{- end }}
+
+reportFilter:
+  namespaces:
+    {{- with .Values.reportFilter.namespaces.include }}
+    include:
+      {{- toYaml . | nindent 6 }}
+    {{- end }}
+    {{- with .Values.reportFilter.namespaces.exclude }}
+    exclude:
+      {{- toYaml . | nindent 6 }}
+    {{- end }}
+  clusterReports:
+    disabled: {{ .Values.reportFilter.clusterReports.disabled }}

@@ -2,7 +2,7 @@ image:
   registry: ghcr.io
   repository: kyverno/policy-reporter
   pullPolicy: IfNotPresent
-  tag: 2.3.2
+  tag: 2.4.0
 
 imagePullSecrets: []
 
@@ -96,6 +96,18 @@ rest:
 # Prometheus Metrics API
 metrics:
   enabled: false
+
+# Filter PolicyReport resources to process
+reportFilter:
+  namespaces:
+    # Process only PolicyReport resources from an included namespace, wildcards are supported
+    include: []
+    # Ignore all PolicyReport resources from a excluded namespace, wildcards are supported
+    # exclude will be ignored if an include filter exists
+    exclude: []
+  clusterReports:
+    # Enable the processing of ClusterPolicyReports, enabled by default
+    enabled: true
 
 # enable policy-report-ui
 ui:
