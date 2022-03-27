@@ -29,6 +29,7 @@ type ListResult struct {
 	ID         string            `json:"id"`
 	Namespace  string            `json:"namespace,omitempty"`
 	Kind       string            `json:"kind"`
+	APIVersion string            `json:"apiVersion"`
 	Name       string            `json:"name"`
 	Message    string            `json:"message"`
 	Category   string            `json:"category,omitempty"`

@@ -607,7 +607,7 @@ func (s *policyReportStore) FetchNamespacedResults(filter api.Filter) ([]*api.Li
 	}
 
 	rows, err := s.db.Query(`
-		SELECT id, resource_namespace, resource_kind, resource_name, message, policy, rule, severity, properties, status, category
+		SELECT id, resource_namespace, resource_kind, resource_api_version, resource_name, message, policy, rule, severity, properties, status, category
 		FROM policy_report_result WHERE resource_namespace != ""`+where+`
 		ORDER BY resource_namespace, resource_name, resource_uid ASC`, args...)
 
@@ -619,7 +619,7 @@ func (s *policyReportStore) FetchNamespacedResults(filter api.Filter) ([]*api.Li
 		result := api.ListResult{}
 		var props []byte
 
-		err := rows.Scan(&result.ID, &result.Namespace, &result.Kind, &result.Name, &result.Message, &result.Policy, &result.Rule, &result.Severity, &props, &result.Status, &result.Category)
+		err := rows.Scan(&result.ID, &result.Namespace, &result.Kind, &result.APIVersion, &result.Name, &result.Message, &result.Policy, &result.Rule, &result.Severity, &props, &result.Status, &result.Category)
 		if err != nil {
 			return list, err
 		}
@@ -641,7 +641,7 @@ func (s *policyReportStore) FetchClusterResults(filter api.Filter) ([]*api.ListR
 	}
 
 	rows, err := s.db.Query(`
-		SELECT id, resource_namespace, resource_kind, resource_name, message, policy, rule, severity, properties, status, category
+		SELECT id, resource_namespace, resource_kind, resource_api_version, resource_name, message, policy, rule, severity, properties, status, category
 		FROM policy_report_result WHERE resource_namespace =""`+where+`
 		ORDER BY resource_namespace, resource_name, resource_uid ASC`, args...)
 
@@ -653,7 +653,7 @@ func (s *policyReportStore) FetchClusterResults(filter api.Filter) ([]*api.ListR
 		result := api.ListResult{}
 		var props []byte
 
-		err := rows.Scan(&result.ID, &result.Namespace, &result.Kind, &result.Name, &result.Message, &result.Policy, &result.Rule, &result.Severity, &props, &result.Status, &result.Category)
+		err := rows.Scan(&result.ID, &result.Namespace, &result.Kind, &result.APIVersion, &result.Name, &result.Message, &result.Policy, &result.Rule, &result.Severity, &props, &result.Status, &result.Category)
 		if err != nil {
 			return list, err
 		}

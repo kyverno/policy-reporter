@@ -396,7 +396,7 @@ func Test_V1_API(t *testing.T) {
 			t.Errorf("handler returned wrong status code: got %v want %v", status, http.StatusOK)
 		}
 
-		expected := `[{"id":"123","namespace":"test","kind":"Deployment","name":"nginx","message":"validation error: requests and limits required. Rule autogen-check-for-requests-and-limits failed at path /spec/template/spec/containers/0/resources/requests/","category":"Best Practices","policy":"require-requests-and-limits-required","rule":"autogen-check-for-requests-and-limits","status":"fail","severity":"high"},{"id":"124","namespace":"test","kind":"Pod","name":"nginx","message":"validation error: requests and limits required. Rule autogen-check-for-requests-and-limits failed at path /spec/template/spec/containers/0/resources/requests/","category":"Best Practices","policy":"require-requests-and-limits-required","rule":"autogen-check-for-requests-and-limits","status":"pass"}]`
+		expected := `[{"id":"123","namespace":"test","kind":"Deployment","apiVersion":"v1","name":"nginx","message":"validation error: requests and limits required. Rule autogen-check-for-requests-and-limits failed at path /spec/template/spec/containers/0/resources/requests/","category":"Best Practices","policy":"require-requests-and-limits-required","rule":"autogen-check-for-requests-and-limits","status":"fail","severity":"high"},{"id":"124","namespace":"test","kind":"Pod","apiVersion":"v1","name":"nginx","message":"validation error: requests and limits required. Rule autogen-check-for-requests-and-limits failed at path /spec/template/spec/containers/0/resources/requests/","category":"Best Practices","policy":"require-requests-and-limits-required","rule":"autogen-check-for-requests-and-limits","status":"pass"}]`
 		if !strings.Contains(rr.Body.String(), expected) {
 			t.Errorf("handler returned unexpected body: got %v want %v", rr.Body.String(), expected)
 		}
@@ -416,7 +416,7 @@ func Test_V1_API(t *testing.T) {
 			t.Errorf("handler returned wrong status code: got %v want %v", status, http.StatusOK)
 		}
 
-		expected := "{\"id\":\"125\",\"kind\":\"Namespace\",\"name\":\"test\",\"message\":\"validation error: The label `test` is required. Rule check-for-labels-on-namespace\",\"category\":\"Convention\",\"policy\":\"require-ns-labels\",\"rule\":\"check-for-labels-on-namespace\",\"status\":\"pass\",\"severity\":\"medium\"}"
+		expected := "{\"id\":\"125\",\"kind\":\"Namespace\",\"apiVersion\":\"v1\",\"name\":\"test\",\"message\":\"validation error: The label `test` is required. Rule check-for-labels-on-namespace\",\"category\":\"Convention\",\"policy\":\"require-ns-labels\",\"rule\":\"check-for-labels-on-namespace\",\"status\":\"pass\",\"severity\":\"medium\"}"
 		if !strings.Contains(rr.Body.String(), expected) {
 			t.Errorf("handler returned unexpected body: got %v want %v", rr.Body.String(), expected)
 		}
