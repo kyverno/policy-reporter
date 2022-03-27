@@ -1,5 +1,9 @@
 # Changelog
 
+# 2.7.1
+* Policy Reporter
+    * Add Resource APIVersion to the Results REST APIs
+
 # 2.7.0
 * Policy Reporter
     * PolicyReport Filter:
