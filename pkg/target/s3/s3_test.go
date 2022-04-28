@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/kyverno/policy-reporter/pkg/report"
+	"github.com/kyverno/policy-reporter/pkg/target"
 	"github.com/kyverno/policy-reporter/pkg/target/s3"
 )
 
@@ -52,11 +53,11 @@ func Test_S3Target(t *testing.T) {
 			}
 		}
 
-		client := s3.NewClient(&testClient{nil, callback}, "", "", []string{}, true)
+		client := s3.NewClient("S3", &testClient{nil, callback}, "", true, &target.Filter{})
 		client.Send(completeResult)
 	})
 	t.Run("Name", func(t *testing.T) {
-		client := s3.NewClient(&testClient{nil, testCallback}, "", "", []string{}, false)
+		client := s3.NewClient("S3", &testClient{nil, testCallback}, "", false, &target.Filter{})
 
 		if client.Name() != "S3" {
 			t.Errorf("Unexpected Name %s", client.Name())

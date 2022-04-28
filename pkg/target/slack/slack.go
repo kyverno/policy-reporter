@@ -172,14 +172,10 @@ func (s *client) Send(result *report.Result) {
 	helper.ProcessHTTPResponse(s.Name(), resp, err)
 }
 
-func (s *client) Name() string {
-	return "Slack"
-}
-
 // NewClient creates a new slack.client to send Results to Slack
-func NewClient(host, minimumPriority string, sources []string, skipExistingOnStartup bool, httpClient httpClient) target.Client {
+func NewClient(name, host string, skipExistingOnStartup bool, filter *target.Filter, httpClient httpClient) target.Client {
 	return &client{
-		target.NewBaseClient(minimumPriority, sources, skipExistingOnStartup),
+		target.NewBaseClient(name, skipExistingOnStartup, filter),
 		host,
 		httpClient,
 	}

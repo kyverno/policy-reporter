@@ -105,14 +105,10 @@ func (d *client) Send(result *report.Result) {
 	helper.ProcessHTTPResponse(d.Name(), resp, err)
 }
 
-func (d *client) Name() string {
-	return "Discord"
-}
-
 // NewClient creates a new loki.client to send Results to Discord
-func NewClient(webhook, minimumPriority string, sources []string, skipExistingOnStartup bool, httpClient httpClient) target.Client {
+func NewClient(name, webhook string, skipExistingOnStartup bool, filter *target.Filter, httpClient httpClient) target.Client {
 	return &client{
-		target.NewBaseClient(minimumPriority, sources, skipExistingOnStartup),
+		target.NewBaseClient(name, skipExistingOnStartup, filter),
 		webhook,
 		httpClient,
 	}

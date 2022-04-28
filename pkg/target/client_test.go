@@ -28,42 +28,144 @@ var result = &report.Result{
 
 func Test_BaseClient(t *testing.T) {
 	t.Run("Validate Default", func(t *testing.T) {
-		client := target.NewBaseClient("", []string{}, false)
+		filter := &target.Filter{}
 
-		if !client.Validate(result) {
+		if !filter.Validate(result) {
 			t.Errorf("Unexpected Validation Result")
 		}
 	})
 	t.Run("Validate MinimumPriority", func(t *testing.T) {
-		client := target.NewBaseClient("error", []string{}, false)
+		filter := &target.Filter{MinimumPriority: "error"}
 
-		if client.Validate(result) {
+		if filter.Validate(result) {
 			t.Errorf("Unexpected Validation Result")
 		}
 	})
 	t.Run("Validate Source", func(t *testing.T) {
-		client := target.NewBaseClient("", []string{"jsPolicy"}, false)
+		filter := &target.Filter{Sources: []string{"jsPolicy"}}
+
+		if filter.Validate(result) {
+			t.Errorf("Unexpected Validation Result")
+		}
+	})
+
+	t.Run("Validate Exclude Namespace match", func(t *testing.T) {
+		filter := &target.Filter{Namespace: target.Rules{Exclude: []string{"default"}}}
+
+		if filter.Validate(result) {
+			t.Errorf("Unexpected Validation Result")
+		}
+	})
+	t.Run("Validate Exclude Namespace mismatch", func(t *testing.T) {
+		filter := &target.Filter{Namespace: target.Rules{Exclude: []string{"team-a"}}}
+
+		if !filter.Validate(result) {
+			t.Errorf("Unexpected Validation Result")
+		}
+	})
+	t.Run("Validate Include Namespace match", func(t *testing.T) {
+		filter := &target.Filter{Namespace: target.Rules{Include: []string{"default"}}}
+
+		if !filter.Validate(result) {
+			t.Errorf("Unexpected Validation Result")
+		}
+	})
+	t.Run("Validate Exclude Namespace mismatch", func(t *testing.T) {
+		filter := &target.Filter{Namespace: target.Rules{Include: []string{"team-a"}}}
+
+		if filter.Validate(result) {
+			t.Errorf("Unexpected Validation Result")
+		}
+	})
+
+	t.Run("Validate Exclude Priority match", func(t *testing.T) {
+		filter := &target.Filter{Priority: target.Rules{Exclude: []string{report.WarningPriority.String()}}}
+
+		if filter.Validate(result) {
+			t.Errorf("Unexpected Validation Result")
+		}
+	})
+	t.Run("Validate Exclude Priority mismatch", func(t *testing.T) {
+		filter := &target.Filter{Priority: target.Rules{Exclude: []string{report.ErrorPriority.String()}}}
+
+		if !filter.Validate(result) {
+			t.Errorf("Unexpected Validation Result")
+		}
+	})
+	t.Run("Validate Include Priority match", func(t *testing.T) {
+		filter := &target.Filter{Priority: target.Rules{Include: []string{report.WarningPriority.String()}}}
+
+		if !filter.Validate(result) {
+			t.Errorf("Unexpected Validation Result")
+		}
+	})
+	t.Run("Validate Exclude Priority mismatch", func(t *testing.T) {
+		filter := &target.Filter{Priority: target.Rules{Include: []string{report.ErrorPriority.String()}}}
+
+		if filter.Validate(result) {
+			t.Errorf("Unexpected Validation Result")
+		}
+	})
+
+	t.Run("Validate Exclude Policy match", func(t *testing.T) {
+		filter := &target.Filter{Policy: target.Rules{Exclude: []string{"require-requests-and-limits-required"}}}
+
+		if filter.Validate(result) {
+			t.Errorf("Unexpected Validation Result")
+		}
+	})
+	t.Run("Validate Exclude Policy mismatch", func(t *testing.T) {
+		filter := &target.Filter{Policy: target.Rules{Exclude: []string{"policy-test"}}}
+
+		if !filter.Validate(result) {
+			t.Errorf("Unexpected Validation Result")
+		}
+	})
+	t.Run("Validate Include Policy match", func(t *testing.T) {
+		filter := &target.Filter{Policy: target.Rules{Include: []string{"require-requests-and-limits-required"}}}
+
+		if !filter.Validate(result) {
+			t.Errorf("Unexpected Validation Result")
+		}
+	})
+	t.Run("Validate Exclude Policy mismatch", func(t *testing.T) {
+		filter := &target.Filter{Policy: target.Rules{Include: []string{"policy-test"}}}
+
+		if filter.Validate(result) {
+			t.Errorf("Unexpected Validation Result")
+		}
+	})
+
+	t.Run("Client Validation", func(t *testing.T) {
+		client := target.NewBaseClient("Client", true, &target.Filter{Sources: []string{"jsPolicy"}})
 
 		if client.Validate(result) {
 			t.Errorf("Unexpected Validation Result")
 		}
 	})
 	t.Run("SkipExistingOnStartup", func(t *testing.T) {
-		client := target.NewBaseClient("", []string{}, true)
+		client := target.NewBaseClient("Client", true, &target.Filter{})
 
 		if !client.SkipExistingOnStartup() {
 			t.Error("Should return configured SkipExistingOnStartup")
 		}
 	})
 	t.Run("MinimumPriority", func(t *testing.T) {
-		client := target.NewBaseClient("error", []string{}, true)
+		client := target.NewBaseClient("Client", true, &target.Filter{MinimumPriority: "error"})
 
 		if client.MinimumPriority() != "error" {
 			t.Error("Should return configured MinimumPriority")
 		}
 	})
+	t.Run("Name", func(t *testing.T) {
+		client := target.NewBaseClient("Client", true, &target.Filter{MinimumPriority: "error"})
+
+		if client.Name() != "Client" {
+			t.Error("Should return configured Name")
+		}
+	})
 	t.Run("Sources", func(t *testing.T) {
-		client := target.NewBaseClient("", []string{"Kyverno"}, true)
+		client := target.NewBaseClient("Client", true, &target.Filter{Sources: []string{"Kyverno"}})
 
 		if len(client.Sources()) != 1 {
 			t.Fatal("Unexpected length of Sources")

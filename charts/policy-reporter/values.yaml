@@ -2,7 +2,7 @@ image:
   registry: ghcr.io
   repository: kyverno/policy-reporter
   pullPolicy: IfNotPresent
-  tag: 2.4.1
+  tag: 2.5.0
 
 imagePullSecrets: []
 
@@ -161,6 +161,23 @@ target:
     skipExistingOnStartup: true
     # Added as additional labels to each Loki event
     customLabels: {}
+    # Filter Results which should send to this target by namespaces, priorities or policies
+    # Wildcars for namespaces and policies are supported, you can either define exclude or include values
+    # Filters are available for all targets except the UI
+    filter: {}
+#      namespaces:
+#        include: ["develop"]
+#      priorities:
+#        exclude: ["debug", "info", "error"]
+    channels: []
+#    - host: "http://loki.loki-stack:3100"
+#      sources: []
+#      customLabels: {}
+#      filter:
+#        namespaces:
+#          include: ["develop"]
+#        priorities:
+#          exclude: ["debug", "info", "error"]
 
   elasticsearch:
     # elasticsearch host address
@@ -186,6 +203,18 @@ target:
     sources: []
     # Skip already existing PolicyReportResults on startup
     skipExistingOnStartup: true
+#    channels:
+#    - webhook: "https://slack.webhook1"
+#      filter:
+#        namespaces:
+#          include: ["develop"]
+#        priorities:
+#          exclude: ["debug", "info", "error"]
+#    - webhook: "https://slack.webhook2"
+#      minimumPriority: "warning"
+#      filter:
+#        namespaces:
+#          include: ["team-a-*"]
 
   discord:
     # discord app webhook address

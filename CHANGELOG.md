@@ -1,5 +1,11 @@
 # Changelog
 
+# 2.8.0
+* Policy Reporter
+    * New target filter and channels to define multiple targets of the same client
+        * Filter target results by exclude and include rules for namesapces, priorities and policies
+        * Support Wildcards for policy and namespace filter
+
 # 2.7.1
 * Policy Reporter
     * Add Resource APIVersion to the Results REST APIs

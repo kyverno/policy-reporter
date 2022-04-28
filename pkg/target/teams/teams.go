@@ -119,14 +119,10 @@ func (s *client) Send(result *report.Result) {
 	helper.ProcessHTTPResponse(s.Name(), resp, err)
 }
 
-func (s *client) Name() string {
-	return "Teams"
-}
-
 // NewClient creates a new teams.client to send Results to MS Teams
-func NewClient(host, minimumPriority string, sources []string, skipExistingOnStartup bool, httpClient httpClient) target.Client {
+func NewClient(name, host string, skipExistingOnStartup bool, filter *target.Filter, httpClient httpClient) target.Client {
 	return &client{
-		target.NewBaseClient(minimumPriority, sources, skipExistingOnStartup),
+		target.NewBaseClient(name, skipExistingOnStartup, filter),
 		host,
 		httpClient,
 	}

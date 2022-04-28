@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/kyverno/policy-reporter/pkg/report"
+	"github.com/kyverno/policy-reporter/pkg/target"
 	"github.com/kyverno/policy-reporter/pkg/target/elasticsearch"
 )
 
@@ -59,7 +60,7 @@ func Test_ElasticsearchTarget(t *testing.T) {
 			}
 		}
 
-		client := elasticsearch.NewClient("http://localhost:9200", "policy-reporter", "annually", "", []string{}, false, testClient{callback, 200})
+		client := elasticsearch.NewClient("Elasticsearch", "http://localhost:9200", "policy-reporter", "annually", false, &target.Filter{}, testClient{callback, 200})
 		client.Send(completeResult)
 	})
 	t.Run("Send with Monthly Result", func(t *testing.T) {
@@ -69,7 +70,7 @@ func Test_ElasticsearchTarget(t *testing.T) {
 			}
 		}
 
-		client := elasticsearch.NewClient("http://localhost:9200", "policy-reporter", "monthly", "", []string{}, false, testClient{callback, 200})
+		client := elasticsearch.NewClient("Elasticsearch", "http://localhost:9200", "policy-reporter", "monthly", false, &target.Filter{}, testClient{callback, 200})
 		client.Send(completeResult)
 	})
 	t.Run("Send with Monthly Result", func(t *testing.T) {
@@ -79,7 +80,7 @@ func Test_ElasticsearchTarget(t *testing.T) {
 			}
 		}
 
-		client := elasticsearch.NewClient("http://localhost:9200", "policy-reporter", "daily", "", []string{}, false, testClient{callback, 200})
+		client := elasticsearch.NewClient("Elasticsearch", "http://localhost:9200", "policy-reporter", "daily", false, &target.Filter{}, testClient{callback, 200})
 		client.Send(completeResult)
 	})
 	t.Run("Send with None Result", func(t *testing.T) {
@@ -89,11 +90,11 @@ func Test_ElasticsearchTarget(t *testing.T) {
 			}
 		}
 
-		client := elasticsearch.NewClient("http://localhost:9200", "policy-reporter", "none", "", []string{}, false, testClient{callback, 200})
+		client := elasticsearch.NewClient("Elasticsearch", "http://localhost:9200", "policy-reporter", "none", false, &target.Filter{}, testClient{callback, 200})
 		client.Send(completeResult)
 	})
 	t.Run("Name", func(t *testing.T) {
-		client := elasticsearch.NewClient("http://localhost:9200", "policy-reporter", "none", "", []string{}, true, testClient{})
+		client := elasticsearch.NewClient("Elasticsearch", "http://localhost:9200", "policy-reporter", "none", true, &target.Filter{}, testClient{})
 
 		if client.Name() != "Elasticsearch" {
 			t.Errorf("Unexpected Name %s", client.Name())
