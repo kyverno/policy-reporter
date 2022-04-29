@@ -210,6 +210,8 @@ target:
 #          include: ["develop"]
 #        priorities:
 #          exclude: ["debug", "info", "error"]
+#        policies:
+#          include: ["require-run-as-nonroot"]
 #    - webhook: "https://slack.webhook2"
 #      minimumPriority: "warning"
 #      filter:
