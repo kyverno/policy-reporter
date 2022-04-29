@@ -2,6 +2,7 @@ package config
 
 import (
 	"database/sql"
+	"fmt"
 	"log"
 	"net/http"
 	"time"
@@ -30,20 +31,14 @@ import (
 
 // Resolver manages dependencies
 type Resolver struct {
-	config              *Config
-	k8sConfig           *rest.Config
-	mapper              kubernetes.Mapper
-	publisher           report.EventPublisher
-	policyStore         sqlite3.PolicyReportStore
-	policyReportClient  report.PolicyReportClient
-	lokiClient          target.Client
-	elasticsearchClient target.Client
-	slackClient         target.Client
-	discordClient       target.Client
-	teamsClient         target.Client
-	uiClient            target.Client
-	s3Client            target.Client
-	resultCache         *cache.Cache
+	config             *Config
+	k8sConfig          *rest.Config
+	mapper             kubernetes.Mapper
+	publisher          report.EventPublisher
+	policyStore        sqlite3.PolicyReportStore
+	policyReportClient report.PolicyReportClient
+	targetClients      []target.Client
+	resultCache        *cache.Cache
 }
 
 // APIServer resolver method
@@ -118,234 +113,141 @@ func (r *Resolver) Mapper() kubernetes.Mapper {
 	return mapper
 }
 
-// LokiClient resolver method
-func (r *Resolver) LokiClient() target.Client {
-	if r.lokiClient != nil {
-		return r.lokiClient
+// LokiClients resolver method
+func (r *Resolver) LokiClients() []target.Client {
+	clients := make([]target.Client, 0)
+
+	if loki := createLokiClient(r.config.Loki, Loki{}, "Loki"); loki != nil {
+		clients = append(clients, loki)
+	}
+	for i, channel := range r.config.Loki.Channels {
+		if loki := createLokiClient(channel, r.config.Loki, fmt.Sprintf("Loki Channel %d", i+1)); loki != nil {
+			clients = append(clients, loki)
+		}
 	}
 
-	if r.config.Loki.Host == "" {
-		return nil
-	}
-
-	r.lokiClient = loki.NewClient(
-		r.config.Loki.Host,
-		r.config.Loki.MinimumPriority,
-		r.config.Loki.Sources,
-		r.config.Loki.SkipExisting,
-		r.config.Loki.CustomLabels,
-		&http.Client{},
-	)
-
-	log.Println("[INFO] Loki configured")
-
-	return r.lokiClient
+	return clients
 }
 
-// ElasticsearchClient resolver method
-func (r *Resolver) ElasticsearchClient() target.Client {
-	if r.elasticsearchClient != nil {
-		return r.elasticsearchClient
+// ElasticsearchClients resolver method
+func (r *Resolver) ElasticsearchClients() []target.Client {
+	clients := make([]target.Client, 0)
+
+	if es := createElasticsearchClient(r.config.Elasticsearch, Elasticsearch{}, "Elasticsearch"); es != nil {
+		clients = append(clients, es)
+	}
+	for i, channel := range r.config.Elasticsearch.Channels {
+		if es := createElasticsearchClient(channel, r.config.Elasticsearch, fmt.Sprintf("Elasticsearch Channel %d", i+1)); es != nil {
+			clients = append(clients, es)
+		}
 	}
 
-	if r.config.Elasticsearch.Host == "" {
-		return nil
-	}
-	if r.config.Elasticsearch.Index == "" {
-		r.config.Elasticsearch.Index = "policy-reporter"
-	}
-	if r.config.Elasticsearch.Rotation == "" {
-		r.config.Elasticsearch.Rotation = elasticsearch.Dayli
-	}
-
-	r.elasticsearchClient = elasticsearch.NewClient(
-		r.config.Elasticsearch.Host,
-		r.config.Elasticsearch.Index,
-		r.config.Elasticsearch.Rotation,
-		r.config.Elasticsearch.MinimumPriority,
-		r.config.Elasticsearch.Sources,
-		r.config.Elasticsearch.SkipExisting,
-		&http.Client{},
-	)
-
-	log.Println("[INFO] Elasticsearch configured")
-
-	return r.elasticsearchClient
+	return clients
 }
 
-// SlackClient resolver method
-func (r *Resolver) SlackClient() target.Client {
-	if r.slackClient != nil {
-		return r.slackClient
+// SlackClients resolver method
+func (r *Resolver) SlackClients() []target.Client {
+	clients := make([]target.Client, 0)
+
+	if es := createSlackClient(r.config.Slack, Slack{}, "Slack"); es != nil {
+		clients = append(clients, es)
+	}
+	for i, channel := range r.config.Slack.Channels {
+		if es := createSlackClient(channel, r.config.Slack, fmt.Sprintf("Slack Channel %d", i+1)); es != nil {
+			clients = append(clients, es)
+		}
 	}
 
-	if r.config.Slack.Webhook == "" {
-		return nil
-	}
-
-	r.slackClient = slack.NewClient(
-		r.config.Slack.Webhook,
-		r.config.Slack.MinimumPriority,
-		r.config.Slack.Sources,
-		r.config.Slack.SkipExisting,
-		&http.Client{},
-	)
-
-	log.Println("[INFO] Slack configured")
-
-	return r.slackClient
+	return clients
 }
 
-// DiscordClient resolver method
-func (r *Resolver) DiscordClient() target.Client {
-	if r.discordClient != nil {
-		return r.discordClient
+// DiscordClients resolver method
+func (r *Resolver) DiscordClients() []target.Client {
+	clients := make([]target.Client, 0)
+
+	if es := createDiscordClient(r.config.Discord, Discord{}, "Discord"); es != nil {
+		clients = append(clients, es)
+	}
+	for i, channel := range r.config.Discord.Channels {
+		if es := createDiscordClient(channel, r.config.Discord, fmt.Sprintf("Discord Channel %d", i+1)); es != nil {
+			clients = append(clients, es)
+		}
 	}
 
-	if r.config.Discord.Webhook == "" {
-		return nil
-	}
-
-	r.discordClient = discord.NewClient(
-		r.config.Discord.Webhook,
-		r.config.Discord.MinimumPriority,
-		r.config.Discord.Sources,
-		r.config.Discord.SkipExisting,
-		&http.Client{},
-	)
-
-	log.Println("[INFO] Discord configured")
-
-	return r.discordClient
+	return clients
 }
 
-// TeamsClient resolver method
-func (r *Resolver) TeamsClient() target.Client {
-	if r.teamsClient != nil {
-		return r.teamsClient
+// TeamsClients resolver method
+func (r *Resolver) TeamsClients() []target.Client {
+	clients := make([]target.Client, 0)
+
+	if es := createTeamsClient(r.config.Teams, Teams{}, "Teams"); es != nil {
+		clients = append(clients, es)
+	}
+	for i, channel := range r.config.Teams.Channels {
+		if es := createTeamsClient(channel, r.config.Teams, fmt.Sprintf("Teams Channel %d", i+1)); es != nil {
+			clients = append(clients, es)
+		}
 	}
 
-	if r.config.Teams.Webhook == "" {
-		return nil
-	}
-
-	r.teamsClient = teams.NewClient(
-		r.config.Teams.Webhook,
-		r.config.Teams.MinimumPriority,
-		r.config.Teams.Sources,
-		r.config.Teams.SkipExisting,
-		&http.Client{},
-	)
-
-	log.Println("[INFO] Teams configured")
-
-	return r.teamsClient
+	return clients
 }
 
 // UIClient resolver method
 func (r *Resolver) UIClient() target.Client {
-	if r.uiClient != nil {
-		return r.uiClient
-	}
-
 	if r.config.UI.Host == "" {
 		return nil
 	}
 
-	r.uiClient = ui.NewClient(
-		r.config.UI.Host,
-		r.config.UI.MinimumPriority,
-		r.config.UI.Sources,
-		r.config.UI.SkipExisting,
-		&http.Client{},
-	)
-
 	log.Println("[INFO] UI configured")
 
-	return r.uiClient
+	return ui.NewClient(
+		"UI",
+		r.config.UI.Host,
+		r.config.UI.SkipExisting,
+		createTargetFilter(Filter{}, r.config.UI.MinimumPriority, r.config.UI.Sources),
+		&http.Client{},
+	)
 }
 
-func (r *Resolver) S3Client() target.Client {
-	if r.s3Client != nil {
-		return r.s3Client
+// TeamsClients resolver method
+func (r *Resolver) S3Clients() []target.Client {
+	clients := make([]target.Client, 0)
+
+	if es := createS3Client(r.config.S3, S3{}, "S3"); es != nil {
+		clients = append(clients, es)
 	}
-	if r.config.S3.Endpoint == "" {
-		return nil
-	}
-	if r.config.S3.AccessKeyID == "" {
-		log.Printf("[ERROR] S3.AccessKeyID has not been declared")
-		return nil
-	}
-	if r.config.S3.SecretAccessKey == "" {
-		log.Printf("[ERROR] S3.SecretAccessKey has not been declared")
-		return nil
-	}
-	if r.config.S3.Region == "" {
-		log.Printf("[ERROR] S3.Region has not been declared")
-		return nil
-	}
-	if r.config.S3.Bucket == "" {
-		log.Printf("[ERROR] S3.Bucket has to be declared")
-		return nil
-	}
-	if r.config.S3.Prefix == "" {
-		r.config.S3.Prefix = "policy-reporter/"
+	for i, channel := range r.config.S3.Channels {
+		if es := createS3Client(channel, r.config.S3, fmt.Sprintf("S3 Channel %d", i+1)); es != nil {
+			clients = append(clients, es)
+		}
 	}
 
-	s3Client := helper.NewClient(
-		r.config.S3.AccessKeyID,
-		r.config.S3.SecretAccessKey,
-		r.config.S3.Region,
-		r.config.S3.Endpoint,
-		r.config.S3.Bucket,
-	)
-
-	r.s3Client = s3.NewClient(
-		s3Client,
-		r.config.S3.Prefix,
-		r.config.S3.MinimumPriority,
-		r.config.S3.Sources,
-		r.config.S3.SkipExisting,
-	)
-
-	log.Println("[INFO] S3 configured")
-
-	return r.s3Client
+	return clients
 }
 
 // TargetClients resolver method
 func (r *Resolver) TargetClients() []target.Client {
+	if len(r.targetClients) > 0 {
+		return r.targetClients
+	}
+
 	clients := make([]target.Client, 0)
 
-	if loki := r.LokiClient(); loki != nil {
-		clients = append(clients, loki)
-	}
-
-	if elasticsearch := r.ElasticsearchClient(); elasticsearch != nil {
-		clients = append(clients, elasticsearch)
-	}
-
-	if slack := r.SlackClient(); slack != nil {
-		clients = append(clients, slack)
-	}
-
-	if discord := r.DiscordClient(); discord != nil {
-		clients = append(clients, discord)
-	}
-
-	if teams := r.TeamsClient(); teams != nil {
-		clients = append(clients, teams)
-	}
+	clients = append(clients, r.LokiClients()...)
+	clients = append(clients, r.ElasticsearchClients()...)
+	clients = append(clients, r.SlackClients()...)
+	clients = append(clients, r.DiscordClients()...)
+	clients = append(clients, r.TeamsClients()...)
+	clients = append(clients, r.S3Clients()...)
 
 	if ui := r.UIClient(); ui != nil {
 		clients = append(clients, ui)
 	}
 
-	if s3 := r.S3Client(); s3 != nil {
-		clients = append(clients, s3)
-	}
+	r.targetClients = clients
 
-	return clients
+	return r.targetClients
 }
 
 // SkipExistingOnStartup config method
@@ -397,5 +299,226 @@ func NewResolver(config *Config, k8sConfig *rest.Config) Resolver {
 	return Resolver{
 		config:    config,
 		k8sConfig: k8sConfig,
+	}
+}
+
+func createSlackClient(config Slack, parent Slack, name string) target.Client {
+	if config.Webhook == "" {
+		return nil
+	}
+
+	if config.MinimumPriority == "" {
+		config.MinimumPriority = parent.MinimumPriority
+	}
+
+	if !config.SkipExisting {
+		config.SkipExisting = parent.SkipExisting
+	}
+
+	log.Printf("[INFO] %s configured", name)
+
+	return slack.NewClient(
+		name,
+		config.Webhook,
+		config.SkipExisting,
+		createTargetFilter(config.Filter, config.MinimumPriority, config.Sources),
+		&http.Client{},
+	)
+}
+
+func createLokiClient(config Loki, parent Loki, name string) target.Client {
+	if config.Host == "" && parent.Host == "" {
+		return nil
+	} else if config.Host == "" {
+		config.Host = parent.Host
+	}
+
+	if !config.SkipExisting {
+		config.SkipExisting = parent.SkipExisting
+	}
+
+	log.Printf("[INFO] %s configured", name)
+
+	return loki.NewClient(
+		name,
+		config.Host,
+		config.SkipExisting,
+		createTargetFilter(config.Filter, config.MinimumPriority, config.Sources),
+		config.CustomLabels,
+		&http.Client{},
+	)
+}
+
+func createElasticsearchClient(config Elasticsearch, parent Elasticsearch, name string) target.Client {
+	if config.Host == "" && parent.Host == "" {
+		return nil
+	} else if config.Host == "" {
+		config.Host = parent.Host
+	}
+
+	if config.Index == "" && parent.Index == "" {
+		config.Index = "policy-reporter"
+	} else if config.Index == "" {
+		config.Index = parent.Index
+	}
+
+	if config.Rotation == "" && parent.Rotation == "" {
+		config.Rotation = elasticsearch.Dayli
+	} else if config.Rotation == "" {
+		config.Rotation = parent.Rotation
+	}
+
+	if config.MinimumPriority == "" {
+		config.MinimumPriority = parent.MinimumPriority
+	}
+
+	if !config.SkipExisting {
+		config.SkipExisting = parent.SkipExisting
+	}
+
+	log.Printf("[INFO] %s configured", name)
+
+	return elasticsearch.NewClient(
+		name,
+		config.Host,
+		config.Index,
+		config.Rotation,
+		config.SkipExisting,
+		createTargetFilter(config.Filter, config.MinimumPriority, config.Sources),
+		&http.Client{},
+	)
+}
+
+func createDiscordClient(config Discord, parent Discord, name string) target.Client {
+	if config.Webhook == "" {
+		return nil
+	}
+
+	if config.MinimumPriority == "" {
+		config.MinimumPriority = parent.MinimumPriority
+	}
+
+	if !config.SkipExisting {
+		config.SkipExisting = parent.SkipExisting
+	}
+
+	log.Printf("[INFO] %s configured", name)
+
+	return discord.NewClient(
+		name,
+		config.Webhook,
+		config.SkipExisting,
+		createTargetFilter(config.Filter, config.MinimumPriority, config.Sources),
+		&http.Client{},
+	)
+}
+
+// TeamsClient resolver method
+func createTeamsClient(config Teams, parent Teams, name string) target.Client {
+	if config.Webhook == "" {
+		return nil
+	}
+
+	if config.MinimumPriority == "" {
+		config.MinimumPriority = parent.MinimumPriority
+	}
+
+	if !config.SkipExisting {
+		config.SkipExisting = parent.SkipExisting
+	}
+
+	log.Printf("[INFO] %s configured", name)
+
+	return teams.NewClient(
+		name,
+		config.Webhook,
+		config.SkipExisting,
+		createTargetFilter(config.Filter, config.MinimumPriority, config.Sources),
+		&http.Client{},
+	)
+}
+
+func createS3Client(config S3, parent S3, name string) target.Client {
+	if config.Endpoint == "" && parent.Endpoint == "" {
+		return nil
+	} else if config.Endpoint == "" {
+		config.Endpoint = parent.Endpoint
+	}
+
+	if config.AccessKeyID == "" && parent.AccessKeyID == "" {
+		log.Printf("[ERROR] %s.AccessKeyID has not been declared", name)
+		return nil
+	} else if config.AccessKeyID == "" {
+		config.AccessKeyID = parent.AccessKeyID
+	}
+
+	if config.SecretAccessKey == "" && parent.SecretAccessKey == "" {
+		log.Printf("[ERROR] %s.SecretAccessKey has not been declared", name)
+		return nil
+	} else if config.SecretAccessKey == "" {
+		config.SecretAccessKey = parent.SecretAccessKey
+	}
+
+	if config.Region == "" && parent.Region == "" {
+		log.Printf("[ERROR] %s.Region has not been declared", name)
+		return nil
+	} else if config.Region == "" {
+		config.Region = parent.Region
+	}
+
+	if config.Bucket == "" && parent.Bucket == "" {
+		log.Printf("[ERROR] %s.Bucket has not been declared", name)
+		return nil
+	} else if config.Bucket == "" {
+		config.Bucket = parent.Bucket
+	}
+
+	if config.Prefix == "" {
+		config.Prefix = parent.Prefix
+	}
+
+	if config.MinimumPriority == "" {
+		config.MinimumPriority = parent.MinimumPriority
+	}
+
+	if !config.SkipExisting {
+		config.SkipExisting = parent.SkipExisting
+	}
+
+	s3Client := helper.NewClient(
+		config.AccessKeyID,
+		config.SecretAccessKey,
+		config.Region,
+		config.Endpoint,
+		config.Bucket,
+	)
+
+	log.Printf("[INFO] %s configured", name)
+
+	return s3.NewClient(
+		name,
+		s3Client,
+		config.Prefix,
+		config.SkipExisting,
+		createTargetFilter(config.Filter, config.MinimumPriority, config.Sources),
+	)
+}
+
+func createTargetFilter(filter Filter, minimumPriority string, sources []string) *target.Filter {
+	return &target.Filter{
+		MinimumPriority: minimumPriority,
+		Sources:         sources,
+		Namespace: target.Rules{
+			Include: filter.Namespaces.Include,
+			Exclude: filter.Namespaces.Exclude,
+		},
+		Priority: target.Rules{
+			Include: filter.Priorities.Include,
+			Exclude: filter.Priorities.Exclude,
+		},
+		Policy: target.Rules{
+			Include: filter.Policies.Include,
+			Exclude: filter.Policies.Exclude,
+		},
 	}
 }

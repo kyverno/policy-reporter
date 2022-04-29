@@ -94,14 +94,10 @@ func (l *client) Send(result *report.Result) {
 	helper.ProcessHTTPResponse(l.Name(), resp, err)
 }
 
-func (l *client) Name() string {
-	return "Loki"
-}
-
 // NewClient creates a new loki.client to send Results to Loki
-func NewClient(host, minimumPriority string, sources []string, skipExistingOnStartup bool, customLabels map[string]string, httpClient httpClient) target.Client {
+func NewClient(name, host string, skipExistingOnStartup bool, filter *target.Filter, customLabels map[string]string, httpClient httpClient) target.Client {
 	return &client{
-		target.NewBaseClient(minimumPriority, sources, skipExistingOnStartup),
+		target.NewBaseClient(name, skipExistingOnStartup, filter),
 		host + "/api/prom/push",
 		httpClient,
 		customLabels,

@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/kyverno/policy-reporter/pkg/report"
+	"github.com/kyverno/policy-reporter/pkg/target"
 	"github.com/kyverno/policy-reporter/pkg/target/slack"
 )
 
@@ -67,7 +68,7 @@ func Test_SlackTarget(t *testing.T) {
 			}
 		}
 
-		client := slack.NewClient("http://hook.slack:80", "", []string{}, false, testClient{callback, 200})
+		client := slack.NewClient("Teams", "http://hook.slack:80", false, &target.Filter{}, testClient{callback, 200})
 		client.Send(completeResult)
 	})
 
@@ -86,11 +87,11 @@ func Test_SlackTarget(t *testing.T) {
 			}
 		}
 
-		client := slack.NewClient("http://hook.slack:80", "", []string{}, false, testClient{callback, 200})
+		client := slack.NewClient("Slack", "http://hook.slack:80", false, &target.Filter{}, testClient{callback, 200})
 		client.Send(minimalResult)
 	})
 	t.Run("Name", func(t *testing.T) {
-		client := slack.NewClient("http://localhost:9200", "", []string{}, true, testClient{})
+		client := slack.NewClient("Slack", "http://localhost:9200", true, &target.Filter{}, testClient{})
 
 		if client.Name() != "Slack" {
 			t.Errorf("Unexpected Name %s", client.Name())

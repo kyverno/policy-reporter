@@ -57,14 +57,10 @@ func (e *client) Send(result *report.Result) {
 	helper.ProcessHTTPResponse(e.Name(), resp, err)
 }
 
-func (e *client) Name() string {
-	return "Elasticsearch"
-}
-
 // NewClient creates a new loki.client to send Results to Elasticsearch
-func NewClient(host, index, rotation, minimumPriority string, sources []string, skipExistingOnStartup bool, httpClient httpClient) target.Client {
+func NewClient(name, host, index, rotation string, skipExistingOnStartup bool, filter *target.Filter, httpClient httpClient) target.Client {
 	return &client{
-		target.NewBaseClient(minimumPriority, sources, skipExistingOnStartup),
+		target.NewBaseClient(name, skipExistingOnStartup, filter),
 		host,
 		index,
 		rotation,

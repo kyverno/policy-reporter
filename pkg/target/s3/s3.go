@@ -36,14 +36,10 @@ func (y *client) Send(result *report.Result) {
 	log.Printf("[INFO] S3 PUSH OK")
 }
 
-func (y *client) Name() string {
-	return "S3"
-}
-
 // NewClient creates a new S3.client to send Results to S3. It doesnt' work right now
-func NewClient(s3client helper.S3Client, prefix string, minimumPriority string, sources []string, skipExistingOnStartup bool) target.Client {
+func NewClient(name string, s3client helper.S3Client, prefix string, skipExistingOnStartup bool, filter *target.Filter) target.Client {
 	return &client{
-		target.NewBaseClient(minimumPriority, sources, skipExistingOnStartup),
+		target.NewBaseClient(name, skipExistingOnStartup, filter),
 		s3client,
 		prefix,
 	}

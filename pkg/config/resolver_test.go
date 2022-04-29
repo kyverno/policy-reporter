@@ -13,6 +13,12 @@ var testConfig = &config.Config{
 		Host:            "http://localhost:3100",
 		SkipExisting:    true,
 		MinimumPriority: "debug",
+		CustomLabels:    map[string]string{"label": "value"},
+		Channels: []config.Loki{
+			{
+				CustomLabels: map[string]string{"label2": "value2"},
+			},
+		},
 	},
 	Elasticsearch: config.Elasticsearch{
 		Host:            "http://localhost:9200",
@@ -20,21 +26,31 @@ var testConfig = &config.Config{
 		Rotation:        "dayli",
 		SkipExisting:    true,
 		MinimumPriority: "debug",
+		Channels:        []config.Elasticsearch{{}},
 	},
 	Slack: config.Slack{
 		Webhook:         "http://hook.slack:80",
 		SkipExisting:    true,
 		MinimumPriority: "debug",
+		Channels: []config.Slack{{
+			Webhook: "http://localhost:9200",
+		}},
 	},
 	Discord: config.Discord{
 		Webhook:         "http://hook.discord:80",
 		SkipExisting:    true,
 		MinimumPriority: "debug",
+		Channels: []config.Discord{{
+			Webhook: "http://localhost:9200",
+		}},
 	},
 	Teams: config.Teams{
 		Webhook:         "http://hook.teams:80",
 		SkipExisting:    true,
 		MinimumPriority: "debug",
+		Channels: []config.Teams{{
+			Webhook: "http://localhost:9200",
+		}},
 	},
 	UI: config.UI{
 		Host:            "http://localhost:8080",
@@ -49,6 +65,7 @@ var testConfig = &config.Config{
 		MinimumPriority: "debug",
 		Endpoint:        "https://storage.yandexcloud.net",
 		Region:          "ru-central1",
+		Channels:        []config.S3{{}},
 	},
 }
 
@@ -56,69 +73,40 @@ func Test_ResolveTarget(t *testing.T) {
 	resolver := config.NewResolver(testConfig, nil)
 
 	t.Run("Loki", func(t *testing.T) {
-		client := resolver.LokiClient()
-		if client == nil {
-			t.Error("Expected Client, got nil")
+		clients := resolver.LokiClients()
+		if len(clients) != 2 {
+			t.Errorf("Expected 2 Client, got %d clients", len(clients))
 		}
 
-		client2 := resolver.LokiClient()
-		if client != client2 {
-			t.Error("Error: Should reuse first instance")
-		}
 	})
 	t.Run("Elasticsearch", func(t *testing.T) {
-		client := resolver.ElasticsearchClient()
-		if client == nil {
-			t.Error("Expected Client, got nil")
-		}
-
-		client2 := resolver.ElasticsearchClient()
-		if client != client2 {
-			t.Error("Error: Should reuse first instance")
+		clients := resolver.ElasticsearchClients()
+		if len(clients) != 2 {
+			t.Errorf("Expected 2 Client, got %d clients", len(clients))
 		}
 	})
 	t.Run("Slack", func(t *testing.T) {
-		client := resolver.SlackClient()
-		if client == nil {
+		clients := resolver.SlackClients()
+		if len(clients) != 2 {
 			t.Error("Expected Client, got nil")
-		}
-
-		client2 := resolver.SlackClient()
-		if client != client2 {
-			t.Error("Error: Should reuse first instance")
 		}
 	})
 	t.Run("Discord", func(t *testing.T) {
-		client := resolver.DiscordClient()
-		if client == nil {
+		clients := resolver.DiscordClients()
+		if len(clients) != 2 {
 			t.Error("Expected Client, got nil")
-		}
-
-		client2 := resolver.DiscordClient()
-		if client != client2 {
-			t.Error("Error: Should reuse first instance")
 		}
 	})
 	t.Run("Teams", func(t *testing.T) {
-		client := resolver.TeamsClient()
-		if client == nil {
-			t.Error("Expected Client, got nil")
-		}
-
-		client2 := resolver.TeamsClient()
-		if client != client2 {
-			t.Error("Error: Should reuse first instance")
+		clients := resolver.TeamsClients()
+		if len(clients) != 2 {
+			t.Errorf("Expected 2 Client, got %d clients", len(clients))
 		}
 	})
 	t.Run("S3", func(t *testing.T) {
-		client := resolver.S3Client()
-		if client == nil {
-			t.Error("Expected Client, got nil")
-		}
-
-		client2 := resolver.S3Client()
-		if client != client2 {
-			t.Error("Error: Should reuse first instance")
+		clients := resolver.S3Clients()
+		if len(clients) != 2 {
+			t.Errorf("Expected 2 Client, got %d clients", len(clients))
 		}
 	})
 }
@@ -127,8 +115,8 @@ func Test_ResolveTargets(t *testing.T) {
 	resolver := config.NewResolver(testConfig, nil)
 
 	clients := resolver.TargetClients()
-	if count := len(clients); count != 7 {
-		t.Errorf("Expected 7 Clients, got %d", count)
+	if count := len(clients); count != 13 {
+		t.Errorf("Expected 13 Clients, got %d", count)
 	}
 }
 
@@ -210,42 +198,42 @@ func Test_ResolveTargetWithoutHost(t *testing.T) {
 	t.Run("Loki", func(t *testing.T) {
 		resolver := config.NewResolver(config2, nil)
 
-		if resolver.LokiClient() != nil {
+		if len(resolver.LokiClients()) != 0 {
 			t.Error("Expected Client to be nil if no host is configured")
 		}
 	})
 	t.Run("Elasticsearch", func(t *testing.T) {
 		resolver := config.NewResolver(config2, nil)
 
-		if resolver.ElasticsearchClient() != nil {
+		if len(resolver.ElasticsearchClients()) != 0 {
 			t.Error("Expected Client to be nil if no host is configured")
 		}
 	})
 	t.Run("Slack", func(t *testing.T) {
 		resolver := config.NewResolver(config2, nil)
 
-		if resolver.SlackClient() != nil {
+		if len(resolver.SlackClients()) != 0 {
 			t.Error("Expected Client to be nil if no host is configured")
 		}
 	})
 	t.Run("Discord", func(t *testing.T) {
 		resolver := config.NewResolver(config2, nil)
 
-		if resolver.DiscordClient() != nil {
+		if len(resolver.DiscordClients()) != 0 {
 			t.Error("Expected Client to be nil if no host is configured")
 		}
 	})
 	t.Run("Teams", func(t *testing.T) {
 		resolver := config.NewResolver(config2, nil)
 
-		if resolver.TeamsClient() != nil {
+		if len(resolver.TeamsClients()) != 0 {
 			t.Error("Expected Client to be nil if no host is configured")
 		}
 	})
 	t.Run("S3.Endoint", func(t *testing.T) {
 		resolver := config.NewResolver(config2, nil)
 
-		if resolver.S3Client() != nil {
+		if len(resolver.S3Clients()) != 0 {
 			t.Error("Expected Client to be nil if no endpoint is configured")
 		}
 	})
@@ -254,7 +242,7 @@ func Test_ResolveTargetWithoutHost(t *testing.T) {
 
 		resolver := config.NewResolver(config2, nil)
 
-		if resolver.S3Client() != nil {
+		if len(resolver.S3Clients()) != 0 {
 			t.Error("Expected Client to be nil if no accessKey is configured")
 		}
 	})
@@ -263,7 +251,7 @@ func Test_ResolveTargetWithoutHost(t *testing.T) {
 
 		resolver := config.NewResolver(config2, nil)
 
-		if resolver.S3Client() != nil {
+		if len(resolver.S3Clients()) != 0 {
 			t.Error("Expected Client to be nil if no accessKey is configured")
 		}
 	})
@@ -272,7 +260,7 @@ func Test_ResolveTargetWithoutHost(t *testing.T) {
 
 		resolver := config.NewResolver(config2, nil)
 
-		if resolver.S3Client() != nil {
+		if len(resolver.S3Clients()) != 0 {
 			t.Error("Expected Client to be nil if no secretAccessKey is configured")
 		}
 	})
@@ -281,7 +269,7 @@ func Test_ResolveTargetWithoutHost(t *testing.T) {
 
 		resolver := config.NewResolver(config2, nil)
 
-		if resolver.S3Client() != nil {
+		if len(resolver.S3Clients()) != 0 {
 			t.Error("Expected Client to be nil if no region is configured")
 		}
 	})
@@ -290,7 +278,7 @@ func Test_ResolveTargetWithoutHost(t *testing.T) {
 
 		resolver := config.NewResolver(config2, nil)
 
-		if resolver.S3Client() != nil {
+		if len(resolver.S3Clients()) != 0 {
 			t.Error("Expected Client to be nil if no bucket is configured")
 		}
 	})

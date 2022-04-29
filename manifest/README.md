@@ -66,6 +66,7 @@ loki:
   skipExistingOnStartup: true
   customLabels: {}
   sources: []
+  channels: []
 
 elasticsearch:
   host: ""
@@ -74,24 +75,28 @@ elasticsearch:
   minimumPriority: ""
   skipExistingOnStartup: true
   sources: []
+  channels: []
 
 slack:
   webhook: ""
   minimumPriority: ""
   skipExistingOnStartup: true
   sources: []
+  channels: []
 
 discord:
   webhook: ""
   minimumPriority: ""
   skipExistingOnStartup: true
   sources: []
+  channels: []
 
 teams:
   webhook: ""
   minimumPriority: ""
   skipExistingOnStartup: true
   sources: []
+  channels: []
 
 ui:
   host: ""
@@ -108,6 +113,7 @@ s3:
   minimumPriority: "warning"
   skipExistingOnStartup: true
   sources: []
+  channels: []
 
 reportFilter:
   namespaces:

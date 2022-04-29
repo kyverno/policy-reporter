@@ -10,6 +10,14 @@ loki:
   sources:
     {{- toYaml . | nindent 4 }}
   {{- end }}
+  {{- with .Values.target.loki.filter }}
+  filter:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  {{- with .Values.target.loki.channels }}
+  channels:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
 
 elasticsearch:
   host: {{ .Values.target.elasticsearch.host | quote }}
@@ -21,6 +29,14 @@ elasticsearch:
   sources:
     {{- toYaml . | nindent 4 }}
   {{- end }}
+  {{- with .Values.target.elasticsearch.filter }}
+  filter:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  {{- with .Values.target.elasticsearch.channels }}
+  channels:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
 
 slack:
   webhook: {{ .Values.target.slack.webhook | quote }}
@@ -28,6 +44,14 @@ slack:
   skipExistingOnStartup: {{ .Values.target.slack.skipExistingOnStartup }}
   {{- with .Values.target.slack.sources }}
   sources:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  {{- with .Values.target.slack.filter }}
+  filter:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  {{- with .Values.target.slack.channels }}
+  channels:
     {{- toYaml . | nindent 4 }}
   {{- end }}
 
@@ -39,6 +63,14 @@ discord:
   sources:
     {{- toYaml . | nindent 4 }}
   {{- end }}
+  {{- with .Values.target.discord.filter }}
+  filter:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  {{- with .Values.target.discord.channels }}
+  channels:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
 
 teams:
   webhook: {{ .Values.target.teams.webhook | quote }}
@@ -46,6 +78,14 @@ teams:
   skipExistingOnStartup: {{ .Values.target.teams.skipExistingOnStartup }}
   {{- with .Values.target.teams.sources }}
   sources:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  {{- with .Values.target.teams.filter }}
+  filter:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  {{- with .Values.target.teams.channels }}
+  channels:
     {{- toYaml . | nindent 4 }}
   {{- end }}
 
@@ -69,6 +109,14 @@ s3:
   skipExistingOnStartup: {{ .Values.target.s3.skipExistingOnStartup }}
   {{- with .Values.target.s3.sources }}
   sources:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  {{- with .Values.target.s3.filter }}
+  filter:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  {{- with .Values.target.s3.channels }}
+  channels:
     {{- toYaml . | nindent 4 }}
   {{- end }}
 
