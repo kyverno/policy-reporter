@@ -1,17 +1,12 @@
 package slack
 
 import (
-	"net/http"
 	"strings"
 
-	"github.com/kyverno/policy-reporter/pkg/helper"
 	"github.com/kyverno/policy-reporter/pkg/report"
 	"github.com/kyverno/policy-reporter/pkg/target"
+	"github.com/kyverno/policy-reporter/pkg/target/http"
 )
-
-type httpClient interface {
-	Do(req *http.Request) (*http.Response, error)
-}
 
 type text struct {
 	Type string `json:"type"`
@@ -42,7 +37,7 @@ type payload struct {
 type client struct {
 	target.BaseClient
 	webhook string
-	client  httpClient
+	client  http.Client
 }
 
 var colors = map[report.Priority]string{
@@ -160,20 +155,17 @@ func (s *client) newPayload(result *report.Result) payload {
 }
 
 func (s *client) Send(result *report.Result) {
-	req, err := helper.CreateJSONRequest(s.Name(), "POST", s.webhook, s.newPayload(result))
+	req, err := http.CreateJSONRequest(s.Name(), "POST", s.webhook, s.newPayload(result))
 	if err != nil {
 		return
 	}
 
-	req.Header.Add("Content-Type", "application/json; charset=utf-8")
-	req.Header.Add("User-Agent", "Policy-Reporter")
-
 	resp, err := s.client.Do(req)
-	helper.ProcessHTTPResponse(s.Name(), resp, err)
+	http.ProcessHTTPResponse(s.Name(), resp, err)
 }
 
 // NewClient creates a new slack.client to send Results to Slack
-func NewClient(name, host string, skipExistingOnStartup bool, filter *target.Filter, httpClient httpClient) target.Client {
+func NewClient(name, host string, skipExistingOnStartup bool, filter *target.Filter, httpClient http.Client) target.Client {
 	return &client{
 		target.NewBaseClient(name, skipExistingOnStartup, filter),
 		host,

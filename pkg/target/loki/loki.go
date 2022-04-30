@@ -1,18 +1,13 @@
 package loki
 
 import (
-	"net/http"
 	"strings"
 	"time"
 
-	"github.com/kyverno/policy-reporter/pkg/helper"
 	"github.com/kyverno/policy-reporter/pkg/report"
 	"github.com/kyverno/policy-reporter/pkg/target"
+	"github.com/kyverno/policy-reporter/pkg/target/http"
 )
-
-type httpClient interface {
-	Do(req *http.Request) (*http.Response, error)
-}
 
 type payload struct {
 	Streams []stream `json:"streams"`
@@ -77,25 +72,24 @@ func newLokiPayload(result *report.Result, customLabels map[string]string) paylo
 type client struct {
 	target.BaseClient
 	host         string
-	client       httpClient
+	client       http.Client
 	customLabels map[string]string
 }
 
 func (l *client) Send(result *report.Result) {
-	req, err := helper.CreateJSONRequest(l.Name(), "POST", l.host, newLokiPayload(result, l.customLabels))
+	req, err := http.CreateJSONRequest(l.Name(), "POST", l.host, newLokiPayload(result, l.customLabels))
 	if err != nil {
 		return
 	}
 
-	req.Header.Add("Content-Type", "application/json")
-	req.Header.Add("User-Agent", "Policy-Reporter")
+	req.Header.Set("Content-Type", "application/json")
 
 	resp, err := l.client.Do(req)
-	helper.ProcessHTTPResponse(l.Name(), resp, err)
+	http.ProcessHTTPResponse(l.Name(), resp, err)
 }
 
 // NewClient creates a new loki.client to send Results to Loki
-func NewClient(name, host string, skipExistingOnStartup bool, filter *target.Filter, customLabels map[string]string, httpClient httpClient) target.Client {
+func NewClient(name, host string, skipExistingOnStartup bool, filter *target.Filter, customLabels map[string]string, httpClient http.Client) target.Client {
 	return &client{
 		target.NewBaseClient(name, skipExistingOnStartup, filter),
 		host + "/api/prom/push",

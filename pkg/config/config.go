@@ -82,6 +82,17 @@ type UI struct {
 	Sources         []string `mapstructure:"sources"`
 }
 
+// Webhook configuration
+type Webhook struct {
+	Host            string            `mapstructure:"host"`
+	Headers         map[string]string `mapstructure:"headers"`
+	SkipExisting    bool              `mapstructure:"skipExistingOnStartup"`
+	MinimumPriority string            `mapstructure:"minimumPriority"`
+	Filter          Filter            `mapstructure:"filter"`
+	Sources         []string          `mapstructure:"sources"`
+	Channels        []Webhook         `mapstructure:"channels"`
+}
+
 type S3 struct {
 	AccessKeyID     string   `mapstructure:"accessKeyID"`
 	SecretAccessKey string   `mapstructure:"secretAccessKey"`
@@ -131,6 +142,7 @@ type Config struct {
 	Teams         Teams         `mapstructure:"teams"`
 	S3            S3            `mapstructure:"s3"`
 	UI            UI            `mapstructure:"ui"`
+	Webhook       Webhook       `mapstructure:"webhook"`
 	API           API           `mapstructure:"api"`
 	Kubeconfig    string        `mapstructure:"kubeconfig"`
 	DBFile        string        `mapstructure:"dbfile"`

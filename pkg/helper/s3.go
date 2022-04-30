@@ -11,6 +11,7 @@ import (
 )
 
 type S3Client interface {
+	// Upload given Data the configured S3 storage
 	Upload(body *bytes.Buffer, key string) error
 }
 

@@ -57,6 +57,20 @@ var testConfig = &config.Config{
 		SkipExisting:    true,
 		MinimumPriority: "debug",
 	},
+	Webhook: config.Webhook{
+		Host: "http://localhost:8080",
+		Headers: map[string]string{
+			"X-Custom": "Header",
+		},
+		SkipExisting:    true,
+		MinimumPriority: "debug",
+		Channels: []config.Webhook{{
+			Host: "http://localhost:8081",
+			Headers: map[string]string{
+				"X-Custom-2": "Header",
+			},
+		}},
+	},
 	S3: config.S3{
 		AccessKeyID:     "AccessKey",
 		SecretAccessKey: "SecretAccessKey",
@@ -103,6 +117,12 @@ func Test_ResolveTarget(t *testing.T) {
 			t.Errorf("Expected 2 Client, got %d clients", len(clients))
 		}
 	})
+	t.Run("Webhook", func(t *testing.T) {
+		clients := resolver.WebhookClients()
+		if len(clients) != 2 {
+			t.Errorf("Expected 2 Client, got %d clients", len(clients))
+		}
+	})
 	t.Run("S3", func(t *testing.T) {
 		clients := resolver.S3Clients()
 		if len(clients) != 2 {
@@ -115,8 +135,8 @@ func Test_ResolveTargets(t *testing.T) {
 	resolver := config.NewResolver(testConfig, nil)
 
 	clients := resolver.TargetClients()
-	if count := len(clients); count != 13 {
-		t.Errorf("Expected 13 Clients, got %d", count)
+	if count := len(clients); count != 15 {
+		t.Errorf("Expected 15 Clients, got %d", count)
 	}
 }
 
@@ -184,6 +204,11 @@ func Test_ResolveTargetWithoutHost(t *testing.T) {
 			SkipExisting:    true,
 			MinimumPriority: "debug",
 		},
+		Webhook: config.Webhook{
+			Host:            "",
+			SkipExisting:    true,
+			MinimumPriority: "debug",
+		},
 		S3: config.S3{
 			Endpoint:        "",
 			Region:          "",
@@ -227,6 +252,13 @@ func Test_ResolveTargetWithoutHost(t *testing.T) {
 		resolver := config.NewResolver(config2, nil)
 
 		if len(resolver.TeamsClients()) != 0 {
+			t.Error("Expected Client to be nil if no host is configured")
+		}
+	})
+	t.Run("Webhook", func(t *testing.T) {
+		resolver := config.NewResolver(config2, nil)
+
+		if len(resolver.WebhookClients()) != 0 {
 			t.Error("Expected Client to be nil if no host is configured")
 		}
 	})

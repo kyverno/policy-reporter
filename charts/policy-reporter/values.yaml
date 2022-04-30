@@ -193,6 +193,10 @@ target:
     sources: []
     # Skip already existing PolicyReportResults on startup
     skipExistingOnStartup: true
+    # filter results send by namespaces, policies and priorities
+    filter: {}
+    # add additional elasticsearch channels with different configurations and filters
+    channels: []
 
   slack:
     # slack app webhook address
@@ -203,7 +207,10 @@ target:
     sources: []
     # Skip already existing PolicyReportResults on startup
     skipExistingOnStartup: true
-#    channels:
+    # filter results send by namespaces, policies and priorities
+    filter: {}
+    # add additional slack channels with different configurations and filters
+    channels: []
 #    - webhook: "https://slack.webhook1"
 #      filter:
 #        namespaces:
@@ -227,6 +234,10 @@ target:
     sources: []
     # Skip already existing PolicyReportResults on startup
     skipExistingOnStartup: true
+    # filter results send by namespaces, policies and priorities
+    filter: {}
+    # add additional discord channels with different configurations and filters
+    channels: []
 
   teams:
     # teams webhook address
@@ -237,9 +248,13 @@ target:
     sources: []
     # Skip already existing PolicyReportResults on startup
     skipExistingOnStartup: true
+    # filter results send by namespaces, policies and priorities
+    filter: {}
+    # add additional teams channels with different configurations and filters
+    channels: []
 
   ui:
-    # teams webhook address
+    # ui host address
     host: ""
     # minimum priority "" < info < warning < critical < error
     minimumPriority: "warning"
@@ -247,6 +262,22 @@ target:
     sources: []
     # Skip already existing PolicyReportResults on startup
     skipExistingOnStartup: true
+
+  webhook:
+    # webhook host address
+    host: ""
+    # additional http headers
+    headers: {}
+    # minimum priority "" < info < warning < critical < error
+    minimumPriority: ""
+    # list of sources which should send to the UI Log
+    sources: []
+    # Skip already existing PolicyReportResults on startup
+    skipExistingOnStartup: true
+    # filter results send by namespaces, policies and priorities
+    filter: {}
+    # add additional webhook channels with different configurations and filters
+    channels: []
 
   s3:
     # S3 access key
@@ -267,6 +298,10 @@ target:
     sources: []
     # Skip already existing PolicyReportResults on startup
     skipExistingOnStartup: true
+    # filter results send by namespaces, policies and priorities
+    filter: {}
+    # add additional s3 channels with different configurations and filters
+    channels: []
 
 # Node labels for pod assignment
 # ref: https://kubernetes.io/docs/user-guide/node-selection/

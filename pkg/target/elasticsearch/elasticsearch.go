@@ -1,12 +1,11 @@
 package elasticsearch
 
 import (
-	"net/http"
 	"time"
 
-	"github.com/kyverno/policy-reporter/pkg/helper"
 	"github.com/kyverno/policy-reporter/pkg/report"
 	"github.com/kyverno/policy-reporter/pkg/target"
+	"github.com/kyverno/policy-reporter/pkg/target/http"
 )
 
 // Rotation Enum
@@ -20,16 +19,12 @@ const (
 	Annually Rotation = "annually"
 )
 
-type httpClient interface {
-	Do(req *http.Request) (*http.Response, error)
-}
-
 type client struct {
 	target.BaseClient
 	host     string
 	index    string
 	rotation Rotation
-	client   httpClient
+	client   http.Client
 }
 
 func (e *client) Send(result *report.Result) {
@@ -45,20 +40,17 @@ func (e *client) Send(result *report.Result) {
 		host = e.host + "/" + e.index + "-" + time.Now().Format("2006.01.02") + "/event"
 	}
 
-	req, err := helper.CreateJSONRequest(e.Name(), "POST", host, result)
+	req, err := http.CreateJSONRequest(e.Name(), "POST", host, result)
 	if err != nil {
 		return
 	}
 
-	req.Header.Add("Content-Type", "application/json; charset=utf-8")
-	req.Header.Add("User-Agent", "Policy-Reporter")
-
 	resp, err := e.client.Do(req)
-	helper.ProcessHTTPResponse(e.Name(), resp, err)
+	http.ProcessHTTPResponse(e.Name(), resp, err)
 }
 
 // NewClient creates a new loki.client to send Results to Elasticsearch
-func NewClient(name, host, index, rotation string, skipExistingOnStartup bool, filter *target.Filter, httpClient httpClient) target.Client {
+func NewClient(name, host, index, rotation string, skipExistingOnStartup bool, filter *target.Filter, httpClient http.Client) target.Client {
 	return &client{
 		target.NewBaseClient(name, skipExistingOnStartup, filter),
 		host,
