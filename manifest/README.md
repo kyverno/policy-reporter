@@ -104,6 +104,14 @@ ui:
   skipExistingOnStartup: true
   sources: []
 
+webhook:
+  host: ""
+  headers: {}
+  minimumPriority: ""
+  skipExistingOnStartup: true
+  sources: []
+  channels: []
+
 s3:
   endpoint: ""
   region: ""

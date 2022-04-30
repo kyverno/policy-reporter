@@ -1,4 +1,4 @@
-package ui
+package webhook
 
 import (
 	"github.com/kyverno/policy-reporter/pkg/report"
@@ -8,8 +8,9 @@ import (
 
 type client struct {
 	target.BaseClient
-	host   string
-	client http.Client
+	host    string
+	headers map[string]string
+	client  http.Client
 }
 
 func (e *client) Send(result *report.Result) {
@@ -18,15 +19,20 @@ func (e *client) Send(result *report.Result) {
 		return
 	}
 
+	for header, value := range e.headers {
+		req.Header.Set(header, value)
+	}
+
 	resp, err := e.client.Do(req)
 	http.ProcessHTTPResponse(e.Name(), resp, err)
 }
 
 // NewClient creates a new loki.client to send Results to Elasticsearch
-func NewClient(name, host string, skipExistingOnStartup bool, filter *target.Filter, httpClient http.Client) target.Client {
+func NewClient(name, host string, headers map[string]string, skipExistingOnStartup bool, filter *target.Filter, httpClient http.Client) target.Client {
 	return &client{
 		target.NewBaseClient(name, skipExistingOnStartup, filter),
-		host + "/api/push",
+		host,
+		headers,
 		httpClient,
 	}
 }

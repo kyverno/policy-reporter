@@ -21,6 +21,7 @@ import (
 	"github.com/kyverno/policy-reporter/pkg/target/slack"
 	"github.com/kyverno/policy-reporter/pkg/target/teams"
 	"github.com/kyverno/policy-reporter/pkg/target/ui"
+	"github.com/kyverno/policy-reporter/pkg/target/webhook"
 
 	"github.com/patrickmn/go-cache"
 	"k8s.io/client-go/dynamic"
@@ -193,6 +194,22 @@ func (r *Resolver) TeamsClients() []target.Client {
 	return clients
 }
 
+// WebhookClients resolver method
+func (r *Resolver) WebhookClients() []target.Client {
+	clients := make([]target.Client, 0)
+
+	if es := createWebhookClient(r.config.Webhook, Webhook{}, "Webhook"); es != nil {
+		clients = append(clients, es)
+	}
+	for i, channel := range r.config.Webhook.Channels {
+		if es := createWebhookClient(channel, r.config.Webhook, fmt.Sprintf("Webhook Channel %d", i+1)); es != nil {
+			clients = append(clients, es)
+		}
+	}
+
+	return clients
+}
+
 // UIClient resolver method
 func (r *Resolver) UIClient() target.Client {
 	if r.config.UI.Host == "" {
@@ -240,6 +257,7 @@ func (r *Resolver) TargetClients() []target.Client {
 	clients = append(clients, r.DiscordClients()...)
 	clients = append(clients, r.TeamsClients()...)
 	clients = append(clients, r.S3Clients()...)
+	clients = append(clients, r.WebhookClients()...)
 
 	if ui := r.UIClient(); ui != nil {
 		clients = append(clients, ui)
@@ -413,7 +431,6 @@ func createDiscordClient(config Discord, parent Discord, name string) target.Cli
 	)
 }
 
-// TeamsClient resolver method
 func createTeamsClient(config Teams, parent Teams, name string) target.Client {
 	if config.Webhook == "" {
 		return nil
@@ -432,6 +449,43 @@ func createTeamsClient(config Teams, parent Teams, name string) target.Client {
 	return teams.NewClient(
 		name,
 		config.Webhook,
+		config.SkipExisting,
+		createTargetFilter(config.Filter, config.MinimumPriority, config.Sources),
+		&http.Client{},
+	)
+}
+
+func createWebhookClient(config Webhook, parent Webhook, name string) target.Client {
+	if config.Host == "" {
+		return nil
+	}
+
+	if config.MinimumPriority == "" {
+		config.MinimumPriority = parent.MinimumPriority
+	}
+
+	if !config.SkipExisting {
+		config.SkipExisting = parent.SkipExisting
+	}
+
+	if len(parent.Headers) > 0 {
+		headers := map[string]string{}
+		for header, value := range parent.Headers {
+			headers[header] = value
+		}
+		for header, value := range config.Headers {
+			headers[header] = value
+		}
+
+		config.Headers = headers
+	}
+
+	log.Printf("[INFO] %s configured", name)
+
+	return webhook.NewClient(
+		name,
+		config.Host,
+		config.Headers,
 		config.SkipExisting,
 		createTargetFilter(config.Filter, config.MinimumPriority, config.Sources),
 		&http.Client{},
@@ -473,7 +527,9 @@ func createS3Client(config S3, parent S3, name string) target.Client {
 		config.Bucket = parent.Bucket
 	}
 
-	if config.Prefix == "" {
+	if config.Prefix == "" && parent.Prefix == "" {
+		config.Prefix = "policy-reporter"
+	} else if config.Prefix == "" {
 		config.Prefix = parent.Prefix
 	}
 

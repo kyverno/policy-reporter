@@ -89,6 +89,23 @@ teams:
     {{- toYaml . | nindent 4 }}
   {{- end }}
 
+webhook:
+  host: {{ .Values.target.webhook.host | quote }}
+  minimumPriority: {{ .Values.target.webhook.minimumPriority | quote }}
+  skipExistingOnStartup: {{ .Values.target.webhook.skipExistingOnStartup }}
+  {{- with .Values.target.webhook.sources }}
+  sources:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  {{- with .Values.target.webhook.filter }}
+  filter:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  {{- with .Values.target.webhook.channels }}
+  channels:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+
 ui:
   host: {{ include "policyreporter.uihost" . }}
   minimumPriority: {{ .Values.target.ui.minimumPriority | quote }}

@@ -1,18 +1,13 @@
 package teams
 
 import (
-	"net/http"
 	"strings"
 	"time"
 
-	"github.com/kyverno/policy-reporter/pkg/helper"
 	"github.com/kyverno/policy-reporter/pkg/report"
 	"github.com/kyverno/policy-reporter/pkg/target"
+	"github.com/kyverno/policy-reporter/pkg/target/http"
 )
-
-type httpClient interface {
-	Do(req *http.Request) (*http.Response, error)
-}
 
 type fact struct {
 	Name  string `json:"name"`
@@ -103,24 +98,21 @@ func newPayload(result *report.Result) payload {
 type client struct {
 	target.BaseClient
 	webhook string
-	client  httpClient
+	client  http.Client
 }
 
 func (s *client) Send(result *report.Result) {
-	req, err := helper.CreateJSONRequest(s.Name(), "POST", s.webhook, newPayload(result))
+	req, err := http.CreateJSONRequest(s.Name(), "POST", s.webhook, newPayload(result))
 	if err != nil {
 		return
 	}
 
-	req.Header.Add("Content-Type", "application/json; charset=utf-8")
-	req.Header.Add("User-Agent", "Policy-Reporter")
-
 	resp, err := s.client.Do(req)
-	helper.ProcessHTTPResponse(s.Name(), resp, err)
+	http.ProcessHTTPResponse(s.Name(), resp, err)
 }
 
 // NewClient creates a new teams.client to send Results to MS Teams
-func NewClient(name, host string, skipExistingOnStartup bool, filter *target.Filter, httpClient httpClient) target.Client {
+func NewClient(name, host string, skipExistingOnStartup bool, filter *target.Filter, httpClient http.Client) target.Client {
 	return &client{
 		target.NewBaseClient(name, skipExistingOnStartup, filter),
 		host,

@@ -1,12 +1,11 @@
 package discord
 
 import (
-	"net/http"
 	"strings"
 
-	"github.com/kyverno/policy-reporter/pkg/helper"
 	"github.com/kyverno/policy-reporter/pkg/report"
 	"github.com/kyverno/policy-reporter/pkg/target"
+	"github.com/kyverno/policy-reporter/pkg/target/http"
 )
 
 type payload struct {
@@ -82,31 +81,24 @@ func newPayload(result *report.Result) payload {
 	}
 }
 
-type httpClient interface {
-	Do(req *http.Request) (*http.Response, error)
-}
-
 type client struct {
 	target.BaseClient
 	webhook string
-	client  httpClient
+	client  http.Client
 }
 
 func (d *client) Send(result *report.Result) {
-	req, err := helper.CreateJSONRequest(d.Name(), "POST", d.webhook, newPayload(result))
+	req, err := http.CreateJSONRequest(d.Name(), "POST", d.webhook, newPayload(result))
 	if err != nil {
 		return
 	}
 
-	req.Header.Add("Content-Type", "application/json; charset=utf-8")
-	req.Header.Add("User-Agent", "Policy-Reporter")
-
 	resp, err := d.client.Do(req)
-	helper.ProcessHTTPResponse(d.Name(), resp, err)
+	http.ProcessHTTPResponse(d.Name(), resp, err)
 }
 
 // NewClient creates a new loki.client to send Results to Discord
-func NewClient(name, webhook string, skipExistingOnStartup bool, filter *target.Filter, httpClient httpClient) target.Client {
+func NewClient(name, webhook string, skipExistingOnStartup bool, filter *target.Filter, httpClient http.Client) target.Client {
 	return &client{
 		target.NewBaseClient(name, skipExistingOnStartup, filter),
 		webhook,

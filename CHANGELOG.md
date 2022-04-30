@@ -5,6 +5,10 @@
     * New target filter and channels to define multiple configurations of the same target
         * Filter target results by exclude and include rules for namesapces, priorities and policies
         * Support wildcards for policies and namespaces
+    * New __webhook__ target
+        * this target is a simple way to send notifications to custom tools and APIs
+        * results are send as POST requests with a JSON representation of the result
+        * the _headers_ properties allows you to send custom header with the request to allow for example authentication
 
 # 2.7.1
 * Policy Reporter
