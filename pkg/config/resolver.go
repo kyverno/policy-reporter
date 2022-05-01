@@ -355,6 +355,10 @@ func createLokiClient(config Loki, parent Loki, name string) target.Client {
 		config.SkipExisting = parent.SkipExisting
 	}
 
+	if config.MinimumPriority == "" {
+		config.MinimumPriority = parent.MinimumPriority
+	}
+
 	log.Printf("[INFO] %s configured", name)
 
 	return loki.NewClient(
