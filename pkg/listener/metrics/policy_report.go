@@ -14,7 +14,7 @@ var policyGauge = promauto.NewGaugeVec(prometheus.GaugeOpts{
 var ruleGauge = promauto.NewGaugeVec(prometheus.GaugeOpts{
 	Name: "policy_report_result",
 	Help: "List of all PolicyReport Results",
-}, []string{"namespace", "rule", "policy", "report", "kind", "name", "status", "severity", "category"})
+}, []string{"namespace", "rule", "policy", "report", "kind", "name", "status", "severity", "category", "source"})
 
 func CreatePolicyReportMetricsListener() report.PolicyReportListener {
 	prometheus.Register(policyGauge)
@@ -69,6 +69,7 @@ func generateResultLabels(report *report.PolicyReport, result *report.Result) pr
 		"status":    result.Status,
 		"severity":  result.Severity,
 		"category":  result.Category,
+		"source":    result.Source,
 	}
 
 	if result.HasResource() {

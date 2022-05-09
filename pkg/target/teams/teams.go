@@ -54,19 +54,21 @@ func newPayload(result *report.Result) payload {
 	if result.Severity != "" {
 		facts = append(facts, fact{"Severity", result.Severity})
 	}
-	res := &report.Resource{}
-	if result.HasResource() {
-		res = result.Resource
-	}
 
-	if res.UID != "" {
+	if result.HasResource() {
+		res := result.Resource
+
 		facts = append(facts, fact{"Kind", res.Kind})
 		facts = append(facts, fact{"Name", res.Name})
-		facts = append(facts, fact{"UID", res.UID})
+		if res.UID != "" {
+			facts = append(facts, fact{"UID", res.UID})
+		}
 		if res.Namespace != "" {
 			facts = append(facts, fact{"Namespace", res.Namespace})
 		}
-		facts = append(facts, fact{"API Version", res.APIVersion})
+		if res.APIVersion != "" {
+			facts = append(facts, fact{"API Version", res.APIVersion})
+		}
 	}
 
 	for property, value := range result.Properties {

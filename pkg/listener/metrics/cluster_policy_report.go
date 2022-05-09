@@ -14,7 +14,7 @@ var clusterPolicyGauge = promauto.NewGaugeVec(prometheus.GaugeOpts{
 var clusterRuleGauge = promauto.NewGaugeVec(prometheus.GaugeOpts{
 	Name: "cluster_policy_report_result",
 	Help: "List of all ClusterPolicyReport Results",
-}, []string{"rule", "policy", "report", "kind", "name", "status", "severity", "category"})
+}, []string{"rule", "policy", "report", "kind", "name", "status", "severity", "category", "source"})
 
 func CreateClusterPolicyReportMetricsListener() report.PolicyReportListener {
 	prometheus.Register(clusterPolicyGauge)
@@ -68,6 +68,7 @@ func generateClusterResultLabels(newReport *report.PolicyReport, result *report.
 		"status":   result.Status,
 		"severity": result.Severity,
 		"category": result.Category,
+		"source":   result.Source,
 	}
 
 	if result.HasResource() {

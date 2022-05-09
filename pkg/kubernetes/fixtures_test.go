@@ -113,6 +113,93 @@ var policyMap = map[string]interface{}{
 			"policy":    "priority-test",
 			"resources": []interface{}{},
 		},
+		map[string]interface{}{
+			"message": "message 3",
+			"result":  "fail",
+			"scored":  true,
+			"policy":  "required-label",
+			"rule":    "app-label-required",
+			"timestamp": map[string]interface{}{
+				"seconds": int64(1614093000),
+			},
+			"source":   "test",
+			"category": "test",
+			"severity": "high",
+			"resources": []interface{}{
+				map[string]interface{}{
+					"apiVersion": "v1",
+					"kind":       "Deployment",
+					"name":       "nginx",
+					"namespace":  "test",
+					"uid":        "dfd57c50-f30c-4729-b63f-b1954d8988b3",
+				},
+			},
+			"properties": map[string]interface{}{
+				"version":              "1.2.0",
+				kubernetes.ResultIDKey: "123456",
+			},
+		},
+	},
+}
+
+var enforcePolicyMap = map[string]interface{}{
+	"metadata": map[string]interface{}{
+		"name":              "policy-report",
+		"namespace":         "test",
+		"creationTimestamp": "2021-02-23T15:00:00Z",
+	},
+	"summary": map[string]interface{}{
+		"pass":  int64(1),
+		"skip":  int64(2),
+		"warn":  int64(3),
+		"fail":  int64(4),
+		"error": int64(5),
+	},
+	"results": []interface{}{
+		map[string]interface{}{
+			"message": "message",
+			"result":  "fail",
+			"scored":  true,
+			"policy":  "required-label",
+			"rule":    "app-label-required",
+			"timestamp": map[string]interface{}{
+				"seconds": int64(1614093000),
+			},
+			"source":   "test",
+			"category": "test",
+			"severity": "high",
+			"resources": []interface{}{
+				map[string]interface{}{
+					"apiVersion": "v1",
+					"kind":       "Deployment",
+					"name":       "nginx",
+					"namespace":  "test",
+					"uid":        "dfd57c50-f30c-4729-b63f-b1954d8988d1",
+				},
+			},
+		},
+		map[string]interface{}{
+			"message":  "message 3",
+			"result":   "fail",
+			"scored":   true,
+			"policy":   "required-label",
+			"rule":     "app-label-required",
+			"source":   "test",
+			"category": "test",
+			"severity": "high",
+			"resources": []interface{}{
+				map[string]interface{}{
+					"apiVersion": "v1",
+					"kind":       "Deployment",
+					"name":       "nginx",
+					"namespace":  "test",
+					"uid":        "",
+				},
+			},
+			"properties": map[string]interface{}{
+				kubernetes.ResultIDKey: "123456",
+			},
+		},
 	},
 }
 
@@ -162,5 +249,6 @@ var priorityMap = map[string]string{
 	"priority-test": "warning",
 }
 
-var result1ID string = report.GeneratePolicyReportResultID("dfd57c50-f30c-4729-b63f-b1954d8988d1", "required-label", "app-label-required", "fail", "message")
-var result2ID string = report.GeneratePolicyReportResultID("", "priority-test", "", "fail", "message 2")
+var result1ID string = report.GeneratePolicyReportResultID("dfd57c50-f30c-4729-b63f-b1954d8988d1", "nginx", "required-label", "app-label-required", "fail", "message")
+var result2ID string = report.GeneratePolicyReportResultID("", "", "priority-test", "", "fail", "message 2")
+var result3ID string = "123456"

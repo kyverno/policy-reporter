@@ -284,10 +284,17 @@ func testResultMetricLabels(metric *ioprometheusclient.Metric, result *report.Re
 		return fmt.Errorf("unexpected Severity Label Value: %s", value)
 	}
 
-	if name := *metric.Label[8].Name; name != "status" {
+	if name := *metric.Label[8].Name; name != "source" {
+		return fmt.Errorf("unexpected Source Label: %s", name)
+	}
+	if value := *metric.Label[8].Value; value != result.Source {
+		return fmt.Errorf("unexpected Source Label Value: %s", value)
+	}
+
+	if name := *metric.Label[9].Name; name != "status" {
 		return fmt.Errorf("unexpected Name Label: %s", name)
 	}
-	if value := *metric.Label[8].Value; value != result.Status {
+	if value := *metric.Label[9].Value; value != result.Status {
 		return fmt.Errorf("unexpected Status Label Value: %s", value)
 	}
 

@@ -7,6 +7,8 @@ import (
 	"github.com/kyverno/policy-reporter/pkg/report"
 )
 
+const ResultIDKey = "resultID"
+
 // Mapper converts maps into report structs
 type Mapper interface {
 	// MapPolicyReport maps a map into a PolicyReport
@@ -133,6 +135,11 @@ func (m *mapper) mapResult(result map[string]interface{}) []*report.Result {
 
 		if props, ok := result["properties"]; ok {
 			if properties, ok := props.(map[string]interface{}); ok {
+				if id, ok := properties[ResultIDKey]; ok {
+					r.ID = toString(id)
+					delete(properties, ResultIDKey)
+				}
+
 				for property, v := range properties {
 					value := toString(v)
 					if len(value) > 0 {
@@ -142,7 +149,9 @@ func (m *mapper) mapResult(result map[string]interface{}) []*report.Result {
 			}
 		}
 
-		r.ID = report.GeneratePolicyReportResultID(r.Resource.UID, r.Policy, r.Rule, r.Status, r.Message)
+		if r.ID == "" {
+			r.ID = report.GeneratePolicyReportResultID(r.Resource.UID, r.Resource.Name, r.Policy, r.Rule, r.Status, r.Message)
+		}
 
 		return r
 	}

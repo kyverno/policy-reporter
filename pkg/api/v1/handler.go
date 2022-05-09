@@ -30,12 +30,36 @@ func ClusterResourcesPolicyListHandler(finder PolicyReportFinder) http.HandlerFu
 	}
 }
 
+// ClusterResourcesRuleListHandler REST API
+func ClusterResourcesRuleListHandler(finder PolicyReportFinder) http.HandlerFunc {
+	return func(w http.ResponseWriter, req *http.Request) {
+		list, err := finder.FetchClusterRules(Filter{
+			Sources:    req.URL.Query()["sources"],
+			Policies:   req.URL.Query()["policies"],
+			Categories: req.URL.Query()["categories"],
+		})
+		helper.SendJSONResponse(w, list, err)
+	}
+}
+
 // NamespacedResourcesPolicyListHandler REST API
 func NamespacedResourcesPolicyListHandler(finder PolicyReportFinder) http.HandlerFunc {
 	return func(w http.ResponseWriter, req *http.Request) {
 		list, err := finder.FetchNamespacedPolicies(Filter{
 			Sources:    req.URL.Query()["sources"],
 			Categories: req.URL.Query()["categories"],
+		})
+		helper.SendJSONResponse(w, list, err)
+	}
+}
+
+// NamespacedResourcesPolicyListHandler REST API
+func NamespacedResourcesRuleListHandler(finder PolicyReportFinder) http.HandlerFunc {
+	return func(w http.ResponseWriter, req *http.Request) {
+		list, err := finder.FetchNamespacedRules(Filter{
+			Sources:    req.URL.Query()["sources"],
+			Categories: req.URL.Query()["categories"],
+			Policies:   req.URL.Query()["policies"],
 		})
 		helper.SendJSONResponse(w, list, err)
 	}
@@ -58,6 +82,7 @@ func ClusterResourcesKindListHandler(finder PolicyReportFinder) http.HandlerFunc
 			Sources:    req.URL.Query()["sources"],
 			Categories: req.URL.Query()["categories"],
 			Policies:   req.URL.Query()["policies"],
+			Rules:      req.URL.Query()["rules"],
 		})
 		helper.SendJSONResponse(w, list, err)
 	}
@@ -70,6 +95,7 @@ func NamespacedResourcesKindListHandler(finder PolicyReportFinder) http.HandlerF
 			Sources:    req.URL.Query()["sources"],
 			Categories: req.URL.Query()["categories"],
 			Policies:   req.URL.Query()["policies"],
+			Rules:      req.URL.Query()["rules"],
 			Namespaces: req.URL.Query()["namespaces"],
 		})
 		helper.SendJSONResponse(w, list, err)
@@ -83,6 +109,7 @@ func ClusterResourcesListHandler(finder PolicyReportFinder) http.HandlerFunc {
 			Sources:    req.URL.Query()["sources"],
 			Categories: req.URL.Query()["categories"],
 			Policies:   req.URL.Query()["policies"],
+			Rules:      req.URL.Query()["rules"],
 			Kinds:      req.URL.Query()["kinds"],
 		})
 		helper.SendJSONResponse(w, list, err)
@@ -96,6 +123,7 @@ func NamespacedResourcesListHandler(finder PolicyReportFinder) http.HandlerFunc 
 			Sources:    req.URL.Query()["sources"],
 			Categories: req.URL.Query()["categories"],
 			Policies:   req.URL.Query()["policies"],
+			Rules:      req.URL.Query()["rules"],
 			Namespaces: req.URL.Query()["namespaces"],
 			Kinds:      req.URL.Query()["kinds"],
 		})
@@ -128,6 +156,7 @@ func ClusterResourcesStatusCountHandler(finder PolicyReportFinder) http.HandlerF
 			Categories: req.URL.Query()["categories"],
 			Severities: req.URL.Query()["severities"],
 			Policies:   req.URL.Query()["policies"],
+			Rules:      req.URL.Query()["rules"],
 			Status:     req.URL.Query()["status"],
 		})
 		helper.SendJSONResponse(w, list, err)
@@ -144,6 +173,7 @@ func NamespacedResourcesStatusCountsHandler(finder PolicyReportFinder) http.Hand
 			Categories: req.URL.Query()["categories"],
 			Severities: req.URL.Query()["severities"],
 			Policies:   req.URL.Query()["policies"],
+			Rules:      req.URL.Query()["rules"],
 			Status:     req.URL.Query()["status"],
 		})
 		helper.SendJSONResponse(w, list, err)
@@ -172,6 +202,7 @@ func NamespacedResourcesResultHandler(finder PolicyReportFinder) http.HandlerFun
 			Categories: req.URL.Query()["categories"],
 			Severities: req.URL.Query()["severities"],
 			Policies:   req.URL.Query()["policies"],
+			Rules:      req.URL.Query()["rules"],
 			Status:     req.URL.Query()["status"],
 		})
 		helper.SendJSONResponse(w, list, err)
@@ -188,6 +219,7 @@ func ClusterResourcesResultHandler(finder PolicyReportFinder) http.HandlerFunc {
 			Categories: req.URL.Query()["categories"],
 			Severities: req.URL.Query()["severities"],
 			Policies:   req.URL.Query()["policies"],
+			Rules:      req.URL.Query()["rules"],
 			Status:     req.URL.Query()["status"],
 		})
 		helper.SendJSONResponse(w, list, err)
@@ -201,6 +233,7 @@ func NamespaceListHandler(finder PolicyReportFinder) http.HandlerFunc {
 			Sources:    req.URL.Query()["sources"],
 			Categories: req.URL.Query()["categories"],
 			Policies:   req.URL.Query()["policies"],
+			Rules:      req.URL.Query()["rules"],
 		})
 		helper.SendJSONResponse(w, list, err)
 	}

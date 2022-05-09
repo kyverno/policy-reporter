@@ -254,12 +254,12 @@ func GeneratePolicyReportID(name, namespace string) string {
 	return fmt.Sprintf("%x", h.Sum(nil))
 }
 
-func GeneratePolicyReportResultID(uid, policy, rule, status, suffix string) string {
+func GeneratePolicyReportResultID(uid, name, policy, rule, status, suffix string) string {
 	if uid != "" {
 		suffix = "__" + uid
 	}
 
-	id := fmt.Sprintf("%s__%s__%s%s", policy, rule, status, suffix)
+	id := fmt.Sprintf("%s_%s__%s__%s%s", name, policy, rule, status, suffix)
 
 	h := sha1.New()
 	h.Write([]byte(id))
