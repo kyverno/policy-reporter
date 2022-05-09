@@ -141,10 +141,6 @@ func (m *mapper) mapResult(result map[string]interface{}) []*report.Result {
 				}
 
 				for property, v := range properties {
-					if property == ResultIDKey {
-						continue
-					}
-
 					value := toString(v)
 					if len(value) > 0 {
 						r.Properties[property] = value

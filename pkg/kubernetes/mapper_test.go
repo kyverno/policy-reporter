@@ -147,6 +147,18 @@ func Test_MapMinPolicyReport(t *testing.T) {
 	}
 }
 
+func Test_ResultIDPropertyMapping(t *testing.T) {
+	mapper := kubernetes.NewMapper(map[string]string{})
+
+	preport := mapper.MapPolicyReport(enforcePolicyMap)
+
+	result := preport.Results[result3ID]
+
+	if result == nil {
+		t.Errorf("Expected ResultID was mapped from property Key %s", kubernetes.ResultIDKey)
+	}
+}
+
 func Test_PriorityMap(t *testing.T) {
 	t.Run("Test exact match, without default", func(t *testing.T) {
 		mapper := kubernetes.NewMapper(map[string]string{"required-label": "debug"})
@@ -168,7 +180,7 @@ func Test_PriorityMap(t *testing.T) {
 		result := preport.Results[result1ID]
 
 		if result.Priority != report.DebugPriority {
-			t.Errorf("Expected Policy '%d' (acutal %d)", report.DebugPriority, result.Priority)
+			t.Errorf("Expected Priority '%d' (acutal %d)", report.DebugPriority, result.Priority)
 		}
 	})
 
