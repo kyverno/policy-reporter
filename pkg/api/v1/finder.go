@@ -6,6 +6,7 @@ type Filter struct {
 	Namespaces []string
 	Sources    []string
 	Policies   []string
+	Rules      []string
 	Severities []string
 	Status     []string
 	Resources  []string
@@ -14,8 +15,12 @@ type Filter struct {
 type PolicyReportFinder interface {
 	// FetchClusterPolicies from current PolicyReportResults
 	FetchClusterPolicies(Filter) ([]string, error)
+	// FetchClusterRules from current PolicyReportResults
+	FetchClusterRules(Filter) ([]string, error)
 	// FetchNamespacedPolicies from current PolicyReportResults with a Namespace
 	FetchNamespacedPolicies(Filter) ([]string, error)
+	// FetchNamespacedRules from current PolicyReportResults with a Namespace
+	FetchNamespacedRules(Filter) ([]string, error)
 	// FetchCategories from current PolicyReportResults
 	FetchCategories(Filter) ([]string, error)
 	// FetchClusterSources from current PolicyReportResults

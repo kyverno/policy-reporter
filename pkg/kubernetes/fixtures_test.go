@@ -162,5 +162,5 @@ var priorityMap = map[string]string{
 	"priority-test": "warning",
 }
 
-var result1ID string = report.GeneratePolicyReportResultID("dfd57c50-f30c-4729-b63f-b1954d8988d1", "required-label", "app-label-required", "fail", "message")
-var result2ID string = report.GeneratePolicyReportResultID("", "priority-test", "", "fail", "message 2")
+var result1ID string = report.GeneratePolicyReportResultID("dfd57c50-f30c-4729-b63f-b1954d8988d1", "nginx", "required-label", "app-label-required", "fail", "message")
+var result2ID string = report.GeneratePolicyReportResultID("", "", "priority-test", "", "fail", "message 2")

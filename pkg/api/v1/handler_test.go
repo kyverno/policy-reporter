@@ -152,6 +152,26 @@ func Test_V1_API(t *testing.T) {
 		}
 	})
 
+	t.Run("ClusterRuleListHandler", func(t *testing.T) {
+		req, err := http.NewRequest("GET", "/v1/cluster-rules", nil)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		rr := httptest.NewRecorder()
+		handler := v1.ClusterResourcesRuleListHandler(store)
+		handler.ServeHTTP(rr, req)
+
+		if status := rr.Code; status != http.StatusOK {
+			t.Errorf("handler returned wrong status code: got %v want %v", status, http.StatusOK)
+		}
+
+		expected := `["check-for-labels-on-namespace"]`
+		if !strings.Contains(rr.Body.String(), expected) {
+			t.Errorf("handler returned unexpected body: got %v want %v", rr.Body.String(), expected)
+		}
+	})
+
 	t.Run("NamespacedPolicyListHandler", func(t *testing.T) {
 		req, err := http.NewRequest("GET", "/v1/namespaced-policies", nil)
 		if err != nil {
@@ -167,6 +187,26 @@ func Test_V1_API(t *testing.T) {
 		}
 
 		expected := `["require-requests-and-limits-required"]`
+		if !strings.Contains(rr.Body.String(), expected) {
+			t.Errorf("handler returned unexpected body: got %v want %v", rr.Body.String(), expected)
+		}
+	})
+
+	t.Run("NamespacedRuleListHandler", func(t *testing.T) {
+		req, err := http.NewRequest("GET", "/v1/namespaced-rules", nil)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		rr := httptest.NewRecorder()
+		handler := v1.NamespacedResourcesRuleListHandler(store)
+		handler.ServeHTTP(rr, req)
+
+		if status := rr.Code; status != http.StatusOK {
+			t.Errorf("handler returned wrong status code: got %v want %v", status, http.StatusOK)
+		}
+
+		expected := `["autogen-check-for-requests-and-limits"]`
 		if !strings.Contains(rr.Body.String(), expected) {
 			t.Errorf("handler returned unexpected body: got %v want %v", rr.Body.String(), expected)
 		}

@@ -101,34 +101,54 @@ func (s *client) newPayload(result *report.Result) payload {
 		att.Blocks = append(att.Blocks, b)
 	}
 
-	res := &report.Resource{}
 	if result.HasResource() {
-		res = result.Resource
-	}
+		res := result.Resource
 
-	if res.UID != "" {
-		att.Blocks = append(
-			att.Blocks,
-			block{Type: "section", Text: &text{Type: "mrkdwn", Text: "*Resource*"}},
-			block{
+		att.Blocks = append(att.Blocks, block{Type: "section", Text: &text{Type: "mrkdwn", Text: "*Resource*"}})
+
+		if res.APIVersion != "" {
+			att.Blocks = append(att.Blocks, block{
 				Type: "section",
 				Fields: []field{
 					{Type: "mrkdwn", Text: "*Kind*\n" + res.Kind},
 					{Type: "mrkdwn", Text: "*API Version*\n" + res.APIVersion},
 				},
-			},
-			block{
+			})
+		} else if res.APIVersion == "" && res.UID != "" {
+			att.Blocks = append(att.Blocks, block{
+				Type: "section",
+				Text: &text{Type: "mrkdwn", Text: "*Kind*\n" + res.Kind},
+			})
+		}
+
+		if res.UID != "" {
+			att.Blocks = append(att.Blocks, block{
 				Type: "section",
 				Fields: []field{
 					{Type: "mrkdwn", Text: "*Name*\n" + res.Name},
 					{Type: "mrkdwn", Text: "*UID*\n" + res.UID},
 				},
-			},
-		)
-	}
+			})
+		} else if res.UID == "" && res.APIVersion != "" {
+			att.Blocks = append(att.Blocks, block{
+				Type: "section",
+				Text: &text{Type: "mrkdwn", Text: "*Name*\n" + res.Name},
+			})
+		}
 
-	if res.Namespace != "" {
-		att.Blocks = append(att.Blocks, block{Type: "section", Fields: []field{{Type: "mrkdwn", Text: "*Namespace*\n" + res.Namespace}}})
+		if res.APIVersion == "" && res.UID == "" {
+			att.Blocks = append(att.Blocks, block{
+				Type: "section",
+				Fields: []field{
+					{Type: "mrkdwn", Text: "*Kind*\n" + res.Kind},
+					{Type: "mrkdwn", Text: "*Name*\n" + res.Name},
+				},
+			})
+		}
+
+		if res.Namespace != "" {
+			att.Blocks = append(att.Blocks, block{Type: "section", Fields: []field{{Type: "mrkdwn", Text: "*Namespace*\n" + res.Namespace}}})
+		}
 	}
 
 	if len(result.Properties) > 0 {

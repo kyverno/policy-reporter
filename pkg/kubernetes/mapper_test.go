@@ -243,9 +243,40 @@ func Test_MapTimestamoAsInt(t *testing.T) {
 	}
 
 	r := mapper.MapPolicyReport(policyReport)
-	id := report.GeneratePolicyReportResultID("", "priority-test", "", "fail", "message 2")
+	id := report.GeneratePolicyReportResultID("", "", "priority-test", "", "fail", "message 2")
 
 	if r.Results[id].Timestamp.IsZero() {
 		t.Errorf("Expected valid Timestamp")
+	}
+}
+
+func Test_MapCustomResultID(t *testing.T) {
+	mapper := kubernetes.NewMapper(make(map[string]string))
+
+	policyReport := map[string]interface{}{
+		"metadata": map[string]interface{}{
+			"name":              "policy-report",
+			"namespace":         "test",
+			"creationTimestamp": "2021-02-23T15:00:00Z",
+		},
+		"results": []interface{}{map[string]interface{}{
+			"message": "message 2",
+			"status":  "fail",
+			"scored":  true,
+			"timestamp": map[string]interface{}{
+				"seconds": 1614093000,
+			},
+			"policy":    "priority-test",
+			"resources": []interface{}{},
+			"properties": map[string]interface{}{
+				kubernetes.ResultIDKey: "123456",
+			},
+		}},
+	}
+
+	r := mapper.MapPolicyReport(policyReport)
+
+	if _, ok := r.Results["123456"]; !ok {
+		t.Errorf("Expected resultID used as result.ID")
 	}
 }

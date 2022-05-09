@@ -8,7 +8,7 @@ import (
 )
 
 var result1 = &report.Result{
-	ID:       "e0659854c6ee5c1a4df9242b2eb8b40919967842",
+	ID:       "c6215d837642824766ec511357140bf02636b5d8",
 	Message:  "validation error: requests and limits required. Rule autogen-check-for-requests-and-limits failed at path /spec/template/spec/containers/0/resources/requests/",
 	Policy:   "require-requests-and-limits-required",
 	Rule:     "autogen-check-for-requests-and-limits",
@@ -135,10 +135,10 @@ func Test_ClusterPolicyReport(t *testing.T) {
 
 func Test_Result(t *testing.T) {
 	t.Run("Check Result.GetIdentifier", func(t *testing.T) {
-		expected := report.GeneratePolicyReportResultID(result1.Resource.UID, result1.Policy, result1.Rule, result1.Status, "")
+		expected := report.GeneratePolicyReportResultID(result1.Resource.UID, result1.Resource.Name, result1.Policy, result1.Rule, result1.Status, "")
 
 		if result1.GetIdentifier() != expected {
-			t.Errorf("Expected ClusterPolicyReport.GetIdentifier() to be %s (actual: %s)", expected, creport.GetIdentifier())
+			t.Errorf("Expected ClusterPolicyReport.GetIdentifier() to be %s (actual: %s)", expected, result1.GetIdentifier())
 		}
 	})
 	t.Run("Check Result.HasResource with Resource", func(t *testing.T) {

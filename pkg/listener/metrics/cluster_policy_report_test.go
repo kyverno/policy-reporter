@@ -183,7 +183,7 @@ func testClusterSummaryMetricLabels(
 
 func testClusterResultMetricLabels(metric *ioprometheusclient.Metric, result *report.Result) error {
 	if name := *metric.Label[0].Name; name != "category" {
-		return fmt.Errorf("unexpected Name Label: %s", name)
+		return fmt.Errorf("unexpected Category Label: %s", name)
 	}
 	if value := *metric.Label[0].Value; value != result.Category {
 		return fmt.Errorf("unexpected Category Label Value: %s", value)
@@ -228,10 +228,17 @@ func testClusterResultMetricLabels(metric *ioprometheusclient.Metric, result *re
 		return fmt.Errorf("unexpected Severity Label Value: %s", value)
 	}
 
-	if name := *metric.Label[7].Name; name != "status" {
+	if name := *metric.Label[7].Name; name != "source" {
+		return fmt.Errorf("unexpected Source Label: %s", name)
+	}
+	if value := *metric.Label[7].Value; value != result.Source {
+		return fmt.Errorf("unexpected Source Label Value: %s", value)
+	}
+
+	if name := *metric.Label[8].Name; name != "status" {
 		return fmt.Errorf("unexpected Name Label: %s", name)
 	}
-	if value := *metric.Label[7].Value; value != result.Status {
+	if value := *metric.Label[8].Value; value != result.Status {
 		return fmt.Errorf("unexpected Status Label Value: %s", value)
 	}
 

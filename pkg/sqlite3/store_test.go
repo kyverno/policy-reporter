@@ -444,6 +444,19 @@ func Test_PolicyReportStore(t *testing.T) {
 		}
 	})
 
+	t.Run("FetchClusterRules", func(t *testing.T) {
+		items, err := store.FetchClusterRules(v1.Filter{Sources: []string{"kyverno"}})
+		if err != nil {
+			t.Fatalf("Unexpected Error: %s", err)
+		}
+		if len(items) != 1 {
+			t.Errorf("Should Find 1 cluster scoped Policy")
+		}
+		if items[0] != "check-for-labels-on-namespace" {
+			t.Errorf("Should return 'check-for-labels-on-namespace' rule")
+		}
+	})
+
 	t.Run("FetchNamespacedPolicies", func(t *testing.T) {
 		items, err := store.FetchNamespacedPolicies(v1.Filter{Sources: []string{"kyverno"}})
 		if err != nil {
@@ -453,6 +466,19 @@ func Test_PolicyReportStore(t *testing.T) {
 			t.Errorf("Should find 1 namespace scoped policy")
 		}
 		if items[0] != "require-requests-and-limits-required" {
+			t.Errorf("Should return 'require-requests-and-limits-required' policy")
+		}
+	})
+
+	t.Run("FetchNamespacedRules", func(t *testing.T) {
+		items, err := store.FetchNamespacedRules(v1.Filter{Sources: []string{"kyverno"}})
+		if err != nil {
+			t.Fatalf("Unexpected Error: %s", err)
+		}
+		if len(items) != 1 {
+			t.Errorf("Should find 1 namespace scoped policy")
+		}
+		if items[0] != "autogen-check-for-requests-and-limits" {
 			t.Errorf("Should return 'require-requests-and-limits-required' policy")
 		}
 	})

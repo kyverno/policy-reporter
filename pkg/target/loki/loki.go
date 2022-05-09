@@ -48,12 +48,21 @@ func newLokiPayload(result *report.Result, customLabels map[string]string) paylo
 	if result.Severity != "" {
 		labels = append(labels, "severity=\""+result.Severity+"\"")
 	}
+	if result.Source != "" {
+		labels = append(labels, "producer=\""+result.Source+"\"")
+	}
 	if result.HasResource() {
+		if result.Resource.APIVersion != "" {
+			labels = append(labels, "apiVersion=\""+result.Resource.APIVersion+"\"")
+		}
 		labels = append(labels, "kind=\""+result.Resource.Kind+"\"")
 		labels = append(labels, "name=\""+result.Resource.Name+"\"")
-		labels = append(labels, "apiVersion=\""+result.Resource.APIVersion+"\"")
-		labels = append(labels, "uid=\""+result.Resource.UID+"\"")
-		labels = append(labels, "namespace=\""+result.Resource.Namespace+"\"")
+		if result.Resource.UID != "" {
+			labels = append(labels, "uid=\""+result.Resource.UID+"\"")
+		}
+		if result.Resource.Namespace != "" {
+			labels = append(labels, "namespace=\""+result.Resource.Namespace+"\"")
+		}
 	}
 
 	for property, value := range result.Properties {

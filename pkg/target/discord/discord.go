@@ -60,7 +60,9 @@ func newPayload(result *report.Result) payload {
 		if result.Resource.Namespace != "" {
 			embedFields = append(embedFields, embedField{"Namespace", result.Resource.Namespace, true})
 		}
-		embedFields = append(embedFields, embedField{"API Version", result.Resource.APIVersion, true})
+		if result.Resource.APIVersion != "" {
+			embedFields = append(embedFields, embedField{"API Version", result.Resource.APIVersion, true})
+		}
 	}
 
 	for property, value := range result.Properties {
