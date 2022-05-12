@@ -8,9 +8,11 @@ import (
 	"time"
 
 	"github.com/kyverno/policy-reporter/pkg/api"
+	"github.com/kyverno/policy-reporter/pkg/cache"
 	"github.com/kyverno/policy-reporter/pkg/helper"
 	"github.com/kyverno/policy-reporter/pkg/kubernetes"
 	"github.com/kyverno/policy-reporter/pkg/listener"
+	"github.com/kyverno/policy-reporter/pkg/redis"
 	"github.com/kyverno/policy-reporter/pkg/report"
 	"github.com/kyverno/policy-reporter/pkg/sqlite3"
 	"github.com/kyverno/policy-reporter/pkg/target"
@@ -23,10 +25,9 @@ import (
 	"github.com/kyverno/policy-reporter/pkg/target/ui"
 	"github.com/kyverno/policy-reporter/pkg/target/webhook"
 
-	"github.com/patrickmn/go-cache"
-	"k8s.io/client-go/dynamic"
-
+	goredis "github.com/go-redis/redis/v8"
 	_ "github.com/mattn/go-sqlite3"
+	"k8s.io/client-go/dynamic"
 	"k8s.io/client-go/rest"
 )
 
@@ -39,7 +40,7 @@ type Resolver struct {
 	policyStore        sqlite3.PolicyReportStore
 	policyReportClient report.PolicyReportClient
 	targetClients      []target.Client
-	resultCache        *cache.Cache
+	resultCache        cache.Cache
 }
 
 // APIServer resolver method
@@ -303,11 +304,25 @@ func (r *Resolver) ReportFilter() report.Filter {
 }
 
 // ResultCache resolver method
-func (r *Resolver) ResultCache() *cache.Cache {
+func (r *Resolver) ResultCache() cache.Cache {
 	if r.resultCache != nil {
 		return r.resultCache
 	}
-	r.resultCache = cache.New(time.Minute*150, time.Minute*15)
+
+	if r.config.Redis.Enabled {
+		r.resultCache = redis.New(
+			r.config.Redis.Prefix,
+			goredis.NewClient(&goredis.Options{
+				Addr:     r.config.Redis.Address,
+				Username: r.config.Redis.Username,
+				Password: r.config.Redis.Password,
+				DB:       r.config.Redis.Database,
+			}),
+			2*time.Hour,
+		)
+	} else {
+		r.resultCache = cache.New(time.Minute*150, time.Minute*15)
+	}
 
 	return r.resultCache
 }

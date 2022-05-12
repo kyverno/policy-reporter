@@ -3,7 +3,9 @@ package config_test
 import (
 	"testing"
 
+	"github.com/kyverno/policy-reporter/pkg/cache"
 	"github.com/kyverno/policy-reporter/pkg/config"
+	"github.com/kyverno/policy-reporter/pkg/redis"
 	"github.com/kyverno/policy-reporter/pkg/report"
 	"k8s.io/client-go/rest"
 )
@@ -356,17 +358,38 @@ func Test_ResolveAPIServer(t *testing.T) {
 }
 
 func Test_ResolveCache(t *testing.T) {
-	resolver := config.NewResolver(testConfig, &rest.Config{})
+	t.Run("InMemory", func(t *testing.T) {
+		resolver := config.NewResolver(testConfig, &rest.Config{})
+		_, ok := resolver.ResultCache().(*cache.InMemoryCache)
+		if !ok {
+			t.Error("Expected Cache to be InMemory Cache")
+		}
 
-	cache1 := resolver.ResultCache()
-	if cache1 == nil {
-		t.Error("Error: Should return ResultCache")
-	}
+		cache1 := resolver.ResultCache()
+		if cache1 == nil {
+			t.Error("Error: Should return ResultCache")
+		}
 
-	cache2 := resolver.ResultCache()
-	if cache1 != cache2 {
-		t.Error("A second call resolver.ResultCache() should return the cached first cache")
-	}
+		cache2 := resolver.ResultCache()
+		if cache1 != cache2 {
+			t.Error("A second call resolver.ResultCache() should return the cached first cache")
+		}
+	})
+
+	t.Run("Redis", func(t *testing.T) {
+		var redisConfig = &config.Config{
+			Redis: config.Redis{
+				Enabled: true,
+				Address: "localhost:6379",
+			},
+		}
+
+		resolver := config.NewResolver(redisConfig, &rest.Config{})
+		_, ok := resolver.ResultCache().(*redis.RedisCache)
+		if !ok {
+			t.Error("Expected Cache to be Redis Cache")
+		}
+	})
 }
 
 func Test_ResolveMapper(t *testing.T) {
