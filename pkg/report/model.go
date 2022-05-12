@@ -216,6 +216,16 @@ func (pr PolicyReport) HasResult(id string) bool {
 	return ok
 }
 
+// ResultList returns all results as slice
+func (pr PolicyReport) ResultList() []*Result {
+	list := make([]*Result, 0, len(pr.Results))
+	for _, v := range pr.Results {
+		list = append(list, v)
+	}
+
+	return list
+}
+
 // GetType returns the Type of the Report
 func (pr PolicyReport) GetType() ResourceType {
 	if pr.Namespace == "" {
