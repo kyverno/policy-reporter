@@ -4,14 +4,14 @@ import (
 	"sync"
 	"time"
 
+	"github.com/kyverno/policy-reporter/pkg/cache"
 	"github.com/kyverno/policy-reporter/pkg/report"
-	"github.com/patrickmn/go-cache"
 )
 
 type ResultListener struct {
 	skipExisting bool
 	listener     []report.PolicyReportResultListener
-	cache        *cache.Cache
+	cache        cache.Cache
 	startUp      time.Time
 }
 
@@ -22,7 +22,7 @@ func (l *ResultListener) RegisterListener(listener report.PolicyReportResultList
 func (l *ResultListener) Listen(event report.LifecycleEvent) {
 	if len(event.OldPolicyReport.Results) > 0 {
 		for id := range event.OldPolicyReport.Results {
-			l.cache.SetDefault(id, true)
+			l.cache.Add(id)
 		}
 	}
 
@@ -49,7 +49,7 @@ func (l *ResultListener) Listen(event report.LifecycleEvent) {
 	wg := sync.WaitGroup{}
 
 	for _, r := range diff {
-		if _, found := l.cache.Get(r.GetIdentifier()); found {
+		if found := l.cache.Has(r.GetIdentifier()); found {
 			continue
 		}
 
@@ -66,7 +66,7 @@ func (l *ResultListener) Listen(event report.LifecycleEvent) {
 	wg.Wait()
 }
 
-func NewResultListener(skipExisting bool, rcache *cache.Cache, startUp time.Time) *ResultListener {
+func NewResultListener(skipExisting bool, rcache cache.Cache, startUp time.Time) *ResultListener {
 	return &ResultListener{
 		skipExisting: skipExisting,
 		cache:        rcache,

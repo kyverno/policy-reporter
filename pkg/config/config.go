@@ -122,15 +122,28 @@ type Metrics struct {
 	Enabled bool `mapstructure:"enabled"`
 }
 
+// PriorityMap configuration
 type PriorityMap = map[string]string
 
+// ClusterReportFilter configuration
 type ClusterReportFilter struct {
 	Disabled bool `mapstructure:"disabled"`
 }
 
+// ReportFilter configuration
 type ReportFilter struct {
 	Namespaces     NamespaceFilter     `mapstructure:"namespaces"`
 	ClusterReports ClusterReportFilter `mapstructure:"clusterReports"`
+}
+
+// Redis configuration
+type Redis struct {
+	Enabled  bool   `mapstructure:"enabled"`
+	Address  string `mapstructure:"address"`
+	Prefix   string `mapstructure:"prefix"`
+	Username string `mapstructure:"username"`
+	Password string `mapstructure:"password"`
+	Database int    `mapstructure:"database"`
 }
 
 // Config of the PolicyReporter
@@ -150,4 +163,5 @@ type Config struct {
 	REST          REST          `mapstructure:"rest"`
 	PriorityMap   PriorityMap   `mapstructure:"priorityMap"`
 	ReportFilter  ReportFilter  `mapstructure:"reportFilter"`
+	Redis         Redis         `mapstructure:"redis"`
 }
