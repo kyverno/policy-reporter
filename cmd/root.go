@@ -61,6 +61,10 @@ func loadConfig(cmd *cobra.Command) (*config.Config, error) {
 		v.BindPFlag("metrics.enabled", flag)
 	}
 
+	if flag := cmd.Flags().Lookup("profile"); flag != nil {
+		v.BindPFlag("profiling.enabled", flag)
+	}
+
 	if flag := cmd.Flags().Lookup("dbfile"); flag != nil {
 		v.BindPFlag("dbfile", flag)
 	}

@@ -8,6 +8,8 @@ import (
 	v1 "github.com/kyverno/policy-reporter/pkg/api/v1"
 	"github.com/kyverno/policy-reporter/pkg/target"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
+
+	pprof "net/http/pprof"
 )
 
 // Server for the Lifecycle and optional HTTP REST API
@@ -21,7 +23,9 @@ type Server interface {
 	// RegisterMetricsHandler adds the optional metrics endpoint
 	RegisterMetricsHandler()
 	// RegisterV1Handler adds the optional v1 REST APIs
-	RegisterV1Handler(finder v1.PolicyReportFinder)
+	RegisterV1Handler(v1.PolicyReportFinder)
+	// RegisterProfilingHandler adds the optional pprof profiling APIs
+	RegisterProfilingHandler()
 }
 
 type httpServer struct {
@@ -63,6 +67,14 @@ func (s *httpServer) RegisterMetricsHandler() {
 	s.mux.Handle("/metrics", promhttp.Handler())
 }
 
+func (s *httpServer) RegisterProfilingHandler() {
+	s.mux.HandleFunc("/debug/pprof/", pprof.Index)
+	s.mux.HandleFunc("/debug/pprof/cmdline", pprof.Cmdline)
+	s.mux.HandleFunc("/debug/pprof/profile", pprof.Profile)
+	s.mux.HandleFunc("/debug/pprof/symbol", pprof.Symbol)
+	s.mux.HandleFunc("/debug/pprof/trace", pprof.Trace)
+}
+
 func (s *httpServer) Start() error {
 	return s.http.ListenAndServe()
 }
@@ -73,13 +85,15 @@ func (s *httpServer) Shutdown(ctx context.Context) error {
 
 // NewServer constructor for a new API Server
 func NewServer(targets []target.Client, port int, foundResources map[string]string) Server {
+	mux := http.NewServeMux()
+
 	s := &httpServer{
 		targets:        targets,
-		mux:            http.DefaultServeMux,
+		mux:            mux,
 		foundResources: foundResources,
 		http: http.Server{
 			Addr:    fmt.Sprintf(":%d", port),
-			Handler: http.DefaultServeMux,
+			Handler: mux,
 		},
 	}
 
