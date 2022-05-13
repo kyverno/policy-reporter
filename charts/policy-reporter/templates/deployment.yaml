@@ -56,8 +56,8 @@ spec:
             - --metrics-enabled={{ or .Values.metrics.enabled .Values.monitoring.enabled }}
             - --rest-enabled={{ or .Values.rest.enabled .Values.ui.enabled }}
           ports:
-            - name: http
-              containerPort: 8080
+            - name: {{ .Values.port.name }}
+              containerPort: {{ .Values.port.number }}
               protocol: TCP
           livenessProbe:
             {{- toYaml .Values.livenessProbe | nindent 12 }}

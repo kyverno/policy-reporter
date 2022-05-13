@@ -44,21 +44,17 @@ spec:
           securityContext: {{ include "kyverno.securityContext" . | nindent 12 }}
           {{- end }}
           args:
-            - --port=8080
+            - --port={{ .Values.port.number }}
             - --metrics-enabled={{ .Values.metrics.enabled }}
             - --rest-enabled={{ .Values.rest.enabled }}
           ports:
-            - name: rest
-              containerPort: 8080
+            - name: {{ .Values.port.name }}
+              containerPort: {{ .Values.port.number }}
               protocol: TCP
           livenessProbe:
-            httpGet:
-              path: /healthz
-              port: rest
+            {{- toYaml .Values.livenessProbe | nindent 12 }}
           readinessProbe:
-            httpGet:
-              path: /ready
-              port: rest
+            {{- toYaml .Values.readinessProbe | nindent 12 }}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
       {{- with .Values.nodeSelector }}
