@@ -93,6 +93,23 @@ func Test_PolicyReport(t *testing.T) {
 			t.Error("Expected 1 new result in diff")
 		}
 	})
+
+	t.Run("Check PolicyReport.ResultList", func(t *testing.T) {
+		creport2 := &report.PolicyReport{
+			ID:                "57e1551475e17740bacc3640d2412b1a6aad6a93",
+			Name:              "cpolr-test",
+			Summary:           &report.Summary{},
+			CreationTimestamp: time.Now(),
+			Results:           map[string]*report.Result{result1.GetIdentifier(): result1, result2.GetIdentifier(): result2},
+		}
+
+		list := creport2.ResultList()
+
+		if len(creport2.ResultList()) != 2 {
+			t.Errorf("Expected len of PolicyReport.ResultList() to be 2 (actual: %d)", len(list))
+		}
+	})
+
 }
 
 func Test_ClusterPolicyReport(t *testing.T) {

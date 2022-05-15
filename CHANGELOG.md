@@ -1,5 +1,12 @@
 # Changelog
 
+# 2.9.0
+* Policy Reporter
+    * New configuration to use Redis as external result caching store
+    * SQLite Improvement: Use batch insertion for PolicyReportResults
+    * PolicyReport Informer Update: Use typed informer to improve performance and memory usage
+    * Drop support for `v1alpha1` of the PolicyReport CRD
+
 # 2.8.0
 * Policy Reporter
     * New target filter and channels to define multiple configurations of the same target

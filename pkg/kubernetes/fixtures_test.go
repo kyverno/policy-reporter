@@ -5,33 +5,18 @@ import (
 
 	"github.com/kyverno/policy-reporter/pkg/kubernetes"
 	"github.com/kyverno/policy-reporter/pkg/report"
-	"k8s.io/apimachinery/pkg/runtime"
-	"k8s.io/apimachinery/pkg/runtime/schema"
-	"k8s.io/client-go/dynamic"
-	"k8s.io/client-go/dynamic/fake"
+
+	"github.com/kyverno/kyverno/api/policyreport/v1alpha2"
+	"github.com/kyverno/kyverno/pkg/client/clientset/versioned/fake"
+	v1alpha2client "github.com/kyverno/kyverno/pkg/client/clientset/versioned/typed/policyreport/v1alpha2"
+	corev1 "k8s.io/api/core/v1"
+	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-var policyReportSchema = schema.GroupVersionResource{
-	Group:    "wgpolicyk8s.io",
-	Version:  "v1alpha2",
-	Resource: "policyreports",
-}
+func NewFakeCilent() (*fake.Clientset, v1alpha2client.PolicyReportInterface, v1alpha2client.ClusterPolicyReportInterface) {
+	client := fake.NewSimpleClientset()
 
-var clusterPolicyReportSchema = schema.GroupVersionResource{
-	Group:    "wgpolicyk8s.io",
-	Version:  "v1alpha2",
-	Resource: "clusterpolicyreports",
-}
-
-var gvrToListKind = map[schema.GroupVersionResource]string{
-	policyReportSchema:        "PolicyReportList",
-	clusterPolicyReportSchema: "ClusterPolicyReportList",
-}
-
-func NewFakeCilent() (dynamic.Interface, dynamic.ResourceInterface) {
-	client := fake.NewSimpleDynamicClientWithCustomListKinds(runtime.NewScheme(), gvrToListKind)
-
-	return client, client.Resource(policyReportSchema).Namespace("test")
+	return client, client.Wgpolicyk8sV1alpha2().PolicyReports("test"), client.Wgpolicyk8sV1alpha2().ClusterPolicyReports()
 }
 
 func NewMapper() kubernetes.Mapper {
@@ -64,191 +49,194 @@ func newStore(size int) *store {
 	}
 }
 
-var policyMap = map[string]interface{}{
-	"metadata": map[string]interface{}{
-		"name":              "policy-report",
-		"namespace":         "test",
-		"creationTimestamp": "2021-02-23T15:00:00Z",
-	},
-	"summary": map[string]interface{}{
-		"pass":  int64(1),
-		"skip":  int64(2),
-		"warn":  int64(3),
-		"fail":  int64(4),
-		"error": int64(5),
-	},
-	"results": []interface{}{
-		map[string]interface{}{
-			"message": "message",
-			"result":  "fail",
-			"scored":  true,
-			"policy":  "required-label",
-			"rule":    "app-label-required",
-			"timestamp": map[string]interface{}{
-				"seconds": int64(1614093000),
-			},
-			"source":   "test",
-			"category": "test",
-			"severity": "high",
-			"resources": []interface{}{
-				map[string]interface{}{
-					"apiVersion": "v1",
-					"kind":       "Deployment",
-					"name":       "nginx",
-					"namespace":  "test",
-					"uid":        "dfd57c50-f30c-4729-b63f-b1954d8988d1",
-				},
-			},
-			"properties": map[string]interface{}{
-				"version": "1.2.0",
-			},
-		},
-		map[string]interface{}{
-			"message": "message 2",
-			"result":  "fail",
-			"scored":  true,
-			"timestamp": map[string]interface{}{
-				"seconds": int64(1614093000),
-			},
-			"policy":    "priority-test",
-			"resources": []interface{}{},
-		},
-		map[string]interface{}{
-			"message": "message 3",
-			"result":  "fail",
-			"scored":  true,
-			"policy":  "required-label",
-			"rule":    "app-label-required",
-			"timestamp": map[string]interface{}{
-				"seconds": int64(1614093000),
-			},
-			"source":   "test",
-			"category": "test",
-			"severity": "high",
-			"resources": []interface{}{
-				map[string]interface{}{
-					"apiVersion": "v1",
-					"kind":       "Deployment",
-					"name":       "nginx",
-					"namespace":  "test",
-					"uid":        "dfd57c50-f30c-4729-b63f-b1954d8988b3",
-				},
-			},
-			"properties": map[string]interface{}{
-				"version":              "1.2.0",
-				kubernetes.ResultIDKey: "123456",
-			},
-		},
-	},
-}
-
-var enforcePolicyMap = map[string]interface{}{
-	"metadata": map[string]interface{}{
-		"name":              "policy-report",
-		"namespace":         "test",
-		"creationTimestamp": "2021-02-23T15:00:00Z",
-	},
-	"summary": map[string]interface{}{
-		"pass":  int64(1),
-		"skip":  int64(2),
-		"warn":  int64(3),
-		"fail":  int64(4),
-		"error": int64(5),
-	},
-	"results": []interface{}{
-		map[string]interface{}{
-			"message": "message",
-			"result":  "fail",
-			"scored":  true,
-			"policy":  "required-label",
-			"rule":    "app-label-required",
-			"timestamp": map[string]interface{}{
-				"seconds": int64(1614093000),
-			},
-			"source":   "test",
-			"category": "test",
-			"severity": "high",
-			"resources": []interface{}{
-				map[string]interface{}{
-					"apiVersion": "v1",
-					"kind":       "Deployment",
-					"name":       "nginx",
-					"namespace":  "test",
-					"uid":        "dfd57c50-f30c-4729-b63f-b1954d8988d1",
-				},
-			},
-		},
-		map[string]interface{}{
-			"message":  "message 3",
-			"result":   "fail",
-			"scored":   true,
-			"policy":   "required-label",
-			"rule":     "app-label-required",
-			"source":   "test",
-			"category": "test",
-			"severity": "high",
-			"resources": []interface{}{
-				map[string]interface{}{
-					"apiVersion": "v1",
-					"kind":       "Deployment",
-					"name":       "nginx",
-					"namespace":  "test",
-					"uid":        "",
-				},
-			},
-			"properties": map[string]interface{}{
-				kubernetes.ResultIDKey: "123456",
-			},
-		},
-	},
-}
-
-var minPolicyMap = map[string]interface{}{
-	"metadata": map[string]interface{}{
-		"name":      "policy-report",
-		"namespace": "test",
-	},
-	"results": []interface{}{},
-}
-
-var clusterPolicyMap = map[string]interface{}{
-	"metadata": map[string]interface{}{
-		"name":              "clusterpolicy-report",
-		"creationTimestamp": "2021-02-23T15:00:00Z",
-	},
-	"summary": map[string]interface{}{
-		"pass":  int64(1),
-		"skip":  int64(2),
-		"warn":  int64(3),
-		"fail":  int64(4),
-		"error": int64(5),
-	},
-	"results": []interface{}{
-		map[string]interface{}{
-			"message":   "message",
-			"result":    "fail",
-			"scored":    true,
-			"policy":    "cluster-required-label",
-			"rule":      "ns-label-required",
-			"category":  "test",
-			"severity":  "high",
-			"timestamp": map[string]interface{}{"seconds": ""},
-			"resources": []interface{}{
-				map[string]interface{}{
-					"apiVersion": "v1",
-					"kind":       "Namespace",
-					"name":       "policy-reporter",
-					"uid":        "dfd57c50-f30c-4729-b63f-b1954d8988d1",
-				},
-			},
-		},
-	},
-}
-
 var priorityMap = map[string]string{
 	"priority-test": "warning",
 }
 
-var result1ID string = report.GeneratePolicyReportResultID("dfd57c50-f30c-4729-b63f-b1954d8988d1", "nginx", "required-label", "app-label-required", "fail", "message")
-var result2ID string = report.GeneratePolicyReportResultID("", "", "priority-test", "", "fail", "message 2")
+var policyReportCRD = &v1alpha2.PolicyReport{
+	ObjectMeta: v1.ObjectMeta{
+		Name:      "policy-report",
+		Namespace: "test",
+	},
+	Summary: v1alpha2.PolicyReportSummary{
+		Pass:  1,
+		Skip:  2,
+		Warn:  3,
+		Fail:  4,
+		Error: 5,
+	},
+	Results: []*v1alpha2.PolicyReportResult{
+		{
+			Message:   "message",
+			Result:    v1alpha2.StatusFail,
+			Scored:    true,
+			Policy:    "required-label",
+			Rule:      "app-label-required",
+			Timestamp: v1.Timestamp{Seconds: 1614093000},
+			Source:    "test",
+			Category:  "test",
+			Severity:  v1alpha2.SeverityHigh,
+			Resources: []*corev1.ObjectReference{
+				{
+					APIVersion: "v1",
+					Kind:       "Deployment",
+					Name:       "nginx",
+					Namespace:  "test",
+					UID:        "dfd57c50-f30c-4729-b63f-b1954d8988d1",
+				},
+			},
+			Properties: map[string]string{"version": "1.2.0"},
+		},
+		{
+			Message:   "message 2",
+			Result:    v1alpha2.StatusFail,
+			Scored:    true,
+			Policy:    "priority-test",
+			Timestamp: v1.Timestamp{Seconds: 1614093000},
+		},
+		{
+			Message:   "message 3",
+			Result:    v1alpha2.StatusFail,
+			Scored:    true,
+			Policy:    "required-label",
+			Rule:      "app-label-required",
+			Timestamp: v1.Timestamp{Seconds: 1614093000},
+			Source:    "test",
+			Category:  "test",
+			Severity:  v1alpha2.SeverityHigh,
+			Resources: []*corev1.ObjectReference{
+				{
+					APIVersion: "v1",
+					Kind:       "Deployment",
+					Name:       "name",
+					Namespace:  "test",
+					UID:        "dfd57c50-f30c-4729-b63f-b1954d8988b3",
+				},
+			},
+			Properties: map[string]string{"version": "1.2.0", kubernetes.ResultIDKey: "123456"},
+		},
+	},
+}
+
+var minPolicyReportCRD = &v1alpha2.PolicyReport{
+	ObjectMeta: v1.ObjectMeta{
+		Name:      "policy-report",
+		Namespace: "test",
+	},
+}
+
+var enforceReportCRD = &v1alpha2.PolicyReport{
+	ObjectMeta: v1.ObjectMeta{
+		Name:              "policy-report",
+		Namespace:         "test",
+		CreationTimestamp: v1.Now(),
+	},
+	Summary: v1alpha2.PolicyReportSummary{
+		Fail: 3,
+	},
+	Results: []*v1alpha2.PolicyReportResult{
+		{
+			Message:   "message",
+			Result:    v1alpha2.StatusFail,
+			Scored:    true,
+			Policy:    "required-label",
+			Rule:      "app-label-required",
+			Timestamp: v1.Timestamp{Seconds: 1614093000},
+			Source:    "test",
+			Category:  "test",
+			Severity:  v1alpha2.SeverityHigh,
+			Resources: []*corev1.ObjectReference{
+				{
+					APIVersion: "v1",
+					Kind:       "Deployment",
+					Name:       "nginx",
+					Namespace:  "test",
+					UID:        "",
+				},
+			},
+			Properties: map[string]string{"version": "1.2.0"},
+		},
+		{
+			Message:   "message 3",
+			Result:    v1alpha2.StatusFail,
+			Scored:    true,
+			Policy:    "required-label",
+			Rule:      "app-label-required",
+			Timestamp: v1.Timestamp{Seconds: 1614093000},
+			Source:    "test",
+			Category:  "test",
+			Severity:  v1alpha2.SeverityHigh,
+			Resources: []*corev1.ObjectReference{
+				{
+					APIVersion: "v1",
+					Kind:       "Deployment",
+					Name:       "name",
+					Namespace:  "test",
+					UID:        "",
+				},
+			},
+			Properties: map[string]string{"version": "1.2.0", kubernetes.ResultIDKey: "123456"},
+		},
+	},
+}
+
+var clusterPolicyReportCRD = &v1alpha2.ClusterPolicyReport{
+	ObjectMeta: v1.ObjectMeta{
+		Name: "cluster-policy-report",
+	},
+	Summary: v1alpha2.PolicyReportSummary{
+		Fail: 4,
+	},
+	Results: []*v1alpha2.PolicyReportResult{
+		{
+			Message:   "message",
+			Result:    v1alpha2.StatusFail,
+			Scored:    true,
+			Policy:    "cluster-required-label",
+			Rule:      "ns-label-required",
+			Timestamp: v1.Timestamp{Seconds: 1614093000},
+			Source:    "test",
+			Category:  "test",
+			Severity:  v1alpha2.SeverityHigh,
+			Resources: []*corev1.ObjectReference{
+				{
+					APIVersion: "v1",
+					Kind:       "Namespace",
+					Name:       "policy-reporter",
+					Namespace:  "test",
+					UID:        "dfd57c50-f30c-4729-b63f-b1954d8988d1",
+				},
+			},
+			Properties: map[string]string{"version": "1.2.0"},
+		},
+	},
+}
+
+var result1ID string = report.GeneratePolicyReportResultID(
+	string(policyReportCRD.Results[0].Resources[0].UID),
+	policyReportCRD.Results[0].Resources[0].Name,
+	policyReportCRD.Results[0].Policy,
+	policyReportCRD.Results[0].Rule,
+	string(policyReportCRD.Results[0].Result),
+	policyReportCRD.Results[0].Message,
+)
+
+var result2ID string = report.GeneratePolicyReportResultID(
+	"",
+	"",
+	policyReportCRD.Results[1].Policy,
+	policyReportCRD.Results[1].Rule,
+	string(policyReportCRD.Results[1].Result),
+	policyReportCRD.Results[1].Message,
+)
+
 var result3ID string = "123456"
+
+var cresult1ID string = report.GeneratePolicyReportResultID(
+	string(clusterPolicyReportCRD.Results[0].Resources[0].UID),
+	clusterPolicyReportCRD.Results[0].Resources[0].Name,
+	clusterPolicyReportCRD.Results[0].Policy,
+	clusterPolicyReportCRD.Results[0].Rule,
+	string(clusterPolicyReportCRD.Results[0].Result),
+	clusterPolicyReportCRD.Results[0].Message,
+)

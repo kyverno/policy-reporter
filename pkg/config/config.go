@@ -122,6 +122,11 @@ type Metrics struct {
 	Enabled bool `mapstructure:"enabled"`
 }
 
+// Profiling configuration
+type Profiling struct {
+	Enabled bool `mapstructure:"enabled"`
+}
+
 // PriorityMap configuration
 type PriorityMap = map[string]string
 
@@ -164,4 +169,5 @@ type Config struct {
 	PriorityMap   PriorityMap   `mapstructure:"priorityMap"`
 	ReportFilter  ReportFilter  `mapstructure:"reportFilter"`
 	Redis         Redis         `mapstructure:"redis"`
+	Profiling     Profiling     `mapstructure:"profiling"`
 }
