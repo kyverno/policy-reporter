@@ -51,6 +51,7 @@ spec:
           securityContext: {{ include "kyverno.securityContext" . | nindent 12 }}
           {{- end }}
           args:
+            - --port={{ .Values.port.number }}
             - --config=/app/config.yaml
             - --dbfile=/sqlite/database.db
             - --metrics-enabled={{ or .Values.metrics.enabled .Values.monitoring.enabled }}
