@@ -5,6 +5,10 @@ metadata:
   {{ if .Values.serviceMonitor.namespace }}
   namespace: {{ .Values.serviceMonitor.namespace }}
   {{ end }}
+  {{- if .Values.annotations }}
+  annotations:
+    {{- toYaml .Values.annotations | nindent 4 }}
+  {{- end }}
   labels:
     {{- include "monitoring.labels" . | nindent 4 }}
     {{- with .Values.serviceMonitor.labels }}

@@ -1,6 +1,9 @@
 plugins:
   kyverno: false
 
+# Key/value pairs that are attached to all resources.
+annotations: {}
+
 serviceMonitor:
   # allow to override the namespace for serviceMonitor  
   namespace:
