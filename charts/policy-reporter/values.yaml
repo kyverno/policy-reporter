@@ -17,6 +17,10 @@ deploymentStrategy: {}
   #  maxUnavailable: 25%
   # type: RollingUpdate
 
+port:
+  name: http
+  number: 8080
+
 # Key/value pairs that are attached to all resources.
 annotations: {}
 
