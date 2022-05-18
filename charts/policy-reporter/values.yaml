@@ -17,6 +17,9 @@ deploymentStrategy: {}
   #  maxUnavailable: 25%
   # type: RollingUpdate
 
+# When using a custom port together with the PolicyReporter UI
+# the port has also to be changed in the UI subchart as well because it can't access the parent values.
+# You can change the port under `ui.policyReporter.port`
 port:
   name: http
   number: 8080
@@ -131,8 +134,7 @@ global:
     kyverno: false
   # The name of service policy-report. Defaults to ReleaseName.
   backend: ""
-  # Service Port number
-  port: 8080
+  # overwrite the fullname of all resources including subcharts
   fullnameOverride: ""
   # additional labels added on each resource
   labels: {}

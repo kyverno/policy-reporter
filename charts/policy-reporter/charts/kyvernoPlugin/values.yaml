@@ -2,7 +2,7 @@ image:
   registry: ghcr.io
   repository: kyverno/policy-reporter-kyverno-plugin
   pullPolicy: IfNotPresent
-  tag: 1.2.1
+  tag: 1.3.0
 
 imagePullSecrets: []
 
@@ -17,6 +17,9 @@ deploymentStrategy: {}
   #  maxUnavailable: 25%
   # type: RollingUpdate
 
+# When using a custom port together with the PolicyReporter UI
+# the port has also to be changed in the UI subchart as well because it can't access values of other subcharts.
+# You can change the port under `ui.kyvernoPlugin.port`
 port:
   name: rest
   number: 8080
