@@ -44,9 +44,9 @@ spec:
           {{- end }}
           args:
             - -config=/app/config.yaml
-            - -policy-reporter=http://{{ include "ui.policyReportServiceName" . }}:{{ .Values.global.port }}
+            - -policy-reporter=http://{{ include "ui.policyReportServiceName" . }}:{{ .Values.policyReporter.port }}
             {{- if or .Values.plugins.kyverno .Values.global.plugins.kyverno }}
-            - -kyverno-plugin=http://{{ include "ui.kyvernoPluginServiceName" . }}:8080
+            - -kyverno-plugin=http://{{ include "ui.kyvernoPluginServiceName" . }}:{{ .Values.kyvernoPlugin.port }}
             {{- end }}
           ports:
             - name: http

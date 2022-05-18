@@ -10,6 +10,18 @@ log:
   # holds the latest 200 validation results in the UI Log
   size: 200
 
+# enable/disable views as needed in the Policy Reporter UI
+# disabled log view will also disable the UI as push target
+views:
+  dashboard:
+    policyReports: true
+    clusterPolicyReports: true
+  logs: true
+  policyReports: true
+  clusterPolicyReports: true
+  kyvernoPolicies: true
+  kyvernoVerifyImages: true
+
 plugins:
   kyverno: false
 
@@ -17,7 +29,15 @@ image:
   registry: ghcr.io
   repository: kyverno/policy-reporter-ui
   pullPolicy: IfNotPresent
-  tag: 1.3.3
+  tag: 1.3.4
+
+# configurations related to the PolicyReporter API
+policyReporter:
+  port: 8080
+
+# configurations related to the RolicyReporter KyvernoPlugin API
+kyvernoPlugin:
+  port: 8080
 
 imagePullSecrets: []
 
@@ -114,15 +134,3 @@ affinity: {}
 networkPolicy:
   enabled: false
   egress: []
-
-# enable/disable views as needed in the Policy Reporter UI
-# disabled log view will also disable the UI as push target
-views:
-  dashboard:
-    policyReports: true
-    clusterPolicyReports: true
-  logs: true
-  policyReports: true
-  clusterPolicyReports: true
-  kyvernoPolicies: true
-  kyvernoVerifyImages: true
