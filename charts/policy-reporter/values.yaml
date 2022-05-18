@@ -118,7 +118,7 @@ kyvernoPlugin:
 
 # Settings for the monitoring subchart
 monitoring:
-  enabled: true
+  enabled: false
 
 global:
   # available plugins

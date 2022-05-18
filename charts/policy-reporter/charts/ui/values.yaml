@@ -4,8 +4,7 @@ enabled: false
 displayMode: ""
 
 # Key/value pairs that are attached to all resources.
-annotations: #{}
-  kyverno.io: ui
+annotations: {}
 
 log:
   # holds the latest 200 validation results in the UI Log

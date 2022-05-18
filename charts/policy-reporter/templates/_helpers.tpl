@@ -36,7 +36,7 @@ app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
 {{- end }}
 app.kubernetes.io/component: reporting
 app.kubernetes.io/managed-by: {{ .Release.Service }}
-app.kubernetes.io/part-of: kyverno
+app.kubernetes.io/part-of: {{ include "policyreporter.name" . }}
 {{- with .Values.global.labels }}
 {{ toYaml . }}
 {{- end -}}
