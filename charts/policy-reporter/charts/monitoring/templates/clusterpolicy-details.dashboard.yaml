@@ -6,6 +6,9 @@ metadata:
   namespace: {{ include "monitoring.namespace" . }}
   annotations:
     {{ .Values.grafana.folder.annotation }}: {{ .Values.grafana.folder.name }}
+    {{- with .Values.annotations }}
+        {{- toYaml . | nindent 4 }}
+    {{- end }}
   labels:
     {{ .Values.grafana.dashboards.label }}: "1"
     {{- include "monitoring.labels" . | nindent 4 }}

@@ -17,7 +17,7 @@ deploymentStrategy: {}
   #  maxUnavailable: 25%
   # type: RollingUpdate
 
-# Key/value pairs that are attached to Deployment.
+# Key/value pairs that are attached to all resources.
 annotations: {}
 
 # Create cluster role policies

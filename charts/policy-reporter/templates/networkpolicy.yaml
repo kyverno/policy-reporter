@@ -2,6 +2,10 @@
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
+  {{- if .Values.annotations }}
+  annotations:
+    {{- toYaml .Values.annotations | nindent 4 }}
+  {{- end }}
   labels: {{ include "policyreporter.labels" . | nindent 4 }}
   name: {{ include "policyreporter.fullname" . }}
 spec:

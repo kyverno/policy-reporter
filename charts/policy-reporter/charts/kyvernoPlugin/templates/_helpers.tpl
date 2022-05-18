@@ -34,7 +34,9 @@ helm.sh/chart: {{ include "kyvernoplugin.chart" . }}
 {{- if .Chart.AppVersion }}
 app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
 {{- end }}
+app.kubernetes.io/component: plugin
 app.kubernetes.io/managed-by: {{ .Release.Service }}
+app.kubernetes.io/part-of: kyverno
 {{- with .Values.global.labels }}
 {{ toYaml . }}
 {{- end -}}
