@@ -11,6 +11,7 @@ import (
 
 	api "github.com/kyverno/policy-reporter/pkg/api/v1"
 	"github.com/kyverno/policy-reporter/pkg/report"
+
 	_ "github.com/mattn/go-sqlite3"
 )
 
@@ -49,6 +50,8 @@ const (
 		"timestamp" INTEGER,
 		FOREIGN KEY (policy_report_id) REFERENCES policy_report(id) ON DELETE CASCADE
 	);`
+
+	resultInsertBaseSQL = "INSERT INTO policy_report_result(policy_report_id, id, policy, rule, message, scored, priority, status, severity, category, source, resource_api_version, resource_kind, resource_name, resource_namespace, resource_uid, properties, timestamp) VALUES "
 )
 
 type PolicyReportStore interface {
@@ -719,41 +722,52 @@ func (s *policyReportStore) FetchClusterResults(filter api.Filter) ([]*api.ListR
 }
 
 func (s *policyReportStore) persistResults(report *report.PolicyReport) error {
-	for _, result := range report.Results {
-		rstmt, err := s.db.Prepare("INSERT INTO policy_report_result(policy_report_id, id, policy, rule, message, scored, priority, status, severity, category, source, resource_api_version, resource_kind, resource_name, resource_namespace, resource_uid, properties, timestamp) values(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)")
+	bulks := chunkSlice(report.ResultList(), 100)
+
+	for _, list := range bulks {
+		sqlStr := resultInsertBaseSQL
+		vals := make([]interface{}, 0, len(list)*18)
+
+		for _, result := range list {
+			sqlStr += "(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?),"
+
+			var props string
+			b, err := json.Marshal(result.Properties)
+			if err == nil {
+				props = string(b)
+			}
+
+			vals = append(
+				vals,
+				report.GetIdentifier(),
+				result.GetIdentifier(),
+				result.Policy,
+				result.Rule,
+				result.Message,
+				result.Scored,
+				result.Priority,
+				result.Status,
+				result.Severity,
+				result.Category,
+				result.Source,
+				result.Resource.APIVersion,
+				result.Resource.Kind,
+				result.Resource.Name,
+				result.Resource.Namespace,
+				result.Resource.UID,
+				props,
+				result.Timestamp.Unix(),
+			)
+		}
+
+		sqlStr = sqlStr[0 : len(sqlStr)-1]
+		rstmt, err := s.db.Prepare(sqlStr)
 		if err != nil {
 			return err
 		}
 		defer rstmt.Close()
 
-		var props string
-
-		b, err := json.Marshal(result.Properties)
-		if err == nil {
-			props = string(b)
-		}
-
-		_, err = rstmt.Exec(
-			report.GetIdentifier(),
-			result.GetIdentifier(),
-			result.Policy,
-			result.Rule,
-			result.Message,
-			result.Scored,
-			result.Priority,
-			result.Status,
-			result.Severity,
-			result.Category,
-			result.Source,
-			result.Resource.APIVersion,
-			result.Resource.Kind,
-			result.Resource.Name,
-			result.Resource.Namespace,
-			result.Resource.UID,
-			props,
-			result.Timestamp.Unix(),
-		)
-
+		_, err = rstmt.Exec(vals...)
 		if err != nil {
 			return err
 		}
@@ -936,4 +950,19 @@ func NewDatabase(dbFile string) (*sql.DB, error) {
 	file.Close()
 
 	return sql.Open("sqlite3", dbFile)
+}
+
+func chunkSlice(slice []*report.Result, chunkSize int) [][]*report.Result {
+	var chunks [][]*report.Result
+	for i := 0; i < len(slice); i += chunkSize {
+		end := i + chunkSize
+
+		if end > len(slice) {
+			end = len(slice)
+		}
+
+		chunks = append(chunks, slice[i:end])
+	}
+
+	return chunks
 }

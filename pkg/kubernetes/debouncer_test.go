@@ -27,19 +27,19 @@ func Test_Debouncer(t *testing.T) {
 
 		debouncer.Add(report.LifecycleEvent{
 			Type:            report.Added,
-			NewPolicyReport: mapper.MapPolicyReport(policyMap),
+			NewPolicyReport: mapper.MapPolicyReport(policyReportCRD),
 		})
 
 		debouncer.Add(report.LifecycleEvent{
 			Type:            report.Updated,
-			NewPolicyReport: mapper.MapPolicyReport(minPolicyMap),
+			NewPolicyReport: mapper.MapPolicyReport(minPolicyReportCRD),
 		})
 
 		time.Sleep(10 * time.Millisecond)
 
 		debouncer.Add(report.LifecycleEvent{
 			Type:            report.Updated,
-			NewPolicyReport: mapper.MapPolicyReport(policyMap),
+			NewPolicyReport: mapper.MapPolicyReport(policyReportCRD),
 		})
 
 		wg.Wait()

@@ -6,3 +6,4 @@ build
 sqlite-database.db
 values.yaml
 coverage.out
+heap*

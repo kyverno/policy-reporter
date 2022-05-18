@@ -24,6 +24,7 @@ func Test_NewServer(t *testing.T) {
 
 	server.RegisterMetricsHandler()
 	server.RegisterV1Handler(nil)
+	server.RegisterProfilingHandler()
 
 	serviceRunning := make(chan struct{})
 	serviceDone := make(chan struct{})

@@ -26,8 +26,8 @@ import (
 	"github.com/kyverno/policy-reporter/pkg/target/webhook"
 
 	goredis "github.com/go-redis/redis/v8"
+	"github.com/kyverno/kyverno/pkg/client/clientset/versioned"
 	_ "github.com/mattn/go-sqlite3"
-	"k8s.io/client-go/dynamic"
 	"k8s.io/client-go/rest"
 )
 
@@ -285,7 +285,7 @@ func (r *Resolver) PolicyReportClient() (report.PolicyReportClient, error) {
 		return r.policyReportClient, nil
 	}
 
-	client, err := dynamic.NewForConfig(r.k8sConfig)
+	client, err := versioned.NewForConfig(r.k8sConfig)
 	if err != nil {
 		return nil, err
 	}

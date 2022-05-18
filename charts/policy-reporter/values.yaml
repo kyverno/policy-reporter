@@ -21,7 +21,7 @@ port:
   name: http
   number: 8080
 
-# Key/value pairs that are attached to Deployment.
+# Key/value pairs that are attached to all resources.
 annotations: {}
 
 # Create cluster role policies

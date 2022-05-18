@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"flag"
+	"log"
 
 	"golang.org/x/sync/errgroup"
 
@@ -60,13 +61,20 @@ func newRunCMD() *cobra.Command {
 					return err
 				}
 
+				log.Println("[INFO] REST api enabled")
 				resolver.RegisterStoreListener(store)
 				server.RegisterV1Handler(store)
 			}
 
 			if c.Metrics.Enabled {
+				log.Println("[INFO] metrics enabled")
 				resolver.RegisterMetricsListener()
 				server.RegisterMetricsHandler()
+			}
+
+			if c.Profiling.Enabled {
+				log.Println("[INFO] pprof profiling enabled")
+				server.RegisterProfilingHandler()
 			}
 
 			g.Go(server.Start)
@@ -90,6 +98,7 @@ func newRunCMD() *cobra.Command {
 	cmd.PersistentFlags().StringP("dbfile", "d", "sqlite-database.db", "path to the SQLite DB File")
 	cmd.PersistentFlags().BoolP("metrics-enabled", "m", false, "Enable Policy Reporter's Metrics API")
 	cmd.PersistentFlags().BoolP("rest-enabled", "r", false, "Enable Policy Reporter's REST API")
+	cmd.PersistentFlags().Bool("profile", false, "Enable application profiling with pprof")
 
 	flag.Parse()
 
