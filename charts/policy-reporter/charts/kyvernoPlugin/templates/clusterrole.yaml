@@ -22,4 +22,26 @@ rules:
   - get
   - list
   - watch
+{{- if .Values.blockReports.enabled }}
+- apiGroups:
+  - ""
+  resources:
+  - events
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - '*'
+  resources:
+  - policyreports
+  - policyreports/status
+  - clusterpolicyreports
+  - clusterpolicyreports/status
+  verbs:
+  - get
+  - create
+  - update
+  - delete
+{{- end }}
 {{- end -}}

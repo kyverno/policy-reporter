@@ -119,7 +119,7 @@ data:
         "pluginVersion": "7.1.5",
         "targets": [
             {
-            "expr": "sum(cluster_policy_report_result{policy=~\"$policy\", category=~\"$category\", severity=~\"$severity\", kind=~\"$kind\", status=\"pass\"})",
+            "expr": "sum(cluster_policy_report_result{policy=~\"$policy\", category=~\"$category\", severity=~\"$severity\", source=~\"$source\", kind=~\"$kind\", status=\"pass\"})",
             "instant": true,
             "interval": "",
             "legendFormat": "",
@@ -175,7 +175,7 @@ data:
         "pluginVersion": "7.1.5",
         "targets": [
             {
-            "expr": "sum(policy_report_result{policy=~\"$policy\", category=~\"$category\", severity=~\"$severity\", kind=~\"$kind\", status=\"warn\"})",
+            "expr": "sum(policy_report_result{policy=~\"$policy\", category=~\"$category\", severity=~\"$severity\", source=~\"$source\", kind=~\"$kind\", status=\"warn\"})",
             "instant": true,
             "interval": "",
             "legendFormat": "",
@@ -231,7 +231,7 @@ data:
         "pluginVersion": "7.1.5",
         "targets": [
             {
-            "expr": "sum(cluster_policy_report_result{policy=~\"$policy\", category=~\"$category\", severity=~\"$severity\", kind=~\"$kind\", status=\"fail\"})",
+            "expr": "sum(cluster_policy_report_result{policy=~\"$policy\", category=~\"$category\", severity=~\"$severity\", source=~\"$source\", kind=~\"$kind\", status=\"fail\"})",
             "instant": true,
             "interval": "",
             "legendFormat": "",
@@ -287,7 +287,7 @@ data:
         "pluginVersion": "7.1.5",
         "targets": [
             {
-            "expr": "sum(cluster_policy_report_result{policy=~\"$policy\", category=~\"$category\", severity=~\"$severity\", kind=~\"$kind\", status=\"error\"})",
+            "expr": "sum(cluster_policy_report_result{policy=~\"$policy\", category=~\"$category\", severity=~\"$severity\", source=~\"$source\", kind=~\"$kind\", status=\"error\"})",
             "instant": true,
             "interval": "",
             "legendFormat": "",
@@ -348,7 +348,7 @@ data:
         "steppedLine": false,
         "targets": [
             {
-            "expr": "sum(cluster_policy_report_result{policy=~\"$policy\", category=~\"$category\", severity=~\"$severity\", kind=~\"$kind\"} > 0) by (status)",
+            "expr": "sum(cluster_policy_report_result{policy=~\"$policy\", category=~\"$category\", severity=~\"$severity\", source=~\"$source\", kind=~\"$kind\"} > 0) by (status)",
             "interval": "",
             "legendFormat": "{{`{{ status }}`}}",
             "refId": "A"
@@ -435,7 +435,7 @@ data:
         "pluginVersion": "7.1.5",
         "targets": [
             {
-            "expr": "sum(cluster_policy_report_result{policy=~\"$policy\", category=~\"$category\", severity=~\"$severity\", kind=~\"$kind\", status=\"pass\"}) by (policy,rule,kind,name,status,severity,category)",
+            "expr": "sum(cluster_policy_report_result{policy=~\"$policy\", category=~\"$category\", severity=~\"$severity\", kind=~\"$kind\", source=~\"$source\", status=\"pass\"}) by (policy,rule,kind,name,status,severity,category,source)",
             "format": "table",
             "instant": true,
             "interval": "",
@@ -512,7 +512,7 @@ data:
         "pluginVersion": "7.1.5",
         "targets": [
             {
-            "expr": "sum(cluster_policy_report_result{policy=~\"$policy\", category=~\"$category\", severity=~\"$severity\", kind=~\"$kind\", status=\"fail\"}) by (policy,rule,kind,name,status,severity,category)",
+            "expr": "sum(cluster_policy_report_result{policy=~\"$policy\", category=~\"$category\", severity=~\"$severity\", source=~\"$source\", kind=~\"$kind\", status=\"fail\"}) by (policy,rule,kind,name,status,severity,category,source)",
             "format": "table",
             "instant": true,
             "interval": "",
@@ -586,7 +586,7 @@ data:
         "pluginVersion": "7.1.5",
         "targets": [
             {
-            "expr": "sum(cluster_policy_report_result{policy=~\"$policy\", category=~\"$category\", severity=~\"$severity\", kind=~\"$kind\", status=\"warn\"}) by (policy,rule,kind,name,status,severity,category)",
+            "expr": "sum(cluster_policy_report_result{policy=~\"$policy\", category=~\"$category\", severity=~\"$severity\", source=~\"$source\", kind=~\"$kind\", status=\"warn\"}) by (policy,rule,kind,name,status,severity,category,source)",
             "format": "table",
             "instant": true,
             "interval": "",
@@ -660,7 +660,7 @@ data:
         "pluginVersion": "7.1.5",
         "targets": [
             {
-            "expr": "sum(cluster_policy_report_result{policy=~\"$policy\", category=~\"$category\", severity=~\"$severity\", kind=~\"$kind\", status=\"error\"}) by (policy,rule,kind,name,status,severity,category)",
+            "expr": "sum(cluster_policy_report_result{policy=~\"$policy\", category=~\"$category\", severity=~\"$severity\", source=~\"$source\", kind=~\"$kind\", status=\"error\"}) by (policy,rule,kind,name,status,severity,category,source)",
             "format": "table",
             "instant": true,
             "interval": "",
@@ -779,6 +779,26 @@ data:
             "name": "kind",
             "options": [],
             "query": "label_values(cluster_policy_report_result, kind)",
+            "refresh": 2,
+            "regex": "",
+            "skipUrlSync": false,
+            "sort": 5,
+            "tagValuesQuery": "",
+            "tags": [],
+            "tagsQuery": "",
+            "type": "query",
+            "useTags": false
+        },
+        {
+            "allValue": ".*",
+            "definition": "label_values(cluster_policy_report_result, source)",
+            "hide": 0,
+            "includeAll": true,
+            "label": "Source",
+            "multi": true,
+            "name": "source",
+            "options": [],
+            "query": "label_values(cluster_policy_report_result, source)",
             "refresh": 2,
             "regex": "",
             "skipUrlSync": false,
