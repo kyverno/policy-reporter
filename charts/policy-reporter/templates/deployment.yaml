@@ -93,7 +93,7 @@ spec:
           {{- else }}
           secretName: {{ include "policyreporter.fullname" . }}-config
           {{- end }}
-          optional: true   
+          optional: true
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}

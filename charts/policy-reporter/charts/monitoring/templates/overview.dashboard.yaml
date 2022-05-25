@@ -111,7 +111,7 @@ data:
         "pluginVersion": "7.1.5",
         "targets": [
             {
-            "expr": "sum(policy_report_result{policy=~\"$policy\", category=~\"$category\", severity=~\"$severity\", kind=~\"$kind\", exported_namespace=~\"$namespace\", status=~\"fail|error\"} > 0) by (exported_namespace)",
+            "expr": "sum(policy_report_result{policy=~\"$policy\", category=~\"$category\", severity=~\"$severity\", source=~\"$source\", kind=~\"$kind\", exported_namespace=~\"$namespace\", status=~\"fail|error\"} > 0) by (exported_namespace)",
             "instant": true,
             "interval": "",
             "legendFormat": "{{`{{ exported_namespace }}`}}",
@@ -172,7 +172,7 @@ data:
         "pluginVersion": "7.1.5",
         "targets": [
             {
-            "expr": "sum(cluster_policy_report_result{policy=~\"$policy\", category=~\"$category\", severity=~\"$severity\", kind=~\"$kind\", status=~\"fail|error\"} > 0) by (status)",
+            "expr": "sum(cluster_policy_report_result{policy=~\"$policy\", category=~\"$category\", severity=~\"$severity\", source=~\"$source\", kind=~\"$kind\", status=~\"fail|error\"} > 0) by (status)",
             "format": "time_series",
             "interval": "",
             "intervalFactor": 1,
@@ -234,13 +234,13 @@ data:
         "steppedLine": false,
         "targets": [
             {
-            "expr": "sum(cluster_policy_report_result{policy=~\"$policy\", category=~\"$category\", severity=~\"$severity\", kind=~\"$kind\", status=~\"fail|error\"} > 0) by (policy)",
+            "expr": "sum(cluster_policy_report_result{policy=~\"$policy\", category=~\"$category\", severity=~\"$severity\", source=~\"$source\", kind=~\"$kind\", status=~\"fail|error\"} > 0) by (policy)",
             "interval": "",
             "legendFormat": "{{`{{ policy }}`}}",
             "refId": "A"
             },
             {
-            "expr": "sum(policy_report_result{policy=~\"$policy\", category=~\"$category\", severity=~\"$severity\", kind=~\"$kind\", exported_namespace=~\"$namespace\", status=~\"fail|error\"} > 0) by (policy)",
+            "expr": "sum(policy_report_result{policy=~\"$policy\", category=~\"$category\", severity=~\"$severity\", source=~\"$source\", kind=~\"$kind\", exported_namespace=~\"$namespace\", status=~\"fail|error\"} > 0) by (policy)",
             "interval": "",
             "legendFormat": "{{`{{ policy }}`}}",
             "refId": "B"
@@ -325,7 +325,7 @@ data:
         "pluginVersion": "7.1.5",
         "targets": [
             {
-            "expr": "sum(policy_report_result{policy=~\"$policy\", category=~\"$category\", severity=~\"$severity\", kind=~\"$kind\", exported_namespace=~\"$namespace\", status=~\"fail|error\"}) by (exported_namespace,policy,rule,kind,name,status,category,severity)",
+            "expr": "sum(policy_report_result{policy=~\"$policy\", category=~\"$category\", severity=~\"$severity\", source=~\"$source\", kind=~\"$kind\", exported_namespace=~\"$namespace\", status=~\"fail|error\"}) by (exported_namespace,policy,rule,kind,name,status,category,severity,source)",
             "format": "table",
             "instant": true,
             "interval": "",
@@ -399,7 +399,7 @@ data:
         "pluginVersion": "7.1.5",
         "targets": [
             {
-            "expr": "sum(cluster_policy_report_result{policy=~\"$policy\", category=~\"$category\", severity=~\"$severity\", kind=~\"$kind\", status=~\"fail|error\"}) by (policy,rule,kind,name,status,category,severity)",
+            "expr": "sum(cluster_policy_report_result{policy=~\"$policy\", category=~\"$category\", severity=~\"$severity\", source=~\"$source\", kind=~\"$kind\", status=~\"fail|error\"}) by (policy,rule,kind,name,status,category,severity,source)",
             "format": "table",
             "instant": true,
             "interval": "",
@@ -540,6 +540,26 @@ data:
             "name": "kind",
             "options": [],
             "query": "label_values({__name__=~ \"policy_report_result|cluster_policy_report_result\", status=~\"fail|error\"}, kind)",
+            "refresh": 2,
+            "regex": "",
+            "skipUrlSync": false,
+            "sort": 5,
+            "tagValuesQuery": "",
+            "tags": [],
+            "tagsQuery": "",
+            "type": "query",
+            "useTags": false
+        },
+        {
+            "allValue": ".*",
+            "definition": "label_values({__name__=~ \"policy_report_result|cluster_policy_report_result\", status=~\"fail|error\"}, source)",
+            "hide": 0,
+            "includeAll": true,
+            "label": "Source",
+            "multi": true,
+            "name": "source",
+            "options": [],
+            "query": "label_values({__name__=~ \"policy_report_result|cluster_policy_report_result\", status=~\"fail|error\"}, source)",
             "refresh": 2,
             "regex": "",
             "skipUrlSync": false,

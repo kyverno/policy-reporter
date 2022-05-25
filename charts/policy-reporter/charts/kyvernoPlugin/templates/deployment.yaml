@@ -2,10 +2,11 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: {{ include "kyvernoplugin.fullname" . }}
-  {{- if .Values.annotations }}
   annotations:
-    {{- toYaml .Values.annotations | nindent 4 }}
-  {{- end }}
+    checksum/secret: {{ include (print .Template.BasePath "/config-secret.yaml") . | sha256sum | quote }}
+    {{- if .Values.annotations }}
+      {{- toYaml .Values.annotations | nindent 4 }}
+    {{- end }}
   labels:
     {{- include "kyvernoplugin.labels" . | nindent 4 }}
 spec:
@@ -64,6 +65,16 @@ spec:
             {{- toYaml .Values.readinessProbe | nindent 12 }}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
+          volumeMounts:
+          - name: config-file
+            mountPath: /app/config.yaml
+            subPath: config.yaml
+            readOnly: true
+      volumes:
+      - name: config-file
+        secret:
+          secretName: {{ include "kyvernoplugin.fullname" . }}-config
+          optional: true
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}

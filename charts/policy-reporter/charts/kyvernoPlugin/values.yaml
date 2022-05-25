@@ -2,7 +2,7 @@ image:
   registry: ghcr.io
   repository: kyverno/policy-reporter-kyverno-plugin
   pullPolicy: IfNotPresent
-  tag: 1.3.0
+  tag: 1.3.1
 
 imagePullSecrets: []
 
@@ -109,6 +109,13 @@ rest:
 # Prometheus Metrics API
 metrics:
   enabled: true
+
+blockReports:
+  enabled: false
+  eventNamespace: default
+  results: 
+    maxPerReport: 200
+    keepOnlyLatest: false
 
 # Enable a NetworkPolicy for this chart. Useful on clusters where Network Policies are
 # used and configured in a default-deny fashion.

@@ -1,0 +1,2 @@
+blockReports:
+  {{- toYaml .Values.blockReports | nindent 2 }}
