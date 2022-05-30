@@ -1,6 +1,8 @@
 package metrics
 
 import (
+	"strings"
+
 	"github.com/kyverno/policy-reporter/pkg/report"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
@@ -16,7 +18,7 @@ var clusterRuleGauge = promauto.NewGaugeVec(prometheus.GaugeOpts{
 	Help: "List of all ClusterPolicyReport Results",
 }, []string{"rule", "policy", "report", "kind", "name", "status", "severity", "category", "source"})
 
-func CreateClusterPolicyReportMetricsListener() report.PolicyReportListener {
+func CreateClusterPolicyReportMetricsListener(filter *Filter) report.PolicyReportListener {
 	prometheus.Register(clusterPolicyGauge)
 	prometheus.Register(clusterRuleGauge)
 
@@ -29,20 +31,30 @@ func CreateClusterPolicyReportMetricsListener() report.PolicyReportListener {
 
 		switch event.Type {
 		case report.Added:
-			updateClusterPolicyGauge(newReport)
+			resetClusterPolicyGauge(newReport)
 
 			for _, result := range newReport.Results {
+				if !filter.Validate(result) {
+					continue
+				}
+
 				clusterRuleGauge.With(generateClusterResultLabels(newReport, result)).Set(1)
+				clusterPolicyGauge.WithLabelValues(newReport.Name, strings.Title(result.Status)).Add(1)
 			}
 		case report.Updated:
-			updateClusterPolicyGauge(newReport)
+			resetClusterPolicyGauge(newReport)
 
 			for _, result := range oldReport.Results {
 				clusterRuleGauge.Delete(generateClusterResultLabels(oldReport, result))
 			}
 
 			for _, result := range newReport.Results {
+				if !filter.Validate(result) {
+					continue
+				}
+
 				clusterRuleGauge.With(generateClusterResultLabels(newReport, result)).Set(1)
+				clusterPolicyGauge.WithLabelValues(newReport.Name, strings.Title(result.Status)).Add(1)
 			}
 		case report.Deleted:
 			clusterPolicyGauge.DeleteLabelValues(newReport.Name, "Pass")
@@ -79,20 +91,20 @@ func generateClusterResultLabels(newReport *report.PolicyReport, result *report.
 	return labels
 }
 
-func updateClusterPolicyGauge(newReport *report.PolicyReport) {
+func resetClusterPolicyGauge(newReport *report.PolicyReport) {
 	clusterPolicyGauge.
 		WithLabelValues(newReport.Name, "Pass").
-		Set(float64(newReport.Summary.Pass))
+		Set(0)
 	clusterPolicyGauge.
 		WithLabelValues(newReport.Name, "Fail").
-		Set(float64(newReport.Summary.Fail))
+		Set(0)
 	clusterPolicyGauge.
 		WithLabelValues(newReport.Name, "Warn").
-		Set(float64(newReport.Summary.Warn))
+		Set(0)
 	clusterPolicyGauge.
 		WithLabelValues(newReport.Name, "Error").
-		Set(float64(newReport.Summary.Error))
+		Set(0)
 	clusterPolicyGauge.
 		WithLabelValues(newReport.Name, "Skip").
-		Set(float64(newReport.Summary.Skip))
+		Set(0)
 }

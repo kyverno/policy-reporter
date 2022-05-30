@@ -6,9 +6,9 @@ import (
 )
 
 // NewMetricsListener for PolicyReport watch.Events
-func NewMetricsListener() report.PolicyReportListener {
-	pCallback := metrics.CreatePolicyReportMetricsListener()
-	cCallback := metrics.CreateClusterPolicyReportMetricsListener()
+func NewMetricsListener(filter *metrics.Filter) report.PolicyReportListener {
+	pCallback := metrics.CreatePolicyReportMetricsListener(filter)
+	cCallback := metrics.CreateClusterPolicyReportMetricsListener(filter)
 
 	return func(event report.LifecycleEvent) {
 		if event.NewPolicyReport.Namespace == "" {

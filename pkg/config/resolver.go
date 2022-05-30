@@ -12,6 +12,7 @@ import (
 	"github.com/kyverno/policy-reporter/pkg/helper"
 	"github.com/kyverno/policy-reporter/pkg/kubernetes"
 	"github.com/kyverno/policy-reporter/pkg/listener"
+	"github.com/kyverno/policy-reporter/pkg/listener/metrics"
 	"github.com/kyverno/policy-reporter/pkg/redis"
 	"github.com/kyverno/policy-reporter/pkg/report"
 	"github.com/kyverno/policy-reporter/pkg/sqlite3"
@@ -99,7 +100,28 @@ func (r *Resolver) RegisterStoreListener(store report.PolicyReportStore) {
 
 // RegisterMetricsListener resolver method
 func (r *Resolver) RegisterMetricsListener() {
-	r.EventPublisher().RegisterListener(listener.NewMetricsListener())
+	r.EventPublisher().RegisterListener(listener.NewMetricsListener(metrics.NewFilter(
+		metrics.Rules{
+			Exclude: r.config.Metrics.Filter.Namespaces.Exclude,
+			Include: r.config.Metrics.Filter.Namespaces.Include,
+		},
+		metrics.Rules{
+			Exclude: r.config.Metrics.Filter.Status.Exclude,
+			Include: r.config.Metrics.Filter.Status.Include,
+		},
+		metrics.Rules{
+			Exclude: r.config.Metrics.Filter.Policies.Exclude,
+			Include: r.config.Metrics.Filter.Policies.Include,
+		},
+		metrics.Rules{
+			Exclude: r.config.Metrics.Filter.Sources.Exclude,
+			Include: r.config.Metrics.Filter.Sources.Include,
+		},
+		metrics.Rules{
+			Exclude: r.config.Metrics.Filter.Severities.Exclude,
+			Include: r.config.Metrics.Filter.Severities.Include,
+		},
+	)))
 }
 
 // Mapper resolver method
@@ -223,7 +245,7 @@ func (r *Resolver) UIClient() target.Client {
 		"UI",
 		r.config.UI.Host,
 		r.config.UI.SkipExisting,
-		createTargetFilter(Filter{}, r.config.UI.MinimumPriority, r.config.UI.Sources),
+		createTargetFilter(TargetFilter{}, r.config.UI.MinimumPriority, r.config.UI.Sources),
 		&http.Client{},
 	)
 }
@@ -579,7 +601,7 @@ func createS3Client(config S3, parent S3, name string) target.Client {
 	)
 }
 
-func createTargetFilter(filter Filter, minimumPriority string, sources []string) *target.Filter {
+func createTargetFilter(filter TargetFilter, minimumPriority string, sources []string) *target.Filter {
 	return &target.Filter{
 		MinimumPriority: minimumPriority,
 		Sources:         sources,

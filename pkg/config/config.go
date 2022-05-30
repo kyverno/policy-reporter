@@ -1,24 +1,22 @@
 package config
 
-type NamespaceFilter struct {
+type ValueFilter struct {
 	Include []string `mapstructure:"include"`
 	Exclude []string `mapstructure:"exclude"`
 }
 
-type PriorityFilter struct {
-	Include []string `mapstructure:"include"`
-	Exclude []string `mapstructure:"exclude"`
+type TargetFilter struct {
+	Namespaces ValueFilter `mapstructure:"namespaces"`
+	Priorities ValueFilter `mapstructure:"priorities"`
+	Policies   ValueFilter `mapstructure:"policies"`
 }
 
-type PolicyFilter struct {
-	Include []string `mapstructure:"include"`
-	Exclude []string `mapstructure:"exclude"`
-}
-
-type Filter struct {
-	Namespaces NamespaceFilter `mapstructure:"namespaces"`
-	Priorities PriorityFilter  `mapstructure:"priorities"`
-	Policies   PolicyFilter    `mapstructure:"policies"`
+type MetricsFilter struct {
+	Namespaces ValueFilter `mapstructure:"namespaces"`
+	Policies   ValueFilter `mapstructure:"policies"`
+	Severities ValueFilter `mapstructure:"severities"`
+	Status     ValueFilter `mapstructure:"status"`
+	Sources    ValueFilter `mapstructure:"sources"`
 }
 
 // Loki configuration
@@ -27,7 +25,7 @@ type Loki struct {
 	CustomLabels    map[string]string `mapstructure:"customLabels"`
 	SkipExisting    bool              `mapstructure:"skipExistingOnStartup"`
 	MinimumPriority string            `mapstructure:"minimumPriority"`
-	Filter          Filter            `mapstructure:"filter"`
+	Filter          TargetFilter      `mapstructure:"filter"`
 	Sources         []string          `mapstructure:"sources"`
 	Channels        []Loki            `mapstructure:"channels"`
 }
@@ -39,39 +37,39 @@ type Elasticsearch struct {
 	Rotation        string          `mapstructure:"rotation"`
 	SkipExisting    bool            `mapstructure:"skipExistingOnStartup"`
 	MinimumPriority string          `mapstructure:"minimumPriority"`
-	Filter          Filter          `mapstructure:"filter"`
+	Filter          TargetFilter    `mapstructure:"filter"`
 	Sources         []string        `mapstructure:"sources"`
 	Channels        []Elasticsearch `mapstructure:"channels"`
 }
 
 // Slack configuration
 type Slack struct {
-	Webhook         string   `mapstructure:"webhook"`
-	SkipExisting    bool     `mapstructure:"skipExistingOnStartup"`
-	MinimumPriority string   `mapstructure:"minimumPriority"`
-	Filter          Filter   `mapstructure:"filter"`
-	Sources         []string `mapstructure:"sources"`
-	Channels        []Slack  `mapstructure:"channels"`
+	Webhook         string       `mapstructure:"webhook"`
+	SkipExisting    bool         `mapstructure:"skipExistingOnStartup"`
+	MinimumPriority string       `mapstructure:"minimumPriority"`
+	Filter          TargetFilter `mapstructure:"filter"`
+	Sources         []string     `mapstructure:"sources"`
+	Channels        []Slack      `mapstructure:"channels"`
 }
 
 // Discord configuration
 type Discord struct {
-	Webhook         string    `mapstructure:"webhook"`
-	SkipExisting    bool      `mapstructure:"skipExistingOnStartup"`
-	MinimumPriority string    `mapstructure:"minimumPriority"`
-	Filter          Filter    `mapstructure:"filter"`
-	Sources         []string  `mapstructure:"sources"`
-	Channels        []Discord `mapstructure:"channels"`
+	Webhook         string       `mapstructure:"webhook"`
+	SkipExisting    bool         `mapstructure:"skipExistingOnStartup"`
+	MinimumPriority string       `mapstructure:"minimumPriority"`
+	Filter          TargetFilter `mapstructure:"filter"`
+	Sources         []string     `mapstructure:"sources"`
+	Channels        []Discord    `mapstructure:"channels"`
 }
 
 // Teams configuration
 type Teams struct {
-	Webhook         string   `mapstructure:"webhook"`
-	SkipExisting    bool     `mapstructure:"skipExistingOnStartup"`
-	MinimumPriority string   `mapstructure:"minimumPriority"`
-	Filter          Filter   `mapstructure:"filter"`
-	Sources         []string `mapstructure:"sources"`
-	Channels        []Teams  `mapstructure:"channels"`
+	Webhook         string       `mapstructure:"webhook"`
+	SkipExisting    bool         `mapstructure:"skipExistingOnStartup"`
+	MinimumPriority string       `mapstructure:"minimumPriority"`
+	Filter          TargetFilter `mapstructure:"filter"`
+	Sources         []string     `mapstructure:"sources"`
+	Channels        []Teams      `mapstructure:"channels"`
 }
 
 // UI configuration
@@ -88,23 +86,23 @@ type Webhook struct {
 	Headers         map[string]string `mapstructure:"headers"`
 	SkipExisting    bool              `mapstructure:"skipExistingOnStartup"`
 	MinimumPriority string            `mapstructure:"minimumPriority"`
-	Filter          Filter            `mapstructure:"filter"`
+	Filter          TargetFilter      `mapstructure:"filter"`
 	Sources         []string          `mapstructure:"sources"`
 	Channels        []Webhook         `mapstructure:"channels"`
 }
 
 type S3 struct {
-	AccessKeyID     string   `mapstructure:"accessKeyID"`
-	SecretAccessKey string   `mapstructure:"secretAccessKey"`
-	Region          string   `mapstructure:"region"`
-	Endpoint        string   `mapstructure:"endpoint"`
-	Prefix          string   `mapstructure:"prefix"`
-	Bucket          string   `mapstructure:"bucket"`
-	SkipExisting    bool     `mapstructure:"skipExistingOnStartup"`
-	MinimumPriority string   `mapstructure:"minimumPriority"`
-	Filter          Filter   `mapstructure:"filter"`
-	Sources         []string `mapstructure:"sources"`
-	Channels        []S3     `mapstructure:"channels"`
+	AccessKeyID     string       `mapstructure:"accessKeyID"`
+	SecretAccessKey string       `mapstructure:"secretAccessKey"`
+	Region          string       `mapstructure:"region"`
+	Endpoint        string       `mapstructure:"endpoint"`
+	Prefix          string       `mapstructure:"prefix"`
+	Bucket          string       `mapstructure:"bucket"`
+	SkipExisting    bool         `mapstructure:"skipExistingOnStartup"`
+	MinimumPriority string       `mapstructure:"minimumPriority"`
+	Filter          TargetFilter `mapstructure:"filter"`
+	Sources         []string     `mapstructure:"sources"`
+	Channels        []S3         `mapstructure:"channels"`
 }
 
 // API configuration
@@ -119,7 +117,8 @@ type REST struct {
 
 // Metrics configuration
 type Metrics struct {
-	Enabled bool `mapstructure:"enabled"`
+	Enabled bool          `mapstructure:"enabled"`
+	Filter  MetricsFilter `mapstructure:"filter"`
 }
 
 // Profiling configuration
@@ -137,7 +136,7 @@ type ClusterReportFilter struct {
 
 // ReportFilter configuration
 type ReportFilter struct {
-	Namespaces     NamespaceFilter     `mapstructure:"namespaces"`
+	Namespaces     ValueFilter         `mapstructure:"namespaces"`
 	ClusterReports ClusterReportFilter `mapstructure:"clusterReports"`
 }
 

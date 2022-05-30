@@ -26,6 +26,7 @@ func Test_ClusterPolicyReportMetricGeneration(t *testing.T) {
 		Results: map[string]*report.Result{
 			result1.GetIdentifier(): result1,
 			result2.GetIdentifier(): result2,
+			result3.GetIdentifier(): result3,
 		},
 	}
 
@@ -35,10 +36,11 @@ func Test_ClusterPolicyReportMetricGeneration(t *testing.T) {
 		CreationTimestamp: time.Now(),
 		Results: map[string]*report.Result{
 			result1.GetIdentifier(): result1,
+			result3.GetIdentifier(): result3,
 		},
 	}
 
-	handler := metrics.CreateClusterPolicyReportMetricsListener()
+	handler := metrics.CreateClusterPolicyReportMetricsListener(&metrics.Filter{Policy: metrics.Rules{Exclude: []string{"disallow-policy"}}})
 
 	t.Run("Added Metric", func(t *testing.T) {
 		handler(report.LifecycleEvent{Type: report.Added, NewPolicyReport: report1, OldPolicyReport: &report.PolicyReport{}})

@@ -28,6 +28,7 @@ var result1 = &report.Result{
 		Namespace:  "test",
 		UID:        "536ab69f-1b3c-4bd9-9ba4-274a56188409",
 	},
+	Source: "Kyverno",
 }
 
 var result2 = &report.Result{
@@ -46,6 +47,26 @@ var result2 = &report.Result{
 		Namespace:  "test",
 		UID:        "535ab69f-1b3c-4bd9-9ba4-274a56188419",
 	},
+	Source: "Kyverno",
+}
+
+var result3 = &report.Result{
+	ID:       "3",
+	Message:  "validation error: requests and limits required. Rule autogen-check-for-requests-and-limits failed at path /spec/template/spec/containers/0/resources/requests/",
+	Policy:   "disallow-policy",
+	Rule:     "check-for-requests-and-limits",
+	Priority: report.WarningPriority,
+	Status:   report.Pass,
+	Category: "resources",
+	Scored:   true,
+	Resource: &report.Resource{
+		APIVersion: "v1",
+		Kind:       "Deployment",
+		Name:       "nginx",
+		Namespace:  "test",
+		UID:        "535ab69f-1b3c-4bd9-9ba4-274a56188419",
+	},
+	Source: "Kyverno",
 }
 
 var preport = &report.PolicyReport{
@@ -62,11 +83,12 @@ func Test_PolicyReportMetricGeneration(t *testing.T) {
 		ID:                "1",
 		Name:              "polr-test",
 		Namespace:         "test",
-		Summary:           &report.Summary{Pass: 1, Fail: 1},
+		Summary:           &report.Summary{Pass: 2, Fail: 1},
 		CreationTimestamp: time.Now(),
 		Results: map[string]*report.Result{
 			result1.GetIdentifier(): result1,
 			result2.GetIdentifier(): result2,
+			result3.GetIdentifier(): result3,
 		},
 	}
 
@@ -78,10 +100,11 @@ func Test_PolicyReportMetricGeneration(t *testing.T) {
 		CreationTimestamp: time.Now(),
 		Results: map[string]*report.Result{
 			result1.GetIdentifier(): result1,
+			result3.GetIdentifier(): result3,
 		},
 	}
 
-	handler := metrics.CreatePolicyReportMetricsListener()
+	handler := metrics.CreatePolicyReportMetricsListener(&metrics.Filter{Policy: metrics.Rules{Exclude: []string{"disallow-policy"}}})
 
 	t.Run("Added Metric", func(t *testing.T) {
 		handler(report.LifecycleEvent{Type: report.Added, NewPolicyReport: report1, OldPolicyReport: &report.PolicyReport{}})
