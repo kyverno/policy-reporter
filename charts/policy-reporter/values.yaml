@@ -103,6 +103,11 @@ rest:
 # Prometheus Metrics API
 metrics:
   enabled: false
+#  filter:
+#    sources:
+#      exclude: ["Trivy CIS Kube Bench"]
+#    status:
+#      exclude: ["pass", "skip"]
 
 # Filter PolicyReport resources to process
 reportFilter:
