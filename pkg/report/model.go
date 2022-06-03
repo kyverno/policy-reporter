@@ -8,7 +8,20 @@ import (
 )
 
 // Event Enum
-type Event = int
+type Event int
+
+func (e Event) String() string {
+	switch e {
+	case Added:
+		return "add"
+	case Updated:
+		return "update"
+	case Deleted:
+		return "delete"
+	}
+
+	return "unknown"
+}
 
 // Possible PolicyReport Event Enums
 const (

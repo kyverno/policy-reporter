@@ -2,6 +2,7 @@ package kubernetes_test
 
 import (
 	"context"
+	"fmt"
 	"sync"
 	"testing"
 	"time"
@@ -20,15 +21,21 @@ func Test_PolicyReportWatcher(t *testing.T) {
 	kclient, rclient, _ := NewFakeCilent()
 	client := kubernetes.NewPolicyReportClient(kclient, NewMapper(), 100*time.Millisecond, filter)
 
-	eventChan := client.WatchPolicyReports(ctx)
-
+	group := client.WatchPolicyReports(ctx)
 	store := newStore(3)
 
 	wg := sync.WaitGroup{}
 	wg.Add(3)
 
 	go func() {
+		reportID := <-group.ChannelAdded()
+		eventChan, err := group.Listen(reportID)
+		if err != nil {
+			t.Error(err)
+		}
+
 		for event := range eventChan {
+			fmt.Printf("%v\n", event.Type)
 			store.Add(event)
 			wg.Done()
 		}
@@ -52,14 +59,19 @@ func Test_ClusterPolicyReportWatcher(t *testing.T) {
 	kclient, _, rclient := NewFakeCilent()
 	client := kubernetes.NewPolicyReportClient(kclient, NewMapper(), 100*time.Millisecond, filter)
 
-	eventChan := client.WatchPolicyReports(ctx)
-
+	group := client.WatchPolicyReports(ctx)
 	store := newStore(3)
 
 	wg := sync.WaitGroup{}
 	wg.Add(3)
 
 	go func() {
+		reportID := <-group.ChannelAdded()
+		eventChan, err := group.Listen(reportID)
+		if err != nil {
+			t.Error(err)
+		}
+
 		for event := range eventChan {
 			store.Add(event)
 			wg.Done()

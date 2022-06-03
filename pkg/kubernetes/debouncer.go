@@ -9,14 +9,13 @@ import (
 
 type Debouncer interface {
 	Add(e report.LifecycleEvent)
-	ReportChan() <-chan report.LifecycleEvent
-	Close()
+	ReportGroups() *report.Group
 }
 
 type debouncer struct {
 	waitDuration time.Duration
 	events       map[string]report.LifecycleEvent
-	channel      chan report.LifecycleEvent
+	channel      *report.Group
 	mutx         *sync.Mutex
 }
 
@@ -28,8 +27,14 @@ func (d *debouncer) Add(event report.LifecycleEvent) {
 		d.mutx.Unlock()
 	}
 
-	if event.Type != report.Updated {
-		d.channel <- event
+	if event.Type == report.Added {
+		d.channel.Register(event.NewPolicyReport.ID)
+		d.channel.AddEvent(event)
+		return
+	}
+
+	if event.Type == report.Deleted {
+		d.channel.AddEvent(event)
 		return
 	}
 
@@ -43,7 +48,7 @@ func (d *debouncer) Add(event report.LifecycleEvent) {
 
 			d.mutx.Lock()
 			if event, ok := d.events[event.NewPolicyReport.GetIdentifier()]; ok {
-				d.channel <- event
+				d.channel.AddEvent(event)
 				delete(d.events, event.NewPolicyReport.GetIdentifier())
 			}
 			d.mutx.Unlock()
@@ -61,15 +66,11 @@ func (d *debouncer) Add(event report.LifecycleEvent) {
 		return
 	}
 
-	d.channel <- event
+	d.channel.AddEvent(event)
 }
 
-func (d *debouncer) ReportChan() <-chan report.LifecycleEvent {
+func (d *debouncer) ReportGroups() *report.Group {
 	return d.channel
-}
-
-func (d *debouncer) Close() {
-	close(d.channel)
 }
 
 func NewDebouncer(waitDuration time.Duration) Debouncer {
@@ -77,6 +78,6 @@ func NewDebouncer(waitDuration time.Duration) Debouncer {
 		waitDuration: waitDuration,
 		events:       make(map[string]report.LifecycleEvent),
 		mutx:         new(sync.Mutex),
-		channel:      make(chan report.LifecycleEvent),
+		channel:      report.NewGroup(),
 	}
 }

@@ -17,7 +17,11 @@ func Test_Debouncer(t *testing.T) {
 		wg.Add(2)
 
 		go func() {
-			for event := range debouncer.ReportChan() {
+			group := debouncer.ReportGroups()
+			reportID := <-group.ChannelAdded()
+			eventChan, _ := group.Listen(reportID)
+
+			for event := range eventChan {
 				wg.Done()
 				if len(event.NewPolicyReport.Results) == 0 {
 					t.Error("Expected to skip the empty modify event")
@@ -44,6 +48,6 @@ func Test_Debouncer(t *testing.T) {
 
 		wg.Wait()
 
-		debouncer.Close()
+		debouncer.ReportGroups().CloseAll()
 	})
 }
