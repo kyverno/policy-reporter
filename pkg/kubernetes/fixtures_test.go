@@ -65,7 +65,7 @@ var policyReportCRD = &v1alpha2.PolicyReport{
 		Fail:  4,
 		Error: 5,
 	},
-	Results: []*v1alpha2.PolicyReportResult{
+	Results: []v1alpha2.PolicyReportResult{
 		{
 			Message:   "message",
 			Result:    v1alpha2.StatusFail,
@@ -76,7 +76,7 @@ var policyReportCRD = &v1alpha2.PolicyReport{
 			Source:    "test",
 			Category:  "test",
 			Severity:  v1alpha2.SeverityHigh,
-			Resources: []*corev1.ObjectReference{
+			Resources: []corev1.ObjectReference{
 				{
 					APIVersion: "v1",
 					Kind:       "Deployment",
@@ -104,7 +104,7 @@ var policyReportCRD = &v1alpha2.PolicyReport{
 			Source:    "test",
 			Category:  "test",
 			Severity:  v1alpha2.SeverityHigh,
-			Resources: []*corev1.ObjectReference{
+			Resources: []corev1.ObjectReference{
 				{
 					APIVersion: "v1",
 					Kind:       "Deployment",
@@ -134,7 +134,7 @@ var enforceReportCRD = &v1alpha2.PolicyReport{
 	Summary: v1alpha2.PolicyReportSummary{
 		Fail: 3,
 	},
-	Results: []*v1alpha2.PolicyReportResult{
+	Results: []v1alpha2.PolicyReportResult{
 		{
 			Message:   "message",
 			Result:    v1alpha2.StatusFail,
@@ -145,7 +145,7 @@ var enforceReportCRD = &v1alpha2.PolicyReport{
 			Source:    "test",
 			Category:  "test",
 			Severity:  v1alpha2.SeverityHigh,
-			Resources: []*corev1.ObjectReference{
+			Resources: []corev1.ObjectReference{
 				{
 					APIVersion: "v1",
 					Kind:       "Deployment",
@@ -166,7 +166,7 @@ var enforceReportCRD = &v1alpha2.PolicyReport{
 			Source:    "test",
 			Category:  "test",
 			Severity:  v1alpha2.SeverityHigh,
-			Resources: []*corev1.ObjectReference{
+			Resources: []corev1.ObjectReference{
 				{
 					APIVersion: "v1",
 					Kind:       "Deployment",
@@ -187,7 +187,7 @@ var clusterPolicyReportCRD = &v1alpha2.ClusterPolicyReport{
 	Summary: v1alpha2.PolicyReportSummary{
 		Fail: 4,
 	},
-	Results: []*v1alpha2.PolicyReportResult{
+	Results: []v1alpha2.PolicyReportResult{
 		{
 			Message:   "message",
 			Result:    v1alpha2.StatusFail,
@@ -198,7 +198,7 @@ var clusterPolicyReportCRD = &v1alpha2.ClusterPolicyReport{
 			Source:    "test",
 			Category:  "test",
 			Severity:  v1alpha2.SeverityHigh,
-			Resources: []*corev1.ObjectReference{
+			Resources: []corev1.ObjectReference{
 				{
 					APIVersion: "v1",
 					Kind:       "Namespace",

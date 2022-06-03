@@ -653,18 +653,18 @@ func (s *policyReportStore) FetchStatusCounts(filter api.Filter) ([]api.StatusCo
 	return statusCounts, nil
 }
 
-func (s *policyReportStore) FetchNamespacedResults(filter api.Filter) ([]*api.ListResult, error) {
+func (s *policyReportStore) FetchNamespacedResults(filter api.Filter, pagination api.Pagination) ([]*api.ListResult, error) {
 	list := []*api.ListResult{}
 
 	where, args := generateFilterWhere(filter, []string{"sources", "categories", "policies", "rules", "kinds", "resources", "status", "severities", "namespaces"})
 	if len(where) > 0 {
 		where = " AND " + where
 	}
+	paginationString := generatePagination(pagination)
 
 	rows, err := s.db.Query(`
 		SELECT id, resource_namespace, resource_kind, resource_api_version, resource_name, message, policy, rule, severity, properties, status, category
-		FROM policy_report_result WHERE resource_namespace != ""`+where+`
-		ORDER BY resource_namespace, resource_name, resource_uid ASC`, args...)
+		FROM policy_report_result WHERE resource_namespace != ""`+where+` `+paginationString, args...)
 
 	if err != nil {
 		return list, err
@@ -687,18 +687,35 @@ func (s *policyReportStore) FetchNamespacedResults(filter api.Filter) ([]*api.Li
 	return list, nil
 }
 
-func (s *policyReportStore) FetchClusterResults(filter api.Filter) ([]*api.ListResult, error) {
+func (s *policyReportStore) CountNamespacedResults(filter api.Filter) (int, error) {
+	var count int
+
+	where, args := generateFilterWhere(filter, []string{"sources", "categories", "policies", "rules", "kinds", "resources", "status", "severities", "namespaces"})
+	if len(where) > 0 {
+		where = " AND " + where
+	}
+
+	row := s.db.QueryRow(`SELECT count(id) FROM policy_report_result WHERE resource_namespace != ""`+where, args...)
+	err := row.Scan(&count)
+	if err != nil {
+		return 0, err
+	}
+
+	return count, nil
+}
+
+func (s *policyReportStore) FetchClusterResults(filter api.Filter, pagination api.Pagination) ([]*api.ListResult, error) {
 	list := []*api.ListResult{}
 
 	where, args := generateFilterWhere(filter, []string{"sources", "categories", "policies", "rules", "kinds", "resources", "status", "severities"})
 	if len(where) > 0 {
 		where = " AND " + where
 	}
+	paginationString := generatePagination(pagination)
 
 	rows, err := s.db.Query(`
 		SELECT id, resource_namespace, resource_kind, resource_api_version, resource_name, message, policy, rule, severity, properties, status, category
-		FROM policy_report_result WHERE resource_namespace =""`+where+`
-		ORDER BY resource_namespace, resource_name, resource_uid ASC`, args...)
+		FROM policy_report_result WHERE resource_namespace =""`+where+` `+paginationString, args...)
 
 	if err != nil {
 		return list, err
@@ -719,6 +736,23 @@ func (s *policyReportStore) FetchClusterResults(filter api.Filter) ([]*api.ListR
 	}
 
 	return list, nil
+}
+
+func (s *policyReportStore) CountClusterResults(filter api.Filter) (int, error) {
+	var count int
+
+	where, args := generateFilterWhere(filter, []string{"sources", "categories", "policies", "rules", "kinds", "resources", "status", "severities"})
+	if len(where) > 0 {
+		where = " AND " + where
+	}
+
+	row := s.db.QueryRow(`SELECT count(id) FROM policy_report_result WHERE resource_namespace =""`+where, args...)
+	err := row.Scan(&count)
+	if err != nil {
+		return 0, err
+	}
+
+	return count, nil
 }
 
 func (s *policyReportStore) persistResults(report *report.PolicyReport) error {
@@ -913,10 +947,35 @@ func generateFilterWhere(filter api.Filter, active []string) (string, []interfac
 		argCounter, where, args = appendWhere(filter.Severities, "severity", where, args, argCounter)
 	}
 	if contains("status", active) {
-		_, where, args = appendWhere(filter.Status, "status", where, args, argCounter)
+		argCounter, where, args = appendWhere(filter.Status, "status", where, args, argCounter)
+	}
+	if filter.Search != "" {
+		likeIndex := argCounter + 1
+		equalIndex := argCounter + 2
+
+		where = append(where, fmt.Sprintf(
+			`(resource_namespace LIKE $%d OR resource_name LIKE $%d OR policy LIKE $%d OR rule LIKE $%d OR severity = $%d OR status = $%d)`,
+			likeIndex,
+			likeIndex,
+			likeIndex,
+			likeIndex,
+			equalIndex,
+			equalIndex,
+		))
+		args = append(args, filter.Search+"%", filter.Search)
 	}
 
 	return strings.Join(where, " AND "), args
+}
+
+func generatePagination(pagination api.Pagination) string {
+	return fmt.Sprintf(
+		"ORDER BY %s %s LIMIT %d OFFSET %d",
+		strings.Join(pagination.SortBy, ","),
+		pagination.Direction,
+		pagination.Offset,
+		(pagination.Page-1)*pagination.Offset,
+	)
 }
 
 func contains(source string, sources []string) bool {

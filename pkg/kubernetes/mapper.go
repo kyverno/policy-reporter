@@ -53,7 +53,7 @@ func (m *mapper) MapClusterPolicyReport(creport *v1alpha2.ClusterPolicyReport) *
 	}
 
 	for _, resultItem := range creport.Results {
-		results := m.mapResult(resultItem)
+		results := m.mapResult(resultItem.DeepCopy())
 		for _, result := range results {
 			r.Results[result.GetIdentifier()] = result
 		}

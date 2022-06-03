@@ -33,15 +33,21 @@ func (k *k8sPolicyReportClient) WatchPolicyReports(ctx context.Context) <-chan r
 	factory := externalversions.NewSharedInformerFactory(k.client, 0).Wgpolicyk8s().V1alpha2()
 
 	go func(f v1alpha2.Interface) {
+		informer := factory.PolicyReports().Informer()
+
 		for {
-			k.watchPolicyReport(ctx, f, "policyreport.wgpolicyk8s.io")
+			k.watchPolicyReport(ctx, informer, "policyreport.wgpolicyk8s.io")
+			time.Sleep(k.restartWatchOnFailure)
 		}
 	}(factory)
 
 	if !k.reportFilter.DisableClusterReports() {
+		informer := factory.ClusterPolicyReports().Informer()
+
 		go func(f v1alpha2.Interface) {
 			for {
-				k.watchClusterPolicyReport(ctx, f, "clusterpolicyreport.wgpolicyk8s.io")
+				k.watchClusterPolicyReport(ctx, informer, "clusterpolicyreport.wgpolicyk8s.io")
+				time.Sleep(k.restartWatchOnFailure)
 			}
 		}(factory)
 	}
@@ -57,8 +63,7 @@ func (k *k8sPolicyReportClient) WatchPolicyReports(ctx context.Context) <-chan r
 	return k.debouncer.ReportChan()
 }
 
-func (k *k8sPolicyReportClient) watchPolicyReport(ctx context.Context, factory v1alpha2.Interface, crd string) {
-	informer := factory.PolicyReports().Informer()
+func (k *k8sPolicyReportClient) watchPolicyReport(ctx context.Context, informer cache.SharedIndexInformer, crd string) {
 	ctx = k.addErrorWatchHandler(ctx, informer, crd)
 
 	go k.handleCRDRegistration(ctx, informer, crd)
@@ -99,8 +104,7 @@ func (k *k8sPolicyReportClient) watchPolicyReport(ctx context.Context, factory v
 	informer.Run(ctx.Done())
 }
 
-func (k *k8sPolicyReportClient) watchClusterPolicyReport(ctx context.Context, factory v1alpha2.Interface, crd string) {
-	informer := factory.ClusterPolicyReports().Informer()
+func (k *k8sPolicyReportClient) watchClusterPolicyReport(ctx context.Context, informer cache.SharedIndexInformer, crd string) {
 	ctx = k.addErrorWatchHandler(ctx, informer, crd)
 
 	go k.handleCRDRegistration(ctx, informer, crd)

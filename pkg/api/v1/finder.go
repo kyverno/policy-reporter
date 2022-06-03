@@ -10,6 +10,14 @@ type Filter struct {
 	Severities []string
 	Status     []string
 	Resources  []string
+	Search     string
+}
+
+type Pagination struct {
+	Page      int
+	Offset    int
+	SortBy    []string
+	Direction string
 }
 
 type PolicyReportFinder interface {
@@ -42,9 +50,13 @@ type PolicyReportFinder interface {
 	// FetchStatusCounts from current PolicyReportResults
 	FetchStatusCounts(Filter) ([]StatusCount, error)
 	// FetchNamespacedResults from current PolicyReportResults with a Namespace
-	FetchNamespacedResults(Filter) ([]*ListResult, error)
+	FetchNamespacedResults(Filter, Pagination) ([]*ListResult, error)
 	// FetchClusterResults from current PolicyReportResults
-	FetchClusterResults(Filter) ([]*ListResult, error)
+	FetchClusterResults(Filter, Pagination) ([]*ListResult, error)
+	// CountNamespacedResults from current PolicyReportResults with a Namespace
+	CountNamespacedResults(Filter) (int, error)
+	// CountClusterResults from current PolicyReportResults
+	CountClusterResults(Filter) (int, error)
 	// FetchRuleStatusCounts from current PolicyReportResults
 	FetchRuleStatusCounts(policy, rule string) ([]StatusCount, error)
 }

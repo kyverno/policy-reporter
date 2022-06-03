@@ -5,6 +5,11 @@ import (
 	"github.com/kyverno/policy-reporter/pkg/target"
 )
 
+type ResultList struct {
+	Items []*ListResult `json:"items"`
+	Count int           `json:"count"`
+}
+
 type StatusCount struct {
 	Status string `json:"status"`
 	Count  int    `json:"count"`
