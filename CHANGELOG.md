@@ -6,6 +6,13 @@
     * SQLite Improvement: Use batch insertion for PolicyReportResults
     * PolicyReport Informer Update: Use typed informer to improve performance and memory usage
     * Drop support for `v1alpha1` of the PolicyReport CRD
+    * Serverside Pagination for better Dashboard performance
+    * Concurrent PolicyReport processing
+* Policy Reporter UI
+    * Serverside Pagination support
+    * Dynamic Chart sizes
+* Policy Reporter Kyverno Plugin
+    * Generate Policy Reports for enforcement violations
 
 # 2.8.0
 * Policy Reporter

@@ -90,7 +90,7 @@ func (s *policyReportStore) Get(id string) (*report.PolicyReport, bool) {
 	if err == sql.ErrNoRows {
 		return r, false
 	} else if err != nil {
-		log.Printf("[ERROR] Failed to select PolicyReport: %s", err)
+		log.Printf("[ERROR] failed to select PolicyReport: %s", err)
 		return r, false
 	}
 
@@ -98,7 +98,7 @@ func (s *policyReportStore) Get(id string) (*report.PolicyReport, bool) {
 
 	results, err := s.fetchResults(id)
 	if err != nil {
-		log.Printf("Failed to fetch Reports: %s\n", err)
+		log.Printf("[ERROR] failed to fetch Reports: %s\n", err)
 		return r, false
 	}
 
@@ -756,7 +756,7 @@ func (s *policyReportStore) CountClusterResults(filter api.Filter) (int, error) 
 }
 
 func (s *policyReportStore) persistResults(report *report.PolicyReport) error {
-	bulks := chunkSlice(report.ResultList(), 100)
+	bulks := chunkSlice(report.ResultList(), 50)
 
 	for _, list := range bulks {
 		sqlStr := resultInsertBaseSQL

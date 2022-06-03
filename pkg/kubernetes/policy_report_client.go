@@ -29,7 +29,7 @@ func (k *k8sPolicyReportClient) GetFoundResources() map[string]string {
 	return k.found
 }
 
-func (k *k8sPolicyReportClient) WatchPolicyReports(ctx context.Context) <-chan report.LifecycleEvent {
+func (k *k8sPolicyReportClient) WatchPolicyReports(ctx context.Context) *report.Group {
 	factory := externalversions.NewSharedInformerFactory(k.client, 0).Wgpolicyk8s().V1alpha2()
 
 	go func(f v1alpha2.Interface) {
@@ -60,7 +60,7 @@ func (k *k8sPolicyReportClient) WatchPolicyReports(ctx context.Context) <-chan r
 		}
 	}
 
-	return k.debouncer.ReportChan()
+	return k.debouncer.ReportGroups()
 }
 
 func (k *k8sPolicyReportClient) watchPolicyReport(ctx context.Context, informer cache.SharedIndexInformer, crd string) {
