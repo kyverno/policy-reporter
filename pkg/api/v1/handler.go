@@ -2,10 +2,14 @@ package v1
 
 import (
 	"net/http"
+	"strconv"
+	"strings"
 
 	"github.com/kyverno/policy-reporter/pkg/helper"
 	"github.com/kyverno/policy-reporter/pkg/target"
 )
+
+var defaultOrder = []string{"resource_namespace", "resource_name", "resource_uid", "policy", "rule", "message"}
 
 // TargetsHandler for the Targets REST API
 func TargetsHandler(targets []target.Client) http.HandlerFunc {
@@ -194,7 +198,24 @@ func RuleStatusCountHandler(finder PolicyReportFinder) http.HandlerFunc {
 // NamespacedResourcesResultHandler REST API
 func NamespacedResourcesResultHandler(finder PolicyReportFinder) http.HandlerFunc {
 	return func(w http.ResponseWriter, req *http.Request) {
-		list, err := finder.FetchNamespacedResults(Filter{
+		page, err := strconv.Atoi(req.URL.Query().Get("page"))
+		if err != nil || page < 1 {
+			page = 1
+		}
+		offset, err := strconv.Atoi(req.URL.Query().Get("offset"))
+		if err != nil || offset < 1 {
+			offset = 20
+		}
+		direction := "ASC"
+		if strings.ToLower(req.URL.Query().Get("direction")) == "desc" {
+			direction = "DESC"
+		}
+		sortBy := req.URL.Query()["sortBy"]
+		if len(sortBy) == 0 {
+			sortBy = defaultOrder
+		}
+
+		filter := Filter{
 			Namespaces: req.URL.Query()["namespaces"],
 			Kinds:      req.URL.Query()["kinds"],
 			Resources:  req.URL.Query()["resources"],
@@ -204,15 +225,41 @@ func NamespacedResourcesResultHandler(finder PolicyReportFinder) http.HandlerFun
 			Policies:   req.URL.Query()["policies"],
 			Rules:      req.URL.Query()["rules"],
 			Status:     req.URL.Query()["status"],
+			Search:     req.URL.Query().Get("search"),
+		}
+
+		count, err := finder.CountNamespacedResults(filter)
+		list, err := finder.FetchNamespacedResults(filter, Pagination{
+			Page:      page,
+			Offset:    offset,
+			SortBy:    sortBy,
+			Direction: direction,
 		})
-		helper.SendJSONResponse(w, list, err)
+		helper.SendJSONResponse(w, ResultList{Items: list, Count: count}, err)
 	}
 }
 
 // ClusterResourcesResultHandler REST API
 func ClusterResourcesResultHandler(finder PolicyReportFinder) http.HandlerFunc {
 	return func(w http.ResponseWriter, req *http.Request) {
-		list, err := finder.FetchClusterResults(Filter{
+		page, err := strconv.Atoi(req.URL.Query().Get("page"))
+		if err != nil || page < 1 {
+			page = 1
+		}
+		offset, err := strconv.Atoi(req.URL.Query().Get("offset"))
+		if err != nil || offset < 1 {
+			offset = 20
+		}
+		direction := "ASC"
+		if strings.ToLower(req.URL.Query().Get("direction")) == "desc" {
+			direction = "DESC"
+		}
+		sortBy := req.URL.Query()["sortBy"]
+		if len(sortBy) == 0 {
+			sortBy = defaultOrder
+		}
+
+		filter := Filter{
 			Kinds:      req.URL.Query()["kinds"],
 			Resources:  req.URL.Query()["resources"],
 			Sources:    req.URL.Query()["sources"],
@@ -221,8 +268,15 @@ func ClusterResourcesResultHandler(finder PolicyReportFinder) http.HandlerFunc {
 			Policies:   req.URL.Query()["policies"],
 			Rules:      req.URL.Query()["rules"],
 			Status:     req.URL.Query()["status"],
+		}
+		count, err := finder.CountClusterResults(filter)
+		list, err := finder.FetchClusterResults(filter, Pagination{
+			Page:      page,
+			Offset:    offset,
+			SortBy:    sortBy,
+			Direction: direction,
 		})
-		helper.SendJSONResponse(w, list, err)
+		helper.SendJSONResponse(w, ResultList{Items: list, Count: count}, err)
 	}
 }
 

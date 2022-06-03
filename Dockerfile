@@ -1,4 +1,4 @@
-FROM golang:1.17.8 as builder
+FROM golang:1.18 as builder
 
 ARG LD_FLAGS
 ARG TARGETPLATFORM

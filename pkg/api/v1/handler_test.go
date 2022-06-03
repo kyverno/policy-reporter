@@ -423,7 +423,7 @@ func Test_V1_API(t *testing.T) {
 	})
 
 	t.Run("NamespacedResultHandler", func(t *testing.T) {
-		req, err := http.NewRequest("GET", "/v1/namespaced-results", nil)
+		req, err := http.NewRequest("GET", "/v1/namespaced-results?direction=desc", nil)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -443,7 +443,7 @@ func Test_V1_API(t *testing.T) {
 	})
 
 	t.Run("ClusterResultHandler", func(t *testing.T) {
-		req, err := http.NewRequest("GET", "/v1/cluster-results", nil)
+		req, err := http.NewRequest("GET", "/v1/cluster-results?direction=desc", nil)
 		if err != nil {
 			t.Fatal(err)
 		}

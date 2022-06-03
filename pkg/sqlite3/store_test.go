@@ -9,6 +9,8 @@ import (
 	"github.com/kyverno/policy-reporter/pkg/sqlite3"
 )
 
+var pagination = v1.Pagination{Page: 1, Offset: 20, Direction: "ASC", SortBy: []string{"resource_name"}}
+
 var result1 = &report.Result{
 	ID:       "123",
 	Message:  "validation error: requests and limits required. Rule autogen-check-for-requests-and-limits failed at path /spec/template/spec/containers/0/resources/requests/",
@@ -340,7 +342,7 @@ func Test_PolicyReportStore(t *testing.T) {
 	})
 
 	t.Run("FetchNamespacedResults", func(t *testing.T) {
-		items, err := store.FetchNamespacedResults(v1.Filter{Namespaces: []string{"test"}})
+		items, err := store.FetchNamespacedResults(v1.Filter{Namespaces: []string{"test"}}, pagination)
 		if err != nil {
 			t.Fatalf("Unexpected Error: %s", err)
 		}
@@ -351,7 +353,32 @@ func Test_PolicyReportStore(t *testing.T) {
 	})
 
 	t.Run("FetchNamespacedResults with SeverityFilter", func(t *testing.T) {
-		items, err := store.FetchNamespacedResults(v1.Filter{Severities: []string{report.High}})
+		items, err := store.FetchNamespacedResults(v1.Filter{Severities: []string{report.High}}, pagination)
+		if err != nil {
+			t.Fatalf("Unexpected Error: %s", err)
+		}
+
+		if len(items) != 1 {
+			t.Fatalf("Should return 1 namespaced result")
+		}
+		if items[0].Severity != report.High {
+			t.Fatalf("result with severity high")
+		}
+	})
+
+	t.Run("CountNamespacedResults with SeverityFilter", func(t *testing.T) {
+		count, err := store.CountNamespacedResults(v1.Filter{Severities: []string{report.High}})
+		if err != nil {
+			t.Fatalf("Unexpected Error: %s", err)
+		}
+
+		if count != 1 {
+			t.Fatalf("Should return 1 namespaced result")
+		}
+	})
+
+	t.Run("FetchNamespacedResults with SearchFilter", func(t *testing.T) {
+		items, err := store.FetchNamespacedResults(v1.Filter{Search: report.High}, pagination)
 		if err != nil {
 			t.Fatalf("Unexpected Error: %s", err)
 		}
@@ -365,7 +392,7 @@ func Test_PolicyReportStore(t *testing.T) {
 	})
 
 	t.Run("FetchClusterResults", func(t *testing.T) {
-		items, err := store.FetchClusterResults(v1.Filter{Status: []string{report.Pass, report.Fail}})
+		items, err := store.FetchClusterResults(v1.Filter{Status: []string{report.Pass, report.Fail}}, pagination)
 		if err != nil {
 			t.Fatalf("Unexpected Error: %s", err)
 		}
@@ -375,8 +402,33 @@ func Test_PolicyReportStore(t *testing.T) {
 		}
 	})
 
+	t.Run("CountClusterResults", func(t *testing.T) {
+		count, err := store.CountClusterResults(v1.Filter{Status: []string{report.Pass, report.Fail}})
+		if err != nil {
+			t.Fatalf("Unexpected Error: %s", err)
+		}
+
+		if count != 2 {
+			t.Fatalf("Should return 2 cluster results")
+		}
+	})
+
 	t.Run("FetchClusterResults with SeverityFilter", func(t *testing.T) {
-		items, err := store.FetchClusterResults(v1.Filter{Severities: []string{report.High}})
+		items, err := store.FetchClusterResults(v1.Filter{Severities: []string{report.High}}, pagination)
+		if err != nil {
+			t.Fatalf("Unexpected Error: %s", err)
+		}
+
+		if len(items) != 1 {
+			t.Fatalf("Should return 1 namespaced result")
+		}
+		if items[0].Severity != report.High {
+			t.Fatalf("result with severity high")
+		}
+	})
+
+	t.Run("FetchClusterResults with SearchFilter", func(t *testing.T) {
+		items, err := store.FetchClusterResults(v1.Filter{Search: report.High}, pagination)
 		if err != nil {
 			t.Fatalf("Unexpected Error: %s", err)
 		}
@@ -526,7 +578,7 @@ func Test_PolicyReportStore(t *testing.T) {
 		store.Add(preport)
 
 		store.CleanUp()
-		list, _ := store.FetchNamespacedResults(v1.Filter{})
+		list, _ := store.FetchNamespacedResults(v1.Filter{}, v1.Pagination{Page: 1, Offset: 20})
 		if len(list) == 1 {
 			t.Fatalf("Should have no results after CleanUp")
 		}
