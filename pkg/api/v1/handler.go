@@ -198,23 +198,6 @@ func RuleStatusCountHandler(finder PolicyReportFinder) http.HandlerFunc {
 // NamespacedResourcesResultHandler REST API
 func NamespacedResourcesResultHandler(finder PolicyReportFinder) http.HandlerFunc {
 	return func(w http.ResponseWriter, req *http.Request) {
-		page, err := strconv.Atoi(req.URL.Query().Get("page"))
-		if err != nil || page < 1 {
-			page = 1
-		}
-		offset, err := strconv.Atoi(req.URL.Query().Get("offset"))
-		if err != nil || offset < 1 {
-			offset = 20
-		}
-		direction := "ASC"
-		if strings.ToLower(req.URL.Query().Get("direction")) == "desc" {
-			direction = "DESC"
-		}
-		sortBy := req.URL.Query()["sortBy"]
-		if len(sortBy) == 0 {
-			sortBy = defaultOrder
-		}
-
 		filter := Filter{
 			Namespaces: req.URL.Query()["namespaces"],
 			Kinds:      req.URL.Query()["kinds"],
@@ -229,12 +212,7 @@ func NamespacedResourcesResultHandler(finder PolicyReportFinder) http.HandlerFun
 		}
 
 		count, err := finder.CountNamespacedResults(filter)
-		list, err := finder.FetchNamespacedResults(filter, Pagination{
-			Page:      page,
-			Offset:    offset,
-			SortBy:    sortBy,
-			Direction: direction,
-		})
+		list, err := finder.FetchNamespacedResults(filter, buildPaginatiomn(req))
 		helper.SendJSONResponse(w, ResultList{Items: list, Count: count}, err)
 	}
 }
@@ -242,23 +220,6 @@ func NamespacedResourcesResultHandler(finder PolicyReportFinder) http.HandlerFun
 // ClusterResourcesResultHandler REST API
 func ClusterResourcesResultHandler(finder PolicyReportFinder) http.HandlerFunc {
 	return func(w http.ResponseWriter, req *http.Request) {
-		page, err := strconv.Atoi(req.URL.Query().Get("page"))
-		if err != nil || page < 1 {
-			page = 1
-		}
-		offset, err := strconv.Atoi(req.URL.Query().Get("offset"))
-		if err != nil || offset < 1 {
-			offset = 20
-		}
-		direction := "ASC"
-		if strings.ToLower(req.URL.Query().Get("direction")) == "desc" {
-			direction = "DESC"
-		}
-		sortBy := req.URL.Query()["sortBy"]
-		if len(sortBy) == 0 {
-			sortBy = defaultOrder
-		}
-
 		filter := Filter{
 			Kinds:      req.URL.Query()["kinds"],
 			Resources:  req.URL.Query()["resources"],
@@ -270,12 +231,7 @@ func ClusterResourcesResultHandler(finder PolicyReportFinder) http.HandlerFunc {
 			Status:     req.URL.Query()["status"],
 		}
 		count, err := finder.CountClusterResults(filter)
-		list, err := finder.FetchClusterResults(filter, Pagination{
-			Page:      page,
-			Offset:    offset,
-			SortBy:    sortBy,
-			Direction: direction,
-		})
+		list, err := finder.FetchClusterResults(filter, buildPaginatiomn(req))
 		helper.SendJSONResponse(w, ResultList{Items: list, Count: count}, err)
 	}
 }
@@ -290,5 +246,31 @@ func NamespaceListHandler(finder PolicyReportFinder) http.HandlerFunc {
 			Rules:      req.URL.Query()["rules"],
 		})
 		helper.SendJSONResponse(w, list, err)
+	}
+}
+
+func buildPaginatiomn(req *http.Request) Pagination {
+	page, err := strconv.Atoi(req.URL.Query().Get("page"))
+	if err != nil || page < 1 {
+		page = 0
+	}
+	offset, err := strconv.Atoi(req.URL.Query().Get("offset"))
+	if err != nil || offset < 1 {
+		offset = 20
+	}
+	direction := "ASC"
+	if strings.ToLower(req.URL.Query().Get("direction")) == "desc" {
+		direction = "DESC"
+	}
+	sortBy := req.URL.Query()["sortBy"]
+	if len(sortBy) == 0 {
+		sortBy = defaultOrder
+	}
+
+	return Pagination{
+		Page:      page,
+		Offset:    offset,
+		SortBy:    sortBy,
+		Direction: direction,
 	}
 }

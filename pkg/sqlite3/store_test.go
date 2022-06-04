@@ -578,7 +578,7 @@ func Test_PolicyReportStore(t *testing.T) {
 		store.Add(preport)
 
 		store.CleanUp()
-		list, _ := store.FetchNamespacedResults(v1.Filter{}, v1.Pagination{Page: 1, Offset: 20})
+		list, _ := store.FetchNamespacedResults(v1.Filter{}, v1.Pagination{Page: 0})
 		if len(list) == 1 {
 			t.Fatalf("Should have no results after CleanUp")
 		}

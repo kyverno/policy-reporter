@@ -969,6 +969,14 @@ func generateFilterWhere(filter api.Filter, active []string) (string, []interfac
 }
 
 func generatePagination(pagination api.Pagination) string {
+	if pagination.Page == 0 {
+		return fmt.Sprintf(
+			"ORDER BY %s %s",
+			strings.Join(pagination.SortBy, ","),
+			pagination.Direction,
+		)
+	}
+
 	return fmt.Sprintf(
 		"ORDER BY %s %s LIMIT %d OFFSET %d",
 		strings.Join(pagination.SortBy, ","),
