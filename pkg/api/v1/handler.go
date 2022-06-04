@@ -256,7 +256,7 @@ func buildPaginatiomn(req *http.Request) Pagination {
 	}
 	offset, err := strconv.Atoi(req.URL.Query().Get("offset"))
 	if err != nil || offset < 1 {
-		offset = 20
+		offset = 0
 	}
 	direction := "ASC"
 	if strings.ToLower(req.URL.Query().Get("direction")) == "desc" {
