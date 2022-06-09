@@ -1,5 +1,13 @@
 # Changelog
 
+# 2.9.1
+* Policy Reporter
+    * Name Configuration for Target (Channels) to customize UI Labels
+* Policy Reporter UI
+    * Fix table on chip selection
+    * Order labels
+    * Return 404 Status Code for non existing URL paths
+
 # 2.9.0
 * Policy Reporter
     * New configuration to use Redis as external result caching store

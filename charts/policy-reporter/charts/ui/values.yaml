@@ -29,7 +29,7 @@ image:
   registry: ghcr.io
   repository: kyverno/policy-reporter-ui
   pullPolicy: IfNotPresent
-  tag: 1.4.0
+  tag: 1.4.2
 
 # configurations related to the PolicyReporter API
 policyReporter:
