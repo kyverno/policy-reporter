@@ -81,6 +81,7 @@ var testConfig = &config.Config{
 		MinimumPriority: "debug",
 		Endpoint:        "https://storage.yandexcloud.net",
 		Region:          "ru-central1",
+		Prefix:          "prefix",
 		Channels:        []config.S3{{}},
 	},
 }

@@ -21,6 +21,7 @@ type MetricsFilter struct {
 
 // Loki configuration
 type Loki struct {
+	Name            string            `mapstructure:"name"`
 	Host            string            `mapstructure:"host"`
 	CustomLabels    map[string]string `mapstructure:"customLabels"`
 	SkipExisting    bool              `mapstructure:"skipExistingOnStartup"`
@@ -32,6 +33,7 @@ type Loki struct {
 
 // Elasticsearch configuration
 type Elasticsearch struct {
+	Name            string          `mapstructure:"name"`
 	Host            string          `mapstructure:"host"`
 	Index           string          `mapstructure:"index"`
 	Rotation        string          `mapstructure:"rotation"`
@@ -44,6 +46,7 @@ type Elasticsearch struct {
 
 // Slack configuration
 type Slack struct {
+	Name            string       `mapstructure:"name"`
 	Webhook         string       `mapstructure:"webhook"`
 	SkipExisting    bool         `mapstructure:"skipExistingOnStartup"`
 	MinimumPriority string       `mapstructure:"minimumPriority"`
@@ -54,6 +57,7 @@ type Slack struct {
 
 // Discord configuration
 type Discord struct {
+	Name            string       `mapstructure:"name"`
 	Webhook         string       `mapstructure:"webhook"`
 	SkipExisting    bool         `mapstructure:"skipExistingOnStartup"`
 	MinimumPriority string       `mapstructure:"minimumPriority"`
@@ -64,6 +68,7 @@ type Discord struct {
 
 // Teams configuration
 type Teams struct {
+	Name            string       `mapstructure:"name"`
 	Webhook         string       `mapstructure:"webhook"`
 	SkipExisting    bool         `mapstructure:"skipExistingOnStartup"`
 	MinimumPriority string       `mapstructure:"minimumPriority"`
@@ -82,6 +87,7 @@ type UI struct {
 
 // Webhook configuration
 type Webhook struct {
+	Name            string            `mapstructure:"name"`
 	Host            string            `mapstructure:"host"`
 	Headers         map[string]string `mapstructure:"headers"`
 	SkipExisting    bool              `mapstructure:"skipExistingOnStartup"`
@@ -92,6 +98,7 @@ type Webhook struct {
 }
 
 type S3 struct {
+	Name            string       `mapstructure:"name"`
 	AccessKeyID     string       `mapstructure:"accessKeyID"`
 	SecretAccessKey string       `mapstructure:"secretAccessKey"`
 	Region          string       `mapstructure:"region"`

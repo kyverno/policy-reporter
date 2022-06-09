@@ -140,12 +140,19 @@ func (r *Resolver) Mapper() kubernetes.Mapper {
 // LokiClients resolver method
 func (r *Resolver) LokiClients() []target.Client {
 	clients := make([]target.Client, 0)
+	if r.config.Loki.Name == "" {
+		r.config.Loki.Name = "Loki"
+	}
 
-	if loki := createLokiClient(r.config.Loki, Loki{}, "Loki"); loki != nil {
+	if loki := createLokiClient(r.config.Loki, Loki{}); loki != nil {
 		clients = append(clients, loki)
 	}
 	for i, channel := range r.config.Loki.Channels {
-		if loki := createLokiClient(channel, r.config.Loki, fmt.Sprintf("Loki Channel %d", i+1)); loki != nil {
+		if channel.Name == "" {
+			channel.Name = fmt.Sprintf("Loki Channel %d", i+1)
+		}
+
+		if loki := createLokiClient(channel, r.config.Loki); loki != nil {
 			clients = append(clients, loki)
 		}
 	}
@@ -156,12 +163,19 @@ func (r *Resolver) LokiClients() []target.Client {
 // ElasticsearchClients resolver method
 func (r *Resolver) ElasticsearchClients() []target.Client {
 	clients := make([]target.Client, 0)
+	if r.config.Elasticsearch.Name == "" {
+		r.config.Elasticsearch.Name = "Elasticsearch"
+	}
 
-	if es := createElasticsearchClient(r.config.Elasticsearch, Elasticsearch{}, "Elasticsearch"); es != nil {
+	if es := createElasticsearchClient(r.config.Elasticsearch, Elasticsearch{}); es != nil {
 		clients = append(clients, es)
 	}
 	for i, channel := range r.config.Elasticsearch.Channels {
-		if es := createElasticsearchClient(channel, r.config.Elasticsearch, fmt.Sprintf("Elasticsearch Channel %d", i+1)); es != nil {
+		if channel.Name == "" {
+			channel.Name = fmt.Sprintf("Elasticsearch Channel %d", i+1)
+		}
+
+		if es := createElasticsearchClient(channel, r.config.Elasticsearch); es != nil {
 			clients = append(clients, es)
 		}
 	}
@@ -172,12 +186,19 @@ func (r *Resolver) ElasticsearchClients() []target.Client {
 // SlackClients resolver method
 func (r *Resolver) SlackClients() []target.Client {
 	clients := make([]target.Client, 0)
+	if r.config.Slack.Name == "" {
+		r.config.Slack.Name = "Slack"
+	}
 
-	if es := createSlackClient(r.config.Slack, Slack{}, "Slack"); es != nil {
+	if es := createSlackClient(r.config.Slack, Slack{}); es != nil {
 		clients = append(clients, es)
 	}
 	for i, channel := range r.config.Slack.Channels {
-		if es := createSlackClient(channel, r.config.Slack, fmt.Sprintf("Slack Channel %d", i+1)); es != nil {
+		if channel.Name == "" {
+			channel.Name = fmt.Sprintf("Slack Channel %d", i+1)
+		}
+
+		if es := createSlackClient(channel, r.config.Slack); es != nil {
 			clients = append(clients, es)
 		}
 	}
@@ -188,12 +209,19 @@ func (r *Resolver) SlackClients() []target.Client {
 // DiscordClients resolver method
 func (r *Resolver) DiscordClients() []target.Client {
 	clients := make([]target.Client, 0)
+	if r.config.Discord.Name == "" {
+		r.config.Discord.Name = "Discord"
+	}
 
-	if es := createDiscordClient(r.config.Discord, Discord{}, "Discord"); es != nil {
+	if es := createDiscordClient(r.config.Discord, Discord{}); es != nil {
 		clients = append(clients, es)
 	}
 	for i, channel := range r.config.Discord.Channels {
-		if es := createDiscordClient(channel, r.config.Discord, fmt.Sprintf("Discord Channel %d", i+1)); es != nil {
+		if channel.Name == "" {
+			channel.Name = fmt.Sprintf("Discord Channel %d", i+1)
+		}
+
+		if es := createDiscordClient(channel, r.config.Discord); es != nil {
 			clients = append(clients, es)
 		}
 	}
@@ -204,12 +232,19 @@ func (r *Resolver) DiscordClients() []target.Client {
 // TeamsClients resolver method
 func (r *Resolver) TeamsClients() []target.Client {
 	clients := make([]target.Client, 0)
+	if r.config.Teams.Name == "" {
+		r.config.Teams.Name = "Teams"
+	}
 
-	if es := createTeamsClient(r.config.Teams, Teams{}, "Teams"); es != nil {
+	if es := createTeamsClient(r.config.Teams, Teams{}); es != nil {
 		clients = append(clients, es)
 	}
 	for i, channel := range r.config.Teams.Channels {
-		if es := createTeamsClient(channel, r.config.Teams, fmt.Sprintf("Teams Channel %d", i+1)); es != nil {
+		if channel.Name == "" {
+			channel.Name = fmt.Sprintf("Teams Channel %d", i+1)
+		}
+
+		if es := createTeamsClient(channel, r.config.Teams); es != nil {
 			clients = append(clients, es)
 		}
 	}
@@ -220,12 +255,19 @@ func (r *Resolver) TeamsClients() []target.Client {
 // WebhookClients resolver method
 func (r *Resolver) WebhookClients() []target.Client {
 	clients := make([]target.Client, 0)
+	if r.config.Webhook.Name == "" {
+		r.config.Webhook.Name = "Webhook"
+	}
 
-	if es := createWebhookClient(r.config.Webhook, Webhook{}, "Webhook"); es != nil {
+	if es := createWebhookClient(r.config.Webhook, Webhook{}); es != nil {
 		clients = append(clients, es)
 	}
 	for i, channel := range r.config.Webhook.Channels {
-		if es := createWebhookClient(channel, r.config.Webhook, fmt.Sprintf("Webhook Channel %d", i+1)); es != nil {
+		if channel.Name == "" {
+			channel.Name = fmt.Sprintf("Webhook Channel %d", i+1)
+		}
+
+		if es := createWebhookClient(channel, r.config.Webhook); es != nil {
 			clients = append(clients, es)
 		}
 	}
@@ -253,12 +295,19 @@ func (r *Resolver) UIClient() target.Client {
 // TeamsClients resolver method
 func (r *Resolver) S3Clients() []target.Client {
 	clients := make([]target.Client, 0)
+	if r.config.S3.Name == "" {
+		r.config.S3.Name = "S3"
+	}
 
-	if es := createS3Client(r.config.S3, S3{}, "S3"); es != nil {
+	if es := createS3Client(r.config.S3, S3{}); es != nil {
 		clients = append(clients, es)
 	}
 	for i, channel := range r.config.S3.Channels {
-		if es := createS3Client(channel, r.config.S3, fmt.Sprintf("S3 Channel %d", i+1)); es != nil {
+		if channel.Name == "" {
+			channel.Name = fmt.Sprintf("S3 Channel %d", i+1)
+		}
+
+		if es := createS3Client(channel, r.config.S3); es != nil {
 			clients = append(clients, es)
 		}
 	}
@@ -357,7 +406,7 @@ func NewResolver(config *Config, k8sConfig *rest.Config) Resolver {
 	}
 }
 
-func createSlackClient(config Slack, parent Slack, name string) target.Client {
+func createSlackClient(config Slack, parent Slack) target.Client {
 	if config.Webhook == "" {
 		return nil
 	}
@@ -370,10 +419,10 @@ func createSlackClient(config Slack, parent Slack, name string) target.Client {
 		config.SkipExisting = parent.SkipExisting
 	}
 
-	log.Printf("[INFO] %s configured", name)
+	log.Printf("[INFO] %s configured", config.Name)
 
 	return slack.NewClient(
-		name,
+		config.Name,
 		config.Webhook,
 		config.SkipExisting,
 		createTargetFilter(config.Filter, config.MinimumPriority, config.Sources),
@@ -381,7 +430,7 @@ func createSlackClient(config Slack, parent Slack, name string) target.Client {
 	)
 }
 
-func createLokiClient(config Loki, parent Loki, name string) target.Client {
+func createLokiClient(config Loki, parent Loki) target.Client {
 	if config.Host == "" && parent.Host == "" {
 		return nil
 	} else if config.Host == "" {
@@ -396,10 +445,10 @@ func createLokiClient(config Loki, parent Loki, name string) target.Client {
 		config.MinimumPriority = parent.MinimumPriority
 	}
 
-	log.Printf("[INFO] %s configured", name)
+	log.Printf("[INFO] %s configured", config.Name)
 
 	return loki.NewClient(
-		name,
+		config.Name,
 		config.Host,
 		config.SkipExisting,
 		createTargetFilter(config.Filter, config.MinimumPriority, config.Sources),
@@ -408,7 +457,7 @@ func createLokiClient(config Loki, parent Loki, name string) target.Client {
 	)
 }
 
-func createElasticsearchClient(config Elasticsearch, parent Elasticsearch, name string) target.Client {
+func createElasticsearchClient(config Elasticsearch, parent Elasticsearch) target.Client {
 	if config.Host == "" && parent.Host == "" {
 		return nil
 	} else if config.Host == "" {
@@ -435,10 +484,10 @@ func createElasticsearchClient(config Elasticsearch, parent Elasticsearch, name 
 		config.SkipExisting = parent.SkipExisting
 	}
 
-	log.Printf("[INFO] %s configured", name)
+	log.Printf("[INFO] %s configured", config.Name)
 
 	return elasticsearch.NewClient(
-		name,
+		config.Name,
 		config.Host,
 		config.Index,
 		config.Rotation,
@@ -448,7 +497,7 @@ func createElasticsearchClient(config Elasticsearch, parent Elasticsearch, name 
 	)
 }
 
-func createDiscordClient(config Discord, parent Discord, name string) target.Client {
+func createDiscordClient(config Discord, parent Discord) target.Client {
 	if config.Webhook == "" {
 		return nil
 	}
@@ -461,10 +510,10 @@ func createDiscordClient(config Discord, parent Discord, name string) target.Cli
 		config.SkipExisting = parent.SkipExisting
 	}
 
-	log.Printf("[INFO] %s configured", name)
+	log.Printf("[INFO] %s configured", config.Name)
 
 	return discord.NewClient(
-		name,
+		config.Name,
 		config.Webhook,
 		config.SkipExisting,
 		createTargetFilter(config.Filter, config.MinimumPriority, config.Sources),
@@ -472,7 +521,7 @@ func createDiscordClient(config Discord, parent Discord, name string) target.Cli
 	)
 }
 
-func createTeamsClient(config Teams, parent Teams, name string) target.Client {
+func createTeamsClient(config Teams, parent Teams) target.Client {
 	if config.Webhook == "" {
 		return nil
 	}
@@ -485,10 +534,10 @@ func createTeamsClient(config Teams, parent Teams, name string) target.Client {
 		config.SkipExisting = parent.SkipExisting
 	}
 
-	log.Printf("[INFO] %s configured", name)
+	log.Printf("[INFO] %s configured", config.Name)
 
 	return teams.NewClient(
-		name,
+		config.Name,
 		config.Webhook,
 		config.SkipExisting,
 		createTargetFilter(config.Filter, config.MinimumPriority, config.Sources),
@@ -496,7 +545,7 @@ func createTeamsClient(config Teams, parent Teams, name string) target.Client {
 	)
 }
 
-func createWebhookClient(config Webhook, parent Webhook, name string) target.Client {
+func createWebhookClient(config Webhook, parent Webhook) target.Client {
 	if config.Host == "" {
 		return nil
 	}
@@ -521,10 +570,10 @@ func createWebhookClient(config Webhook, parent Webhook, name string) target.Cli
 		config.Headers = headers
 	}
 
-	log.Printf("[INFO] %s configured", name)
+	log.Printf("[INFO] %s configured", config.Name)
 
 	return webhook.NewClient(
-		name,
+		config.Name,
 		config.Host,
 		config.Headers,
 		config.SkipExisting,
@@ -533,7 +582,7 @@ func createWebhookClient(config Webhook, parent Webhook, name string) target.Cli
 	)
 }
 
-func createS3Client(config S3, parent S3, name string) target.Client {
+func createS3Client(config S3, parent S3) target.Client {
 	if config.Endpoint == "" && parent.Endpoint == "" {
 		return nil
 	} else if config.Endpoint == "" {
@@ -541,28 +590,28 @@ func createS3Client(config S3, parent S3, name string) target.Client {
 	}
 
 	if config.AccessKeyID == "" && parent.AccessKeyID == "" {
-		log.Printf("[ERROR] %s.AccessKeyID has not been declared", name)
+		log.Printf("[ERROR] %s.AccessKeyID has not been declared", config.Name)
 		return nil
 	} else if config.AccessKeyID == "" {
 		config.AccessKeyID = parent.AccessKeyID
 	}
 
 	if config.SecretAccessKey == "" && parent.SecretAccessKey == "" {
-		log.Printf("[ERROR] %s.SecretAccessKey has not been declared", name)
+		log.Printf("[ERROR] %s.SecretAccessKey has not been declared", config.Name)
 		return nil
 	} else if config.SecretAccessKey == "" {
 		config.SecretAccessKey = parent.SecretAccessKey
 	}
 
 	if config.Region == "" && parent.Region == "" {
-		log.Printf("[ERROR] %s.Region has not been declared", name)
+		log.Printf("[ERROR] %s.Region has not been declared", config.Name)
 		return nil
 	} else if config.Region == "" {
 		config.Region = parent.Region
 	}
 
 	if config.Bucket == "" && parent.Bucket == "" {
-		log.Printf("[ERROR] %s.Bucket has not been declared", name)
+		log.Printf("[ERROR] %s.Bucket has not been declared", config.Name)
 		return nil
 	} else if config.Bucket == "" {
 		config.Bucket = parent.Bucket
@@ -590,10 +639,10 @@ func createS3Client(config S3, parent S3, name string) target.Client {
 		config.Bucket,
 	)
 
-	log.Printf("[INFO] %s configured", name)
+	log.Printf("[INFO] %s configured", config.Name)
 
 	return s3.NewClient(
-		name,
+		config.Name,
 		s3Client,
 		config.Prefix,
 		config.SkipExisting,
