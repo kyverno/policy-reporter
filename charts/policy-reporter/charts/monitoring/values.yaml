@@ -5,7 +5,7 @@ plugins:
 annotations: {}
 
 serviceMonitor:
-  # allow to override the namespace for serviceMonitor  
+  # allow to override the namespace for serviceMonitor
   namespace:
   # labels to match the serviceMonitorSelector of the Prometheus Resource
   labels: {}
@@ -26,9 +26,10 @@ grafana:
   namespace:
   dashboards:
     # Enable the deployment of grafana dashboards
-    enabled: true 
+    enabled: true
     # Label to find dashboards using the k8s sidecar
     label: grafana_dashboard
+    value: "1"
   folder:
     # Annotation to enable folder storage using the k8s sidecar
     annotation: grafana_folder
