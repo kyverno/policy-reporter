@@ -29,6 +29,7 @@ grafana:
     enabled: true 
     # Label to find dashboards using the k8s sidecar
     label: grafana_dashboard
+    value: "1"
   folder:
     # Annotation to enable folder storage using the k8s sidecar
     annotation: grafana_folder

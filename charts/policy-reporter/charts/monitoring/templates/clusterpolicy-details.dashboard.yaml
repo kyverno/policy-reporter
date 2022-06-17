@@ -10,7 +10,7 @@ metadata:
         {{- toYaml . | nindent 4 }}
     {{- end }}
   labels:
-    {{ .Values.grafana.dashboards.label }}: "1"
+    {{ .Values.grafana.dashboards.label }}:  {{ .Values.grafana.dashboards.value }}
     {{- include "monitoring.labels" . | nindent 4 }}
 data:
   cluster-policy-reporter-details-dashboard.json: |
