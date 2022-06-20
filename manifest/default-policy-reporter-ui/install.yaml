@@ -80,6 +80,7 @@ metadata:
   namespace: policy-reporter
   labels:
     app.kubernetes.io/name: policy-reporter-ui
+    app.kubernetes.io/part-of: policy-reporter
 spec:
   replicas: 1
   selector:
@@ -128,6 +129,7 @@ metadata:
   namespace: policy-reporter
   labels:
     app.kubernetes.io/name: policy-reporter
+    app.kubernetes.io/part-of: policy-reporter
 spec:
   replicas: 1
   selector:

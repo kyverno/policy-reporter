@@ -141,6 +141,7 @@ metadata:
   labels:
     app.kubernetes.io/name: kyverno-plugin
     app.kubernetes.io/instance: policy-reporter
+    app.kubernetes.io/part-of: policy-reporter
 spec:
   replicas: 1
   selector:
@@ -192,6 +193,7 @@ metadata:
   namespace: policy-reporter
   labels:
     app.kubernetes.io/name: policy-reporter-ui
+    app.kubernetes.io/part-of: policy-reporter
 spec:
   replicas: 1
   selector:
@@ -240,6 +242,7 @@ metadata:
   namespace: policy-reporter
   labels:
     app.kubernetes.io/name: policy-reporter
+    app.kubernetes.io/part-of: policy-reporter
 spec:
   replicas: 1
   selector:
