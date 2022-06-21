@@ -5,7 +5,7 @@ description: |
   It creates Prometheus Metrics and can send rule validation events to different targets like Loki, Elasticsearch, Slack or Discord
 
 type: application
-version: 2.9.2
+version: 2.9.3
 appVersion: 2.6.1
 
 icon: https://github.com/kyverno/kyverno/raw/main/img/logo.png
@@ -18,7 +18,7 @@ maintainers:
 dependencies:
   - name: monitoring
     condition: monitoring.enabled
-    version: "2.3.1"
+    version: "2.3.2"
   - name: ui
     condition: ui.enabled
     version: "2.4.2"

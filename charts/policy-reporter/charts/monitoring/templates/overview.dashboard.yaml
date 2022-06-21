@@ -10,7 +10,7 @@ metadata:
         {{- toYaml . | nindent 4 }}
     {{- end }}
   labels:
-    {{ .Values.grafana.dashboards.label }}: {{ .Values.grafana.dashboards.value }}
+    {{ .Values.grafana.dashboards.label }}: {{ .Values.grafana.dashboards.value | quote }}
     {{- with .Values.serviceMonitor.labels }}
         {{- toYaml . | nindent 4 }}
     {{- end }}
