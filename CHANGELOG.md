@@ -1,5 +1,9 @@
 # Changelog
 
+# 2.9.3
+* Policy Reporter
+    * Fix `grafana.dashboards.value` type conversion [[fix #158](https://github.com/kyverno/policy-reporter/issues/158)]
+
 # 2.9.2
 * Policy Reporter
     * Add `grafana.dashboards.value` value to configure the ConfigMap label value for the Prometheus Operator by [[#157](https://github.com/kyverno/policy-reporter/pull/157) by [stone-z](https://github.com/stone-z)]
