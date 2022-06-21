@@ -19,6 +19,7 @@ import (
 	"github.com/kyverno/policy-reporter/pkg/target"
 	"github.com/kyverno/policy-reporter/pkg/target/discord"
 	"github.com/kyverno/policy-reporter/pkg/target/elasticsearch"
+	"github.com/kyverno/policy-reporter/pkg/target/kinesis"
 	"github.com/kyverno/policy-reporter/pkg/target/loki"
 	"github.com/kyverno/policy-reporter/pkg/target/s3"
 	"github.com/kyverno/policy-reporter/pkg/target/slack"
@@ -292,7 +293,7 @@ func (r *Resolver) UIClient() target.Client {
 	)
 }
 
-// TeamsClients resolver method
+// S3Clients resolver method
 func (r *Resolver) S3Clients() []target.Client {
 	clients := make([]target.Client, 0)
 	if r.config.S3.Name == "" {
@@ -315,6 +316,29 @@ func (r *Resolver) S3Clients() []target.Client {
 	return clients
 }
 
+// KinesisClients resolver method
+func (r *Resolver) KinesisClients() []target.Client {
+	clients := make([]target.Client, 0)
+	if r.config.Kinesis.Name == "" {
+		r.config.Kinesis.Name = "Kinesis"
+	}
+
+	if es := createKinesisClient(r.config.Kinesis, Kinesis{}); es != nil {
+		clients = append(clients, es)
+	}
+	for i, channel := range r.config.Kinesis.Channels {
+		if channel.Name == "" {
+			channel.Name = fmt.Sprintf("Kinesis Channel %d", i+1)
+		}
+
+		if es := createKinesisClient(channel, r.config.Kinesis); es != nil {
+			clients = append(clients, es)
+		}
+	}
+
+	return clients
+}
+
 // TargetClients resolver method
 func (r *Resolver) TargetClients() []target.Client {
 	if len(r.targetClients) > 0 {
@@ -329,6 +353,7 @@ func (r *Resolver) TargetClients() []target.Client {
 	clients = append(clients, r.DiscordClients()...)
 	clients = append(clients, r.TeamsClients()...)
 	clients = append(clients, r.S3Clients()...)
+	clients = append(clients, r.KinesisClients()...)
 	clients = append(clients, r.WebhookClients()...)
 
 	if ui := r.UIClient(); ui != nil {
@@ -631,7 +656,7 @@ func createS3Client(config S3, parent S3) target.Client {
 		config.SkipExisting = parent.SkipExisting
 	}
 
-	s3Client := helper.NewClient(
+	s3Client := helper.NewS3Client(
 		config.AccessKeyID,
 		config.SecretAccessKey,
 		config.Region,
@@ -645,6 +670,67 @@ func createS3Client(config S3, parent S3) target.Client {
 		config.Name,
 		s3Client,
 		config.Prefix,
+		config.SkipExisting,
+		createTargetFilter(config.Filter, config.MinimumPriority, config.Sources),
+	)
+}
+
+func createKinesisClient(config Kinesis, parent Kinesis) target.Client {
+	if config.Endpoint == "" && parent.Endpoint == "" {
+		return nil
+	} else if config.Endpoint == "" {
+		config.Endpoint = parent.Endpoint
+	}
+
+	if config.AccessKeyID == "" && parent.AccessKeyID == "" {
+		log.Printf("[ERROR] %s.AccessKeyID has not been declared", config.Name)
+		return nil
+	} else if config.AccessKeyID == "" {
+		config.AccessKeyID = parent.AccessKeyID
+	}
+
+	if config.SecretAccessKey == "" && parent.SecretAccessKey == "" {
+		log.Printf("[ERROR] %s.SecretAccessKey has not been declared", config.Name)
+		return nil
+	} else if config.SecretAccessKey == "" {
+		config.SecretAccessKey = parent.SecretAccessKey
+	}
+
+	if config.Region == "" && parent.Region == "" {
+		log.Printf("[ERROR] %s.Region has not been declared", config.Name)
+		return nil
+	} else if config.Region == "" {
+		config.Region = parent.Region
+	}
+
+	if config.StreamName == "" && parent.StreamName == "" {
+		log.Printf("[ERROR] %s.StreamName has not been declared", config.Name)
+		return nil
+	} else if config.StreamName == "" {
+		config.StreamName = parent.StreamName
+	}
+
+	if config.MinimumPriority == "" {
+		config.MinimumPriority = parent.MinimumPriority
+	}
+
+	if !config.SkipExisting {
+		config.SkipExisting = parent.SkipExisting
+	}
+
+	kinesisClient := helper.NewKinesisClient(
+		config.AccessKeyID,
+		config.SecretAccessKey,
+		config.Region,
+		config.Endpoint,
+		config.StreamName,
+	)
+
+	log.Printf("[INFO] %s configured", config.Name)
+
+	return kinesis.NewClient(
+		config.Name,
+		kinesisClient,
 		config.SkipExisting,
 		createTargetFilter(config.Filter, config.MinimumPriority, config.Sources),
 	)

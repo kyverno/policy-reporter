@@ -137,6 +137,27 @@ s3:
     {{- toYaml . | nindent 4 }}
   {{- end }}
 
+kinesis:
+  accessKeyID: {{ .Values.target.kinesis.accessKeyID }}
+  secretAccessKey:  {{ .Values.target.kinesis.secretAccessKey }}
+  region: {{ .Values.target.kinesis.region }}
+  endpoint: {{ .Values.target.kinesis.endpoint }}
+  streamName: {{ .Values.target.kinesis.streamName }}
+  minimumPriority: {{ .Values.target.kinesis.minimumPriority | quote }}
+  skipExistingOnStartup: {{ .Values.target.kinesis.skipExistingOnStartup }}
+  {{- with .Values.target.kinesis.sources }}
+  sources:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  {{- with .Values.target.kinesis.filter }}
+  filter:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  {{- with .Values.target.kinesis.channels }}
+  channels:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+
 {{- with .Values.policyPriorities }}
 priorityMap:
   {{- toYaml . | nindent 2 }}

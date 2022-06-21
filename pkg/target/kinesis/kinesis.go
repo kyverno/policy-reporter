@@ -1,4 +1,4 @@
-package s3
+package kinesis
 
 import (
 	"bytes"
@@ -14,8 +14,7 @@ import (
 
 type client struct {
 	target.BaseClient
-	s3     helper.AWSClient
-	prefix string
+	kinesis helper.AWSClient
 }
 
 func (c *client) Send(result *report.Result) {
@@ -25,22 +24,21 @@ func (c *client) Send(result *report.Result) {
 		log.Printf("[ERROR] %s : %v\n", c.Name(), err.Error())
 		return
 	}
-	key := fmt.Sprintf("%s/%s/%s-%s-%s.json", c.prefix, result.Timestamp.Format("2006-01-02"), result.Policy, result.ID, result.Timestamp.Format(time.RFC3339Nano))
+	key := fmt.Sprintf("%s-%s-%s", result.Policy, result.ID, result.Timestamp.Format(time.RFC3339Nano))
 
-	err := c.s3.Upload(body, key)
+	err := c.kinesis.Upload(body, key)
 	if err != nil {
-		log.Printf("[ERROR] %s : S3 Upload error %v \n", c.Name(), err.Error())
+		log.Printf("[ERROR] %s : Kinesis Upload error %v \n", c.Name(), err.Error())
 		return
 	}
 
 	log.Printf("[INFO] %s PUSH OK", c.Name())
 }
 
-// NewClient creates a new S3.client to send Results to S3. It doesnt' work right now
-func NewClient(name string, s3 helper.AWSClient, prefix string, skipExistingOnStartup bool, filter *target.Filter) target.Client {
+// NewClient creates a new Kinesis.client to send Results to AWS Kinesis compatible source
+func NewClient(name string, kinesis helper.AWSClient, skipExistingOnStartup bool, filter *target.Filter) target.Client {
 	return &client{
 		target.NewBaseClient(name, skipExistingOnStartup, filter),
-		s3,
-		prefix,
+		kinesis,
 	}
 }
