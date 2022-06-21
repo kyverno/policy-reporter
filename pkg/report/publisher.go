@@ -2,6 +2,7 @@ package report
 
 import (
 	"fmt"
+	"log"
 	"sync"
 	"time"
 )
@@ -107,7 +108,7 @@ func (p *lifecycleEventPublisher) Publish(reportChannels *Group) {
 		go func(cName string) {
 			channel, err := reportChannels.ListenWithRetry(cName, 3)
 			if err != nil {
-				fmt.Println(err.Error())
+				log.Println(err.Error())
 			}
 
 			for event := range channel {

@@ -17,11 +17,16 @@ var filter = report.NewFilter(false, make([]string, 0), make([]string, 0))
 
 func Test_PolicyReportWatcher(t *testing.T) {
 	ctx := context.Background()
+	stop := make(chan struct{})
+	defer close(stop)
 
 	kclient, rclient, _ := NewFakeCilent()
-	client := kubernetes.NewPolicyReportClient(kclient, NewMapper(), 100*time.Millisecond, filter)
+	client := kubernetes.NewPolicyReportClient(kclient, NewMapper(), filter)
 
-	group := client.WatchPolicyReports(ctx)
+	group, err := client.Run(stop)
+	if err != nil {
+		t.Fatal(err)
+	}
 	store := newStore(3)
 
 	wg := sync.WaitGroup{}
@@ -55,11 +60,13 @@ func Test_PolicyReportWatcher(t *testing.T) {
 }
 func Test_ClusterPolicyReportWatcher(t *testing.T) {
 	ctx := context.Background()
+	stop := make(chan struct{})
+	defer close(stop)
 
 	kclient, _, rclient := NewFakeCilent()
-	client := kubernetes.NewPolicyReportClient(kclient, NewMapper(), 100*time.Millisecond, filter)
+	client := kubernetes.NewPolicyReportClient(kclient, NewMapper(), filter)
 
-	group := client.WatchPolicyReports(ctx)
+	group, _ := client.Run(stop)
 	store := newStore(3)
 
 	wg := sync.WaitGroup{}
@@ -91,32 +98,16 @@ func Test_ClusterPolicyReportWatcher(t *testing.T) {
 	}
 }
 
-func Test_GetFoundResources(t *testing.T) {
-	ctx := context.Background()
+func Test_HasSynced(t *testing.T) {
+	stop := make(chan struct{})
+	defer close(stop)
 
 	kclient, _, _ := NewFakeCilent()
-	client := kubernetes.NewPolicyReportClient(kclient, NewMapper(), 100*time.Millisecond, filter)
+	client := kubernetes.NewPolicyReportClient(kclient, NewMapper(), filter)
 
-	client.WatchPolicyReports(ctx)
+	client.Run(stop)
 
-	time.Sleep(1 * time.Second)
-
-	if len(client.GetFoundResources()) != 2 {
-		t.Errorf("Should find PolicyReport and ClusterPolicyReport Resource")
-	}
-}
-
-func Test_GetFoundResourcesWihDisabledClusterReports(t *testing.T) {
-	ctx := context.Background()
-
-	kclient, _, _ := NewFakeCilent()
-	client := kubernetes.NewPolicyReportClient(kclient, NewMapper(), 100*time.Millisecond, report.NewFilter(true, make([]string, 0), make([]string, 0)))
-
-	client.WatchPolicyReports(ctx)
-
-	time.Sleep(1 * time.Second)
-
-	if len(client.GetFoundResources()) != 1 {
-		t.Errorf("Should find only PolicyReport Resource")
+	if client.HasSynced() != true {
+		t.Errorf("Should synced")
 	}
 }

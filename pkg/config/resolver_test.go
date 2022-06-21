@@ -352,7 +352,7 @@ func Test_ResolvePolicyStore(t *testing.T) {
 func Test_ResolveAPIServer(t *testing.T) {
 	resolver := config.NewResolver(&config.Config{}, &rest.Config{})
 
-	server := resolver.APIServer(make(map[string]string))
+	server := resolver.APIServer(func() bool { return true })
 	if server == nil {
 		t.Error("Error: Should return API Server")
 	}
