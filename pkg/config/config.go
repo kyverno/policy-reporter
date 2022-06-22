@@ -112,6 +112,20 @@ type S3 struct {
 	Channels        []S3         `mapstructure:"channels"`
 }
 
+type Kinesis struct {
+	Name            string       `mapstructure:"name"`
+	AccessKeyID     string       `mapstructure:"accessKeyID"`
+	SecretAccessKey string       `mapstructure:"secretAccessKey"`
+	Region          string       `mapstructure:"region"`
+	Endpoint        string       `mapstructure:"endpoint"`
+	StreamName      string       `mapstructure:"streamName"`
+	SkipExisting    bool         `mapstructure:"skipExistingOnStartup"`
+	MinimumPriority string       `mapstructure:"minimumPriority"`
+	Filter          TargetFilter `mapstructure:"filter"`
+	Sources         []string     `mapstructure:"sources"`
+	Channels        []Kinesis    `mapstructure:"channels"`
+}
+
 // API configuration
 type API struct {
 	Port int `mapstructure:"port"`
@@ -165,6 +179,7 @@ type Config struct {
 	Discord       Discord       `mapstructure:"discord"`
 	Teams         Teams         `mapstructure:"teams"`
 	S3            S3            `mapstructure:"s3"`
+	Kinesis       Kinesis       `mapstructure:"kinesis"`
 	UI            UI            `mapstructure:"ui"`
 	Webhook       Webhook       `mapstructure:"webhook"`
 	API           API           `mapstructure:"api"`

@@ -1,5 +1,9 @@
 # Changelog
 
+# 2.9.4
+* Policy Reporter
+    * Add [AWS Kinesis](https://aws.amazon.com/kinesis) compatible target
+
 # 2.9.3
 * Policy Reporter
     * Fix `grafana.dashboards.value` type conversion [[fix #158](https://github.com/kyverno/policy-reporter/issues/158)]

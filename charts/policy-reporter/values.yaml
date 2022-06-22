@@ -314,6 +314,28 @@ target:
     # add additional s3 channels with different configurations and filters
     channels: []
 
+  kinesis:
+    # AWS access key
+    accessKeyID: ""
+    # AWS secret access key
+    secretAccessKey: ""
+    # AWS region
+    region: ""
+    # AWS Kinesis endpoint
+    endpoint: ""
+    # AWS Kinesis stream name
+    streamName: ""
+    # minimum priority "" < info < warning < critical < error
+    minimumPriority: ""
+    # list of sources which should send to S3
+    sources: []
+    # Skip already existing PolicyReportResults on startup
+    skipExistingOnStartup: true
+    # filter results send by namespaces, policies and priorities
+    filter: {}
+    # add additional s3 channels with different configurations and filters
+    channels: []
+
 # Node labels for pod assignment
 # ref: https://kubernetes.io/docs/user-guide/node-selection/
 nodeSelector: {}
