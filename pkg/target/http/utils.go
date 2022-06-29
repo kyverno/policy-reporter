@@ -49,7 +49,7 @@ func ProcessHTTPResponse(target string, resp *http.Response, err error) {
 	}
 }
 
-func NewJSONResult(r *report.Result) Result {
+func NewJSONResult(r report.Result) Result {
 	return Result{
 		Message:  r.Message,
 		Policy:   r.Policy,

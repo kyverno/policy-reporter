@@ -14,7 +14,7 @@ type client struct {
 	validated             bool
 }
 
-func (c *client) Send(result *report.Result) {
+func (c *client) Send(result report.Result) {
 	c.Called = true
 }
 
@@ -34,7 +34,7 @@ func (c *client) SkipExistingOnStartup() bool {
 	return c.skipExistingOnStartup
 }
 
-func (c client) Validate(result *report.Result) bool {
+func (c client) Validate(result report.Result) bool {
 	return c.validated
 }
 

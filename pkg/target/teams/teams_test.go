@@ -11,7 +11,7 @@ import (
 	"github.com/kyverno/policy-reporter/pkg/target/teams"
 )
 
-var completeResult = &report.Result{
+var completeResult = report.Result{
 	Message:   "validation error: requests and limits required. Rule autogen-check-for-requests-and-limits failed at path /spec/template/spec/containers/0/resources/requests/",
 	Policy:    "require-requests-and-limits-required",
 	Rule:      "autogen-check-for-requests-and-limits",
@@ -22,7 +22,7 @@ var completeResult = &report.Result{
 	Category:  "resources",
 	Scored:    true,
 	Source:    "Kyverno",
-	Resource: &report.Resource{
+	Resource: report.Resource{
 		APIVersion: "v1",
 		Kind:       "Deployment",
 		Name:       "nginx",
@@ -32,7 +32,7 @@ var completeResult = &report.Result{
 	Properties: map[string]string{"version": "1.2.0"},
 }
 
-var minimalErrorResult = &report.Result{
+var minimalErrorResult = report.Result{
 	Message:  "validation error: label required. Rule app-label-required failed at path /spec/template/spec/containers/0/resources/requests/",
 	Policy:   "app-label-requirement",
 	Priority: report.ErrorPriority,
@@ -40,7 +40,7 @@ var minimalErrorResult = &report.Result{
 	Scored:   true,
 }
 
-var minimalResult = &report.Result{
+var minimalResult = report.Result{
 	Message:  "validation error: label required. Rule app-label-required failed at path /spec/template/spec/containers/0/resources/requests/",
 	Policy:   "app-label-requirement",
 	Priority: report.CriticalPriority,
@@ -48,7 +48,7 @@ var minimalResult = &report.Result{
 	Scored:   true,
 }
 
-var minimalInfoResult = &report.Result{
+var minimalInfoResult = report.Result{
 	Message:  "validation error: label required. Rule app-label-required failed at path /spec/template/spec/containers/0/resources/requests/",
 	Policy:   "app-label-requirement",
 	Priority: report.InfoPriority,
@@ -56,7 +56,7 @@ var minimalInfoResult = &report.Result{
 	Scored:   true,
 }
 
-var minimalDebugResult = &report.Result{
+var minimalDebugResult = report.Result{
 	Message:  "validation error: label required. Rule app-label-required failed at path /spec/template/spec/containers/0/resources/requests/",
 	Policy:   "app-label-requirement",
 	Priority: report.DebugPriority,

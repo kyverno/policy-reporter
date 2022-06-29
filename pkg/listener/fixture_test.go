@@ -6,7 +6,7 @@ import (
 	"github.com/kyverno/policy-reporter/pkg/report"
 )
 
-var result1 = &report.Result{
+var result1 = report.Result{
 	ID:       "123",
 	Message:  "validation error: requests and limits required. Rule autogen-check-for-requests-and-limits failed at path /spec/template/spec/containers/0/resources/requests/",
 	Policy:   "require-requests-and-limits-required",
@@ -17,7 +17,7 @@ var result1 = &report.Result{
 	Severity: report.High,
 	Scored:   true,
 	Source:   "Kyverno",
-	Resource: &report.Resource{
+	Resource: report.Resource{
 		APIVersion: "v1",
 		Kind:       "Deployment",
 		Name:       "nginx",
@@ -26,7 +26,7 @@ var result1 = &report.Result{
 	},
 }
 
-var result2 = &report.Result{
+var result2 = report.Result{
 	ID:       "124",
 	Message:  "validation error: requests and limits required. Rule autogen-check-for-requests-and-limits failed at path /spec/template/spec/containers/0/resources/requests/",
 	Policy:   "require-requests-and-limits-required",
@@ -36,7 +36,7 @@ var result2 = &report.Result{
 	Category: "Best Practices",
 	Scored:   true,
 	Source:   "Kyverno",
-	Resource: &report.Resource{
+	Resource: report.Resource{
 		APIVersion: "v1",
 		Kind:       "Pod",
 		Name:       "nginx",
@@ -45,31 +45,26 @@ var result2 = &report.Result{
 	},
 }
 
-var preport1 = &report.PolicyReport{
-	ID:        report.GeneratePolicyReportID("polr-test", "test"),
-	Name:      "polr-test",
-	Namespace: "test",
-	Results: map[string]*report.Result{
-		result1.GetIdentifier(): result1,
-	},
-	Summary:           &report.Summary{Fail: 1},
+var preport1 = report.PolicyReport{
+	ID:                report.GeneratePolicyReportID("polr-test", "test"),
+	Name:              "polr-test",
+	Namespace:         "test",
+	Results:           []report.Result{result1},
+	Summary:           report.Summary{Fail: 1},
 	CreationTimestamp: time.Now(),
 }
 
-var preport2 = &report.PolicyReport{
-	ID:        report.GeneratePolicyReportID("polr-test", "test"),
-	Name:      "polr-test",
-	Namespace: "test",
-	Results: map[string]*report.Result{
-		result1.GetIdentifier(): result1,
-		result2.GetIdentifier(): result2,
-	},
-	Summary:           &report.Summary{Fail: 1, Pass: 1},
+var preport2 = report.PolicyReport{
+	ID:                report.GeneratePolicyReportID("polr-test", "test"),
+	Name:              "polr-test",
+	Namespace:         "test",
+	Results:           []report.Result{result1, result2},
+	Summary:           report.Summary{Fail: 1, Pass: 1},
 	CreationTimestamp: time.Now(),
 }
 
-var creport = &report.PolicyReport{
+var creport = report.PolicyReport{
 	Name:              "cpolr-test",
-	Summary:           &report.Summary{},
+	Summary:           report.Summary{},
 	CreationTimestamp: time.Now(),
 }

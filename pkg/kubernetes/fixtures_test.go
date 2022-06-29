@@ -118,6 +118,50 @@ var policyReportCRD = &v1alpha2.PolicyReport{
 	},
 }
 
+var multiResourcePolicyReportCRD = &v1alpha2.PolicyReport{
+	ObjectMeta: v1.ObjectMeta{
+		Name:      "policy-report",
+		Namespace: "test",
+	},
+	Summary: v1alpha2.PolicyReportSummary{
+		Pass:  1,
+		Skip:  2,
+		Warn:  3,
+		Fail:  4,
+		Error: 5,
+	},
+	Results: []v1alpha2.PolicyReportResult{
+		{
+			Message:   "message",
+			Result:    v1alpha2.StatusFail,
+			Scored:    true,
+			Policy:    "required-label",
+			Rule:      "app-label-required",
+			Timestamp: v1.Timestamp{Seconds: 1614093000},
+			Source:    "test",
+			Category:  "test",
+			Severity:  v1alpha2.SeverityHigh,
+			Resources: []corev1.ObjectReference{
+				{
+					APIVersion: "v1",
+					Kind:       "Deployment",
+					Name:       "nginx",
+					Namespace:  "test",
+					UID:        "dfd57c50-f30c-4729-b63f-b1954d8988d1",
+				},
+				{
+					APIVersion: "v1",
+					Kind:       "Deployment",
+					Name:       "nginx2",
+					Namespace:  "test",
+					UID:        "dfd57c50-f30c-4729-b63f-b1954d8988d2",
+				},
+			},
+			Properties: map[string]string{"version": "1.2.0"},
+		},
+	},
+}
+
 var minPolicyReportCRD = &v1alpha2.PolicyReport{
 	ObjectMeta: v1.ObjectMeta{
 		Name:      "policy-report",
@@ -203,6 +247,67 @@ var clusterPolicyReportCRD = &v1alpha2.ClusterPolicyReport{
 					APIVersion: "v1",
 					Kind:       "Namespace",
 					Name:       "policy-reporter",
+					Namespace:  "test",
+					UID:        "dfd57c50-f30c-4729-b63f-b1954d8988d1",
+				},
+			},
+			Properties: map[string]string{"version": "1.2.0"},
+		},
+	},
+}
+
+var minClusterPolicyReportCRD = &v1alpha2.ClusterPolicyReport{
+	ObjectMeta: v1.ObjectMeta{
+		Name: "cluster-policy-report",
+	},
+	Summary: v1alpha2.PolicyReportSummary{
+		Fail: 4,
+	},
+	Results: []v1alpha2.PolicyReportResult{
+		{
+			Message:   "message",
+			Result:    v1alpha2.StatusFail,
+			Scored:    true,
+			Policy:    "cluster-policy",
+			Rule:      "cluster-role",
+			Timestamp: v1.Timestamp{Seconds: 1614093000},
+			Source:    "test",
+			Category:  "test",
+			Severity:  v1alpha2.SeverityHigh,
+		},
+	},
+}
+
+var multiResourceClusterPolicyReportCRD = &v1alpha2.ClusterPolicyReport{
+	ObjectMeta: v1.ObjectMeta{
+		Name: "cluster-policy-report",
+	},
+	Summary: v1alpha2.PolicyReportSummary{
+		Fail: 4,
+	},
+	Results: []v1alpha2.PolicyReportResult{
+		{
+			Message:   "message",
+			Result:    v1alpha2.StatusFail,
+			Scored:    true,
+			Policy:    "cluster-required-label",
+			Rule:      "ns-label-required",
+			Timestamp: v1.Timestamp{Seconds: 1614093000},
+			Source:    "test",
+			Category:  "test",
+			Severity:  v1alpha2.SeverityHigh,
+			Resources: []corev1.ObjectReference{
+				{
+					APIVersion: "v1",
+					Kind:       "Namespace",
+					Name:       "policy-reporter",
+					Namespace:  "test",
+					UID:        "dfd57c50-f30c-4729-b63f-b1954d8988d1",
+				},
+				{
+					APIVersion: "v1",
+					Kind:       "Namespace",
+					Name:       "policy-reporter-check",
 					Namespace:  "test",
 					UID:        "dfd57c50-f30c-4729-b63f-b1954d8988d1",
 				},

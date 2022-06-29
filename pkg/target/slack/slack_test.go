@@ -10,7 +10,7 @@ import (
 	"github.com/kyverno/policy-reporter/pkg/target/slack"
 )
 
-var completeResult = &report.Result{
+var completeResult = report.Result{
 	Message:   "validation error: requests and limits required. Rule autogen-check-for-requests-and-limits failed at path /spec/template/spec/containers/0/resources/requests/",
 	Policy:    "require-requests-and-limits-required",
 	Rule:      "autogen-check-for-requests-and-limits",
@@ -21,7 +21,7 @@ var completeResult = &report.Result{
 	Category:  "resources",
 	Scored:    true,
 	Source:    "Kyverno",
-	Resource: &report.Resource{
+	Resource: report.Resource{
 		APIVersion: "v1",
 		Kind:       "Deployment",
 		Name:       "nginx",
@@ -31,7 +31,7 @@ var completeResult = &report.Result{
 	Properties: map[string]string{"version": "1.2.0"},
 }
 
-var enforceResult = &report.Result{
+var enforceResult = report.Result{
 	Message:   "validation error: requests and limits required. Rule autogen-check-for-requests-and-limits failed at path /spec/template/spec/containers/0/resources/requests/",
 	Policy:    "require-requests-and-limits-required",
 	Rule:      "check-for-requests-and-limits",
@@ -42,7 +42,7 @@ var enforceResult = &report.Result{
 	Category:  "resources",
 	Scored:    true,
 	Source:    "Kyverno",
-	Resource: &report.Resource{
+	Resource: report.Resource{
 		APIVersion: "",
 		Kind:       "Pod",
 		Name:       "nginx",
@@ -52,7 +52,7 @@ var enforceResult = &report.Result{
 	Properties: map[string]string{"version": "1.2.0"},
 }
 
-var incompleteResult = &report.Result{
+var incompleteResult = report.Result{
 	Message:   "validation error: requests and limits required. Rule autogen-check-for-requests-and-limits failed at path /spec/template/spec/containers/0/resources/requests/",
 	Policy:    "require-requests-and-limits-required",
 	Rule:      "check-for-requests-and-limits",
@@ -63,7 +63,7 @@ var incompleteResult = &report.Result{
 	Category:  "resources",
 	Scored:    true,
 	Source:    "Kyverno",
-	Resource: &report.Resource{
+	Resource: report.Resource{
 		APIVersion: "v1",
 		Kind:       "Pod",
 		Name:       "nginx",
@@ -73,7 +73,7 @@ var incompleteResult = &report.Result{
 	Properties: map[string]string{"version": "1.2.0"},
 }
 
-var incompleteResult2 = &report.Result{
+var incompleteResult2 = report.Result{
 	Message:   "validation error: requests and limits required. Rule autogen-check-for-requests-and-limits failed at path /spec/template/spec/containers/0/resources/requests/",
 	Policy:    "require-requests-and-limits-required",
 	Rule:      "check-for-requests-and-limits",
@@ -84,7 +84,7 @@ var incompleteResult2 = &report.Result{
 	Category:  "resources",
 	Scored:    true,
 	Source:    "Kyverno",
-	Resource: &report.Resource{
+	Resource: report.Resource{
 		APIVersion: "",
 		Kind:       "Pod",
 		Name:       "nginx",
@@ -94,7 +94,7 @@ var incompleteResult2 = &report.Result{
 	Properties: map[string]string{"version": "1.2.0"},
 }
 
-var minimalResult = &report.Result{
+var minimalResult = report.Result{
 	Message:  "validation error: label required. Rule app-label-required failed at path /spec/template/spec/containers/0/resources/requests/",
 	Policy:   "app-label-requirement",
 	Priority: report.WarningPriority,

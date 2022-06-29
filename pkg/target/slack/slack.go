@@ -48,7 +48,7 @@ var colors = map[report.Priority]string{
 	report.ErrorPriority:    "#e20b0b",
 }
 
-func (s *client) newPayload(result *report.Result) payload {
+func (s *client) newPayload(result report.Result) payload {
 	p := payload{
 		Attachments: make([]attachment, 0, 1),
 	}
@@ -174,7 +174,7 @@ func (s *client) newPayload(result *report.Result) payload {
 	return p
 }
 
-func (s *client) Send(result *report.Result) {
+func (s *client) Send(result report.Result) {
 	req, err := http.CreateJSONRequest(s.Name(), "POST", s.webhook, s.newPayload(result))
 	if err != nil {
 		return

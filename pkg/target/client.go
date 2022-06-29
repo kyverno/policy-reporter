@@ -10,13 +10,13 @@ import (
 // Client for a provided Target
 type Client interface {
 	// Send the given Result to the configured Target
-	Send(result *report.Result)
+	Send(result report.Result)
 	// SkipExistingOnStartup skips already existing PolicyReportResults on startup
 	SkipExistingOnStartup() bool
 	// Name is a unique identifier for each Target
 	Name() string
 	// Validate is a result should send
-	Validate(result *report.Result) bool
+	Validate(result report.Result) bool
 	// MinimumPriority for a triggered Result to send to this target
 	MinimumPriority() string
 	// Sources of the Results which should send to this target, empty means all sources
@@ -36,7 +36,7 @@ type Filter struct {
 	Sources         []string
 }
 
-func (f *Filter) Validate(result *report.Result) bool {
+func (f *Filter) Validate(result report.Result) bool {
 	if len(f.Sources) > 0 && !contains(result.Source, f.Sources) {
 		return false
 	}
@@ -60,8 +60,8 @@ func (f *Filter) Validate(result *report.Result) bool {
 	return true
 }
 
-func (f *Filter) validateNamespaceRules(result *report.Result) bool {
-	if result.Resource != nil && len(f.Namespace.Include) > 0 {
+func (f *Filter) validateNamespaceRules(result report.Result) bool {
+	if result.HasResource() && len(f.Namespace.Include) > 0 {
 		for _, ns := range f.Namespace.Include {
 			if wildcard.Match(ns, result.Resource.Namespace) {
 				return true
@@ -69,7 +69,7 @@ func (f *Filter) validateNamespaceRules(result *report.Result) bool {
 		}
 
 		return false
-	} else if result.Resource != nil && len(f.Namespace.Exclude) > 0 {
+	} else if result.HasResource() && len(f.Namespace.Exclude) > 0 {
 		for _, ns := range f.Namespace.Exclude {
 			if wildcard.Match(ns, result.Resource.Namespace) {
 				return false
@@ -80,7 +80,7 @@ func (f *Filter) validateNamespaceRules(result *report.Result) bool {
 	return true
 }
 
-func (f *Filter) validatePolicyRules(result *report.Result) bool {
+func (f *Filter) validatePolicyRules(result report.Result) bool {
 	if len(f.Policy.Include) > 0 {
 		for _, ns := range f.Policy.Include {
 			if wildcard.Match(ns, result.Policy) {
@@ -100,7 +100,7 @@ func (f *Filter) validatePolicyRules(result *report.Result) bool {
 	return true
 }
 
-func (f *Filter) validatePriorityRules(result *report.Result) bool {
+func (f *Filter) validatePriorityRules(result report.Result) bool {
 	if len(f.Priority.Include) > 0 {
 		return contains(result.Priority.String(), f.Priority.Include)
 	} else if len(f.Priority.Exclude) > 0 && contains(result.Priority.String(), f.Priority.Exclude) {
@@ -128,7 +128,7 @@ func (c *BaseClient) Sources() []string {
 	return c.filter.Sources
 }
 
-func (c *BaseClient) Validate(result *report.Result) bool {
+func (c *BaseClient) Validate(result report.Result) bool {
 	return c.filter.Validate(result)
 }
 

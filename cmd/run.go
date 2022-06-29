@@ -1,8 +1,6 @@
 package cmd
 
 import (
-	"context"
-	"errors"
 	"flag"
 	"log"
 
@@ -34,8 +32,6 @@ func newRunCMD() *cobra.Command {
 				return err
 			}
 
-			ctx := context.Background()
-
 			resolver := config.NewResolver(c, k8sConfig)
 
 			client, err := resolver.PolicyReportClient()
@@ -43,11 +39,11 @@ func newRunCMD() *cobra.Command {
 				return err
 			}
 
+			server := resolver.APIServer(client.HasSynced)
+
 			resolver.RegisterSendResultListener()
 
 			g := &errgroup.Group{}
-
-			server := resolver.APIServer(client.GetFoundResources())
 
 			if c.REST.Enabled {
 				db, err := resolver.Database()
@@ -79,13 +75,13 @@ func newRunCMD() *cobra.Command {
 
 			g.Go(server.Start)
 
-			g.Go(func() error {
-				eventChan := client.WatchPolicyReports(ctx)
+			stop := make(chan struct{})
+			defer close(stop)
 
-				resolver.EventPublisher().Publish(eventChan)
-
-				return errors.New("event publisher stoped")
-			})
+			err = client.Run(stop)
+			if err != nil {
+				return err
+			}
 
 			return g.Wait()
 		},

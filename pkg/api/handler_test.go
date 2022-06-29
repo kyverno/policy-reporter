@@ -16,7 +16,7 @@ func Test_HealthzAPI(t *testing.T) {
 		}
 
 		rr := httptest.NewRecorder()
-		handler := api.HealthzHandler(map[string]string{"wgpolicyk8s.io/v1alpha2": "wgpolicyk8s.io/v1alpha2"})
+		handler := api.HealthzHandler(func() bool { return true })
 
 		handler.ServeHTTP(rr, req)
 
@@ -24,15 +24,14 @@ func Test_HealthzAPI(t *testing.T) {
 			t.Errorf("handler returned wrong status code: got %v want %v", status, http.StatusOK)
 		}
 	})
-
-	t.Run("Unavailable Respose", func(t *testing.T) {
+	t.Run("Unavailable Response", func(t *testing.T) {
 		req, err := http.NewRequest("GET", "/healthz", nil)
 		if err != nil {
 			t.Fatal(err)
 		}
 
 		rr := httptest.NewRecorder()
-		handler := api.HealthzHandler(map[string]string{})
+		handler := api.HealthzHandler(func() bool { return false })
 
 		handler.ServeHTTP(rr, req)
 
@@ -43,19 +42,34 @@ func Test_HealthzAPI(t *testing.T) {
 }
 
 func Test_ReadyAPI(t *testing.T) {
-	t.Run("Success Respose", func(t *testing.T) {
+	t.Run("Success Response", func(t *testing.T) {
 		req, err := http.NewRequest("GET", "/ready", nil)
 		if err != nil {
 			t.Fatal(err)
 		}
 
 		rr := httptest.NewRecorder()
-		handler := api.ReadyHandler()
+		handler := api.ReadyHandler(func() bool { return true })
 
 		handler.ServeHTTP(rr, req)
 
 		if status := rr.Code; status != http.StatusOK {
 			t.Errorf("handler returned wrong status code: got %v want %v", status, http.StatusOK)
+		}
+	})
+	t.Run("Unavailable Response", func(t *testing.T) {
+		req, err := http.NewRequest("GET", "/ready", nil)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		rr := httptest.NewRecorder()
+		handler := api.ReadyHandler(func() bool { return false })
+
+		handler.ServeHTTP(rr, req)
+
+		if status := rr.Code; status != http.StatusServiceUnavailable {
+			t.Errorf("handler returned wrong status code: got %v want %v", status, http.StatusServiceUnavailable)
 		}
 	})
 }

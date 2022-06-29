@@ -2,9 +2,10 @@ package report
 
 import (
 	"bytes"
-	"crypto/sha1"
-	"fmt"
+	"strconv"
 	"time"
+
+	"github.com/segmentio/fasthash/fnv1a"
 )
 
 // Event Enum
@@ -33,8 +34,8 @@ const (
 // LifecycleEvent of PolicyReports
 type LifecycleEvent struct {
 	Type            Event
-	NewPolicyReport *PolicyReport
-	OldPolicyReport *PolicyReport
+	NewPolicyReport PolicyReport
+	OldPolicyReport PolicyReport
 }
 
 // Status Enum defined for PolicyReport
@@ -173,15 +174,15 @@ type Result struct {
 	Message    string
 	Policy     string
 	Rule       string
-	Priority   Priority
 	Status     Status
 	Severity   Severity `json:",omitempty"`
 	Category   string   `json:",omitempty"`
 	Source     string   `json:",omitempty"`
-	Scored     bool
 	Timestamp  time.Time
-	Resource   *Resource
 	Properties map[string]string
+	Resource   Resource
+	Priority   Priority
+	Scored     bool
 }
 
 // GetIdentifier returns a global unique Result identifier
@@ -191,10 +192,6 @@ func (r Result) GetIdentifier() string {
 
 // HasResource checks if the result has an valid Resource
 func (r Result) HasResource() bool {
-	if r.Resource == nil {
-		return false
-	}
-
 	return r.Resource.UID != "" || r.Resource.Name != ""
 }
 
@@ -212,8 +209,8 @@ type PolicyReport struct {
 	ID                string
 	Name              string
 	Namespace         string
-	Results           map[string]*Result
-	Summary           *Summary
+	Results           []Result
+	Summary           Summary
 	CreationTimestamp time.Time
 }
 
@@ -224,19 +221,29 @@ func (pr PolicyReport) GetIdentifier() string {
 
 // HasResult returns if the Report has an Rusult with the given ID
 func (pr PolicyReport) HasResult(id string) bool {
-	_, ok := pr.Results[id]
+	for _, r := range pr.Results {
+		if r.ID == id {
+			return true
+		}
+	}
 
-	return ok
+	return false
+}
+
+// GetResult returns if the Report has an Rusult with the given ID
+func (pr PolicyReport) GetResult(id string) Result {
+	for _, r := range pr.Results {
+		if r.ID == id {
+			return r
+		}
+	}
+
+	return Result{}
 }
 
 // ResultList returns all results as slice
-func (pr PolicyReport) ResultList() []*Result {
-	list := make([]*Result, 0, len(pr.Results))
-	for _, v := range pr.Results {
-		list = append(list, v)
-	}
-
-	return list
+func (pr PolicyReport) ResultList() []Result {
+	return pr.Results
 }
 
 // GetType returns the Type of the Report
@@ -249,8 +256,8 @@ func (pr PolicyReport) GetType() ResourceType {
 }
 
 // GetNewResults filters already existing Results from the old PolicyReport and returns only the diff with new Results
-func (pr PolicyReport) GetNewResults(or *PolicyReport) []*Result {
-	diff := make([]*Result, 0)
+func (pr PolicyReport) GetNewResults(or PolicyReport) []Result {
+	diff := make([]Result, 0)
 
 	for _, r := range pr.Results {
 		if or.HasResult(r.GetIdentifier()) {
@@ -264,28 +271,26 @@ func (pr PolicyReport) GetNewResults(or *PolicyReport) []*Result {
 }
 
 func GeneratePolicyReportID(name, namespace string) string {
-	id := name
+	h1 := fnv1a.Init64
+	h1 = fnv1a.AddString64(h1, name)
 
 	if namespace != "" {
-		id = fmt.Sprintf("%s__%s", namespace, name)
+		h1 = fnv1a.AddString64(h1, namespace)
 	}
 
-	h := sha1.New()
-
-	h.Write([]byte(id))
-
-	return fmt.Sprintf("%x", h.Sum(nil))
+	return strconv.FormatUint(h1, 10)
 }
 
 func GeneratePolicyReportResultID(uid, name, policy, rule, status, suffix string) string {
+	h1 := fnv1a.Init64
+	h1 = fnv1a.AddString64(h1, name)
+	h1 = fnv1a.AddString64(h1, policy)
+	h1 = fnv1a.AddString64(h1, rule)
+	h1 = fnv1a.AddString64(h1, status)
+	h1 = fnv1a.AddString64(h1, suffix)
 	if uid != "" {
-		suffix = "__" + uid
+		h1 = fnv1a.AddString64(h1, uid)
 	}
 
-	id := fmt.Sprintf("%s_%s__%s__%s%s", name, policy, rule, status, suffix)
-
-	h := sha1.New()
-	h.Write([]byte(id))
-
-	return fmt.Sprintf("%x", h.Sum(nil))
+	return strconv.FormatUint(h1, 10)
 }

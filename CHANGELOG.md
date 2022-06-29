@@ -3,6 +3,8 @@
 # 2.9.4
 * Policy Reporter
     * Add [AWS Kinesis](https://aws.amazon.com/kinesis) compatible target
+    * Add new Helm value `profiling.enabled` to enable pprof profiling, disabled by default
+    * Improved Informer handling
 
 # 2.9.3
 * Policy Reporter

@@ -4,7 +4,7 @@ import "github.com/minio/pkg/wildcard"
 
 type Filter interface {
 	DisableClusterReports() bool
-	AllowReport(report *PolicyReport) bool
+	AllowReport(report PolicyReport) bool
 }
 
 type filter struct {
@@ -17,7 +17,7 @@ func (f *filter) DisableClusterReports() bool {
 	return f.disbaleClusterReports
 }
 
-func (f *filter) AllowReport(report *PolicyReport) bool {
+func (f *filter) AllowReport(report PolicyReport) bool {
 	if report.Namespace == "" {
 		return true
 	} else if len(f.includeNamespaces) > 0 {

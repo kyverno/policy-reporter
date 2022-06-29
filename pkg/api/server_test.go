@@ -20,7 +20,7 @@ func Test_NewServer(t *testing.T) {
 
 	port := int(rnd * 10000)
 
-	server := api.NewServer(make([]target.Client, 0), port, make(map[string]string))
+	server := api.NewServer(make([]target.Client, 0), port, func() bool { return true })
 
 	server.RegisterMetricsHandler()
 	server.RegisterV1Handler(nil)

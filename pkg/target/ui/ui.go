@@ -12,7 +12,7 @@ type client struct {
 	client http.Client
 }
 
-func (e *client) Send(result *report.Result) {
+func (e *client) Send(result report.Result) {
 	req, err := http.CreateJSONRequest(e.Name(), "POST", e.host, http.NewJSONResult(result))
 	if err != nil {
 		return

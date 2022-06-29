@@ -8,12 +8,12 @@ import (
 )
 
 func NewSendResultListener(clients []target.Client) report.PolicyReportResultListener {
-	return func(r *report.Result, e bool) {
+	return func(r report.Result, e bool) {
 		wg := &sync.WaitGroup{}
 		wg.Add(len(clients))
 
 		for _, t := range clients {
-			go func(target target.Client, result *report.Result, preExisted bool) {
+			go func(target target.Client, result report.Result, preExisted bool) {
 				defer wg.Done()
 
 				if (preExisted && target.SkipExistingOnStartup()) || !target.Validate(result) {

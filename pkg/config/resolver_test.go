@@ -84,6 +84,16 @@ var testConfig = &config.Config{
 		Prefix:          "prefix",
 		Channels:        []config.S3{{}},
 	},
+	Kinesis: config.Kinesis{
+		AccessKeyID:     "AccessKey",
+		SecretAccessKey: "SecretAccessKey",
+		StreamName:      "policy-reporter",
+		SkipExisting:    true,
+		MinimumPriority: "debug",
+		Endpoint:        "https://yds.serverless.yandexcloud.net",
+		Region:          "ru-central1",
+		Channels:        []config.Kinesis{{}},
+	},
 }
 
 func Test_ResolveTarget(t *testing.T) {
@@ -132,13 +142,19 @@ func Test_ResolveTarget(t *testing.T) {
 			t.Errorf("Expected 2 Client, got %d clients", len(clients))
 		}
 	})
+	t.Run("Kinesis", func(t *testing.T) {
+		clients := resolver.KinesisClients()
+		if len(clients) != 2 {
+			t.Errorf("Expected 2 Client, got %d clients", len(clients))
+		}
+	})
 }
 
 func Test_ResolveTargets(t *testing.T) {
 	resolver := config.NewResolver(testConfig, nil)
 
 	clients := resolver.TargetClients()
-	if count := len(clients); count != 15 {
+	if count := len(clients); count != 17 {
 		t.Errorf("Expected 15 Clients, got %d", count)
 	}
 }
@@ -221,6 +237,15 @@ func Test_ResolveTargetWithoutHost(t *testing.T) {
 			SkipExisting:    true,
 			MinimumPriority: "debug",
 		},
+		Kinesis: config.Kinesis{
+			Endpoint:        "",
+			Region:          "",
+			AccessKeyID:     "",
+			SecretAccessKey: "",
+			StreamName:      "",
+			SkipExisting:    true,
+			MinimumPriority: "debug",
+		},
 	}
 
 	t.Run("Loki", func(t *testing.T) {
@@ -281,15 +306,6 @@ func Test_ResolveTargetWithoutHost(t *testing.T) {
 			t.Error("Expected Client to be nil if no accessKey is configured")
 		}
 	})
-	t.Run("S3.AccessKey", func(t *testing.T) {
-		config2.S3.Endpoint = "https://storage.yandexcloud.net"
-
-		resolver := config.NewResolver(config2, nil)
-
-		if len(resolver.S3Clients()) != 0 {
-			t.Error("Expected Client to be nil if no accessKey is configured")
-		}
-	})
 	t.Run("S3.SecretAccessKey", func(t *testing.T) {
 		config2.S3.AccessKeyID = "access"
 
@@ -314,6 +330,49 @@ func Test_ResolveTargetWithoutHost(t *testing.T) {
 		resolver := config.NewResolver(config2, nil)
 
 		if len(resolver.S3Clients()) != 0 {
+			t.Error("Expected Client to be nil if no bucket is configured")
+		}
+	})
+	t.Run("Kinesis.Endoint", func(t *testing.T) {
+		resolver := config.NewResolver(config2, nil)
+
+		if len(resolver.KinesisClients()) != 0 {
+			t.Error("Expected Client to be nil if no endpoint is configured")
+		}
+	})
+	t.Run("Kinesis.AccessKey", func(t *testing.T) {
+		config2.Kinesis.Endpoint = "https://yds.serverless.yandexcloud.net"
+
+		resolver := config.NewResolver(config2, nil)
+
+		if len(resolver.KinesisClients()) != 0 {
+			t.Error("Expected Client to be nil if no accessKey is configured")
+		}
+	})
+	t.Run("Kinesis.SecretAccessKey", func(t *testing.T) {
+		config2.Kinesis.AccessKeyID = "access"
+
+		resolver := config.NewResolver(config2, nil)
+
+		if len(resolver.KinesisClients()) != 0 {
+			t.Error("Expected Client to be nil if no secretAccessKey is configured")
+		}
+	})
+	t.Run("Kinesis.Region", func(t *testing.T) {
+		config2.Kinesis.SecretAccessKey = "secret"
+
+		resolver := config.NewResolver(config2, nil)
+
+		if len(resolver.KinesisClients()) != 0 {
+			t.Error("Expected Client to be nil if no region is configured")
+		}
+	})
+	t.Run("Kinesis.StreamName", func(t *testing.T) {
+		config2.Kinesis.Region = "ru-central1"
+
+		resolver := config.NewResolver(config2, nil)
+
+		if len(resolver.KinesisClients()) != 0 {
 			t.Error("Expected Client to be nil if no bucket is configured")
 		}
 	})
@@ -352,7 +411,7 @@ func Test_ResolvePolicyStore(t *testing.T) {
 func Test_ResolveAPIServer(t *testing.T) {
 	resolver := config.NewResolver(&config.Config{}, &rest.Config{})
 
-	server := resolver.APIServer(make(map[string]string))
+	server := resolver.APIServer(func() bool { return true })
 	if server == nil {
 		t.Error("Error: Should return API Server")
 	}

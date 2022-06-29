@@ -27,7 +27,7 @@ type client struct {
 	client   http.Client
 }
 
-func (e *client) Send(result *report.Result) {
+func (e *client) Send(result report.Result) {
 	var host string
 	switch e.rotation {
 	case None:

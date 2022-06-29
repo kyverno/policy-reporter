@@ -46,11 +46,11 @@ type Resolver struct {
 }
 
 // APIServer resolver method
-func (r *Resolver) APIServer(foundResources map[string]string) api.Server {
+func (r *Resolver) APIServer(synced func() bool) api.Server {
 	return api.NewServer(
 		r.TargetClients(),
 		r.config.API.Port,
-		foundResources,
+		synced,
 	)
 }
 
@@ -386,7 +386,7 @@ func (r *Resolver) PolicyReportClient() (report.PolicyReportClient, error) {
 		return nil, err
 	}
 
-	r.policyReportClient = kubernetes.NewPolicyReportClient(client, r.Mapper(), 5*time.Second, r.ReportFilter())
+	r.policyReportClient = kubernetes.NewPolicyReportClient(client, r.Mapper(), r.ReportFilter(), r.EventPublisher())
 
 	return r.policyReportClient, nil
 }

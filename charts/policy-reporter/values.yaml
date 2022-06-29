@@ -109,6 +109,9 @@ metrics:
 #    status:
 #      exclude: ["pass", "skip"]
 
+profiling:
+  enabled: false
+
 # Filter PolicyReport resources to process
 reportFilter:
   namespaces:
