@@ -109,7 +109,23 @@ func Test_PolicyReport(t *testing.T) {
 			t.Errorf("Expected len of PolicyReport.ResultList() to be 2 (actual: %d)", len(list))
 		}
 	})
+	t.Run("Check PolicyReport.GetResult", func(t *testing.T) {
+		preport := report.PolicyReport{
+			ID:                "24cfa233af033d104cd6ce0ff9a5a875c71a5844",
+			Name:              "polr-test",
+			Namespace:         "test",
+			Summary:           report.Summary{},
+			CreationTimestamp: time.Now(),
+			Results:           []report.Result{result1},
+		}
 
+		if result := preport.GetResult("8804968580595351199"); result.ID != "8804968580595351199" {
+			t.Error("Expected PolicyReport.GetResult() returns a given Result by ID")
+		}
+		if result := preport.GetResult("123"); result.ID != "" {
+			t.Error("Expected PolicyReport.GetResult() returns an empty Result for an unknown ID")
+		}
+	})
 }
 
 func Test_ClusterPolicyReport(t *testing.T) {
@@ -170,7 +186,6 @@ func Test_Result(t *testing.T) {
 			t.Errorf("Expected result.HasResource() to be false without a Resource (actual: %v)", result1.HasResource())
 		}
 	})
-
 }
 
 func Test_MarshalPriority(t *testing.T) {
@@ -247,6 +262,23 @@ func Test_Priorities(t *testing.T) {
 		}
 		if prio := report.PriorityFromSeverity(report.Low); prio != report.InfoPriority {
 			t.Errorf("Expected Priority to be %d (actual %d)", report.InfoPriority, prio)
+		}
+	})
+}
+
+func Test_Events(t *testing.T) {
+	t.Run("Event.String", func(t *testing.T) {
+		if report.Added.String() != "add" {
+			t.Errorf("Unexpected type conversion, expected %s go %s", "add", report.Added.String())
+		}
+		if report.Updated.String() != "update" {
+			t.Errorf("Unexpected type conversion, expected %s go %s", "update", report.Updated.String())
+		}
+		if report.Deleted.String() != "delete" {
+			t.Errorf("Unexpected type conversion, expected %s go %s", "delete", report.Deleted.String())
+		}
+		if report.Event(4).String() != "unknown" {
+			t.Errorf("Unexpected type conversion, expected %s go %s", "unknown", report.Event(4).String())
 		}
 	})
 }

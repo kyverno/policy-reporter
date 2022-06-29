@@ -189,6 +189,11 @@ func Test_MapClusterPolicyReport(t *testing.T) {
 	if resource.UID != "dfd57c50-f30c-4729-b63f-b1954d8988d1" {
 		t.Errorf("Expected Resource.Namespace 'dfd57c50-f30c-4729-b63f-b1954d8988d1' (acutal %s)", resource.UID)
 	}
+
+	report2 := mapper.MapClusterPolicyReport(minClusterPolicyReportCRD)
+	if len(report2.Results) != 1 || report2.Results[0].HasResource() {
+		t.Error("Expected one result withour resource")
+	}
 }
 
 func Test_ResultIDPropertyMapping(t *testing.T) {
@@ -248,5 +253,27 @@ func Test_MapCustomResultID(t *testing.T) {
 	result := r.GetResult("123456")
 	if result.ID == "" {
 		t.Errorf("Expected resultID used as result.ID")
+	}
+}
+
+func Test_MapMultipleResourcesPolicyReport(t *testing.T) {
+	mapper := kubernetes.NewMapper(make(map[string]string))
+
+	r := mapper.MapPolicyReport(multiResourcePolicyReportCRD)
+
+	results := r.ResultList()
+	if len(results) != 2 {
+		t.Errorf("Expected one result per resource")
+	}
+}
+
+func Test_MapMultipleResourcesClusterPolicyReport(t *testing.T) {
+	mapper := kubernetes.NewMapper(make(map[string]string))
+
+	r := mapper.MapClusterPolicyReport(multiResourceClusterPolicyReportCRD)
+
+	results := r.ResultList()
+	if len(results) != 2 {
+		t.Errorf("Expected one result per resource")
 	}
 }

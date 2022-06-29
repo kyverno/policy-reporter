@@ -243,12 +243,7 @@ func (pr PolicyReport) GetResult(id string) Result {
 
 // ResultList returns all results as slice
 func (pr PolicyReport) ResultList() []Result {
-	list := make([]Result, 0, len(pr.Results))
-	for _, v := range pr.Results {
-		list = append(list, v)
-	}
-
-	return list
+	return pr.Results
 }
 
 // GetType returns the Type of the Report

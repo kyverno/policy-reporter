@@ -43,7 +43,6 @@ type Resolver struct {
 	policyReportClient report.PolicyReportClient
 	targetClients      []target.Client
 	resultCache        cache.Cache
-	synced             func() bool
 }
 
 // APIServer resolver method

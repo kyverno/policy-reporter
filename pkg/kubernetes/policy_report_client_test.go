@@ -91,7 +91,10 @@ func Test_HasSynced(t *testing.T) {
 	kclient, _, _ := NewFakeCilent()
 	client := kubernetes.NewPolicyReportClient(kclient, NewMapper(), filter, report.NewEventPublisher())
 
-	client.Run(stop)
+	err := client.Run(stop)
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	if client.HasSynced() != true {
 		t.Errorf("Should synced")

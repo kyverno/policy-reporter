@@ -31,7 +31,7 @@ func Test_HealthzAPI(t *testing.T) {
 		}
 
 		rr := httptest.NewRecorder()
-		handler := api.ReadyHandler(func() bool { return false })
+		handler := api.HealthzHandler(func() bool { return false })
 
 		handler.ServeHTTP(rr, req)
 
