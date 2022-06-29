@@ -11,7 +11,7 @@ import (
 
 var pagination = v1.Pagination{Page: 1, Offset: 20, Direction: "ASC", SortBy: []string{"resource_name"}}
 
-var result1 = &report.Result{
+var result1 = report.Result{
 	ID:       "123",
 	Message:  "validation error: requests and limits required. Rule autogen-check-for-requests-and-limits failed at path /spec/template/spec/containers/0/resources/requests/",
 	Policy:   "require-requests-and-limits-required",
@@ -22,7 +22,7 @@ var result1 = &report.Result{
 	Severity: report.High,
 	Scored:   true,
 	Source:   "Kyverno",
-	Resource: &report.Resource{
+	Resource: report.Resource{
 		APIVersion: "v1",
 		Kind:       "Deployment",
 		Name:       "nginx",
@@ -31,7 +31,7 @@ var result1 = &report.Result{
 	},
 }
 
-var result2 = &report.Result{
+var result2 = report.Result{
 	ID:       "124",
 	Message:  "validation error: requests and limits required. Rule autogen-check-for-requests-and-limits failed at path /spec/template/spec/containers/0/resources/requests/",
 	Policy:   "require-requests-and-limits-required",
@@ -41,7 +41,7 @@ var result2 = &report.Result{
 	Category: "Best Practices",
 	Scored:   true,
 	Source:   "Kyverno",
-	Resource: &report.Resource{
+	Resource: report.Resource{
 		APIVersion: "v1",
 		Kind:       "Pod",
 		Name:       "nginx",
@@ -50,7 +50,7 @@ var result2 = &report.Result{
 	},
 }
 
-var cresult1 = &report.Result{
+var cresult1 = report.Result{
 	ID:       "125",
 	Message:  "validation error: The label `test` is required. Rule check-for-labels-on-namespace",
 	Policy:   "require-ns-labels",
@@ -61,7 +61,7 @@ var cresult1 = &report.Result{
 	Severity: report.Medium,
 	Scored:   true,
 	Source:   "Kyverno",
-	Resource: &report.Resource{
+	Resource: report.Resource{
 		APIVersion: "v1",
 		Kind:       "Namespace",
 		Name:       "test",
@@ -69,7 +69,7 @@ var cresult1 = &report.Result{
 	},
 }
 
-var cresult2 = &report.Result{
+var cresult2 = report.Result{
 	ID:       "126",
 	Message:  "validation error: The label `test` is required. Rule check-for-labels-on-namespace",
 	Policy:   "require-ns-labels",
@@ -80,7 +80,7 @@ var cresult2 = &report.Result{
 	Severity: report.High,
 	Scored:   true,
 	Source:   "Kyverno",
-	Resource: &report.Resource{
+	Resource: report.Resource{
 		APIVersion: "v1",
 		Kind:       "Namespace",
 		Name:       "dev",
@@ -88,37 +88,29 @@ var cresult2 = &report.Result{
 	},
 }
 
-var preport = &report.PolicyReport{
-	ID:        report.GeneratePolicyReportID("polr-test", "test"),
-	Name:      "polr-test",
-	Namespace: "test",
-	Results: map[string]*report.Result{
-		result1.GetIdentifier(): result1,
-	},
-	Summary:           &report.Summary{Fail: 1},
+var preport = report.PolicyReport{
+	ID:                report.GeneratePolicyReportID("polr-test", "test"),
+	Name:              "polr-test",
+	Namespace:         "test",
+	Results:           []report.Result{result1},
+	Summary:           report.Summary{Fail: 1},
 	CreationTimestamp: time.Now(),
 }
 
-var ureport = &report.PolicyReport{
-	ID:        report.GeneratePolicyReportID("polr-test", "test"),
-	Name:      "polr-test",
-	Namespace: "test",
-	Results: map[string]*report.Result{
-		result1.GetIdentifier(): result1,
-		result2.GetIdentifier(): result2,
-	},
-	Summary:           &report.Summary{Fail: 1, Pass: 1},
+var ureport = report.PolicyReport{
+	ID:                report.GeneratePolicyReportID("polr-test", "test"),
+	Name:              "polr-test",
+	Namespace:         "test",
+	Results:           []report.Result{result1, result2},
+	Summary:           report.Summary{Fail: 1, Pass: 1},
 	CreationTimestamp: time.Now(),
 }
 
-var creport = &report.PolicyReport{
-	ID:   report.GeneratePolicyReportID("cpolr", ""),
-	Name: "cpolr",
-	Results: map[string]*report.Result{
-		cresult1.GetIdentifier(): cresult1,
-		cresult2.GetIdentifier(): cresult2,
-	},
-	Summary:           &report.Summary{},
+var creport = report.PolicyReport{
+	ID:                report.GeneratePolicyReportID("cpolr", ""),
+	Name:              "cpolr",
+	Results:           []report.Result{cresult1, cresult2},
+	Summary:           report.Summary{},
 	CreationTimestamp: time.Now(),
 }
 

@@ -11,23 +11,17 @@ import (
 
 func Test_Debouncer(t *testing.T) {
 	t.Run("Skip Empty Update", func(t *testing.T) {
-		debouncer := kubernetes.NewDebouncer(200 * time.Millisecond)
-
+		counter := 0
 		wg := sync.WaitGroup{}
 		wg.Add(2)
 
-		go func() {
-			group := debouncer.ReportGroups()
-			reportID := <-group.ChannelAdded()
-			eventChan, _ := group.Listen(reportID)
+		publisher := report.NewEventPublisher()
+		publisher.RegisterListener(func(event report.LifecycleEvent) {
+			counter++
+			wg.Done()
+		})
 
-			for event := range eventChan {
-				wg.Done()
-				if len(event.NewPolicyReport.Results) == 0 {
-					t.Error("Expected to skip the empty modify event")
-				}
-			}
-		}()
+		debouncer := kubernetes.NewDebouncer(200*time.Millisecond, publisher)
 
 		debouncer.Add(report.LifecycleEvent{
 			Type:            report.Added,
@@ -48,6 +42,8 @@ func Test_Debouncer(t *testing.T) {
 
 		wg.Wait()
 
-		debouncer.ReportGroups().CloseAll()
+		if counter != 2 {
+			t.Error("Expected to skip the empty modify event")
+		}
 	})
 }

@@ -10,7 +10,7 @@ import (
 	"github.com/kyverno/policy-reporter/pkg/target/discord"
 )
 
-var completeResult = &report.Result{
+var completeResult = report.Result{
 	Message:   "validation error: requests and limits required. Rule autogen-check-for-requests-and-limits failed at path /spec/template/spec/containers/0/resources/requests/",
 	Policy:    "require-requests-and-limits-required",
 	Rule:      "autogen-check-for-requests-and-limits",
@@ -21,7 +21,7 @@ var completeResult = &report.Result{
 	Category:  "resources",
 	Scored:    true,
 	Source:    "Kyverno",
-	Resource: &report.Resource{
+	Resource: report.Resource{
 		APIVersion: "v1",
 		Kind:       "Deployment",
 		Name:       "nginx",
@@ -31,7 +31,7 @@ var completeResult = &report.Result{
 	Properties: map[string]string{"version": "1.2.0"},
 }
 
-var minimalResult = &report.Result{
+var minimalResult = report.Result{
 	Message:  "validation error: label required. Rule app-label-required failed at path /spec/template/spec/containers/0/resources/requests/",
 	Policy:   "app-label-requirement",
 	Priority: report.CriticalPriority,

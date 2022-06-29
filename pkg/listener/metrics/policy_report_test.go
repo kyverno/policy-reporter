@@ -11,7 +11,7 @@ import (
 	ioprometheusclient "github.com/prometheus/client_model/go"
 )
 
-var result1 = &report.Result{
+var result1 = report.Result{
 	ID:       "1",
 	Message:  "validation error: requests and limits required. Rule autogen-check-for-requests-and-limits failed at path /spec/template/spec/containers/0/resources/requests/",
 	Policy:   "require-requests-and-limits-required",
@@ -21,7 +21,7 @@ var result1 = &report.Result{
 	Severity: report.High,
 	Category: "resources",
 	Scored:   true,
-	Resource: &report.Resource{
+	Resource: report.Resource{
 		APIVersion: "v1",
 		Kind:       "Deployment",
 		Name:       "nginx",
@@ -31,7 +31,7 @@ var result1 = &report.Result{
 	Source: "Kyverno",
 }
 
-var result2 = &report.Result{
+var result2 = report.Result{
 	ID:       "2",
 	Message:  "validation error: requests and limits required. Rule autogen-check-for-requests-and-limits failed at path /spec/template/spec/containers/0/resources/requests/",
 	Policy:   "check-requests-and-limits-required",
@@ -40,7 +40,7 @@ var result2 = &report.Result{
 	Status:   report.Pass,
 	Category: "resources",
 	Scored:   true,
-	Resource: &report.Resource{
+	Resource: report.Resource{
 		APIVersion: "v1",
 		Kind:       "Deployment",
 		Name:       "nginx",
@@ -50,7 +50,7 @@ var result2 = &report.Result{
 	Source: "Kyverno",
 }
 
-var result3 = &report.Result{
+var result3 = report.Result{
 	ID:       "3",
 	Message:  "validation error: requests and limits required. Rule autogen-check-for-requests-and-limits failed at path /spec/template/spec/containers/0/resources/requests/",
 	Policy:   "disallow-policy",
@@ -59,7 +59,7 @@ var result3 = &report.Result{
 	Status:   report.Pass,
 	Category: "resources",
 	Scored:   true,
-	Resource: &report.Resource{
+	Resource: report.Resource{
 		APIVersion: "v1",
 		Kind:       "Deployment",
 		Name:       "nginx",
@@ -69,45 +69,38 @@ var result3 = &report.Result{
 	Source: "Kyverno",
 }
 
-var preport = &report.PolicyReport{
+var preport = report.PolicyReport{
 	ID:                "1",
 	Name:              "polr-test",
 	Namespace:         "test",
-	Results:           make(map[string]*report.Result),
-	Summary:           &report.Summary{},
+	Results:           make([]report.Result, 0),
+	Summary:           report.Summary{},
 	CreationTimestamp: time.Now(),
 }
 
 func Test_PolicyReportMetricGeneration(t *testing.T) {
-	report1 := &report.PolicyReport{
+	report1 := report.PolicyReport{
 		ID:                "1",
 		Name:              "polr-test",
 		Namespace:         "test",
-		Summary:           &report.Summary{Pass: 2, Fail: 1},
+		Summary:           report.Summary{Pass: 2, Fail: 1},
 		CreationTimestamp: time.Now(),
-		Results: map[string]*report.Result{
-			result1.GetIdentifier(): result1,
-			result2.GetIdentifier(): result2,
-			result3.GetIdentifier(): result3,
-		},
+		Results:           []report.Result{result1, result2, result3},
 	}
 
-	report2 := &report.PolicyReport{
+	report2 := report.PolicyReport{
 		ID:                "1",
 		Name:              "polr-test",
 		Namespace:         "test",
-		Summary:           &report.Summary{Pass: 0, Fail: 1},
+		Summary:           report.Summary{Pass: 0, Fail: 1},
 		CreationTimestamp: time.Now(),
-		Results: map[string]*report.Result{
-			result1.GetIdentifier(): result1,
-			result3.GetIdentifier(): result3,
-		},
+		Results:           []report.Result{result1, result3},
 	}
 
 	handler := metrics.CreatePolicyReportMetricsListener(&metrics.Filter{Policy: metrics.Rules{Exclude: []string{"disallow-policy"}}})
 
 	t.Run("Added Metric", func(t *testing.T) {
-		handler(report.LifecycleEvent{Type: report.Added, NewPolicyReport: report1, OldPolicyReport: &report.PolicyReport{}})
+		handler(report.LifecycleEvent{Type: report.Added, NewPolicyReport: report1, OldPolicyReport: report.PolicyReport{}})
 
 		metricFam, err := prometheus.DefaultGatherer.Gather()
 		if err != nil {
@@ -152,7 +145,7 @@ func Test_PolicyReportMetricGeneration(t *testing.T) {
 	})
 
 	t.Run("Modified Metric", func(t *testing.T) {
-		handler(report.LifecycleEvent{Type: report.Added, NewPolicyReport: report1, OldPolicyReport: &report.PolicyReport{}})
+		handler(report.LifecycleEvent{Type: report.Added, NewPolicyReport: report1, OldPolicyReport: report.PolicyReport{}})
 		handler(report.LifecycleEvent{Type: report.Updated, NewPolicyReport: report2, OldPolicyReport: report1})
 
 		metricFam, err := prometheus.DefaultGatherer.Gather()
@@ -198,9 +191,9 @@ func Test_PolicyReportMetricGeneration(t *testing.T) {
 	})
 
 	t.Run("Deleted Metric", func(t *testing.T) {
-		handler(report.LifecycleEvent{Type: report.Added, NewPolicyReport: report1, OldPolicyReport: &report.PolicyReport{}})
+		handler(report.LifecycleEvent{Type: report.Added, NewPolicyReport: report1, OldPolicyReport: report.PolicyReport{}})
 		handler(report.LifecycleEvent{Type: report.Updated, NewPolicyReport: report2, OldPolicyReport: report1})
-		handler(report.LifecycleEvent{Type: report.Deleted, NewPolicyReport: report2, OldPolicyReport: &report.PolicyReport{}})
+		handler(report.LifecycleEvent{Type: report.Deleted, NewPolicyReport: report2, OldPolicyReport: report.PolicyReport{}})
 
 		metricFam, err := prometheus.DefaultGatherer.Gather()
 		if err != nil {
@@ -221,7 +214,7 @@ func Test_PolicyReportMetricGeneration(t *testing.T) {
 
 func testSummaryMetricLabels(
 	metric *ioprometheusclient.Metric,
-	preport *report.PolicyReport,
+	preport report.PolicyReport,
 	status string,
 	gauge float64,
 ) error {
@@ -253,7 +246,7 @@ func testSummaryMetricLabels(
 	return nil
 }
 
-func testResultMetricLabels(metric *ioprometheusclient.Metric, result *report.Result) error {
+func testResultMetricLabels(metric *ioprometheusclient.Metric, result report.Result) error {
 	if name := *metric.Label[0].Name; name != "category" {
 		return fmt.Errorf("unexpected Name Label: %s", name)
 	}

@@ -2,20 +2,17 @@ package api
 
 import (
 	"fmt"
-	"log"
 	"net/http"
 )
 
 // HealthzHandler for the Halthz REST API
-func HealthzHandler(found map[string]string) http.HandlerFunc {
+func HealthzHandler(synced func() bool) http.HandlerFunc {
 	return func(w http.ResponseWriter, req *http.Request) {
-		if len(found) == 0 {
+		if !synced() {
 			w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 			w.WriteHeader(http.StatusServiceUnavailable)
 
-			log.Println("[WARNING] - Healthz Check: No policyreport.wgpolicyk8s.io and clusterpolicyreport.wgpolicyk8s.io crds are found")
-
-			fmt.Fprint(w, `{ "error": "No PolicyReport CRDs found" }`)
+			fmt.Fprint(w, `{ "error": "Informers not in sync" }`)
 
 			return
 		}
@@ -28,8 +25,17 @@ func HealthzHandler(found map[string]string) http.HandlerFunc {
 }
 
 // ReadyHandler for the Halthz REST API
-func ReadyHandler() http.HandlerFunc {
+func ReadyHandler(synced func() bool) http.HandlerFunc {
 	return func(w http.ResponseWriter, req *http.Request) {
+		if !synced() {
+			w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+			w.WriteHeader(http.StatusServiceUnavailable)
+
+			fmt.Fprint(w, `{ "error": "Informers not in sync" }`)
+
+			return
+		}
+
 		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 		w.WriteHeader(http.StatusOK)
 		fmt.Fprint(w, "{}")

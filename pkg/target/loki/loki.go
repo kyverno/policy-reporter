@@ -23,7 +23,7 @@ type entry struct {
 	Line string `json:"line"`
 }
 
-func newLokiPayload(result *report.Result, customLabels map[string]string) payload {
+func newLokiPayload(result report.Result, customLabels map[string]string) payload {
 	timestamp := time.Now()
 	if !result.Timestamp.IsZero() {
 		timestamp = result.Timestamp
@@ -85,7 +85,7 @@ type client struct {
 	customLabels map[string]string
 }
 
-func (l *client) Send(result *report.Result) {
+func (l *client) Send(result report.Result) {
 	req, err := http.CreateJSONRequest(l.Name(), "POST", l.host, newLokiPayload(result, l.customLabels))
 	if err != nil {
 		return

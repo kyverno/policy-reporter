@@ -22,8 +22,8 @@ func CreateClusterPolicyReportMetricsListener(filter *Filter) report.PolicyRepor
 	prometheus.Register(clusterPolicyGauge)
 	prometheus.Register(clusterRuleGauge)
 
-	var newReport *report.PolicyReport
-	var oldReport *report.PolicyReport
+	var newReport report.PolicyReport
+	var oldReport report.PolicyReport
 
 	return func(event report.LifecycleEvent) {
 		newReport = event.NewPolicyReport
@@ -70,7 +70,7 @@ func CreateClusterPolicyReportMetricsListener(filter *Filter) report.PolicyRepor
 	}
 }
 
-func generateClusterResultLabels(newReport *report.PolicyReport, result *report.Result) prometheus.Labels {
+func generateClusterResultLabels(newReport report.PolicyReport, result report.Result) prometheus.Labels {
 	labels := prometheus.Labels{
 		"rule":     result.Rule,
 		"policy":   result.Policy,
@@ -91,7 +91,7 @@ func generateClusterResultLabels(newReport *report.PolicyReport, result *report.
 	return labels
 }
 
-func resetClusterPolicyGauge(newReport *report.PolicyReport) {
+func resetClusterPolicyGauge(newReport report.PolicyReport) {
 	clusterPolicyGauge.
 		WithLabelValues(newReport.Name, "Pass").
 		Set(0)

@@ -22,8 +22,8 @@ func CreatePolicyReportMetricsListener(filter *Filter) report.PolicyReportListen
 	prometheus.Register(policyGauge)
 	prometheus.Register(ruleGauge)
 
-	var newReport *report.PolicyReport
-	var oldReport *report.PolicyReport
+	var newReport report.PolicyReport
+	var oldReport report.PolicyReport
 
 	return func(event report.LifecycleEvent) {
 		newReport = event.NewPolicyReport
@@ -70,7 +70,7 @@ func CreatePolicyReportMetricsListener(filter *Filter) report.PolicyReportListen
 	}
 }
 
-func generateResultLabels(report *report.PolicyReport, result *report.Result) prometheus.Labels {
+func generateResultLabels(report report.PolicyReport, result report.Result) prometheus.Labels {
 	labels := prometheus.Labels{
 		"namespace": report.Namespace,
 		"rule":      result.Rule,
@@ -92,7 +92,7 @@ func generateResultLabels(report *report.PolicyReport, result *report.Result) pr
 	return labels
 }
 
-func resetPolicyGauge(newReport *report.PolicyReport) {
+func resetPolicyGauge(newReport report.PolicyReport) {
 	policyGauge.WithLabelValues(newReport.Namespace, newReport.Name, "Pass").Set(0)
 	policyGauge.WithLabelValues(newReport.Namespace, newReport.Name, "Fail").Set(0)
 	policyGauge.WithLabelValues(newReport.Namespace, newReport.Name, "Warn").Set(0)

@@ -7,7 +7,7 @@ import (
 	"github.com/kyverno/policy-reporter/pkg/target"
 )
 
-var result = &report.Result{
+var result = report.Result{
 	Message:  "validation error: requests and limits required. Rule autogen-check-for-requests-and-limits failed at path /spec/template/spec/containers/0/resources/requests/",
 	Policy:   "require-requests-and-limits-required",
 	Rule:     "autogen-check-for-requests-and-limits",
@@ -17,7 +17,7 @@ var result = &report.Result{
 	Category: "resources",
 	Scored:   true,
 	Source:   "Kyverno",
-	Resource: &report.Resource{
+	Resource: report.Resource{
 		APIVersion: "v1",
 		Kind:       "Deployment",
 		Name:       "nginx",

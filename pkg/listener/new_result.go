@@ -21,8 +21,8 @@ func (l *ResultListener) RegisterListener(listener report.PolicyReportResultList
 
 func (l *ResultListener) Listen(event report.LifecycleEvent) {
 	if len(event.OldPolicyReport.Results) > 0 {
-		for id := range event.OldPolicyReport.Results {
-			l.cache.Add(id)
+		for _, result := range event.OldPolicyReport.Results {
+			l.cache.Add(result.ID)
 		}
 	}
 
@@ -56,7 +56,7 @@ func (l *ResultListener) Listen(event report.LifecycleEvent) {
 		wg.Add(len(l.listener))
 
 		for _, cb := range l.listener {
-			go func(callback report.PolicyReportResultListener, result *report.Result) {
+			go func(callback report.PolicyReportResultListener, result report.Result) {
 				callback(result, preExisted)
 				wg.Done()
 			}(cb, r)

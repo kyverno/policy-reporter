@@ -17,7 +17,7 @@ type client struct {
 	kinesis helper.AWSClient
 }
 
-func (c *client) Send(result *report.Result) {
+func (c *client) Send(result report.Result) {
 	body := new(bytes.Buffer)
 
 	if err := json.NewEncoder(body).Encode(result); err != nil {

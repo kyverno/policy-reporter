@@ -37,7 +37,7 @@ var colors = map[report.Priority]string{
 	report.ErrorPriority:    "e20b0b",
 }
 
-func newPayload(result *report.Result) payload {
+func newPayload(result report.Result) payload {
 	facts := make([]fact, 0)
 
 	facts = append(facts, fact{"Policy", result.Policy})
@@ -103,7 +103,7 @@ type client struct {
 	client  http.Client
 }
 
-func (s *client) Send(result *report.Result) {
+func (s *client) Send(result report.Result) {
 	req, err := http.CreateJSONRequest(s.Name(), "POST", s.webhook, newPayload(result))
 	if err != nil {
 		return

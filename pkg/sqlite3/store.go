@@ -81,9 +81,9 @@ func (s *policyReportStore) CreateSchemas() error {
 }
 
 // Get an PolicyReport by Type and ID
-func (s *policyReportStore) Get(id string) (*report.PolicyReport, bool) {
+func (s *policyReportStore) Get(id string) (report.PolicyReport, bool) {
 	var created int64
-	r := &report.PolicyReport{Summary: &report.Summary{}}
+	r := report.PolicyReport{Summary: report.Summary{}}
 
 	row := s.db.QueryRow("SELECT namespace, name, pass, skip, warn, fail, error, created FROM policy_report WHERE id=$1", id)
 	err := row.Scan(&r.Namespace, &r.Name, &r.Summary.Pass, &r.Summary.Skip, &r.Summary.Warn, &r.Summary.Fail, &r.Summary.Error, &created)
@@ -108,7 +108,7 @@ func (s *policyReportStore) Get(id string) (*report.PolicyReport, bool) {
 }
 
 // Add a PolicyReport to the Store
-func (s *policyReportStore) Add(r *report.PolicyReport) error {
+func (s *policyReportStore) Add(r report.PolicyReport) error {
 	stmt, err := s.db.Prepare("INSERT INTO policy_report(id, type, namespace, name, pass, skip, warn, fail, error, created) values(?,?,?,?,?,?,?,?,?,?)")
 	if err != nil {
 		return err
@@ -123,7 +123,7 @@ func (s *policyReportStore) Add(r *report.PolicyReport) error {
 	return s.persistResults(r)
 }
 
-func (s *policyReportStore) Update(r *report.PolicyReport) error {
+func (s *policyReportStore) Update(r report.PolicyReport) error {
 	stmt, err := s.db.Prepare("UPDATE policy_report SET pass=?, skip=?, warn=?, fail=?, error=?, created=? WHERE id=?")
 	if err != nil {
 		return err
@@ -755,12 +755,15 @@ func (s *policyReportStore) CountClusterResults(filter api.Filter) (int, error) 
 	return count, nil
 }
 
-func (s *policyReportStore) persistResults(report *report.PolicyReport) error {
+func (s *policyReportStore) persistResults(report report.PolicyReport) error {
+	var vals []interface{}
+	var sqlStr string
+
 	bulks := chunkSlice(report.ResultList(), 50)
 
 	for _, list := range bulks {
-		sqlStr := resultInsertBaseSQL
-		vals := make([]interface{}, 0, len(list)*18)
+		sqlStr = resultInsertBaseSQL
+		vals = make([]interface{}, 0, len(list)*18)
 
 		for _, result := range list {
 			sqlStr += "(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?),"
@@ -810,8 +813,8 @@ func (s *policyReportStore) persistResults(report *report.PolicyReport) error {
 	return nil
 }
 
-func (s *policyReportStore) fetchResults(reportID string) (map[string]*report.Result, error) {
-	results := make(map[string]*report.Result)
+func (s *policyReportStore) fetchResults(reportID string) ([]report.Result, error) {
+	results := make([]report.Result, 0)
 
 	rows, err := s.db.Query(`
 		SELECT 
@@ -844,8 +847,8 @@ func (s *policyReportStore) fetchResults(reportID string) (map[string]*report.Re
 	var timestamp int64
 
 	for rows.Next() {
-		result := &report.Result{
-			Resource: &report.Resource{},
+		result := report.Result{
+			Resource: report.Resource{},
 		}
 
 		err = rows.Scan(
@@ -878,7 +881,7 @@ func (s *policyReportStore) fetchResults(reportID string) (map[string]*report.Re
 
 		result.Timestamp = time.Unix(timestamp, 0)
 
-		results[result.GetIdentifier()] = result
+		results = append(results, result)
 	}
 
 	return results, nil
@@ -1019,8 +1022,8 @@ func NewDatabase(dbFile string) (*sql.DB, error) {
 	return sql.Open("sqlite3", dbFile)
 }
 
-func chunkSlice(slice []*report.Result, chunkSize int) [][]*report.Result {
-	var chunks [][]*report.Result
+func chunkSlice(slice []report.Result, chunkSize int) [][]report.Result {
+	var chunks [][]report.Result
 	for i := 0; i < len(slice); i += chunkSize {
 		end := i + chunkSize
 

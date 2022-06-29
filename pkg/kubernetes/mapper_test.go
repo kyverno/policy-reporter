@@ -34,8 +34,8 @@ func Test_MapPolicyReport(t *testing.T) {
 		t.Errorf("Unexpected Summary.Error value %d (expected 5)", preport.Summary.Error)
 	}
 
-	result1, ok := preport.Results[result1ID]
-	if !ok {
+	result1 := preport.GetResult(result1ID)
+	if result1.ID == "" {
 		t.Error("Expected result not found")
 	}
 
@@ -90,8 +90,8 @@ func Test_MapPolicyReport(t *testing.T) {
 		t.Errorf("Expected Resource.Namespace 'dfd57c50-f30c-4729-b63f-b1954d8988d1' (acutal %s)", resource.UID)
 	}
 
-	result2, ok := preport.Results[result2ID]
-	if !ok {
+	result2 := preport.GetResult(result2ID)
+	if result1.ID == "" {
 		t.Error("Expected result not found")
 	}
 
@@ -140,8 +140,8 @@ func Test_MapClusterPolicyReport(t *testing.T) {
 		t.Errorf("Unexpected Summary.Error value %d (expected 5)", preport.Summary.Error)
 	}
 
-	result1, ok := preport.Results[cresult1ID]
-	if !ok {
+	result1 := preport.GetResult(cresult1ID)
+	if result1.ID == "" {
 		t.Error("Expected result not found")
 	}
 
@@ -196,9 +196,9 @@ func Test_ResultIDPropertyMapping(t *testing.T) {
 
 	preport := mapper.MapPolicyReport(enforceReportCRD)
 
-	result := preport.Results[result3ID]
+	result := preport.GetResult(result3ID)
 
-	if result == nil {
+	if result.ID == "" {
 		t.Errorf("Expected ResultID was mapped from property Key %s", kubernetes.ResultIDKey)
 	}
 }
@@ -209,7 +209,7 @@ func Test_PriorityMap(t *testing.T) {
 
 		preport := mapper.MapPolicyReport(policyReportCRD)
 
-		result := preport.Results[result1ID]
+		result := preport.GetResult(result1ID)
 
 		if result.Priority != report.DebugPriority {
 			t.Errorf("Expected Policy '%d' (acutal %d)", report.DebugPriority, result.Priority)
@@ -221,8 +221,7 @@ func Test_PriorityMap(t *testing.T) {
 
 		preport := mapper.MapPolicyReport(policyReportCRD)
 
-		result := preport.Results[result1ID]
-
+		result := preport.GetResult(result1ID)
 		if result.Priority != report.DebugPriority {
 			t.Errorf("Expected Priority '%d' (acutal %d)", report.DebugPriority, result.Priority)
 		}
@@ -233,7 +232,7 @@ func Test_PriorityMap(t *testing.T) {
 
 		preport := mapper.MapPolicyReport(policyReportCRD)
 
-		result := preport.Results[result2ID]
+		result := preport.GetResult(result2ID)
 
 		if result.Priority != report.WarningPriority {
 			t.Errorf("Expected Policy '%d' (acutal %d)", report.WarningPriority, result.Priority)
@@ -246,7 +245,8 @@ func Test_MapCustomResultID(t *testing.T) {
 
 	r := mapper.MapPolicyReport(enforceReportCRD)
 
-	if _, ok := r.Results["123456"]; !ok {
+	result := r.GetResult("123456")
+	if result.ID == "" {
 		t.Errorf("Expected resultID used as result.ID")
 	}
 }

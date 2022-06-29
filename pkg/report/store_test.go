@@ -25,12 +25,12 @@ func Test_PolicyReportStore(t *testing.T) {
 	})
 
 	t.Run("Update/Get", func(t *testing.T) {
-		ureport := &report.PolicyReport{
-			ID:                "24cfa233af033d104cd6ce0ff9a5a875c71a5844",
+		ureport := report.PolicyReport{
+			ID:                "7605991845421273693",
 			Name:              "polr-test",
 			Namespace:         "test",
-			Results:           make(map[string]*report.Result),
-			Summary:           &report.Summary{Skip: 1},
+			Results:           make([]report.Result, 0),
+			Summary:           report.Summary{Skip: 1},
 			CreationTimestamp: time.Now(),
 		}
 

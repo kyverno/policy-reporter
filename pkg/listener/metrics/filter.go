@@ -18,8 +18,8 @@ type Filter struct {
 	Severity  Rules
 }
 
-func (f *Filter) Validate(result *report.Result) bool {
-	if result.Resource != nil &&
+func (f *Filter) Validate(result report.Result) bool {
+	if result.HasResource() &&
 		result.Resource.Namespace != "" &&
 		!validateRules(result.Resource.Namespace, f.Namespace) {
 		return false

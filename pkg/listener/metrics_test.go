@@ -15,7 +15,7 @@ func Test_MetricsListener(t *testing.T) {
 	slistener := listener.NewMetricsListener(&metrics.Filter{})
 
 	t.Run("Add ClusterPolicyReport Metric", func(t *testing.T) {
-		slistener(report.LifecycleEvent{Type: report.Added, NewPolicyReport: creport, OldPolicyReport: &report.PolicyReport{}})
+		slistener(report.LifecycleEvent{Type: report.Added, NewPolicyReport: creport, OldPolicyReport: report.PolicyReport{}})
 
 		metricFam, err := prometheus.DefaultGatherer.Gather()
 		if err != nil {
@@ -28,7 +28,7 @@ func Test_MetricsListener(t *testing.T) {
 		}
 	})
 	t.Run("Add PolicyReport Metric", func(t *testing.T) {
-		slistener(report.LifecycleEvent{Type: report.Added, NewPolicyReport: preport1, OldPolicyReport: &report.PolicyReport{}})
+		slistener(report.LifecycleEvent{Type: report.Added, NewPolicyReport: preport1, OldPolicyReport: report.PolicyReport{}})
 
 		metricFam, err := prometheus.DefaultGatherer.Gather()
 		if err != nil {

@@ -59,6 +59,7 @@ spec:
             - --dbfile=/sqlite/database.db
             - --metrics-enabled={{ or .Values.metrics.enabled .Values.monitoring.enabled }}
             - --rest-enabled={{ or .Values.rest.enabled .Values.ui.enabled }}
+            - --profile={{ .Values.profiling.enabled }}
           ports:
             - name: {{ .Values.port.name }}
               containerPort: {{ .Values.port.number }}

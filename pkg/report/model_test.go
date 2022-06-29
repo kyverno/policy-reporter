@@ -7,8 +7,8 @@ import (
 	"github.com/kyverno/policy-reporter/pkg/report"
 )
 
-var result1 = &report.Result{
-	ID:       "c6215d837642824766ec511357140bf02636b5d8",
+var result1 = report.Result{
+	ID:       "8804968580595351199",
 	Message:  "validation error: requests and limits required. Rule autogen-check-for-requests-and-limits failed at path /spec/template/spec/containers/0/resources/requests/",
 	Policy:   "require-requests-and-limits-required",
 	Rule:     "autogen-check-for-requests-and-limits",
@@ -17,7 +17,7 @@ var result1 = &report.Result{
 	Category: "resources",
 	Severity: report.High,
 	Scored:   true,
-	Resource: &report.Resource{
+	Resource: report.Resource{
 		APIVersion: "v1",
 		Kind:       "Deployment",
 		Name:       "nginx",
@@ -26,7 +26,7 @@ var result1 = &report.Result{
 	},
 }
 
-var result2 = &report.Result{
+var result2 = report.Result{
 	ID:       "2",
 	Message:  "validation error: requests and limits required. Rule autogen-check-for-requests-and-limits failed at path /spec/template/spec/containers/0/resources/requests/",
 	Policy:   "require-requests-and-limits-required",
@@ -35,7 +35,7 @@ var result2 = &report.Result{
 	Status:   report.Fail,
 	Category: "resources",
 	Scored:   true,
-	Resource: &report.Resource{
+	Resource: report.Resource{
 		APIVersion: "v1",
 		Kind:       "Deployment",
 		Name:       "nginx",
@@ -44,20 +44,20 @@ var result2 = &report.Result{
 	},
 }
 
-var preport = &report.PolicyReport{
-	ID:                "24cfa233af033d104cd6ce0ff9a5a875c71a5844",
+var preport = report.PolicyReport{
+	ID:                "7605991845421273693",
 	Name:              "polr-test",
 	Namespace:         "test",
-	Results:           make(map[string]*report.Result),
-	Summary:           &report.Summary{},
+	Results:           make([]report.Result, 0),
+	Summary:           report.Summary{},
 	CreationTimestamp: time.Now(),
 }
 
-var creport = &report.PolicyReport{
-	ID:                "57e1551475e17740bacc3640d2412b1a6aad6a93",
+var creport = report.PolicyReport{
+	ID:                "1241710096395975500",
 	Name:              "cpolr-test",
-	Results:           make(map[string]*report.Result),
-	Summary:           &report.Summary{},
+	Results:           make([]report.Result, 0),
+	Summary:           report.Summary{},
 	CreationTimestamp: time.Now(),
 }
 
@@ -71,21 +71,21 @@ func Test_PolicyReport(t *testing.T) {
 	})
 
 	t.Run("Check PolicyReport.GetNewResults", func(t *testing.T) {
-		preport1 := &report.PolicyReport{
+		preport1 := report.PolicyReport{
 			ID:                "24cfa233af033d104cd6ce0ff9a5a875c71a5844",
 			Name:              "polr-test",
 			Namespace:         "test",
-			Summary:           &report.Summary{},
+			Summary:           report.Summary{},
 			CreationTimestamp: time.Now(),
-			Results:           map[string]*report.Result{result1.GetIdentifier(): result1},
+			Results:           []report.Result{result1},
 		}
-		preport2 := &report.PolicyReport{
+		preport2 := report.PolicyReport{
 			ID:                "24cfa233af033d104cd6ce0ff9a5a875c71a5844",
 			Name:              "polr-test",
 			Namespace:         "test",
-			Summary:           &report.Summary{},
+			Summary:           report.Summary{},
 			CreationTimestamp: time.Now(),
-			Results:           map[string]*report.Result{result1.GetIdentifier(): result1, result2.GetIdentifier(): result2},
+			Results:           []report.Result{result1, result2},
 		}
 
 		diff := preport2.GetNewResults(preport1)
@@ -98,9 +98,9 @@ func Test_PolicyReport(t *testing.T) {
 		creport2 := &report.PolicyReport{
 			ID:                "57e1551475e17740bacc3640d2412b1a6aad6a93",
 			Name:              "cpolr-test",
-			Summary:           &report.Summary{},
+			Summary:           report.Summary{},
 			CreationTimestamp: time.Now(),
-			Results:           map[string]*report.Result{result1.GetIdentifier(): result1, result2.GetIdentifier(): result2},
+			Results:           []report.Result{result1, result2},
 		}
 
 		list := creport2.ResultList()
@@ -127,20 +127,20 @@ func Test_ClusterPolicyReport(t *testing.T) {
 	})
 
 	t.Run("Check ClusterPolicyReport.GetNewResults", func(t *testing.T) {
-		creport1 := &report.PolicyReport{
+		creport1 := report.PolicyReport{
 			ID:                "57e1551475e17740bacc3640d2412b1a6aad6a93",
 			Name:              "cpolr-test",
-			Summary:           &report.Summary{},
+			Summary:           report.Summary{},
 			CreationTimestamp: time.Now(),
-			Results:           map[string]*report.Result{result1.GetIdentifier(): result1},
+			Results:           []report.Result{result1},
 		}
 
 		creport2 := &report.PolicyReport{
 			ID:                "57e1551475e17740bacc3640d2412b1a6aad6a93",
 			Name:              "cpolr-test",
-			Summary:           &report.Summary{},
+			Summary:           report.Summary{},
 			CreationTimestamp: time.Now(),
-			Results:           map[string]*report.Result{result1.GetIdentifier(): result1, result2.GetIdentifier(): result2},
+			Results:           []report.Result{result1, result2},
 		}
 
 		diff := creport2.GetNewResults(creport1)

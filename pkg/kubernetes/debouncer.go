@@ -9,13 +9,12 @@ import (
 
 type Debouncer interface {
 	Add(e report.LifecycleEvent)
-	ReportGroups() *report.Group
 }
 
 type debouncer struct {
 	waitDuration time.Duration
 	events       map[string]report.LifecycleEvent
-	channel      *report.Group
+	publisher    report.EventPublisher
 	mutx         *sync.Mutex
 }
 
@@ -27,14 +26,8 @@ func (d *debouncer) Add(event report.LifecycleEvent) {
 		d.mutx.Unlock()
 	}
 
-	if event.Type == report.Added {
-		d.channel.Register(event.NewPolicyReport.ID)
-		d.channel.AddEvent(event)
-		return
-	}
-
-	if event.Type == report.Deleted {
-		d.channel.AddEvent(event)
+	if event.Type == report.Added || event.Type == report.Deleted {
+		d.publisher.Publish(event)
 		return
 	}
 
@@ -48,7 +41,7 @@ func (d *debouncer) Add(event report.LifecycleEvent) {
 
 			d.mutx.Lock()
 			if event, ok := d.events[event.NewPolicyReport.GetIdentifier()]; ok {
-				d.channel.AddEvent(event)
+				d.publisher.Publish(event)
 				delete(d.events, event.NewPolicyReport.GetIdentifier())
 			}
 			d.mutx.Unlock()
@@ -66,18 +59,14 @@ func (d *debouncer) Add(event report.LifecycleEvent) {
 		return
 	}
 
-	d.channel.AddEvent(event)
+	d.publisher.Publish(event)
 }
 
-func (d *debouncer) ReportGroups() *report.Group {
-	return d.channel
-}
-
-func NewDebouncer(waitDuration time.Duration) Debouncer {
+func NewDebouncer(waitDuration time.Duration, publisher report.EventPublisher) Debouncer {
 	return &debouncer{
 		waitDuration: waitDuration,
 		events:       make(map[string]report.LifecycleEvent),
 		mutx:         new(sync.Mutex),
-		channel:      report.NewGroup(),
+		publisher:    publisher,
 	}
 }

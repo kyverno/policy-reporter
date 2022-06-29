@@ -29,15 +29,15 @@ type Server interface {
 }
 
 type httpServer struct {
-	http           http.Server
-	mux            *http.ServeMux
-	targets        []target.Client
-	foundResources map[string]string
+	http    http.Server
+	mux     *http.ServeMux
+	targets []target.Client
+	synced  func() bool
 }
 
 func (s *httpServer) RegisterLifecycleHandler() {
-	s.mux.HandleFunc("/healthz", HealthzHandler(s.foundResources))
-	s.mux.HandleFunc("/ready", ReadyHandler())
+	s.mux.HandleFunc("/healthz", HealthzHandler(s.synced))
+	s.mux.HandleFunc("/ready", ReadyHandler(s.synced))
 }
 
 func (s *httpServer) RegisterV1Handler(finder v1.PolicyReportFinder) {
@@ -84,13 +84,13 @@ func (s *httpServer) Shutdown(ctx context.Context) error {
 }
 
 // NewServer constructor for a new API Server
-func NewServer(targets []target.Client, port int, foundResources map[string]string) Server {
+func NewServer(targets []target.Client, port int, synced func() bool) Server {
 	mux := http.NewServeMux()
 
 	s := &httpServer{
-		targets:        targets,
-		mux:            mux,
-		foundResources: foundResources,
+		targets: targets,
+		synced:  synced,
+		mux:     mux,
 		http: http.Server{
 			Addr:    fmt.Sprintf(":%d", port),
 			Handler: mux,
