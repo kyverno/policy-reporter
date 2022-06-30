@@ -1,5 +1,7 @@
 # Changelog
 
+# 2.9.5
+* Fix Policy Reporter Version in the Helm Chart values.yaml
 # 2.9.4
 * Policy Reporter
     * Add [AWS Kinesis](https://aws.amazon.com/kinesis) compatible target
