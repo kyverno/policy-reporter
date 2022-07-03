@@ -1,0 +1,94 @@
+{{- if  .Values.emailReports.violations.enabled }}
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: {{ include "policyreporter.fullname" . }}-violations-report
+  labels:
+    {{- include "policyreporter.labels" . | nindent 4 }}
+  {{- if .Values.annotations }}
+  annotations:
+    {{- toYaml .Values.annotations | nindent 4 }}
+  {{- end }}
+spec:
+  schedule: {{ .Values.emailReports.violations.schedule | quote }}
+  jobTemplate:
+    spec:
+      activeDeadlineSeconds: {{ .Values.emailReports.violations.activeDeadlineSeconds }}
+      backoffLimit:  {{ .Values.emailReports.violations.backoffLimit }}
+      {{- if gt (.Values.emailReports.violations.ttlSecondsAfterFinished | toString | atoi) 0 }}
+      ttlSecondsAfterFinished: {{ .Values.emailReports.violations.ttlSecondsAfterFinished }}
+      {{- end }}
+      template:
+        metadata:
+          labels:
+            {{- include "policyreporter.selectorLabels" . | nindent 12 }}
+            {{- with .Values.podLabels }}
+              {{- toYaml . | nindent 12 }}
+            {{- end }}
+            {{- with .Values.global.labels }}
+              {{- toYaml . | nindent 12 }}
+            {{- end }}
+          annotations:
+            checksum/secret: {{ include (print .Template.BasePath "/config-email-reports-secret.yaml") . | sha256sum | quote }}
+            {{- with .Values.annotations }}
+              {{- toYaml . | nindent 12 }}
+            {{- end }}
+            {{- with .Values.podAnnotations }}
+              {{- toYaml . | nindent 12 }}
+            {{- end }}
+        spec:
+          {{- with .Values.imagePullSecrets }}
+          imagePullSecrets:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          serviceAccountName: {{ include "policyreporter.serviceAccountName" . }}
+          automountServiceAccountToken: true
+          {{- if .Values.podSecurityContext }}
+          securityContext:
+            {{- toYaml .Values.podSecurityContext | nindent 12 }}
+          {{- end }}
+          restartPolicy: {{ .Values.emailReports.violations.restartPolicy }}
+          containers:
+            - name: {{ .Chart.Name }}
+              image: "{{ .Values.image.registry }}/{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+              imagePullPolicy: {{ .Values.image.pullPolicy }}
+              {{- if .Values.securityContext }}
+              securityContext: {{ include "kyverno.securityContext" . | nindent 16 }}
+              {{- end }}
+              command:
+                - /app/policyreporter
+                - send
+                - violations
+              args:
+                - --config=/app/config.yaml
+                - --template-dir=/app/templates
+              volumeMounts:
+              - name: sqlite
+                mountPath: /sqlite
+              - name: config-file
+                mountPath: /app/config.yaml
+                subPath: config.yaml
+                readOnly: true
+              env:
+              - name: NAMESPACE
+                value: {{ .Release.Namespace }}
+          volumes:
+          - name: sqlite
+            emptyDir: {}
+          - name: config-file
+            secret:
+              secretName: {{ include "policyreporter.fullname" . }}-config-email-reports
+              optional: true
+          {{- with .Values.nodeSelector }}
+          nodeSelector:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+        {{- with .Values.affinity }}
+          affinity:
+            {{- toYaml . | nindent 12 }}
+        {{- end }}
+        {{- with .Values.tolerations }}
+          tolerations:
+            {{- toYaml . | nindent 12 }}
+        {{- end }}
+{{- end }}  

@@ -1,0 +1,458 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html>
+  <head>
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <meta name="x-apple-disable-message-reformatting">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="format-detection" content="telephone=no, date=no, address=no, email=no">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <style type="text/css">
+      body,table,td{font-family:Helvetica,Arial,sans-serif !important}.ExternalClass{width:100%}.ExternalClass,.ExternalClass p,.ExternalClass span,.ExternalClass font,.ExternalClass td,.ExternalClass div{line-height:150%}a{text-decoration:none}*{color:inherit}a[x-apple-data-detectors],u+#body a,#MessageViewBody a{color:inherit;text-decoration:none;font-size:inherit;font-family:inherit;font-weight:inherit;line-height:inherit}img{-ms-interpolation-mode:bicubic}table:not([class^=s-]){font-family:Helvetica,Arial,sans-serif;mso-table-lspace:0pt;mso-table-rspace:0pt;border-spacing:0px;border-collapse:collapse}table:not([class^=s-]) td{border-spacing:0px;border-collapse:collapse}@media screen and (max-width: 600px){.row-responsive.row{margin-right:0 !important}td.col-lg-3{display:block;width:100% !important;padding-left:0 !important;padding-right:0 !important}.w-full,.w-full>tbody>tr>td{width:100% !important}.p-4:not(table),.p-4:not(.btn)>tbody>tr>td,.p-4.btn td a{padding:16px !important}.pt-6:not(table),.pt-6:not(.btn)>tbody>tr>td,.pt-6.btn td a,.py-6:not(table),.py-6:not(.btn)>tbody>tr>td,.py-6.btn td a{padding-top:24px !important}*[class*=s-lg-]>tbody>tr>td{font-size:0 !important;line-height:0 !important;height:0 !important}.s-0>tbody>tr>td{font-size:0 !important;line-height:0 !important;height:0 !important}.s-2>tbody>tr>td{font-size:8px !important;line-height:8px !important;height:8px !important}.s-4>tbody>tr>td{font-size:16px !important;line-height:16px !important;height:16px !important}.s-6>tbody>tr>td{font-size:24px !important;line-height:24px !important;height:24px !important}.s-8>tbody>tr>td{font-size:32px !important;line-height:32px !important;height:32px !important}}
+    </style>
+  </head>
+  <body class="bg-light" style="outline: 0; width: 100%; min-width: 100%; height: 100%; -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; font-family: Helvetica, Arial, sans-serif; line-height: 24px; font-weight: normal; font-size: 16px; -moz-box-sizing: border-box; -webkit-box-sizing: border-box; box-sizing: border-box; color: #000000; margin: 0; padding: 0; border-width: 0;" bgcolor="#f7fafc">
+    <table class="bg-light body" valign="top" role="presentation" border="0" cellpadding="0" cellspacing="0" style="outline: 0; width: 100%; min-width: 100%; height: 100%; -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; font-family: Helvetica, Arial, sans-serif; line-height: 24px; font-weight: normal; font-size: 16px; -moz-box-sizing: border-box; -webkit-box-sizing: border-box; box-sizing: border-box; color: #000000; margin: 0; padding: 0; border-width: 0;" bgcolor="#f7fafc">
+      <tbody>
+        <tr>
+          <td valign="top" style="line-height: 24px; font-size: 16px; margin: 0;" align="left" bgcolor="#f7fafc">
+            <table class="container-fluid" role="presentation" border="0" cellpadding="0" cellspacing="0" style="width: 100%;">
+              <tbody>
+                <tr>
+                  <td style="line-height: 24px; font-size: 16px; width: 100%; margin: 0; padding: 0 16px;" align="left">
+                    <table class="s-4 w-full" role="presentation" border="0" cellpadding="0" cellspacing="0" style="width: 100%;" width="100%">
+                      <tbody>
+                        <tr>
+                          <td style="line-height: 16px; font-size: 16px; width: 100%; height: 16px; margin: 0;" align="left" width="100%" height="16">
+                            &#160;
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                    {{ if .ClusterName }}
+                    <h1 class="h1" style="padding-top: 0; padding-bottom: 0; font-weight: 500; vertical-align: baseline; font-size: 36px; line-height: 43.2px; margin: 0;" align="left">{{ .ClusterName}}: Summary Report</h1>
+                    {{ else }}
+                    <h1 class="h1" style="padding-top: 0; padding-bottom: 0; font-weight: 500; vertical-align: baseline; font-size: 36px; line-height: 43.2px; margin: 0;" align="left">Summary Report</h1>
+                    {{ end }}
+                    <table class="s-4 w-full" role="presentation" border="0" cellpadding="0" cellspacing="0" style="width: 100%;" width="100%">
+                      <tbody>
+                        <tr>
+                          <td style="line-height: 16px; font-size: 16px; width: 100%; height: 16px; margin: 0;" align="left" width="100%" height="16">
+                            &#160;
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                    <table class="s-4 w-full" role="presentation" border="0" cellpadding="0" cellspacing="0" style="width: 100%;" width="100%">
+                      <tbody>
+                        <tr>
+                          <td style="line-height: 16px; font-size: 16px; width: 100%; height: 16px; margin: 0;" align="left" width="100%" height="16">
+                            &#160;
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                    {{ range $key, $source := .Sources }}
+                    <table class="card p-4 pt-6" role="presentation" border="0" cellpadding="0" cellspacing="0" style="border-radius: 6px; border-collapse: separate !important; width: 100%; overflow: hidden; border: 1px solid #e2e8f0;" bgcolor="#ffffff">
+                      <tbody>
+                        <tr>
+                          <td style="line-height: 24px; font-size: 16px; width: 100%; margin: 0; padding: 24px 16px 16px;" align="left" bgcolor="#ffffff">
+                            <h2 class="h2" style="padding-top: 0; padding-bottom: 0; font-weight: 500; vertical-align: baseline; font-size: 32px; line-height: 38.4px; margin: 0;" align="left">{{ $source.Name }}</h2>
+                            <table class="s-6 w-full" role="presentation" border="0" cellpadding="0" cellspacing="0" style="width: 100%;" width="100%">
+                              <tbody>
+                                <tr>
+                                  <td style="line-height: 24px; font-size: 24px; width: 100%; height: 24px; margin: 0;" align="left" width="100%" height="24">
+                                    &#160;
+                                  </td>
+                                </tr>
+                              </tbody>
+                            </table>
+                            {{ if $source.ClusterReports }}
+                            <h3 class="h4" style="padding-top: 0; padding-bottom: 0; font-weight: 500; vertical-align: baseline; font-size: 24px; line-height: 28.8px; margin: 0;" align="left">ClusterPolicyReport Summary</h3>
+                            <table class="s-4 w-full" role="presentation" border="0" cellpadding="0" cellspacing="0" style="width: 100%;" width="100%">
+                              <tbody>
+                                <tr>
+                                  <td style="line-height: 16px; font-size: 16px; width: 100%; height: 16px; margin: 0;" align="left" width="100%" height="16">
+                                    &#160;
+                                  </td>
+                                </tr>
+                              </tbody>
+                            </table>
+                            
+                            <table class="s-0 w-full" role="presentation" border="0" cellpadding="0" cellspacing="0" style="width: 100%;" width="100%">
+                              <tbody>
+                                <tr>
+                                  <td style="line-height: 0; font-size: 0; width: 100%; height: 0; margin: 0;" align="left" width="100%" height="0">
+                                    &#160;
+                                  </td>
+                                </tr>
+                              </tbody>
+                            </table>
+                            <table class="hr" role="presentation" border="0" cellpadding="0" cellspacing="0" style="width: 100%;">
+                              <tbody>
+                                <tr>
+                                  <td style="line-height: 24px; font-size: 16px; border-top-width: 1px; border-top-color: #e2e8f0; border-top-style: solid; height: 1px; width: 100%; margin: 0;" align="left">
+                                  </td>
+                                </tr>
+                              </tbody>
+                            </table>
+                            <table class="s-0 w-full" role="presentation" border="0" cellpadding="0" cellspacing="0" style="width: 100%;" width="100%">
+                              <tbody>
+                                <tr>
+                                  <td style="line-height: 0; font-size: 0; width: 100%; height: 0; margin: 0;" align="left" width="100%" height="0">
+                                    &#160;
+                                  </td>
+                                </tr>
+                              </tbody>
+                            </table>
+                            
+                            <table class="s-4 w-full" role="presentation" border="0" cellpadding="0" cellspacing="0" style="width: 100%;" width="100%">
+                              <tbody>
+                                <tr>
+                                  <td style="line-height: 16px; font-size: 16px; width: 100%; height: 16px; margin: 0;" align="left" width="100%" height="16">
+                                    &#160;
+                                  </td>
+                                </tr>
+                              </tbody>
+                            </table>
+                            <h4 class="h4  text-green-500" style="color: #198754; padding-top: 0; padding-bottom: 0; font-weight: 500; vertical-align: baseline; font-size: 24px; line-height: 28.8px; margin: 0;" align="left">Pass Results: {{ $source.ClusterPassed }}</h4>
+                            <table class="s-4 w-full" role="presentation" border="0" cellpadding="0" cellspacing="0" style="width: 100%;" width="100%">
+                              <tbody>
+                                <tr>
+                                  <td style="line-height: 16px; font-size: 16px; width: 100%; height: 16px; margin: 0;" align="left" width="100%" height="16">
+                                    &#160;
+                                  </td>
+                                </tr>
+                              </tbody>
+                            </table>
+
+                            <table class="s-0 w-full" role="presentation" border="0" cellpadding="0" cellspacing="0" style="width: 100%;" width="100%">
+                              <tbody>
+                                <tr>
+                                  <td style="line-height: 0; font-size: 0; width: 100%; height: 0; margin: 0;" align="left" width="100%" height="0">
+                                    &#160;
+                                  </td>
+                                </tr>
+                              </tbody>
+                            </table>
+                            <table class="hr" role="presentation" border="0" cellpadding="0" cellspacing="0" style="width: 100%;">
+                              <tbody>
+                                <tr>
+                                  <td style="line-height: 24px; font-size: 16px; border-top-width: 1px; border-top-color: #e2e8f0; border-top-style: solid; height: 1px; width: 100%; margin: 0;" align="left">
+                                  </td>
+                                </tr>
+                              </tbody>
+                            </table>
+                            <table class="s-0 w-full" role="presentation" border="0" cellpadding="0" cellspacing="0" style="width: 100%;" width="100%">
+                              <tbody>
+                                <tr>
+                                  <td style="line-height: 0; font-size: 0; width: 100%; height: 0; margin: 0;" align="left" width="100%" height="0">
+                                    &#160;
+                                  </td>
+                                </tr>
+                              </tbody>
+                            </table>
+
+                            {{ range $status := $.Status }}
+                            {{ $results := index $source.ClusterResults $status }}
+                            {{ $length := len $results }}
+                            <table class="s-4 w-full" role="presentation" border="0" cellpadding="0" cellspacing="0" style="width: 100%;" width="100%">
+                              <tbody>
+                                <tr>
+                                  <td style="line-height: 16px; font-size: 16px; width: 100%; height: 16px; margin: 0;" align="left" width="100%" height="16">
+                                    &#160;
+                                  </td>
+                                </tr>
+                              </tbody>
+                            </table>
+                            <h4 class="h4  text-orange-500" style="color: {{ color $status }}; padding-top: 0; padding-bottom: 0; font-weight: 500; vertical-align: baseline; font-size: 24px; line-height: 28.8px; margin: 0;" align="left">{{ title $status }} Results: {{ $length }} </h4>
+                            <table class="s-4 w-full" role="presentation" border="0" cellpadding="0" cellspacing="0" style="width: 100%;" width="100%">
+                              <tbody>
+                                <tr>
+                                  <td style="line-height: 16px; font-size: 16px; width: 100%; height: 16px; margin: 0;" align="left" width="100%" height="16">
+                                    &#160;
+                                  </td>
+                                </tr>
+                              </tbody>
+                            </table>
+
+                            {{ if $results }}
+                            <table class="table table-striped thead-default table-bordered" border="0" cellpadding="0" cellspacing="0" style="width: 100%; max-width: 100%; border: 1px solid #e2e8f0;">
+                              <thead>
+                                <tr>
+                                  <th style="line-height: 24px; font-size: 16px; margin: 0; padding: 12px; border-color: #e2e8f0; border-style: solid; border-width: 1px 1px 2px;" align="left" valign="top">Kind</th>
+                                  <th style="line-height: 24px; font-size: 16px; margin: 0; padding: 12px; border-color: #e2e8f0; border-style: solid; border-width: 1px 1px 2px;" align="left" valign="top">Name</th>
+                                  <th style="line-height: 24px; font-size: 16px; margin: 0; padding: 12px; border-color: #e2e8f0; border-style: solid; border-width: 1px 1px 2px;" align="left" valign="top">Policy</th>
+                                  <th style="line-height: 24px; font-size: 16px; margin: 0; padding: 12px; border-color: #e2e8f0; border-style: solid; border-width: 1px 1px 2px;" align="left" valign="top">Valdiation Rule</th>
+                                  <th style="line-height: 24px; font-size: 16px; margin: 0; padding: 12px; border-color: #e2e8f0; border-style: solid; border-width: 1px 1px 2px;" align="left" valign="top">Result</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                {{ range $key, $result := $results }}
+                                <tr style="" bgcolor="#f2f2f2">
+                                  <td style="line-height: 24px; font-size: 16px; margin: 0; padding: 12px; border: 1px solid #e2e8f0;" align="left" valign="top">{{ $result.Kind }}</td>
+                                  <td style="line-height: 24px; font-size: 16px; margin: 0; padding: 12px; border: 1px solid #e2e8f0;" align="left" valign="top">{{ $result.Name }}</td>
+                                  <td style="line-height: 24px; font-size: 16px; margin: 0; padding: 12px; border: 1px solid #e2e8f0;" align="left" valign="top">{{ $result.Policy }}</td>
+                                  <td style="line-height: 24px; font-size: 16px; margin: 0; padding: 12px; border: 1px solid #e2e8f0;" align="left" valign="top">{{ $result.Rule }}</td>
+                                  <td style="line-height: 24px; font-size: 16px; margin: 0; padding: 12px; border: 1px solid #e2e8f0;" align="left" valign="top">{{ $result.Status }}</td>
+                                </tr>
+                                {{ end }}
+                              </tbody>
+                            </table>
+                            {{ else }}
+                            <table class="s-0 w-full" role="presentation" border="0" cellpadding="0" cellspacing="0" style="width: 100%;" width="100%">
+                              <tbody>
+                                <tr>
+                                  <td style="line-height: 0; font-size: 0; width: 100%; height: 0; margin: 0;" align="left" width="100%" height="0">
+                                    &#160;
+                                  </td>
+                                </tr>
+                              </tbody>
+                            </table>
+                            <table class="hr" role="presentation" border="0" cellpadding="0" cellspacing="0" style="width: 100%;">
+                              <tbody>
+                                <tr>
+                                  <td style="line-height: 24px; font-size: 16px; border-top-width: 1px; border-top-color: #e2e8f0; border-top-style: solid; height: 1px; width: 100%; margin: 0;" align="left">
+                                  </td>
+                                </tr>
+                              </tbody>
+                            </table>
+                            <table class="s-0 w-full" role="presentation" border="0" cellpadding="0" cellspacing="0" style="width: 100%;" width="100%">
+                              <tbody>
+                                <tr>
+                                  <td style="line-height: 0; font-size: 0; width: 100%; height: 0; margin: 0;" align="left" width="100%" height="0">
+                                    &#160;
+                                  </td>
+                                </tr>
+                              </tbody>
+                            </table>
+                            {{ end }}
+                            {{ end }}
+                            {{ end }}
+                            
+                            {{ if or $source.NamespaceResults $source.NamespacePassed }}
+                            <table class="s-8 w-full" role="presentation" border="0" cellpadding="0" cellspacing="0" style="width: 100%;" width="100%">
+                              <tbody>
+                                <tr>
+                                  <td style="line-height: 32px; font-size: 32px; width: 100%; height: 32px; margin: 0;" align="left" width="100%" height="32">
+                                    &#160;
+                                  </td>
+                                </tr>
+                              </tbody>
+                            </table>
+                            <h3 class="h4" style="padding-top: 0; padding-bottom: 0; font-weight: 500; vertical-align: baseline; font-size: 24px; line-height: 28.8px; margin: 0;" align="left">PolicyReport Summary</h3>
+                            {{ end }}
+
+                            {{ range $namespace, $list := $source.NamespaceResults }}
+                            <table class="s-4 w-full" role="presentation" border="0" cellpadding="0" cellspacing="0" style="width: 100%;" width="100%">
+                              <tbody>
+                                <tr>
+                                  <td style="line-height:32px; font-size: 16px; width: 100%; height: 16px; margin: 0;" align="left" width="100%" height="32">
+                                    &#160;
+                                  </td>
+                                </tr>
+                              </tbody>
+                            </table>
+                            <h3 class="h5" style="padding-top: 0; padding-bottom: 0; font-weight: 500; vertical-align: baseline; font-size: 20px; line-height: 24px; margin: 0;" align="left">Namespace: {{ $namespace }}</h3>
+                            <table class="s-8 w-full" role="presentation" border="0" cellpadding="0" cellspacing="0" style="width: 100%;" width="100%">
+                              <tbody>
+                                <tr>
+                                  <td style="line-height: 32px; font-size: 32px; width: 100%; height: 32px; margin: 0;" align="left" width="100%" height="32">
+                                    &#160;
+                                  </td>
+                                </tr>
+                              </tbody>
+                            </table>
+                            <table class="card" role="presentation" border="0" cellpadding="0" cellspacing="0" style="border-radius: 6px; border-collapse: separate !important; width: 100%; overflow: hidden; border: 1px solid #e2e8f0;" bgcolor="#ffffff">
+                              <tbody>
+                                <tr>
+                                  <td style="line-height: 24px; font-size: 16px; width: 100%; margin: 0;" align="left" bgcolor="#ffffff">
+                                    <table class="container-fluid" role="presentation" border="0" cellpadding="0" cellspacing="0" style="width: 100%;">
+                                      <tbody>
+                                        <tr>
+                                          <td style="line-height: 24px; font-size: 16px; width: 100%; margin: 0; padding: 0 16px;" align="left">
+                                            <div class="row row-responsive" style="margin-right: -24px;">
+                                              <table class="" role="presentation" border="0" cellpadding="0" cellspacing="0" style="table-layout: fixed; width: 100%;" width="100%">
+                                                <tbody>
+                                                  <tr>
+                                                    <td class="col-lg-3 col-6" style="line-height: 24px; font-size: 16px; min-height: 1px; font-weight: normal; padding-right: 24px; width: 50%; margin: 0;" align="left" valign="top">
+                                                      <table class="p-4" role="presentation" border="0" cellpadding="0" cellspacing="0">
+                                                        <tbody>
+                                                          <tr>
+                                                            <td style="line-height: 24px; font-size: 16px; margin: 0; padding: 16px;" align="left">
+                                                              <div class="space-y-4">
+                                                                <h1 class="h4 fw-500 text-green-500 text-center" style="color: #198754; padding-top: 0; padding-bottom: 0; font-weight: 500 !important; vertical-align: baseline; font-size: 24px; line-height: 28.8px; margin: 0;" align="center">
+                                                                  Pass
+                                                                </h1>
+                                                                <table class="s-4 w-full" role="presentation" border="0" cellpadding="0" cellspacing="0" style="width: 100%;" width="100%">
+                                                                  <tbody>
+                                                                    <tr>
+                                                                      <td style="line-height: 16px; font-size: 16px; width: 100%; height: 16px; margin: 0;" align="left" width="100%" height="16">
+                                                                        &#160;
+                                                                      </td>
+                                                                    </tr>
+                                                                  </tbody>
+                                                                </table>
+                                                                <p class="text-4xl text-center" style="line-height: 43.2px; font-size: 36px; width: 100%; margin: 0;" align="center">{{index $source.NamespacePassed $namespace }}</p>
+                                                              </div>
+                                                            </td>
+                                                          </tr>
+                                                        </tbody>
+                                                      </table>
+                                                    </td>
+                                                    <td class="col-lg-3 col-6" style="line-height: 24px; font-size: 16px; min-height: 1px; font-weight: normal; padding-right: 24px; width: 50%; margin: 0;" align="left" valign="top">
+                                                      <table class="p-4" role="presentation" border="0" cellpadding="0" cellspacing="0">
+                                                        <tbody>
+                                                          <tr>
+                                                            <td style="line-height: 24px; font-size: 16px; margin: 0; padding: 16px;" align="left">
+                                                              <div class="space-y-4">
+                                                                <h1 class="h4 fw-500 text-orange-500 text-center" style="color: #fd7e14; padding-top: 0; padding-bottom: 0; font-weight: 500 !important; vertical-align: baseline; font-size: 24px; line-height: 28.8px; margin: 0;" align="center">
+                                                                  Warning
+                                                                </h1>
+                                                                <table class="s-4 w-full" role="presentation" border="0" cellpadding="0" cellspacing="0" style="width: 100%;" width="100%">
+                                                                  <tbody>
+                                                                    <tr>
+                                                                      <td style="line-height: 16px; font-size: 16px; width: 100%; height: 16px; margin: 0;" align="left" width="100%" height="16">
+                                                                        &#160;
+                                                                      </td>
+                                                                    </tr>
+                                                                  </tbody>
+                                                                </table>
+                                                                <p class="text-4xl text-center" style="line-height: 43.2px; font-size: 36px; width: 100%; margin: 0;" align="center">{{ lenNamespaceResults $source $namespace "warn" }}</p>
+                                                              </div>
+                                                            </td>
+                                                          </tr>
+                                                        </tbody>
+                                                      </table>
+                                                    </td>
+                                                    <td class="col-lg-3 col-6" style="line-height: 24px; font-size: 16px; min-height: 1px; font-weight: normal; padding-right: 24px; width: 50%; margin: 0;" align="left" valign="top">
+                                                      <table class="p-4" role="presentation" border="0" cellpadding="0" cellspacing="0">
+                                                        <tbody>
+                                                          <tr>
+                                                            <td style="line-height: 24px; font-size: 16px; margin: 0; padding: 16px;" align="left">
+                                                              <div class="space-y-4">
+                                                                <h1 class="h4 fw-500 text-red-500 text-center" style="color: #dc3545; padding-top: 0; padding-bottom: 0; font-weight: 500 !important; vertical-align: baseline; font-size: 24px; line-height: 28.8px; margin: 0;" align="center">
+                                                                  Fail
+                                                                </h1>
+                                                                <table class="s-4 w-full" role="presentation" border="0" cellpadding="0" cellspacing="0" style="width: 100%;" width="100%">
+                                                                  <tbody>
+                                                                    <tr>
+                                                                      <td style="line-height: 16px; font-size: 16px; width: 100%; height: 16px; margin: 0;" align="left" width="100%" height="16">
+                                                                        &#160;
+                                                                      </td>
+                                                                    </tr>
+                                                                  </tbody>
+                                                                </table>
+                                                                <p class="text-4xl text-center" style="line-height: 43.2px; font-size: 36px; width: 100%; margin: 0;" align="center">{{ lenNamespaceResults $source $namespace "fail" }}</p>
+                                                              </div>
+                                                            </td>
+                                                          </tr>
+                                                        </tbody>
+                                                      </table>
+                                                    </td>
+                                                    <td class="col-lg-3 col-6" style="line-height: 24px; font-size: 16px; min-height: 1px; font-weight: normal; padding-right: 24px; width: 50%; margin: 0;" align="left" valign="top">
+                                                      <table class="p-4" role="presentation" border="0" cellpadding="0" cellspacing="0">
+                                                        <tbody>
+                                                          <tr>
+                                                            <td style="line-height: 24px; font-size: 16px; margin: 0; padding: 16px;" align="left">
+                                                              <div class="space-y-4">
+                                                                <h1 class="h4 fw-500 text-red-600 text-center" style="color: #b02a37; padding-top: 0; padding-bottom: 0; font-weight: 500 !important; vertical-align: baseline; font-size: 24px; line-height: 28.8px; margin: 0;" align="center">
+                                                                  Error
+                                                                </h1>
+                                                                <table class="s-4 w-full" role="presentation" border="0" cellpadding="0" cellspacing="0" style="width: 100%;" width="100%">
+                                                                  <tbody>
+                                                                    <tr>
+                                                                      <td style="line-height: 16px; font-size: 16px; width: 100%; height: 16px; margin: 0;" align="left" width="100%" height="16">
+                                                                        &#160;
+                                                                      </td>
+                                                                    </tr>
+                                                                  </tbody>
+                                                                </table>
+                                                                <p class="text-4xl text-center" style="line-height: 43.2px; font-size: 36px; width: 100%; margin: 0;" align="center">{{ lenNamespaceResults $source $namespace "error" }}</p>
+                                                              </div>
+                                                            </td>
+                                                          </tr>
+                                                        </tbody>
+                                                      </table>
+                                                    </td>
+                                                  </tr>
+                                                </tbody>
+                                              </table>
+                                            </div>
+                                          </td>
+                                        </tr>
+                                      </tbody>
+                                    </table>
+                                  </td>
+                                </tr>
+                              </tbody>
+                            </table>
+                            <table class="s-2 w-full" role="presentation" border="0" cellpadding="0" cellspacing="0" style="width: 100%;" width="100%">
+                              <tbody>
+                                <tr>
+                                  <td style="line-height: 8px; font-size: 8px; width: 100%; height: 8px; margin: 0;" align="left" width="100%" height="8">
+                                    &#160;
+                                  </td>
+                                </tr>
+                              </tbody>
+                            </table>
+                            {{ if hasViolations $list }}
+                            <table class="table table-striped thead-default table-bordered" border="0" cellpadding="0" cellspacing="0" style="width: 100%; max-width: 100%; border: 1px solid #e2e8f0;">
+                              <thead>
+                                <tr>
+                                  <th style="line-height: 24px; font-size: 16px; margin: 0; padding: 12px; border-color: #e2e8f0; border-style: solid; border-width: 1px 1px 2px;" align="left" valign="top">Kind</th>
+                                  <th style="line-height: 24px; font-size: 16px; margin: 0; padding: 12px; border-color: #e2e8f0; border-style: solid; border-width: 1px 1px 2px;" align="left" valign="top">Name</th>
+                                  <th style="line-height: 24px; font-size: 16px; margin: 0; padding: 12px; border-color: #e2e8f0; border-style: solid; border-width: 1px 1px 2px;" align="left" valign="top">Policy</th>
+                                  <th style="line-height: 24px; font-size: 16px; margin: 0; padding: 12px; border-color: #e2e8f0; border-style: solid; border-width: 1px 1px 2px;" align="left" valign="top">Valdiation Rule</th>
+                                  <th style="line-height: 24px; font-size: 16px; margin: 0; padding: 12px; border-color: #e2e8f0; border-style: solid; border-width: 1px 1px 2px;" align="left" valign="top">Result</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                {{ range $status, $results := $list }}
+                                {{ range $key, $result := $results }}
+                                <tr style="" bgcolor="#f2f2f2">
+                                  <td style="line-height: 24px; font-size: 16px; margin: 0; padding: 12px; border: 1px solid #e2e8f0;" align="left" valign="top">{{ $result.Kind }}</td>
+                                  <td style="line-height: 24px; font-size: 16px; margin: 0; padding: 12px; border: 1px solid #e2e8f0;" align="left" valign="top">{{ $result.Name }}</td>
+                                  <td style="line-height: 24px; font-size: 16px; margin: 0; padding: 12px; border: 1px solid #e2e8f0;" align="left" valign="top">{{ $result.Policy }}</td>
+                                  <td style="line-height: 24px; font-size: 16px; margin: 0; padding: 12px; border: 1px solid #e2e8f0;" align="left" valign="top">{{ $result.Rule }}</td>
+                                  <td style="line-height: 24px; font-size: 16px; margin: 0; padding: 12px; border: 1px solid #e2e8f0;" align="left" valign="top">
+                                    <table class="badge bg-orange-500 text-white" align="left" role="presentation" border="0" cellpadding="0" cellspacing="0" style="color: #ffffff;" bgcolor="{{ color $status }}">
+                                      <tbody>
+                                        <tr>
+                                          <td style="line-height: 1; font-size: 75%; display: inline-block; font-weight: 700; white-space: nowrap; border-radius: 4px; color: #ffffff; margin: 0; padding: 4px 6.4px;" align="center" bgcolor="{{ color $status }}" valign="baseline">
+                                            <span>{{ $result.Status }}</span>
+                                          </td>
+                                        </tr>
+                                      </tbody>
+                                    </table>
+                                  </td>
+                                </tr>
+                                {{end}}
+                                {{end}}
+                              </tbody>
+                            </table>
+                            {{end}}
+                            {{end}}
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                    <table class="s-4 w-full" role="presentation" border="0" cellpadding="0" cellspacing="0" style="width: 100%;" width="100%">
+                      <tbody>
+                        <tr>
+                          <td style="line-height: 16px; font-size: 16px; width: 100%; height: 16px; margin: 0;" align="left" width="100%" height="16">
+                            &#160;
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                    {{ end }}
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </body>
+</html>

@@ -4,10 +4,10 @@ import (
 	"flag"
 	"log"
 
-	"golang.org/x/sync/errgroup"
-
 	"github.com/kyverno/policy-reporter/pkg/config"
+
 	"github.com/spf13/cobra"
+	"golang.org/x/sync/errgroup"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
 )
@@ -17,7 +17,7 @@ func newRunCMD() *cobra.Command {
 		Use:   "run",
 		Short: "Run PolicyReporter Watcher & HTTP Metrics Server",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			c, err := loadConfig(cmd)
+			c, err := config.Load(cmd)
 			if err != nil {
 				return err
 			}

@@ -5,6 +5,11 @@ type ValueFilter struct {
 	Exclude []string `mapstructure:"exclude"`
 }
 
+type EmailReportFilter struct {
+	Namespaces ValueFilter `mapstructure:"namespaces"`
+	Sources    []string    `mapstructure:"sources"`
+}
+
 type TargetFilter struct {
 	Namespaces ValueFilter `mapstructure:"namespaces"`
 	Priorities ValueFilter `mapstructure:"priorities"`
@@ -97,6 +102,7 @@ type Webhook struct {
 	Channels        []Webhook         `mapstructure:"channels"`
 }
 
+// S3 configuration
 type S3 struct {
 	Name            string       `mapstructure:"name"`
 	AccessKeyID     string       `mapstructure:"accessKeyID"`
@@ -112,6 +118,7 @@ type S3 struct {
 	Channels        []S3         `mapstructure:"channels"`
 }
 
+// Kinesis configuration
 type Kinesis struct {
 	Name            string       `mapstructure:"name"`
 	AccessKeyID     string       `mapstructure:"accessKeyID"`
@@ -124,6 +131,39 @@ type Kinesis struct {
 	Filter          TargetFilter `mapstructure:"filter"`
 	Sources         []string     `mapstructure:"sources"`
 	Channels        []Kinesis    `mapstructure:"channels"`
+}
+
+// SMTP configuration
+type SMTP struct {
+	Host       string `mapstructure:"host"`
+	Port       int    `mapstructure:"port"`
+	Username   string `mapstructure:"username"`
+	Password   string `mapstructure:"password"`
+	From       string `mapstructure:"from"`
+	Encryption string `mapstructure:"encryption"`
+}
+
+// EmailReport configuration
+type EmailReport struct {
+	To                    []string          `mapstructure:"to"`
+	Format                string            `mapstructure:"format"`
+	Filter                EmailReportFilter `mapstructure:"filter"`
+	Channels              []EmailReport     `mapstructure:"channels"`
+	DisableClusterReports bool              `mapstructure:"disableClusterReports"`
+}
+
+// EmailReport configuration
+type EmailTemplates struct {
+	Dir string `mapstructure:"dir"`
+}
+
+// EmailReports configuration
+type EmailReports struct {
+	SMTP        SMTP           `mapstructure:"smtp"`
+	Templates   EmailTemplates `mapstructure:"templates"`
+	Summary     EmailReport    `mapstructure:"summary"`
+	Violations  EmailReport    `mapstructure:"violations"`
+	ClusterName string         `mapstructure:"clusterName"`
 }
 
 // API configuration
@@ -191,4 +231,5 @@ type Config struct {
 	ReportFilter  ReportFilter  `mapstructure:"reportFilter"`
 	Redis         Redis         `mapstructure:"redis"`
 	Profiling     Profiling     `mapstructure:"profiling"`
+	EmailReports  EmailReports  `mapstructure:"emailReports"`
 }

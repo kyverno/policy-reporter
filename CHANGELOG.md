@@ -1,7 +1,16 @@
 # Changelog
 
+# 2.10.0
+* Policy Reporter
+    * Email Reports
+        * Send Summary Reports over SMTP to different E-Mails
+        * Supports channels and filters to send different subsets of Namespaces or Sources to dedicated E-Mails
+        * Reports are generated and send over dedicated CronJobs, this makes it easy to send the reports as often as needed
+        * Currently a basic summary and a more detailed violation report is available and can be separatly enabled and configured
+
 # 2.9.5
 * Fix Policy Reporter Version in the Helm Chart values.yaml
+
 # 2.9.4
 * Policy Reporter
     * Add [AWS Kinesis](https://aws.amazon.com/kinesis) compatible target

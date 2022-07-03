@@ -94,6 +94,19 @@ var testConfig = &config.Config{
 		Region:          "ru-central1",
 		Channels:        []config.Kinesis{{}},
 	},
+	EmailReports: config.EmailReports{
+		Templates: config.EmailTemplates{
+			Dir: "../../templates",
+		},
+		SMTP: config.SMTP{
+			Host:       "localhost",
+			Port:       465,
+			Username:   "policy-reporter@kyverno.io",
+			Password:   "password",
+			From:       "policy-reporter@kyverno.io",
+			Encryption: "ssl/tls",
+		},
+	},
 }
 
 func Test_ResolveTarget(t *testing.T) {
@@ -487,6 +500,27 @@ func Test_ResolveClientWithInvalidK8sConfig(t *testing.T) {
 	}
 }
 
+func Test_ResolveCRDClient(t *testing.T) {
+	resolver := config.NewResolver(testConfig, &rest.Config{})
+
+	_, err := resolver.CRDClient()
+	if err != nil {
+		t.Error("unexpected error")
+	}
+}
+
+func Test_ResolveCRDClientWithInvalidK8sConfig(t *testing.T) {
+	k8sConfig := &rest.Config{}
+	k8sConfig.Host = "invalid/url"
+
+	resolver := config.NewResolver(testConfig, k8sConfig)
+
+	_, err := resolver.CRDClient()
+	if err == nil {
+		t.Error("Error: 'host must be a URL or a host:port pair' was expected")
+	}
+}
+
 func Test_RegisterStoreListener(t *testing.T) {
 	t.Run("Register StoreListener", func(t *testing.T) {
 		resolver := config.NewResolver(testConfig, &rest.Config{})
@@ -525,6 +559,85 @@ func Test_RegisterSendResultListener(t *testing.T) {
 
 		if len(resolver.EventPublisher().GetListener()) != 0 {
 			t.Error("Expected no Listener to be registered because no target exists")
+		}
+	})
+}
+
+func Test_SummaryReportServices(t *testing.T) {
+	t.Run("Generator", func(t *testing.T) {
+		resolver := config.NewResolver(testConfig, &rest.Config{})
+		generator, err := resolver.SummaryGenerator()
+		if err != nil {
+			t.Errorf("Unexpected error: %s", err)
+		}
+		if generator == nil {
+			t.Error("Should return Generator Pointer")
+		}
+	})
+	t.Run("Generator.Error", func(t *testing.T) {
+		k8sConfig := &rest.Config{}
+		k8sConfig.Host = "invalid/url"
+
+		resolver := config.NewResolver(testConfig, k8sConfig)
+
+		_, err := resolver.SummaryGenerator()
+		if err == nil {
+			t.Error("Error: 'host must be a URL or a host:port pair' was expected")
+		}
+	})
+	t.Run("Reporter", func(t *testing.T) {
+		resolver := config.NewResolver(testConfig, &rest.Config{})
+		reporter := resolver.SummaryReporter()
+		if reporter == nil {
+			t.Error("Should return Reporter Pointer")
+		}
+	})
+}
+
+func Test_ViolationReportServices(t *testing.T) {
+	t.Run("Generator", func(t *testing.T) {
+		resolver := config.NewResolver(testConfig, &rest.Config{})
+		generator, err := resolver.ViolationsGenerator()
+		if err != nil {
+			t.Errorf("Unexpected error: %s", err)
+		}
+		if generator == nil {
+			t.Error("Should return Generator Pointer")
+		}
+	})
+	t.Run("Generator.Error", func(t *testing.T) {
+		k8sConfig := &rest.Config{}
+		k8sConfig.Host = "invalid/url"
+
+		resolver := config.NewResolver(testConfig, k8sConfig)
+
+		_, err := resolver.ViolationsGenerator()
+		if err == nil {
+			t.Error("Error: 'host must be a URL or a host:port pair' was expected")
+		}
+	})
+	t.Run("Reporter", func(t *testing.T) {
+		resolver := config.NewResolver(testConfig, &rest.Config{})
+		reporter := resolver.ViolationsReporter()
+		if reporter == nil {
+			t.Error("Should return Reporter Pointer")
+		}
+	})
+}
+
+func Test_SMTP(t *testing.T) {
+	t.Run("SMTP", func(t *testing.T) {
+		resolver := config.NewResolver(testConfig, &rest.Config{})
+		smtp := resolver.SMTPServer()
+		if smtp == nil {
+			t.Error("Should return SMTP Pointer")
+		}
+	})
+	t.Run("EmailClient", func(t *testing.T) {
+		resolver := config.NewResolver(testConfig, &rest.Config{})
+		client := resolver.EmailClient()
+		if client == nil {
+			t.Error("Should return EmailClient Pointer")
 		}
 	})
 }
