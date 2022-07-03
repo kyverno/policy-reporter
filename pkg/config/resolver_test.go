@@ -487,6 +487,27 @@ func Test_ResolveClientWithInvalidK8sConfig(t *testing.T) {
 	}
 }
 
+func Test_ResolveCRDClient(t *testing.T) {
+	resolver := config.NewResolver(testConfig, &rest.Config{})
+
+	_, err := resolver.CRDClient()
+	if err != nil {
+		t.Error("unexpected error")
+	}
+}
+
+func Test_ResolveCRDClientWithInvalidK8sConfig(t *testing.T) {
+	k8sConfig := &rest.Config{}
+	k8sConfig.Host = "invalid/url"
+
+	resolver := config.NewResolver(testConfig, k8sConfig)
+
+	_, err := resolver.CRDClient()
+	if err == nil {
+		t.Error("Error: 'host must be a URL or a host:port pair' was expected")
+	}
+}
+
 func Test_RegisterStoreListener(t *testing.T) {
 	t.Run("Register StoreListener", func(t *testing.T) {
 		resolver := config.NewResolver(testConfig, &rest.Config{})

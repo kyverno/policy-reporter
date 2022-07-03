@@ -3,6 +3,7 @@ package target_test
 import (
 	"testing"
 
+	"github.com/kyverno/policy-reporter/pkg/filter"
 	"github.com/kyverno/policy-reporter/pkg/report"
 	"github.com/kyverno/policy-reporter/pkg/target"
 )
@@ -24,6 +25,18 @@ var result = report.Result{
 		Namespace:  "default",
 		UID:        "536ab69f-1b3c-4bd9-9ba4-274a56188409",
 	},
+}
+
+var result2 = report.Result{
+	Message:  "validation error: requests and limits required. Rule autogen-check-for-requests-and-limits failed at path /spec/template/spec/containers/0/resources/requests/",
+	Policy:   "require-requests-and-limits-required",
+	Rule:     "autogen-check-for-requests-and-limits",
+	Priority: report.WarningPriority,
+	Status:   report.Fail,
+	Severity: report.High,
+	Category: "resources",
+	Scored:   true,
+	Source:   "Kyverno",
 }
 
 func Test_BaseClient(t *testing.T) {
@@ -49,29 +62,37 @@ func Test_BaseClient(t *testing.T) {
 		}
 	})
 
+	t.Run("Validate ClusterResult", func(t *testing.T) {
+		filter := &target.Filter{Namespace: filter.Rules{Include: []string{"default"}}}
+
+		if !filter.Validate(result2) {
+			t.Errorf("Unexpected Validation Result")
+		}
+	})
+
 	t.Run("Validate Exclude Namespace match", func(t *testing.T) {
-		filter := &target.Filter{Namespace: target.Rules{Exclude: []string{"default"}}}
+		filter := &target.Filter{Namespace: filter.Rules{Exclude: []string{"default"}}}
 
 		if filter.Validate(result) {
 			t.Errorf("Unexpected Validation Result")
 		}
 	})
 	t.Run("Validate Exclude Namespace mismatch", func(t *testing.T) {
-		filter := &target.Filter{Namespace: target.Rules{Exclude: []string{"team-a"}}}
+		filter := &target.Filter{Namespace: filter.Rules{Exclude: []string{"team-a"}}}
 
 		if !filter.Validate(result) {
 			t.Errorf("Unexpected Validation Result")
 		}
 	})
 	t.Run("Validate Include Namespace match", func(t *testing.T) {
-		filter := &target.Filter{Namespace: target.Rules{Include: []string{"default"}}}
+		filter := &target.Filter{Namespace: filter.Rules{Include: []string{"default"}}}
 
 		if !filter.Validate(result) {
 			t.Errorf("Unexpected Validation Result")
 		}
 	})
 	t.Run("Validate Exclude Namespace mismatch", func(t *testing.T) {
-		filter := &target.Filter{Namespace: target.Rules{Include: []string{"team-a"}}}
+		filter := &target.Filter{Namespace: filter.Rules{Include: []string{"team-a"}}}
 
 		if filter.Validate(result) {
 			t.Errorf("Unexpected Validation Result")
@@ -79,28 +100,28 @@ func Test_BaseClient(t *testing.T) {
 	})
 
 	t.Run("Validate Exclude Priority match", func(t *testing.T) {
-		filter := &target.Filter{Priority: target.Rules{Exclude: []string{report.WarningPriority.String()}}}
+		filter := &target.Filter{Priority: filter.Rules{Exclude: []string{report.WarningPriority.String()}}}
 
 		if filter.Validate(result) {
 			t.Errorf("Unexpected Validation Result")
 		}
 	})
 	t.Run("Validate Exclude Priority mismatch", func(t *testing.T) {
-		filter := &target.Filter{Priority: target.Rules{Exclude: []string{report.ErrorPriority.String()}}}
+		filter := &target.Filter{Priority: filter.Rules{Exclude: []string{report.ErrorPriority.String()}}}
 
 		if !filter.Validate(result) {
 			t.Errorf("Unexpected Validation Result")
 		}
 	})
 	t.Run("Validate Include Priority match", func(t *testing.T) {
-		filter := &target.Filter{Priority: target.Rules{Include: []string{report.WarningPriority.String()}}}
+		filter := &target.Filter{Priority: filter.Rules{Include: []string{report.WarningPriority.String()}}}
 
 		if !filter.Validate(result) {
 			t.Errorf("Unexpected Validation Result")
 		}
 	})
 	t.Run("Validate Exclude Priority mismatch", func(t *testing.T) {
-		filter := &target.Filter{Priority: target.Rules{Include: []string{report.ErrorPriority.String()}}}
+		filter := &target.Filter{Priority: filter.Rules{Include: []string{report.ErrorPriority.String()}}}
 
 		if filter.Validate(result) {
 			t.Errorf("Unexpected Validation Result")
@@ -108,28 +129,28 @@ func Test_BaseClient(t *testing.T) {
 	})
 
 	t.Run("Validate Exclude Policy match", func(t *testing.T) {
-		filter := &target.Filter{Policy: target.Rules{Exclude: []string{"require-requests-and-limits-required"}}}
+		filter := &target.Filter{Policy: filter.Rules{Exclude: []string{"require-requests-and-limits-required"}}}
 
 		if filter.Validate(result) {
 			t.Errorf("Unexpected Validation Result")
 		}
 	})
 	t.Run("Validate Exclude Policy mismatch", func(t *testing.T) {
-		filter := &target.Filter{Policy: target.Rules{Exclude: []string{"policy-test"}}}
+		filter := &target.Filter{Policy: filter.Rules{Exclude: []string{"policy-test"}}}
 
 		if !filter.Validate(result) {
 			t.Errorf("Unexpected Validation Result")
 		}
 	})
 	t.Run("Validate Include Policy match", func(t *testing.T) {
-		filter := &target.Filter{Policy: target.Rules{Include: []string{"require-requests-and-limits-required"}}}
+		filter := &target.Filter{Policy: filter.Rules{Include: []string{"require-requests-and-limits-required"}}}
 
 		if !filter.Validate(result) {
 			t.Errorf("Unexpected Validation Result")
 		}
 	})
 	t.Run("Validate Exclude Policy mismatch", func(t *testing.T) {
-		filter := &target.Filter{Policy: target.Rules{Include: []string{"policy-test"}}}
+		filter := &target.Filter{Policy: filter.Rules{Include: []string{"policy-test"}}}
 
 		if filter.Validate(result) {
 			t.Errorf("Unexpected Validation Result")

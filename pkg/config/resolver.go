@@ -9,6 +9,10 @@ import (
 
 	"github.com/kyverno/policy-reporter/pkg/api"
 	"github.com/kyverno/policy-reporter/pkg/cache"
+	"github.com/kyverno/policy-reporter/pkg/email"
+	"github.com/kyverno/policy-reporter/pkg/email/summary"
+	"github.com/kyverno/policy-reporter/pkg/email/violations"
+	"github.com/kyverno/policy-reporter/pkg/filter"
 	"github.com/kyverno/policy-reporter/pkg/helper"
 	"github.com/kyverno/policy-reporter/pkg/kubernetes"
 	"github.com/kyverno/policy-reporter/pkg/listener"
@@ -26,9 +30,11 @@ import (
 	"github.com/kyverno/policy-reporter/pkg/target/teams"
 	"github.com/kyverno/policy-reporter/pkg/target/ui"
 	"github.com/kyverno/policy-reporter/pkg/target/webhook"
+	mail "github.com/xhit/go-simple-mail/v2"
 
 	goredis "github.com/go-redis/redis/v8"
 	"github.com/kyverno/kyverno/pkg/client/clientset/versioned"
+	wgpolicyk8sv1alpha2 "github.com/kyverno/kyverno/pkg/client/clientset/versioned/typed/policyreport/v1alpha2"
 	_ "github.com/mattn/go-sqlite3"
 	"k8s.io/client-go/rest"
 )
@@ -374,6 +380,72 @@ func (r *Resolver) SkipExistingOnStartup() bool {
 	}
 
 	return true
+}
+
+func (r *Resolver) CRDClient() (wgpolicyk8sv1alpha2.Wgpolicyk8sV1alpha2Interface, error) {
+	client, err := versioned.NewForConfig(r.k8sConfig)
+	if err != nil {
+		return nil, err
+	}
+
+	return client.Wgpolicyk8sV1alpha2(), nil
+}
+
+func (r *Resolver) SummaryGenerator() (*summary.Generator, error) {
+	client, err := r.CRDClient()
+	if err != nil {
+		return nil, err
+	}
+
+	return summary.NewGenerator(
+		client,
+		EmailReportFilterFromConfig(r.config.EmailReports.Summary.Filter),
+		!r.config.EmailReports.Summary.DisableClusterReports,
+	), nil
+}
+
+func (r *Resolver) SummaryReport() *summary.Reporter {
+	return summary.NewReporter(
+		r.config.EmailReports.Templates.Dir,
+		r.config.EmailReports.ClusterName,
+	)
+}
+
+func (r *Resolver) ViolationsGenerator() (*violations.Generator, error) {
+	client, err := r.CRDClient()
+	if err != nil {
+		return nil, err
+	}
+
+	return violations.NewGenerator(
+		client,
+		EmailReportFilterFromConfig(r.config.EmailReports.Violations.Filter),
+		!r.config.EmailReports.Violations.DisableClusterReports,
+	), nil
+}
+
+func (r *Resolver) ViolationsReport() *violations.Reporter {
+	return violations.NewReporter(
+		r.config.EmailReports.Templates.Dir,
+		r.config.EmailReports.ClusterName,
+	)
+}
+
+func (r *Resolver) SMTPServer() *mail.SMTPServer {
+	server := mail.NewSMTPClient()
+	server.Host = r.config.EmailReports.SMTP.Host
+	server.Port = r.config.EmailReports.SMTP.Port
+	server.Username = r.config.EmailReports.SMTP.Username
+	server.Password = r.config.EmailReports.SMTP.Password
+	server.ConnectTimeout = 10 * time.Second
+	server.SendTimeout = 10 * time.Second
+	server.Encryption = email.EncryptionFromString(r.config.EmailReports.SMTP.Encryption)
+
+	return server
+}
+
+func (r *Resolver) EmailClient() *email.Client {
+	return email.NewClient(r.config.EmailReports.SMTP.From, r.SMTPServer())
 }
 
 func (r *Resolver) PolicyReportClient() (report.PolicyReportClient, error) {
@@ -736,21 +808,31 @@ func createKinesisClient(config Kinesis, parent Kinesis) target.Client {
 	)
 }
 
-func createTargetFilter(filter TargetFilter, minimumPriority string, sources []string) *target.Filter {
+func createTargetFilter(fil TargetFilter, minimumPriority string, sources []string) *target.Filter {
 	return &target.Filter{
 		MinimumPriority: minimumPriority,
 		Sources:         sources,
-		Namespace: target.Rules{
-			Include: filter.Namespaces.Include,
-			Exclude: filter.Namespaces.Exclude,
+		Namespace: filter.Rules{
+			Include: fil.Namespaces.Include,
+			Exclude: fil.Namespaces.Exclude,
 		},
-		Priority: target.Rules{
-			Include: filter.Priorities.Include,
-			Exclude: filter.Priorities.Exclude,
+		Priority: filter.Rules{
+			Include: fil.Priorities.Include,
+			Exclude: fil.Priorities.Exclude,
 		},
-		Policy: target.Rules{
-			Include: filter.Policies.Include,
-			Exclude: filter.Policies.Exclude,
+		Policy: filter.Rules{
+			Include: fil.Policies.Include,
+			Exclude: fil.Policies.Exclude,
 		},
 	}
+}
+
+func EmailReportFilterFromConfig(config EmailReportFilter) filter.Filter {
+	return filter.New(
+		filter.Rules{
+			Include: config.Namespaces.Include,
+			Exclude: config.Namespaces.Exclude,
+		},
+		config.Sources,
+	)
 }
