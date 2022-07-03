@@ -64,11 +64,7 @@ func (s *Source) AddClusterPassed(results int) {
 
 func (s *Source) AddNamespacedPassed(ns string, results int) {
 	s.passMX.Lock()
-	if _, ok := s.NamespacePassed[ns]; ok {
-		s.NamespacePassed[ns] += results
-	} else {
-		s.NamespacePassed[ns] = results
-	}
+	s.NamespacePassed[ns] += results
 	s.passMX.Unlock()
 }
 

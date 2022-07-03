@@ -2,7 +2,7 @@ image:
   registry: ghcr.io
   repository: kyverno/policy-reporter
   pullPolicy: IfNotPresent
-  tag: 2.6.2
+  tag: 2.7.0
 
 imagePullSecrets: []
 
@@ -153,6 +153,50 @@ global:
 #   default: warning
 #   require-ns-labels: error
 policyPriorities: {}
+
+emailReports:
+  clusterName: "" # (optional) - displayed in the E-Mail Report if configured
+  smtp:
+    host: ""
+    port: 465
+    username: ""
+    password: ""
+    from: "" # Displayed From E-Mail Address
+    encryption: "" # ssl/tls / starttls
+
+  # basic summary report
+  summary:
+    enabled: false
+    schedule: "* 8 * * *" # CronJob schedule defines when the report will be send
+    activeDeadlineSeconds: 300 # timeout in seconds
+    backoffLimit: 3 # retry counter
+    ttlSecondsAfterFinished: 0
+    restartPolicy: Never # pod restart policy
+
+    to: [] # list of receiver e-mail addresses
+    filter: {} # optional filters
+    #  namespaces:
+    #    include: []
+    #    exclude: []
+    #  sources: ['Kyverno']
+    channels: [] # (optional) channels can be used to to send only a subset of namespaces / sources to dedicated email addresses
+
+  # violation summary report
+  violations:
+    enabled: false
+    schedule: "* 8 * * *" # CronJob schedule defines when the report will be send
+    activeDeadlineSeconds: 300 # timeout in seconds
+    backoffLimit: 3 # retry counter
+    ttlSecondsAfterFinished: 0
+    restartPolicy: Never # pod restart policy
+
+    to: [] # list of receiver e-mail addresses
+    filter: {} # optional filters
+    #  namespaces:
+    #    include: []
+    #    exclude: []
+    #  sources: ['Kyverno']
+    channels: [] # (optional) channels can be used to to send only a subset of namespaces / sources to dedicated email addresses
 
 # Reference a configuration which already exists instead of creating one
 existingTargetConfig:

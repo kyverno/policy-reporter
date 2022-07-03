@@ -15,13 +15,13 @@ func Test_CreateReport(t *testing.T) {
 
 	client, pClient, cClient := NewFakeCilent()
 
-	pClient.Create(ctx, PolicyReportCRD, v1.CreateOptions{})
-	pClient.Create(ctx, EmptyPolicyReportCRD, v1.CreateOptions{})
-	client.PolicyReports("kyverno").Create(ctx, KyvernoPolicyReportCRD, v1.CreateOptions{})
+	_, _ = pClient.Create(ctx, PolicyReportCRD, v1.CreateOptions{})
+	_, _ = pClient.Create(ctx, EmptyPolicyReportCRD, v1.CreateOptions{})
+	_, _ = client.PolicyReports("kyverno").Create(ctx, KyvernoPolicyReportCRD, v1.CreateOptions{})
 
-	cClient.Create(ctx, ClusterPolicyReportCRD, v1.CreateOptions{})
-	cClient.Create(ctx, EmptyClusterPolicyReportCRD, v1.CreateOptions{})
-	cClient.Create(ctx, KyvernoClusterPolicyReportCRD, v1.CreateOptions{})
+	_, _ = cClient.Create(ctx, ClusterPolicyReportCRD, v1.CreateOptions{})
+	_, _ = cClient.Create(ctx, EmptyClusterPolicyReportCRD, v1.CreateOptions{})
+	_, _ = cClient.Create(ctx, KyvernoClusterPolicyReportCRD, v1.CreateOptions{})
 
 	generator := violations.NewGenerator(client, Filter, true)
 	data, err := generator.GenerateData(ctx)

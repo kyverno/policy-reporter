@@ -78,8 +78,8 @@ Create UI target host based on configuration
 
 {{- define "kyverno.securityContext" -}}
 {{- if semverCompare "<1.19" .Capabilities.KubeVersion.Version }}
-{{ toYaml (omit .Values.securityContext "seccompProfile") }}
+{{- toYaml (omit .Values.securityContext "seccompProfile") }}
 {{- else }}
-{{ toYaml .Values.securityContext }}
+{{- toYaml .Values.securityContext }}
 {{- end }}
 {{- end }}

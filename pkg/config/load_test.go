@@ -25,13 +25,13 @@ func createCMD() *cobra.Command {
 func Test_Load(t *testing.T) {
 	cmd := createCMD()
 
-	cmd.Flags().Set("kubeconfig", "./config")
-	cmd.Flags().Set("port", "8081")
-	cmd.Flags().Set("rest-enabled", "1")
-	cmd.Flags().Set("metrics-enabled", "1")
-	cmd.Flags().Set("profile", "1")
-	cmd.Flags().Set("template-dir", "/app/templates")
-	cmd.Flags().Set("dbfile", "")
+	_ = cmd.Flags().Set("kubeconfig", "./config")
+	_ = cmd.Flags().Set("port", "8081")
+	_ = cmd.Flags().Set("rest-enabled", "1")
+	_ = cmd.Flags().Set("metrics-enabled", "1")
+	_ = cmd.Flags().Set("profile", "1")
+	_ = cmd.Flags().Set("template-dir", "/app/templates")
+	_ = cmd.Flags().Set("dbfile", "")
 
 	c, err := config.Load(cmd)
 	if err != nil {

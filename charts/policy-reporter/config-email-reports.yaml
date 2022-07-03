@@ -1,0 +1,34 @@
+emailReports:
+  clusterName: {{ .Values.emailReports.clusterName }}
+  {{- with .Values.emailReports.smtp }}
+  smtp:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+
+  summary:
+    {{- with .Values.emailReports.summary.to }}
+    to:
+      {{- toYaml . | nindent 6 }}
+    {{- end }}
+    {{- with .Values.emailReports.summary.filter }}
+    filter:
+      {{- toYaml . | nindent 6 }}
+    {{- end }}
+    {{- with .Values.emailReports.violations.channels }}
+    channels:
+      {{- toYaml . | nindent 6 }}
+    {{- end }}
+
+  violations:
+    {{- with .Values.emailReports.violations.to }}
+    to:
+      {{- toYaml . | nindent 6 }}
+    {{- end }}
+    {{- with .Values.emailReports.violations.filter }}
+    filter:
+      {{- toYaml . | nindent 6 }}
+    {{- end }}
+    {{- with .Values.emailReports.violations.channels }}
+    channels:
+      {{- toYaml . | nindent 6 }}
+    {{- end }}
