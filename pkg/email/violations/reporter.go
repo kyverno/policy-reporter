@@ -43,7 +43,7 @@ func (o *Reporter) Report(sources []Source, format string) (email.Report, error)
 
 	return email.Report{
 		ClusterName: o.clusterName,
-		Title:       "Violation Report from " + time.Now().Format("2006-02-01"),
+		Title:       "Summary Report from " + time.Now().Format("2006-02-01"),
 		Message:     b.String(),
 		Format:      format,
 	}, nil

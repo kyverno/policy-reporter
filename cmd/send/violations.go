@@ -45,7 +45,7 @@ func NewViolationsCMD() *cobra.Command {
 				return err
 			}
 
-			reporter := resolver.ViolationsReport()
+			reporter := resolver.ViolationsReporter()
 
 			wg := &sync.WaitGroup{}
 			wg.Add(1 + len(c.EmailReports.Violations.Channels))

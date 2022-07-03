@@ -45,7 +45,7 @@ func NewSummaryCMD() *cobra.Command {
 				return err
 			}
 
-			reporter := resolver.SummaryReport()
+			reporter := resolver.SummaryReporter()
 
 			wg := &sync.WaitGroup{}
 			wg.Add(1 + len(c.EmailReports.Summary.Channels))
