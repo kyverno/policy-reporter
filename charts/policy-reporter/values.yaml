@@ -155,14 +155,14 @@ global:
 policyPriorities: {}
 
 emailReports:
-  clusterName: "" # (optional) - displayed in the E-Mail Report if configured
+  clusterName: "" # (optional) - displayed in the email report if configured
   smtp:
     host: ""
     port: 465
     username: ""
     password: ""
-    from: "" # Displayed From E-Mail Address
-    encryption: "" # ssl/tls / starttls
+    from: "" # displayed from email address
+    encryption: "" # default is none, supports ssl/tls and starttls
 
   # basic summary report
   summary:
@@ -173,15 +173,20 @@ emailReports:
     ttlSecondsAfterFinished: 0
     restartPolicy: Never # pod restart policy
 
-    to: [] # list of receiver e-mail addresses
-    disableClusterReports: false # remove ClusterPolicyResults from Reports
+    to: [] # list of receiver email addresses
     filter: {} # optional filters
+    #  disableClusterReports: false # remove ClusterPolicyResults from Reports
     #  namespaces:
     #    include: []
     #    exclude: []
     #  sources: ['Kyverno']
-    channels: [] # (optional) channels can be used to to send only a subset of namespaces / sources to dedicated email addresses
-
+    channels: [] # (optional) channels can be used to to send only a subset of namespaces / sources to dedicated email addresses    channels: [] # (optional) channels can be used to to send only a subset of namespaces / sources to dedicated email addresses
+    #- to: ['team-a@company.org']
+    #  filter:
+    #    disableClusterReports: true
+    #    namespaces:
+    #      include: ['team-a-*']
+    #    sources: ['Kyverno']
   # violation summary report
   violations:
     enabled: false
@@ -191,14 +196,20 @@ emailReports:
     ttlSecondsAfterFinished: 0
     restartPolicy: Never # pod restart policy
 
-    to: [] # list of receiver e-mail addresses
-    disableClusterReports: false # remove ClusterPolicyResults from Reports
+    to: [] # list of receiver email addresses
     filter: {} # optional filters
+    #  disableClusterReports: false # remove ClusterPolicyResults from Reports
     #  namespaces:
     #    include: []
     #    exclude: []
     #  sources: ['Kyverno']
-    channels: [] # (optional) channels can be used to to send only a subset of namespaces / sources to dedicated email addresses
+    channels: [] # (optional) channels can be used to to send only a subset of namespaces / sources to dedicated email addresses    channels: [] # (optional) channels can be used to to send only a subset of namespaces / sources to dedicated email addresses
+    #- to: ['team-a@company.org']
+    #  filter:
+    #    disableClusterReports: true
+    #    namespaces:
+    #      include: ['team-a-*']
+    #    sources: ['Kyverno']
 
 # Reference a configuration which already exists instead of creating one
 existingTargetConfig:

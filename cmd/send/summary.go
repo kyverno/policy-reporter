@@ -77,7 +77,7 @@ func NewSummaryCMD() *cobra.Command {
 						return
 					}
 
-					sources := summary.FilterSources(data, config.EmailReportFilterFromConfig(channel.Filter), !channel.DisableClusterReports)
+					sources := summary.FilterSources(data, config.EmailReportFilterFromConfig(channel.Filter), !channel.Filter.DisableClusterReports)
 					if len(sources) == 0 {
 						log.Printf("[INFO] skip email - no results to send")
 						return

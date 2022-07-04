@@ -77,7 +77,7 @@ func NewViolationsCMD() *cobra.Command {
 						return
 					}
 
-					sources := violations.FilterSources(data, config.EmailReportFilterFromConfig(channel.Filter), !channel.DisableClusterReports)
+					sources := violations.FilterSources(data, config.EmailReportFilterFromConfig(channel.Filter), !channel.Filter.DisableClusterReports)
 					if len(sources) == 0 {
 						log.Printf("[INFO] skip email - no results to send")
 					}

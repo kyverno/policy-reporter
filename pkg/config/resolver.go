@@ -400,7 +400,7 @@ func (r *Resolver) SummaryGenerator() (*summary.Generator, error) {
 	return summary.NewGenerator(
 		client,
 		EmailReportFilterFromConfig(r.config.EmailReports.Summary.Filter),
-		!r.config.EmailReports.Summary.DisableClusterReports,
+		!r.config.EmailReports.Summary.Filter.DisableClusterReports,
 	), nil
 }
 
@@ -420,7 +420,7 @@ func (r *Resolver) ViolationsGenerator() (*violations.Generator, error) {
 	return violations.NewGenerator(
 		client,
 		EmailReportFilterFromConfig(r.config.EmailReports.Violations.Filter),
-		!r.config.EmailReports.Violations.DisableClusterReports,
+		!r.config.EmailReports.Violations.Filter.DisableClusterReports,
 	), nil
 }
 

@@ -164,8 +164,8 @@ emailReports:
     encryption: '' # default is none, supports ssl/tls and starttls
   violations:
     to: []
-    disableClusterReports: false # remove ClusterPolicyResults from Reports
     filter:
+      disableClusterReports: false # remove ClusterPolicyResults from Reports
       namespaces:
         include: []
         exclude: []

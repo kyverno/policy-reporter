@@ -6,8 +6,9 @@ type ValueFilter struct {
 }
 
 type EmailReportFilter struct {
-	Namespaces ValueFilter `mapstructure:"namespaces"`
-	Sources    []string    `mapstructure:"sources"`
+	DisableClusterReports bool        `mapstructure:"disableClusterReports"`
+	Namespaces            ValueFilter `mapstructure:"namespaces"`
+	Sources               []string    `mapstructure:"sources"`
 }
 
 type TargetFilter struct {
@@ -145,11 +146,10 @@ type SMTP struct {
 
 // EmailReport configuration
 type EmailReport struct {
-	To                    []string          `mapstructure:"to"`
-	Format                string            `mapstructure:"format"`
-	Filter                EmailReportFilter `mapstructure:"filter"`
-	Channels              []EmailReport     `mapstructure:"channels"`
-	DisableClusterReports bool              `mapstructure:"disableClusterReports"`
+	To       []string          `mapstructure:"to"`
+	Format   string            `mapstructure:"format"`
+	Filter   EmailReportFilter `mapstructure:"filter"`
+	Channels []EmailReport     `mapstructure:"channels"`
 }
 
 // EmailReport configuration
