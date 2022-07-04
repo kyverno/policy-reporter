@@ -55,7 +55,7 @@ kubectl apply -f https://raw.githubusercontent.com/kyverno/policy-reporter/main/
 
 ## Policy Reporter Configuration
 
-To configure policy-reporter, for example your notification targets for Policy Reporter create a secret called `policy-reporter-targets` in the `policy-reporter` namespace with an key `config.yaml` as key and the following structure as value:
+To configure policy-reporter, for example your notification targets, create a secret called `policy-reporter-targets` in the `policy-reporter` namespace with an key `config.yaml` as key and the following structure as value:
 
 ```yaml
 priorityMap: {}
