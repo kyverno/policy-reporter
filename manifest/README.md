@@ -139,6 +139,17 @@ When you change the secret while Policy Reporter is already running, you have to
 
 The `violations-email-report` folder can be used to install Policy Reporter only for the matter of sending E-Mail Summary Reports. You can install the Email Summary Report without the requirement of the Policy Reporter core application. If you already have Policy Reporter installed, you can just apply `config-secret.yaml` and `cronjob.yaml` to add the email report feature. It will reuse the existing `ServiceAccount` and `Namespace`.
 
+### Installation
+
+```bash
+kubectl apply -f https://raw.githubusercontent.com/kyverno/policy-reporter/main/manifest/violations-email-report/namespace.yaml
+kubectl apply -f https://raw.githubusercontent.com/kyverno/policy-reporter/main/manifest/violations-email-report/config-secret.yaml
+kubectl apply -f https://raw.githubusercontent.com/kyverno/policy-reporter/main/manifest/violations-email-report/serviceaccount.yaml
+kubectl apply -f https://raw.githubusercontent.com/kyverno/policy-reporter/main/manifest/violations-email-report/cronjob.yaml
+```
+
+### Configuration
+
 To configure your SMTP server and receiver emails use the following configuration template and replace the `config.yaml` value of `config-secret.yaml` with your base64 encoded configuration.
 
 ```yaml

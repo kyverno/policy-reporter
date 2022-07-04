@@ -2,7 +2,6 @@ name: CI
 
 on:
   push:
-    # Publish `master` as Docker `latest` image.
     branches:
       - main
       - development
@@ -10,6 +9,7 @@ on:
     paths-ignore:
       - README.md
       - charts/**
+      - manifest/**
 
   pull_request:
     branches:
