@@ -63,7 +63,7 @@ var PolicyReportCRD = &v1alpha2.PolicyReport{
 			Result:    v1alpha2.StatusFail,
 			Scored:    true,
 			Policy:    "required-label",
-			Rule:      "app-label-required",
+			Rule:      "",
 			Timestamp: v1.Timestamp{Seconds: 1614093000},
 			Source:    "test",
 			Category:  "test",

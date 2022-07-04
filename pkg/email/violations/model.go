@@ -16,11 +16,15 @@ type Result struct {
 
 func mapResult(res v1alpha2.PolicyReportResult) []Result {
 	count := len(res.Resources)
+	rule := res.Rule
+	if rule == "" {
+		rule = res.Message
+	}
 
 	if count == 0 {
 		return []Result{{
 			Policy: res.Policy,
-			Rule:   res.Rule,
+			Rule:   rule,
 			Status: string(res.Result),
 		}}
 	}
@@ -29,7 +33,7 @@ func mapResult(res v1alpha2.PolicyReportResult) []Result {
 	for _, re := range res.Resources {
 		list = append(list, Result{
 			Policy: res.Policy,
-			Rule:   res.Rule,
+			Rule:   rule,
 			Name:   re.Name,
 			Kind:   re.Kind,
 			Status: string(res.Result),

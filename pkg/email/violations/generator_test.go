@@ -55,6 +55,11 @@ func Test_GenerateDataWithSingleSource(t *testing.T) {
 	if result.Status != "fail" {
 		t.Fatalf("unexpected status: %s", result.Status)
 	}
+
+	result = source.NamespaceResults["test"]["fail"][2]
+	if result.Rule != "message 3" {
+		t.Fatalf("unexpected rule: %s", result.Rule)
+	}
 }
 
 func Test_GenerateDataWithMultipleSource(t *testing.T) {
