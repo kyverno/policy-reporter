@@ -55,7 +55,7 @@ kubectl apply -f https://raw.githubusercontent.com/kyverno/policy-reporter/main/
 
 ## Policy Reporter Configuration
 
-To configure policy-reporter, for exomaple your notification targets for Policy Reporter create a secret called `policy-reporter-targets` in the `policy-reporter` namespace with an key `config.yaml` as key and the following structure as value:
+To configure policy-reporter, for example your notification targets for Policy Reporter create a secret called `policy-reporter-targets` in the `policy-reporter` namespace with an key `config.yaml` as key and the following structure as value:
 
 ```yaml
 priorityMap: {}
@@ -134,3 +134,29 @@ reportFilter:
 The `kyverno-policy-reporter-ui` and `default-policy-reporter-ui` installation has an optional preconfigured `target-security.yaml` to apply. This secret configures the Policy Reporter UI as target for Policy Reporter.
 
 When you change the secret while Policy Reporter is already running, you have to delete the current `policy-reporter` Pod.
+
+## Policy Reporter Summary Email Report
+
+The `violations-email-report` folder can be used to install Policy Reporter only for the matter of sending E-Mail Summary Reports. You can install the Email Summary Report without the requirement of the Policy Reporter core application. If you already have Policy Reporter installed, you can just apply `config-secret.yaml` and `cronjob.yaml` to add the email report feature. It will reuse the existing `ServiceAccount` and `Namespace`.
+
+To configure your SMTP server and receiver emails use the following configuration template and replace the `config.yaml` value of `config-secret.yaml` with your base64 encoded configuration.
+
+```yaml
+emailReports:
+  clusterName: '' # optional clustername shown in the Report
+  smtp:
+    host: ''
+    port: 465
+    username: ''
+    password: ''
+    from: '' # from E-Mail address
+    encryption: '' # default is none, supports ssl/tls and starttls
+  violations:
+    to: []
+    filter:
+      namespaces:
+        include: []
+        exclude: []
+      sources: []
+    channels: []
+```

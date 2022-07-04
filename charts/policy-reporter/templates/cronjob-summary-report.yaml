@@ -63,8 +63,6 @@ spec:
                 - --config=/app/config.yaml
                 - --template-dir=/app/templates
               volumeMounts:
-              - name: sqlite
-                mountPath: /sqlite
               - name: config-file
                 mountPath: /app/config.yaml
                 subPath: config.yaml
@@ -73,8 +71,6 @@ spec:
               - name: NAMESPACE
                 value: {{ .Release.Namespace }}
           volumes:
-          - name: sqlite
-            emptyDir: {}
           - name: config-file
             secret:
               secretName: {{ include "policyreporter.fullname" . }}-config-email-reports
