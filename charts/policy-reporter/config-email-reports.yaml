@@ -10,6 +10,7 @@ emailReports:
     to:
       {{- toYaml . | nindent 6 }}
     {{- end }}
+    disableClusterReports: {{ .Values.emailReports.violations.disableClusterReports }}
     {{- with .Values.emailReports.summary.filter }}
     filter:
       {{- toYaml . | nindent 6 }}
@@ -24,6 +25,7 @@ emailReports:
     to:
       {{- toYaml . | nindent 6 }}
     {{- end }}
+    disableClusterReports: {{ .Values.emailReports.violations.disableClusterReports }}
     {{- with .Values.emailReports.violations.filter }}
     filter:
       {{- toYaml . | nindent 6 }}
