@@ -803,7 +803,7 @@ func createTargetFilter(filter TargetFilter, minimumPriority string, sources []s
 }
 
 func EmailReportFilterFromConfig(config EmailReportFilter) email.Filter {
-	return email.NewFilter(ToRuleSet(config.Namespaces), config.Sources)
+	return email.NewFilter(ToRuleSet(config.Namespaces), ToRuleSet(config.Sources))
 }
 
 func ToRuleSet(filter ValueFilter) validate.RuleSets {

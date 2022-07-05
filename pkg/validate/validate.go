@@ -54,7 +54,3 @@ func ContainsRuleSet(value string, rules RuleSets) bool {
 
 	return true
 }
-
-func ContainsString(value string, list []string) bool {
-	return len(list) == 0 || helper.Contains(value, list)
-}

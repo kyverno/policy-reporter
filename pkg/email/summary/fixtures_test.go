@@ -10,7 +10,7 @@ import (
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-var filter = email.NewFilter(validate.RuleSets{}, make([]string, 0, 0))
+var filter = email.NewFilter(validate.RuleSets{}, validate.RuleSets{})
 
 func NewFakeCilent() (v1alpha2client.Wgpolicyk8sV1alpha2Interface, v1alpha2client.PolicyReportInterface, v1alpha2client.ClusterPolicyReportInterface) {
 	client := fake.NewSimpleClientset().Wgpolicyk8sV1alpha2()

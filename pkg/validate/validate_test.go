@@ -83,21 +83,6 @@ func Test_Validations(t *testing.T) {
 			t.Errorf("Unexpected Validation Result")
 		}
 	})
-	t.Run("ContainsString empty list", func(t *testing.T) {
-		if !validate.ContainsString("test", make([]string, 0)) {
-			t.Errorf("Unexpected Validation Result")
-		}
-	})
-	t.Run("ContainsString match", func(t *testing.T) {
-		if !validate.ContainsString("test", []string{"test"}) {
-			t.Errorf("Unexpected Validation Result")
-		}
-	})
-	t.Run("ContainsString mismatch", func(t *testing.T) {
-		if validate.ContainsString("test", []string{"dev"}) {
-			t.Errorf("Unexpected Validation Result")
-		}
-	})
 }
 
 func Test_RulesCount(t *testing.T) {

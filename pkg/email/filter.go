@@ -6,17 +6,17 @@ import (
 
 type Filter struct {
 	namespace validate.RuleSets
-	sources   []string
+	sources   validate.RuleSets
 }
 
 func (f Filter) ValidateSource(source string) bool {
-	return validate.ContainsString(source, f.sources)
+	return validate.ContainsRuleSet(source, f.sources)
 }
 
 func (f Filter) ValidateNamespace(namespace string) bool {
 	return validate.Namespace(namespace, f.namespace)
 }
 
-func NewFilter(namespaces validate.RuleSets, sources []string) Filter {
+func NewFilter(namespaces, sources validate.RuleSets) Filter {
 	return Filter{namespaces, sources}
 }
