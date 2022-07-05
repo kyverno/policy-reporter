@@ -12,29 +12,27 @@ import (
 	ioprometheusclient "github.com/prometheus/client_model/go"
 )
 
-var creport = &report.PolicyReport{
-	Name:              "cpolr-test",
-	Results:           make([]report.Result, 0),
-	Summary:           report.Summary{},
-	CreationTimestamp: time.Now(),
-}
-
 func Test_ClusterPolicyReportMetricGeneration(t *testing.T) {
 	report1 := report.PolicyReport{
 		Name:              "cpolr-test",
 		Summary:           report.Summary{Pass: 1, Fail: 1},
 		CreationTimestamp: time.Now(),
-		Results:           []report.Result{result1, result2, result3},
 	}
 
 	report2 := report.PolicyReport{
 		Name:              "cpolr-test",
 		Summary:           report.Summary{Pass: 0, Fail: 1},
 		CreationTimestamp: time.Now(),
-		Results:           []report.Result{result1, result3},
 	}
 
-	filter := metrics.NewFilter(validate.RuleSets{}, validate.RuleSets{}, validate.RuleSets{Exclude: []string{"disallow-policy"}}, validate.RuleSets{}, validate.RuleSets{})
+	report3 := report.PolicyReport{
+		Name:              "cpolr-test",
+		Summary:           report.Summary{Pass: 0, Fail: 1},
+		CreationTimestamp: time.Now(),
+		Results:           []report.Result{{Source: "Kube Bench"}},
+	}
+
+	filter := metrics.NewReportFilter(validate.RuleSets{}, validate.RuleSets{Exclude: []string{"Kube Bench"}})
 	handler := metrics.CreateClusterPolicyReportMetricsListener(filter)
 
 	t.Run("Added Metric", func(t *testing.T) {
@@ -52,32 +50,19 @@ func Test_ClusterPolicyReportMetricGeneration(t *testing.T) {
 
 		metrics := summary.GetMetric()
 
-		if err = testClusterSummaryMetricLabels(metrics[0], creport, "Error", 0); err != nil {
+		if err = testClusterSummaryMetricLabels(metrics[0], report1, "Error", 0); err != nil {
 			t.Error(err)
 		}
-		if err = testClusterSummaryMetricLabels(metrics[1], creport, "Fail", 1); err != nil {
+		if err = testClusterSummaryMetricLabels(metrics[1], report1, "Fail", 1); err != nil {
 			t.Error(err)
 		}
-		if err = testClusterSummaryMetricLabels(metrics[2], creport, "Pass", 1); err != nil {
+		if err = testClusterSummaryMetricLabels(metrics[2], report1, "Pass", 1); err != nil {
 			t.Error(err)
 		}
-		if err = testClusterSummaryMetricLabels(metrics[3], creport, "Skip", 0); err != nil {
+		if err = testClusterSummaryMetricLabels(metrics[3], report1, "Skip", 0); err != nil {
 			t.Error(err)
 		}
-		if err = testClusterSummaryMetricLabels(metrics[4], creport, "Warn", 0); err != nil {
-			t.Error(err)
-		}
-
-		results := findMetric(metricFam, "cluster_policy_report_result")
-		if summary == nil {
-			t.Fatalf("Metric not found: cluster_policy_report_result")
-		}
-
-		metrics = results.GetMetric()
-		if err = testClusterResultMetricLabels(metrics[0], result2); err != nil {
-			t.Error(err)
-		}
-		if err = testClusterResultMetricLabels(metrics[1], result1); err != nil {
+		if err = testClusterSummaryMetricLabels(metrics[4], report1, "Warn", 0); err != nil {
 			t.Error(err)
 		}
 	})
@@ -98,32 +83,19 @@ func Test_ClusterPolicyReportMetricGeneration(t *testing.T) {
 
 		metrics := summary.GetMetric()
 
-		if err = testClusterSummaryMetricLabels(metrics[0], creport, "Error", 0); err != nil {
+		if err = testClusterSummaryMetricLabels(metrics[0], report2, "Error", 0); err != nil {
 			t.Error(err)
 		}
-		if err = testClusterSummaryMetricLabels(metrics[1], creport, "Fail", 1); err != nil {
+		if err = testClusterSummaryMetricLabels(metrics[1], report2, "Fail", 1); err != nil {
 			t.Error(err)
 		}
-		if err = testClusterSummaryMetricLabels(metrics[2], creport, "Pass", 0); err != nil {
+		if err = testClusterSummaryMetricLabels(metrics[2], report2, "Pass", 0); err != nil {
 			t.Error(err)
 		}
-		if err = testClusterSummaryMetricLabels(metrics[3], creport, "Skip", 0); err != nil {
+		if err = testClusterSummaryMetricLabels(metrics[3], report2, "Skip", 0); err != nil {
 			t.Error(err)
 		}
-		if err = testClusterSummaryMetricLabels(metrics[4], creport, "Warn", 0); err != nil {
-			t.Error(err)
-		}
-
-		results := findMetric(metricFam, "cluster_policy_report_result")
-		if summary == nil {
-			t.Fatalf("Metric not found: cluster_policy_report_result")
-		}
-
-		metrics = results.GetMetric()
-		if len(metrics) != 1 {
-			t.Error("Expected one metric, the second metric should be deleted")
-		}
-		if err = testClusterResultMetricLabels(metrics[0], result1); err != nil {
+		if err = testClusterSummaryMetricLabels(metrics[4], report2, "Warn", 0); err != nil {
 			t.Error(err)
 		}
 	})
@@ -149,11 +121,25 @@ func Test_ClusterPolicyReportMetricGeneration(t *testing.T) {
 			t.Error("cluster_policy_report_result should no longer exist", *results.Name)
 		}
 	})
+
+	t.Run("Filtered Report", func(t *testing.T) {
+		handler(report.LifecycleEvent{Type: report.Added, NewPolicyReport: report3, OldPolicyReport: report.PolicyReport{}})
+
+		metricFam, err := prometheus.DefaultGatherer.Gather()
+		if err != nil {
+			t.Errorf("unexpected Error: %s", err)
+		}
+
+		summary := findMetric(metricFam, "cluster_policy_report_summary")
+		if summary != nil {
+			t.Error("cluster_policy_report_summary should not be created", *summary.Name)
+		}
+	})
 }
 
 func testClusterSummaryMetricLabels(
 	metric *ioprometheusclient.Metric,
-	preport *report.PolicyReport,
+	preport report.PolicyReport,
 	status string,
 	gauge float64,
 ) error {
@@ -172,74 +158,6 @@ func testClusterSummaryMetricLabels(
 	}
 
 	if value := metric.Gauge.GetValue(); value != gauge {
-		return fmt.Errorf("unexpected Metric Value: %v", value)
-	}
-
-	return nil
-}
-
-func testClusterResultMetricLabels(metric *ioprometheusclient.Metric, result report.Result) error {
-	if name := *metric.Label[0].Name; name != "category" {
-		return fmt.Errorf("unexpected Category Label: %s", name)
-	}
-	if value := *metric.Label[0].Value; value != result.Category {
-		return fmt.Errorf("unexpected Category Label Value: %s", value)
-	}
-
-	if name := *metric.Label[1].Name; name != "kind" {
-		return fmt.Errorf("unexpected Name Label: %s", name)
-	}
-	if value := *metric.Label[1].Value; value != result.Resource.Kind {
-		return fmt.Errorf("unexpected Kind Label Value: %s", value)
-	}
-
-	if name := *metric.Label[2].Name; name != "name" {
-		return fmt.Errorf("unexpected Name Label: %s", name)
-	}
-	if value := *metric.Label[2].Value; value != result.Resource.Name {
-		return fmt.Errorf("unexpected Name Label Value: %s", value)
-	}
-
-	if name := *metric.Label[3].Name; name != "policy" {
-		return fmt.Errorf("unexpected Name Label: %s", name)
-	}
-	if value := *metric.Label[3].Value; value != result.Policy {
-		return fmt.Errorf("unexpected Policy Label Value: %s", value)
-	}
-
-	if name := *metric.Label[4].Name; name != "report" {
-		return fmt.Errorf("unexpected Name Label: %s", name)
-	}
-
-	if name := *metric.Label[5].Name; name != "rule" {
-		return fmt.Errorf("unexpected Name Label: %s", name)
-	}
-	if value := *metric.Label[5].Value; value != result.Rule {
-		return fmt.Errorf("unexpected Rule Label Value: %s", value)
-	}
-
-	if name := *metric.Label[6].Name; name != "severity" {
-		return fmt.Errorf("unexpected Name Label: %s", name)
-	}
-	if value := *metric.Label[6].Value; value != result.Severity {
-		return fmt.Errorf("unexpected Severity Label Value: %s", value)
-	}
-
-	if name := *metric.Label[7].Name; name != "source" {
-		return fmt.Errorf("unexpected Source Label: %s", name)
-	}
-	if value := *metric.Label[7].Value; value != result.Source {
-		return fmt.Errorf("unexpected Source Label Value: %s", value)
-	}
-
-	if name := *metric.Label[8].Name; name != "status" {
-		return fmt.Errorf("unexpected Name Label: %s", name)
-	}
-	if value := *metric.Label[8].Value; value != result.Status {
-		return fmt.Errorf("unexpected Status Label Value: %s", value)
-	}
-
-	if value := metric.Gauge.GetValue(); value != 1 {
 		return fmt.Errorf("unexpected Metric Value: %v", value)
 	}
 

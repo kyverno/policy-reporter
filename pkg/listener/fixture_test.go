@@ -74,5 +74,6 @@ var preport3 = report.PolicyReport{
 var creport = report.PolicyReport{
 	Name:              "cpolr-test",
 	Summary:           report.Summary{},
+	Results:           []report.Result{result1, result2},
 	CreationTimestamp: time.Now(),
 }
