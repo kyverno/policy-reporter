@@ -37,7 +37,7 @@ func (c *client) Send(result report.Result) {
 }
 
 // NewClient creates a new S3.client to send Results to S3. It doesnt' work right now
-func NewClient(name string, s3 helper.AWSClient, prefix string, skipExistingOnStartup bool, filter *target.Filter) target.Client {
+func NewClient(name string, s3 helper.AWSClient, prefix string, skipExistingOnStartup bool, filter *report.ResultFilter) target.Client {
 	return &client{
 		target.NewBaseClient(name, skipExistingOnStartup, filter),
 		s3,

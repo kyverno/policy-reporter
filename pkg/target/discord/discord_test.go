@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"github.com/kyverno/policy-reporter/pkg/report"
-	"github.com/kyverno/policy-reporter/pkg/target"
 	"github.com/kyverno/policy-reporter/pkg/target/discord"
 )
 
@@ -68,7 +67,7 @@ func Test_LokiTarget(t *testing.T) {
 			}
 		}
 
-		client := discord.NewClient("Discord", "http://hook.discord:80", false, &target.Filter{}, testClient{callback, 200})
+		client := discord.NewClient("Discord", "http://hook.discord:80", false, &report.ResultFilter{}, testClient{callback, 200})
 		client.Send(completeResult)
 	})
 
@@ -87,11 +86,11 @@ func Test_LokiTarget(t *testing.T) {
 			}
 		}
 
-		client := discord.NewClient("Discord", "http://hook.discord:80", false, &target.Filter{}, testClient{callback, 200})
+		client := discord.NewClient("Discord", "http://hook.discord:80", false, &report.ResultFilter{}, testClient{callback, 200})
 		client.Send(minimalResult)
 	})
 	t.Run("Name", func(t *testing.T) {
-		client := discord.NewClient("Discord", "http://localhost:9200", true, &target.Filter{}, testClient{})
+		client := discord.NewClient("Discord", "http://localhost:9200", true, &report.ResultFilter{}, testClient{})
 
 		if client.Name() != "Discord" {
 			t.Errorf("Unexpected Name %s", client.Name())

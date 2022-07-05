@@ -169,6 +169,8 @@ emailReports:
       namespaces:
         include: []
         exclude: []
-      sources: []
+      sources:
+        include: []
+        exclude: []
     channels: []
 ```

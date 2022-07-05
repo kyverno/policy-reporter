@@ -84,7 +84,7 @@ func Test_ResultListener(t *testing.T) {
 			called = true
 		})
 
-		slistener.Listen(report.LifecycleEvent{Type: report.Updated, NewPolicyReport: preport2, OldPolicyReport: preport1})
+		slistener.Listen(report.LifecycleEvent{Type: report.Updated, NewPolicyReport: preport3, OldPolicyReport: preport1})
 
 		if called {
 			t.Error("Expected Listener not be called with empty results")

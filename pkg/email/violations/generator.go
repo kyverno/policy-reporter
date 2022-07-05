@@ -6,13 +6,13 @@ import (
 
 	"github.com/kyverno/kyverno/api/policyreport/v1alpha2"
 	api "github.com/kyverno/kyverno/pkg/client/clientset/versioned/typed/policyreport/v1alpha2"
-	"github.com/kyverno/policy-reporter/pkg/filter"
+	"github.com/kyverno/policy-reporter/pkg/email"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 type Generator struct {
 	client         api.Wgpolicyk8sV1alpha2Interface
-	filter         filter.Filter
+	filter         email.Filter
 	clusterReports bool
 }
 
@@ -126,11 +126,11 @@ func (o *Generator) GenerateData(ctx context.Context) ([]Source, error) {
 	return list, nil
 }
 
-func NewGenerator(client api.Wgpolicyk8sV1alpha2Interface, filter filter.Filter, clusterReports bool) *Generator {
+func NewGenerator(client api.Wgpolicyk8sV1alpha2Interface, filter email.Filter, clusterReports bool) *Generator {
 	return &Generator{client, filter, clusterReports}
 }
 
-func FilterSources(sources []Source, filter filter.Filter, clusterReports bool) []Source {
+func FilterSources(sources []Source, filter email.Filter, clusterReports bool) []Source {
 	newSources := make([]Source, 0)
 
 	mx := sync.Mutex{}

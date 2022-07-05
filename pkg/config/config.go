@@ -8,7 +8,7 @@ type ValueFilter struct {
 type EmailReportFilter struct {
 	DisableClusterReports bool        `mapstructure:"disableClusterReports"`
 	Namespaces            ValueFilter `mapstructure:"namespaces"`
-	Sources               []string    `mapstructure:"sources"`
+	Sources               ValueFilter `mapstructure:"sources"`
 }
 
 type TargetFilter struct {

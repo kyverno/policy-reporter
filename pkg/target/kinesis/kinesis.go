@@ -36,7 +36,7 @@ func (c *client) Send(result report.Result) {
 }
 
 // NewClient creates a new Kinesis.client to send Results to AWS Kinesis compatible source
-func NewClient(name string, kinesis helper.AWSClient, skipExistingOnStartup bool, filter *target.Filter) target.Client {
+func NewClient(name string, kinesis helper.AWSClient, skipExistingOnStartup bool, filter *report.ResultFilter) target.Client {
 	return &client{
 		target.NewBaseClient(name, skipExistingOnStartup, filter),
 		kinesis,

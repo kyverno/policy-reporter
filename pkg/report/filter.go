@@ -1,44 +1,48 @@
 package report
 
-import "github.com/minio/pkg/wildcard"
+import (
+	"github.com/kyverno/policy-reporter/pkg/validate"
+)
 
-type Filter interface {
-	DisableClusterReports() bool
-	AllowReport(report PolicyReport) bool
-}
-
-type filter struct {
+type Filter struct {
 	disbaleClusterReports bool
-	includeNamespaces     []string
-	excludeNamespaces     []string
+	namespace             validate.RuleSets
 }
 
-func (f *filter) DisableClusterReports() bool {
+func (f *Filter) DisableClusterReports() bool {
 	return f.disbaleClusterReports
 }
 
-func (f *filter) AllowReport(report PolicyReport) bool {
-	if report.Namespace == "" {
-		return true
-	} else if len(f.includeNamespaces) > 0 {
-		for _, ns := range f.includeNamespaces {
-			if wildcard.Match(ns, report.Namespace) {
-				return true
-			}
-		}
+func (f *Filter) AllowReport(report PolicyReport) bool {
+	return validate.Namespace(report.Namespace, f.namespace)
+}
 
-		return false
-	} else if len(f.excludeNamespaces) > 0 {
-		for _, ns := range f.excludeNamespaces {
-			if wildcard.Match(ns, report.Namespace) {
-				return false
-			}
+func NewFilter(disableClusterReports bool, namespace validate.RuleSets) *Filter {
+	return &Filter{disableClusterReports, namespace}
+}
+
+type ResultValidation = func(Result) bool
+
+type ResultFilter struct {
+	validations     []ResultValidation
+	Sources         []string
+	MinimumPriority string
+}
+
+func (rf *ResultFilter) AddValidation(v ResultValidation) {
+	rf.validations = append(rf.validations, v)
+}
+
+func (rf *ResultFilter) Validate(result Result) bool {
+	for _, validation := range rf.validations {
+		if !validation(result) {
+			return false
 		}
 	}
 
 	return true
 }
 
-func NewFilter(disableClusterReports bool, includeNamespaces []string, excludeNamespaces []string) Filter {
-	return &filter{disableClusterReports, includeNamespaces, excludeNamespaces}
+func NewResultFilter() *ResultFilter {
+	return &ResultFilter{}
 }
