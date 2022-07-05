@@ -63,6 +63,14 @@ var preport2 = report.PolicyReport{
 	CreationTimestamp: time.Now(),
 }
 
+var preport3 = report.PolicyReport{
+	ID:                report.GeneratePolicyReportID("polr-test", "test"),
+	Name:              "polr-test",
+	Namespace:         "test",
+	Results:           []report.Result{},
+	CreationTimestamp: time.Now(),
+}
+
 var creport = report.PolicyReport{
 	Name:              "cpolr-test",
 	Summary:           report.Summary{},

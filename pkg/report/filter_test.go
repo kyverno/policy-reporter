@@ -57,3 +57,19 @@ func Test_AllowReport(t *testing.T) {
 		}
 	})
 }
+
+func Test_ResultFilter(t *testing.T) {
+	t.Run("don't filter any result without validations", func(t *testing.T) {
+		filter := report.NewResultFilter()
+		if !filter.Validate(result1) {
+			t.Error("Expected result validates to true")
+		}
+	})
+	t.Run("filter result with a false validation", func(t *testing.T) {
+		filter := report.NewResultFilter()
+		filter.AddValidation(func(r report.Result) bool { return false })
+		if filter.Validate(result1) {
+			t.Error("Expected result validates to false")
+		}
+	})
+}
