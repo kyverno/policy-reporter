@@ -7,6 +7,7 @@ import (
 
 	"github.com/kyverno/policy-reporter/pkg/listener/metrics"
 	"github.com/kyverno/policy-reporter/pkg/report"
+	"github.com/kyverno/policy-reporter/pkg/validate"
 	"github.com/prometheus/client_golang/prometheus"
 	ioprometheusclient "github.com/prometheus/client_model/go"
 )
@@ -33,7 +34,8 @@ func Test_ClusterPolicyReportMetricGeneration(t *testing.T) {
 		Results:           []report.Result{result1, result3},
 	}
 
-	handler := metrics.CreateClusterPolicyReportMetricsListener(&metrics.Filter{Policy: metrics.Rules{Exclude: []string{"disallow-policy"}}})
+	filter := metrics.NewFilter(validate.RuleSets{}, validate.RuleSets{}, validate.RuleSets{Exclude: []string{"disallow-policy"}}, validate.RuleSets{}, validate.RuleSets{})
+	handler := metrics.CreateClusterPolicyReportMetricsListener(filter)
 
 	t.Run("Added Metric", func(t *testing.T) {
 		handler(report.LifecycleEvent{Type: report.Added, NewPolicyReport: report1, OldPolicyReport: report.PolicyReport{}})

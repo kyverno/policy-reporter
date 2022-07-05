@@ -8,11 +8,12 @@ import (
 
 	"github.com/kyverno/policy-reporter/pkg/kubernetes"
 	"github.com/kyverno/policy-reporter/pkg/report"
+	"github.com/kyverno/policy-reporter/pkg/validate"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-var filter = report.NewFilter(false, make([]string, 0), make([]string, 0))
+var filter = report.NewFilter(false, validate.RuleSets{})
 
 func Test_PolicyReportWatcher(t *testing.T) {
 	ctx := context.Background()

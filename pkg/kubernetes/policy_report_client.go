@@ -21,7 +21,7 @@ type k8sPolicyReportClient struct {
 	synced       bool
 	mapper       Mapper
 	mx           *sync.Mutex
-	reportFilter report.Filter
+	reportFilter *report.Filter
 }
 
 func (k *k8sPolicyReportClient) HasSynced() bool {
@@ -137,7 +137,7 @@ func (k *k8sPolicyReportClient) configureClusterPolicyReport() cache.SharedIndex
 }
 
 // NewPolicyReportAdapter new Adapter for Policy Report Kubernetes API
-func NewPolicyReportClient(client versioned.Interface, mapper Mapper, reportFilter report.Filter, publisher report.EventPublisher) report.PolicyReportClient {
+func NewPolicyReportClient(client versioned.Interface, mapper Mapper, reportFilter *report.Filter, publisher report.EventPublisher) report.PolicyReportClient {
 	fatcory := externalversions.NewSharedInformerFactory(client, time.Hour)
 	v1alpha2 := fatcory.Wgpolicyk8s().V1alpha2()
 

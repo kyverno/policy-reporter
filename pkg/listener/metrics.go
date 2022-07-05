@@ -6,7 +6,7 @@ import (
 )
 
 // NewMetricsListener for PolicyReport watch.Events
-func NewMetricsListener(filter *metrics.Filter) report.PolicyReportListener {
+func NewMetricsListener(filter *report.ResultFilter) report.PolicyReportListener {
 	pCallback := metrics.CreatePolicyReportMetricsListener(filter)
 	cCallback := metrics.CreateClusterPolicyReportMetricsListener(filter)
 

@@ -12,7 +12,6 @@ import (
 	"github.com/kyverno/policy-reporter/pkg/email"
 	"github.com/kyverno/policy-reporter/pkg/email/summary"
 	"github.com/kyverno/policy-reporter/pkg/email/violations"
-	"github.com/kyverno/policy-reporter/pkg/filter"
 	"github.com/kyverno/policy-reporter/pkg/helper"
 	"github.com/kyverno/policy-reporter/pkg/kubernetes"
 	"github.com/kyverno/policy-reporter/pkg/listener"
@@ -30,6 +29,7 @@ import (
 	"github.com/kyverno/policy-reporter/pkg/target/teams"
 	"github.com/kyverno/policy-reporter/pkg/target/ui"
 	"github.com/kyverno/policy-reporter/pkg/target/webhook"
+	"github.com/kyverno/policy-reporter/pkg/validate"
 	mail "github.com/xhit/go-simple-mail/v2"
 
 	goredis "github.com/go-redis/redis/v8"
@@ -108,26 +108,11 @@ func (r *Resolver) RegisterStoreListener(store report.PolicyReportStore) {
 // RegisterMetricsListener resolver method
 func (r *Resolver) RegisterMetricsListener() {
 	r.EventPublisher().RegisterListener(listener.NewMetricsListener(metrics.NewFilter(
-		metrics.Rules{
-			Exclude: r.config.Metrics.Filter.Namespaces.Exclude,
-			Include: r.config.Metrics.Filter.Namespaces.Include,
-		},
-		metrics.Rules{
-			Exclude: r.config.Metrics.Filter.Status.Exclude,
-			Include: r.config.Metrics.Filter.Status.Include,
-		},
-		metrics.Rules{
-			Exclude: r.config.Metrics.Filter.Policies.Exclude,
-			Include: r.config.Metrics.Filter.Policies.Include,
-		},
-		metrics.Rules{
-			Exclude: r.config.Metrics.Filter.Sources.Exclude,
-			Include: r.config.Metrics.Filter.Sources.Include,
-		},
-		metrics.Rules{
-			Exclude: r.config.Metrics.Filter.Severities.Exclude,
-			Include: r.config.Metrics.Filter.Severities.Include,
-		},
+		ToRuleSet(r.config.Metrics.Filter.Namespaces),
+		ToRuleSet(r.config.Metrics.Filter.Status),
+		ToRuleSet(r.config.Metrics.Filter.Policies),
+		ToRuleSet(r.config.Metrics.Filter.Sources),
+		ToRuleSet(r.config.Metrics.Filter.Severities),
 	)))
 }
 
@@ -463,11 +448,10 @@ func (r *Resolver) PolicyReportClient() (report.PolicyReportClient, error) {
 	return r.policyReportClient, nil
 }
 
-func (r *Resolver) ReportFilter() report.Filter {
+func (r *Resolver) ReportFilter() *report.Filter {
 	return report.NewFilter(
 		r.config.ReportFilter.ClusterReports.Disabled,
-		r.config.ReportFilter.Namespaces.Include,
-		r.config.ReportFilter.Namespaces.Exclude,
+		ToRuleSet(r.config.ReportFilter.Namespaces),
 	)
 }
 
@@ -808,31 +792,23 @@ func createKinesisClient(config Kinesis, parent Kinesis) target.Client {
 	)
 }
 
-func createTargetFilter(fil TargetFilter, minimumPriority string, sources []string) *target.Filter {
-	return &target.Filter{
-		MinimumPriority: minimumPriority,
-		Sources:         sources,
-		Namespace: filter.Rules{
-			Include: fil.Namespaces.Include,
-			Exclude: fil.Namespaces.Exclude,
-		},
-		Priority: filter.Rules{
-			Include: fil.Priorities.Include,
-			Exclude: fil.Priorities.Exclude,
-		},
-		Policy: filter.Rules{
-			Include: fil.Policies.Include,
-			Exclude: fil.Policies.Exclude,
-		},
-	}
+func createTargetFilter(filter TargetFilter, minimumPriority string, sources []string) *report.ResultFilter {
+	return target.NewClientFilter(
+		ToRuleSet(filter.Namespaces),
+		ToRuleSet(filter.Priorities),
+		ToRuleSet(filter.Policies),
+		minimumPriority,
+		sources,
+	)
 }
 
-func EmailReportFilterFromConfig(config EmailReportFilter) filter.Filter {
-	return filter.New(
-		filter.Rules{
-			Include: config.Namespaces.Include,
-			Exclude: config.Namespaces.Exclude,
-		},
-		config.Sources,
-	)
+func EmailReportFilterFromConfig(config EmailReportFilter) email.Filter {
+	return email.NewFilter(ToRuleSet(config.Namespaces), config.Sources)
+}
+
+func ToRuleSet(filter ValueFilter) validate.RuleSets {
+	return validate.RuleSets{
+		Include: filter.Include,
+		Exclude: filter.Exclude,
+	}
 }

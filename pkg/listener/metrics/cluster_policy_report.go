@@ -18,7 +18,7 @@ var clusterRuleGauge = promauto.NewGaugeVec(prometheus.GaugeOpts{
 	Help: "List of all ClusterPolicyReport Results",
 }, []string{"rule", "policy", "report", "kind", "name", "status", "severity", "category", "source"})
 
-func CreateClusterPolicyReportMetricsListener(filter *Filter) report.PolicyReportListener {
+func CreateClusterPolicyReportMetricsListener(filter *report.ResultFilter) report.PolicyReportListener {
 	prometheus.Register(clusterPolicyGauge)
 	prometheus.Register(clusterRuleGauge)
 

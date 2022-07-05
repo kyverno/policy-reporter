@@ -5,7 +5,6 @@ import (
 	"testing"
 
 	"github.com/kyverno/policy-reporter/pkg/report"
-	"github.com/kyverno/policy-reporter/pkg/target"
 	"github.com/kyverno/policy-reporter/pkg/target/ui"
 )
 
@@ -56,11 +55,11 @@ func Test_UITarget(t *testing.T) {
 			}
 		}
 
-		client := ui.NewClient("UI", "http://localhost:8080", false, &target.Filter{}, testClient{callback, 200})
+		client := ui.NewClient("UI", "http://localhost:8080", false, &report.ResultFilter{}, testClient{callback, 200})
 		client.Send(completeResult)
 	})
 	t.Run("Name", func(t *testing.T) {
-		client := ui.NewClient("UI", "http://localhost:8080", false, &target.Filter{}, testClient{})
+		client := ui.NewClient("UI", "http://localhost:8080", false, &report.ResultFilter{}, testClient{})
 
 		if client.Name() != "UI" {
 			t.Errorf("Unexpected Name %s", client.Name())

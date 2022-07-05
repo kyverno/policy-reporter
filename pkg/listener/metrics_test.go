@@ -4,7 +4,6 @@ import (
 	"testing"
 
 	"github.com/kyverno/policy-reporter/pkg/listener"
-	"github.com/kyverno/policy-reporter/pkg/listener/metrics"
 	"github.com/kyverno/policy-reporter/pkg/report"
 
 	"github.com/prometheus/client_golang/prometheus"
@@ -12,7 +11,7 @@ import (
 )
 
 func Test_MetricsListener(t *testing.T) {
-	slistener := listener.NewMetricsListener(&metrics.Filter{})
+	slistener := listener.NewMetricsListener(&report.ResultFilter{})
 
 	t.Run("Add ClusterPolicyReport Metric", func(t *testing.T) {
 		slistener(report.LifecycleEvent{Type: report.Added, NewPolicyReport: creport, OldPolicyReport: report.PolicyReport{}})

@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"github.com/kyverno/policy-reporter/pkg/report"
-	"github.com/kyverno/policy-reporter/pkg/target"
 	"github.com/kyverno/policy-reporter/pkg/target/teams"
 )
 
@@ -104,7 +103,7 @@ func Test_TeamsTarget(t *testing.T) {
 			}
 		}
 
-		client := teams.NewClient("Teams", "http://hook.teams:80", false, &target.Filter{}, testClient{callback, 200})
+		client := teams.NewClient("Teams", "http://hook.teams:80", false, &report.ResultFilter{}, testClient{callback, 200})
 		client.Send(completeResult)
 	})
 
@@ -134,7 +133,7 @@ func Test_TeamsTarget(t *testing.T) {
 			}
 		}
 
-		client := teams.NewClient("Teams", "http://hook.teams:80", false, &target.Filter{}, testClient{callback, 200})
+		client := teams.NewClient("Teams", "http://hook.teams:80", false, &report.ResultFilter{}, testClient{callback, 200})
 		client.Send(minimalResult)
 	})
 	t.Run("Send Minimal InfoResult", func(t *testing.T) {
@@ -151,7 +150,7 @@ func Test_TeamsTarget(t *testing.T) {
 			}
 		}
 
-		client := teams.NewClient("Teams", "http://hook.teams:80", false, &target.Filter{}, testClient{callback, 200})
+		client := teams.NewClient("Teams", "http://hook.teams:80", false, &report.ResultFilter{}, testClient{callback, 200})
 		client.Send(minimalInfoResult)
 	})
 	t.Run("Send Minimal ErrorResult", func(t *testing.T) {
@@ -168,7 +167,7 @@ func Test_TeamsTarget(t *testing.T) {
 			}
 		}
 
-		client := teams.NewClient("Teams", "http://hook.teams:80", false, &target.Filter{}, testClient{callback, 200})
+		client := teams.NewClient("Teams", "http://hook.teams:80", false, &report.ResultFilter{}, testClient{callback, 200})
 		client.Send(minimalErrorResult)
 	})
 	t.Run("Send Minimal Debug Result", func(t *testing.T) {
@@ -197,11 +196,11 @@ func Test_TeamsTarget(t *testing.T) {
 			}
 		}
 
-		client := teams.NewClient("Teams", "http://hook.teams:80", false, &target.Filter{}, testClient{callback, 200})
+		client := teams.NewClient("Teams", "http://hook.teams:80", false, &report.ResultFilter{}, testClient{callback, 200})
 		client.Send(minimalDebugResult)
 	})
 	t.Run("Name", func(t *testing.T) {
-		client := teams.NewClient("Teams", "http://localhost:9200", true, &target.Filter{}, testClient{})
+		client := teams.NewClient("Teams", "http://localhost:9200", true, &report.ResultFilter{}, testClient{})
 
 		if client.Name() != "Teams" {
 			t.Errorf("Unexpected Name %s", client.Name())

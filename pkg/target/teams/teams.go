@@ -114,7 +114,7 @@ func (s *client) Send(result report.Result) {
 }
 
 // NewClient creates a new teams.client to send Results to MS Teams
-func NewClient(name, host string, skipExistingOnStartup bool, filter *target.Filter, httpClient http.Client) target.Client {
+func NewClient(name, host string, skipExistingOnStartup bool, filter *report.ResultFilter, httpClient http.Client) target.Client {
 	return &client{
 		target.NewBaseClient(name, skipExistingOnStartup, filter),
 		host,

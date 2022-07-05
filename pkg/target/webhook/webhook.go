@@ -28,7 +28,7 @@ func (e *client) Send(result report.Result) {
 }
 
 // NewClient creates a new loki.client to send Results to Elasticsearch
-func NewClient(name, host string, headers map[string]string, skipExistingOnStartup bool, filter *target.Filter, httpClient http.Client) target.Client {
+func NewClient(name, host string, headers map[string]string, skipExistingOnStartup bool, filter *report.ResultFilter, httpClient http.Client) target.Client {
 	return &client{
 		target.NewBaseClient(name, skipExistingOnStartup, filter),
 		host,
