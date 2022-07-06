@@ -107,13 +107,21 @@ func (r *Resolver) RegisterStoreListener(store report.PolicyReportStore) {
 
 // RegisterMetricsListener resolver method
 func (r *Resolver) RegisterMetricsListener() {
-	r.EventPublisher().RegisterListener(listener.NewMetricsListener(metrics.NewFilter(
-		ToRuleSet(r.config.Metrics.Filter.Namespaces),
-		ToRuleSet(r.config.Metrics.Filter.Status),
-		ToRuleSet(r.config.Metrics.Filter.Policies),
-		ToRuleSet(r.config.Metrics.Filter.Sources),
-		ToRuleSet(r.config.Metrics.Filter.Severities),
-	)))
+	r.EventPublisher().RegisterListener(listener.NewMetricsListener(
+		metrics.NewResultFilter(
+			ToRuleSet(r.config.Metrics.Filter.Namespaces),
+			ToRuleSet(r.config.Metrics.Filter.Status),
+			ToRuleSet(r.config.Metrics.Filter.Policies),
+			ToRuleSet(r.config.Metrics.Filter.Sources),
+			ToRuleSet(r.config.Metrics.Filter.Severities),
+		),
+		metrics.NewReportFilter(
+			ToRuleSet(r.config.Metrics.Filter.Namespaces),
+			ToRuleSet(r.config.Metrics.Filter.Sources),
+		),
+		r.config.Metrics.Mode,
+		r.config.Metrics.CustomLabels,
+	))
 }
 
 // Mapper resolver method

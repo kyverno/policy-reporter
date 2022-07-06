@@ -175,7 +175,7 @@ data:
         "pluginVersion": "7.1.5",
         "targets": [
             {
-            "expr": "sum(policy_report_result{policy=~\"$policy\", category=~\"$category\", severity=~\"$severity\", source=~\"$source\", kind=~\"$kind\", status=\"warn\"})",
+            "expr": "sum(cluster_policy_report_result{policy=~\"$policy\", category=~\"$category\", severity=~\"$severity\", source=~\"$source\", kind=~\"$kind\", status=\"warn\"})",
             "instant": true,
             "interval": "",
             "legendFormat": "",
@@ -457,14 +457,15 @@ data:
                 },
                 "indexByName": {
                     "Time": 0,
-                    "Value": 8,
-                    "category": 1,
+                    "source": 1,
+                    "category": 2,
                     "kind": 3,
                     "name": 4,
                     "policy": 5,
                     "rule": 6,
                     "severity": 2,
-                    "status": 7
+                    "status": 7,
+                    "Value": 8
                 },
                 "renameByName": {
                 "exported_namespace": "namespace"
@@ -534,14 +535,15 @@ data:
                 },
                 "indexByName": {
                     "Time": 0,
-                    "Value": 8,
-                    "category": 1,
+                    "source": 1,
+                    "category": 2,
                     "kind": 3,
                     "name": 4,
                     "policy": 5,
                     "rule": 6,
                     "severity": 2,
-                    "status": 7
+                    "status": 7,
+                    "Value": 8
                 },
                 "renameByName": {
                 "exported_namespace": "namespace"
@@ -608,14 +610,15 @@ data:
                 },
                 "indexByName": {
                     "Time": 0,
-                    "Value": 8,
-                    "category": 1,
+                    "source": 1,
+                    "category": 2,
                     "kind": 3,
                     "name": 4,
                     "policy": 5,
                     "rule": 6,
                     "severity": 2,
-                    "status": 7
+                    "status": 7,
+                    "Value": 8
                 },
                 "renameByName": {
                 "exported_namespace": "namespace"
@@ -660,7 +663,7 @@ data:
         "pluginVersion": "7.1.5",
         "targets": [
             {
-            "expr": "sum(cluster_policy_report_result{policy=~\"$policy\", category=~\"$category\", severity=~\"$severity\", source=~\"$source\", kind=~\"$kind\", status=\"error\"}) by (policy,rule,kind,name,status,severity,category,source)",
+            "expr": "sum(cluster_policy_report_result{policy=~\"$policy\", category=~\"$category\", severity=~\"$severity\", source=~\"$source\", kind=~\"$kind\", status=\"warn\"}) by (policy,rule,kind,name,status,severity,category,source)",
             "format": "table",
             "instant": true,
             "interval": "",
@@ -682,14 +685,15 @@ data:
                 },
                 "indexByName": {
                     "Time": 0,
-                    "Value": 8,
-                    "category": 1,
+                    "source": 1,
+                    "category": 2,
                     "kind": 3,
                     "name": 4,
                     "policy": 5,
                     "rule": 6,
                     "severity": 2,
-                    "status": 7
+                    "status": 7,
+                    "Value": 8
                 },
                 "renameByName": {
                 "exported_namespace": "namespace"

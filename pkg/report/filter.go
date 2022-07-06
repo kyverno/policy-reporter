@@ -46,3 +46,27 @@ func (rf *ResultFilter) Validate(result Result) bool {
 func NewResultFilter() *ResultFilter {
 	return &ResultFilter{}
 }
+
+type ReportValidation = func(PolicyReport) bool
+
+type ReportFilter struct {
+	validations []ReportValidation
+}
+
+func (rf *ReportFilter) AddValidation(v ReportValidation) {
+	rf.validations = append(rf.validations, v)
+}
+
+func (rf *ReportFilter) Validate(report PolicyReport) bool {
+	for _, validation := range rf.validations {
+		if !validation(report) {
+			return false
+		}
+	}
+
+	return true
+}
+
+func NewReportFilter() *ReportFilter {
+	return &ReportFilter{}
+}

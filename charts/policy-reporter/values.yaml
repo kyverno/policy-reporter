@@ -103,6 +103,8 @@ rest:
 # Prometheus Metrics API
 metrics:
   enabled: false
+  mode: detailed # available modes are detailed, simple and custom
+  customFields: [] # only used for custom mode. Supported fields are: ["namespace", "rule", "policy", "report" // PolicyReport name, "kind" // resource kind, "name" // resource name, "status", "severity", "category", "source"]
 #  filter:
 #    sources:
 #      exclude: ["Trivy CIS Kube Bench"]

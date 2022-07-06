@@ -790,7 +790,7 @@ func (s *policyReportStore) persistResults(report report.PolicyReport) error {
 				result.Resource.APIVersion,
 				result.Resource.Kind,
 				result.Resource.Name,
-				result.Resource.Namespace,
+				report.Namespace,
 				result.Resource.UID,
 				props,
 				result.Timestamp.Unix(),

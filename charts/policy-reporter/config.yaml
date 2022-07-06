@@ -163,6 +163,17 @@ priorityMap:
   {{- toYaml . | nindent 2 }}
 {{- end }}
 
+metrics:
+  mode: {{ .Values.metrics.mode }}
+  {{- with .Values.metrics.filter }}
+  filter:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  {{- with .Values.metrics.customFields }}
+  customFields:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+
 reportFilter:
   namespaces:
     {{- with .Values.reportFilter.namespaces.include }}

@@ -345,14 +345,15 @@ data:
                 "Value": true
                 },
                 "indexByName": {
-                "category": 0,
-                "severity": 1,
-                "exported_namespace": 2,
-                "kind": 3,
-                "name": 4,
-                "policy": 5,
-                "rule": 6,
-                "status": 7
+                "source": 0,
+                "category": 1,
+                "severity": 2,
+                "exported_namespace": 3,
+                "kind": 4,
+                "name": 5,
+                "policy": 6,
+                "rule": 7,
+                "status": 8
                 },
                 "renameByName": {
                 "exported_namespace": "namespace"
@@ -428,13 +429,14 @@ data:
                 "container": true
                 },
                 "indexByName": {
-                "category": 0,
-                "severity": 1,
-                "kind": 2,
-                "name": 3,
-                "policy": 4,
-                "rule": 5,
-                "status": 6
+                "source": 0,
+                "category": 1,
+                "severity": 2,
+                "kind": 3,
+                "name": 4,
+                "policy": 5,
+                "rule": 6,
+                "status": 7
                 },
                 "renameByName": {}
             }
