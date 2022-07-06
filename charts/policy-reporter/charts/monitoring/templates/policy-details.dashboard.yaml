@@ -454,15 +454,16 @@ data:
                 },
                 "indexByName": {
                     "Time": 0,
-                    "Value": 9,
-                    "category": 1,
+                    "source": 1,
+                    "category": 2,
                     "exported_namespace": 3,
                     "kind": 4,
                     "name": 5,
                     "policy": 6,
                     "rule": 7,
                     "severity": 2,
-                    "status": 8
+                    "status": 8,
+                    "Value": 9
                 },
                 "renameByName": {
                 "exported_namespace": "namespace"
@@ -510,7 +511,7 @@ data:
         "pluginVersion": "7.1.5",
         "targets": [
             {
-            "expr": "sum(policy_report_result{policy=~\"$policy\", category=~\"$category\", severity=~\"$severity\", source=~\"$source\", kind=~\"$kind\", exported_namespace=~\"$namespace\", status=\"fail\"}) by (exported_namespace,category,policy,rule,kind,name,severity,status)",
+            "expr": "sum(policy_report_result{policy=~\"$policy\", category=~\"$category\", severity=~\"$severity\", source=~\"$source\", kind=~\"$kind\", exported_namespace=~\"$namespace\", status=\"fail\"}) by (exported_namespace,category,policy,rule,kind,name,severity,status,source)",
             "format": "table",
             "instant": true,
             "interval": "",
@@ -532,15 +533,16 @@ data:
                 },
                 "indexByName": {
                     "Time": 0,
-                    "Value": 9,
-                    "category": 1,
+                    "source": 1,
+                    "category": 2,
                     "exported_namespace": 3,
                     "kind": 4,
                     "name": 5,
                     "policy": 6,
                     "rule": 7,
                     "severity": 2,
-                    "status": 8
+                    "status": 8,
+                    "Value": 9
                 },
                 "renameByName": {
                 "exported_namespace": "namespace"
@@ -607,15 +609,16 @@ data:
                 },
                 "indexByName": {
                     "Time": 0,
-                    "Value": 9,
-                    "category": 1,
+                    "source": 1,
+                    "category": 2,
                     "exported_namespace": 3,
                     "kind": 4,
                     "name": 5,
                     "policy": 6,
                     "rule": 7,
                     "severity": 2,
-                    "status": 8
+                    "status": 8,
+                    "Value": 9
                 },
                 "renameByName": {
                 "exported_namespace": "namespace"

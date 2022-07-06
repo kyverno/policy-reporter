@@ -120,6 +120,7 @@ func (r *Resolver) RegisterMetricsListener() {
 			ToRuleSet(r.config.Metrics.Filter.Sources),
 		),
 		r.config.Metrics.Mode,
+		r.config.Metrics.CustomLabels,
 	))
 }
 

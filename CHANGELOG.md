@@ -7,6 +7,11 @@
         * Supports channels and filters to send different subsets of Namespaces or Sources to dedicated E-Mails
         * Reports are generated and send over dedicated CronJobs, this makes it easy to send the reports as often as needed
         * Currently a basic summary and a more detailed violation report is available and can be separatly enabled and configured
+    * Metrics
+        * Add `metrics.mode` for less or custom metric values, to reduce cardinality
+    * Monitoring
+        * Fix Source Column for result tables
+        * Fix Warn counter for ClusterPolicyReport Details
 
 # 2.9.5
 * Fix Policy Reporter Version in the Helm Chart values.yaml

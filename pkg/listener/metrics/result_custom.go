@@ -6,14 +6,21 @@ import (
 	"github.com/prometheus/client_golang/prometheus/promauto"
 )
 
-func RegisterSimpleClusterResultGauge(name string) *prometheus.GaugeVec {
+func RegisterCustomResultGauge(name string, labelNames []string) *prometheus.GaugeVec {
 	return promauto.NewGaugeVec(prometheus.GaugeOpts{
 		Name: name,
-		Help: "Gauge of ClusterPolicyReportResults by Policy",
-	}, []string{"policy", "status", "severity", "category", "source"})
+		Help: "Gauge of Results by Policy",
+	}, labelNames)
 }
 
-func CreateSimpleClusterResultMetricsListener(filter *report.ResultFilter, gauge *prometheus.GaugeVec) report.PolicyReportListener {
+type LabelGenerator = func(report.PolicyReport, report.Result) map[string]string
+type LabelCallback = func(map[string]string, report.PolicyReport, report.Result)
+
+func CreateCustomResultMetricsListener(
+	filter *report.ResultFilter,
+	gauge *prometheus.GaugeVec,
+	labelGenerator LabelGenerator,
+) report.PolicyReportListener {
 	var newReport report.PolicyReport
 	var oldReport report.PolicyReport
 
@@ -28,7 +35,7 @@ func CreateSimpleClusterResultMetricsListener(filter *report.ResultFilter, gauge
 					continue
 				}
 
-				gauge.With(generateSimpleClusterResultLabels(result)).Inc()
+				gauge.With(labelGenerator(newReport, result)).Inc()
 			}
 		case report.Updated:
 			for _, result := range oldReport.Results {
@@ -36,7 +43,7 @@ func CreateSimpleClusterResultMetricsListener(filter *report.ResultFilter, gauge
 					continue
 				}
 
-				gauge.With(generateSimpleClusterResultLabels(result)).Dec()
+				gauge.With(labelGenerator(oldReport, result)).Dec()
 			}
 
 			for _, result := range newReport.Results {
@@ -44,7 +51,7 @@ func CreateSimpleClusterResultMetricsListener(filter *report.ResultFilter, gauge
 					continue
 				}
 
-				gauge.With(generateSimpleClusterResultLabels(result)).Inc()
+				gauge.With(labelGenerator(newReport, result)).Inc()
 			}
 		case report.Deleted:
 			for _, result := range newReport.Results {
@@ -52,20 +59,8 @@ func CreateSimpleClusterResultMetricsListener(filter *report.ResultFilter, gauge
 					continue
 				}
 
-				gauge.With(generateSimpleClusterResultLabels(result)).Dec()
+				gauge.With(labelGenerator(newReport, result)).Dec()
 			}
 		}
 	}
-}
-
-func generateSimpleClusterResultLabels(result report.Result) prometheus.Labels {
-	labels := prometheus.Labels{
-		"policy":   result.Policy,
-		"status":   result.Status,
-		"severity": result.Severity,
-		"category": result.Category,
-		"source":   result.Source,
-	}
-
-	return labels
 }

@@ -11,8 +11,13 @@ var (
 )
 
 // NewMetricsListener for PolicyReport watch.Events
-func NewMetricsListener(filter *report.ResultFilter, reportFilter *report.ReportFilter, mode metrics.Mode) report.PolicyReportListener {
-	resultListeners := ResultListeners(filter, reportFilter, mode)
+func NewMetricsListener(
+	filter *report.ResultFilter,
+	reportFilter *report.ReportFilter,
+	mode metrics.Mode,
+	fields []string,
+) report.PolicyReportListener {
+	resultListeners := ResultListeners(filter, reportFilter, mode, fields)
 
 	return func(event report.LifecycleEvent) {
 		if event.NewPolicyReport.Namespace == "" {
@@ -23,11 +28,49 @@ func NewMetricsListener(filter *report.ResultFilter, reportFilter *report.Report
 	}
 }
 
-func ResultListeners(filter *report.ResultFilter, reportFilter *report.ReportFilter, mode metrics.Mode) []report.PolicyReportListener {
+func ResultListeners(
+	filter *report.ResultFilter,
+	reportFilter *report.ReportFilter,
+	mode metrics.Mode,
+	fields []string,
+) []report.PolicyReportListener {
 	if mode == metrics.Simple {
+		fields := []string{"namespace", "policy", "status", "severity", "category", "source"}
+		clusterFields := []string{"policy", "status", "severity", "category", "source"}
+
 		return []report.PolicyReportListener{
-			metrics.CreateSimpleResultMetricsListener(filter, metrics.RegisterSimpleResultGauge(ResultGaugeName)),
-			metrics.CreateSimpleClusterResultMetricsListener(filter, metrics.RegisterSimpleClusterResultGauge(ClusterResultGaugeName)),
+			metrics.CreateCustomResultMetricsListener(
+				filter,
+				metrics.RegisterCustomResultGauge(ResultGaugeName, fields),
+				metrics.CreateLabelGenerator(fields),
+			),
+			metrics.CreateCustomResultMetricsListener(
+				filter,
+				metrics.RegisterCustomResultGauge(ClusterResultGaugeName, clusterFields),
+				metrics.CreateLabelGenerator(clusterFields),
+			),
+		}
+	}
+	if mode == metrics.Custom {
+		clusterFields := make([]string, 0, len(fields))
+		for _, field := range fields {
+			if field == "namespace" {
+				continue
+			}
+			clusterFields = append(clusterFields, field)
+		}
+
+		return []report.PolicyReportListener{
+			metrics.CreateCustomResultMetricsListener(
+				filter,
+				metrics.RegisterCustomResultGauge(ResultGaugeName, fields),
+				metrics.CreateLabelGenerator(fields),
+			),
+			metrics.CreateCustomResultMetricsListener(
+				filter,
+				metrics.RegisterCustomResultGauge(ClusterResultGaugeName, clusterFields),
+				metrics.CreateLabelGenerator(clusterFields),
+			),
 		}
 	}
 
