@@ -179,7 +179,7 @@ type REST struct {
 // Metrics configuration
 type Metrics struct {
 	Filter       MetricsFilter `mapstructure:"filter"`
-	CustomLabels []string      `mapstructure:"customFields"`
+	CustomLabels []string      `mapstructure:"customLabels"`
 	Mode         string        `mapstructure:"mode"`
 	Enabled      bool          `mapstructure:"enabled"`
 }

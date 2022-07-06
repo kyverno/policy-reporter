@@ -32,44 +32,44 @@ func ResultListeners(
 	filter *report.ResultFilter,
 	reportFilter *report.ReportFilter,
 	mode metrics.Mode,
-	fields []string,
+	labels []string,
 ) []report.PolicyReportListener {
 	if mode == metrics.Simple {
-		fields := []string{"namespace", "policy", "status", "severity", "category", "source"}
-		clusterFields := []string{"policy", "status", "severity", "category", "source"}
+		labels = []string{"namespace", "policy", "status", "severity", "category", "source"}
+		clusterLabels := []string{"policy", "status", "severity", "category", "source"}
 
 		return []report.PolicyReportListener{
 			metrics.CreateCustomResultMetricsListener(
 				filter,
-				metrics.RegisterCustomResultGauge(ResultGaugeName, fields),
-				metrics.CreateLabelGenerator(fields),
+				metrics.RegisterCustomResultGauge(ResultGaugeName, labels),
+				metrics.CreateLabelGenerator(labels),
 			),
 			metrics.CreateCustomResultMetricsListener(
 				filter,
-				metrics.RegisterCustomResultGauge(ClusterResultGaugeName, clusterFields),
-				metrics.CreateLabelGenerator(clusterFields),
+				metrics.RegisterCustomResultGauge(ClusterResultGaugeName, clusterLabels),
+				metrics.CreateLabelGenerator(clusterLabels),
 			),
 		}
 	}
 	if mode == metrics.Custom {
-		clusterFields := make([]string, 0, len(fields))
-		for _, field := range fields {
-			if field == "namespace" {
+		clusterLabels := make([]string, 0, len(labels))
+		for _, label := range labels {
+			if label == "namespace" {
 				continue
 			}
-			clusterFields = append(clusterFields, field)
+			clusterLabels = append(clusterLabels, label)
 		}
 
 		return []report.PolicyReportListener{
 			metrics.CreateCustomResultMetricsListener(
 				filter,
-				metrics.RegisterCustomResultGauge(ResultGaugeName, fields),
-				metrics.CreateLabelGenerator(fields),
+				metrics.RegisterCustomResultGauge(ResultGaugeName, labels),
+				metrics.CreateLabelGenerator(labels),
 			),
 			metrics.CreateCustomResultMetricsListener(
 				filter,
-				metrics.RegisterCustomResultGauge(ClusterResultGaugeName, clusterFields),
-				metrics.CreateLabelGenerator(clusterFields),
+				metrics.RegisterCustomResultGauge(ClusterResultGaugeName, clusterLabels),
+				metrics.CreateLabelGenerator(clusterLabels),
 			),
 		}
 	}

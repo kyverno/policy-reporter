@@ -169,8 +169,8 @@ metrics:
   filter:
     {{- toYaml . | nindent 4 }}
   {{- end }}
-  {{- with .Values.metrics.customFields }}
-  customFields:
+  {{- with .Values.metrics.customLabels }}
+  customLabels:
     {{- toYaml . | nindent 4 }}
   {{- end }}
 
