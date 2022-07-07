@@ -18,6 +18,11 @@ func Test_Validations(t *testing.T) {
 		}
 	})
 
+	t.Run("Empty Namespace", func(t *testing.T) {
+		if !validate.Namespace("", validate.RuleSets{Exclude: []string{""}}) {
+			t.Errorf("Unexpected Validation Result")
+		}
+	})
 	t.Run("Namespace Exclude Namespace match", func(t *testing.T) {
 		if validate.Namespace("default", validate.RuleSets{Exclude: []string{"default"}}) {
 			t.Errorf("Unexpected Validation Result")

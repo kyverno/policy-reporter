@@ -6,23 +6,11 @@ import (
 )
 
 func Namespace(namespace string, namespaces RuleSets) bool {
-	if namespace != "" && len(namespaces.Include) > 0 {
-		for _, ns := range namespaces.Include {
-			if wildcard.Match(ns, namespace) {
-				return true
-			}
-		}
-
-		return false
-	} else if namespace != "" && len(namespaces.Exclude) > 0 {
-		for _, ns := range namespaces.Exclude {
-			if wildcard.Match(ns, namespace) {
-				return false
-			}
-		}
+	if namespace == "" {
+		return true
 	}
 
-	return true
+	return MatchRuleSet(namespace, namespaces)
 }
 
 func MatchRuleSet(value string, rules RuleSets) bool {
