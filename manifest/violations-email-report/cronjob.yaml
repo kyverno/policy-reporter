@@ -51,9 +51,6 @@ spec:
                 mountPath: /app/config.yaml
                 subPath: config.yaml
                 readOnly: true
-              env:
-              - name: NAMESPACE
-                value: kyverno
           volumes:
           - name: config-file
             secret:

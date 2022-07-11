@@ -117,9 +117,6 @@ spec:
           - name: config-file
             mountPath: /app/config.yaml
             subPath: config.yaml
-          env:
-          - name: NAMESPACE
-            value: policy-reporter
       volumes:
       - name: config-file
         secret:

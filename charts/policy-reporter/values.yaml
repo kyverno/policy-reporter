@@ -169,7 +169,7 @@ emailReports:
   # basic summary report
   summary:
     enabled: false
-    schedule: "* 8 * * *" # CronJob schedule defines when the report will be send
+    schedule: "0 8 * * *" # CronJob schedule defines when the report will be send
     activeDeadlineSeconds: 300 # timeout in seconds
     backoffLimit: 3 # retry counter
     ttlSecondsAfterFinished: 0
@@ -195,7 +195,7 @@ emailReports:
   # violation summary report
   violations:
     enabled: false
-    schedule: "* 8 * * *" # CronJob schedule defines when the report will be send
+    schedule: "0 8 * * *" # CronJob schedule defines when the report will be send
     activeDeadlineSeconds: 300 # timeout in seconds
     backoffLimit: 3 # retry counter
     ttlSecondsAfterFinished: 0

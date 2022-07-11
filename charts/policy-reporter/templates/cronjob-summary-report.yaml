@@ -21,6 +21,7 @@ spec:
       template:
         metadata:
           labels:
+            app.kubernetes.io/part-of: {{ include "policyreporter.name" . }}
             {{- include "policyreporter.selectorLabels" . | nindent 12 }}
             {{- with .Values.podLabels }}
               {{- toYaml . | nindent 12 }}
@@ -67,9 +68,6 @@ spec:
                 mountPath: /app/config.yaml
                 subPath: config.yaml
                 readOnly: true
-              env:
-              - name: NAMESPACE
-                value: {{ .Release.Namespace }}
           volumes:
           - name: config-file
             secret:
