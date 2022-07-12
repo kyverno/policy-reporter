@@ -5,7 +5,7 @@
 
 Kyverno ships with two types of validation. You can either enforce a rule or audit it. If you don't want to block developers or if you want to try out a new rule, you can use the audit functionality. The audit configuration creates [PolicyReports](https://kyverno.io/docs/policy-reports/) which you can access with `kubectl`. Because I can't find a simple solution to get a general overview of this PolicyReports and PolicyReportResults, I created this tool to send information about PolicyReports to different targets like [Grafana Loki](https://grafana.com/oss/loki/), [Elasticsearch](https://www.elastic.co/de/elasticsearch/) or [Slack](https://slack.com/). 
 
-Policy Reporter provides also a Prometheus Metrics API as well as an standalone mode along with the [Policy Reporter UI](https://kyverno.github.io/policy-reporter/guide/02-getting-started#core--policy-reporter-ui).
+Policy Reporter provides also a Prometheus Metrics API as well as an standalone mode along with the [Policy Reporter UI](https://kyverno.github.io/policy-reporter/guide/getting-started#core--policy-reporter-ui).
 
 This project is in an early stage. Please let me know if anything did not work as expected or if you want to send your audits to unsupported targets.
 
@@ -27,7 +27,7 @@ helm repo update
 
 ### Basic Installation
 
-The basic installation provides optional Prometheus Metrics and/or optional REST APIs, for more details have a look at the [Documentation](https://kyverno.github.io/policy-reporter/guide/02-getting-started).
+The basic installation provides optional Prometheus Metrics and/or optional REST APIs, for more details have a look at the [Documentation](https://kyverno.github.io/policy-reporter/guide/getting-started).
 
 ```bash
 helm install policy-reporter policy-reporter/policy-reporter -n policy-reporter --set metrics.enabled=true --set rest.enabled=true --create-namespace
@@ -48,25 +48,25 @@ kubectl port-forward service/policy-reporter-ui 8082:8080 -n policy-reporter
 ```
 Open `http://localhost:8082/` in your browser.
 
-Check the [Documentation](https://kyverno.github.io/policy-reporter/guide/02-getting-started#core--policy-reporter-ui) for Screens and additional Information
+Check the [Documentation](https://kyverno.github.io/policy-reporter/guide/getting-started#core--policy-reporter-ui) for Screens and additional Information
 
 ## Targets
 
 Policy Reporter supports the following [Targets](https://kyverno.github.io/policy-reporter/core/06-targets) to send new (Cluster)PolicyReport Results too:
-* [Grafana Loki](https://kyverno.github.io/policy-reporter/core/06-targets#grafana-loki)
-* [Elasticsearch](https://kyverno.github.io/policy-reporter/core/06-targets#elasticsearch)
-* [Slack](https://kyverno.github.io/policy-reporter/core/06-targets#slack)
-* [Discord](https://kyverno.github.io/policy-reporter/core/06-targets#discord)
-* [MS Teams](https://kyverno.github.io/policy-reporter/core/06-targets#microsoft-teams)
-* [Policy Reporter UI](https://kyverno.github.io/policy-reporter/core/06-targets#policy-reporter-ui)
-* [S3](https://kyverno.github.io/policy-reporter/core/06-targets#s3-compatible-storage)
+* [Grafana Loki](https://kyverno.github.io/policy-reporter/core/targets#grafana-loki)
+* [Elasticsearch](https://kyverno.github.io/policy-reporter/core/targets#elasticsearch)
+* [Slack](https://kyverno.github.io/policy-reporter/core/targets#slack)
+* [Discord](https://kyverno.github.io/policy-reporter/core/targets#discord)
+* [MS Teams](https://kyverno.github.io/policy-reporter/core/targets#microsoft-teams)
+* [Policy Reporter UI](https://kyverno.github.io/policy-reporter/core/targets#policy-reporter-ui)
+* [S3](https://kyverno.github.io/policy-reporter/core/targets#s3-compatible-storage)
 
 
 ## Monitoring
 
 The Helm Chart includes optional SubChart for [Prometheus Operator](https://github.com/prometheus-community/helm-charts/tree/main/charts/kube-prometheus-stack) Integration. The provided Dashboards working without Loki and are only based on the Prometheus Metrics.
 
-Have a look into the [Documentation](https://kyverno.github.io/policy-reporter/guide/04-helm-chart-core/#configure-the-servicemonitor) for details.
+Have a look into the [Documentation](https://kyverno.github.io/policy-reporter/guide/helm-chart-core/#configure-the-servicemonitor) for details.
 
 ### Grafana Dashboard Import
 
