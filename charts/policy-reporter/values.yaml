@@ -185,13 +185,13 @@ emailReports:
     #    include: []
     #    exclude: []
     channels: [] # (optional) channels can be used to to send only a subset of namespaces / sources to dedicated email addresses    channels: [] # (optional) channels can be used to to send only a subset of namespaces / sources to dedicated email addresses
-    #- to: ['team-a@company.org']
-    #  filter:
-    #    disableClusterReports: true
-    #    namespaces:
-    #      include: ['team-a-*']
-    #    sources:
-    #      include: ['Kyverno']
+    #  - to: ['team-a@company.org']
+    #    filter:
+    #      disableClusterReports: true
+    #      namespaces:
+    #        include: ['team-a-*']
+    #      sources:
+    #        include: ['Kyverno']
   # violation summary report
   violations:
     enabled: false
@@ -211,13 +211,13 @@ emailReports:
     #    include: []
     #    exclude: []
     channels: [] # (optional) channels can be used to to send only a subset of namespaces / sources to dedicated email addresses    channels: [] # (optional) channels can be used to to send only a subset of namespaces / sources to dedicated email addresses
-    #- to: ['team-a@company.org']
-    #  filter:
-    #    disableClusterReports: true
-    #    namespaces:
-    #      include: ['team-a-*']
-    #    sources:
-    #      include: ['Kyverno']
+    #  - to: ['team-a@company.org']
+    #    filter:
+    #      disableClusterReports: true
+    #      namespaces:
+    #        include: ['team-a-*']
+    #      sources:
+    #        include: ['Kyverno']
 
 # Reference a configuration which already exists instead of creating one
 existingTargetConfig:

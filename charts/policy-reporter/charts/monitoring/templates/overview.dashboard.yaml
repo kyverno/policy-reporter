@@ -62,7 +62,7 @@ data:
     "links": [],
     "panels": [
         {
-        "datasource": null,
+        "datasource": "${DS_PROMETHEUS}",
         "fieldConfig": {
             "defaults": {
             "custom": {
@@ -124,7 +124,7 @@ data:
         "type": "bargauge"
         },
         {
-        "datasource": null,
+        "datasource": "${DS_PROMETHEUS}",
         "fieldConfig": {
             "defaults": {
             "custom": {},
@@ -190,7 +190,7 @@ data:
         "bars": false,
         "dashLength": 10,
         "dashes": false,
-        "datasource": null,
+        "datasource": "${DS_PROMETHEUS}",
         "fieldConfig": {
             "defaults": {
             "custom": {}
@@ -289,7 +289,7 @@ data:
         }
         },
         {
-        "datasource": null,
+        "datasource": "${DS_PROMETHEUS}",
         "fieldConfig": {
             "defaults": {
             "custom": {
@@ -364,7 +364,7 @@ data:
         "type": "table"
         },
         {
-        "datasource": null,
+        "datasource": "${DS_PROMETHEUS}",
         "fieldConfig": {
             "defaults": {
             "custom": {
@@ -453,7 +453,18 @@ data:
     "templating": {
         "list": [
         {
+            "hide": 0,
+            "label": "Datasource",
+            "name": "DS_PROMETHEUS",
+            "options": [],
+            "query": "prometheus",
+            "refresh": 1,
+            "regex": "",
+            "type": "datasource"
+        },
+        {
             "allValue": ".*",
+            "datasource": "${DS_PROMETHEUS}",
             "definition": "label_values({__name__=~ \"policy_report_result|cluster_policy_report_result\", status=~\"fail|error\"}, policy)",
             "hide": 0,
             "includeAll": true,
@@ -474,6 +485,7 @@ data:
         },
         {
             "allValue": ".*",
+            "datasource": "${DS_PROMETHEUS}",
             "definition": "label_values({__name__=~ \"policy_report_result|cluster_policy_report_result\", status=~\"fail|error\"}, category)",
             "hide": 0,
             "includeAll": true,
@@ -494,6 +506,7 @@ data:
         },
         {
             "allValue": ".*",
+            "datasource": "${DS_PROMETHEUS}",
             "definition": "label_values({__name__=~ \"policy_report_result|cluster_policy_report_result\", status=~\"fail|error\"}, severity)",
             "hide": 0,
             "includeAll": true,
@@ -514,6 +527,7 @@ data:
         },
         {
             "allValue": ".*",
+            "datasource": "${DS_PROMETHEUS}",
             "definition": "label_values({__name__= \"policy_report_result\", status=~\"fail|error\"}, exported_namespace)",
             "hide": 0,
             "includeAll": true,
@@ -534,6 +548,7 @@ data:
         },
         {
             "allValue": ".*",
+            "datasource": "${DS_PROMETHEUS}",
             "definition": "label_values({__name__=~ \"policy_report_result|cluster_policy_report_result\", status=~\"fail|error\"}, kind)",
             "hide": 0,
             "includeAll": true,
@@ -554,6 +569,7 @@ data:
         },
         {
             "allValue": ".*",
+            "datasource": "${DS_PROMETHEUS}",
             "definition": "label_values({__name__=~ \"policy_report_result|cluster_policy_report_result\", status=~\"fail|error\"}, source)",
             "hide": 0,
             "includeAll": true,

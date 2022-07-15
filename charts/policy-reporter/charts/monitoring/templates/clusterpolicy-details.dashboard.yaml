@@ -76,6 +76,7 @@ data:
     "links": [],
     "panels": [
         {
+        "datasource": "${DS_PROMETHEUS}",
         "fieldConfig": {
             "defaults": {
             "custom": {},
@@ -132,6 +133,7 @@ data:
         "type": "stat"
         },
         {
+        "datasource": "${DS_PROMETHEUS}",
         "fieldConfig": {
             "defaults": {
             "custom": {},
@@ -188,6 +190,7 @@ data:
         "type": "stat"
         },
         {
+        "datasource": "${DS_PROMETHEUS}",
         "fieldConfig": {
             "defaults": {
             "custom": {},
@@ -244,6 +247,7 @@ data:
         "type": "stat"
         },
         {
+        "datasource": "${DS_PROMETHEUS}",
         "fieldConfig": {
             "defaults": {
             "custom": {},
@@ -305,6 +309,7 @@ data:
         "bars": false,
         "dashLength": 10,
         "dashes": false,
+        "datasource": "${DS_PROMETHEUS}",
         "fieldConfig": {
             "defaults": {
             "custom": {}
@@ -400,6 +405,7 @@ data:
 {{- end }}
 {{- if .Values.clusterPolicyReportDetails.passTable.enabled }}
         ,{
+        "datasource": "${DS_PROMETHEUS}",
         "fieldConfig": {
             "defaults": {
             "custom": {
@@ -478,6 +484,7 @@ data:
 {{- end }}
 {{- if .Values.clusterPolicyReportDetails.failTable.enabled }}
         ,{
+        "datasource": "${DS_PROMETHEUS}",
         "fieldConfig": {
             "defaults": {
             "custom": {
@@ -556,6 +563,7 @@ data:
 {{- end }}
 {{- if .Values.clusterPolicyReportDetails.warningTable.enabled }}
         ,{
+        "datasource": "${DS_PROMETHEUS}",
         "fieldConfig": {
             "defaults": {
             "custom": {
@@ -631,6 +639,7 @@ data:
 {{- end }}
 {{- if .Values.clusterPolicyReportDetails.errorTable.enabled }}
         ,{
+        "datasource": "${DS_PROMETHEUS}",
         "fieldConfig": {
             "defaults": {
             "custom": {
@@ -713,8 +722,19 @@ data:
     "templating": {
         "list": [
         {
+            "hide": 0,
+            "label": "Datasource",
+            "name": "DS_PROMETHEUS",
+            "options": [],
+            "query": "prometheus",
+            "refresh": 1,
+            "regex": "",
+            "type": "datasource"
+        },
+        {
             "allValue": ".*",
             "current": {},
+            "datasource": "${DS_PROMETHEUS}",
             "definition": "label_values(cluster_policy_report_result, policy)",
             "hide": 0,
             "includeAll": true,
@@ -735,6 +755,7 @@ data:
         },
         {
             "allValue": ".*",
+            "datasource": "${DS_PROMETHEUS}",
             "definition": "label_values(cluster_policy_report_result, category)",
             "hide": 0,
             "includeAll": true,
@@ -755,6 +776,7 @@ data:
         },
         {
             "allValue": ".*",
+            "datasource": "${DS_PROMETHEUS}",
             "definition": "label_values(cluster_policy_report_result, severity)",
             "hide": 0,
             "includeAll": true,
@@ -775,6 +797,7 @@ data:
         },
         {
             "allValue": ".*",
+            "datasource": "${DS_PROMETHEUS}",
             "definition": "label_values(cluster_policy_report_result, kind)",
             "hide": 0,
             "includeAll": true,
@@ -795,6 +818,7 @@ data:
         },
         {
             "allValue": ".*",
+            "datasource": "${DS_PROMETHEUS}",
             "definition": "label_values(cluster_policy_report_result, source)",
             "hide": 0,
             "includeAll": true,
