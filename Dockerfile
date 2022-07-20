@@ -1,6 +1,6 @@
 FROM golang:1.18 as builder
 
-ARG LD_FLAGS
+ARG LD_FLAGS='-s -w -linkmode external -extldflags "-static"'
 ARG TARGETPLATFORM
 
 WORKDIR /app

@@ -21,3 +21,7 @@ data:
       clusterPolicyReports: {{ .Values.views.clusterPolicyReports }}
       kyvernoPolicies: {{ .Values.views.kyvernoPolicies }}
       kyvernoVerifyImages: {{ .Values.views.kyvernoVerifyImages }}
+    {{- with .Values.clusters }}
+    clusters:
+      {{- toYaml . | nindent 4 }}
+    {{- end }}

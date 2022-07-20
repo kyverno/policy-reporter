@@ -1,5 +1,11 @@
 enabled: false
 
+image:
+  registry: ghcr.io
+  repository: kyverno/policy-reporter-ui
+  pullPolicy: IfNotPresent
+  tag: 1.5.0
+
 # possible default displayModes: light/dark
 displayMode: ""
 
@@ -25,11 +31,12 @@ views:
 plugins:
   kyverno: false
 
-image:
-  registry: ghcr.io
-  repository: kyverno/policy-reporter-ui
-  pullPolicy: IfNotPresent
-  tag: 1.4.2
+# Attention: be sure that your APIs are not accessable for the outside world
+# Use tools like VPN, private Networks or internal Network Load Balancer to expose your APIs in a secure way to the UI
+clusters: []
+# - name: External Cluster
+#   api: https://policy-reporter.external.cluster                       # reachable external Policy Reporter REST API
+#   kyvernoApi: https://policy-reporter-kyverno-plugin.external.cluster # (optional) reachable external Policy Reporter Kyverno Plugin REST API
 
 # configurations related to the PolicyReporter API
 policyReporter:

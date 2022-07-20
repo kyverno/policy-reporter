@@ -1,5 +1,15 @@
 # Changelog
 
+# 2.10.2
+* Policy Reporter UI
+    * New option `ui.clusters` makes it possible to configure additional external Policy Reporter APIs (<a href="https://kyverno.github.io/policy-reporter/guide/helm-chart-core#external-clusters" target="_blank">details</a>)
+    * General UI improvements for loading state and error handling
+
+# 2.10.1
+* Monitoring
+    * Fix Datasource for Metrics and Filters in the preconfigured Dashboards
+    * Add Datasource as additional Select to the preconfigured Dashboards
+
 # 2.10.0
 * Policy Reporter
     * Email Reports
