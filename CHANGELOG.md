@@ -2,7 +2,7 @@
 
 # 2.10.2
 * Policy Reporter UI
-    * New option `ui.clusters` makes it possible to configure additional external Policy Reporter APIs
+    * New option `ui.clusters` makes it possible to configure additional external Policy Reporter APIs (<a href="https://kyverno.github.io/policy-reporter/guide/helm-chart-core#external-clusters" target="_blank">details</a>)
     * General UI improvements for loading state and error handling
 
 # 2.10.1
