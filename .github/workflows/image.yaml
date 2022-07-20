@@ -21,19 +21,30 @@ jobs:
           echo VERSION=$VERSION
           echo "::set-output name=version::$VERSION"
 
-      - name: login to GitHub Container Registry
-        run: echo ${{ secrets.CR_PAT }} | docker login ghcr.io -u ${{ github.repository_owner }} --password-stdin
+      - name: Login to Github Packages
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.CR_PAT }}
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v1
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v1
+        uses: docker/setup-buildx-action@v2
         id: buildx
         with:
           install: true
           version: latest
 
-      - name: docker images publish
-        run: |
-          make IMAGE_TAG="${{ steps.params.outputs.version }}" docker-push
+      - name: Build image and push to GitHub Container Registry
+        uses: docker/build-push-action@v3
+        with:
+          push: true
+          platforms: linux/arm64,linux/amd64,linux/s390x
+          cache-from: type=registry,ref=ghcr.io/kyverno/policy-reporter:buildcache
+          cache-to: type=registry,ref=ghcr.io/kyverno/policy-reporter:buildcache,mode=max
+          tags: |
+            ghcr.io/kyverno/policy-reporter:latest
+            ghcr.io/kyverno/policy-reporter:${{ steps.params.outputs.version }}
