@@ -117,7 +117,7 @@ func Test_LokiTarget(t *testing.T) {
 			}
 		}
 
-		loki := loki.NewClient("Loki", "http://localhost:3100", false, &report.ResultFilter{}, map[string]string{"custom": "label"}, testClient{callback, 200})
+		loki := loki.NewClient("Loki", "http://localhost:3100/api/prom/push", false, &report.ResultFilter{}, map[string]string{"custom": "label"}, testClient{callback, 200})
 		loki.Send(completeResult)
 	})
 
@@ -175,11 +175,11 @@ func Test_LokiTarget(t *testing.T) {
 			}
 		}
 
-		loki := loki.NewClient("Loki", "http://localhost:3100", false, &report.ResultFilter{}, make(map[string]string), testClient{callback, 200})
+		loki := loki.NewClient("Loki", "http://localhost:3100/api/prom/push", false, &report.ResultFilter{}, make(map[string]string), testClient{callback, 200})
 		loki.Send(minimalResult)
 	})
 	t.Run("Name", func(t *testing.T) {
-		client := loki.NewClient("Loki", "http://localhost:9200", true, &report.ResultFilter{}, make(map[string]string), testClient{})
+		client := loki.NewClient("Loki", "http://localhost:9200/api/prom/push", true, &report.ResultFilter{}, make(map[string]string), testClient{})
 
 		if client.Name() != "Loki" {
 			t.Errorf("Unexpected Name %s", client.Name())

@@ -98,10 +98,10 @@ func (l *client) Send(result report.Result) {
 }
 
 // NewClient creates a new loki.client to send Results to Loki
-func NewClient(name, host string, skipExistingOnStartup bool, filter *report.ResultFilter, customLabels map[string]string, httpClient http.Client) target.Client {
+func NewClient(name, api string, skipExistingOnStartup bool, filter *report.ResultFilter, customLabels map[string]string, httpClient http.Client) target.Client {
 	return &client{
 		target.NewBaseClient(name, skipExistingOnStartup, filter),
-		host + "/api/prom/push",
+		api,
 		httpClient,
 		customLabels,
 	}

@@ -1,5 +1,9 @@
 # Changelog
 
+# 2.10.3
+* Policy Reporter
+    * Add new config `target.loki.path` to overwrite the deprected prom push API
+
 # 2.10.2
 * Policy Reporter UI
     * New option `ui.clusters` makes it possible to configure additional external Policy Reporter APIs (<a href="https://kyverno.github.io/policy-reporter/guide/helm-chart-core#external-clusters" target="_blank">details</a>)
