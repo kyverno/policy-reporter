@@ -1,5 +1,6 @@
 loki:
   host: {{ .Values.target.loki.host | quote }}
+  path: {{ .Values.target.loki.path | quote }}
   minimumPriority: {{ .Values.target.loki.minimumPriority | quote }}
   skipExistingOnStartup: {{ .Values.target.loki.skipExistingOnStartup }}
   {{- with .Values.target.loki.customLabels }}

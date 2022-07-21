@@ -2,7 +2,7 @@ image:
   registry: ghcr.io
   repository: kyverno/policy-reporter
   pullPolicy: IfNotPresent
-  tag: 2.7.0
+  tag: 2.7.1
 
 imagePullSecrets: []
 
@@ -232,6 +232,8 @@ target:
   loki:
     # loki host address
     host: ""
+    # loki api path, defaults to "/api/prom/push" (deprecated)
+    path: ""
     # minimum priority "" < info < warning < critical < error
     minimumPriority: ""
     # list of sources which should send to loki

@@ -29,6 +29,7 @@ type MetricsFilter struct {
 type Loki struct {
 	Name            string            `mapstructure:"name"`
 	Host            string            `mapstructure:"host"`
+	Path            string            `mapstructure:"path"`
 	CustomLabels    map[string]string `mapstructure:"customLabels"`
 	SkipExisting    bool              `mapstructure:"skipExistingOnStartup"`
 	MinimumPriority string            `mapstructure:"minimumPriority"`

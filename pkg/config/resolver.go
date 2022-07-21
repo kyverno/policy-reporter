@@ -143,6 +143,9 @@ func (r *Resolver) LokiClients() []target.Client {
 	if r.config.Loki.Name == "" {
 		r.config.Loki.Name = "Loki"
 	}
+	if r.config.Loki.Path == "" {
+		r.config.Loki.Path = "/api/prom/push"
+	}
 
 	if loki := createLokiClient(r.config.Loki, Loki{}); loki != nil {
 		clients = append(clients, loki)
@@ -534,11 +537,15 @@ func createLokiClient(config Loki, parent Loki) target.Client {
 		config.MinimumPriority = parent.MinimumPriority
 	}
 
+	if config.Path == "" {
+		config.Path = parent.Path
+	}
+
 	log.Printf("[INFO] %s configured", config.Name)
 
 	return loki.NewClient(
 		config.Name,
-		config.Host,
+		config.Host+config.Path,
 		config.SkipExisting,
 		createTargetFilter(config.Filter, config.MinimumPriority, config.Sources),
 		config.CustomLabels,
