@@ -166,9 +166,16 @@ func Test_ResolveTarget(t *testing.T) {
 func Test_ResolveTargets(t *testing.T) {
 	resolver := config.NewResolver(testConfig, nil)
 
-	clients := resolver.TargetClients()
-	if count := len(clients); count != 17 {
-		t.Errorf("Expected 15 Clients, got %d", count)
+	if count := len(resolver.TargetClients()); count != 17 {
+		t.Errorf("Expected 17 Clients, got %d", count)
+	}
+}
+
+func Test_ResolveHasTargets(t *testing.T) {
+	resolver := config.NewResolver(testConfig, nil)
+
+	if !resolver.HasTargets() {
+		t.Errorf("Expected 'true'")
 	}
 }
 
@@ -405,6 +412,20 @@ func Test_ResolvePolicyClient(t *testing.T) {
 	}
 }
 
+func Test_ResolveLeaderElectionClient(t *testing.T) {
+	resolver := config.NewResolver(&config.Config{DBFile: "test.db"}, &rest.Config{})
+
+	client1, err := resolver.LeaderElectionClient()
+	if err != nil {
+		t.Errorf("Unexpected Error: %s", err)
+	}
+
+	client2, _ := resolver.LeaderElectionClient()
+	if client1 != client2 {
+		t.Error("A second call resolver.LeaderElectionClient() should return the cached first client")
+	}
+}
+
 func Test_ResolvePolicyStore(t *testing.T) {
 	resolver := config.NewResolver(&config.Config{DBFile: "test.db"}, &rest.Config{})
 	db, _ := resolver.Database()
@@ -495,6 +516,18 @@ func Test_ResolveClientWithInvalidK8sConfig(t *testing.T) {
 	resolver := config.NewResolver(testConfig, k8sConfig)
 
 	_, err := resolver.PolicyReportClient()
+	if err == nil {
+		t.Error("Error: 'host must be a URL or a host:port pair' was expected")
+	}
+}
+
+func Test_ResolveLeaderElectionWithInvalidK8sConfig(t *testing.T) {
+	k8sConfig := &rest.Config{}
+	k8sConfig.Host = "invalid/url"
+
+	resolver := config.NewResolver(testConfig, k8sConfig)
+
+	_, err := resolver.LeaderElectionClient()
 	if err == nil {
 		t.Error("Error: 'host must be a URL or a host:port pair' was expected")
 	}

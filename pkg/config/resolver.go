@@ -14,6 +14,7 @@ import (
 	"github.com/kyverno/policy-reporter/pkg/email/violations"
 	"github.com/kyverno/policy-reporter/pkg/helper"
 	"github.com/kyverno/policy-reporter/pkg/kubernetes"
+	"github.com/kyverno/policy-reporter/pkg/leaderelection"
 	"github.com/kyverno/policy-reporter/pkg/listener"
 	"github.com/kyverno/policy-reporter/pkg/listener/metrics"
 	"github.com/kyverno/policy-reporter/pkg/redis"
@@ -36,6 +37,7 @@ import (
 	"github.com/kyverno/kyverno/pkg/client/clientset/versioned"
 	wgpolicyk8sv1alpha2 "github.com/kyverno/kyverno/pkg/client/clientset/versioned/typed/policyreport/v1alpha2"
 	_ "github.com/mattn/go-sqlite3"
+	k8s "k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
 )
 
@@ -47,6 +49,7 @@ type Resolver struct {
 	publisher          report.EventPublisher
 	policyStore        sqlite3.PolicyReportStore
 	policyReportClient report.PolicyReportClient
+	leaderElector      *leaderelection.Client
 	targetClients      []target.Client
 	resultCache        cache.Cache
 }
@@ -77,6 +80,31 @@ func (r *Resolver) PolicyReportStore(db *sql.DB) (sqlite3.PolicyReportStore, err
 	return r.policyStore, err
 }
 
+// LeaderElectionClient resolver method
+func (r *Resolver) LeaderElectionClient() (*leaderelection.Client, error) {
+	if r.leaderElector != nil {
+		return r.leaderElector, nil
+	}
+
+	clientset, err := k8s.NewForConfig(r.k8sConfig)
+	if err != nil {
+		return nil, err
+	}
+
+	r.leaderElector = leaderelection.New(
+		clientset.CoordinationV1(),
+		r.config.LeaderElection.LockName,
+		r.config.LeaderElection.Namespace,
+		r.config.LeaderElection.PodName,
+		time.Duration(r.config.LeaderElection.LeaseDuration)*time.Second,
+		time.Duration(r.config.LeaderElection.RenewDeadline)*time.Second,
+		time.Duration(r.config.LeaderElection.RetryPeriod)*time.Second,
+		r.config.LeaderElection.ReleaseOnCancel,
+	)
+
+	return r.leaderElector, nil
+}
+
 // EventPublisher resolver method
 func (r *Resolver) EventPublisher() report.EventPublisher {
 	if r.publisher != nil {
@@ -96,18 +124,18 @@ func (r *Resolver) RegisterSendResultListener() {
 		newResultListener := listener.NewResultListener(r.SkipExistingOnStartup(), r.ResultCache(), time.Now())
 		newResultListener.RegisterListener(listener.NewSendResultListener(targets))
 
-		r.EventPublisher().RegisterListener(newResultListener.Listen)
+		r.EventPublisher().RegisterListener(listener.NewResults, newResultListener.Listen)
 	}
 }
 
 // RegisterSendResultListener resolver method
 func (r *Resolver) RegisterStoreListener(store report.PolicyReportStore) {
-	r.EventPublisher().RegisterListener(listener.NewStoreListener(store))
+	r.EventPublisher().RegisterListener(listener.Store, listener.NewStoreListener(store))
 }
 
 // RegisterMetricsListener resolver method
 func (r *Resolver) RegisterMetricsListener() {
-	r.EventPublisher().RegisterListener(listener.NewMetricsListener(
+	r.EventPublisher().RegisterListener(listener.Metrics, listener.NewMetricsListener(
 		metrics.NewResultFilter(
 			ToRuleSet(r.config.Metrics.Filter.Namespaces),
 			ToRuleSet(r.config.Metrics.Filter.Status),
@@ -365,6 +393,10 @@ func (r *Resolver) TargetClients() []target.Client {
 	r.targetClients = clients
 
 	return r.targetClients
+}
+
+func (r *Resolver) HasTargets() bool {
+	return len(r.TargetClients()) > 0
 }
 
 // SkipExistingOnStartup config method

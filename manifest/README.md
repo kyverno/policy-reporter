@@ -1,8 +1,8 @@
 # Installation Manifests for Policy Reporter
 
-You can use this manifests to install Policy Reporter without additional tools like Helm or Kustomize. The manifests are structured into three installations.
+You can use this manifests to install Policy Reporter without additional tools like Helm or Kustomize. The manifests are structured into five installations.
 
-The installation requires a `policy-reporter` namespace. Because the installation includes RBAC resources which requires a serviceAccountName and a namespace configuration. The default namespace is `policy-reporter`. If this namespace will be created if it does not exist.
+The installation requires a `policy-reporter` namespace. Because the installation includes RBAC resources which requires a serviceAccountName and a namespace configuration. The default namespace is `policy-reporter`. This namespace will be created if it does not exist.
 
 ## Policy Reporter
 
@@ -11,6 +11,7 @@ The `policy-reporter` folder is the basic installation for Policy Reporter witho
 ### Installation
 
 ```bash
+kubectl apply -f https://raw.githubusercontent.com/kyverno/policy-reporter/main/manifest/policy-reporter/namespace.yaml
 kubectl apply -f https://raw.githubusercontent.com/kyverno/policy-reporter/main/manifest/policy-reporter/install.yaml
 ```
 
@@ -52,6 +53,31 @@ kubectl apply -f https://raw.githubusercontent.com/kyverno/policy-reporter/main/
 kubectl apply -f https://raw.githubusercontent.com/kyverno/policy-reporter/main/manifest/kyverno-policy-reporter-ui/target-secret.yaml
 kubectl apply -f https://raw.githubusercontent.com/kyverno/policy-reporter/main/manifest/kyverno-policy-reporter-ui/install.yaml
 ```
+
+## Complete High Available Setup
+
+The `complete-ha` folder is the extended Policy Reporter, Policy Reporter Kyverno Plugin and the extended Policy Reporter UI installation, each component as High Available setup with leaderelection and an external redis storage.
+
+Enables:
+* Policy Reporter REST API (`http://policy-reporter:8080`)
+* Policy Reporter Metrics API (`http://policy-reporter:8080/metrics`)
+* Kyverno Plugin Rest API (`http://policy-reporter-kyverno-plugin:8080/policies`)
+* Kyverno Plugin Metrics API (`http://policy-reporter-kyverno-plugin:8080/metrics`) 
+* Kyverno Plugin PolicyReport creation for blocked resources (by __Kyverno__ enforce policies)
+* Policy Reporter UI Endpoint (`http://policy-reporter-ui:8080`). 
+
+### Installation
+
+```bash
+kubectl apply -f https://raw.githubusercontent.com/kyverno/policy-reporter/main/manifest/complete-ha/namespace.yaml
+kubectl apply -f https://raw.githubusercontent.com/kyverno/policy-reporter/main/manifest/complete-ha/config-core.yaml
+kubectl apply -f https://raw.githubusercontent.com/kyverno/policy-reporter/main/manifest/complete-ha/config-ui.yaml
+kubectl apply -f https://raw.githubusercontent.com/kyverno/policy-reporter/main/manifest/complete-ha/config-kyverno-plugin.yaml
+kubectl apply -f https://raw.githubusercontent.com/kyverno/policy-reporter/main/manifest/complete-ha/redis.yaml
+kubectl apply -f https://raw.githubusercontent.com/kyverno/policy-reporter/main/manifest/complete-ha/install.yaml
+```
+
+See `complete-ha/README.md` for details about the used configuration values.
 
 ## Policy Reporter Configuration
 
@@ -129,6 +155,22 @@ reportFilter:
     exclucde: []
   clusterReports:
     disabled: false
+
+# optional external result caching
+redis:
+  enabled: false
+  address: ""
+  database: 0
+  prefix: "policy-reporter"
+  username: ""
+  password: ""
+
+leaderElection:
+  enabled: false
+  releaseOnCancel: true
+  leaseDuration: 15
+  renewDeadline: 10
+  retryPeriod: 2
 ```
 
 The `kyverno-policy-reporter-ui` and `default-policy-reporter-ui` installation has an optional preconfigured `target-security.yaml` to apply. This secret configures the Policy Reporter UI as target for Policy Reporter.

@@ -6,6 +6,8 @@ import (
 	"github.com/kyverno/policy-reporter/pkg/report"
 )
 
+const Store = "store_listener"
+
 func NewStoreListener(store report.PolicyReportStore) report.PolicyReportListener {
 	return func(event report.LifecycleEvent) {
 		if event.Type == report.Deleted {

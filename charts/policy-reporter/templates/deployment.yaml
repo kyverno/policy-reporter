@@ -51,7 +51,7 @@ spec:
           image: "{{ .Values.image.registry }}/{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           {{- if .Values.securityContext }}
-          securityContext: {{ include "kyverno.securityContext" . | nindent 12 }}
+          securityContext: {{ include "policyreporter.securityContext" . | nindent 12 }}
           {{- end }}
           args:
             - --port={{ .Values.port.number }}
@@ -60,6 +60,7 @@ spec:
             - --metrics-enabled={{ or .Values.metrics.enabled .Values.monitoring.enabled }}
             - --rest-enabled={{ or .Values.rest.enabled .Values.ui.enabled }}
             - --profile={{ .Values.profiling.enabled }}
+            - --lease-name={{ include "policyreporter.fullname" . }}
           ports:
             - name: {{ .Values.port.name }}
               containerPort: {{ .Values.port.number }}
@@ -81,6 +82,17 @@ spec:
             subPath: config.yaml
             {{- end }}
             readOnly: true
+          {{- if .Values.leaderElection.enabled }}
+          env:
+          - name: POD_NAME
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.name
+          - name: POD_NAMESPACE
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.namespace
+          {{- end }}
       volumes:
       - name: sqlite
         emptyDir: {}

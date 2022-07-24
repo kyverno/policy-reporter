@@ -1,2 +1,5 @@
 blockReports:
   {{- toYaml .Values.blockReports | nindent 2 }}
+
+leaderElection:
+  {{- toYaml .Values.leaderElection | nindent 2 }}

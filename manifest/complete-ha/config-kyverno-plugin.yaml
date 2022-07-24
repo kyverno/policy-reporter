@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: policy-reporter-kyverno-plugin-config
+  labels:
+    app.kubernetes.io/name: policy-reporter-kyverno-plugin
+    app.kubernetes.io/instance: policy-reporter
+type: Opaque
+data:
+  config.yaml: YmxvY2tSZXBvcnRzOgogIGVuYWJsZWQ6IHRydWU=

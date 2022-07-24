@@ -8,6 +8,8 @@ import (
 	"github.com/kyverno/policy-reporter/pkg/report"
 )
 
+const NewResults = "new_results_listener"
+
 type ResultListener struct {
 	skipExisting bool
 	listener     []report.PolicyReportResultListener

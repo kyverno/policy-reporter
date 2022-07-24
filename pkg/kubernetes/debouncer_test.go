@@ -16,7 +16,7 @@ func Test_Debouncer(t *testing.T) {
 		wg.Add(2)
 
 		publisher := report.NewEventPublisher()
-		publisher.RegisterListener(func(event report.LifecycleEvent) {
+		publisher.RegisterListener("test", func(event report.LifecycleEvent) {
 			counter++
 			wg.Done()
 		})

@@ -187,3 +187,13 @@ reportFilter:
     {{- end }}
   clusterReports:
     disabled: {{ .Values.reportFilter.clusterReports.disabled }}
+
+{{- with .Values.leaderElection }}
+leaderElection:
+  {{- toYaml . | nindent 2 }}
+{{- end }}
+
+{{- with .Values.redis }}
+redis:
+  {{- toYaml . | nindent 2 }}
+{{- end }}

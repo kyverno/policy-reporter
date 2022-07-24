@@ -76,10 +76,22 @@ Create UI target host based on configuration
 {{- end }}
 {{- end }}
 
-{{- define "kyverno.securityContext" -}}
+{{- define "policyreporter.securityContext" -}}
 {{- if semverCompare "<1.19" .Capabilities.KubeVersion.Version }}
 {{- toYaml (omit .Values.securityContext "seccompProfile") }}
 {{- else }}
 {{- toYaml .Values.securityContext }}
+{{- end }}
+{{- end }}
+
+{{- define "policyreporter.podDisruptionBudget" -}}
+{{- if and .Values.podDisruptionBudget.minAvailable .Values.podDisruptionBudget.maxUnavailable }}
+{{- fail "Cannot set both .Values.podDisruptionBudget.minAvailable and .Values.podDisruptionBudget.maxUnavailable" -}}
+{{- end }}
+{{- if not .Values.podDisruptionBudget.maxUnavailable }}
+minAvailable: {{ default 1 .Values.podDisruptionBudget.minAvailable }}
+{{- end }}
+{{- if .Values.podDisruptionBudget.maxUnavailable }}
+maxUnavailable: {{ .Values.podDisruptionBudget.maxUnavailable }}
 {{- end }}
 {{- end }}

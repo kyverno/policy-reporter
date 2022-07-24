@@ -25,3 +25,9 @@ data:
     clusters:
       {{- toYaml . | nindent 4 }}
     {{- end }}
+
+    {{- with .Values.redis }}
+    redis:
+      {{- toYaml . | nindent 6 }}
+    {{- end }}
+
