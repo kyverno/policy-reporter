@@ -6,7 +6,7 @@ The installation requires a `policy-reporter` namespace. Because the installatio
 
 ## Policy Reporter
 
-The `policy-reporter` folder is the basic installation for Policy Reporter without the UI. Includes a basic Configuration Secret `policy-reporter-targets`, empty by default and the `http://policy-reporter:8080/metrics` Endpoint.
+The `policy-reporter` folder is the basic installation for Policy Reporter without the UI or other components. Includes a basic Configuration Secret `policy-reporter-targets`, empty by default and the `http://policy-reporter:8080/metrics` Endpoint.
 
 ### Installation
 
@@ -15,9 +15,9 @@ kubectl apply -f https://raw.githubusercontent.com/kyverno/policy-reporter/main/
 kubectl apply -f https://raw.githubusercontent.com/kyverno/policy-reporter/main/manifest/policy-reporter/install.yaml
 ```
 
-## Default Policy Reporter UI
+## Policy Reporter + UI
 
-The `default-policy-reporter-ui` folder is the extended Policy Reporter and the default Policy Reporter UI installation. 
+The `policy-reporter-ui` contains manifests for Policy Reporter and the Policy Reporter UI. 
 
 Enables: 
 * Policy Reporter REST API (`http://policy-reporter:8080`) 
@@ -28,14 +28,14 @@ Configures Policy Reporter UI as Target for Policy Reporter.
 ### Installation
 
 ```bash
-kubectl apply -f https://raw.githubusercontent.com/kyverno/policy-reporter/main/manifest/default-policy-reporter-ui/namespace.yaml
-kubectl apply -f https://raw.githubusercontent.com/kyverno/policy-reporter/main/manifest/default-policy-reporter-ui/target-secret.yaml
-kubectl apply -f https://raw.githubusercontent.com/kyverno/policy-reporter/main/manifest/default-policy-reporter-ui/install.yaml
+kubectl apply -f https://raw.githubusercontent.com/kyverno/policy-reporter/main/manifest/policy-reporter-ui/namespace.yaml
+kubectl apply -f https://raw.githubusercontent.com/kyverno/policy-reporter/main/manifest/policy-reporter-ui/target-secret.yaml
+kubectl apply -f https://raw.githubusercontent.com/kyverno/policy-reporter/main/manifest/policy-reporter-ui/install.yaml
 ```
 
-## Kyverno Policy Reporter UI
+## Policy Reporter + KyvernoPlugin + UI
 
-The `kyverno-policy-reporter-ui` folder is the extended Policy Reporter, Policy Reporter Kyverno Plugin and the extended Policy Reporter UI installation. 
+The `policy-reporter-kyverno-ui` contains manifests for Policy Reporter, Policy Reporter Kyverno Plugin and Policy Reporter UI. 
 
 Enables:
 * Policy Reporter REST API (`http://policy-reporter:8080`)
@@ -49,14 +49,14 @@ Configures Policy Reporter UI as Target for Policy Reporter and enables the Kyve
 ### Installation
 
 ```bash
-kubectl apply -f https://raw.githubusercontent.com/kyverno/policy-reporter/main/manifest/kyverno-policy-reporter-ui/namespace.yaml
-kubectl apply -f https://raw.githubusercontent.com/kyverno/policy-reporter/main/manifest/kyverno-policy-reporter-ui/target-secret.yaml
-kubectl apply -f https://raw.githubusercontent.com/kyverno/policy-reporter/main/manifest/kyverno-policy-reporter-ui/install.yaml
+kubectl apply -f https://raw.githubusercontent.com/kyverno/policy-reporter/main/manifest/policy-reporter-kyverno-ui/namespace.yaml
+kubectl apply -f https://raw.githubusercontent.com/kyverno/policy-reporter/main/manifest/policy-reporter-kyverno-ui/target-secret.yaml
+kubectl apply -f https://raw.githubusercontent.com/kyverno/policy-reporter/main/manifest/policy-reporter-kyverno-ui/install.yaml
 ```
 
-## Complete High Available Setup
+## High Available Policy Reporter + KyvernoPlugin + UI
 
-The `complete-ha` folder is the extended Policy Reporter, Policy Reporter Kyverno Plugin and the extended Policy Reporter UI installation, each component as High Available setup with leaderelection and an external redis storage.
+The `policy-reporter-kyverno-ui-ha` contains a high available setup for Policy Reporter, Policy Reporter Kyverno Plugin and Policy Reporter UI, it enabled leaderelection and uses redis as a external and central storage for shared caches and Logs (UI)
 
 Enables:
 * Policy Reporter REST API (`http://policy-reporter:8080`)
@@ -64,17 +64,22 @@ Enables:
 * Kyverno Plugin Rest API (`http://policy-reporter-kyverno-plugin:8080/policies`)
 * Kyverno Plugin Metrics API (`http://policy-reporter-kyverno-plugin:8080/metrics`) 
 * Kyverno Plugin PolicyReport creation for blocked resources (by __Kyverno__ enforce policies)
-* Policy Reporter UI Endpoint (`http://policy-reporter-ui:8080`). 
+* Policy Reporter UI Endpoint (`http://policy-reporter-ui:8080`).
+
+Additional resources:
+* `PodDisruptionBudget` for each component
+* `Role` and `RoleBinding` for Policy Reporter and the KyvernoPlugin to manage Lease resources for leaderelection
+* Basic `Redis`, used as central and external cache for Policy Reporter and as central Log storage for Policy Reporter UI
 
 ### Installation
 
 ```bash
-kubectl apply -f https://raw.githubusercontent.com/kyverno/policy-reporter/main/manifest/complete-ha/namespace.yaml
-kubectl apply -f https://raw.githubusercontent.com/kyverno/policy-reporter/main/manifest/complete-ha/config-core.yaml
-kubectl apply -f https://raw.githubusercontent.com/kyverno/policy-reporter/main/manifest/complete-ha/config-ui.yaml
-kubectl apply -f https://raw.githubusercontent.com/kyverno/policy-reporter/main/manifest/complete-ha/config-kyverno-plugin.yaml
-kubectl apply -f https://raw.githubusercontent.com/kyverno/policy-reporter/main/manifest/complete-ha/redis.yaml
-kubectl apply -f https://raw.githubusercontent.com/kyverno/policy-reporter/main/manifest/complete-ha/install.yaml
+kubectl apply -f https://raw.githubusercontent.com/kyverno/policy-reporter/main/manifest/policy-reporter-kyverno-ui-ha/namespace.yaml
+kubectl apply -f https://raw.githubusercontent.com/kyverno/policy-reporter/main/manifest/policy-reporter-kyverno-ui-ha/config-core.yaml
+kubectl apply -f https://raw.githubusercontent.com/kyverno/policy-reporter/main/manifest/policy-reporter-kyverno-ui-ha/config-ui.yaml
+kubectl apply -f https://raw.githubusercontent.com/kyverno/policy-reporter/main/manifest/policy-reporter-kyverno-ui-ha/config-kyverno-plugin.yaml
+kubectl apply -f https://raw.githubusercontent.com/kyverno/policy-reporter/main/manifest/policy-reporter-kyverno-ui-ha/redis.yaml
+kubectl apply -f https://raw.githubusercontent.com/kyverno/policy-reporter/main/manifest/policy-reporter-kyverno-ui-ha/install.yaml
 ```
 
 See `complete-ha/README.md` for details about the used configuration values.
