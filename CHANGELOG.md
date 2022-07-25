@@ -2,14 +2,14 @@
 
 # 2.11.0
 * Policy Reporter
-    * High Availability support with leader election for necessary features like target pushes, to avoid duplicated pushes by multiple instances
+    * High Availability support with leaderelection for necessary features like target pushes, to avoid duplicated pushes by multiple instances
         * Add new `role` and `rolebinding` to manage lease objects if leaderelection is enabled
     * Add redis configuration to the Helm Chart for external cache storage
     * Add PodDisruptionBudget for HA Deployments (replicaCount > 1)
     * Add `skipTLS` configuration for MS Teams Webhook
 
 * Policy Reporter KyvernoPlugin
-    * High Availability support with leader election for necessary features like PolicyReport management for blocked resources
+    * High Availability support with leaderelection for necessary features like PolicyReport management for blocked resources
         * Add new `role` and `rolebinding` to manage lease objects if leaderelection is enabled
     * Add PodDisruptionBudget for HA Deployments (replicaCount > 1)
     * Internal refactoring for better CRD management

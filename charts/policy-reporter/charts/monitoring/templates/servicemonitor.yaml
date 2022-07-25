@@ -20,8 +20,13 @@ spec:
         {{- include "policyreporter.selectorLabels" . | nindent 8 }}
   endpoints:
   - port: http
-    {{- with .Values.serviceMonitor.relabelings }}
     relabelings:
+    - action: labeldrop
+      regex: pod|service|container
+    - targetLabel: instance
+      replacement: policy-reporter
+      action: replace
+    {{- with .Values.serviceMonitor.relabelings }}
       {{- toYaml . | nindent 4 }}
     {{- end }}
     {{- with .Values.serviceMonitor.metricRelabelings }}

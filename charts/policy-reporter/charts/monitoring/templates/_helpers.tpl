@@ -50,3 +50,8 @@ app.kubernetes.io/instance: {{ .Release.Name }}
 {{- .Release.Namespace -}}
 {{- end }}
 {{- end }}
+
+{{- define "kyvernoplugin.selectorLabels" -}}
+app.kubernetes.io/name: kyverno-plugin
+app.kubernetes.io/instance: {{ .Release.Name }}
+{{- end }}

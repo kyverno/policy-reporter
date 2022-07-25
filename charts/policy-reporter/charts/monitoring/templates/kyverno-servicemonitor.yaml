@@ -21,8 +21,13 @@ spec:
         {{- include "kyvernoplugin.selectorLabels" . | nindent 8 }}
   endpoints:
   - port: rest
-    {{- with .Values.kyverno.serviceMonitor.relabelings }}
     relabelings:
+    - action: labeldrop
+      regex: pod|service|container
+    - targetLabel: instance
+      replacement: policy-reporter
+      action: replace
+    {{- with .Values.kyverno.serviceMonitor.relabelings }}
       {{- toYaml . | nindent 4 }}
     {{- end }}
     {{- with .Values.kyverno.serviceMonitor.metricRelabelings }}

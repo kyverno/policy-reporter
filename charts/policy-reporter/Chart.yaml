@@ -18,7 +18,7 @@ maintainers:
 dependencies:
   - name: monitoring
     condition: monitoring.enabled
-    version: "2.3.4"
+    version: "2.4.0"
   - name: ui
     condition: ui.enabled
     version: "2.6.0"
