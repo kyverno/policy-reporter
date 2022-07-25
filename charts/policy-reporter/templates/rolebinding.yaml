@@ -1,4 +1,4 @@
-{{- if and (and .Values.serviceAccount.create .Values.rbac.enabled) .Values.leaderElection.enabled -}}
+{{- if and (and .Values.serviceAccount.create .Values.rbac.enabled) (include "policyreporter.leaderElection" .) -}}
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:

@@ -2,4 +2,8 @@ blockReports:
   {{- toYaml .Values.blockReports | nindent 2 }}
 
 leaderElection:
-  {{- toYaml .Values.leaderElection | nindent 2 }}
+  enabled: {{ include "policyreporter.leaderElection" . }}
+  releaseOnCancel: {{ .Values.leaderElection.releaseOnCancel }}
+  leaseDuration: {{ .Values.leaderElection.leaseDuration }}
+  renewDeadline: {{ .Values.leaderElection.renewDeadline }}
+  retryPeriod: {{ .Values.leaderElection.retryPeriod }}

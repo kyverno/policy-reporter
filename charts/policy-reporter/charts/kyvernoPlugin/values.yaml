@@ -118,8 +118,9 @@ blockReports:
 
 # required if policy-reporter-kyverno-plugin should run in HA mode and the "blockReports" feature is enabled
 # if "blockReports" is disabled, leaderElection is also disabled automatically
+# will be enabled when replicaCount > 1
 leaderElection:
-  enabled: true
+  enabled: false
   releaseOnCancel: true
   leaseDuration: 15
   renewDeadline: 10

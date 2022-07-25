@@ -82,7 +82,7 @@ spec:
             subPath: config.yaml
             {{- end }}
             readOnly: true
-          {{- if .Values.leaderElection.enabled }}
+          {{- if (include "policyreporter.leaderElection" .) }}
           env:
           - name: POD_NAME
             valueFrom:

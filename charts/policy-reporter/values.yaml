@@ -403,10 +403,11 @@ target:
     # add additional s3 channels with different configurations and filters
     channels: []
 
-# required if policy-reporter should run in HA mode and you have targets configured
+# required when policy-reporter runs in HA mode and you have targets configured
 # if no targets are configured, leaderElection is disabled automatically
+# will be enabled when replicaCount > 1
 leaderElection:
-  enabled: true
+  enabled: false
   releaseOnCancel: true
   leaseDuration: 15
   renewDeadline: 10
