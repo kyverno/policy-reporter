@@ -95,7 +95,3 @@ minAvailable: {{ default 1 .Values.podDisruptionBudget.minAvailable }}
 maxUnavailable: {{ .Values.podDisruptionBudget.maxUnavailable }}
 {{- end }}
 {{- end }}
-
-{{- define "policyreporter.leaderElection" -}}
-{{- or .Values.leaderElection.enabled (gt (int .Values.replicaCount) 1) }}
-{{- end }}

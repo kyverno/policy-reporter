@@ -190,7 +190,7 @@ reportFilter:
     disabled: {{ .Values.reportFilter.clusterReports.disabled }}
 
 leaderElection:
-  enabled: {{ include "policyreporter.leaderElection" . }}
+  enabled: {{ or .Values.leaderElection.enabled (gt (int .Values.replicaCount) 1) }}
   releaseOnCancel: {{ .Values.leaderElection.releaseOnCancel }}
   leaseDuration: {{ .Values.leaderElection.leaseDuration }}
   renewDeadline: {{ .Values.leaderElection.renewDeadline }}
