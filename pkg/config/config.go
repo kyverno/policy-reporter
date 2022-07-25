@@ -77,6 +77,7 @@ type Discord struct {
 type Teams struct {
 	Name            string       `mapstructure:"name"`
 	Webhook         string       `mapstructure:"webhook"`
+	SkipTLS         bool         `mapstructure:"skipTLS"`
 	SkipExisting    bool         `mapstructure:"skipExistingOnStartup"`
 	MinimumPriority string       `mapstructure:"minimumPriority"`
 	Filter          TargetFilter `mapstructure:"filter"`

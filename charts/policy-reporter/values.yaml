@@ -320,6 +320,8 @@ target:
   teams:
     # teams webhook address
     webhook: ""
+    # skip TLS
+    skipTLS: false
     # minimum priority "" < info < warning < critical < error
     minimumPriority: ""
     # list of sources which should send to teams

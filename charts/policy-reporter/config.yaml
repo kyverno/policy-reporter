@@ -75,6 +75,7 @@ discord:
 
 teams:
   webhook: {{ .Values.target.teams.webhook | quote }}
+  skipTLS: {{ .Values.target.teams.skipTLS }}
   minimumPriority: {{ .Values.target.teams.minimumPriority | quote }}
   skipExistingOnStartup: {{ .Values.target.teams.skipExistingOnStartup }}
   {{- with .Values.target.teams.sources }}

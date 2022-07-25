@@ -6,6 +6,7 @@
         * Add new `role` and `rolebinding` to manage lease objects if leaderelection is enabled
     * Add redis configuration to the Helm Chart for external cache storage
     * Add PodDisruptionBudget for HA Deployments (replicaCount > 1)
+    * Add `skipTLS` configuration for MS Teams Webhook
 
 * Policy Reporter KyvernoPlugin
     * High Availability support with leader election for necessary features like PolicyReport management for blocked resources

@@ -1,6 +1,7 @@
 package config
 
 import (
+	"crypto/tls"
 	"database/sql"
 	"fmt"
 	"log"
@@ -662,14 +663,27 @@ func createTeamsClient(config Teams, parent Teams) target.Client {
 		config.SkipExisting = parent.SkipExisting
 	}
 
+	if !config.SkipTLS {
+		config.SkipTLS = parent.SkipTLS
+	}
+
 	log.Printf("[INFO] %s configured", config.Name)
+
+	client := &http.Client{}
+
+	if config.SkipTLS {
+		client.Transport = http.DefaultTransport.(*http.Transport).Clone()
+		client.Transport.(*http.Transport).TLSClientConfig = &tls.Config{
+			InsecureSkipVerify: config.SkipTLS,
+		}
+	}
 
 	return teams.NewClient(
 		config.Name,
 		config.Webhook,
 		config.SkipExisting,
 		createTargetFilter(config.Filter, config.MinimumPriority, config.Sources),
-		&http.Client{},
+		client,
 	)
 }
 

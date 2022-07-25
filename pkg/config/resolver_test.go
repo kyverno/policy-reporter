@@ -48,6 +48,7 @@ var testConfig = &config.Config{
 	},
 	Teams: config.Teams{
 		Webhook:         "http://hook.teams:80",
+		SkipTLS:         true,
 		SkipExisting:    true,
 		MinimumPriority: "debug",
 		Channels: []config.Teams{{
