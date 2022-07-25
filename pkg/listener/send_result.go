@@ -7,6 +7,8 @@ import (
 	"github.com/kyverno/policy-reporter/pkg/target"
 )
 
+const SendResults = "send_results_listener"
+
 func NewSendResultListener(clients []target.Client) report.PolicyReportResultListener {
 	return func(r report.Result, e bool) {
 		wg := &sync.WaitGroup{}

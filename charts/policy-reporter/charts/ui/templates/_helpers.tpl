@@ -104,7 +104,7 @@ Create the name of the service account to use
 {{- end }}
 {{- end }}
 
-{{- define "kyverno.securityContext" -}}
+{{- define "ui.securityContext" -}}
 {{- if semverCompare "<1.19" .Capabilities.KubeVersion.Version }}
 {{ toYaml (omit .Values.securityContext "seccompProfile") }}
 {{- else }}

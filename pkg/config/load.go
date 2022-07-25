@@ -10,6 +10,11 @@ import (
 func Load(cmd *cobra.Command) (*Config, error) {
 	v := viper.New()
 
+	v.SetDefault("leaderElection.releaseOnCancel", true)
+	v.SetDefault("leaderElection.leaseDuration", 15)
+	v.SetDefault("leaderElection.renewDeadline", 10)
+	v.SetDefault("leaderElection.retryPeriod", 2)
+
 	cfgFile := ""
 
 	configFlag := cmd.Flags().Lookup("config")
@@ -56,6 +61,17 @@ func Load(cmd *cobra.Command) (*Config, error) {
 
 	if flag := cmd.Flags().Lookup("template-dir"); flag != nil {
 		v.BindPFlag("emailReports.templates.dir", flag)
+	}
+
+	if flag := cmd.Flags().Lookup("lease-name"); flag != nil {
+		v.BindPFlag("leaderElection.lockName", flag)
+	}
+
+	if err := v.BindEnv("leaderElection.podName", "POD_NAME"); err != nil {
+		log.Printf("[WARNING] failed to bind env POD_NAME")
+	}
+	if err := v.BindEnv("leaderElection.namespace", "POD_NAMESPACE"); err != nil {
+		log.Printf("[WARNING] failed to bind env POD_NAMESPACE")
 	}
 
 	c := &Config{}

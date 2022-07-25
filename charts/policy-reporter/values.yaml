@@ -2,13 +2,10 @@ image:
   registry: ghcr.io
   repository: kyverno/policy-reporter
   pullPolicy: IfNotPresent
-  tag: 2.7.1
+  tag: 2.8.0
 
 imagePullSecrets: []
 
-# Deploy not more than one replica
-# Policy Reporter doesn't scale yet.
-# Each pod will report each change.
 replicaCount: 1
 
 deploymentStrategy: {}
@@ -323,6 +320,8 @@ target:
   teams:
     # teams webhook address
     webhook: ""
+    # skip TLS
+    skipTLS: false
     # minimum priority "" < info < warning < critical < error
     minimumPriority: ""
     # list of sources which should send to teams
@@ -405,6 +404,34 @@ target:
     filter: {}
     # add additional s3 channels with different configurations and filters
     channels: []
+
+# required when policy-reporter runs in HA mode and you have targets configured
+# if no targets are configured, leaderElection is disabled automatically
+# will be enabled when replicaCount > 1
+leaderElection:
+  enabled: false
+  releaseOnCancel: true
+  leaseDuration: 15
+  renewDeadline: 10
+  retryPeriod: 2
+
+# use redis as external result cache instead of the in memory cache
+redis:
+  enabled: false
+  address: ""
+  database: 0
+  prefix: "policy-reporter"
+  username: ""
+  password: ""
+
+# enabled if replicaCount > 1
+podDisruptionBudget:
+  # -- Configures the minimum available pods for policy-reporter disruptions.
+  # Cannot be used if `maxUnavailable` is set.
+  minAvailable: 1
+  # -- Configures the maximum unavailable pods for policy-reporter disruptions.
+  # Cannot be used if `minAvailable` is set.
+  maxUnavailable:
 
 # Node labels for pod assignment
 # ref: https://kubernetes.io/docs/user-guide/node-selection/

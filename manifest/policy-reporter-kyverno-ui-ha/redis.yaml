@@ -1,0 +1,30 @@
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: redis
+  label:
+    app: redis
+  namespace: policy-reporter
+spec:
+  containers:
+  - image: redis:alpine
+    imagePullPolicy: IfNotPresent
+    name: redis
+    resources: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: redis
+  name: redis
+  namespace: policy-reporter
+spec:
+  ports:
+  - port: 6379
+    protocol: TCP
+    targetPort: 6379
+  selector:
+    app: redis
+  type: ClusterIP

@@ -1,15 +1,18 @@
 package cmd
 
 import (
+	"context"
 	"flag"
 	"log"
 
 	"github.com/kyverno/policy-reporter/pkg/config"
+	"github.com/kyverno/policy-reporter/pkg/listener"
 
 	"github.com/spf13/cobra"
 	"golang.org/x/sync/errgroup"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
+	"k8s.io/klog"
 )
 
 func newRunCMD() *cobra.Command {
@@ -41,8 +44,6 @@ func newRunCMD() *cobra.Command {
 
 			server := resolver.APIServer(client.HasSynced)
 
-			resolver.RegisterSendResultListener()
-
 			g := &errgroup.Group{}
 
 			if c.REST.Enabled {
@@ -73,6 +74,33 @@ func newRunCMD() *cobra.Command {
 				server.RegisterProfilingHandler()
 			}
 
+			if resolver.HasTargets() && c.LeaderElection.Enabled {
+				elector, err := resolver.LeaderElectionClient()
+				if err != nil {
+					return err
+				}
+
+				elector.RegisterOnStart(func(c context.Context) {
+					klog.Info("started leadership")
+
+					resolver.RegisterSendResultListener()
+				}).RegisterOnNew(func(currentID, lockID string) {
+					if currentID != lockID {
+						klog.Infof("leadership by %s", currentID)
+					}
+				}).RegisterOnStop(func() {
+					klog.Info("stopped leadership")
+
+					resolver.EventPublisher().UnregisterListener(listener.NewResults)
+				})
+
+				g.Go(func() error {
+					return elector.Run(cmd.Context())
+				})
+			} else if resolver.HasTargets() {
+				resolver.RegisterSendResultListener()
+			}
+
 			g.Go(server.Start)
 
 			stop := make(chan struct{})
@@ -95,6 +123,7 @@ func newRunCMD() *cobra.Command {
 	cmd.PersistentFlags().BoolP("metrics-enabled", "m", false, "Enable Policy Reporter's Metrics API")
 	cmd.PersistentFlags().BoolP("rest-enabled", "r", false, "Enable Policy Reporter's REST API")
 	cmd.PersistentFlags().Bool("profile", false, "Enable application profiling with pprof")
+	cmd.PersistentFlags().String("lease-name", "policy-reporter", "name of the LeaseLock")
 
 	flag.Parse()
 

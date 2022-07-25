@@ -3,7 +3,7 @@
 build
 /test.yaml
 **/test.db
-sqlite-database.db
+sqlite-database*.db
 values.yaml
 coverage.out
 heap*

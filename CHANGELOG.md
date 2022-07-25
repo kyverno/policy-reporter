@@ -1,5 +1,23 @@
 # Changelog
 
+# 2.11.0
+* Policy Reporter
+    * High Availability support with leaderelection for necessary features like target pushes, to avoid duplicated pushes by multiple instances
+        * Add new `role` and `rolebinding` to manage lease objects if leaderelection is enabled
+    * Add redis configuration to the Helm Chart for external cache storage
+    * Add PodDisruptionBudget for HA Deployments (replicaCount > 1)
+    * Add `skipTLS` configuration for MS Teams Webhook
+
+* Policy Reporter KyvernoPlugin
+    * High Availability support with leaderelection for necessary features like PolicyReport management for blocked resources
+        * Add new `role` and `rolebinding` to manage lease objects if leaderelection is enabled
+    * Add PodDisruptionBudget for HA Deployments (replicaCount > 1)
+    * Internal refactoring for better CRD management
+
+* Policy Reporter UI
+    * Add redis as possible log storage to support high availability deployments
+    * Add PodDisruptionBudget for HA Deployments (replicaCount > 1)
+
 # 2.10.3
 * Policy Reporter
     * Add new config `target.loki.path` to overwrite the deprected prom push API

@@ -5,25 +5,34 @@ import (
 )
 
 type EventPublisher interface {
-	// RegisterListener register Handlers called on each PolicyReport watch.Event
-	RegisterListener(PolicyReportListener)
+	// RegisterListener register Handlers called on each PolicyReport Event
+	RegisterListener(string, PolicyReportListener)
+	// UnregisterListener removes an registered handler
+	UnregisterListener(string)
 	// GetListener returns a list of all registered Listeners
-	GetListener() []PolicyReportListener
+	GetListener() map[string]PolicyReportListener
 	// Process LifecycleEvent with all registered listeners
 	Publish(event LifecycleEvent)
 }
 
 type lifecycleEventPublisher struct {
-	listeners     []PolicyReportListener
+	listeners     map[string]PolicyReportListener
 	listenerCount int
 }
 
-func (p *lifecycleEventPublisher) RegisterListener(listener PolicyReportListener) {
-	p.listeners = append(p.listeners, listener)
+func (p *lifecycleEventPublisher) RegisterListener(name string, listener PolicyReportListener) {
+	p.listeners[name] = listener
 	p.listenerCount++
 }
 
-func (p *lifecycleEventPublisher) GetListener() []PolicyReportListener {
+func (p *lifecycleEventPublisher) UnregisterListener(name string) {
+	if _, ok := p.listeners[name]; ok {
+		delete(p.listeners, name)
+		p.listenerCount--
+	}
+}
+
+func (p *lifecycleEventPublisher) GetListener() map[string]PolicyReportListener {
 	return p.listeners
 }
 
@@ -42,5 +51,8 @@ func (p *lifecycleEventPublisher) Publish(event LifecycleEvent) {
 }
 
 func NewEventPublisher() EventPublisher {
-	return &lifecycleEventPublisher{}
+	return &lifecycleEventPublisher{
+		listeners:     make(map[string]func(LifecycleEvent)),
+		listenerCount: 0,
+	}
 }

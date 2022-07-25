@@ -75,6 +75,7 @@ discord:
 
 teams:
   webhook: {{ .Values.target.teams.webhook | quote }}
+  skipTLS: {{ .Values.target.teams.skipTLS }}
   minimumPriority: {{ .Values.target.teams.minimumPriority | quote }}
   skipExistingOnStartup: {{ .Values.target.teams.skipExistingOnStartup }}
   {{- with .Values.target.teams.sources }}
@@ -187,3 +188,15 @@ reportFilter:
     {{- end }}
   clusterReports:
     disabled: {{ .Values.reportFilter.clusterReports.disabled }}
+
+leaderElection:
+  enabled: {{ or .Values.leaderElection.enabled (gt (int .Values.replicaCount) 1) }}
+  releaseOnCancel: {{ .Values.leaderElection.releaseOnCancel }}
+  leaseDuration: {{ .Values.leaderElection.leaseDuration }}
+  renewDeadline: {{ .Values.leaderElection.renewDeadline }}
+  retryPeriod: {{ .Values.leaderElection.retryPeriod }}
+
+{{- with .Values.redis }}
+redis:
+  {{- toYaml . | nindent 2 }}
+{{- end }}

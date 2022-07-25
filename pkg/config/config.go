@@ -77,6 +77,7 @@ type Discord struct {
 type Teams struct {
 	Name            string       `mapstructure:"name"`
 	Webhook         string       `mapstructure:"webhook"`
+	SkipTLS         bool         `mapstructure:"skipTLS"`
 	SkipExisting    bool         `mapstructure:"skipExistingOnStartup"`
 	MinimumPriority string       `mapstructure:"minimumPriority"`
 	Filter          TargetFilter `mapstructure:"filter"`
@@ -214,25 +215,38 @@ type Redis struct {
 	Database int    `mapstructure:"database"`
 }
 
+// LeaderElection configuration
+type LeaderElection struct {
+	LockName        string `mapstructure:"lockName"`
+	PodName         string `mapstructure:"podName"`
+	Namespace       string `mapstructure:"namespace"`
+	LeaseDuration   int    `mapstructure:"leaseDuration"`
+	RenewDeadline   int    `mapstructure:"renewDeadline"`
+	RetryPeriod     int    `mapstructure:"retryPeriod"`
+	ReleaseOnCancel bool   `mapstructure:"releaseOnCancel"`
+	Enabled         bool   `mapstructure:"enabled"`
+}
+
 // Config of the PolicyReporter
 type Config struct {
-	Loki          Loki          `mapstructure:"loki"`
-	Elasticsearch Elasticsearch `mapstructure:"elasticsearch"`
-	Slack         Slack         `mapstructure:"slack"`
-	Discord       Discord       `mapstructure:"discord"`
-	Teams         Teams         `mapstructure:"teams"`
-	S3            S3            `mapstructure:"s3"`
-	Kinesis       Kinesis       `mapstructure:"kinesis"`
-	UI            UI            `mapstructure:"ui"`
-	Webhook       Webhook       `mapstructure:"webhook"`
-	API           API           `mapstructure:"api"`
-	Kubeconfig    string        `mapstructure:"kubeconfig"`
-	DBFile        string        `mapstructure:"dbfile"`
-	Metrics       Metrics       `mapstructure:"metrics"`
-	REST          REST          `mapstructure:"rest"`
-	PriorityMap   PriorityMap   `mapstructure:"priorityMap"`
-	ReportFilter  ReportFilter  `mapstructure:"reportFilter"`
-	Redis         Redis         `mapstructure:"redis"`
-	Profiling     Profiling     `mapstructure:"profiling"`
-	EmailReports  EmailReports  `mapstructure:"emailReports"`
+	Loki           Loki           `mapstructure:"loki"`
+	Elasticsearch  Elasticsearch  `mapstructure:"elasticsearch"`
+	Slack          Slack          `mapstructure:"slack"`
+	Discord        Discord        `mapstructure:"discord"`
+	Teams          Teams          `mapstructure:"teams"`
+	S3             S3             `mapstructure:"s3"`
+	Kinesis        Kinesis        `mapstructure:"kinesis"`
+	UI             UI             `mapstructure:"ui"`
+	Webhook        Webhook        `mapstructure:"webhook"`
+	API            API            `mapstructure:"api"`
+	Kubeconfig     string         `mapstructure:"kubeconfig"`
+	DBFile         string         `mapstructure:"dbfile"`
+	Metrics        Metrics        `mapstructure:"metrics"`
+	REST           REST           `mapstructure:"rest"`
+	PriorityMap    PriorityMap    `mapstructure:"priorityMap"`
+	ReportFilter   ReportFilter   `mapstructure:"reportFilter"`
+	Redis          Redis          `mapstructure:"redis"`
+	Profiling      Profiling      `mapstructure:"profiling"`
+	EmailReports   EmailReports   `mapstructure:"emailReports"`
+	LeaderElection LeaderElection `mapstructure:"leaderElection"`
 }

@@ -10,6 +10,8 @@ var (
 	ClusterResultGaugeName = "cluster_policy_report_result"
 )
 
+const Metrics = "metric_listener"
+
 // NewMetricsListener for PolicyReport watch.Events
 func NewMetricsListener(
 	filter *report.ResultFilter,
