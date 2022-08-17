@@ -2,6 +2,7 @@ package summary
 
 import (
 	"context"
+	"log"
 	"sync"
 
 	"github.com/kyverno/kyverno/api/policyreport/v1alpha2"
@@ -35,11 +36,13 @@ func (o *Generator) GenerateData(ctx context.Context) ([]Source, error) {
 				defer wg.Done()
 
 				if len(report.Results) == 0 {
+					log.Printf("[INFO] skipped ClusterPolicyReport '%s' - no results available", report.Name)
 					return
 				}
 
 				rs := report.Results[0].Source
 				if !o.filter.ValidateSource(rs) {
+					log.Printf("[INFO] skipped ClusterPolicyReport '%s' - source excluded", report.Name)
 					return
 				}
 
@@ -52,6 +55,8 @@ func (o *Generator) GenerateData(ctx context.Context) ([]Source, error) {
 				mx.Unlock()
 
 				s.AddClusterSummary(report.Summary)
+
+				log.Printf("[INFO] Processed ClusterPolicyReport '%s'\n", report.Name)
 			}(rep)
 		}
 	}
@@ -68,11 +73,13 @@ func (o *Generator) GenerateData(ctx context.Context) ([]Source, error) {
 			defer wg.Done()
 
 			if len(report.Results) == 0 || !o.filter.ValidateNamespace(report.Namespace) {
+				log.Printf("[INFO] skipped PolicyReport '%s' - no results or namespace excluded", report.Name)
 				return
 			}
 
 			rs := report.Results[0].Source
 			if !o.filter.ValidateSource(rs) {
+				log.Printf("[INFO] skipped PolicyReport '%s' - source excluded", report.Name)
 				return
 			}
 
@@ -85,6 +92,8 @@ func (o *Generator) GenerateData(ctx context.Context) ([]Source, error) {
 			mx.Unlock()
 
 			s.AddNamespacedSummary(report.Namespace, report.Summary)
+
+			log.Printf("[INFO] Processed PolicyReport '%s'\n", report.Name)
 		}(rep)
 	}
 

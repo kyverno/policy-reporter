@@ -2,6 +2,7 @@ package violations
 
 import (
 	"context"
+	"log"
 	"sync"
 
 	"github.com/kyverno/kyverno/api/policyreport/v1alpha2"
@@ -35,12 +36,14 @@ func (o *Generator) GenerateData(ctx context.Context) ([]Source, error) {
 				defer wg.Done()
 
 				if len(report.Results) == 0 {
+					log.Printf("[INFO] skipped ClusterPolicyReport '%s' - no results available", report.Name)
 					return
 				}
 
 				rs := report.Results[0].Source
 
 				if !o.filter.ValidateSource(rs) {
+					log.Printf("[INFO] skipped ClusterPolicyReport '%s' - source excluded", report.Name)
 					return
 				}
 
@@ -53,6 +56,8 @@ func (o *Generator) GenerateData(ctx context.Context) ([]Source, error) {
 				mx.Unlock()
 
 				s.AddClusterPassed(report.Summary.Pass)
+
+				defer log.Printf("[INFO] Processed ClusterPolicyReport '%s'\n", report.Name)
 
 				length := len(report.Results)
 				if length == 0 || length == report.Summary.Pass+report.Summary.Skip {
@@ -82,12 +87,14 @@ func (o *Generator) GenerateData(ctx context.Context) ([]Source, error) {
 			defer wg.Done()
 
 			if len(report.Results) == 0 {
+				log.Printf("[INFO] skipped PolicyReport '%s' - no results", report.Name)
 				return
 			}
 
 			rs := report.Results[0].Source
 
 			if !o.filter.ValidateSource(rs) || !o.filter.ValidateNamespace(report.Namespace) {
+				log.Printf("[INFO] skipped PolicyReport '%s' - source or namespace excluded", report.Name)
 				return
 			}
 
@@ -100,6 +107,8 @@ func (o *Generator) GenerateData(ctx context.Context) ([]Source, error) {
 			mx.Unlock()
 
 			s.AddNamespacedPassed(report.Namespace, report.Summary.Pass)
+
+			defer log.Printf("[INFO] Processed PolicyReport '%s'\n", report.Name)
 
 			length := len(report.Results)
 			if length == 0 || length == report.Summary.Pass+report.Summary.Skip {
