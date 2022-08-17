@@ -1,5 +1,11 @@
 # Changelog
 
+# 2.11.1
+* Policy Reporter
+    * Fix `CronJob` Resources by [[#157](https://github.com/kyverno/policy-reporter/pull/178) by [MaxRink](https://github.com/MaxRink)]
+* Policy Reporter UI
+    * Fix API Proxy for APIs behind ReverseProxy (like NGINX Ingress)
+
 # 2.11.0
 * Policy Reporter
     * High Availability support with leaderelection for necessary features like target pushes, to avoid duplicated pushes by multiple instances
