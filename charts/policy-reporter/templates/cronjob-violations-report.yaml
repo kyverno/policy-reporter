@@ -54,7 +54,7 @@ spec:
               image: "{{ .Values.image.registry }}/{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
               imagePullPolicy: {{ .Values.image.pullPolicy }}
               {{- if .Values.securityContext }}
-              securityContext: {{ include "kyverno.securityContext" . | nindent 16 }}
+              securityContext: {{ include "policyreporter.securityContext" . | nindent 16 }}
               {{- end }}
               command:
                 - /app/policyreporter
