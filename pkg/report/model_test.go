@@ -8,7 +8,7 @@ import (
 )
 
 var result1 = report.Result{
-	ID:       "8804968580595351199",
+	ID:       "16097155368874536783",
 	Message:  "validation error: requests and limits required. Rule autogen-check-for-requests-and-limits failed at path /spec/template/spec/containers/0/resources/requests/",
 	Policy:   "require-requests-and-limits-required",
 	Rule:     "autogen-check-for-requests-and-limits",
@@ -119,7 +119,7 @@ func Test_PolicyReport(t *testing.T) {
 			Results:           []report.Result{result1},
 		}
 
-		if result := preport.GetResult("8804968580595351199"); result.ID != "8804968580595351199" {
+		if result := preport.GetResult("16097155368874536783"); result.ID != "16097155368874536783" {
 			t.Error("Expected PolicyReport.GetResult() returns a given Result by ID")
 		}
 		if result := preport.GetResult("123"); result.ID != "" {
@@ -168,7 +168,7 @@ func Test_ClusterPolicyReport(t *testing.T) {
 
 func Test_Result(t *testing.T) {
 	t.Run("Check Result.GetIdentifier", func(t *testing.T) {
-		expected := report.GeneratePolicyReportResultID(result1.Resource.UID, result1.Resource.Name, result1.Policy, result1.Rule, result1.Status, "")
+		expected := report.GeneratePolicyReportResultID(result1.Resource.UID, result1.Resource.Name, result1.Policy, result1.Rule, result1.Status, result1.Message, result1.Category)
 
 		if result1.GetIdentifier() != expected {
 			t.Errorf("Expected ClusterPolicyReport.GetIdentifier() to be %s (actual: %s)", expected, result1.GetIdentifier())

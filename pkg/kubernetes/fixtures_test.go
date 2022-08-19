@@ -324,6 +324,7 @@ var result1ID string = report.GeneratePolicyReportResultID(
 	policyReportCRD.Results[0].Rule,
 	string(policyReportCRD.Results[0].Result),
 	policyReportCRD.Results[0].Message,
+	policyReportCRD.Results[0].Category,
 )
 
 var result2ID string = report.GeneratePolicyReportResultID(
@@ -333,6 +334,7 @@ var result2ID string = report.GeneratePolicyReportResultID(
 	policyReportCRD.Results[1].Rule,
 	string(policyReportCRD.Results[1].Result),
 	policyReportCRD.Results[1].Message,
+	policyReportCRD.Results[1].Category,
 )
 
 var result3ID string = "123456"
@@ -344,4 +346,5 @@ var cresult1ID string = report.GeneratePolicyReportResultID(
 	clusterPolicyReportCRD.Results[0].Rule,
 	string(clusterPolicyReportCRD.Results[0].Result),
 	clusterPolicyReportCRD.Results[0].Message,
+	clusterPolicyReportCRD.Results[0].Category,
 )

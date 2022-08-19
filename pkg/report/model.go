@@ -281,12 +281,13 @@ func GeneratePolicyReportID(name, namespace string) string {
 	return strconv.FormatUint(h1, 10)
 }
 
-func GeneratePolicyReportResultID(uid, name, policy, rule, status, suffix string) string {
+func GeneratePolicyReportResultID(uid, name, policy, rule, status, suffix, category string) string {
 	h1 := fnv1a.Init64
 	h1 = fnv1a.AddString64(h1, name)
 	h1 = fnv1a.AddString64(h1, policy)
 	h1 = fnv1a.AddString64(h1, rule)
 	h1 = fnv1a.AddString64(h1, status)
+	h1 = fnv1a.AddString64(h1, category)
 	h1 = fnv1a.AddString64(h1, suffix)
 	if uid != "" {
 		h1 = fnv1a.AddString64(h1, uid)

@@ -158,7 +158,15 @@ func (m *mapper) mapResult(result v1alpha2.PolicyReportResult, res report.Resour
 	}
 
 	if r.ID == "" {
-		r.ID = report.GeneratePolicyReportResultID(r.Resource.UID, r.Resource.Name, r.Policy, r.Rule, r.Status, r.Message)
+		r.ID = report.GeneratePolicyReportResultID(
+			r.Resource.UID,
+			r.Resource.Name,
+			r.Policy,
+			r.Rule,
+			r.Status,
+			r.Message,
+			r.Category,
+		)
 	}
 
 	return r
