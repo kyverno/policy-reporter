@@ -2,6 +2,7 @@ package send
 
 import (
 	"log"
+	"strings"
 	"sync"
 
 	"github.com/kyverno/policy-reporter/pkg/config"
@@ -54,6 +55,7 @@ func NewViolationsCMD() *cobra.Command {
 				defer wg.Done()
 
 				if len(c.EmailReports.Violations.To) == 0 {
+					log.Print("[INFO] skipped - no email configured")
 					return
 				}
 
@@ -66,7 +68,10 @@ func NewViolationsCMD() *cobra.Command {
 				err = resolver.EmailClient().Send(report, c.EmailReports.Violations.To)
 				if err != nil {
 					log.Printf("[ERROR] failed to send report: %s\n", err)
+					return
 				}
+
+				log.Printf("[INFO] email sent to %s\n", strings.Join(c.EmailReports.Violations.To, ", "))
 			}()
 
 			for _, ch := range c.EmailReports.Violations.Channels {
@@ -74,12 +79,14 @@ func NewViolationsCMD() *cobra.Command {
 					defer wg.Done()
 
 					if len(channel.To) == 0 {
+						log.Print("[INFO] skipped - no channel email configured")
 						return
 					}
 
 					sources := violations.FilterSources(data, config.EmailReportFilterFromConfig(channel.Filter), !channel.Filter.DisableClusterReports)
 					if len(sources) == 0 {
 						log.Printf("[INFO] skip email - no results to send")
+						return
 					}
 
 					report, err := reporter.Report(sources, channel.Format)
@@ -91,7 +98,10 @@ func NewViolationsCMD() *cobra.Command {
 					err = resolver.EmailClient().Send(report, channel.To)
 					if err != nil {
 						log.Printf("[ERROR] failed to send report: %s\n", err)
+						return
 					}
+
+					log.Printf("[INFO] email sent to %s\n", strings.Join(channel.To, ", "))
 				}(ch)
 			}
 

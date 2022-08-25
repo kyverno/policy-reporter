@@ -2,6 +2,7 @@ package summary
 
 import (
 	"context"
+	"log"
 	"sync"
 
 	"github.com/kyverno/kyverno/api/policyreport/v1alpha2"
@@ -52,6 +53,8 @@ func (o *Generator) GenerateData(ctx context.Context) ([]Source, error) {
 				mx.Unlock()
 
 				s.AddClusterSummary(report.Summary)
+
+				log.Printf("[INFO] Processed ClusterPolicyReport '%s'\n", report.Name)
 			}(rep)
 		}
 	}
@@ -85,6 +88,8 @@ func (o *Generator) GenerateData(ctx context.Context) ([]Source, error) {
 			mx.Unlock()
 
 			s.AddNamespacedSummary(report.Namespace, report.Summary)
+
+			log.Printf("[INFO] Processed PolicyReport '%s'\n", report.Name)
 		}(rep)
 	}
 

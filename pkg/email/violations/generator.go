@@ -2,6 +2,7 @@ package violations
 
 import (
 	"context"
+	"log"
 	"sync"
 
 	"github.com/kyverno/kyverno/api/policyreport/v1alpha2"
@@ -54,6 +55,8 @@ func (o *Generator) GenerateData(ctx context.Context) ([]Source, error) {
 
 				s.AddClusterPassed(report.Summary.Pass)
 
+				defer log.Printf("[INFO] Processed ClusterPolicyReport '%s'\n", report.Name)
+
 				length := len(report.Results)
 				if length == 0 || length == report.Summary.Pass+report.Summary.Skip {
 					return
@@ -100,6 +103,8 @@ func (o *Generator) GenerateData(ctx context.Context) ([]Source, error) {
 			mx.Unlock()
 
 			s.AddNamespacedPassed(report.Namespace, report.Summary.Pass)
+
+			defer log.Printf("[INFO] Processed PolicyReport '%s'\n", report.Name)
 
 			length := len(report.Results)
 			if length == 0 || length == report.Summary.Pass+report.Summary.Skip {
