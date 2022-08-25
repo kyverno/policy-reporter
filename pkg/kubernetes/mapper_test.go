@@ -45,8 +45,8 @@ func Test_MapPolicyReport(t *testing.T) {
 	if result1.Status != report.Fail {
 		t.Errorf("Expected Message '%s' (acutal %s)", report.Fail, result1.Status)
 	}
-	if result1.Priority != report.CriticalPriority {
-		t.Errorf("Expected Priority '%d' (acutal %d)", report.CriticalPriority, result1.Priority)
+	if result1.Priority != report.ErrorPriority {
+		t.Errorf("Expected Priority '%d' (acutal %d)", report.ErrorPriority, result1.Priority)
 	}
 	if !result1.Scored {
 		t.Errorf("Expected Scored to be true")
@@ -151,8 +151,8 @@ func Test_MapClusterPolicyReport(t *testing.T) {
 	if result1.Status != report.Fail {
 		t.Errorf("Expected Message '%s' (acutal %s)", report.Fail, result1.Status)
 	}
-	if result1.Priority != report.CriticalPriority {
-		t.Errorf("Expected Priority '%d' (acutal %d)", report.CriticalPriority, result1.Priority)
+	if result1.Priority != report.ErrorPriority {
+		t.Errorf("Expected Priority '%d' (acutal %d)", report.ErrorPriority, result1.Priority)
 	}
 	if !result1.Scored {
 		t.Errorf("Expected Scored to be true")

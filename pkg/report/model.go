@@ -52,9 +52,11 @@ const (
 	Pass  Status = "pass"
 	Skip  Status = "skip"
 
-	Low    Severity = "low"
-	Medium Severity = "medium"
-	High   Severity = "high"
+	Info     Severity = "info"
+	Low      Severity = "low"
+	Medium   Severity = "medium"
+	High     Severity = "high"
+	Critical Severity = "critical"
 
 	defaultString  = ""
 	debugString    = "debug"
@@ -132,12 +134,18 @@ func PriorityFromStatus(s Status) Priority {
 // PriorityFromSeverity creates a Priority based on a Severity
 func PriorityFromSeverity(s Severity) Priority {
 	switch s {
-	case High:
+	case Critical:
 		return CriticalPriority
+	case High:
+		return ErrorPriority
 	case Medium:
 		return WarningPriority
-	default:
+	case Info:
 		return InfoPriority
+	case Low:
+		return InfoPriority
+	default:
+		return DebugPriority
 	}
 }
 

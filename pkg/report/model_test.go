@@ -254,14 +254,23 @@ func Test_Priorities(t *testing.T) {
 		}
 	})
 	t.Run("PriorityFromSeverity", func(t *testing.T) {
-		if prio := report.PriorityFromSeverity(report.High); prio != report.CriticalPriority {
+		if prio := report.PriorityFromSeverity(report.Critical); prio != report.CriticalPriority {
 			t.Errorf("Expected Priority to be %d (actual %d)", report.CriticalPriority, prio)
+		}
+		if prio := report.PriorityFromSeverity(report.High); prio != report.ErrorPriority {
+			t.Errorf("Expected Priority to be %d (actual %d)", report.ErrorPriority, prio)
 		}
 		if prio := report.PriorityFromSeverity(report.Medium); prio != report.WarningPriority {
 			t.Errorf("Expected Priority to be %d (actual %d)", report.WarningPriority, prio)
 		}
 		if prio := report.PriorityFromSeverity(report.Low); prio != report.InfoPriority {
 			t.Errorf("Expected Priority to be %d (actual %d)", report.InfoPriority, prio)
+		}
+		if prio := report.PriorityFromSeverity(report.Info); prio != report.InfoPriority {
+			t.Errorf("Expected Priority to be %d (actual %d)", report.InfoPriority, prio)
+		}
+		if prio := report.PriorityFromSeverity(""); prio != report.DebugPriority {
+			t.Errorf("Expected Priority to be %d (actual %d)", report.DebugPriority, prio)
 		}
 	})
 }

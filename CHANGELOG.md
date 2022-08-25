@@ -1,5 +1,16 @@
 # Changelog
 
+# 2.11.2
+* Policy Reporter
+    * Add new Severity values `info` and `critical`
+    * Update PolicyReport ID generierung
+* Policy Reporter UI
+    * Fix Grouping by Policy and Categories
+    * Fix ReverseProxy RequestHost
+    * New configuration `ui.clusterName` which is used in the ClusterSelect, if you configure additional Clusters
+* Policy Reporter Kyverno Plugin
+    * Add `time` property to PolicyReportResults
+
 # 2.11.1
 * Policy Reporter
     * Fix `CronJob` Resources by [[#157](https://github.com/kyverno/policy-reporter/pull/178) by [MaxRink](https://github.com/MaxRink)]

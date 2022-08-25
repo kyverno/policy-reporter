@@ -6,7 +6,7 @@ require (
 	github.com/aws/aws-sdk-go v1.44.47
 	github.com/go-redis/redis/v8 v8.11.5
 	github.com/kyverno/go-wildcard v1.0.4
-	github.com/kyverno/kyverno v1.7.1
+	github.com/kyverno/kyverno v1.7.3
 	github.com/mattn/go-sqlite3 v2.0.3+incompatible
 	github.com/patrickmn/go-cache v2.1.0+incompatible
 	github.com/prometheus/client_golang v1.12.2
@@ -18,6 +18,7 @@ require (
 	golang.org/x/sync v0.0.0-20220601150217-0de741cfad7f
 	k8s.io/apimachinery v0.24.2
 	k8s.io/client-go v0.24.2
+	k8s.io/klog v1.0.0
 )
 
 require (
@@ -64,7 +65,6 @@ require (
 	gopkg.in/inf.v0 v0.9.1 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
-	k8s.io/klog v1.0.0 // indirect
 	k8s.io/klog/v2 v2.70.0 // indirect
 	k8s.io/utils v0.0.0-20220210201930-3a6ce19ff2f9 // indirect
 	sigs.k8s.io/structured-merge-diff/v4 v4.2.1 // indirect

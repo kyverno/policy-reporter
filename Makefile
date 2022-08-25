@@ -1,7 +1,7 @@
 GO ?= go
 BUILD ?= build
 REPO ?= ghcr.io/kyverno/policy-reporter
-IMAGE_TAG ?= 2.8.0
+IMAGE_TAG ?= 2.8.1
 LD_FLAGS='-s -w -linkmode external -extldflags "-static"'
 PLATFORMS ?= linux/arm64,linux/amd64,linux/s390x
 

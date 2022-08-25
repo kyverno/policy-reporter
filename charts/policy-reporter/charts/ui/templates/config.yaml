@@ -12,6 +12,7 @@ data:
   config.yaml: |-
     logSize: {{ .Values.log.size }}
     displayMode: {{ .Values.displayMode | quote }}
+    clusterName: {{ .Values.clusterName | quote }}
     views:
       dashboard:
         policyReports: {{ .Values.views.dashboard.policyReports }}
