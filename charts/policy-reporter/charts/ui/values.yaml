@@ -4,7 +4,7 @@ image:
   registry: ghcr.io
   repository: kyverno/policy-reporter-ui
   pullPolicy: IfNotPresent
-  tag: 1.6.1
+  tag: 1.6.5
 
 # possible default displayModes: light/dark
 displayMode: ""
@@ -30,6 +30,9 @@ views:
 
 plugins:
   kyverno: false
+
+# Custom Cluster Name which is used in the ClusterSelect, if you configured additional clusters below.
+clusterName: ""
 
 # Attention: be sure that your APIs are not accessable for the outside world
 # Use tools like VPN, private Networks or internal Network Load Balancer to expose your APIs in a secure way to the UI
