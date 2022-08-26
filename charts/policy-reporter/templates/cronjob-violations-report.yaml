@@ -68,6 +68,45 @@ spec:
                 mountPath: /app/config.yaml
                 subPath: config.yaml
                 readOnly: true
+              {{- if .Values.emailReports.smtp.secret }}
+              env:
+              - name: EMAIL_REPORTS_SMTP_HOST
+                valueFrom:
+                  secretKeyRef:
+                    name: {{ .Values.emailReports.smtp.secret }}
+                    key: host
+                    optional: true
+              - name: EMAIL_REPORTS_SMTP_PORT
+                valueFrom:
+                  secretKeyRef:
+                    name: {{ .Values.emailReports.smtp.secret }}
+                    key: port
+                    optional: true
+              - name: EMAIL_REPORTS_SMTP_USERNAME
+                valueFrom:
+                  secretKeyRef:
+                    name: {{ .Values.emailReports.smtp.secret }}
+                    key: username
+                    optional: true
+              - name: EMAIL_REPORTS_SMTP_PASSWORD
+                valueFrom:
+                  secretKeyRef:
+                    name: {{ .Values.emailReports.smtp.secret }}
+                    key: password
+                    optional: true
+              - name: EMAIL_REPORTS_SMTP_FROM
+                valueFrom:
+                  secretKeyRef:
+                    name: {{ .Values.emailReports.smtp.secret }}
+                    key: from
+                    optional: true
+              - name: EMAIL_REPORTS_SMTP_ENCRYPTION
+                valueFrom:
+                  secretKeyRef:
+                    name: {{ .Values.emailReports.smtp.secret }}
+                    key: encryption
+                    optional: true
+              {{- end }}
           volumes:
           - name: config-file
             secret:

@@ -1,5 +1,11 @@
 # Changelog
 
+# 2.11.3
+* Policy Reporter
+    * New `emailReports.smtp.secret` configuration to use an existing external secret to configure your SMTP connection
+        * You can set all or a subset of the available keys in your secret: `host`, `port`, `username`, `password`, `from`, `encryption`
+        * Keys available in your secret have a higher priority as your Helm release values.
+
 # 2.11.2
 * Policy Reporter
     * Add new Severity values `info` and `critical`

@@ -2,6 +2,7 @@ package config
 
 import (
 	"log"
+	"strings"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -29,6 +30,7 @@ func Load(cmd *cobra.Command) (*Config, error) {
 		v.SetConfigName("config")
 	}
 
+	v.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
 	v.AutomaticEnv()
 
 	if err := v.ReadInConfig(); err != nil {
@@ -73,6 +75,14 @@ func Load(cmd *cobra.Command) (*Config, error) {
 	if err := v.BindEnv("leaderElection.namespace", "POD_NAMESPACE"); err != nil {
 		log.Printf("[WARNING] failed to bind env POD_NAMESPACE")
 	}
+
+	// bind SMTP config from environment vars, if existing
+	_ = v.BindEnv("emailReports.smtp.username", "EMAIL_REPORTS_SMTP_USERNAME")
+	_ = v.BindEnv("emailReports.smtp.password", "EMAIL_REPORTS_SMTP_PASSWORD")
+	_ = v.BindEnv("emailReports.smtp.encryption", "EMAIL_REPORTS_SMTP_ENCRYPTION")
+	_ = v.BindEnv("emailReports.smtp.host", "EMAIL_REPORTS_SMTP_HOST")
+	_ = v.BindEnv("emailReports.smtp.port", "EMAIL_REPORTS_SMTP_PORT")
+	_ = v.BindEnv("emailReports.smtp.from", "EMAIL_REPORTS_SMTP_FROM")
 
 	c := &Config{}
 
