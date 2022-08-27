@@ -1,6 +1,7 @@
 package kubernetes
 
 import (
+	"strings"
 	"time"
 
 	"github.com/kyverno/policy-reporter/pkg/report"
@@ -141,7 +142,7 @@ func (m *mapper) mapResult(result v1alpha2.PolicyReportResult, res report.Resour
 	}
 
 	if r.Status == report.Fail {
-		r.Priority = m.resolvePriority(r.Policy, r.Severity)
+		r.Priority = m.resolvePriority(strings.ToLower(r.Policy), r.Severity)
 	}
 
 	if id, ok := result.Properties[ResultIDKey]; ok {
