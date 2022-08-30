@@ -82,6 +82,9 @@ spec:
             subPath: config.yaml
             {{- end }}
             readOnly: true
+          {{- with .Values.extraVolumes.volumeMounts }}
+          {{ toYaml . | nindent 10 | trim }}
+          {{- end }}
           {{- if or .Values.leaderElection.enabled (gt (int .Values.replicaCount) 1) }}
           env:
           - name: POD_NAME
@@ -104,6 +107,9 @@ spec:
           secretName: {{ include "policyreporter.fullname" . }}-config
           {{- end }}
           optional: true
+      {{- with .Values.extraVolumes.volumes }}
+      {{ toYaml . | nindent 6 | trim }}
+      {{- end }}
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
