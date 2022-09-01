@@ -456,3 +456,8 @@ readinessProbe:
   httpGet:
     path: /healthz
     port: http
+
+extraVolumes:
+  volumeMounts: []
+
+  volumes: []
