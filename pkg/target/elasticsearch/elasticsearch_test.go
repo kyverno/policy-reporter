@@ -57,9 +57,13 @@ func Test_ElasticsearchTarget(t *testing.T) {
 			if url := req.URL.String(); url != "http://localhost:9200/policy-reporter-"+time.Now().Format("2006")+"/event" {
 				t.Errorf("Unexpected Host: %s", url)
 			}
+
+			if req.Header.Get("Authorization") == "" {
+				t.Error("Expected Authentication header for BasicAuth is set")
+			}
 		}
 
-		client := elasticsearch.NewClient("Elasticsearch", "http://localhost:9200", "policy-reporter", "annually", false, &report.ResultFilter{}, testClient{callback, 200})
+		client := elasticsearch.NewClient("Elasticsearch", "http://localhost:9200", "username", "password", "policy-reporter", "annually", false, &report.ResultFilter{}, testClient{callback, 200})
 		client.Send(completeResult)
 	})
 	t.Run("Send with Monthly Result", func(t *testing.T) {
@@ -67,9 +71,13 @@ func Test_ElasticsearchTarget(t *testing.T) {
 			if url := req.URL.String(); url != "http://localhost:9200/policy-reporter-"+time.Now().Format("2006.01")+"/event" {
 				t.Errorf("Unexpected Host: %s", url)
 			}
+
+			if req.Header.Get("Authorization") != "" {
+				t.Error("Expected Authentication header is not set")
+			}
 		}
 
-		client := elasticsearch.NewClient("Elasticsearch", "http://localhost:9200", "policy-reporter", "monthly", false, &report.ResultFilter{}, testClient{callback, 200})
+		client := elasticsearch.NewClient("Elasticsearch", "http://localhost:9200", "", "", "policy-reporter", "monthly", false, &report.ResultFilter{}, testClient{callback, 200})
 		client.Send(completeResult)
 	})
 	t.Run("Send with Monthly Result", func(t *testing.T) {
@@ -79,7 +87,7 @@ func Test_ElasticsearchTarget(t *testing.T) {
 			}
 		}
 
-		client := elasticsearch.NewClient("Elasticsearch", "http://localhost:9200", "policy-reporter", "daily", false, &report.ResultFilter{}, testClient{callback, 200})
+		client := elasticsearch.NewClient("Elasticsearch", "http://localhost:9200", "", "", "policy-reporter", "daily", false, &report.ResultFilter{}, testClient{callback, 200})
 		client.Send(completeResult)
 	})
 	t.Run("Send with None Result", func(t *testing.T) {
@@ -89,11 +97,11 @@ func Test_ElasticsearchTarget(t *testing.T) {
 			}
 		}
 
-		client := elasticsearch.NewClient("Elasticsearch", "http://localhost:9200", "policy-reporter", "none", false, &report.ResultFilter{}, testClient{callback, 200})
+		client := elasticsearch.NewClient("Elasticsearch", "http://localhost:9200", "", "", "policy-reporter", "none", false, &report.ResultFilter{}, testClient{callback, 200})
 		client.Send(completeResult)
 	})
 	t.Run("Name", func(t *testing.T) {
-		client := elasticsearch.NewClient("Elasticsearch", "http://localhost:9200", "policy-reporter", "none", true, &report.ResultFilter{}, testClient{})
+		client := elasticsearch.NewClient("Elasticsearch", "http://localhost:9200", "", "", "policy-reporter", "none", true, &report.ResultFilter{}, testClient{})
 
 		if client.Name() != "Elasticsearch" {
 			t.Errorf("Unexpected Name %s", client.Name())

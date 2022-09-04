@@ -593,6 +593,14 @@ func createElasticsearchClient(config Elasticsearch, parent Elasticsearch) targe
 		config.Host = parent.Host
 	}
 
+	if config.Username == "" {
+		config.Username = parent.Username
+	}
+
+	if config.Password == "" {
+		config.Password = parent.Password
+	}
+
 	if config.Index == "" && parent.Index == "" {
 		config.Index = "policy-reporter"
 	} else if config.Index == "" {
@@ -600,7 +608,7 @@ func createElasticsearchClient(config Elasticsearch, parent Elasticsearch) targe
 	}
 
 	if config.Rotation == "" && parent.Rotation == "" {
-		config.Rotation = elasticsearch.Dayli
+		config.Rotation = elasticsearch.Daily
 	} else if config.Rotation == "" {
 		config.Rotation = parent.Rotation
 	}
@@ -618,6 +626,8 @@ func createElasticsearchClient(config Elasticsearch, parent Elasticsearch) targe
 	return elasticsearch.NewClient(
 		config.Name,
 		config.Host,
+		config.Username,
+		config.Password,
 		config.Index,
 		config.Rotation,
 		config.SkipExisting,

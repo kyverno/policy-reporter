@@ -25,7 +25,7 @@ var testConfig = &config.Config{
 	Elasticsearch: config.Elasticsearch{
 		Host:            "http://localhost:9200",
 		Index:           "policy-reporter",
-		Rotation:        "dayli",
+		Rotation:        "daily",
 		SkipExisting:    true,
 		MinimumPriority: "debug",
 		Channels:        []config.Elasticsearch{{}},
@@ -225,7 +225,7 @@ func Test_ResolveTargetWithoutHost(t *testing.T) {
 		Elasticsearch: config.Elasticsearch{
 			Host:            "",
 			Index:           "policy-reporter",
-			Rotation:        "dayli",
+			Rotation:        "daily",
 			SkipExisting:    true,
 			MinimumPriority: "debug",
 		},
