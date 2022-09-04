@@ -263,6 +263,10 @@ target:
     host: ""
     # elasticsearch index (default: policy-reporter)
     index: ""
+    # elasticsearch username für HTTP Basic Auth
+    username: ""
+    # elasticsearch password für HTTP Basic Auth
+    password: ""
     # elasticsearch index rotation and index suffix
     # possible values: daily, monthly, annually, none (default: daily)
     rotation: ""

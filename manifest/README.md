@@ -102,7 +102,7 @@ loki:
 elasticsearch:
   host: ""
   index: "policy-reporter"
-  rotation: "dayli"
+  rotation: "daily"
   minimumPriority: ""
   skipExistingOnStartup: true
   sources: []

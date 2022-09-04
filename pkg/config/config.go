@@ -44,6 +44,8 @@ type Elasticsearch struct {
 	Host            string          `mapstructure:"host"`
 	Index           string          `mapstructure:"index"`
 	Rotation        string          `mapstructure:"rotation"`
+	Username        string          `mapstructure:"username"`
+	Password        string          `mapstructure:"password"`
 	SkipExisting    bool            `mapstructure:"skipExistingOnStartup"`
 	MinimumPriority string          `mapstructure:"minimumPriority"`
 	Filter          TargetFilter    `mapstructure:"filter"`

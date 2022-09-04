@@ -22,8 +22,10 @@ loki:
 
 elasticsearch:
   host: {{ .Values.target.elasticsearch.host | quote }}
+  username: {{ .Values.target.elasticsearch.username | quote }}
+  password: {{ .Values.target.elasticsearch.password | quote }}
   index: {{ .Values.target.elasticsearch.index | default "policy-reporter" | quote }}
-  rotation: {{ .Values.target.elasticsearch.rotation | default "dayli" | quote }}
+  rotation: {{ .Values.target.elasticsearch.rotation | default "daily" | quote }}
   minimumPriority: {{ .Values.target.elasticsearch.minimumPriority | quote }}
   skipExistingOnStartup: {{ .Values.target.elasticsearch.skipExistingOnStartup }}
   {{- with .Values.target.elasticsearch.sources }}
