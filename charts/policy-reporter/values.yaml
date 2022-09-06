@@ -290,6 +290,8 @@ target:
     sources: []
     # Skip already existing PolicyReportResults on startup
     skipExistingOnStartup: true
+    # Added as additional fields to each Slack event
+    customField: {}
     # filter results send by namespaces, policies and priorities
     filter: {}
     # add additional slack channels with different configurations and filters

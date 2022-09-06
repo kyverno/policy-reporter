@@ -552,6 +552,7 @@ func createSlackClient(config Slack, parent Slack) target.Client {
 		config.SkipExisting,
 		createTargetFilter(config.Filter, config.MinimumPriority, config.Sources),
 		&http.Client{},
+		config.CustomFields,
 	)
 }
 
