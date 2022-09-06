@@ -152,7 +152,7 @@ func (s *client) newPayload(result report.Result) payload {
 		}
 	}
 
-	if len(result.Properties) > 0 {
+	if len(result.Properties) > 0 || len(s.customFields) > 0 {
 		att.Blocks = append(
 			att.Blocks,
 			block{Type: "section", Text: &text{Type: "mrkdwn", Text: "*Properties*"}},
