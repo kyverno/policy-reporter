@@ -42,6 +42,7 @@ type ListResult struct {
 	Rule       string            `json:"rule"`
 	Status     string            `json:"status"`
 	Severity   string            `json:"severity,omitempty"`
+	Timestamp  int               `json:"timestamp,omitempty"`
 	Properties map[string]string `json:"properties,omitempty"`
 }
 
