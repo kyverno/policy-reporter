@@ -36,8 +36,9 @@ type payload struct {
 
 type client struct {
 	target.BaseClient
-	webhook string
-	client  http.Client
+	webhook      string
+	client       http.Client
+	customFields map[string]string
 }
 
 var colors = map[report.Priority]string{
@@ -165,6 +166,9 @@ func (s *client) newPayload(result report.Result) payload {
 		for property, value := range result.Properties {
 			propBlock.Fields = append(propBlock.Fields, field{Type: "mrkdwn", Text: "*" + strings.Title(property) + "*\n" + value})
 		}
+		for property, value := range s.customFields {
+			propBlock.Fields = append(propBlock.Fields, field{Type: "mrkdwn", Text: "*" + strings.Title(property) + "*\n" + value})
+		}
 
 		att.Blocks = append(att.Blocks, propBlock)
 	}
@@ -185,10 +189,11 @@ func (s *client) Send(result report.Result) {
 }
 
 // NewClient creates a new slack.client to send Results to Slack
-func NewClient(name, host string, skipExistingOnStartup bool, filter *report.ResultFilter, httpClient http.Client) target.Client {
+func NewClient(name, host string, skipExistingOnStartup bool, filter *report.ResultFilter, httpClient http.Client, customFields map[string]string) target.Client {
 	return &client{
 		target.NewBaseClient(name, skipExistingOnStartup, filter),
 		host,
 		httpClient,
+		customFields,
 	}
 }

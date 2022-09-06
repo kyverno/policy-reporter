@@ -55,13 +55,14 @@ type Elasticsearch struct {
 
 // Slack configuration
 type Slack struct {
-	Name            string       `mapstructure:"name"`
-	Webhook         string       `mapstructure:"webhook"`
-	SkipExisting    bool         `mapstructure:"skipExistingOnStartup"`
-	MinimumPriority string       `mapstructure:"minimumPriority"`
-	Filter          TargetFilter `mapstructure:"filter"`
-	Sources         []string     `mapstructure:"sources"`
-	Channels        []Slack      `mapstructure:"channels"`
+	Name            string            `mapstructure:"name"`
+	Webhook         string            `mapstructure:"webhook"`
+	CustomFields    map[string]string `mapstructure:"customFields"`
+	SkipExisting    bool              `mapstructure:"skipExistingOnStartup"`
+	MinimumPriority string            `mapstructure:"minimumPriority"`
+	Filter          TargetFilter      `mapstructure:"filter"`
+	Sources         []string          `mapstructure:"sources"`
+	Channels        []Slack           `mapstructure:"channels"`
 }
 
 // Discord configuration

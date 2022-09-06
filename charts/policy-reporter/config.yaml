@@ -45,6 +45,10 @@ slack:
   webhook: {{ .Values.target.slack.webhook | quote }}
   minimumPriority: {{ .Values.target.slack.minimumPriority | quote }}
   skipExistingOnStartup: {{ .Values.target.slack.skipExistingOnStartup }}
+  {{- with .Values.target.slack.customFields }}
+  customFields:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
   {{- with .Values.target.slack.sources }}
   sources:
     {{- toYaml . | nindent 4 }}

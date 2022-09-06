@@ -130,7 +130,7 @@ func Test_SlackTarget(t *testing.T) {
 			}
 		}
 
-		client := slack.NewClient("Teams", "http://hook.slack:80", false, &report.ResultFilter{}, testClient{callback, 200})
+		client := slack.NewClient("Teams", "http://hook.slack:80", false, &report.ResultFilter{}, testClient{callback, 200}, map[string]string{"Cluster": "Name"})
 		client.Send(completeResult)
 	})
 
@@ -149,7 +149,7 @@ func Test_SlackTarget(t *testing.T) {
 			}
 		}
 
-		client := slack.NewClient("Slack", "http://hook.slack:80", false, &report.ResultFilter{}, testClient{callback, 200})
+		client := slack.NewClient("Slack", "http://hook.slack:80", false, &report.ResultFilter{}, testClient{callback, 200}, make(map[string]string))
 		client.Send(minimalResult)
 	})
 
@@ -168,7 +168,7 @@ func Test_SlackTarget(t *testing.T) {
 			}
 		}
 
-		client := slack.NewClient("Slack", "http://hook.slack:80", false, &report.ResultFilter{}, testClient{callback, 200})
+		client := slack.NewClient("Slack", "http://hook.slack:80", false, &report.ResultFilter{}, testClient{callback, 200}, make(map[string]string))
 		client.Send(enforceResult)
 	})
 
@@ -187,7 +187,7 @@ func Test_SlackTarget(t *testing.T) {
 			}
 		}
 
-		client := slack.NewClient("Slack", "http://hook.slack:80", false, &report.ResultFilter{}, testClient{callback, 200})
+		client := slack.NewClient("Slack", "http://hook.slack:80", false, &report.ResultFilter{}, testClient{callback, 200}, make(map[string]string))
 		client.Send(incompleteResult)
 	})
 
@@ -206,12 +206,12 @@ func Test_SlackTarget(t *testing.T) {
 			}
 		}
 
-		client := slack.NewClient("Slack", "http://hook.slack:80", false, &report.ResultFilter{}, testClient{callback, 200})
+		client := slack.NewClient("Slack", "http://hook.slack:80", false, &report.ResultFilter{}, testClient{callback, 200}, make(map[string]string))
 		client.Send(incompleteResult2)
 	})
 
 	t.Run("Name", func(t *testing.T) {
-		client := slack.NewClient("Slack", "http://localhost:9200", true, &report.ResultFilter{}, testClient{})
+		client := slack.NewClient("Slack", "http://localhost:9200", true, &report.ResultFilter{}, testClient{}, make(map[string]string))
 
 		if client.Name() != "Slack" {
 			t.Errorf("Unexpected Name %s", client.Name())
