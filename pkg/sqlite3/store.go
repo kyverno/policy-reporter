@@ -663,7 +663,7 @@ func (s *policyReportStore) FetchNamespacedResults(filter api.Filter, pagination
 	paginationString := generatePagination(pagination)
 
 	rows, err := s.db.Query(`
-		SELECT id, resource_namespace, resource_kind, resource_api_version, resource_name, message, policy, rule, severity, properties, status, category
+		SELECT id, resource_namespace, resource_kind, resource_api_version, resource_name, message, policy, rule, severity, properties, status, category, timestamp
 		FROM policy_report_result WHERE resource_namespace != ""`+where+` `+paginationString, args...)
 
 	if err != nil {
@@ -674,7 +674,7 @@ func (s *policyReportStore) FetchNamespacedResults(filter api.Filter, pagination
 		result := api.ListResult{}
 		var props []byte
 
-		err := rows.Scan(&result.ID, &result.Namespace, &result.Kind, &result.APIVersion, &result.Name, &result.Message, &result.Policy, &result.Rule, &result.Severity, &props, &result.Status, &result.Category)
+		err := rows.Scan(&result.ID, &result.Namespace, &result.Kind, &result.APIVersion, &result.Name, &result.Message, &result.Policy, &result.Rule, &result.Severity, &props, &result.Status, &result.Category, &result.Timestamp)
 		if err != nil {
 			return list, err
 		}
@@ -714,7 +714,7 @@ func (s *policyReportStore) FetchClusterResults(filter api.Filter, pagination ap
 	paginationString := generatePagination(pagination)
 
 	rows, err := s.db.Query(`
-		SELECT id, resource_namespace, resource_kind, resource_api_version, resource_name, message, policy, rule, severity, properties, status, category
+		SELECT id, resource_namespace, resource_kind, resource_api_version, resource_name, message, policy, rule, severity, properties, status, category, timestamp
 		FROM policy_report_result WHERE resource_namespace =""`+where+` `+paginationString, args...)
 
 	if err != nil {
@@ -725,7 +725,7 @@ func (s *policyReportStore) FetchClusterResults(filter api.Filter, pagination ap
 		result := api.ListResult{}
 		var props []byte
 
-		err := rows.Scan(&result.ID, &result.Namespace, &result.Kind, &result.APIVersion, &result.Name, &result.Message, &result.Policy, &result.Rule, &result.Severity, &props, &result.Status, &result.Category)
+		err := rows.Scan(&result.ID, &result.Namespace, &result.Kind, &result.APIVersion, &result.Name, &result.Message, &result.Policy, &result.Rule, &result.Severity, &props, &result.Status, &result.Category, &result.Timestamp)
 		if err != nil {
 			return list, err
 		}

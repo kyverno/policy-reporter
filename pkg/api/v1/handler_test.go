@@ -15,16 +15,17 @@ import (
 )
 
 var result1 = report.Result{
-	ID:       "123",
-	Message:  "validation error: requests and limits required. Rule autogen-check-for-requests-and-limits failed at path /spec/template/spec/containers/0/resources/requests/",
-	Policy:   "require-requests-and-limits-required",
-	Rule:     "autogen-check-for-requests-and-limits",
-	Priority: report.ErrorPriority,
-	Status:   report.Fail,
-	Category: "Best Practices",
-	Severity: report.High,
-	Scored:   true,
-	Source:   "Kyverno",
+	ID:        "123",
+	Message:   "validation error: requests and limits required. Rule autogen-check-for-requests-and-limits failed at path /spec/template/spec/containers/0/resources/requests/",
+	Policy:    "require-requests-and-limits-required",
+	Rule:      "autogen-check-for-requests-and-limits",
+	Priority:  report.ErrorPriority,
+	Status:    report.Fail,
+	Category:  "Best Practices",
+	Severity:  report.High,
+	Scored:    true,
+	Source:    "Kyverno",
+	Timestamp: time.Date(2022, 9, 6, 0, 0, 0, 0, time.UTC),
 	Resource: report.Resource{
 		APIVersion: "v1",
 		Kind:       "Deployment",
@@ -35,15 +36,16 @@ var result1 = report.Result{
 }
 
 var result2 = report.Result{
-	ID:       "124",
-	Message:  "validation error: requests and limits required. Rule autogen-check-for-requests-and-limits failed at path /spec/template/spec/containers/0/resources/requests/",
-	Policy:   "require-requests-and-limits-required",
-	Rule:     "autogen-check-for-requests-and-limits",
-	Priority: report.WarningPriority,
-	Status:   report.Pass,
-	Category: "Best Practices",
-	Scored:   true,
-	Source:   "Kyverno",
+	ID:        "124",
+	Message:   "validation error: requests and limits required. Rule autogen-check-for-requests-and-limits failed at path /spec/template/spec/containers/0/resources/requests/",
+	Policy:    "require-requests-and-limits-required",
+	Rule:      "autogen-check-for-requests-and-limits",
+	Priority:  report.WarningPriority,
+	Status:    report.Pass,
+	Category:  "Best Practices",
+	Scored:    true,
+	Source:    "Kyverno",
+	Timestamp: time.Date(2022, 9, 6, 0, 0, 0, 0, time.UTC),
 	Resource: report.Resource{
 		APIVersion: "v1",
 		Kind:       "Pod",
@@ -54,16 +56,17 @@ var result2 = report.Result{
 }
 
 var cresult1 = report.Result{
-	ID:       "125",
-	Message:  "validation error: The label `test` is required. Rule check-for-labels-on-namespace",
-	Policy:   "require-ns-labels",
-	Rule:     "check-for-labels-on-namespace",
-	Priority: report.ErrorPriority,
-	Status:   report.Pass,
-	Category: "Convention",
-	Severity: report.Medium,
-	Scored:   true,
-	Source:   "Kyverno",
+	ID:        "125",
+	Message:   "validation error: The label `test` is required. Rule check-for-labels-on-namespace",
+	Policy:    "require-ns-labels",
+	Rule:      "check-for-labels-on-namespace",
+	Priority:  report.ErrorPriority,
+	Status:    report.Pass,
+	Category:  "Convention",
+	Severity:  report.Medium,
+	Scored:    true,
+	Source:    "Kyverno",
+	Timestamp: time.Date(2022, 9, 6, 0, 0, 0, 0, time.UTC),
 	Resource: report.Resource{
 		APIVersion: "v1",
 		Kind:       "Namespace",
@@ -430,7 +433,7 @@ func Test_V1_API(t *testing.T) {
 			t.Errorf("handler returned wrong status code: got %v want %v", status, http.StatusOK)
 		}
 
-		expected := `[{"id":"123","namespace":"test","kind":"Deployment","apiVersion":"v1","name":"nginx","message":"validation error: requests and limits required. Rule autogen-check-for-requests-and-limits failed at path /spec/template/spec/containers/0/resources/requests/","category":"Best Practices","policy":"require-requests-and-limits-required","rule":"autogen-check-for-requests-and-limits","status":"fail","severity":"high"},{"id":"124","namespace":"test","kind":"Pod","apiVersion":"v1","name":"nginx","message":"validation error: requests and limits required. Rule autogen-check-for-requests-and-limits failed at path /spec/template/spec/containers/0/resources/requests/","category":"Best Practices","policy":"require-requests-and-limits-required","rule":"autogen-check-for-requests-and-limits","status":"pass"}]`
+		expected := `[{"id":"123","namespace":"test","kind":"Deployment","apiVersion":"v1","name":"nginx","message":"validation error: requests and limits required. Rule autogen-check-for-requests-and-limits failed at path /spec/template/spec/containers/0/resources/requests/","category":"Best Practices","policy":"require-requests-and-limits-required","rule":"autogen-check-for-requests-and-limits","status":"fail","severity":"high","timestamp":1662422400},{"id":"124","namespace":"test","kind":"Pod","apiVersion":"v1","name":"nginx","message":"validation error: requests and limits required. Rule autogen-check-for-requests-and-limits failed at path /spec/template/spec/containers/0/resources/requests/","category":"Best Practices","policy":"require-requests-and-limits-required","rule":"autogen-check-for-requests-and-limits","status":"pass","timestamp":1662422400}]`
 		if !strings.Contains(rr.Body.String(), expected) {
 			t.Errorf("handler returned unexpected body: got %v want %v", rr.Body.String(), expected)
 		}
@@ -450,7 +453,7 @@ func Test_V1_API(t *testing.T) {
 			t.Errorf("handler returned wrong status code: got %v want %v", status, http.StatusOK)
 		}
 
-		expected := "{\"id\":\"125\",\"kind\":\"Namespace\",\"apiVersion\":\"v1\",\"name\":\"test\",\"message\":\"validation error: The label `test` is required. Rule check-for-labels-on-namespace\",\"category\":\"Convention\",\"policy\":\"require-ns-labels\",\"rule\":\"check-for-labels-on-namespace\",\"status\":\"pass\",\"severity\":\"medium\"}"
+		expected := "{\"id\":\"125\",\"kind\":\"Namespace\",\"apiVersion\":\"v1\",\"name\":\"test\",\"message\":\"validation error: The label `test` is required. Rule check-for-labels-on-namespace\",\"category\":\"Convention\",\"policy\":\"require-ns-labels\",\"rule\":\"check-for-labels-on-namespace\",\"status\":\"pass\",\"severity\":\"medium\",\"timestamp\":1662422400}"
 		if !strings.Contains(rr.Body.String(), expected) {
 			t.Errorf("handler returned unexpected body: got %v want %v", rr.Body.String(), expected)
 		}
