@@ -9,6 +9,7 @@ metadata:
   labels:
     {{- include "kyvernoplugin.labels" . | nindent 4 }}
   name: {{ include "kyvernoplugin.fullname" . }}-leaderelection
+  namespace: {{ include "kyvernoplugin.namespace" . }}
 rules:
 - apiGroups:
   - coordination.k8s.io

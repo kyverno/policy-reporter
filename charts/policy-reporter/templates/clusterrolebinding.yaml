@@ -16,5 +16,5 @@ roleRef:
 subjects:
 - kind: "ServiceAccount"
   name: {{ include "policyreporter.serviceAccountName" . }}
-  namespace: {{ .Release.Namespace }}
+  namespace: {{ include "policyreporter.namespace" . }}
 {{- end -}}

@@ -8,6 +8,7 @@ metadata:
     {{- toYaml .Values.annotations | nindent 4 }}
   {{- end }}
   name: {{ include "kyvernoplugin.fullname" . }}
+  namespace: {{ include "kyvernoplugin.namespace" . }}
 spec:
   podSelector:
     matchLabels: {{- include "kyvernoplugin.selectorLabels" . | nindent 6 }}

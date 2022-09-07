@@ -3,6 +3,7 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
   name: {{ include "policyreporter.fullname" . }}-leaderelection
+  namespace: {{ include "policyreporter.namespace" . }}
   {{- if .Values.annotations }}
   annotations:
     {{- toYaml .Values.annotations | nindent 4 }}
@@ -16,5 +17,5 @@ roleRef:
 subjects:
 - kind: "ServiceAccount"
   name: {{ include "policyreporter.serviceAccountName" . }}
-  namespace: {{ .Release.Namespace }}
+  namespace: {{ include "policyreporter.namespace" . }}
 {{- end -}}

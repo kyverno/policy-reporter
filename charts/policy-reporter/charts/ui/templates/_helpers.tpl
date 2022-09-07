@@ -111,3 +111,12 @@ Create the name of the service account to use
 {{ toYaml .Values.securityContext }}
 {{- end }}
 {{- end }}
+
+{{/* Get the namespace name. */}}
+{{- define "ui.namespace" -}}
+{{- if .Values.global.namespace -}}
+    {{- .Values.global.namespace -}}
+{{- else -}}
+    {{- .Release.Namespace -}}
+{{- end -}}
+{{- end -}}

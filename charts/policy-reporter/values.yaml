@@ -143,6 +143,8 @@ global:
   backend: ""
   # overwrite the fullname of all resources including subcharts
   fullnameOverride: ""
+  # configure the namespace of all resources including subcharts
+  namespace: ""
   # additional labels added on each resource
   labels: {}
 

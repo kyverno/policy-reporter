@@ -46,6 +46,8 @@ app.kubernetes.io/instance: {{ .Release.Name }}
 {{- define "monitoring.namespace" -}}
 {{-  if .Values.grafana.namespace -}}
 {{- .Values.grafana.namespace -}}
+{{- else if .Values.global.namespace -}}
+    {{- .Values.global.namespace -}}
 {{- else -}}
 {{- .Release.Namespace -}}
 {{- end }}
@@ -54,4 +56,15 @@ app.kubernetes.io/instance: {{ .Release.Name }}
 {{- define "kyvernoplugin.selectorLabels" -}}
 app.kubernetes.io/name: kyverno-plugin
 app.kubernetes.io/instance: {{ .Release.Name }}
+{{- end }}
+
+{{/* Get the namespace name. */}}
+{{- define "monitoring.smNamespace" -}}
+{{-  if .Values.serviceMonitor.namespace -}}
+{{- .Values.serviceMonitor.namespace -}}
+{{- else if .Values.global.namespace -}}
+    {{- .Values.global.namespace -}}
+{{- else -}}
+{{- .Release.Namespace -}}
+{{- end }}
 {{- end }}

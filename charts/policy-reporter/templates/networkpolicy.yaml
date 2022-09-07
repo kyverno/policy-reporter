@@ -8,6 +8,7 @@ metadata:
   {{- end }}
   labels: {{ include "policyreporter.labels" . | nindent 4 }}
   name: {{ include "policyreporter.fullname" . }}
+  namespace: {{ include "policyreporter.namespace" . }}
 spec:
   podSelector:
     matchLabels: {{- include "policyreporter.selectorLabels" . | nindent 6 }}

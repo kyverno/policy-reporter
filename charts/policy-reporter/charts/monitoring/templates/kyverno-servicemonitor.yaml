@@ -4,7 +4,7 @@ kind: ServiceMonitor
 metadata:
   name: {{ include "monitoring.fullname" . }}-kyverno-plugin
   {{ if .Values.serviceMonitor.namespace }}
-  namespace: {{ .Values.serviceMonitor.namespace }}
+  namespace: {{ include "monitoring.smNamespace" . }}
   {{ end }}
   {{- if .Values.annotations }}
   annotations:
