@@ -1,5 +1,13 @@
 # Changelog
 
+# 2.12.0
+* Policy Reporter
+    * New Helm Chart value to add extra volumes to PolicyReporter deployment [[#186](https://github.com/kyverno/policy-reporter/pull/186) by [preved911](https://github.com/preved911)]
+    * HTTP Basic authentication for Elasticsearch targets with `username` and `password` configuration fields
+    * `target.slack.customFields` map property for Slack pushes to add additional metadata to notifications like clustername
+    * Add timestamp to Result REST APIs
+    * Overwrite the installation target namespace via the new `global.namespace` value.
+
 # 2.11.3
 * Policy Reporter
     * New `emailReports.smtp.secret` configuration to use an existing external secret to configure your SMTP connection
