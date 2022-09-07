@@ -2,6 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: {{ include "ui.fullname" . }}
+  namespace: {{ include "ui.namespace" . }}
   labels:
     {{- include "ui.labels" . | nindent 4 }}
 spec:

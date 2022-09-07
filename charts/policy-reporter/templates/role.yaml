@@ -9,6 +9,7 @@ metadata:
   labels:
     {{- include "policyreporter.labels" . | nindent 4 }}
   name: {{ include "policyreporter.fullname" . }}-leaderelection
+  namespace: {{ include "policyreporter.namespace" . }}
 rules:
 - apiGroups:
   - coordination.k8s.io

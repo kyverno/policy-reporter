@@ -76,3 +76,12 @@ app.kubernetes.io/instance: {{ .Release.Name }}
 {{ toYaml .Values.securityContext }}
 {{- end }}
 {{- end }}
+
+{{/* Get the namespace name. */}}
+{{- define "kyvernoplugin.namespace" -}}
+{{- if .Values.global.namespace -}}
+    {{- .Values.global.namespace -}}
+{{- else -}}
+    {{- .Release.Namespace -}}
+{{- end -}}
+{{- end -}}

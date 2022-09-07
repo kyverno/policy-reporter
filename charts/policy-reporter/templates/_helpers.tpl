@@ -95,3 +95,12 @@ minAvailable: {{ default 1 .Values.podDisruptionBudget.minAvailable }}
 maxUnavailable: {{ .Values.podDisruptionBudget.maxUnavailable }}
 {{- end }}
 {{- end }}
+
+{{/* Get the namespace name. */}}
+{{- define "policyreporter.namespace" -}}
+{{- if .Values.global.namespace -}}
+    {{- .Values.global.namespace -}}
+{{- else -}}
+    {{- .Release.Namespace -}}
+{{- end -}}
+{{- end -}}

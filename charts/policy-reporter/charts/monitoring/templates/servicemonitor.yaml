@@ -3,7 +3,7 @@ kind: ServiceMonitor
 metadata:
   name: {{ include "monitoring.fullname" . }}
   {{ if .Values.serviceMonitor.namespace }}
-  namespace: {{ .Values.serviceMonitor.namespace }}
+  namespace: {{ include "monitoring.smNamespace" . }}
   {{ end }}
   {{- if .Values.annotations }}
   annotations:

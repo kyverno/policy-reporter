@@ -2,6 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: {{ include "kyvernoplugin.fullname" . }}
+  namespace: {{ include "kyvernoplugin.namespace" . }}
   annotations:
     {{- if .Values.annotations }}
       {{- toYaml .Values.annotations | nindent 4 }}
