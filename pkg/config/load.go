@@ -83,6 +83,7 @@ func Load(cmd *cobra.Command) (*Config, error) {
 	_ = v.BindEnv("emailReports.smtp.host", "EMAIL_REPORTS_SMTP_HOST")
 	_ = v.BindEnv("emailReports.smtp.port", "EMAIL_REPORTS_SMTP_PORT")
 	_ = v.BindEnv("emailReports.smtp.from", "EMAIL_REPORTS_SMTP_FROM")
+	_ = v.BindEnv("ui.host", "UI_HOST")
 
 	c := &Config{}
 
