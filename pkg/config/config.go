@@ -30,6 +30,7 @@ type Loki struct {
 	Name            string            `mapstructure:"name"`
 	Host            string            `mapstructure:"host"`
 	Path            string            `mapstructure:"path"`
+	SecretRef       string            `mapstructure:"secretRef"`
 	CustomLabels    map[string]string `mapstructure:"customLabels"`
 	SkipExisting    bool              `mapstructure:"skipExistingOnStartup"`
 	MinimumPriority string            `mapstructure:"minimumPriority"`
@@ -46,6 +47,7 @@ type Elasticsearch struct {
 	Rotation        string          `mapstructure:"rotation"`
 	Username        string          `mapstructure:"username"`
 	Password        string          `mapstructure:"password"`
+	SecretRef       string          `mapstructure:"secretRef"`
 	SkipExisting    bool            `mapstructure:"skipExistingOnStartup"`
 	MinimumPriority string          `mapstructure:"minimumPriority"`
 	Filter          TargetFilter    `mapstructure:"filter"`
@@ -57,6 +59,7 @@ type Elasticsearch struct {
 type Slack struct {
 	Name            string            `mapstructure:"name"`
 	Webhook         string            `mapstructure:"webhook"`
+	SecretRef       string            `mapstructure:"secretRef"`
 	CustomFields    map[string]string `mapstructure:"customFields"`
 	SkipExisting    bool              `mapstructure:"skipExistingOnStartup"`
 	MinimumPriority string            `mapstructure:"minimumPriority"`
@@ -69,6 +72,7 @@ type Slack struct {
 type Discord struct {
 	Name            string            `mapstructure:"name"`
 	Webhook         string            `mapstructure:"webhook"`
+	SecretRef       string            `mapstructure:"secretRef"`
 	CustomFields    map[string]string `mapstructure:"customFields"`
 	SkipExisting    bool              `mapstructure:"skipExistingOnStartup"`
 	MinimumPriority string            `mapstructure:"minimumPriority"`
@@ -81,6 +85,7 @@ type Discord struct {
 type Teams struct {
 	Name            string            `mapstructure:"name"`
 	Webhook         string            `mapstructure:"webhook"`
+	SecretRef       string            `mapstructure:"secretRef"`
 	CustomFields    map[string]string `mapstructure:"customFields"`
 	SkipTLS         bool              `mapstructure:"skipTLS"`
 	SkipExisting    bool              `mapstructure:"skipExistingOnStartup"`
@@ -103,6 +108,7 @@ type Webhook struct {
 	Name            string            `mapstructure:"name"`
 	Host            string            `mapstructure:"host"`
 	Headers         map[string]string `mapstructure:"headers"`
+	SecretRef       string            `mapstructure:"secretRef"`
 	SkipExisting    bool              `mapstructure:"skipExistingOnStartup"`
 	MinimumPriority string            `mapstructure:"minimumPriority"`
 	Filter          TargetFilter      `mapstructure:"filter"`
@@ -119,6 +125,7 @@ type S3 struct {
 	Endpoint        string       `mapstructure:"endpoint"`
 	Prefix          string       `mapstructure:"prefix"`
 	Bucket          string       `mapstructure:"bucket"`
+	SecretRef       string       `mapstructure:"secretRef"`
 	SkipExisting    bool         `mapstructure:"skipExistingOnStartup"`
 	MinimumPriority string       `mapstructure:"minimumPriority"`
 	Filter          TargetFilter `mapstructure:"filter"`
@@ -134,6 +141,7 @@ type Kinesis struct {
 	Region          string       `mapstructure:"region"`
 	Endpoint        string       `mapstructure:"endpoint"`
 	StreamName      string       `mapstructure:"streamName"`
+	SecretRef       string       `mapstructure:"secretRef"`
 	SkipExisting    bool         `mapstructure:"skipExistingOnStartup"`
 	MinimumPriority string       `mapstructure:"minimumPriority"`
 	Filter          TargetFilter `mapstructure:"filter"`
@@ -234,6 +242,7 @@ type LeaderElection struct {
 
 // Config of the PolicyReporter
 type Config struct {
+	Namespace      string         `mapstructure:"namespace"`
 	Loki           Loki           `mapstructure:"loki"`
 	Elasticsearch  Elasticsearch  `mapstructure:"elasticsearch"`
 	Slack          Slack          `mapstructure:"slack"`
