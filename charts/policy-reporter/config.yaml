@@ -1,6 +1,7 @@
 loki:
   host: {{ .Values.target.loki.host | quote }}
   path: {{ .Values.target.loki.path | quote }}
+  secretRef: {{ .Values.target.loki.secretRef | quote }}
   minimumPriority: {{ .Values.target.loki.minimumPriority | quote }}
   skipExistingOnStartup: {{ .Values.target.loki.skipExistingOnStartup }}
   {{- with .Values.target.loki.customLabels }}
@@ -24,6 +25,7 @@ elasticsearch:
   host: {{ .Values.target.elasticsearch.host | quote }}
   username: {{ .Values.target.elasticsearch.username | quote }}
   password: {{ .Values.target.elasticsearch.password | quote }}
+  secretRef: {{ .Values.target.elasticsearch.secretRef | quote }}
   index: {{ .Values.target.elasticsearch.index | default "policy-reporter" | quote }}
   rotation: {{ .Values.target.elasticsearch.rotation | default "daily" | quote }}
   minimumPriority: {{ .Values.target.elasticsearch.minimumPriority | quote }}
@@ -43,6 +45,7 @@ elasticsearch:
 
 slack:
   webhook: {{ .Values.target.slack.webhook | quote }}
+  secretRef: {{ .Values.target.slack.secretRef | quote }}
   minimumPriority: {{ .Values.target.slack.minimumPriority | quote }}
   skipExistingOnStartup: {{ .Values.target.slack.skipExistingOnStartup }}
   {{- with .Values.target.slack.customFields }}
@@ -64,8 +67,13 @@ slack:
 
 discord:
   webhook: {{ .Values.target.discord.webhook | quote }}
+  secretRef: {{ .Values.target.discord.secretRef | quote }}
   minimumPriority: {{ .Values.target.discord.minimumPriority | quote }}
   skipExistingOnStartup: {{ .Values.target.discord.skipExistingOnStartup }}
+  {{- with .Values.target.discord.customFields }}
+  customFields:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
   {{- with .Values.target.discord.sources }}
   sources:
     {{- toYaml . | nindent 4 }}
@@ -82,8 +90,13 @@ discord:
 teams:
   webhook: {{ .Values.target.teams.webhook | quote }}
   skipTLS: {{ .Values.target.teams.skipTLS }}
+  secretRef: {{ .Values.target.teams.secretRef | quote }}
   minimumPriority: {{ .Values.target.teams.minimumPriority | quote }}
   skipExistingOnStartup: {{ .Values.target.teams.skipExistingOnStartup }}
+  {{- with .Values.target.teams.customFields }}
+  customFields:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
   {{- with .Values.target.teams.sources }}
   sources:
     {{- toYaml . | nindent 4 }}
@@ -99,6 +112,7 @@ teams:
 
 webhook:
   host: {{ .Values.target.webhook.host | quote }}
+  secretRef: {{ .Values.target.webhook.secretRef | quote }}
   minimumPriority: {{ .Values.target.webhook.minimumPriority | quote }}
   skipExistingOnStartup: {{ .Values.target.webhook.skipExistingOnStartup }}
   {{- with .Values.target.webhook.sources }}
@@ -126,6 +140,7 @@ ui:
 s3:
   accessKeyID: {{ .Values.target.s3.accessKeyID }}
   secretAccessKey:  {{ .Values.target.s3.secretAccessKey }}
+  secretRef: {{ .Values.target.s3.secretRef | quote }}
   region: {{ .Values.target.s3.region }}
   endpoint: {{ .Values.target.s3.endpoint }}
   bucket: {{ .Values.target.s3.bucket }}
@@ -148,6 +163,7 @@ s3:
 kinesis:
   accessKeyID: {{ .Values.target.kinesis.accessKeyID }}
   secretAccessKey:  {{ .Values.target.kinesis.secretAccessKey }}
+  secretRef: {{ .Values.target.kinesis.secretRef | quote }}
   region: {{ .Values.target.kinesis.region }}
   endpoint: {{ .Values.target.kinesis.endpoint }}
   streamName: {{ .Values.target.kinesis.streamName }}
