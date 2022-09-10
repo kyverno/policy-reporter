@@ -315,13 +315,15 @@ func (r *Resolver) UIClient() target.Client {
 
 	log.Println("[INFO] UI configured")
 
-	return ui.NewClient(
-		"UI",
-		r.config.UI.Host,
-		r.config.UI.SkipExisting,
-		createTargetFilter(TargetFilter{}, r.config.UI.MinimumPriority, r.config.UI.Sources),
-		&http.Client{},
-	)
+	return ui.NewClient(ui.Options{
+		ClientOptions: target.ClientOptions{
+			Name:                  "UI",
+			SkipExistingOnStartup: r.config.UI.SkipExisting,
+			Filter:                createTargetFilter(TargetFilter{}, r.config.UI.MinimumPriority, r.config.UI.Sources),
+		},
+		Host:       r.config.UI.Host,
+		HTTPClient: &http.Client{},
+	})
 }
 
 // S3Clients resolver method
@@ -546,14 +548,16 @@ func createSlackClient(config Slack, parent Slack) target.Client {
 
 	log.Printf("[INFO] %s configured", config.Name)
 
-	return slack.NewClient(
-		config.Name,
-		config.Webhook,
-		config.SkipExisting,
-		createTargetFilter(config.Filter, config.MinimumPriority, config.Sources),
-		&http.Client{},
-		config.CustomFields,
-	)
+	return slack.NewClient(slack.Options{
+		ClientOptions: target.ClientOptions{
+			Name:                  config.Name,
+			SkipExistingOnStartup: config.SkipExisting,
+			Filter:                createTargetFilter(config.Filter, config.MinimumPriority, config.Sources),
+		},
+		Webhook:      config.Webhook,
+		CustomFields: config.CustomFields,
+		HTTPClient:   &http.Client{},
+	})
 }
 
 func createLokiClient(config Loki, parent Loki) target.Client {
@@ -577,14 +581,16 @@ func createLokiClient(config Loki, parent Loki) target.Client {
 
 	log.Printf("[INFO] %s configured", config.Name)
 
-	return loki.NewClient(
-		config.Name,
-		config.Host+config.Path,
-		config.SkipExisting,
-		createTargetFilter(config.Filter, config.MinimumPriority, config.Sources),
-		config.CustomLabels,
-		&http.Client{},
-	)
+	return loki.NewClient(loki.Options{
+		ClientOptions: target.ClientOptions{
+			Name:                  config.Name,
+			SkipExistingOnStartup: config.SkipExisting,
+			Filter:                createTargetFilter(config.Filter, config.MinimumPriority, config.Sources),
+		},
+		Host:         config.Host + config.Path,
+		CustomLabels: config.CustomLabels,
+		HTTPClient:   &http.Client{},
+	})
 }
 
 func createElasticsearchClient(config Elasticsearch, parent Elasticsearch) target.Client {
@@ -624,17 +630,19 @@ func createElasticsearchClient(config Elasticsearch, parent Elasticsearch) targe
 
 	log.Printf("[INFO] %s configured", config.Name)
 
-	return elasticsearch.NewClient(
-		config.Name,
-		config.Host,
-		config.Username,
-		config.Password,
-		config.Index,
-		config.Rotation,
-		config.SkipExisting,
-		createTargetFilter(config.Filter, config.MinimumPriority, config.Sources),
-		&http.Client{},
-	)
+	return elasticsearch.NewClient(elasticsearch.Options{
+		ClientOptions: target.ClientOptions{
+			Name:                  config.Name,
+			SkipExistingOnStartup: config.SkipExisting,
+			Filter:                createTargetFilter(config.Filter, config.MinimumPriority, config.Sources),
+		},
+		Host:       config.Host,
+		Username:   config.Username,
+		Password:   config.Password,
+		Rotation:   config.Rotation,
+		Index:      config.Index,
+		HTTPClient: &http.Client{},
+	})
 }
 
 func createDiscordClient(config Discord, parent Discord) target.Client {
@@ -652,13 +660,16 @@ func createDiscordClient(config Discord, parent Discord) target.Client {
 
 	log.Printf("[INFO] %s configured", config.Name)
 
-	return discord.NewClient(
-		config.Name,
-		config.Webhook,
-		config.SkipExisting,
-		createTargetFilter(config.Filter, config.MinimumPriority, config.Sources),
-		&http.Client{},
-	)
+	return discord.NewClient(discord.Options{
+		ClientOptions: target.ClientOptions{
+			Name:                  config.Name,
+			SkipExistingOnStartup: config.SkipExisting,
+			Filter:                createTargetFilter(config.Filter, config.MinimumPriority, config.Sources),
+		},
+		Webhook:      config.Webhook,
+		CustomFields: config.CustomFields,
+		HTTPClient:   &http.Client{},
+	})
 }
 
 func createTeamsClient(config Teams, parent Teams) target.Client {
@@ -689,13 +700,16 @@ func createTeamsClient(config Teams, parent Teams) target.Client {
 		}
 	}
 
-	return teams.NewClient(
-		config.Name,
-		config.Webhook,
-		config.SkipExisting,
-		createTargetFilter(config.Filter, config.MinimumPriority, config.Sources),
-		client,
-	)
+	return teams.NewClient(teams.Options{
+		ClientOptions: target.ClientOptions{
+			Name:                  config.Name,
+			SkipExistingOnStartup: config.SkipExisting,
+			Filter:                createTargetFilter(config.Filter, config.MinimumPriority, config.Sources),
+		},
+		Webhook:      config.Webhook,
+		CustomFields: config.CustomFields,
+		HTTPClient:   &http.Client{},
+	})
 }
 
 func createWebhookClient(config Webhook, parent Webhook) target.Client {
@@ -725,14 +739,16 @@ func createWebhookClient(config Webhook, parent Webhook) target.Client {
 
 	log.Printf("[INFO] %s configured", config.Name)
 
-	return webhook.NewClient(
-		config.Name,
-		config.Host,
-		config.Headers,
-		config.SkipExisting,
-		createTargetFilter(config.Filter, config.MinimumPriority, config.Sources),
-		&http.Client{},
-	)
+	return webhook.NewClient(webhook.Options{
+		ClientOptions: target.ClientOptions{
+			Name:                  config.Name,
+			SkipExistingOnStartup: config.SkipExisting,
+			Filter:                createTargetFilter(config.Filter, config.MinimumPriority, config.Sources),
+		},
+		Host:       config.Host,
+		Headers:    config.Headers,
+		HTTPClient: &http.Client{},
+	})
 }
 
 func createS3Client(config S3, parent S3) target.Client {
@@ -794,13 +810,15 @@ func createS3Client(config S3, parent S3) target.Client {
 
 	log.Printf("[INFO] %s configured", config.Name)
 
-	return s3.NewClient(
-		config.Name,
-		s3Client,
-		config.Prefix,
-		config.SkipExisting,
-		createTargetFilter(config.Filter, config.MinimumPriority, config.Sources),
-	)
+	return s3.NewClient(s3.Options{
+		ClientOptions: target.ClientOptions{
+			Name:                  config.Name,
+			SkipExistingOnStartup: config.SkipExisting,
+			Filter:                createTargetFilter(config.Filter, config.MinimumPriority, config.Sources),
+		},
+		S3:     s3Client,
+		Prefix: config.Prefix,
+	})
 }
 
 func createKinesisClient(config Kinesis, parent Kinesis) target.Client {
@@ -856,12 +874,14 @@ func createKinesisClient(config Kinesis, parent Kinesis) target.Client {
 
 	log.Printf("[INFO] %s configured", config.Name)
 
-	return kinesis.NewClient(
-		config.Name,
-		kinesisClient,
-		config.SkipExisting,
-		createTargetFilter(config.Filter, config.MinimumPriority, config.Sources),
-	)
+	return kinesis.NewClient(kinesis.Options{
+		ClientOptions: target.ClientOptions{
+			Name:                  config.Name,
+			SkipExistingOnStartup: config.SkipExisting,
+			Filter:                createTargetFilter(config.Filter, config.MinimumPriority, config.Sources),
+		},
+		Kinesis: kinesisClient,
+	})
 }
 
 func createTargetFilter(filter TargetFilter, minimumPriority string, sources []string) *report.ResultFilter {

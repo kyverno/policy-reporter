@@ -8,6 +8,14 @@ import (
 	"github.com/kyverno/policy-reporter/pkg/target/http"
 )
 
+// Options to configure the Discord target
+type Options struct {
+	target.ClientOptions
+	Webhook      string
+	CustomFields map[string]string
+	HTTPClient   http.Client
+}
+
 type payload struct {
 	Content string  `json:"content"`
 	Embeds  []embed `json:"embeds"`
@@ -34,7 +42,7 @@ var colors = map[report.Priority]string{
 	report.ErrorPriority:    "15158332",
 }
 
-func newPayload(result report.Result) payload {
+func newPayload(result report.Result, customFields map[string]string) payload {
 	color := colors[result.Priority]
 
 	embedFields := make([]embedField, 0)
@@ -69,6 +77,10 @@ func newPayload(result report.Result) payload {
 		embedFields = append(embedFields, embedField{strings.Title(property), value, true})
 	}
 
+	for property, value := range customFields {
+		embedFields = append(embedFields, embedField{strings.Title(property), value, true})
+	}
+
 	embeds := make([]embed, 0, 1)
 	embeds = append(embeds, embed{
 		Title:       "New Policy Report Result",
@@ -85,12 +97,13 @@ func newPayload(result report.Result) payload {
 
 type client struct {
 	target.BaseClient
-	webhook string
-	client  http.Client
+	webhook      string
+	customFields map[string]string
+	client       http.Client
 }
 
 func (d *client) Send(result report.Result) {
-	req, err := http.CreateJSONRequest(d.Name(), "POST", d.webhook, newPayload(result))
+	req, err := http.CreateJSONRequest(d.Name(), "POST", d.webhook, newPayload(result, d.customFields))
 	if err != nil {
 		return
 	}
@@ -100,10 +113,11 @@ func (d *client) Send(result report.Result) {
 }
 
 // NewClient creates a new loki.client to send Results to Discord
-func NewClient(name, webhook string, skipExistingOnStartup bool, filter *report.ResultFilter, httpClient http.Client) target.Client {
+func NewClient(options Options) target.Client {
 	return &client{
-		target.NewBaseClient(name, skipExistingOnStartup, filter),
-		webhook,
-		httpClient,
+		target.NewBaseClient(options.ClientOptions),
+		options.Webhook,
+		options.CustomFields,
+		options.HTTPClient,
 	}
 }

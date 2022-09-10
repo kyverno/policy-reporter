@@ -67,25 +67,27 @@ type Slack struct {
 
 // Discord configuration
 type Discord struct {
-	Name            string       `mapstructure:"name"`
-	Webhook         string       `mapstructure:"webhook"`
-	SkipExisting    bool         `mapstructure:"skipExistingOnStartup"`
-	MinimumPriority string       `mapstructure:"minimumPriority"`
-	Filter          TargetFilter `mapstructure:"filter"`
-	Sources         []string     `mapstructure:"sources"`
-	Channels        []Discord    `mapstructure:"channels"`
+	Name            string            `mapstructure:"name"`
+	Webhook         string            `mapstructure:"webhook"`
+	CustomFields    map[string]string `mapstructure:"customFields"`
+	SkipExisting    bool              `mapstructure:"skipExistingOnStartup"`
+	MinimumPriority string            `mapstructure:"minimumPriority"`
+	Filter          TargetFilter      `mapstructure:"filter"`
+	Sources         []string          `mapstructure:"sources"`
+	Channels        []Discord         `mapstructure:"channels"`
 }
 
 // Teams configuration
 type Teams struct {
-	Name            string       `mapstructure:"name"`
-	Webhook         string       `mapstructure:"webhook"`
-	SkipTLS         bool         `mapstructure:"skipTLS"`
-	SkipExisting    bool         `mapstructure:"skipExistingOnStartup"`
-	MinimumPriority string       `mapstructure:"minimumPriority"`
-	Filter          TargetFilter `mapstructure:"filter"`
-	Sources         []string     `mapstructure:"sources"`
-	Channels        []Teams      `mapstructure:"channels"`
+	Name            string            `mapstructure:"name"`
+	Webhook         string            `mapstructure:"webhook"`
+	CustomFields    map[string]string `mapstructure:"customFields"`
+	SkipTLS         bool              `mapstructure:"skipTLS"`
+	SkipExisting    bool              `mapstructure:"skipExistingOnStartup"`
+	MinimumPriority string            `mapstructure:"minimumPriority"`
+	Filter          TargetFilter      `mapstructure:"filter"`
+	Sources         []string          `mapstructure:"sources"`
+	Channels        []Teams           `mapstructure:"channels"`
 }
 
 // UI configuration

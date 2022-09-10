@@ -8,6 +8,14 @@ import (
 	"github.com/kyverno/policy-reporter/pkg/target/http"
 )
 
+// Options to configure the Slack target
+type Options struct {
+	target.ClientOptions
+	Webhook      string
+	CustomFields map[string]string
+	HTTPClient   http.Client
+}
+
 type text struct {
 	Type string `json:"type"`
 	Text string `json:"text"`
@@ -189,11 +197,11 @@ func (s *client) Send(result report.Result) {
 }
 
 // NewClient creates a new slack.client to send Results to Slack
-func NewClient(name, host string, skipExistingOnStartup bool, filter *report.ResultFilter, httpClient http.Client, customFields map[string]string) target.Client {
+func NewClient(options Options) target.Client {
 	return &client{
-		target.NewBaseClient(name, skipExistingOnStartup, filter),
-		host,
-		httpClient,
-		customFields,
+		target.NewBaseClient(options.ClientOptions),
+		options.Webhook,
+		options.HTTPClient,
+		options.CustomFields,
 	}
 }
