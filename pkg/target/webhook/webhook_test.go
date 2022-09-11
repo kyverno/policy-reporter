@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/kyverno/policy-reporter/pkg/report"
+	"github.com/kyverno/policy-reporter/pkg/target"
 	"github.com/kyverno/policy-reporter/pkg/target/webhook"
 )
 
@@ -64,11 +65,25 @@ func Test_UITarget(t *testing.T) {
 			return nil
 		}
 
-		client := webhook.NewClient("HTTP", "http://localhost:8080/webhook", map[string]string{"X-Code": "1234"}, false, &report.ResultFilter{}, testClient{callback, 200})
+		client := webhook.NewClient(webhook.Options{
+			ClientOptions: target.ClientOptions{
+				Name: "UI",
+			},
+			Host:       "http://localhost:8080/webhook",
+			Headers:    map[string]string{"X-Code": "1234"},
+			HTTPClient: testClient{callback, 200},
+		})
 		client.Send(completeResult)
 	})
 	t.Run("Name", func(t *testing.T) {
-		client := webhook.NewClient("HTTP", "http://localhost:8080/webhook", map[string]string{"X-Code": "1234"}, false, &report.ResultFilter{}, testClient{})
+		client := webhook.NewClient(webhook.Options{
+			ClientOptions: target.ClientOptions{
+				Name: "HTTP",
+			},
+			Host:       "http://localhost:8080",
+			Headers:    map[string]string{"X-Code": "1234"},
+			HTTPClient: testClient{},
+		})
 
 		if client.Name() != "HTTP" {
 			t.Errorf("Unexpected Name %s", client.Name())

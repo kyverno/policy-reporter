@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/kyverno/policy-reporter/pkg/report"
+	"github.com/kyverno/policy-reporter/pkg/target"
 	"github.com/kyverno/policy-reporter/pkg/target/kinesis"
 )
 
@@ -56,11 +57,21 @@ func Test_KinesisTarget(t *testing.T) {
 			}
 		}
 
-		client := kinesis.NewClient("Kinesis", &testClient{nil, callback}, true, &report.ResultFilter{})
+		client := kinesis.NewClient(kinesis.Options{
+			ClientOptions: target.ClientOptions{
+				Name: "Kinesis",
+			},
+			Kinesis: &testClient{nil, callback},
+		})
 		client.Send(completeResult)
 	})
 	t.Run("Name", func(t *testing.T) {
-		client := kinesis.NewClient("Kinesis", &testClient{nil, testCallback}, false, &report.ResultFilter{})
+		client := kinesis.NewClient(kinesis.Options{
+			ClientOptions: target.ClientOptions{
+				Name: "Kinesis",
+			},
+			Kinesis: &testClient{},
+		})
 
 		if client.Name() != "Kinesis" {
 			t.Errorf("Unexpected Name %s", client.Name())

@@ -66,19 +66,37 @@ type BaseClient struct {
 	filter                *report.ResultFilter
 }
 
+type ClientOptions struct {
+	Name                  string
+	SkipExistingOnStartup bool
+	Filter                *report.ResultFilter
+}
+
 func (c *BaseClient) Name() string {
 	return c.name
 }
 
 func (c *BaseClient) MinimumPriority() string {
+	if c.filter == nil {
+		return report.DefaultPriority.String()
+	}
+
 	return c.filter.MinimumPriority
 }
 
 func (c *BaseClient) Sources() []string {
+	if c.filter == nil {
+		return make([]string, 0)
+	}
+
 	return c.filter.Sources
 }
 
 func (c *BaseClient) Validate(result report.Result) bool {
+	if c.filter == nil {
+		return true
+	}
+
 	return c.filter.Validate(result)
 }
 
@@ -86,6 +104,6 @@ func (c *BaseClient) SkipExistingOnStartup() bool {
 	return c.skipExistingOnStartup
 }
 
-func NewBaseClient(name string, skipExistingOnStartup bool, filter *report.ResultFilter) BaseClient {
-	return BaseClient{name, skipExistingOnStartup, filter}
+func NewBaseClient(options ClientOptions) BaseClient {
+	return BaseClient{options.Name, options.SkipExistingOnStartup, options.Filter}
 }

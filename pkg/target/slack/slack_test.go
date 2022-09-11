@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/kyverno/policy-reporter/pkg/report"
+	"github.com/kyverno/policy-reporter/pkg/target"
 	"github.com/kyverno/policy-reporter/pkg/target/slack"
 )
 
@@ -130,7 +131,14 @@ func Test_SlackTarget(t *testing.T) {
 			}
 		}
 
-		client := slack.NewClient("Teams", "http://hook.slack:80", false, &report.ResultFilter{}, testClient{callback, 200}, map[string]string{"Cluster": "Name"})
+		client := slack.NewClient(slack.Options{
+			ClientOptions: target.ClientOptions{
+				Name: "Slack",
+			},
+			Webhook:      "http://hook.slack:80",
+			CustomFields: map[string]string{"Cluster": "Name"},
+			HTTPClient:   testClient{callback, 200},
+		})
 		client.Send(completeResult)
 	})
 
@@ -149,7 +157,13 @@ func Test_SlackTarget(t *testing.T) {
 			}
 		}
 
-		client := slack.NewClient("Slack", "http://hook.slack:80", false, &report.ResultFilter{}, testClient{callback, 200}, make(map[string]string))
+		client := slack.NewClient(slack.Options{
+			ClientOptions: target.ClientOptions{
+				Name: "Slack",
+			},
+			Webhook:    "http://hook.slack:80",
+			HTTPClient: testClient{callback, 200},
+		})
 		client.Send(minimalResult)
 	})
 
@@ -168,7 +182,13 @@ func Test_SlackTarget(t *testing.T) {
 			}
 		}
 
-		client := slack.NewClient("Slack", "http://hook.slack:80", false, &report.ResultFilter{}, testClient{callback, 200}, make(map[string]string))
+		client := slack.NewClient(slack.Options{
+			ClientOptions: target.ClientOptions{
+				Name: "Slack",
+			},
+			Webhook:    "http://hook.slack:80",
+			HTTPClient: testClient{callback, 200},
+		})
 		client.Send(enforceResult)
 	})
 
@@ -187,7 +207,14 @@ func Test_SlackTarget(t *testing.T) {
 			}
 		}
 
-		client := slack.NewClient("Slack", "http://hook.slack:80", false, &report.ResultFilter{}, testClient{callback, 200}, make(map[string]string))
+		client := slack.NewClient(slack.Options{
+			ClientOptions: target.ClientOptions{
+				Name: "Slack",
+			},
+			Webhook:      "http://hook.slack:80",
+			CustomFields: map[string]string{"Cluster": "Name"},
+			HTTPClient:   testClient{callback, 200},
+		})
 		client.Send(incompleteResult)
 	})
 
@@ -206,12 +233,26 @@ func Test_SlackTarget(t *testing.T) {
 			}
 		}
 
-		client := slack.NewClient("Slack", "http://hook.slack:80", false, &report.ResultFilter{}, testClient{callback, 200}, make(map[string]string))
+		client := slack.NewClient(slack.Options{
+			ClientOptions: target.ClientOptions{
+				Name: "Slack",
+			},
+			Webhook:      "http://hook.slack:80",
+			CustomFields: map[string]string{"Cluster": "Name"},
+			HTTPClient:   testClient{callback, 200},
+		})
 		client.Send(incompleteResult2)
 	})
 
 	t.Run("Name", func(t *testing.T) {
-		client := slack.NewClient("Slack", "http://localhost:9200", true, &report.ResultFilter{}, testClient{}, make(map[string]string))
+		client := slack.NewClient(slack.Options{
+			ClientOptions: target.ClientOptions{
+				Name: "Slack",
+			},
+			Webhook:      "http://hook.slack:80",
+			CustomFields: map[string]string{"Cluster": "Name"},
+			HTTPClient:   testClient{},
+		})
 
 		if client.Name() != "Slack" {
 			t.Errorf("Unexpected Name %s", client.Name())

@@ -110,62 +110,8 @@ var testConfig = &config.Config{
 	},
 }
 
-func Test_ResolveTarget(t *testing.T) {
-	resolver := config.NewResolver(testConfig, nil)
-
-	t.Run("Loki", func(t *testing.T) {
-		clients := resolver.LokiClients()
-		if len(clients) != 2 {
-			t.Errorf("Expected 2 Client, got %d clients", len(clients))
-		}
-
-	})
-	t.Run("Elasticsearch", func(t *testing.T) {
-		clients := resolver.ElasticsearchClients()
-		if len(clients) != 2 {
-			t.Errorf("Expected 2 Client, got %d clients", len(clients))
-		}
-	})
-	t.Run("Slack", func(t *testing.T) {
-		clients := resolver.SlackClients()
-		if len(clients) != 2 {
-			t.Error("Expected Client, got nil")
-		}
-	})
-	t.Run("Discord", func(t *testing.T) {
-		clients := resolver.DiscordClients()
-		if len(clients) != 2 {
-			t.Error("Expected Client, got nil")
-		}
-	})
-	t.Run("Teams", func(t *testing.T) {
-		clients := resolver.TeamsClients()
-		if len(clients) != 2 {
-			t.Errorf("Expected 2 Client, got %d clients", len(clients))
-		}
-	})
-	t.Run("Webhook", func(t *testing.T) {
-		clients := resolver.WebhookClients()
-		if len(clients) != 2 {
-			t.Errorf("Expected 2 Client, got %d clients", len(clients))
-		}
-	})
-	t.Run("S3", func(t *testing.T) {
-		clients := resolver.S3Clients()
-		if len(clients) != 2 {
-			t.Errorf("Expected 2 Client, got %d clients", len(clients))
-		}
-	})
-	t.Run("Kinesis", func(t *testing.T) {
-		clients := resolver.KinesisClients()
-		if len(clients) != 2 {
-			t.Errorf("Expected 2 Client, got %d clients", len(clients))
-		}
-	})
-}
-
 func Test_ResolveTargets(t *testing.T) {
-	resolver := config.NewResolver(testConfig, nil)
+	resolver := config.NewResolver(testConfig, &rest.Config{})
 
 	if count := len(resolver.TargetClients()); count != 17 {
 		t.Errorf("Expected 17 Clients, got %d", count)
@@ -173,7 +119,7 @@ func Test_ResolveTargets(t *testing.T) {
 }
 
 func Test_ResolveHasTargets(t *testing.T) {
-	resolver := config.NewResolver(testConfig, nil)
+	resolver := config.NewResolver(testConfig, &rest.Config{})
 
 	if !resolver.HasTargets() {
 		t.Errorf("Expected 'true'")
@@ -197,7 +143,7 @@ func Test_ResolveSkipExistingOnStartup(t *testing.T) {
 	t.Run("Resolve false", func(t *testing.T) {
 		testConfig.Elasticsearch.SkipExisting = false
 
-		resolver := config.NewResolver(testConfig, nil)
+		resolver := config.NewResolver(testConfig, &rest.Config{})
 
 		if resolver.SkipExistingOnStartup() == true {
 			t.Error("Expected SkipExistingOnStartup to be false if one Client has SkipExistingOnStartup false configured")
@@ -207,194 +153,10 @@ func Test_ResolveSkipExistingOnStartup(t *testing.T) {
 	t.Run("Resolve true", func(t *testing.T) {
 		testConfig.Elasticsearch.SkipExisting = true
 
-		resolver := config.NewResolver(testConfig, nil)
+		resolver := config.NewResolver(testConfig, &rest.Config{})
 
 		if resolver.SkipExistingOnStartup() == false {
 			t.Error("Expected SkipExistingOnStartup to be true if all Client has SkipExistingOnStartup true configured")
-		}
-	})
-}
-
-func Test_ResolveTargetWithoutHost(t *testing.T) {
-	config2 := &config.Config{
-		Loki: config.Loki{
-			Host:            "",
-			SkipExisting:    true,
-			MinimumPriority: "debug",
-		},
-		Elasticsearch: config.Elasticsearch{
-			Host:            "",
-			Index:           "policy-reporter",
-			Rotation:        "daily",
-			SkipExisting:    true,
-			MinimumPriority: "debug",
-		},
-		Slack: config.Slack{
-			Webhook:         "",
-			SkipExisting:    true,
-			MinimumPriority: "debug",
-		},
-		Discord: config.Discord{
-			Webhook:         "",
-			SkipExisting:    true,
-			MinimumPriority: "debug",
-		},
-		Teams: config.Teams{
-			Webhook:         "",
-			SkipExisting:    true,
-			MinimumPriority: "debug",
-		},
-		Webhook: config.Webhook{
-			Host:            "",
-			SkipExisting:    true,
-			MinimumPriority: "debug",
-		},
-		S3: config.S3{
-			Endpoint:        "",
-			Region:          "",
-			AccessKeyID:     "",
-			SecretAccessKey: "",
-			Bucket:          "",
-			SkipExisting:    true,
-			MinimumPriority: "debug",
-		},
-		Kinesis: config.Kinesis{
-			Endpoint:        "",
-			Region:          "",
-			AccessKeyID:     "",
-			SecretAccessKey: "",
-			StreamName:      "",
-			SkipExisting:    true,
-			MinimumPriority: "debug",
-		},
-	}
-
-	t.Run("Loki", func(t *testing.T) {
-		resolver := config.NewResolver(config2, nil)
-
-		if len(resolver.LokiClients()) != 0 {
-			t.Error("Expected Client to be nil if no host is configured")
-		}
-	})
-	t.Run("Elasticsearch", func(t *testing.T) {
-		resolver := config.NewResolver(config2, nil)
-
-		if len(resolver.ElasticsearchClients()) != 0 {
-			t.Error("Expected Client to be nil if no host is configured")
-		}
-	})
-	t.Run("Slack", func(t *testing.T) {
-		resolver := config.NewResolver(config2, nil)
-
-		if len(resolver.SlackClients()) != 0 {
-			t.Error("Expected Client to be nil if no host is configured")
-		}
-	})
-	t.Run("Discord", func(t *testing.T) {
-		resolver := config.NewResolver(config2, nil)
-
-		if len(resolver.DiscordClients()) != 0 {
-			t.Error("Expected Client to be nil if no host is configured")
-		}
-	})
-	t.Run("Teams", func(t *testing.T) {
-		resolver := config.NewResolver(config2, nil)
-
-		if len(resolver.TeamsClients()) != 0 {
-			t.Error("Expected Client to be nil if no host is configured")
-		}
-	})
-	t.Run("Webhook", func(t *testing.T) {
-		resolver := config.NewResolver(config2, nil)
-
-		if len(resolver.WebhookClients()) != 0 {
-			t.Error("Expected Client to be nil if no host is configured")
-		}
-	})
-	t.Run("S3.Endoint", func(t *testing.T) {
-		resolver := config.NewResolver(config2, nil)
-
-		if len(resolver.S3Clients()) != 0 {
-			t.Error("Expected Client to be nil if no endpoint is configured")
-		}
-	})
-	t.Run("S3.AccessKey", func(t *testing.T) {
-		config2.S3.Endpoint = "https://storage.yandexcloud.net"
-
-		resolver := config.NewResolver(config2, nil)
-
-		if len(resolver.S3Clients()) != 0 {
-			t.Error("Expected Client to be nil if no accessKey is configured")
-		}
-	})
-	t.Run("S3.SecretAccessKey", func(t *testing.T) {
-		config2.S3.AccessKeyID = "access"
-
-		resolver := config.NewResolver(config2, nil)
-
-		if len(resolver.S3Clients()) != 0 {
-			t.Error("Expected Client to be nil if no secretAccessKey is configured")
-		}
-	})
-	t.Run("S3.Region", func(t *testing.T) {
-		config2.S3.SecretAccessKey = "secret"
-
-		resolver := config.NewResolver(config2, nil)
-
-		if len(resolver.S3Clients()) != 0 {
-			t.Error("Expected Client to be nil if no region is configured")
-		}
-	})
-	t.Run("S3.Bucket", func(t *testing.T) {
-		config2.S3.Region = "ru-central1"
-
-		resolver := config.NewResolver(config2, nil)
-
-		if len(resolver.S3Clients()) != 0 {
-			t.Error("Expected Client to be nil if no bucket is configured")
-		}
-	})
-	t.Run("Kinesis.Endoint", func(t *testing.T) {
-		resolver := config.NewResolver(config2, nil)
-
-		if len(resolver.KinesisClients()) != 0 {
-			t.Error("Expected Client to be nil if no endpoint is configured")
-		}
-	})
-	t.Run("Kinesis.AccessKey", func(t *testing.T) {
-		config2.Kinesis.Endpoint = "https://yds.serverless.yandexcloud.net"
-
-		resolver := config.NewResolver(config2, nil)
-
-		if len(resolver.KinesisClients()) != 0 {
-			t.Error("Expected Client to be nil if no accessKey is configured")
-		}
-	})
-	t.Run("Kinesis.SecretAccessKey", func(t *testing.T) {
-		config2.Kinesis.AccessKeyID = "access"
-
-		resolver := config.NewResolver(config2, nil)
-
-		if len(resolver.KinesisClients()) != 0 {
-			t.Error("Expected Client to be nil if no secretAccessKey is configured")
-		}
-	})
-	t.Run("Kinesis.Region", func(t *testing.T) {
-		config2.Kinesis.SecretAccessKey = "secret"
-
-		resolver := config.NewResolver(config2, nil)
-
-		if len(resolver.KinesisClients()) != 0 {
-			t.Error("Expected Client to be nil if no region is configured")
-		}
-	})
-	t.Run("Kinesis.StreamName", func(t *testing.T) {
-		config2.Kinesis.Region = "ru-central1"
-
-		resolver := config.NewResolver(config2, nil)
-
-		if len(resolver.KinesisClients()) != 0 {
-			t.Error("Expected Client to be nil if no bucket is configured")
 		}
 	})
 }
@@ -551,6 +313,27 @@ func Test_ResolveCRDClientWithInvalidK8sConfig(t *testing.T) {
 
 	_, err := resolver.CRDClient()
 	if err == nil {
+		t.Error("Error: 'host must be a URL or a host:port pair' was expected")
+	}
+}
+
+func Test_ResolveSecretClient(t *testing.T) {
+	resolver := config.NewResolver(testConfig, &rest.Config{})
+
+	client := resolver.SecretClient()
+	if client == nil {
+		t.Error("unexpected error")
+	}
+}
+
+func Test_ResolveSecretCClientWithInvalidK8sConfig(t *testing.T) {
+	k8sConfig := &rest.Config{}
+	k8sConfig.Host = "invalid/url"
+
+	resolver := config.NewResolver(testConfig, k8sConfig)
+
+	client := resolver.SecretClient()
+	if client != nil {
 		t.Error("Error: 'host must be a URL or a host:port pair' was expected")
 	}
 }

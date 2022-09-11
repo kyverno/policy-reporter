@@ -12,6 +12,12 @@ import (
 	"github.com/kyverno/policy-reporter/pkg/target"
 )
 
+// Options to configure the Kinesis target
+type Options struct {
+	target.ClientOptions
+	Kinesis helper.AWSClient
+}
+
 type client struct {
 	target.BaseClient
 	kinesis helper.AWSClient
@@ -36,9 +42,9 @@ func (c *client) Send(result report.Result) {
 }
 
 // NewClient creates a new Kinesis.client to send Results to AWS Kinesis compatible source
-func NewClient(name string, kinesis helper.AWSClient, skipExistingOnStartup bool, filter *report.ResultFilter) target.Client {
+func NewClient(options Options) target.Client {
 	return &client{
-		target.NewBaseClient(name, skipExistingOnStartup, filter),
-		kinesis,
+		target.NewBaseClient(options.ClientOptions),
+		options.Kinesis,
 	}
 }

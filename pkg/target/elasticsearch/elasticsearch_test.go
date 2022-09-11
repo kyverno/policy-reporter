@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/kyverno/policy-reporter/pkg/report"
+	"github.com/kyverno/policy-reporter/pkg/target"
 	"github.com/kyverno/policy-reporter/pkg/target/elasticsearch"
 )
 
@@ -63,7 +64,17 @@ func Test_ElasticsearchTarget(t *testing.T) {
 			}
 		}
 
-		client := elasticsearch.NewClient("Elasticsearch", "http://localhost:9200", "username", "password", "policy-reporter", "annually", false, &report.ResultFilter{}, testClient{callback, 200})
+		client := elasticsearch.NewClient(elasticsearch.Options{
+			ClientOptions: target.ClientOptions{
+				Name: "Elasticsearch",
+			},
+			Host:       "http://localhost:9200",
+			Username:   "username",
+			Password:   "password",
+			Index:      "policy-reporter",
+			Rotation:   elasticsearch.Annually,
+			HTTPClient: testClient{callback, 200},
+		})
 		client.Send(completeResult)
 	})
 	t.Run("Send with Monthly Result", func(t *testing.T) {
@@ -77,7 +88,15 @@ func Test_ElasticsearchTarget(t *testing.T) {
 			}
 		}
 
-		client := elasticsearch.NewClient("Elasticsearch", "http://localhost:9200", "", "", "policy-reporter", "monthly", false, &report.ResultFilter{}, testClient{callback, 200})
+		client := elasticsearch.NewClient(elasticsearch.Options{
+			ClientOptions: target.ClientOptions{
+				Name: "Elasticsearch",
+			},
+			Host:       "http://localhost:9200",
+			Index:      "policy-reporter",
+			Rotation:   elasticsearch.Monthly,
+			HTTPClient: testClient{callback, 200},
+		})
 		client.Send(completeResult)
 	})
 	t.Run("Send with Monthly Result", func(t *testing.T) {
@@ -87,7 +106,15 @@ func Test_ElasticsearchTarget(t *testing.T) {
 			}
 		}
 
-		client := elasticsearch.NewClient("Elasticsearch", "http://localhost:9200", "", "", "policy-reporter", "daily", false, &report.ResultFilter{}, testClient{callback, 200})
+		client := elasticsearch.NewClient(elasticsearch.Options{
+			ClientOptions: target.ClientOptions{
+				Name: "Elasticsearch",
+			},
+			Host:       "http://localhost:9200",
+			Index:      "policy-reporter",
+			Rotation:   elasticsearch.Daily,
+			HTTPClient: testClient{callback, 200},
+		})
 		client.Send(completeResult)
 	})
 	t.Run("Send with None Result", func(t *testing.T) {
@@ -97,11 +124,27 @@ func Test_ElasticsearchTarget(t *testing.T) {
 			}
 		}
 
-		client := elasticsearch.NewClient("Elasticsearch", "http://localhost:9200", "", "", "policy-reporter", "none", false, &report.ResultFilter{}, testClient{callback, 200})
+		client := elasticsearch.NewClient(elasticsearch.Options{
+			ClientOptions: target.ClientOptions{
+				Name: "Elasticsearch",
+			},
+			Host:       "http://localhost:9200",
+			Index:      "policy-reporter",
+			Rotation:   elasticsearch.None,
+			HTTPClient: testClient{callback, 200},
+		})
 		client.Send(completeResult)
 	})
 	t.Run("Name", func(t *testing.T) {
-		client := elasticsearch.NewClient("Elasticsearch", "http://localhost:9200", "", "", "policy-reporter", "none", true, &report.ResultFilter{}, testClient{})
+		client := elasticsearch.NewClient(elasticsearch.Options{
+			ClientOptions: target.ClientOptions{
+				Name: "Elasticsearch",
+			},
+			Host:       "http://localhost:9200",
+			Index:      "policy-reporter",
+			Rotation:   elasticsearch.None,
+			HTTPClient: testClient{},
+		})
 
 		if client.Name() != "Elasticsearch" {
 			t.Errorf("Unexpected Name %s", client.Name())

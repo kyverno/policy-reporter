@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/kyverno/policy-reporter/pkg/report"
+	"github.com/kyverno/policy-reporter/pkg/target"
 	"github.com/kyverno/policy-reporter/pkg/target/loki"
 )
 
@@ -117,8 +118,15 @@ func Test_LokiTarget(t *testing.T) {
 			}
 		}
 
-		loki := loki.NewClient("Loki", "http://localhost:3100/api/prom/push", false, &report.ResultFilter{}, map[string]string{"custom": "label"}, testClient{callback, 200})
-		loki.Send(completeResult)
+		client := loki.NewClient(loki.Options{
+			ClientOptions: target.ClientOptions{
+				Name: "Loki",
+			},
+			Host:         "http://localhost:3100/api/prom/push",
+			CustomLabels: map[string]string{"custom": "label"},
+			HTTPClient:   testClient{callback, 200},
+		})
+		client.Send(completeResult)
 	})
 
 	t.Run("Send Minimal Result", func(t *testing.T) {
@@ -175,11 +183,25 @@ func Test_LokiTarget(t *testing.T) {
 			}
 		}
 
-		loki := loki.NewClient("Loki", "http://localhost:3100/api/prom/push", false, &report.ResultFilter{}, make(map[string]string), testClient{callback, 200})
-		loki.Send(minimalResult)
+		client := loki.NewClient(loki.Options{
+			ClientOptions: target.ClientOptions{
+				Name: "Loki",
+			},
+			Host:         "http://localhost:3100/api/prom/push",
+			CustomLabels: map[string]string{"custom": "label"},
+			HTTPClient:   testClient{callback, 200},
+		})
+		client.Send(minimalResult)
 	})
 	t.Run("Name", func(t *testing.T) {
-		client := loki.NewClient("Loki", "http://localhost:9200/api/prom/push", true, &report.ResultFilter{}, make(map[string]string), testClient{})
+		client := loki.NewClient(loki.Options{
+			ClientOptions: target.ClientOptions{
+				Name: "Loki",
+			},
+			Host:         "http://localhost:3100/api/prom/push",
+			CustomLabels: map[string]string{"custom": "label"},
+			HTTPClient:   testClient{},
+		})
 
 		if client.Name() != "Loki" {
 			t.Errorf("Unexpected Name %s", client.Name())
