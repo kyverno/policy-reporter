@@ -9,6 +9,14 @@ import (
 	"github.com/kyverno/policy-reporter/pkg/target/http"
 )
 
+// Options to configure the Slack target
+type Options struct {
+	target.ClientOptions
+	Webhook      string
+	CustomFields map[string]string
+	HTTPClient   http.Client
+}
+
 type fact struct {
 	Name  string `json:"name"`
 	Value string `json:"value"`
@@ -37,7 +45,7 @@ var colors = map[report.Priority]string{
 	report.ErrorPriority:    "e20b0b",
 }
 
-func newPayload(result report.Result) payload {
+func newPayload(result report.Result, customFields map[string]string) payload {
 	facts := make([]fact, 0)
 
 	facts = append(facts, fact{"Policy", result.Policy})
@@ -74,6 +82,9 @@ func newPayload(result report.Result) payload {
 	for property, value := range result.Properties {
 		facts = append(facts, fact{strings.Title(property), value})
 	}
+	for property, value := range customFields {
+		facts = append(facts, fact{strings.Title(property), value})
+	}
 
 	timestamp := time.Now()
 	if !result.Timestamp.IsZero() {
@@ -99,12 +110,13 @@ func newPayload(result report.Result) payload {
 
 type client struct {
 	target.BaseClient
-	webhook string
-	client  http.Client
+	webhook      string
+	customFields map[string]string
+	client       http.Client
 }
 
 func (s *client) Send(result report.Result) {
-	req, err := http.CreateJSONRequest(s.Name(), "POST", s.webhook, newPayload(result))
+	req, err := http.CreateJSONRequest(s.Name(), "POST", s.webhook, newPayload(result, s.customFields))
 	if err != nil {
 		return
 	}
@@ -114,10 +126,11 @@ func (s *client) Send(result report.Result) {
 }
 
 // NewClient creates a new teams.client to send Results to MS Teams
-func NewClient(name, host string, skipExistingOnStartup bool, filter *report.ResultFilter, httpClient http.Client) target.Client {
+func NewClient(options Options) target.Client {
 	return &client{
-		target.NewBaseClient(name, skipExistingOnStartup, filter),
-		host,
-		httpClient,
+		target.NewBaseClient(options.ClientOptions),
+		options.Webhook,
+		options.CustomFields,
+		options.HTTPClient,
 	}
 }

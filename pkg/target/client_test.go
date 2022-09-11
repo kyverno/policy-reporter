@@ -241,43 +241,79 @@ func Test_BaseClient(t *testing.T) {
 	})
 
 	t.Run("Client Validation", func(t *testing.T) {
-		filter := target.NewClientFilter(
-			validate.RuleSets{},
-			validate.RuleSets{},
-			validate.RuleSets{Include: []string{"policy-test"}},
-			"",
-			[]string{"jsPolicy"},
-		)
-
-		client := target.NewBaseClient("Client", true, filter)
+		client := target.NewBaseClient(target.ClientOptions{
+			Name: "Client",
+			Filter: target.NewClientFilter(
+				validate.RuleSets{},
+				validate.RuleSets{},
+				validate.RuleSets{Include: []string{"policy-test"}},
+				"",
+				[]string{"jsPolicy"},
+			),
+			SkipExistingOnStartup: true,
+		})
 
 		if client.Validate(result) {
 			t.Errorf("Unexpected Validation Result")
 		}
 	})
+
+	t.Run("Client Validation Fallbacks", func(t *testing.T) {
+		client := target.NewBaseClient(target.ClientOptions{
+			Name:                  "Client",
+			SkipExistingOnStartup: true,
+		})
+
+		if !client.Validate(result) {
+			t.Errorf("Should fallback to true")
+		}
+		if client.MinimumPriority() != report.DefaultPriority.String() {
+			t.Errorf("Should fallback to default priority")
+		}
+		if len(client.Sources()) != 0 || client.Sources() == nil {
+			t.Errorf("Should fallback to empty list")
+		}
+	})
+
 	t.Run("SkipExistingOnStartup", func(t *testing.T) {
-		client := target.NewBaseClient("Client", true, &report.ResultFilter{})
+		client := target.NewBaseClient(target.ClientOptions{
+			Name:                  "Client",
+			Filter:                &report.ResultFilter{},
+			SkipExistingOnStartup: true,
+		})
 
 		if !client.SkipExistingOnStartup() {
 			t.Error("Should return configured SkipExistingOnStartup")
 		}
 	})
 	t.Run("MinimumPriority", func(t *testing.T) {
-		client := target.NewBaseClient("Client", true, &report.ResultFilter{MinimumPriority: "error"})
+		client := target.NewBaseClient(target.ClientOptions{
+			Name:                  "Client",
+			Filter:                &report.ResultFilter{MinimumPriority: "error"},
+			SkipExistingOnStartup: true,
+		})
 
 		if client.MinimumPriority() != "error" {
 			t.Error("Should return configured MinimumPriority")
 		}
 	})
 	t.Run("Name", func(t *testing.T) {
-		client := target.NewBaseClient("Client", true, &report.ResultFilter{MinimumPriority: "error"})
+		client := target.NewBaseClient(target.ClientOptions{
+			Name:                  "Client",
+			Filter:                &report.ResultFilter{MinimumPriority: "error"},
+			SkipExistingOnStartup: true,
+		})
 
 		if client.Name() != "Client" {
 			t.Error("Should return configured Name")
 		}
 	})
 	t.Run("Sources", func(t *testing.T) {
-		client := target.NewBaseClient("Client", true, &report.ResultFilter{Sources: []string{"Kyverno"}})
+		client := target.NewBaseClient(target.ClientOptions{
+			Name:                  "Client",
+			Filter:                &report.ResultFilter{Sources: []string{"Kyverno"}},
+			SkipExistingOnStartup: true,
+		})
 
 		if len(client.Sources()) != 1 {
 			t.Fatal("Unexpected length of Sources")

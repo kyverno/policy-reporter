@@ -6,6 +6,13 @@ import (
 	"github.com/kyverno/policy-reporter/pkg/target/http"
 )
 
+// Options to configure the Discord target
+type Options struct {
+	target.ClientOptions
+	Host       string
+	HTTPClient http.Client
+}
+
 type client struct {
 	target.BaseClient
 	host   string
@@ -23,10 +30,10 @@ func (e *client) Send(result report.Result) {
 }
 
 // NewClient creates a new loki.client to send Results to Elasticsearch
-func NewClient(name, host string, skipExistingOnStartup bool, filter *report.ResultFilter, httpClient http.Client) target.Client {
+func NewClient(options Options) target.Client {
 	return &client{
-		target.NewBaseClient(name, skipExistingOnStartup, filter),
-		host + "/api/push",
-		httpClient,
+		target.NewBaseClient(options.ClientOptions),
+		options.Host + "/api/push",
+		options.HTTPClient,
 	}
 }
