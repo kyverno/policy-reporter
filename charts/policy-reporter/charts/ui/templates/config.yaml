@@ -13,6 +13,7 @@ data:
   config.yaml: |-
     logSize: {{ .Values.log.size }}
     displayMode: {{ .Values.displayMode | quote }}
+    refreshInterval: {{ .Values.refreshInterval }}
     clusterName: {{ .Values.clusterName | quote }}
     views:
       dashboard:
