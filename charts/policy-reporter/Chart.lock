@@ -4,9 +4,9 @@ dependencies:
   version: 2.4.1
 - name: ui
   repository: ""
-  version: 2.6.2
+  version: 2.6.3
 - name: kyvernoPlugin
   repository: ""
   version: 1.4.2
-digest: sha256:d8883cd2a0f00f638e75637a9291434c3ac056b5a75f3011916ae4e7a6e3dc7a
-generated: "2022-09-07T12:44:06.313+02:00"
+digest: sha256:81d364fd4b0dce6268ab59f3c6e43c68bb1a1011983f017b3b637e25839b2d5e
+generated: "2022-09-12T11:07:34.402531+02:00"
