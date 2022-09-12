@@ -8,6 +8,17 @@ import (
 	"github.com/kyverno/policy-reporter/pkg/target/http"
 )
 
+// Options to configure elasticsearch target
+type Options struct {
+	target.ClientOptions
+	Host       string
+	Username   string
+	Password   string
+	Index      string
+	Rotation   string
+	HTTPClient http.Client
+}
+
 // Rotation Enum
 type Rotation = string
 
@@ -56,14 +67,14 @@ func (e *client) Send(result report.Result) {
 }
 
 // NewClient creates a new elasticsearch.client to send Results to Elasticsearch
-func NewClient(name, host, username, password, index, rotation string, skipExistingOnStartup bool, filter *report.ResultFilter, httpClient http.Client) target.Client {
+func NewClient(options Options) target.Client {
 	return &client{
-		target.NewBaseClient(name, skipExistingOnStartup, filter),
-		host,
-		index,
-		username,
-		password,
-		rotation,
-		httpClient,
+		target.NewBaseClient(options.ClientOptions),
+		options.Host,
+		options.Index,
+		options.Username,
+		options.Password,
+		options.Rotation,
+		options.HTTPClient,
 	}
 }

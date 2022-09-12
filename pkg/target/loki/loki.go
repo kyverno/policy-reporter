@@ -9,6 +9,14 @@ import (
 	"github.com/kyverno/policy-reporter/pkg/target/http"
 )
 
+// Options to configure the Loko target
+type Options struct {
+	target.ClientOptions
+	Host         string
+	CustomLabels map[string]string
+	HTTPClient   http.Client
+}
+
 type payload struct {
 	Streams []stream `json:"streams"`
 }
@@ -98,11 +106,11 @@ func (l *client) Send(result report.Result) {
 }
 
 // NewClient creates a new loki.client to send Results to Loki
-func NewClient(name, api string, skipExistingOnStartup bool, filter *report.ResultFilter, customLabels map[string]string, httpClient http.Client) target.Client {
+func NewClient(options Options) target.Client {
 	return &client{
-		target.NewBaseClient(name, skipExistingOnStartup, filter),
-		api,
-		httpClient,
-		customLabels,
+		target.NewBaseClient(options.ClientOptions),
+		options.Host,
+		options.HTTPClient,
+		options.CustomLabels,
 	}
 }

@@ -72,7 +72,12 @@ func Load(cmd *cobra.Command) (*Config, error) {
 	if err := v.BindEnv("leaderElection.podName", "POD_NAME"); err != nil {
 		log.Printf("[WARNING] failed to bind env POD_NAME")
 	}
+
 	if err := v.BindEnv("leaderElection.namespace", "POD_NAMESPACE"); err != nil {
+		log.Printf("[WARNING] failed to bind env POD_NAMESPACE")
+	}
+
+	if err := v.BindEnv("namespace", "POD_NAMESPACE"); err != nil {
 		log.Printf("[WARNING] failed to bind env POD_NAMESPACE")
 	}
 
@@ -83,7 +88,10 @@ func Load(cmd *cobra.Command) (*Config, error) {
 	_ = v.BindEnv("emailReports.smtp.host", "EMAIL_REPORTS_SMTP_HOST")
 	_ = v.BindEnv("emailReports.smtp.port", "EMAIL_REPORTS_SMTP_PORT")
 	_ = v.BindEnv("emailReports.smtp.from", "EMAIL_REPORTS_SMTP_FROM")
+  // bind ui host from environment vars, if existing
 	_ = v.BindEnv("ui.host", "UI_HOST")
+	// bind slack webhook from environment vars, if existing
+	_ = v.BindEnv("slack.webhook", "SLACK_WEBHOOK")
 
 	c := &Config{}
 

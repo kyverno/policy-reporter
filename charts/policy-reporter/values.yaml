@@ -2,7 +2,7 @@ image:
   registry: ghcr.io
   repository: kyverno/policy-reporter
   pullPolicy: IfNotPresent
-  tag: 2.9.0
+  tag: 2.9.1
 
 imagePullSecrets: []
 
@@ -232,6 +232,8 @@ target:
   loki:
     # loki host address
     host: ""
+    # receive the host from an existing secret instead
+    secretRef: ""
     # loki api path, defaults to "/api/prom/push" (deprecated)
     path: ""
     # minimum priority "" < info < warning < critical < error
@@ -269,6 +271,8 @@ target:
     username: ""
     # elasticsearch password für HTTP Basic Auth
     password: ""
+    # receive the host, username and/or password from an existing secret instead
+    secretRef: ""
     # elasticsearch index rotation and index suffix
     # possible values: daily, monthly, annually, none (default: daily)
     rotation: ""
@@ -286,6 +290,8 @@ target:
   slack:
     # slack app webhook address
     webhook: ""
+    # receive the webhook from an existing secret instead
+    secretRef: ""
     # minimum priority "" < info < warning < critical < error
     minimumPriority: ""
     # list of sources which should send to slack
@@ -315,6 +321,8 @@ target:
   discord:
     # discord app webhook address
     webhook: ""
+    # receive the webhook from an existing secret instead
+    secretRef: ""
     # minimum priority "" < info < warning < critical < error
     minimumPriority: ""
     # list of sources which should send to discord
@@ -329,6 +337,8 @@ target:
   teams:
     # teams webhook address
     webhook: ""
+    # receive the webhook from an existing secret instead
+    secretRef: ""
     # skip TLS
     skipTLS: false
     # minimum priority "" < info < warning < critical < error
@@ -355,6 +365,8 @@ target:
   webhook:
     # webhook host address
     host: ""
+    # receive the host and/or token from an existing secret, the token is added as Authorization header
+    secretRef: ""
     # additional http headers
     headers: {}
     # minimum priority "" < info < warning < critical < error
@@ -373,6 +385,8 @@ target:
     accessKeyID: ""
     # S3 secret access key
     secretAccessKey: ""
+    # receive the accessKeyID and/or secretAccessKey from an existing secret instead
+    secretRef: ""
     # S3 storage region
     region: ""
     # S3 storage endpoint
@@ -397,6 +411,8 @@ target:
     accessKeyID: ""
     # AWS secret access key
     secretAccessKey: ""
+    # receive the accessKeyID and/or secretAccessKey from an existing secret instead
+    secretRef: ""
     # AWS region
     region: ""
     # AWS Kinesis endpoint

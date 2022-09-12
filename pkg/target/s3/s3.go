@@ -12,6 +12,13 @@ import (
 	"github.com/kyverno/policy-reporter/pkg/target"
 )
 
+// Options to configure the Kinesis target
+type Options struct {
+	target.ClientOptions
+	S3     helper.AWSClient
+	Prefix string
+}
+
 type client struct {
 	target.BaseClient
 	s3     helper.AWSClient
@@ -37,10 +44,10 @@ func (c *client) Send(result report.Result) {
 }
 
 // NewClient creates a new S3.client to send Results to S3. It doesnt' work right now
-func NewClient(name string, s3 helper.AWSClient, prefix string, skipExistingOnStartup bool, filter *report.ResultFilter) target.Client {
+func NewClient(options Options) target.Client {
 	return &client{
-		target.NewBaseClient(name, skipExistingOnStartup, filter),
-		s3,
-		prefix,
+		target.NewBaseClient(options.ClientOptions),
+		options.S3,
+		options.Prefix,
 	}
 }

@@ -510,7 +510,13 @@ func Test_TargetsAPI(t *testing.T) {
 
 		rr := httptest.NewRecorder()
 		handler := v1.TargetsHandler([]target.Client{
-			loki.NewClient("Loki", "", true, &report.ResultFilter{}, make(map[string]string), &http.Client{}),
+			loki.NewClient(loki.Options{
+				ClientOptions: target.ClientOptions{
+					Name:                  "Loki",
+					SkipExistingOnStartup: true,
+				},
+				HTTPClient: &http.Client{},
+			}),
 		})
 
 		handler.ServeHTTP(rr, req)
