@@ -88,8 +88,6 @@ func Load(cmd *cobra.Command) (*Config, error) {
 	_ = v.BindEnv("emailReports.smtp.host", "EMAIL_REPORTS_SMTP_HOST")
 	_ = v.BindEnv("emailReports.smtp.port", "EMAIL_REPORTS_SMTP_PORT")
 	_ = v.BindEnv("emailReports.smtp.from", "EMAIL_REPORTS_SMTP_FROM")
-  // bind ui host from environment vars, if existing
-	_ = v.BindEnv("ui.host", "UI_HOST")
 	// bind slack webhook from environment vars, if existing
 	_ = v.BindEnv("slack.webhook", "SLACK_WEBHOOK")
 	// bind ui host from environment vars, if existing
