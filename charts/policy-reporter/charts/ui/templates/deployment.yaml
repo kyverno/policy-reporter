@@ -18,6 +18,7 @@ spec:
     metadata:
       labels:
         {{- include "ui.selectorLabels" . | nindent 8 }}
+        {{- include "ui.podLabels" . | nindent 8 }}
         {{- with .Values.podLabels }}
           {{- toYaml . | nindent 8 }}
         {{- end }}

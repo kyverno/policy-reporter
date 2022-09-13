@@ -43,6 +43,15 @@ app.kubernetes.io/part-of: {{ include "policyreporter.name" . }}
 {{- end }}
 
 {{/*
+Pod labels
+*/}}
+{{- define "policyreporter.podLabels" -}}
+helm.sh/chart: {{ include "policyreporter.chart" . }}
+app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
+app.kubernetes.io/part-of: {{ include "policyreporter.name" . }}
+{{- end }}
+
+{{/*
 Selector labels
 */}}
 {{- define "policyreporter.selectorLabels" -}}

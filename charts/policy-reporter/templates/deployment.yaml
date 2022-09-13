@@ -22,6 +22,7 @@ spec:
     metadata:
       labels:
         {{- include "policyreporter.selectorLabels" . | nindent 8 }}
+        {{- include "policyreporter.podLabels" . | nindent 8 }}
         {{- with .Values.podLabels }}
           {{- toYaml . | nindent 8 }}
         {{- end }}

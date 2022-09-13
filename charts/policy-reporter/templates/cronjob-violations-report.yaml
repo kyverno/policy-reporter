@@ -22,8 +22,8 @@ spec:
       template:
         metadata:
           labels:
-            app.kubernetes.io/part-of: {{ include "policyreporter.name" . }}
             {{- include "policyreporter.selectorLabels" . | nindent 12 }}
+            {{- include "policyreporter.podLabels" . | nindent 12 }}
             {{- with .Values.podLabels }}
               {{- toYaml . | nindent 12 }}
             {{- end }}
