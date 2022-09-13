@@ -22,6 +22,7 @@ spec:
     metadata:
       labels:
         {{- include "kyvernoplugin.selectorLabels" . | nindent 8 }}
+        {{- include "kyvernoplugin.podLabels" . | nindent 8 }}
         {{- with .Values.podLabels }}
           {{- toYaml . | nindent 8 }}
         {{- end }}
