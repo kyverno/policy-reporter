@@ -29,6 +29,8 @@ type MetricsFilter struct {
 type Loki struct {
 	Name            string            `mapstructure:"name"`
 	Host            string            `mapstructure:"host"`
+	SkipTLS         bool              `mapstructure:"skipTLS"`
+	Certificate     string            `mapstructure:"certificate"`
 	Path            string            `mapstructure:"path"`
 	SecretRef       string            `mapstructure:"secretRef"`
 	CustomLabels    map[string]string `mapstructure:"customLabels"`
@@ -43,6 +45,8 @@ type Loki struct {
 type Elasticsearch struct {
 	Name            string          `mapstructure:"name"`
 	Host            string          `mapstructure:"host"`
+	SkipTLS         bool            `mapstructure:"skipTLS"`
+	Certificate     string          `mapstructure:"certificate"`
 	Index           string          `mapstructure:"index"`
 	Rotation        string          `mapstructure:"rotation"`
 	Username        string          `mapstructure:"username"`
@@ -88,6 +92,7 @@ type Teams struct {
 	SecretRef       string            `mapstructure:"secretRef"`
 	CustomFields    map[string]string `mapstructure:"customFields"`
 	SkipTLS         bool              `mapstructure:"skipTLS"`
+	Certificate     string            `mapstructure:"certificate"`
 	SkipExisting    bool              `mapstructure:"skipExistingOnStartup"`
 	MinimumPriority string            `mapstructure:"minimumPriority"`
 	Filter          TargetFilter      `mapstructure:"filter"`
@@ -98,6 +103,8 @@ type Teams struct {
 // UI configuration
 type UI struct {
 	Host            string   `mapstructure:"host"`
+	SkipTLS         bool     `mapstructure:"skipTLS"`
+	Certificate     string   `mapstructure:"certificate"`
 	SkipExisting    bool     `mapstructure:"skipExistingOnStartup"`
 	MinimumPriority string   `mapstructure:"minimumPriority"`
 	Sources         []string `mapstructure:"sources"`
@@ -107,6 +114,8 @@ type UI struct {
 type Webhook struct {
 	Name            string            `mapstructure:"name"`
 	Host            string            `mapstructure:"host"`
+	SkipTLS         bool              `mapstructure:"skipTLS"`
+	Certificate     string            `mapstructure:"certificate"`
 	Headers         map[string]string `mapstructure:"headers"`
 	SecretRef       string            `mapstructure:"secretRef"`
 	SkipExisting    bool              `mapstructure:"skipExistingOnStartup"`

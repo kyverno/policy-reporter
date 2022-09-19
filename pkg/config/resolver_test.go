@@ -16,6 +16,7 @@ var testConfig = &config.Config{
 		SkipExisting:    true,
 		MinimumPriority: "debug",
 		CustomLabels:    map[string]string{"label": "value"},
+		SkipTLS:         true,
 		Channels: []config.Loki{
 			{
 				CustomLabels: map[string]string{"label2": "value2"},
@@ -28,6 +29,7 @@ var testConfig = &config.Config{
 		Rotation:        "daily",
 		SkipExisting:    true,
 		MinimumPriority: "debug",
+		SkipTLS:         true,
 		Channels:        []config.Elasticsearch{{}},
 	},
 	Slack: config.Slack{
@@ -66,6 +68,7 @@ var testConfig = &config.Config{
 			"X-Custom": "Header",
 		},
 		SkipExisting:    true,
+		SkipTLS:         true,
 		MinimumPriority: "debug",
 		Channels: []config.Webhook{{
 			Host: "http://localhost:8081",

@@ -2,10 +2,8 @@ package config
 
 import (
 	"context"
-	"crypto/tls"
 	"fmt"
 	"log"
-	"net/http"
 
 	"github.com/kyverno/policy-reporter/pkg/helper"
 	"github.com/kyverno/policy-reporter/pkg/kubernetes/secrets"
@@ -13,6 +11,7 @@ import (
 	"github.com/kyverno/policy-reporter/pkg/target"
 	"github.com/kyverno/policy-reporter/pkg/target/discord"
 	"github.com/kyverno/policy-reporter/pkg/target/elasticsearch"
+	"github.com/kyverno/policy-reporter/pkg/target/http"
 	"github.com/kyverno/policy-reporter/pkg/target/kinesis"
 	"github.com/kyverno/policy-reporter/pkg/target/loki"
 	"github.com/kyverno/policy-reporter/pkg/target/s3"
@@ -186,7 +185,7 @@ func (f *TargetFactory) UIClient(config UI) target.Client {
 			Filter:                createTargetFilter(TargetFilter{}, config.MinimumPriority, config.Sources),
 		},
 		Host:       config.Host,
-		HTTPClient: &http.Client{},
+		HTTPClient: http.NewClient(config.Certificate, config.SkipTLS),
 	})
 }
 
@@ -263,7 +262,7 @@ func (f *TargetFactory) createSlackClient(config Slack, parent Slack) target.Cli
 		},
 		Webhook:      config.Webhook,
 		CustomFields: config.CustomFields,
-		HTTPClient:   &http.Client{},
+		HTTPClient:   http.NewClient("", false),
 	})
 }
 
@@ -276,6 +275,14 @@ func (f *TargetFactory) createLokiClient(config Loki, parent Loki) target.Client
 		return nil
 	} else if config.Host == "" {
 		config.Host = parent.Host
+	}
+
+	if config.Certificate == "" {
+		config.Certificate = parent.Certificate
+	}
+
+	if !config.SkipTLS {
+		config.SkipTLS = parent.SkipTLS
 	}
 
 	if !config.SkipExisting {
@@ -300,7 +307,7 @@ func (f *TargetFactory) createLokiClient(config Loki, parent Loki) target.Client
 		},
 		Host:         config.Host + config.Path,
 		CustomLabels: config.CustomLabels,
-		HTTPClient:   &http.Client{},
+		HTTPClient:   http.NewClient(config.Certificate, config.SkipTLS),
 	})
 }
 
@@ -313,6 +320,14 @@ func (f *TargetFactory) createElasticsearchClient(config Elasticsearch, parent E
 		return nil
 	} else if config.Host == "" {
 		config.Host = parent.Host
+	}
+
+	if config.Certificate == "" {
+		config.Certificate = parent.Certificate
+	}
+
+	if !config.SkipTLS {
+		config.SkipTLS = parent.SkipTLS
 	}
 
 	if config.Username == "" {
@@ -356,7 +371,7 @@ func (f *TargetFactory) createElasticsearchClient(config Elasticsearch, parent E
 		Password:   config.Password,
 		Rotation:   config.Rotation,
 		Index:      config.Index,
-		HTTPClient: &http.Client{},
+		HTTPClient: http.NewClient(config.Certificate, config.SkipTLS),
 	})
 }
 
@@ -387,7 +402,7 @@ func (f *TargetFactory) createDiscordClient(config Discord, parent Discord) targ
 		},
 		Webhook:      config.Webhook,
 		CustomFields: config.CustomFields,
-		HTTPClient:   &http.Client{},
+		HTTPClient:   http.NewClient("", false),
 	})
 }
 
@@ -398,6 +413,14 @@ func (f *TargetFactory) createTeamsClient(config Teams, parent Teams) target.Cli
 
 	if config.Webhook == "" {
 		return nil
+	}
+
+	if config.Certificate == "" {
+		config.Certificate = parent.Certificate
+	}
+
+	if !config.SkipTLS {
+		config.SkipTLS = parent.SkipTLS
 	}
 
 	if config.MinimumPriority == "" {
@@ -414,15 +437,6 @@ func (f *TargetFactory) createTeamsClient(config Teams, parent Teams) target.Cli
 
 	log.Printf("[INFO] %s configured", config.Name)
 
-	client := &http.Client{}
-
-	if config.SkipTLS {
-		client.Transport = http.DefaultTransport.(*http.Transport).Clone()
-		client.Transport.(*http.Transport).TLSClientConfig = &tls.Config{
-			InsecureSkipVerify: config.SkipTLS,
-		}
-	}
-
 	return teams.NewClient(teams.Options{
 		ClientOptions: target.ClientOptions{
 			Name:                  config.Name,
@@ -431,7 +445,7 @@ func (f *TargetFactory) createTeamsClient(config Teams, parent Teams) target.Cli
 		},
 		Webhook:      config.Webhook,
 		CustomFields: config.CustomFields,
-		HTTPClient:   &http.Client{},
+		HTTPClient:   http.NewClient(config.Certificate, config.SkipTLS),
 	})
 }
 
@@ -442,6 +456,14 @@ func (f *TargetFactory) createWebhookClient(config Webhook, parent Webhook) targ
 
 	if config.Host == "" {
 		return nil
+	}
+
+	if config.Certificate == "" {
+		config.Certificate = parent.Certificate
+	}
+
+	if !config.SkipTLS {
+		config.SkipTLS = parent.SkipTLS
 	}
 
 	if config.MinimumPriority == "" {
@@ -474,7 +496,7 @@ func (f *TargetFactory) createWebhookClient(config Webhook, parent Webhook) targ
 		},
 		Host:       config.Host,
 		Headers:    config.Headers,
-		HTTPClient: &http.Client{},
+		HTTPClient: http.NewClient(config.Certificate, config.SkipTLS),
 	})
 }
 
