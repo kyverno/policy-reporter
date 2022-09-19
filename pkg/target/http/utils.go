@@ -2,8 +2,11 @@ package http
 
 import (
 	"bytes"
+	"crypto/tls"
+	"crypto/x509"
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"net/http"
 
@@ -68,4 +71,30 @@ func NewJSONResult(r report.Result) Result {
 		},
 		CreationTimestamp: r.Timestamp,
 	}
+}
+
+func NewClient(certificatePath string, skipTLS bool) *http.Client {
+	transport := http.DefaultTransport.(*http.Transport).Clone()
+	transport.TLSClientConfig = &tls.Config{
+		InsecureSkipVerify: skipTLS,
+	}
+
+	client := &http.Client{
+		Transport: transport,
+	}
+
+	if certificatePath != "" {
+		caCert, err := ioutil.ReadFile(certificatePath)
+		if err != nil {
+			log.Printf("[ERROR] failed to read certificate: %s\n", certificatePath)
+			return client
+		}
+
+		caCertPool := x509.NewCertPool()
+		caCertPool.AppendCertsFromPEM(caCert)
+
+		transport.TLSClientConfig.RootCAs = caCertPool
+	}
+
+	return client
 }

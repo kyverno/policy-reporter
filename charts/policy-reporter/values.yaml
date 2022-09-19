@@ -232,6 +232,11 @@ target:
   loki:
     # loki host address
     host: ""
+    # path to your custom certificate
+    # can be added under extraVolumes
+    certificate: ""
+    # skip TLS verification if necessary
+    skipTLS: false
     # receive the host from an existing secret instead
     secretRef: ""
     # loki api path, defaults to "/api/prom/push" (deprecated)
@@ -265,6 +270,11 @@ target:
   elasticsearch:
     # elasticsearch host address
     host: ""
+    # path to your custom certificate
+    # can be added under extraVolumes
+    certificate: ""
+    # skip TLS verification if necessary
+    skipTLS: false
     # elasticsearch index (default: policy-reporter)
     index: ""
     # elasticsearch username für HTTP Basic Auth
@@ -339,7 +349,10 @@ target:
     webhook: ""
     # receive the webhook from an existing secret instead
     secretRef: ""
-    # skip TLS
+    # path to your custom certificate
+    # can be added under extraVolumes
+    certificate: ""
+    # skip TLS verification if necessary
     skipTLS: false
     # minimum priority "" < info < warning < critical < error
     minimumPriority: ""
@@ -355,6 +368,11 @@ target:
   ui:
     # ui host address
     host: ""
+    # path to your custom certificate
+    # can be added under extraVolumes
+    certificate: ""
+    # skip TLS verification if necessary
+    skipTLS: false
     # minimum priority "" < info < warning < critical < error
     minimumPriority: "warning"
     # list of sources which should send to the UI Log
@@ -365,6 +383,11 @@ target:
   webhook:
     # webhook host address
     host: ""
+    # path to your custom certificate
+    # can be added under extraVolumes
+    certificate: ""
+    # skip TLS verification if necessary
+    skipTLS: false
     # receive the host and/or token from an existing secret, the token is added as Authorization header
     secretRef: ""
     # additional http headers

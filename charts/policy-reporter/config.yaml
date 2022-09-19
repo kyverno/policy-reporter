@@ -1,5 +1,7 @@
 loki:
   host: {{ .Values.target.loki.host | quote }}
+  certificate: {{ .Values.target.loki.certificate | quote }}
+  skipTLS: {{ .Values.target.loki.skipTLS }}
   path: {{ .Values.target.loki.path | quote }}
   secretRef: {{ .Values.target.loki.secretRef | quote }}
   minimumPriority: {{ .Values.target.loki.minimumPriority | quote }}
@@ -23,6 +25,8 @@ loki:
 
 elasticsearch:
   host: {{ .Values.target.elasticsearch.host | quote }}
+  certificate: {{ .Values.target.elasticsearch.certificate | quote }}
+  skipTLS: {{ .Values.target.elasticsearch.skipTLS }}
   username: {{ .Values.target.elasticsearch.username | quote }}
   password: {{ .Values.target.elasticsearch.password | quote }}
   secretRef: {{ .Values.target.elasticsearch.secretRef | quote }}
@@ -89,6 +93,7 @@ discord:
 
 teams:
   webhook: {{ .Values.target.teams.webhook | quote }}
+  certificate: {{ .Values.target.teams.certificate | quote }}
   skipTLS: {{ .Values.target.teams.skipTLS }}
   secretRef: {{ .Values.target.teams.secretRef | quote }}
   minimumPriority: {{ .Values.target.teams.minimumPriority | quote }}
@@ -112,6 +117,8 @@ teams:
 
 webhook:
   host: {{ .Values.target.webhook.host | quote }}
+  certificate: {{ .Values.target.webhook.certificate | quote }}
+  skipTLS: {{ .Values.target.webhook.skipTLS }}
   secretRef: {{ .Values.target.webhook.secretRef | quote }}
   minimumPriority: {{ .Values.target.webhook.minimumPriority | quote }}
   skipExistingOnStartup: {{ .Values.target.webhook.skipExistingOnStartup }}
@@ -130,6 +137,8 @@ webhook:
 
 ui:
   host: {{ include "policyreporter.uihost" . }}
+  certificate: {{ .Values.target.ui.certificate | quote }}
+  skipTLS: {{ .Values.target.ui.skipTLS }}
   minimumPriority: {{ .Values.target.ui.minimumPriority | quote }}
   skipExistingOnStartup: {{ .Values.target.ui.skipExistingOnStartup }}
   {{- with .Values.target.ui.sources }}
