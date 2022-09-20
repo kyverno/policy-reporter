@@ -94,7 +94,7 @@ spec:
       automountServiceAccountToken: false
       containers:
         - name: ui
-          image: "ghcr.io/kyverno/policy-reporter-ui:1.6.5"
+          image: "ghcr.io/kyverno/policy-reporter-ui:1.6.6"
           imagePullPolicy: IfNotPresent
           securityContext:
             allowPrivilegeEscalation: false

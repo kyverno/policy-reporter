@@ -1,5 +1,16 @@
 # Changelog
 
+# 2.13.0
+* Policy Reporter
+    * New `certificate` config for `loki`, `elasticsearch`, `teams`, `webhook` and `ui`, to set the path to your custom certificate for the related client.
+    * New `skipTLS` config for `loki`, `elasticsearch`, `teams`, `webhook` and `ui`, to skip tls if needed for the given target.
+    * New `secretRef` for targets to reference a secret with the related `username`, `password`, `webhook`, `host`, `accessKeyID`, `secretAccessKey` information of the given target, instead of configure your credentials directly.
+* Policy Reporter UI
+    * New value `refreshInterval` to configure the default refresh interval for API polling. Set `0` to disable polling.
+* Policy Reporter Kyverno Plugin
+    * Fix the creation of duplicated results for PolicyReportResults.
+
+
 # 2.12.0
 * Policy Reporter
     * New Helm Chart value to add extra volumes to PolicyReporter deployment [[#186](https://github.com/kyverno/policy-reporter/pull/186) by [preved911](https://github.com/preved911)]

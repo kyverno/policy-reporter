@@ -238,7 +238,7 @@ spec:
       automountServiceAccountToken: true
       containers:
         - name: "kyverno-plugin"
-          image: "ghcr.io/kyverno/policy-reporter-kyverno-plugin:1.4.1"
+          image: "ghcr.io/kyverno/policy-reporter-kyverno-plugin:1.4.2"
           imagePullPolicy: IfNotPresent
           securityContext:
             allowPrivilegeEscalation: false
@@ -308,7 +308,7 @@ spec:
     spec:
       containers:
         - name: ui
-          image: "ghcr.io/kyverno/policy-reporter-ui:1.6.5"
+          image: "ghcr.io/kyverno/policy-reporter-ui:1.6.6"
           imagePullPolicy: IfNotPresent
           securityContext:
             allowPrivilegeEscalation: false
