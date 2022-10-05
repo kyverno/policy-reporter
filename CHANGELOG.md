@@ -1,5 +1,8 @@
 # Changelog
 
+# 2.13.1
+* Policy Reporter
+
 # 2.13.0
 * Policy Reporter
     * New `certificate` config for `loki`, `elasticsearch`, `teams`, `webhook` and `ui`, to set the path to your custom certificate for the related client.
