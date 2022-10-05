@@ -51,7 +51,7 @@ const (
 		FOREIGN KEY (policy_report_id) REFERENCES policy_report(id) ON DELETE CASCADE
 	);`
 
-	resultInsertBaseSQL = "INSERT INTO policy_report_result(policy_report_id, id, policy, rule, message, scored, priority, status, severity, category, source, resource_api_version, resource_kind, resource_name, resource_namespace, resource_uid, properties, timestamp) VALUES "
+	resultInsertBaseSQL = "INSERT OR IGNORE INTO policy_report_result(policy_report_id, id, policy, rule, message, scored, priority, status, severity, category, source, resource_api_version, resource_kind, resource_name, resource_namespace, resource_uid, properties, timestamp) VALUES "
 )
 
 type PolicyReportStore interface {

@@ -97,6 +97,15 @@ var preport = report.PolicyReport{
 	CreationTimestamp: time.Now(),
 }
 
+var dreport = report.PolicyReport{
+	ID:                report.GeneratePolicyReportID("polr-test", "test"),
+	Name:              "polr-test",
+	Namespace:         "test",
+	Results:           []report.Result{result1, result1, result2},
+	Summary:           report.Summary{Fail: 1},
+	CreationTimestamp: time.Now(),
+}
+
 var ureport = report.PolicyReport{
 	ID:                report.GeneratePolicyReportID("polr-test", "test"),
 	Name:              "polr-test",
@@ -573,6 +582,28 @@ func Test_PolicyReportStore(t *testing.T) {
 		list, _ := store.FetchNamespacedResults(v1.Filter{}, v1.Pagination{Page: 0})
 		if len(list) == 1 {
 			t.Fatalf("Should have no results after CleanUp")
+		}
+	})
+
+	t.Run("Insert duplicates", func(t *testing.T) {
+		err := store.Add(dreport)
+		if err != nil {
+			t.Errorf("Should ignore duplicated ID: %s", err)
+		}
+
+		polr, ok := store.Get(preport.GetIdentifier())
+		if ok == false {
+			t.Errorf("Should be found in Store after adding report to the store")
+		}
+
+		if len(polr.Results) != 2 {
+			t.Errorf("Should ignore duplicated result")
+		}
+
+		store.Remove(dreport.GetIdentifier())
+		_, ok = store.Get(dreport.GetIdentifier())
+		if ok == true {
+			t.Fatalf("Should not be found after Remove report from Store")
 		}
 	})
 }
