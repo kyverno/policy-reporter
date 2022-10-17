@@ -43,20 +43,21 @@ type Loki struct {
 
 // Elasticsearch configuration
 type Elasticsearch struct {
-	Name            string          `mapstructure:"name"`
-	Host            string          `mapstructure:"host"`
-	SkipTLS         bool            `mapstructure:"skipTLS"`
-	Certificate     string          `mapstructure:"certificate"`
-	Index           string          `mapstructure:"index"`
-	Rotation        string          `mapstructure:"rotation"`
-	Username        string          `mapstructure:"username"`
-	Password        string          `mapstructure:"password"`
-	SecretRef       string          `mapstructure:"secretRef"`
-	SkipExisting    bool            `mapstructure:"skipExistingOnStartup"`
-	MinimumPriority string          `mapstructure:"minimumPriority"`
-	Filter          TargetFilter    `mapstructure:"filter"`
-	Sources         []string        `mapstructure:"sources"`
-	Channels        []Elasticsearch `mapstructure:"channels"`
+	Name            string            `mapstructure:"name"`
+	Host            string            `mapstructure:"host"`
+	SkipTLS         bool              `mapstructure:"skipTLS"`
+	Certificate     string            `mapstructure:"certificate"`
+	Index           string            `mapstructure:"index"`
+	Rotation        string            `mapstructure:"rotation"`
+	Username        string            `mapstructure:"username"`
+	Password        string            `mapstructure:"password"`
+	SecretRef       string            `mapstructure:"secretRef"`
+	CustomFields    map[string]string `mapstructure:"customFields"`
+	SkipExisting    bool              `mapstructure:"skipExistingOnStartup"`
+	MinimumPriority string            `mapstructure:"minimumPriority"`
+	Filter          TargetFilter      `mapstructure:"filter"`
+	Sources         []string          `mapstructure:"sources"`
+	Channels        []Elasticsearch   `mapstructure:"channels"`
 }
 
 // Slack configuration
@@ -118,6 +119,7 @@ type Webhook struct {
 	Certificate     string            `mapstructure:"certificate"`
 	Headers         map[string]string `mapstructure:"headers"`
 	SecretRef       string            `mapstructure:"secretRef"`
+	CustomFields    map[string]string `mapstructure:"customFields"`
 	SkipExisting    bool              `mapstructure:"skipExistingOnStartup"`
 	MinimumPriority string            `mapstructure:"minimumPriority"`
 	Filter          TargetFilter      `mapstructure:"filter"`
@@ -127,35 +129,37 @@ type Webhook struct {
 
 // S3 configuration
 type S3 struct {
-	Name            string       `mapstructure:"name"`
-	AccessKeyID     string       `mapstructure:"accessKeyID"`
-	SecretAccessKey string       `mapstructure:"secretAccessKey"`
-	Region          string       `mapstructure:"region"`
-	Endpoint        string       `mapstructure:"endpoint"`
-	Prefix          string       `mapstructure:"prefix"`
-	Bucket          string       `mapstructure:"bucket"`
-	SecretRef       string       `mapstructure:"secretRef"`
-	SkipExisting    bool         `mapstructure:"skipExistingOnStartup"`
-	MinimumPriority string       `mapstructure:"minimumPriority"`
-	Filter          TargetFilter `mapstructure:"filter"`
-	Sources         []string     `mapstructure:"sources"`
-	Channels        []S3         `mapstructure:"channels"`
+	Name            string            `mapstructure:"name"`
+	AccessKeyID     string            `mapstructure:"accessKeyID"`
+	SecretAccessKey string            `mapstructure:"secretAccessKey"`
+	Region          string            `mapstructure:"region"`
+	Endpoint        string            `mapstructure:"endpoint"`
+	Prefix          string            `mapstructure:"prefix"`
+	Bucket          string            `mapstructure:"bucket"`
+	SecretRef       string            `mapstructure:"secretRef"`
+	CustomFields    map[string]string `mapstructure:"customFields"`
+	SkipExisting    bool              `mapstructure:"skipExistingOnStartup"`
+	MinimumPriority string            `mapstructure:"minimumPriority"`
+	Filter          TargetFilter      `mapstructure:"filter"`
+	Sources         []string          `mapstructure:"sources"`
+	Channels        []S3              `mapstructure:"channels"`
 }
 
 // Kinesis configuration
 type Kinesis struct {
-	Name            string       `mapstructure:"name"`
-	AccessKeyID     string       `mapstructure:"accessKeyID"`
-	SecretAccessKey string       `mapstructure:"secretAccessKey"`
-	Region          string       `mapstructure:"region"`
-	Endpoint        string       `mapstructure:"endpoint"`
-	StreamName      string       `mapstructure:"streamName"`
-	SecretRef       string       `mapstructure:"secretRef"`
-	SkipExisting    bool         `mapstructure:"skipExistingOnStartup"`
-	MinimumPriority string       `mapstructure:"minimumPriority"`
-	Filter          TargetFilter `mapstructure:"filter"`
-	Sources         []string     `mapstructure:"sources"`
-	Channels        []Kinesis    `mapstructure:"channels"`
+	Name            string            `mapstructure:"name"`
+	AccessKeyID     string            `mapstructure:"accessKeyID"`
+	SecretAccessKey string            `mapstructure:"secretAccessKey"`
+	Region          string            `mapstructure:"region"`
+	Endpoint        string            `mapstructure:"endpoint"`
+	StreamName      string            `mapstructure:"streamName"`
+	SecretRef       string            `mapstructure:"secretRef"`
+	CustomFields    map[string]string `mapstructure:"customFields"`
+	SkipExisting    bool              `mapstructure:"skipExistingOnStartup"`
+	MinimumPriority string            `mapstructure:"minimumPriority"`
+	Filter          TargetFilter      `mapstructure:"filter"`
+	Sources         []string          `mapstructure:"sources"`
+	Channels        []Kinesis         `mapstructure:"channels"`
 }
 
 // SMTP configuration

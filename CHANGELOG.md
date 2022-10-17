@@ -1,5 +1,11 @@
 # Changelog
 
+# 2.13.2
+* Policy Reporter
+    * Add `customFields` property to missing targets: `Elasticsearch`, `S3`, `Webhook`, `Kinesis`
+* Policy Reporter UI
+    * Create Links out of URL property values
+
 # 2.13.1
 * Policy Reporter
 

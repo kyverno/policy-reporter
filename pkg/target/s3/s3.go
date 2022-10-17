@@ -15,17 +15,33 @@ import (
 // Options to configure the Kinesis target
 type Options struct {
 	target.ClientOptions
-	S3     helper.AWSClient
-	Prefix string
+	CustomFields map[string]string
+	S3           helper.AWSClient
+	Prefix       string
 }
 
 type client struct {
 	target.BaseClient
-	s3     helper.AWSClient
-	prefix string
+	customFields map[string]string
+	s3           helper.AWSClient
+	prefix       string
 }
 
 func (c *client) Send(result report.Result) {
+	if len(c.customFields) > 0 {
+		props := make(map[string]string, 0)
+
+		for property, value := range c.customFields {
+			props[property] = value
+		}
+
+		for property, value := range result.Properties {
+			props[property] = value
+		}
+
+		result.Properties = props
+	}
+
 	body := new(bytes.Buffer)
 
 	if err := json.NewEncoder(body).Encode(result); err != nil {
@@ -47,6 +63,7 @@ func (c *client) Send(result report.Result) {
 func NewClient(options Options) target.Client {
 	return &client{
 		target.NewBaseClient(options.ClientOptions),
+		options.CustomFields,
 		options.S3,
 		options.Prefix,
 	}

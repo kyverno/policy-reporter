@@ -27,6 +27,7 @@ var completeResult = report.Result{
 		Namespace:  "default",
 		UID:        "536ab69f-1b3c-4bd9-9ba4-274a56188409",
 	},
+	Properties: map[string]string{"version": "1234"},
 }
 
 type testClient struct {
@@ -69,11 +70,16 @@ func Test_UITarget(t *testing.T) {
 			ClientOptions: target.ClientOptions{
 				Name: "UI",
 			},
-			Host:       "http://localhost:8080/webhook",
-			Headers:    map[string]string{"X-Code": "1234"},
-			HTTPClient: testClient{callback, 200},
+			Host:         "http://localhost:8080/webhook",
+			Headers:      map[string]string{"X-Code": "1234"},
+			CustomFields: map[string]string{"cluster": "name"},
+			HTTPClient:   testClient{callback, 200},
 		})
 		client.Send(completeResult)
+
+		if len(completeResult.Properties) > 1 || completeResult.Properties["cluster"] != "" {
+			t.Error("expected customFields are not added to the actuel result")
+		}
 	})
 	t.Run("Name", func(t *testing.T) {
 		client := webhook.NewClient(webhook.Options{
