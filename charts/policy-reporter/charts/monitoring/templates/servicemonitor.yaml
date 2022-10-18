@@ -18,6 +18,7 @@ spec:
         {{- include "policyreporter.selectorLabels" . | nindent 8 }}
   endpoints:
   - port: http
+    honorLabels: {{ .Values.serviceMonitor.honorLabels }}
     relabelings:
     - action: labeldrop
       regex: pod|service|container

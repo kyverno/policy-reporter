@@ -19,6 +19,7 @@ spec:
         {{- include "kyvernoplugin.selectorLabels" . | nindent 8 }}
   endpoints:
   - port: rest
+    honorLabels: {{ .Values.kyverno.serviceMonitor.honorLabels }}
     relabelings:
     - action: labeldrop
       regex: pod|service|container
