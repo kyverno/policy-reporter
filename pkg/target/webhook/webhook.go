@@ -9,19 +9,35 @@ import (
 // Options to configure the Discord target
 type Options struct {
 	target.ClientOptions
-	Host       string
-	Headers    map[string]string
-	HTTPClient http.Client
+	Host         string
+	Headers      map[string]string
+	CustomFields map[string]string
+	HTTPClient   http.Client
 }
 
 type client struct {
 	target.BaseClient
-	host    string
-	headers map[string]string
-	client  http.Client
+	host         string
+	headers      map[string]string
+	customFields map[string]string
+	client       http.Client
 }
 
 func (e *client) Send(result report.Result) {
+	if len(e.customFields) > 0 {
+		props := make(map[string]string, 0)
+
+		for property, value := range e.customFields {
+			props[property] = value
+		}
+
+		for property, value := range result.Properties {
+			props[property] = value
+		}
+
+		result.Properties = props
+	}
+
 	req, err := http.CreateJSONRequest(e.Name(), "POST", e.host, http.NewJSONResult(result))
 	if err != nil {
 		return
@@ -41,6 +57,7 @@ func NewClient(options Options) target.Client {
 		target.NewBaseClient(options.ClientOptions),
 		options.Host,
 		options.Headers,
+		options.CustomFields,
 		options.HTTPClient,
 	}
 }

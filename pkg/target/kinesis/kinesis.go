@@ -15,15 +15,31 @@ import (
 // Options to configure the Kinesis target
 type Options struct {
 	target.ClientOptions
-	Kinesis helper.AWSClient
+	CustomFields map[string]string
+	Kinesis      helper.AWSClient
 }
 
 type client struct {
 	target.BaseClient
-	kinesis helper.AWSClient
+	customFields map[string]string
+	kinesis      helper.AWSClient
 }
 
 func (c *client) Send(result report.Result) {
+	if len(c.customFields) > 0 {
+		props := make(map[string]string, 0)
+
+		for property, value := range c.customFields {
+			props[property] = value
+		}
+
+		for property, value := range result.Properties {
+			props[property] = value
+		}
+
+		result.Properties = props
+	}
+
 	body := new(bytes.Buffer)
 
 	if err := json.NewEncoder(body).Encode(result); err != nil {
@@ -45,6 +61,7 @@ func (c *client) Send(result report.Result) {
 func NewClient(options Options) target.Client {
 	return &client{
 		target.NewBaseClient(options.ClientOptions),
+		options.CustomFields,
 		options.Kinesis,
 	}
 }

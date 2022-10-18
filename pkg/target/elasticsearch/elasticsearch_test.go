@@ -68,14 +68,19 @@ func Test_ElasticsearchTarget(t *testing.T) {
 			ClientOptions: target.ClientOptions{
 				Name: "Elasticsearch",
 			},
-			Host:       "http://localhost:9200",
-			Username:   "username",
-			Password:   "password",
-			Index:      "policy-reporter",
-			Rotation:   elasticsearch.Annually,
-			HTTPClient: testClient{callback, 200},
+			Host:         "http://localhost:9200",
+			Username:     "username",
+			Password:     "password",
+			Index:        "policy-reporter",
+			Rotation:     elasticsearch.Annually,
+			HTTPClient:   testClient{callback, 200},
+			CustomFields: map[string]string{"cluster": "name"},
 		})
 		client.Send(completeResult)
+
+		if len(completeResult.Properties) > 1 {
+			t.Error("expected customFields are not added to the actuel result")
+		}
 	})
 	t.Run("Send with Monthly Result", func(t *testing.T) {
 		callback := func(req *http.Request) {

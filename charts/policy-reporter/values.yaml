@@ -292,6 +292,8 @@ target:
     sources: []
     # Skip already existing PolicyReportResults on startup
     skipExistingOnStartup: true
+    # Added as additional properties to each elasticsearch event
+    customField: {}
     # filter results send by namespaces, policies and priorities
     filter: {}
     # add additional elasticsearch channels with different configurations and filters
@@ -398,6 +400,8 @@ target:
     sources: []
     # Skip already existing PolicyReportResults on startup
     skipExistingOnStartup: true
+    # Added as additional properties to each webhook event
+    customField: {}
     # filter results send by namespaces, policies and priorities
     filter: {}
     # add additional webhook channels with different configurations and filters
@@ -424,6 +428,8 @@ target:
     sources: []
     # Skip already existing PolicyReportResults on startup
     skipExistingOnStartup: true
+    # Added as additional properties to each s3 event
+    customField: {}
     # filter results send by namespaces, policies and priorities
     filter: {}
     # add additional s3 channels with different configurations and filters
@@ -448,6 +454,8 @@ target:
     sources: []
     # Skip already existing PolicyReportResults on startup
     skipExistingOnStartup: true
+    # Added as additional properties to each kinesis event
+    customField: {}
     # filter results send by namespaces, policies and priorities
     filter: {}
     # add additional s3 channels with different configurations and filters

@@ -38,6 +38,10 @@ elasticsearch:
   sources:
     {{- toYaml . | nindent 4 }}
   {{- end }}
+  {{- with .Values.target.elasticsearch.customFields }}
+  customFields:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
   {{- with .Values.target.elasticsearch.filter }}
   filter:
     {{- toYaml . | nindent 4 }}
@@ -126,6 +130,10 @@ webhook:
   sources:
     {{- toYaml . | nindent 4 }}
   {{- end }}
+  {{- with .Values.target.webhook.customFields }}
+  customFields:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
   {{- with .Values.target.webhook.filter }}
   filter:
     {{- toYaml . | nindent 4 }}
@@ -160,6 +168,10 @@ s3:
   sources:
     {{- toYaml . | nindent 4 }}
   {{- end }}
+  {{- with .Values.target.s3.customFields }}
+  customFields:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
   {{- with .Values.target.s3.filter }}
   filter:
     {{- toYaml . | nindent 4 }}
@@ -180,6 +192,10 @@ kinesis:
   skipExistingOnStartup: {{ .Values.target.kinesis.skipExistingOnStartup }}
   {{- with .Values.target.kinesis.sources }}
   sources:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  {{- with .Values.target.kinesis.customFields }}
+  customFields:
     {{- toYaml . | nindent 4 }}
   {{- end }}
   {{- with .Values.target.kinesis.filter }}

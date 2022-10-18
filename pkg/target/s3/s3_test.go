@@ -11,14 +11,15 @@ import (
 )
 
 var completeResult = report.Result{
-	Message:  "validation error: requests and limits required. Rule autogen-check-for-requests-and-limits failed at path /spec/template/spec/containers/0/resources/requests/",
-	Policy:   "require-requests-and-limits-required",
-	Rule:     "autogen-check-for-requests-and-limits",
-	Priority: report.WarningPriority,
-	Status:   report.Fail,
-	Severity: report.High,
-	Category: "resources",
-	Scored:   true,
+	Message:    "validation error: requests and limits required. Rule autogen-check-for-requests-and-limits failed at path /spec/template/spec/containers/0/resources/requests/",
+	Policy:     "require-requests-and-limits-required",
+	Rule:       "autogen-check-for-requests-and-limits",
+	Priority:   report.WarningPriority,
+	Status:     report.Fail,
+	Severity:   report.High,
+	Category:   "resources",
+	Scored:     true,
+	Properties: map[string]string{"version": "1234"},
 	Resource: report.Resource{
 		APIVersion: "v1",
 		Kind:       "Deployment",
@@ -57,9 +58,14 @@ func Test_S3Target(t *testing.T) {
 			ClientOptions: target.ClientOptions{
 				Name: "S3",
 			},
-			S3: &testClient{nil, callback},
+			CustomFields: map[string]string{"cluster": "name"},
+			S3:           &testClient{nil, callback},
 		})
 		client.Send(completeResult)
+
+		if len(completeResult.Properties) > 1 || completeResult.Properties["cluster"] != "" {
+			t.Error("expected customFields are not added to the actuel result")
+		}
 	})
 	t.Run("Name", func(t *testing.T) {
 		client := s3.NewClient(s3.Options{

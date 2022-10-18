@@ -11,12 +11,13 @@ import (
 // Options to configure elasticsearch target
 type Options struct {
 	target.ClientOptions
-	Host       string
-	Username   string
-	Password   string
-	Index      string
-	Rotation   string
-	HTTPClient http.Client
+	Host         string
+	Username     string
+	Password     string
+	Index        string
+	Rotation     string
+	CustomFields map[string]string
+	HTTPClient   http.Client
 }
 
 // Rotation Enum
@@ -32,12 +33,13 @@ const (
 
 type client struct {
 	target.BaseClient
-	host     string
-	index    string
-	username string
-	password string
-	rotation Rotation
-	client   http.Client
+	host         string
+	index        string
+	username     string
+	password     string
+	rotation     Rotation
+	customFields map[string]string
+	client       http.Client
 }
 
 func (e *client) Send(result report.Result) {
@@ -51,6 +53,20 @@ func (e *client) Send(result report.Result) {
 		host = e.host + "/" + e.index + "-" + time.Now().Format("2006.01") + "/event"
 	default:
 		host = e.host + "/" + e.index + "-" + time.Now().Format("2006.01.02") + "/event"
+	}
+
+	if len(e.customFields) > 0 {
+		props := make(map[string]string, 0)
+
+		for property, value := range e.customFields {
+			props[property] = value
+		}
+
+		for property, value := range result.Properties {
+			props[property] = value
+		}
+
+		result.Properties = props
 	}
 
 	req, err := http.CreateJSONRequest(e.Name(), "POST", host, result)
@@ -75,6 +91,7 @@ func NewClient(options Options) target.Client {
 		options.Username,
 		options.Password,
 		options.Rotation,
+		options.CustomFields,
 		options.HTTPClient,
 	}
 }
