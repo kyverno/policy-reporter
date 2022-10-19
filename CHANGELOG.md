@@ -10,6 +10,8 @@
 
 # 2.13.1
 * Policy Reporter
+    * Fix persist error for duplicated IDs
+    * Disable UI SA automount
 
 # 2.13.0
 * Policy Reporter
