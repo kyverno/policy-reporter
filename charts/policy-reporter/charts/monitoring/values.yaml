@@ -5,6 +5,8 @@ plugins:
 annotations: {}
 
 serviceMonitor:
+  # HonorLabels chooses the metrics labels on collisions with target labels
+  honorLabels: false
   # allow to override the namespace for serviceMonitor
   namespace:
   # labels to match the serviceMonitorSelector of the Prometheus Resource
@@ -16,6 +18,8 @@ serviceMonitor:
 
 kyverno:
   serviceMonitor:
+    # HonorLabels chooses the metrics labels on collisions with target labels
+    honorLabels: false
     # see serviceMonitor.relabelings
     relabelings: []
     # see serviceMonitor.relabelings
