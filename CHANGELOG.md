@@ -5,6 +5,8 @@
     * Add `customFields` property to missing targets: `Elasticsearch`, `S3`, `Webhook`, `Kinesis`
 * Policy Reporter UI
     * Create Links out of URL property values
+* Monitoring
+    * New `monitoring.serviceMonitor.honorLabels` and `monitoring.kyverno.serviceMonitor.honorLabels` value: chooses the metrics labels on collisions with target labels [[#216](https://github.com/kyverno/policy-reporter/pull/216) by [monotek](https://github.com/monotek)]
 
 # 2.13.1
 * Policy Reporter
