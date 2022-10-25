@@ -2,7 +2,7 @@ image:
   registry: ghcr.io
   repository: kyverno/policy-reporter
   pullPolicy: IfNotPresent
-  tag: 2.10.1
+  tag: 2.10.2
 
 imagePullSecrets: []
 
@@ -293,7 +293,7 @@ target:
     # Skip already existing PolicyReportResults on startup
     skipExistingOnStartup: true
     # Added as additional properties to each elasticsearch event
-    customField: {}
+    customFields: {}
     # filter results send by namespaces, policies and priorities
     filter: {}
     # add additional elasticsearch channels with different configurations and filters
@@ -311,7 +311,7 @@ target:
     # Skip already existing PolicyReportResults on startup
     skipExistingOnStartup: true
     # Added as additional fields to each Slack event
-    customField: {}
+    customFields: {}
     # filter results send by namespaces, policies and priorities
     filter: {}
     # add additional slack channels with different configurations and filters
@@ -401,7 +401,7 @@ target:
     # Skip already existing PolicyReportResults on startup
     skipExistingOnStartup: true
     # Added as additional properties to each webhook event
-    customField: {}
+    customFields: {}
     # filter results send by namespaces, policies and priorities
     filter: {}
     # add additional webhook channels with different configurations and filters
@@ -429,7 +429,7 @@ target:
     # Skip already existing PolicyReportResults on startup
     skipExistingOnStartup: true
     # Added as additional properties to each s3 event
-    customField: {}
+    customFields: {}
     # filter results send by namespaces, policies and priorities
     filter: {}
     # add additional s3 channels with different configurations and filters
@@ -455,7 +455,7 @@ target:
     # Skip already existing PolicyReportResults on startup
     skipExistingOnStartup: true
     # Added as additional properties to each kinesis event
-    customField: {}
+    customFields: {}
     # filter results send by namespaces, policies and priorities
     filter: {}
     # add additional s3 channels with different configurations and filters

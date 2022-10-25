@@ -1,5 +1,9 @@
 # Changelog
 
+# 2.13.3
+* Fix `customFields` property in values.yaml
+* Fix PolicyReporter `image.tag` version
+
 # 2.13.2
 * Policy Reporter
     * Add `customFields` property to missing targets: `Elasticsearch`, `S3`, `Webhook`, `Kinesis`
