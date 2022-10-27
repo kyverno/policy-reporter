@@ -366,12 +366,13 @@ func (f *TargetFactory) createElasticsearchClient(config Elasticsearch, parent E
 			SkipExistingOnStartup: config.SkipExisting,
 			Filter:                createTargetFilter(config.Filter, config.MinimumPriority, config.Sources),
 		},
-		Host:       config.Host,
-		Username:   config.Username,
-		Password:   config.Password,
-		Rotation:   config.Rotation,
-		Index:      config.Index,
-		HTTPClient: http.NewClient(config.Certificate, config.SkipTLS),
+		Host:         config.Host,
+		Username:     config.Username,
+		Password:     config.Password,
+		Rotation:     config.Rotation,
+		Index:        config.Index,
+		CustomFields: config.CustomFields,
+		HTTPClient:   http.NewClient(config.Certificate, config.SkipTLS),
 	})
 }
 
@@ -494,9 +495,10 @@ func (f *TargetFactory) createWebhookClient(config Webhook, parent Webhook) targ
 			SkipExistingOnStartup: config.SkipExisting,
 			Filter:                createTargetFilter(config.Filter, config.MinimumPriority, config.Sources),
 		},
-		Host:       config.Host,
-		Headers:    config.Headers,
-		HTTPClient: http.NewClient(config.Certificate, config.SkipTLS),
+		Host:         config.Host,
+		Headers:      config.Headers,
+		CustomFields: config.CustomFields,
+		HTTPClient:   http.NewClient(config.Certificate, config.SkipTLS),
 	})
 }
 
@@ -569,8 +571,9 @@ func (f *TargetFactory) createS3Client(config S3, parent S3) target.Client {
 			SkipExistingOnStartup: config.SkipExisting,
 			Filter:                createTargetFilter(config.Filter, config.MinimumPriority, config.Sources),
 		},
-		S3:     s3Client,
-		Prefix: config.Prefix,
+		S3:           s3Client,
+		CustomFields: config.CustomFields,
+		Prefix:       config.Prefix,
 	})
 }
 
@@ -637,7 +640,8 @@ func (f *TargetFactory) createKinesisClient(config Kinesis, parent Kinesis) targ
 			SkipExistingOnStartup: config.SkipExisting,
 			Filter:                createTargetFilter(config.Filter, config.MinimumPriority, config.Sources),
 		},
-		Kinesis: kinesisClient,
+		CustomFields: config.CustomFields,
+		Kinesis:      kinesisClient,
 	})
 }
 

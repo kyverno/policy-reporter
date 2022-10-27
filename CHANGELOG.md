@@ -1,5 +1,8 @@
 # Changelog
 
+# 2.13.4
+* Fix `customFields` mapping in TargetFactory
+
 # 2.13.3
 * Fix `customFields` property in values.yaml
 * Fix PolicyReporter `image.tag` version

@@ -286,4 +286,109 @@ func Test_GetValuesFromSecret(t *testing.T) {
 			t.Error("Expected client are skipped")
 		}
 	})
+
+	t.Run("Get CustomFields from Slack", func(t *testing.T) {
+		clients := factory.SlackClients(config.Slack{CustomFields: map[string]string{"field": "value"}, Webhook: "http://localhost"})
+		if len(clients) != 1 {
+			t.Error("Expected one client created")
+		}
+
+		client := reflect.ValueOf(clients[0]).Elem()
+
+		customFields := client.FieldByName("customFields").MapKeys()
+		if customFields[0].String() != "field" {
+			t.Errorf("Expected customFields are added")
+		}
+	})
+	t.Run("Get CustomFields from Discord", func(t *testing.T) {
+		clients := factory.DiscordClients(config.Discord{CustomFields: map[string]string{"field": "value"}, Webhook: "http://localhost"})
+		if len(clients) != 1 {
+			t.Error("Expected one client created")
+		}
+
+		client := reflect.ValueOf(clients[0]).Elem()
+
+		customFields := client.FieldByName("customFields").MapKeys()
+		if customFields[0].String() != "field" {
+			t.Errorf("Expected customFields are added")
+		}
+	})
+	t.Run("Get CustomFields from MS Teams", func(t *testing.T) {
+		clients := factory.TeamsClients(config.Teams{CustomFields: map[string]string{"field": "value"}, Webhook: "http://localhost"})
+		if len(clients) != 1 {
+			t.Error("Expected one client created")
+		}
+
+		client := reflect.ValueOf(clients[0]).Elem()
+
+		customFields := client.FieldByName("customFields").MapKeys()
+		if customFields[0].String() != "field" {
+			t.Errorf("Expected customFields are added")
+		}
+	})
+	t.Run("Get CustomFields from Elasticsearch", func(t *testing.T) {
+		clients := factory.ElasticsearchClients(config.Elasticsearch{CustomFields: map[string]string{"field": "value"}, Host: "http://localhost"})
+		if len(clients) != 1 {
+			t.Error("Expected one client created")
+		}
+
+		client := reflect.ValueOf(clients[0]).Elem()
+
+		customFields := client.FieldByName("customFields").MapKeys()
+		if customFields[0].String() != "field" {
+			t.Errorf("Expected customFields are added")
+		}
+	})
+	t.Run("Get CustomFields from Webhook", func(t *testing.T) {
+		clients := factory.WebhookClients(config.Webhook{CustomFields: map[string]string{"field": "value"}, Host: "http://localhost"})
+		if len(clients) != 1 {
+			t.Error("Expected one client created")
+		}
+
+		client := reflect.ValueOf(clients[0]).Elem()
+
+		customFields := client.FieldByName("customFields").MapKeys()
+		if customFields[0].String() != "field" {
+			t.Errorf("Expected customFields are added")
+		}
+	})
+	t.Run("Get CustomFields from Kinesis", func(t *testing.T) {
+		clients := factory.KinesisClients(testConfig.Kinesis)
+		if len(clients) < 1 {
+			t.Error("Expected one client created")
+		}
+
+		client := reflect.ValueOf(clients[0]).Elem()
+
+		customFields := client.FieldByName("customFields").MapKeys()
+		if customFields[0].String() != "field" {
+			t.Errorf("Expected customFields are added")
+		}
+	})
+	t.Run("Get CustomFields from S3", func(t *testing.T) {
+		clients := factory.S3Clients(testConfig.S3)
+		if len(clients) < 1 {
+			t.Error("Expected one client created")
+		}
+
+		client := reflect.ValueOf(clients[0]).Elem()
+
+		customFields := client.FieldByName("customFields").MapKeys()
+		if customFields[0].String() != "field" {
+			t.Errorf("Expected customFields are added")
+		}
+	})
+	t.Run("Get CustomLabels from Loki", func(t *testing.T) {
+		clients := factory.LokiClients(config.Loki{CustomLabels: map[string]string{"label": "value"}, Host: "http://localhost"})
+		if len(clients) < 1 {
+			t.Error("Expected one client created")
+		}
+
+		client := reflect.ValueOf(clients[0]).Elem()
+
+		customFields := client.FieldByName("customLabels").MapKeys()
+		if customFields[0].String() != "label" {
+			t.Errorf("Expected customLabels are added")
+		}
+	})
 }

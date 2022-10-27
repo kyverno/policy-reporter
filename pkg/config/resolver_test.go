@@ -36,6 +36,7 @@ var testConfig = &config.Config{
 		Webhook:         "http://hook.slack:80",
 		SkipExisting:    true,
 		MinimumPriority: "debug",
+		CustomFields:    map[string]string{"field": "value"},
 		Channels: []config.Slack{{
 			Webhook: "http://localhost:9200",
 		}},
@@ -44,6 +45,7 @@ var testConfig = &config.Config{
 		Webhook:         "http://hook.discord:80",
 		SkipExisting:    true,
 		MinimumPriority: "debug",
+		CustomFields:    map[string]string{"field": "value"},
 		Channels: []config.Discord{{
 			Webhook: "http://localhost:9200",
 		}},
@@ -53,6 +55,7 @@ var testConfig = &config.Config{
 		SkipTLS:         true,
 		SkipExisting:    true,
 		MinimumPriority: "debug",
+		CustomFields:    map[string]string{"field": "value"},
 		Channels: []config.Teams{{
 			Webhook: "http://localhost:9200",
 		}},
@@ -70,6 +73,7 @@ var testConfig = &config.Config{
 		SkipExisting:    true,
 		SkipTLS:         true,
 		MinimumPriority: "debug",
+		CustomFields:    map[string]string{"field": "value"},
 		Channels: []config.Webhook{{
 			Host: "http://localhost:8081",
 			Headers: map[string]string{
@@ -86,6 +90,7 @@ var testConfig = &config.Config{
 		Endpoint:        "https://storage.yandexcloud.net",
 		Region:          "ru-central1",
 		Prefix:          "prefix",
+		CustomFields:    map[string]string{"field": "value"},
 		Channels:        []config.S3{{}},
 	},
 	Kinesis: config.Kinesis{
@@ -96,6 +101,7 @@ var testConfig = &config.Config{
 		MinimumPriority: "debug",
 		Endpoint:        "https://yds.serverless.yandexcloud.net",
 		Region:          "ru-central1",
+		CustomFields:    map[string]string{"field": "value"},
 		Channels:        []config.Kinesis{{}},
 	},
 	EmailReports: config.EmailReports{
