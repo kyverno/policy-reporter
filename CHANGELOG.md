@@ -1,5 +1,8 @@
 # Changelog
 
+# 2.13.5
+* Add configuration `target.s3.pathStyle` for the `S3` output
+
 # 2.13.4
 * Fix `customFields` mapping in TargetFactory
 

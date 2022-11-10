@@ -2,7 +2,7 @@ image:
   registry: ghcr.io
   repository: kyverno/policy-reporter
   pullPolicy: IfNotPresent
-  tag: 2.10.3
+  tag: 2.10.4
 
 imagePullSecrets: []
 
@@ -420,6 +420,8 @@ target:
     endpoint: ""
     # S3 storage, bucket name
     bucket: ""
+    # S3 storage, force path style configuration
+    pathStyle: false
     # name of prefix, keys will have format: s3://<bucket>/<prefix>/YYYY-MM-DD/YYYY-MM-DDTHH:mm:ss.s+01:00.json
     prefix: ""
     # minimum priority "" < info < warning < critical < error

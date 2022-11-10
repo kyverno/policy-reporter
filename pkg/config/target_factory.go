@@ -561,6 +561,7 @@ func (f *TargetFactory) createS3Client(config S3, parent S3) target.Client {
 		config.Region,
 		config.Endpoint,
 		config.Bucket,
+		config.PathStyle,
 	)
 
 	log.Printf("[INFO] %s configured", config.Name)
