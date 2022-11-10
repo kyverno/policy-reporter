@@ -136,6 +136,7 @@ type S3 struct {
 	Endpoint        string            `mapstructure:"endpoint"`
 	Prefix          string            `mapstructure:"prefix"`
 	Bucket          string            `mapstructure:"bucket"`
+	PathStyle       bool              `mapstructure:"pathStyle"`
 	SecretRef       string            `mapstructure:"secretRef"`
 	CustomFields    map[string]string `mapstructure:"customFields"`
 	SkipExisting    bool              `mapstructure:"skipExistingOnStartup"`

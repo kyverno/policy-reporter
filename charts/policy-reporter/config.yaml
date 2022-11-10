@@ -161,6 +161,7 @@ s3:
   region: {{ .Values.target.s3.region }}
   endpoint: {{ .Values.target.s3.endpoint }}
   bucket: {{ .Values.target.s3.bucket }}
+  pathStyle: {{ .Values.target.s3.pathStyle }}
   prefix: {{ .Values.target.s3.prefix }}
   minimumPriority: {{ .Values.target.s3.minimumPriority | quote }}
   skipExistingOnStartup: {{ .Values.target.s3.skipExistingOnStartup }}

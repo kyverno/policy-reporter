@@ -88,6 +88,7 @@ var testConfig = &config.Config{
 		SkipExisting:    true,
 		MinimumPriority: "debug",
 		Endpoint:        "https://storage.yandexcloud.net",
+		PathStyle:       true,
 		Region:          "ru-central1",
 		Prefix:          "prefix",
 		CustomFields:    map[string]string{"field": "value"},

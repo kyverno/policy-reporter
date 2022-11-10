@@ -32,12 +32,17 @@ func (s *s3Client) Upload(body *bytes.Buffer, key string) error {
 }
 
 // NewS3Client creates a new S3.client to send Results to S3
-func NewS3Client(accessKeyID, secretAccessKey, region, endpoint, bucket string) AWSClient {
-	sess, err := session.NewSession(&aws.Config{
+func NewS3Client(accessKeyID, secretAccessKey, region, endpoint, bucket string, pathStyle bool) AWSClient {
+	config := &aws.Config{
 		Region:      aws.String(region),
 		Endpoint:    aws.String(endpoint),
 		Credentials: credentials.NewStaticCredentials(accessKeyID, secretAccessKey, ""),
-	})
+	}
+	if pathStyle {
+		config.S3ForcePathStyle = &pathStyle
+	}
+
+	sess, err := session.NewSession(config)
 	if err != nil {
 		log.Printf("[ERROR]: %v\n", "Error while creating S3 Session")
 		return nil
