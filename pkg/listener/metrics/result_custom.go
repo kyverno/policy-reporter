@@ -4,6 +4,8 @@ import (
 	"github.com/kyverno/policy-reporter/pkg/report"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
+
+	dto "github.com/prometheus/client_model/go"
 )
 
 func RegisterCustomResultGauge(name string, labelNames []string) *prometheus.GaugeVec {
@@ -43,7 +45,7 @@ func CreateCustomResultMetricsListener(
 					continue
 				}
 
-				gauge.With(labelGenerator(oldReport, result)).Dec()
+				decreaseOrDelete(gauge, labelGenerator(oldReport, result))
 			}
 
 			for _, result := range newReport.Results {
@@ -59,8 +61,24 @@ func CreateCustomResultMetricsListener(
 					continue
 				}
 
-				gauge.With(labelGenerator(newReport, result)).Dec()
+				decreaseOrDelete(gauge, labelGenerator(newReport, result))
 			}
 		}
+	}
+}
+
+func decreaseOrDelete(vec *prometheus.GaugeVec, labels map[string]string) {
+	m := &dto.Metric{}
+
+	err := vec.With(labels).Write(m)
+	if err != nil {
+		vec.With(labels).Dec()
+		return
+	}
+
+	if *m.Gauge.Value == 1 {
+		vec.Delete(labels)
+	} else {
+		vec.With(labels).Dec()
 	}
 }

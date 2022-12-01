@@ -217,6 +217,7 @@ type PolicyReport struct {
 	ID                string
 	Name              string
 	Namespace         string
+	Labels            map[string]string
 	Results           []Result
 	Summary           Summary
 	CreationTimestamp time.Time

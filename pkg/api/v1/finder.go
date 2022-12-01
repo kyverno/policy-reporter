@@ -1,16 +1,17 @@
 package v1
 
 type Filter struct {
-	Kinds      []string
-	Categories []string
-	Namespaces []string
-	Sources    []string
-	Policies   []string
-	Rules      []string
-	Severities []string
-	Status     []string
-	Resources  []string
-	Search     string
+	Kinds       []string
+	Categories  []string
+	Namespaces  []string
+	Sources     []string
+	Policies    []string
+	Rules       []string
+	Severities  []string
+	Status      []string
+	Resources   []string
+	ReportLabel map[string]string
+	Search      string
 }
 
 type Pagination struct {
@@ -59,4 +60,8 @@ type PolicyReportFinder interface {
 	CountClusterResults(Filter) (int, error)
 	// FetchRuleStatusCounts from current PolicyReportResults
 	FetchRuleStatusCounts(policy, rule string) ([]StatusCount, error)
+	// FetchClusterReportLabels from ClusterPolicyReports
+	FetchClusterReportLabels(Filter) (map[string][]string, error)
+	// FetchNamespacedReportLabels from PolicyReports
+	FetchNamespacedReportLabels(Filter) (map[string][]string, error)
 }

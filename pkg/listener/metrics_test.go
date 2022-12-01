@@ -56,7 +56,7 @@ func Test_SimpleMetricsListener(t *testing.T) {
 func Test_CustomMetricsListener(t *testing.T) {
 	listener.ResultGaugeName = "policy_report_custom_result"
 	listener.ClusterResultGaugeName = "cluster_policy_report_custom_result"
-	customFields := []string{"namespace", "policy", "status", "source"}
+	customFields := []string{"namespace", "policy", "status", "source", "label:app"}
 
 	slistener := listener.NewMetricsListener(&report.ResultFilter{}, &report.ReportFilter{}, metrics.Custom, customFields)
 

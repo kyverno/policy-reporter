@@ -51,6 +51,7 @@ func (s *httpServer) RegisterV1Handler(finder v1.PolicyReportFinder) {
 	s.mux.HandleFunc("/v1/namespaced-resources/kinds", Gzip(v1.NamespacedResourcesKindListHandler(finder)))
 	s.mux.HandleFunc("/v1/namespaced-resources/resources", Gzip(v1.NamespacedResourcesListHandler(finder)))
 	s.mux.HandleFunc("/v1/namespaced-resources/sources", Gzip(v1.NamespacedSourceListHandler(finder)))
+	s.mux.HandleFunc("/v1/namespaced-resources/report-labels", Gzip(v1.NamespacedReportLabelListHandler(finder)))
 	s.mux.HandleFunc("/v1/namespaced-resources/status-counts", Gzip(v1.NamespacedResourcesStatusCountsHandler(finder)))
 	s.mux.HandleFunc("/v1/namespaced-resources/results", Gzip(v1.NamespacedResourcesResultHandler(finder)))
 
@@ -59,6 +60,7 @@ func (s *httpServer) RegisterV1Handler(finder v1.PolicyReportFinder) {
 	s.mux.HandleFunc("/v1/cluster-resources/kinds", Gzip(v1.ClusterResourcesKindListHandler(finder)))
 	s.mux.HandleFunc("/v1/cluster-resources/resources", Gzip(v1.ClusterResourcesListHandler(finder)))
 	s.mux.HandleFunc("/v1/cluster-resources/sources", Gzip(v1.ClusterResourcesSourceListHandler(finder)))
+	s.mux.HandleFunc("/v1/cluster-resources/report-labels", Gzip(v1.ClusterReportLabelListHandler(finder)))
 	s.mux.HandleFunc("/v1/cluster-resources/status-counts", Gzip(v1.ClusterResourcesStatusCountHandler(finder)))
 	s.mux.HandleFunc("/v1/cluster-resources/results", Gzip(v1.ClusterResourcesResultHandler(finder)))
 }

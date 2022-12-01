@@ -1,6 +1,8 @@
 package listener
 
 import (
+	"strings"
+
 	"github.com/kyverno/policy-reporter/pkg/listener/metrics"
 	"github.com/kyverno/policy-reporter/pkg/report"
 )
@@ -44,34 +46,48 @@ func ResultListeners(
 			metrics.CreateCustomResultMetricsListener(
 				filter,
 				metrics.RegisterCustomResultGauge(ResultGaugeName, labels),
-				metrics.CreateLabelGenerator(labels),
+				metrics.CreateLabelGenerator(labels, labels),
 			),
 			metrics.CreateCustomResultMetricsListener(
 				filter,
 				metrics.RegisterCustomResultGauge(ClusterResultGaugeName, clusterLabels),
-				metrics.CreateLabelGenerator(clusterLabels),
+				metrics.CreateLabelGenerator(clusterLabels, clusterLabels),
 			),
 		}
 	}
 	if mode == metrics.Custom {
 		clusterLabels := make([]string, 0, len(labels))
+
+		clusterLabelNames := make([]string, 0, len(labels))
+		labelNames := make([]string, 0, len(labels))
+
 		for _, label := range labels {
+			labelName := label
+			if strings.HasPrefix(label, metrics.ReportLabelPrefix) {
+				replacer := strings.NewReplacer(".", "_", "/", "_", ":", "_", "-", "_", ";", "_")
+				labelName = replacer.Replace(strings.TrimPrefix(label, metrics.ReportLabelPrefix))
+			}
+
+			labelNames = append(labelNames, labelName)
+
 			if label == "namespace" {
 				continue
 			}
+
 			clusterLabels = append(clusterLabels, label)
+			clusterLabelNames = append(clusterLabelNames, labelName)
 		}
 
 		return []report.PolicyReportListener{
 			metrics.CreateCustomResultMetricsListener(
 				filter,
-				metrics.RegisterCustomResultGauge(ResultGaugeName, labels),
-				metrics.CreateLabelGenerator(labels),
+				metrics.RegisterCustomResultGauge(ResultGaugeName, labelNames),
+				metrics.CreateLabelGenerator(labels, labelNames),
 			),
 			metrics.CreateCustomResultMetricsListener(
 				filter,
-				metrics.RegisterCustomResultGauge(ClusterResultGaugeName, clusterLabels),
-				metrics.CreateLabelGenerator(clusterLabels),
+				metrics.RegisterCustomResultGauge(ClusterResultGaugeName, clusterLabelNames),
+				metrics.CreateLabelGenerator(clusterLabels, clusterLabelNames),
 			),
 		}
 	}
