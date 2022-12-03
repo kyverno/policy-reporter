@@ -1,4 +1,8 @@
 {{- if and $.Values.grafana.dashboards.enabled $.Values.grafana.dashboards.enable.policyReportDetails }}
+{{- $filters := .Values.grafana.dashboards.labelFilter }}
+{{- if and .Values.grafana.dashboards.multicluster.enabled .Values.grafana.dashboards.multicluster.label }}
+{{- $filters = append $filters .Values.grafana.dashboards.multicluster.label }}
+{{- end }}
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -115,7 +119,7 @@ data:
         "pluginVersion": "7.1.5",
         "targets": [
             {
-            "expr": "sum(policy_report_result{policy=~\"$policy\", category=~\"$category\", severity=~\"$severity\", source=~\"$source\", kind=~\"$kind\", exported_namespace=~\"$namespace\", status=\"pass\"{{ range .Values.grafana.dashboards.labelFilter }}, {{.}}=~\"${{.}}\"{{ end }} } > 0) by (exported_namespace)",
+            "expr": "sum(policy_report_result{policy=~\"$policy\", category=~\"$category\", severity=~\"$severity\", source=~\"$source\", kind=~\"$kind\", exported_namespace=~\"$namespace\", status=\"pass\"{{ range $filters }}, {{.}}=~\"${{.}}\"{{ end }} } > 0) by (exported_namespace)",
             "instant": true,
             "interval": "",
             "legendFormat": "{{`{{ exported_namespace }}`}}",
@@ -170,7 +174,7 @@ data:
         "pluginVersion": "7.1.5",
         "targets": [
             {
-            "expr": "sum(policy_report_result{policy=~\"$policy\", category=~\"$category\", severity=~\"$severity\", source=~\"$source\", kind=~\"$kind\", exported_namespace=~\"$namespace\", status=\"fail\"{{ range .Values.grafana.dashboards.labelFilter }}, {{.}}=~\"${{.}}\"{{ end }} } > 0) by (exported_namespace)",
+            "expr": "sum(policy_report_result{policy=~\"$policy\", category=~\"$category\", severity=~\"$severity\", source=~\"$source\", kind=~\"$kind\", exported_namespace=~\"$namespace\", status=\"fail\"{{ range $filters }}, {{.}}=~\"${{.}}\"{{ end }} } > 0) by (exported_namespace)",
             "instant": true,
             "interval": "",
             "legendFormat": "{{`{{ exported_namespace }}`}}",
@@ -226,7 +230,7 @@ data:
         "pluginVersion": "7.1.5",
         "targets": [
             {
-            "expr": "sum(policy_report_result{policy=~\"$policy\", category=~\"$category\", severity=~\"$severity\", source=~\"$source\", kind=~\"$kind\", exported_namespace=~\"$namespace\", status=\"warn\"{{ range .Values.grafana.dashboards.labelFilter }}, {{.}}=~\"${{.}}\"{{ end }} } > 0) by (exported_namespace)",
+            "expr": "sum(policy_report_result{policy=~\"$policy\", category=~\"$category\", severity=~\"$severity\", source=~\"$source\", kind=~\"$kind\", exported_namespace=~\"$namespace\", status=\"warn\"{{ range $filters }}, {{.}}=~\"${{.}}\"{{ end }} } > 0) by (exported_namespace)",
             "instant": true,
             "interval": "",
             "legendFormat": "{{`{{ exported_namespace }}`}}",
@@ -281,7 +285,7 @@ data:
         "pluginVersion": "7.1.5",
         "targets": [
             {
-            "expr": "sum(policy_report_result{policy=~\"$policy\", category=~\"$category\", severity=~\"$severity\", source=~\"$source\", kind=~\"$kind\", exported_namespace=~\"$namespace\", status=\"error\"{{ range .Values.grafana.dashboards.labelFilter }}, {{.}}=~\"${{.}}\"{{ end }} } > 0) by (exported_namespace)",
+            "expr": "sum(policy_report_result{policy=~\"$policy\", category=~\"$category\", severity=~\"$severity\", source=~\"$source\", kind=~\"$kind\", exported_namespace=~\"$namespace\", status=\"error\"{{ range $filters }}, {{.}}=~\"${{.}}\"{{ end }} } > 0) by (exported_namespace)",
             "instant": true,
             "interval": "",
             "legendFormat": "{{`{{ exported_namespace }}`}}",
@@ -344,7 +348,7 @@ data:
         "steppedLine": false,
         "targets": [
             {
-            "expr": "sum(policy_report_result{policy=~\"$policy\", category=~\"$category\", severity=~\"$severity\", source=~\"$source\", kind=~\"$kind\", exported_namespace=~\"$namespace\"{{ range .Values.grafana.dashboards.labelFilter }}, {{.}}=~\"${{.}}\"{{ end }} } > 0) by (status, exported_namespace)",
+            "expr": "sum(policy_report_result{policy=~\"$policy\", category=~\"$category\", severity=~\"$severity\", source=~\"$source\", kind=~\"$kind\", exported_namespace=~\"$namespace\"{{ range $filters }}, {{.}}=~\"${{.}}\"{{ end }} } > 0) by (status, exported_namespace)",
             "interval": "",
             "legendFormat": "{{`{{ exported_namespace }}`}} {{`{{ status }}`}}",
             "refId": "A"
@@ -432,7 +436,7 @@ data:
         "pluginVersion": "7.1.5",
         "targets": [
             {
-            "expr": "sum(policy_report_result{policy=~\"$policy\", category=~\"$category\", severity=~\"$severity\", source=~\"$source\", kind=~\"$kind\", exported_namespace=~\"$namespace\", status=\"pass\"{{ range .Values.grafana.dashboards.labelFilter }}, {{.}}=~\"${{.}}\"{{ end }} }) by (exported_namespace,category,policy,rule,kind,name,severity,status,source{{ range .Values.grafana.dashboards.labelFilter }},{{.}}{{ end }} )",
+            "expr": "sum(policy_report_result{policy=~\"$policy\", category=~\"$category\", severity=~\"$severity\", source=~\"$source\", kind=~\"$kind\", exported_namespace=~\"$namespace\", status=\"pass\"{{ range $filters }}, {{.}}=~\"${{.}}\"{{ end }} }) by (exported_namespace,category,policy,rule,kind,name,severity,status,source{{ range $filters }},{{.}}{{ end }} )",
             "format": "table",
             "instant": true,
             "interval": "",
@@ -512,7 +516,7 @@ data:
         "pluginVersion": "7.1.5",
         "targets": [
             {
-            "expr": "sum(policy_report_result{policy=~\"$policy\", category=~\"$category\", severity=~\"$severity\", source=~\"$source\", kind=~\"$kind\", exported_namespace=~\"$namespace\", status=\"fail\"{{ range .Values.grafana.dashboards.labelFilter }}, {{.}}=~\"${{.}}\"{{ end }} }) by (exported_namespace,category,policy,rule,kind,name,severity,status,source{{ range .Values.grafana.dashboards.labelFilter }},{{.}}{{ end }})",
+            "expr": "sum(policy_report_result{policy=~\"$policy\", category=~\"$category\", severity=~\"$severity\", source=~\"$source\", kind=~\"$kind\", exported_namespace=~\"$namespace\", status=\"fail\"{{ range $filters }}, {{.}}=~\"${{.}}\"{{ end }} }) by (exported_namespace,category,policy,rule,kind,name,severity,status,source{{ range $filters }},{{.}}{{ end }})",
             "format": "table",
             "instant": true,
             "interval": "",
@@ -589,7 +593,7 @@ data:
         "pluginVersion": "7.1.5",
         "targets": [
             {
-            "expr": "sum(policy_report_result{policy=~\"$policy\", category=~\"$category\", severity=~\"$severity\", source=~\"$source\", kind=~\"$kind\", exported_namespace=~\"$namespace\", status=\"warn\"{{ range .Values.grafana.dashboards.labelFilter }}, {{.}}=~\"${{.}}\"{{ end }} }) by (exported_namespace,category,policy,rule,kind,name,severity,status,source{{ range .Values.grafana.dashboards.labelFilter }},{{.}}{{ end }} )",
+            "expr": "sum(policy_report_result{policy=~\"$policy\", category=~\"$category\", severity=~\"$severity\", source=~\"$source\", kind=~\"$kind\", exported_namespace=~\"$namespace\", status=\"warn\"{{ range $filters }}, {{.}}=~\"${{.}}\"{{ end }} }) by (exported_namespace,category,policy,rule,kind,name,severity,status,source{{ range $filters }},{{.}}{{ end }} )",
             "format": "table",
             "instant": true,
             "interval": "",
@@ -666,7 +670,7 @@ data:
         "pluginVersion": "7.1.5",
         "targets": [
             {
-            "expr": "sum(policy_report_result{policy=~\"$policy\", category=~\"$category\", severity=~\"$severity\", source=~\"$source\", kind=~\"$kind\", exported_namespace=~\"$namespace\", status=\"error\"{{ range .Values.grafana.dashboards.labelFilter }}, {{.}}=~\"${{.}}\"{{ end }} }) by (exported_namespace,category,policy,rule,kind,name,severity,status,source{{ range .Values.grafana.dashboards.labelFilter }},{{.}}{{ end }} )",
+            "expr": "sum(policy_report_result{policy=~\"$policy\", category=~\"$category\", severity=~\"$severity\", source=~\"$source\", kind=~\"$kind\", exported_namespace=~\"$namespace\", status=\"error\"{{ range $filters }}, {{.}}=~\"${{.}}\"{{ end }} }) by (exported_namespace,category,policy,rule,kind,name,severity,status,source{{ range $filters }},{{.}}{{ end }} )",
             "format": "table",
             "instant": true,
             "interval": "",
@@ -851,7 +855,7 @@ data:
             "type": "query",
             "useTags": false
         }
-        {{- range .Values.grafana.dashboards.labelFilter }}
+        {{- range $filters }}
         ,{
             "allValue": ".*",
             "datasource": "${DS_PROMETHEUS}",

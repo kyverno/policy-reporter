@@ -35,6 +35,9 @@ grafana:
     label: grafana_dashboard
     value: "1"
     labelFilter: []
+    multicluster:
+      enabled: false
+      label: cluster
     enable:
       overview: true
       policyReportDetails: true

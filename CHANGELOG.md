@@ -19,6 +19,7 @@
         - `grafana.datasource.pluginName`, default `Prometheus`
         - `grafana.datasource.pluginId`, default `prometheus`
     * New value `grafana.dashboards.labelFilter` to add custom report labels as dashboard filter, default `[]`. Label has to be a valid prometheus label, e.g. `created-by` => `created_by`.
+    * New values `grafana.dashboards.multicluster.enabled` and `grafana.dashboards.multicluster.label` to add an optional `cluster` label.
 
 
 # 2.13.5

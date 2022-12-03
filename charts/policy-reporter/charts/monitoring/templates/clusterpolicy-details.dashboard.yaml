@@ -1,4 +1,8 @@
 {{- if and $.Values.grafana.dashboards.enabled $.Values.grafana.dashboards.enable.clusterPolicyReportDetails }}
+{{- $filters := .Values.grafana.dashboards.labelFilter }}
+{{- if and .Values.grafana.dashboards.multicluster.enabled .Values.grafana.dashboards.multicluster.label }}
+{{- $filters = append $filters .Values.grafana.dashboards.multicluster.label }}
+{{- end }}
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -114,7 +118,7 @@ data:
         "pluginVersion": "7.1.5",
         "targets": [
             {
-            "expr": "sum(cluster_policy_report_result{policy=~\"$policy\", category=~\"$category\", severity=~\"$severity\", source=~\"$source\", kind=~\"$kind\", status=\"pass\"{{ range .Values.grafana.dashboards.labelFilter }}, {{.}}=~\"${{.}}\"{{ end }} })",
+            "expr": "sum(cluster_policy_report_result{policy=~\"$policy\", category=~\"$category\", severity=~\"$severity\", source=~\"$source\", kind=~\"$kind\", status=\"pass\"{{ range $filters }}, {{.}}=~\"${{.}}\"{{ end }} })",
             "instant": true,
             "interval": "",
             "legendFormat": "",
@@ -171,7 +175,7 @@ data:
         "pluginVersion": "7.1.5",
         "targets": [
             {
-            "expr": "sum(cluster_policy_report_result{policy=~\"$policy\", category=~\"$category\", severity=~\"$severity\", source=~\"$source\", kind=~\"$kind\", status=\"warn\"{{ range .Values.grafana.dashboards.labelFilter }}, {{.}}=~\"${{.}}\"{{ end }} })",
+            "expr": "sum(cluster_policy_report_result{policy=~\"$policy\", category=~\"$category\", severity=~\"$severity\", source=~\"$source\", kind=~\"$kind\", status=\"warn\"{{ range $filters }}, {{.}}=~\"${{.}}\"{{ end }} })",
             "instant": true,
             "interval": "",
             "legendFormat": "",
@@ -228,7 +232,7 @@ data:
         "pluginVersion": "7.1.5",
         "targets": [
             {
-            "expr": "sum(cluster_policy_report_result{policy=~\"$policy\", category=~\"$category\", severity=~\"$severity\", source=~\"$source\", kind=~\"$kind\", status=\"fail\"{{ range .Values.grafana.dashboards.labelFilter }}, {{.}}=~\"${{.}}\"{{ end }} })",
+            "expr": "sum(cluster_policy_report_result{policy=~\"$policy\", category=~\"$category\", severity=~\"$severity\", source=~\"$source\", kind=~\"$kind\", status=\"fail\"{{ range $filters }}, {{.}}=~\"${{.}}\"{{ end }} })",
             "instant": true,
             "interval": "",
             "legendFormat": "",
@@ -285,7 +289,7 @@ data:
         "pluginVersion": "7.1.5",
         "targets": [
             {
-            "expr": "sum(cluster_policy_report_result{policy=~\"$policy\", category=~\"$category\", severity=~\"$severity\", source=~\"$source\", kind=~\"$kind\", status=\"error\"{{ range .Values.grafana.dashboards.labelFilter }}, {{.}}=~\"${{.}}\"{{ end }} })",
+            "expr": "sum(cluster_policy_report_result{policy=~\"$policy\", category=~\"$category\", severity=~\"$severity\", source=~\"$source\", kind=~\"$kind\", status=\"error\"{{ range $filters }}, {{.}}=~\"${{.}}\"{{ end }} })",
             "instant": true,
             "interval": "",
             "legendFormat": "",
@@ -347,7 +351,7 @@ data:
         "steppedLine": false,
         "targets": [
             {
-            "expr": "sum(cluster_policy_report_result{policy=~\"$policy\", category=~\"$category\", severity=~\"$severity\", source=~\"$source\", kind=~\"$kind\"{{ range .Values.grafana.dashboards.labelFilter }}, {{.}}=~\"${{.}}\"{{ end }} } > 0) by (status)",
+            "expr": "sum(cluster_policy_report_result{policy=~\"$policy\", category=~\"$category\", severity=~\"$severity\", source=~\"$source\", kind=~\"$kind\"{{ range $filters }}, {{.}}=~\"${{.}}\"{{ end }} } > 0) by (status)",
             "interval": "",
             "legendFormat": "{{`{{ status }}`}}",
             "refId": "A"
@@ -435,7 +439,7 @@ data:
         "pluginVersion": "7.1.5",
         "targets": [
             {
-            "expr": "sum(cluster_policy_report_result{policy=~\"$policy\", category=~\"$category\", severity=~\"$severity\", kind=~\"$kind\", source=~\"$source\", status=\"pass\"{{ range .Values.grafana.dashboards.labelFilter }}, {{.}}=~\"${{.}}\"{{ end }} }) by (policy,rule,kind,name,status,severity,category,source{{ range .Values.grafana.dashboards.labelFilter }},{{.}}{{ end }})",
+            "expr": "sum(cluster_policy_report_result{policy=~\"$policy\", category=~\"$category\", severity=~\"$severity\", kind=~\"$kind\", source=~\"$source\", status=\"pass\"{{ range $filters }}, {{.}}=~\"${{.}}\"{{ end }} }) by (policy,rule,kind,name,status,severity,category,source{{ range $filters }},{{.}}{{ end }})",
             "format": "table",
             "instant": true,
             "interval": "",
@@ -514,7 +518,7 @@ data:
         "pluginVersion": "7.1.5",
         "targets": [
             {
-            "expr": "sum(cluster_policy_report_result{policy=~\"$policy\", category=~\"$category\", severity=~\"$severity\", source=~\"$source\", kind=~\"$kind\", status=\"fail\"{{ range .Values.grafana.dashboards.labelFilter }}, {{.}}=~\"${{.}}\"{{ end }} }) by (policy,rule,kind,name,status,severity,category,source{{ range .Values.grafana.dashboards.labelFilter }},{{.}}{{ end }})",
+            "expr": "sum(cluster_policy_report_result{policy=~\"$policy\", category=~\"$category\", severity=~\"$severity\", source=~\"$source\", kind=~\"$kind\", status=\"fail\"{{ range $filters }}, {{.}}=~\"${{.}}\"{{ end }} }) by (policy,rule,kind,name,status,severity,category,source{{ range $filters }},{{.}}{{ end }})",
             "format": "table",
             "instant": true,
             "interval": "",
@@ -590,7 +594,7 @@ data:
         "pluginVersion": "7.1.5",
         "targets": [
             {
-            "expr": "sum(cluster_policy_report_result{policy=~\"$policy\", category=~\"$category\", severity=~\"$severity\", source=~\"$source\", kind=~\"$kind\", status=\"warn\"{{ range .Values.grafana.dashboards.labelFilter }}, {{.}}=~\"${{.}}\"{{ end }} }) by (policy,rule,kind,name,status,severity,category,source{{ range .Values.grafana.dashboards.labelFilter }},{{.}}{{ end }} )",
+            "expr": "sum(cluster_policy_report_result{policy=~\"$policy\", category=~\"$category\", severity=~\"$severity\", source=~\"$source\", kind=~\"$kind\", status=\"warn\"{{ range $filters }}, {{.}}=~\"${{.}}\"{{ end }} }) by (policy,rule,kind,name,status,severity,category,source{{ range $filters }},{{.}}{{ end }} )",
             "format": "table",
             "instant": true,
             "interval": "",
@@ -666,7 +670,7 @@ data:
         "pluginVersion": "7.1.5",
         "targets": [
             {
-            "expr": "sum(cluster_policy_report_result{policy=~\"$policy\", category=~\"$category\", severity=~\"$severity\", source=~\"$source\", kind=~\"$kind\", status=\"warn\"{{ range .Values.grafana.dashboards.labelFilter }}, {{.}}=~\"${{.}}\"{{ end }} }) by (policy,rule,kind,name,status,severity,category,source{{ range .Values.grafana.dashboards.labelFilter }},{{.}}{{ end }})",
+            "expr": "sum(cluster_policy_report_result{policy=~\"$policy\", category=~\"$category\", severity=~\"$severity\", source=~\"$source\", kind=~\"$kind\", status=\"warn\"{{ range $filters }}, {{.}}=~\"${{.}}\"{{ end }} }) by (policy,rule,kind,name,status,severity,category,source{{ range $filters }},{{.}}{{ end }})",
             "format": "table",
             "instant": true,
             "interval": "",
@@ -831,7 +835,7 @@ data:
             "type": "query",
             "useTags": false
         }
-        {{- range .Values.grafana.dashboards.labelFilter }}
+        {{- range $filters }}
         ,{
             "allValue": ".*",
             "datasource": "${DS_PROMETHEUS}",

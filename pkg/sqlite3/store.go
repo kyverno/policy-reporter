@@ -849,7 +849,7 @@ func (s *policyReportStore) FetchNamespacedReportLabels(filter api.Filter) (map[
 		where = " AND " + where
 	}
 
-	rows, err := s.db.Query(`SELECT DISTINCT report.labels from policy_report report JOIN policy_report_result as result ON result.policy_report_id = report.id WHERE report.namespace != ""`+where+` GROUP BY result.source ORDER BY report.namespace ASC`, args...)
+	rows, err := s.db.Query(`SELECT DISTINCT report.labels from policy_report report JOIN policy_report_result as result ON result.policy_report_id = report.id WHERE report.namespace != ""`+where+` GROUP BY report.id, result.source ORDER BY report.namespace ASC`, args...)
 	if err != nil {
 		return list, err
 	}
@@ -882,7 +882,7 @@ func (s *policyReportStore) FetchClusterReportLabels(filter api.Filter) (map[str
 		where = " AND " + where
 	}
 
-	rows, err := s.db.Query(`SELECT DISTINCT report.labels from policy_report report JOIN policy_report_result as result ON result.policy_report_id = report.id WHERE report.namespace = ""`+where+` GROUP BY result.source`, args...)
+	rows, err := s.db.Query(`SELECT DISTINCT report.labels from policy_report report JOIN policy_report_result as result ON result.policy_report_id = report.id WHERE report.namespace = ""`+where+` GROUP BY report.id, result.source`, args...)
 	if err != nil {
 		return list, err
 	}
@@ -1124,7 +1124,7 @@ func generateFilterWhere(filter api.Filter, active []string) (string, []interfac
 		for key, value := range filter.ReportLabel {
 			argCounter++
 
-			where = append(where, fmt.Sprintf("json_extract(report.labels, '$.%s') = $%d", key, argCounter))
+			where = append(where, fmt.Sprintf("json_extract(report.labels, '$.\"%s\"') = $%d", key, argCounter))
 			args = append(args, value)
 		}
 	}
