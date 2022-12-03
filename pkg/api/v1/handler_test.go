@@ -96,6 +96,7 @@ var cresult2 = report.Result{
 
 var preport = report.PolicyReport{
 	ID:                report.GeneratePolicyReportID("polr-test", "test"),
+	Labels:            map[string]string{"app": "policy-reporter", "scope": "namespace"},
 	Name:              "polr-test",
 	Namespace:         "test",
 	Results:           []report.Result{result1, result2},
@@ -105,6 +106,7 @@ var preport = report.PolicyReport{
 
 var creport = report.PolicyReport{
 	ID:                report.GeneratePolicyReportID("cpolr", ""),
+	Labels:            map[string]string{"app": "policy-reporter", "scope": "cluster"},
 	Name:              "cpolr",
 	Results:           []report.Result{cresult1, cresult2},
 	Summary:           report.Summary{},
@@ -474,6 +476,46 @@ func Test_V1_API(t *testing.T) {
 		}
 
 		expected := `["test"]`
+		if !strings.Contains(rr.Body.String(), expected) {
+			t.Errorf("handler returned unexpected body: got %v want %v", rr.Body.String(), expected)
+		}
+	})
+
+	t.Run("ClusterReportLabelListHandler", func(t *testing.T) {
+		req, err := http.NewRequest("GET", "/v1/cluster-resources/report-labels?sources=kyverno", nil)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		rr := httptest.NewRecorder()
+		handler := v1.ClusterReportLabelListHandler(store)
+		handler.ServeHTTP(rr, req)
+
+		if status := rr.Code; status != http.StatusOK {
+			t.Errorf("handler returned wrong status code: got %v want %v", status, http.StatusOK)
+		}
+
+		expected := `{"app":["policy-reporter"],"scope":["cluster"]}`
+		if !strings.Contains(rr.Body.String(), expected) {
+			t.Errorf("handler returned unexpected body: got %v want %v", rr.Body.String(), expected)
+		}
+	})
+
+	t.Run("ClusterReportLabelListHandler", func(t *testing.T) {
+		req, err := http.NewRequest("GET", "/v1/namespaced-resources/report-labels?sources=kyverno", nil)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		rr := httptest.NewRecorder()
+		handler := v1.NamespacedReportLabelListHandler(store)
+		handler.ServeHTTP(rr, req)
+
+		if status := rr.Code; status != http.StatusOK {
+			t.Errorf("handler returned wrong status code: got %v want %v", status, http.StatusOK)
+		}
+
+		expected := `{"app":["policy-reporter"],"scope":["namespace"]}`
 		if !strings.Contains(rr.Body.String(), expected) {
 			t.Errorf("handler returned unexpected body: got %v want %v", rr.Body.String(), expected)
 		}
