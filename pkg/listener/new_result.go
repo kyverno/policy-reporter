@@ -59,7 +59,7 @@ func (l *ResultListener) Listen(event report.LifecycleEvent) {
 
 		for _, cb := range l.listener {
 			go func(callback report.PolicyReportResultListener, result report.Result) {
-				callback(result, preExisted)
+				callback(event.NewPolicyReport, result, preExisted)
 				wg.Done()
 			}(cb, r)
 		}

@@ -8,7 +8,7 @@
         * New API to get available labels for ClusterPolicyReports: `/v1/cluster-resources/report-labels`
     * Metrics
         * special syntax to add report labels to metric labels: `label:report-label-name`, special characters like `-`, `/`, `.`, `:` will be transformed to `_` in metrics
-
+    * New Target Filter `reportLabel` to, filter results based on labels of the related (Cluster)PolicyReport
 * Monitoring
     * New values to disable dedicated Grafana Dashboards:
         - `grafana.dashboards.enable.overview`, default `true`

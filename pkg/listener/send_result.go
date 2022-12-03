@@ -10,20 +10,20 @@ import (
 const SendResults = "send_results_listener"
 
 func NewSendResultListener(clients []target.Client) report.PolicyReportResultListener {
-	return func(r report.Result, e bool) {
+	return func(rep report.PolicyReport, r report.Result, e bool) {
 		wg := &sync.WaitGroup{}
 		wg.Add(len(clients))
 
 		for _, t := range clients {
-			go func(target target.Client, result report.Result, preExisted bool) {
+			go func(target target.Client, re report.PolicyReport, result report.Result, preExisted bool) {
 				defer wg.Done()
 
-				if (preExisted && target.SkipExistingOnStartup()) || !target.Validate(result) {
+				if (preExisted && target.SkipExistingOnStartup()) || !target.Validate(re, result) {
 					return
 				}
 
 				target.Send(result)
-			}(t, r, e)
+			}(t, rep, r, e)
 		}
 
 		wg.Wait()

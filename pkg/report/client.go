@@ -4,7 +4,7 @@ package report
 type PolicyReportListener = func(LifecycleEvent)
 
 // PolicyReportResultListener is called whenever a new PolicyResult comes in
-type PolicyReportResultListener = func(Result, bool)
+type PolicyReportResultListener = func(PolicyReport, Result, bool)
 
 // PolicyReportClient watches for PolicyReport Events and executes registered callback
 type PolicyReportClient interface {
