@@ -22,8 +22,8 @@ import (
 	mail "github.com/xhit/go-simple-mail/v2"
 
 	goredis "github.com/go-redis/redis/v8"
-	"github.com/kyverno/kyverno/pkg/client/clientset/versioned"
-	wgpolicyk8sv1alpha2 "github.com/kyverno/kyverno/pkg/client/clientset/versioned/typed/policyreport/v1alpha2"
+	"github.com/kyverno/policy-reporter/pkg/crd/client/clientset/versioned"
+	wgpolicyk8sv1alpha2 "github.com/kyverno/policy-reporter/pkg/crd/client/clientset/versioned/typed/policyreport/v1alpha2"
 	_ "github.com/mattn/go-sqlite3"
 	k8s "k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"

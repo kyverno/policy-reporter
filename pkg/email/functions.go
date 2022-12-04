@@ -1,6 +1,6 @@
 package email
 
-import "github.com/kyverno/kyverno/api/policyreport/v1alpha2"
+import "github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
 
 const (
 	PassColor    = "#198754"
