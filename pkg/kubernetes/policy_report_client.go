@@ -7,10 +7,10 @@ import (
 
 	"github.com/kyverno/policy-reporter/pkg/report"
 
-	pr "github.com/kyverno/kyverno/api/policyreport/v1alpha2"
-	"github.com/kyverno/kyverno/pkg/client/clientset/versioned"
-	"github.com/kyverno/kyverno/pkg/client/informers/externalversions"
-	"github.com/kyverno/kyverno/pkg/client/informers/externalversions/policyreport/v1alpha2"
+	pr "github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
+	"github.com/kyverno/policy-reporter/pkg/crd/client/clientset/versioned"
+	"github.com/kyverno/policy-reporter/pkg/crd/client/informers/externalversions"
+	"github.com/kyverno/policy-reporter/pkg/crd/client/informers/externalversions/policyreport/v1alpha2"
 	"k8s.io/client-go/tools/cache"
 )
 
