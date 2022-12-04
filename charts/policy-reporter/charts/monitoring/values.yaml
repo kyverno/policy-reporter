@@ -34,11 +34,24 @@ grafana:
     # Label to find dashboards using the k8s sidecar
     label: grafana_dashboard
     value: "1"
+    labelFilter: []
+    multicluster:
+      enabled: false
+      label: cluster
+    enable:
+      overview: true
+      policyReportDetails: true
+      clusterPolicyReportDetails: true
   folder:
     # Annotation to enable folder storage using the k8s sidecar
     annotation: grafana_folder
     # Grafana folder in which to store the dashboards
     name: Policy Reporter
+  datasource:
+    label: Prometheus
+    pluginId: prometheus
+    pluginName: Prometheus
+
 
 policyReportDetails:
   firstStatusRow:

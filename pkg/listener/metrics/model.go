@@ -1,6 +1,10 @@
 package metrics
 
-import "github.com/kyverno/policy-reporter/pkg/report"
+import (
+	"strings"
+
+	"github.com/kyverno/policy-reporter/pkg/report"
+)
 
 type Mode = string
 
@@ -9,6 +13,8 @@ const (
 	Custom   Mode = "custom"
 	Detailed Mode = "detailed"
 )
+
+const ReportLabelPrefix = "label:"
 
 var LabelGeneratorMapping = map[string]LabelCallback{
 	"namespace": func(m map[string]string, pr report.PolicyReport, _ report.Result) {
@@ -43,10 +49,17 @@ var LabelGeneratorMapping = map[string]LabelCallback{
 	},
 }
 
-func CreateLabelGenerator(labelNames []string) LabelGenerator {
-	chains := make([]func(map[string]string, report.PolicyReport, report.Result), 0, len(labelNames))
+func CreateLabelGenerator(labels []string, names []string) LabelGenerator {
+	chains := make([]func(map[string]string, report.PolicyReport, report.Result), 0, len(labels))
 
-	for _, label := range labelNames {
+	for index, label := range labels {
+		if strings.HasPrefix(label, ReportLabelPrefix) {
+			label = strings.TrimPrefix(label, ReportLabelPrefix)
+
+			chains = append(chains, func(m map[string]string, pr report.PolicyReport, _ report.Result) {
+				m[names[index]] = pr.Labels[label]
+			})
+		}
 		if callback, ok := LabelGeneratorMapping[label]; ok {
 			chains = append(chains, callback)
 		}

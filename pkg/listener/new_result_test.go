@@ -14,7 +14,7 @@ func Test_ResultListener(t *testing.T) {
 		var called report.Result
 
 		slistener := listener.NewResultListener(true, cache.New(0, 5*time.Minute), time.Now())
-		slistener.RegisterListener(func(r report.Result, b bool) {
+		slistener.RegisterListener(func(_ report.PolicyReport, r report.Result, b bool) {
 			called = r
 		})
 
@@ -29,7 +29,7 @@ func Test_ResultListener(t *testing.T) {
 		var called bool
 
 		slistener := listener.NewResultListener(true, cache.New(0, 5*time.Minute), time.Now())
-		slistener.RegisterListener(func(r report.Result, b bool) {
+		slistener.RegisterListener(func(_ report.PolicyReport, r report.Result, b bool) {
 			called = true
 		})
 
@@ -44,7 +44,7 @@ func Test_ResultListener(t *testing.T) {
 		var called bool
 
 		slistener := listener.NewResultListener(true, cache.New(0, 5*time.Minute), time.Now())
-		slistener.RegisterListener(func(r report.Result, b bool) {
+		slistener.RegisterListener(func(_ report.PolicyReport, r report.Result, b bool) {
 			called = true
 		})
 
@@ -62,7 +62,7 @@ func Test_ResultListener(t *testing.T) {
 		rcache.Add(result2.ID)
 
 		slistener := listener.NewResultListener(true, rcache, time.Now())
-		slistener.RegisterListener(func(r report.Result, b bool) {
+		slistener.RegisterListener(func(_ report.PolicyReport, r report.Result, b bool) {
 			called = true
 		})
 
@@ -73,14 +73,14 @@ func Test_ResultListener(t *testing.T) {
 		}
 	})
 
-	t.Run("Early Return if Rsults are empty", func(t *testing.T) {
+	t.Run("Early Return if Results are empty", func(t *testing.T) {
 		var called bool
 
 		rcache := cache.New(0, 5*time.Minute)
 		rcache.Add(result2.ID)
 
 		slistener := listener.NewResultListener(true, rcache, time.Now())
-		slistener.RegisterListener(func(r report.Result, b bool) {
+		slistener.RegisterListener(func(_ report.PolicyReport, r report.Result, b bool) {
 			called = true
 		})
 

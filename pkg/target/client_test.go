@@ -39,9 +39,13 @@ var result2 = report.Result{
 	Source:   "Kyverno",
 }
 
+var preport = report.PolicyReport{
+	Labels: map[string]string{"app": "policy-reporter"},
+}
+
 func Test_BaseClient(t *testing.T) {
 	t.Run("Validate MinimumPriority", func(t *testing.T) {
-		filter := target.NewClientFilter(
+		filter := target.NewResultFilter(
 			validate.RuleSets{},
 			validate.RuleSets{},
 			validate.RuleSets{},
@@ -54,7 +58,7 @@ func Test_BaseClient(t *testing.T) {
 		}
 	})
 	t.Run("Validate Source", func(t *testing.T) {
-		filter := target.NewClientFilter(
+		filter := target.NewResultFilter(
 			validate.RuleSets{},
 			validate.RuleSets{},
 			validate.RuleSets{},
@@ -68,7 +72,7 @@ func Test_BaseClient(t *testing.T) {
 	})
 
 	t.Run("Validate ClusterResult", func(t *testing.T) {
-		filter := target.NewClientFilter(
+		filter := target.NewResultFilter(
 			validate.RuleSets{Include: []string{"default"}},
 			validate.RuleSets{},
 			validate.RuleSets{},
@@ -82,7 +86,7 @@ func Test_BaseClient(t *testing.T) {
 	})
 
 	t.Run("Validate Exclude Namespace match", func(t *testing.T) {
-		filter := target.NewClientFilter(
+		filter := target.NewResultFilter(
 			validate.RuleSets{Exclude: []string{"default"}},
 			validate.RuleSets{},
 			validate.RuleSets{},
@@ -95,7 +99,7 @@ func Test_BaseClient(t *testing.T) {
 		}
 	})
 	t.Run("Validate Exclude Namespace mismatch", func(t *testing.T) {
-		filter := target.NewClientFilter(
+		filter := target.NewResultFilter(
 			validate.RuleSets{Exclude: []string{"team-a"}},
 			validate.RuleSets{},
 			validate.RuleSets{},
@@ -108,7 +112,7 @@ func Test_BaseClient(t *testing.T) {
 		}
 	})
 	t.Run("Validate Include Namespace match", func(t *testing.T) {
-		filter := target.NewClientFilter(
+		filter := target.NewResultFilter(
 			validate.RuleSets{Include: []string{"default"}},
 			validate.RuleSets{},
 			validate.RuleSets{},
@@ -121,7 +125,7 @@ func Test_BaseClient(t *testing.T) {
 		}
 	})
 	t.Run("Validate Exclude Namespace mismatch", func(t *testing.T) {
-		filter := target.NewClientFilter(
+		filter := target.NewResultFilter(
 			validate.RuleSets{Include: []string{"team-a"}},
 			validate.RuleSets{},
 			validate.RuleSets{},
@@ -135,7 +139,7 @@ func Test_BaseClient(t *testing.T) {
 	})
 
 	t.Run("Validate Exclude Priority match", func(t *testing.T) {
-		filter := target.NewClientFilter(
+		filter := target.NewResultFilter(
 			validate.RuleSets{},
 			validate.RuleSets{Exclude: []string{report.WarningPriority.String()}},
 			validate.RuleSets{},
@@ -148,7 +152,7 @@ func Test_BaseClient(t *testing.T) {
 		}
 	})
 	t.Run("Validate Exclude Priority mismatch", func(t *testing.T) {
-		filter := target.NewClientFilter(
+		filter := target.NewResultFilter(
 			validate.RuleSets{},
 			validate.RuleSets{Exclude: []string{report.ErrorPriority.String()}},
 			validate.RuleSets{},
@@ -161,7 +165,7 @@ func Test_BaseClient(t *testing.T) {
 		}
 	})
 	t.Run("Validate Include Priority match", func(t *testing.T) {
-		filter := target.NewClientFilter(
+		filter := target.NewResultFilter(
 			validate.RuleSets{},
 			validate.RuleSets{Include: []string{report.WarningPriority.String()}},
 			validate.RuleSets{},
@@ -174,7 +178,7 @@ func Test_BaseClient(t *testing.T) {
 		}
 	})
 	t.Run("Validate Exclude Priority mismatch", func(t *testing.T) {
-		filter := target.NewClientFilter(
+		filter := target.NewResultFilter(
 			validate.RuleSets{},
 			validate.RuleSets{Include: []string{report.ErrorPriority.String()}},
 			validate.RuleSets{},
@@ -188,7 +192,7 @@ func Test_BaseClient(t *testing.T) {
 	})
 
 	t.Run("Validate Exclude Policy match", func(t *testing.T) {
-		filter := target.NewClientFilter(
+		filter := target.NewResultFilter(
 			validate.RuleSets{},
 			validate.RuleSets{},
 			validate.RuleSets{Exclude: []string{"require-requests-and-limits-required"}},
@@ -201,7 +205,7 @@ func Test_BaseClient(t *testing.T) {
 		}
 	})
 	t.Run("Validate Exclude Policy mismatch", func(t *testing.T) {
-		filter := target.NewClientFilter(
+		filter := target.NewResultFilter(
 			validate.RuleSets{},
 			validate.RuleSets{},
 			validate.RuleSets{Exclude: []string{"policy-test"}},
@@ -214,7 +218,7 @@ func Test_BaseClient(t *testing.T) {
 		}
 	})
 	t.Run("Validate Include Policy match", func(t *testing.T) {
-		filter := target.NewClientFilter(
+		filter := target.NewResultFilter(
 			validate.RuleSets{},
 			validate.RuleSets{},
 			validate.RuleSets{Include: []string{"require-requests-and-limits-required"}},
@@ -227,7 +231,7 @@ func Test_BaseClient(t *testing.T) {
 		}
 	})
 	t.Run("Validate Exclude Policy mismatch", func(t *testing.T) {
-		filter := target.NewClientFilter(
+		filter := target.NewResultFilter(
 			validate.RuleSets{},
 			validate.RuleSets{},
 			validate.RuleSets{Include: []string{"policy-test"}},
@@ -240,10 +244,82 @@ func Test_BaseClient(t *testing.T) {
 		}
 	})
 
-	t.Run("Client Validation", func(t *testing.T) {
+	t.Run("Validate Include Label match", func(t *testing.T) {
+		filter := target.NewReportFilter(
+			validate.RuleSets{Include: []string{"app:policy-reporter"}},
+		)
+
+		if !filter.Validate(preport) {
+			t.Errorf("Unexpected Validation Result")
+		}
+	})
+	t.Run("Validate Exclude Label match", func(t *testing.T) {
+		filter := target.NewReportFilter(
+			validate.RuleSets{Exclude: []string{"app:policy-reporter"}},
+		)
+
+		if filter.Validate(preport) {
+			t.Errorf("Unexpected Validation Result")
+		}
+	})
+	t.Run("Validate Exclude Label mismatch", func(t *testing.T) {
+		filter := target.NewReportFilter(
+			validate.RuleSets{Exclude: []string{"app:monitoring"}},
+		)
+
+		if !filter.Validate(preport) {
+			t.Errorf("Unexpected Validation Result")
+		}
+	})
+	t.Run("Validate Include Label mismatch", func(t *testing.T) {
+		filter := target.NewReportFilter(
+			validate.RuleSets{Include: []string{"app:monitoring"}},
+		)
+
+		if filter.Validate(preport) {
+			t.Errorf("Unexpected Validation Result")
+		}
+	})
+	t.Run("Validate label as wildcard filter", func(t *testing.T) {
+		filter := target.NewReportFilter(
+			validate.RuleSets{Exclude: []string{"app"}},
+		)
+
+		if filter.Validate(preport) {
+			t.Errorf("Unexpected Validation Result")
+		}
+
+		filter = target.NewReportFilter(
+			validate.RuleSets{Include: []string{"app"}},
+		)
+
+		if !filter.Validate(preport) {
+			t.Errorf("Unexpected Validation Result")
+		}
+	})
+	t.Run("Validate Include Label wildcard", func(t *testing.T) {
+		filter := target.NewReportFilter(
+			validate.RuleSets{Include: []string{"app:*"}},
+		)
+
+		if !filter.Validate(preport) {
+			t.Errorf("Unexpected Validation Result")
+		}
+	})
+	t.Run("Validate Exclude Label wildcard", func(t *testing.T) {
+		filter := target.NewReportFilter(
+			validate.RuleSets{Exclude: []string{"app:*"}},
+		)
+
+		if filter.Validate(preport) {
+			t.Errorf("Unexpected Validation Result")
+		}
+	})
+
+	t.Run("Client Result Validation", func(t *testing.T) {
 		client := target.NewBaseClient(target.ClientOptions{
 			Name: "Client",
-			Filter: target.NewClientFilter(
+			ResultFilter: target.NewResultFilter(
 				validate.RuleSets{},
 				validate.RuleSets{},
 				validate.RuleSets{Include: []string{"policy-test"}},
@@ -253,7 +329,19 @@ func Test_BaseClient(t *testing.T) {
 			SkipExistingOnStartup: true,
 		})
 
-		if client.Validate(result) {
+		if client.Validate(report.PolicyReport{}, result) {
+			t.Errorf("Unexpected Validation Result")
+		}
+	})
+
+	t.Run("Client Report Validation", func(t *testing.T) {
+		client := target.NewBaseClient(target.ClientOptions{
+			Name:                  "Client",
+			ReportFilter:          target.NewReportFilter(validate.RuleSets{Include: []string{"app"}}),
+			SkipExistingOnStartup: true,
+		})
+
+		if client.Validate(report.PolicyReport{}, result) {
 			t.Errorf("Unexpected Validation Result")
 		}
 	})
@@ -264,7 +352,7 @@ func Test_BaseClient(t *testing.T) {
 			SkipExistingOnStartup: true,
 		})
 
-		if !client.Validate(result) {
+		if !client.Validate(report.PolicyReport{}, result) {
 			t.Errorf("Should fallback to true")
 		}
 		if client.MinimumPriority() != report.DefaultPriority.String() {
@@ -278,7 +366,7 @@ func Test_BaseClient(t *testing.T) {
 	t.Run("SkipExistingOnStartup", func(t *testing.T) {
 		client := target.NewBaseClient(target.ClientOptions{
 			Name:                  "Client",
-			Filter:                &report.ResultFilter{},
+			ResultFilter:          &report.ResultFilter{},
 			SkipExistingOnStartup: true,
 		})
 
@@ -289,7 +377,7 @@ func Test_BaseClient(t *testing.T) {
 	t.Run("MinimumPriority", func(t *testing.T) {
 		client := target.NewBaseClient(target.ClientOptions{
 			Name:                  "Client",
-			Filter:                &report.ResultFilter{MinimumPriority: "error"},
+			ResultFilter:          &report.ResultFilter{MinimumPriority: "error"},
 			SkipExistingOnStartup: true,
 		})
 
@@ -300,7 +388,7 @@ func Test_BaseClient(t *testing.T) {
 	t.Run("Name", func(t *testing.T) {
 		client := target.NewBaseClient(target.ClientOptions{
 			Name:                  "Client",
-			Filter:                &report.ResultFilter{MinimumPriority: "error"},
+			ResultFilter:          &report.ResultFilter{MinimumPriority: "error"},
 			SkipExistingOnStartup: true,
 		})
 
@@ -311,7 +399,7 @@ func Test_BaseClient(t *testing.T) {
 	t.Run("Sources", func(t *testing.T) {
 		client := target.NewBaseClient(target.ClientOptions{
 			Name:                  "Client",
-			Filter:                &report.ResultFilter{Sources: []string{"Kyverno"}},
+			ResultFilter:          &report.ResultFilter{Sources: []string{"Kyverno"}},
 			SkipExistingOnStartup: true,
 		})
 

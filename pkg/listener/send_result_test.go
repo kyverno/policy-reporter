@@ -34,7 +34,7 @@ func (c *client) SkipExistingOnStartup() bool {
 	return c.skipExistingOnStartup
 }
 
-func (c client) Validate(result report.Result) bool {
+func (c client) Validate(rep report.PolicyReport, result report.Result) bool {
 	return c.validated
 }
 
@@ -42,7 +42,7 @@ func Test_SendResultListener(t *testing.T) {
 	t.Run("Send Result", func(t *testing.T) {
 		c := &client{validated: true}
 		slistener := listener.NewSendResultListener([]target.Client{c})
-		slistener(result1, false)
+		slistener(preport1, result1, false)
 
 		if !c.Called {
 			t.Error("Expected Send to be called")
@@ -51,7 +51,7 @@ func Test_SendResultListener(t *testing.T) {
 	t.Run("Don't Send Result when validation fails", func(t *testing.T) {
 		c := &client{validated: false}
 		slistener := listener.NewSendResultListener([]target.Client{c})
-		slistener(result1, false)
+		slistener(preport1, result1, false)
 
 		if c.Called {
 			t.Error("Expected Send not to be called")
@@ -60,7 +60,7 @@ func Test_SendResultListener(t *testing.T) {
 	t.Run("Don't Send pre existing Result when skipExistingOnStartup is true", func(t *testing.T) {
 		c := &client{skipExistingOnStartup: true}
 		slistener := listener.NewSendResultListener([]target.Client{c})
-		slistener(result1, true)
+		slistener(preport1, result1, true)
 
 		if c.Called {
 			t.Error("Expected Send not to be called")

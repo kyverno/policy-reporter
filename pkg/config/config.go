@@ -12,9 +12,10 @@ type EmailReportFilter struct {
 }
 
 type TargetFilter struct {
-	Namespaces ValueFilter `mapstructure:"namespaces"`
-	Priorities ValueFilter `mapstructure:"priorities"`
-	Policies   ValueFilter `mapstructure:"policies"`
+	Namespaces   ValueFilter `mapstructure:"namespaces"`
+	Priorities   ValueFilter `mapstructure:"priorities"`
+	Policies     ValueFilter `mapstructure:"policies"`
+	ReportLabels ValueFilter `mapstructure:"reportLabels"`
 }
 
 type MetricsFilter struct {

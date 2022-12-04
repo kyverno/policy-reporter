@@ -182,7 +182,7 @@ func (f *TargetFactory) UIClient(config UI) target.Client {
 		ClientOptions: target.ClientOptions{
 			Name:                  "UI",
 			SkipExistingOnStartup: config.SkipExisting,
-			Filter:                createTargetFilter(TargetFilter{}, config.MinimumPriority, config.Sources),
+			ResultFilter:          createResultFilter(TargetFilter{}, config.MinimumPriority, config.Sources),
 		},
 		Host:       config.Host,
 		HTTPClient: http.NewClient(config.Certificate, config.SkipTLS),
@@ -258,7 +258,8 @@ func (f *TargetFactory) createSlackClient(config Slack, parent Slack) target.Cli
 		ClientOptions: target.ClientOptions{
 			Name:                  config.Name,
 			SkipExistingOnStartup: config.SkipExisting,
-			Filter:                createTargetFilter(config.Filter, config.MinimumPriority, config.Sources),
+			ResultFilter:          createResultFilter(config.Filter, config.MinimumPriority, config.Sources),
+			ReportFilter:          createReprotFilter(config.Filter),
 		},
 		Webhook:      config.Webhook,
 		CustomFields: config.CustomFields,
@@ -303,7 +304,8 @@ func (f *TargetFactory) createLokiClient(config Loki, parent Loki) target.Client
 		ClientOptions: target.ClientOptions{
 			Name:                  config.Name,
 			SkipExistingOnStartup: config.SkipExisting,
-			Filter:                createTargetFilter(config.Filter, config.MinimumPriority, config.Sources),
+			ResultFilter:          createResultFilter(config.Filter, config.MinimumPriority, config.Sources),
+			ReportFilter:          createReprotFilter(config.Filter),
 		},
 		Host:         config.Host + config.Path,
 		CustomLabels: config.CustomLabels,
@@ -364,7 +366,8 @@ func (f *TargetFactory) createElasticsearchClient(config Elasticsearch, parent E
 		ClientOptions: target.ClientOptions{
 			Name:                  config.Name,
 			SkipExistingOnStartup: config.SkipExisting,
-			Filter:                createTargetFilter(config.Filter, config.MinimumPriority, config.Sources),
+			ResultFilter:          createResultFilter(config.Filter, config.MinimumPriority, config.Sources),
+			ReportFilter:          createReprotFilter(config.Filter),
 		},
 		Host:         config.Host,
 		Username:     config.Username,
@@ -399,7 +402,8 @@ func (f *TargetFactory) createDiscordClient(config Discord, parent Discord) targ
 		ClientOptions: target.ClientOptions{
 			Name:                  config.Name,
 			SkipExistingOnStartup: config.SkipExisting,
-			Filter:                createTargetFilter(config.Filter, config.MinimumPriority, config.Sources),
+			ResultFilter:          createResultFilter(config.Filter, config.MinimumPriority, config.Sources),
+			ReportFilter:          createReprotFilter(config.Filter),
 		},
 		Webhook:      config.Webhook,
 		CustomFields: config.CustomFields,
@@ -442,7 +446,8 @@ func (f *TargetFactory) createTeamsClient(config Teams, parent Teams) target.Cli
 		ClientOptions: target.ClientOptions{
 			Name:                  config.Name,
 			SkipExistingOnStartup: config.SkipExisting,
-			Filter:                createTargetFilter(config.Filter, config.MinimumPriority, config.Sources),
+			ResultFilter:          createResultFilter(config.Filter, config.MinimumPriority, config.Sources),
+			ReportFilter:          createReprotFilter(config.Filter),
 		},
 		Webhook:      config.Webhook,
 		CustomFields: config.CustomFields,
@@ -493,7 +498,8 @@ func (f *TargetFactory) createWebhookClient(config Webhook, parent Webhook) targ
 		ClientOptions: target.ClientOptions{
 			Name:                  config.Name,
 			SkipExistingOnStartup: config.SkipExisting,
-			Filter:                createTargetFilter(config.Filter, config.MinimumPriority, config.Sources),
+			ResultFilter:          createResultFilter(config.Filter, config.MinimumPriority, config.Sources),
+			ReportFilter:          createReprotFilter(config.Filter),
 		},
 		Host:         config.Host,
 		Headers:      config.Headers,
@@ -570,7 +576,8 @@ func (f *TargetFactory) createS3Client(config S3, parent S3) target.Client {
 		ClientOptions: target.ClientOptions{
 			Name:                  config.Name,
 			SkipExistingOnStartup: config.SkipExisting,
-			Filter:                createTargetFilter(config.Filter, config.MinimumPriority, config.Sources),
+			ResultFilter:          createResultFilter(config.Filter, config.MinimumPriority, config.Sources),
+			ReportFilter:          createReprotFilter(config.Filter),
 		},
 		S3:           s3Client,
 		CustomFields: config.CustomFields,
@@ -639,7 +646,8 @@ func (f *TargetFactory) createKinesisClient(config Kinesis, parent Kinesis) targ
 		ClientOptions: target.ClientOptions{
 			Name:                  config.Name,
 			SkipExistingOnStartup: config.SkipExisting,
-			Filter:                createTargetFilter(config.Filter, config.MinimumPriority, config.Sources),
+			ResultFilter:          createResultFilter(config.Filter, config.MinimumPriority, config.Sources),
+			ReportFilter:          createReprotFilter(config.Filter),
 		},
 		CustomFields: config.CustomFields,
 		Kinesis:      kinesisClient,
@@ -715,13 +723,19 @@ func (f *TargetFactory) mapSecretValues(config any, ref string) {
 	}
 }
 
-func createTargetFilter(filter TargetFilter, minimumPriority string, sources []string) *report.ResultFilter {
-	return target.NewClientFilter(
+func createResultFilter(filter TargetFilter, minimumPriority string, sources []string) *report.ResultFilter {
+	return target.NewResultFilter(
 		ToRuleSet(filter.Namespaces),
 		ToRuleSet(filter.Priorities),
 		ToRuleSet(filter.Policies),
 		minimumPriority,
 		sources,
+	)
+}
+
+func createReprotFilter(filter TargetFilter) *report.ReportFilter {
+	return target.NewReportFilter(
+		ToRuleSet(filter.ReportLabels),
 	)
 }
 

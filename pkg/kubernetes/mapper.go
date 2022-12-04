@@ -29,6 +29,7 @@ func (m *mapper) MapPolicyReport(preport *v1alpha2.PolicyReport) report.PolicyRe
 	r := report.PolicyReport{
 		Name:              preport.Name,
 		Namespace:         preport.Namespace,
+		Labels:            preport.Labels,
 		Summary:           m.mapSummary(preport.Summary),
 		Results:           make([]report.Result, 0),
 		CreationTimestamp: preport.CreationTimestamp.Time,
@@ -54,6 +55,7 @@ func (m *mapper) MapClusterPolicyReport(creport *v1alpha2.ClusterPolicyReport) r
 	r := report.PolicyReport{
 		Name:              creport.Name,
 		Summary:           m.mapSummary(creport.Summary),
+		Labels:            creport.Labels,
 		Results:           make([]report.Result, 0),
 		CreationTimestamp: creport.CreationTimestamp.Time,
 	}
