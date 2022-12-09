@@ -40,8 +40,18 @@ rules:
   - clusterpolicyreports/status
   verbs:
   - get
+  - list
   - create
   - update
   - delete
+{{- else }}
+- apiGroups:
+  - '*'
+  resources:
+  - policyreports
+  - clusterpolicyreports
+  verbs:
+  - get
+  - list
 {{- end }}
 {{- end -}}

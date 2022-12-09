@@ -3,5 +3,5 @@ name: kyvernoPlugin
 description: Policy Reporter Kyverno Plugin
 
 type: application
-version: 1.4.3
-appVersion: 1.4.2
+version: 1.5.0
+appVersion: 1.5.0

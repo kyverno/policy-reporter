@@ -20,7 +20,15 @@
         - `grafana.datasource.pluginId`, default `prometheus`
     * New value `grafana.dashboards.labelFilter` to add custom report labels as dashboard filter, default `[]`. Label has to be a valid prometheus label, e.g. `created-by` => `created_by`.
     * New values `grafana.dashboards.multicluster.enabled` and `grafana.dashboards.multicluster.label` to add an optional `cluster` label.
-
+* Kyverno Plugin
+    * New HTML Compliance Reports
+        * Grouped by Policy with Details per Namespace and Resource
+        * Grouped by Namespace with Details per Policy and Resource
+    * Go update to 1.19
+* UI
+    * Integrate new Compliance Reports
+    * New PolicyReport label based filter, use `ui.labelFilter` to define a list of labels to add
+    * Go update to 1.19
 
 # 2.13.5
 * Add configuration `target.s3.pathStyle` for the `S3` output
