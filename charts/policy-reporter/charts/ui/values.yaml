@@ -4,7 +4,7 @@ image:
   registry: ghcr.io
   repository: kyverno/policy-reporter-ui
   pullPolicy: IfNotPresent
-  tag: 1.6.7
+  tag: 1.7.0
 
 # possible default displayModes: light/dark
 displayMode: ""
@@ -43,6 +43,22 @@ clusters: []
 # - name: External Cluster
 #   api: https://policy-reporter.external.cluster                       # reachable external Policy Reporter REST API
 #   kyvernoApi: https://policy-reporter-kyverno-plugin.external.cluster # (optional) reachable external Policy Reporter Kyverno Plugin REST API
+
+# define custom filter for policy report results based on (Cluster)PolicyReport labels
+# exmaple - use a owner label on all reports belonging to a dedicated team and add the label as additional custom filter
+#
+# apiVersion: wgpolicyk8s.io/v1alpha2
+# kind: PolicyReport
+# metadata:
+#   labels:
+#     app.kubernetes.io/managed-by: kyverno
+#     owner: team-a
+#   name: cpol-disallow-capabilities
+#   namespace: default
+# results: [...]
+#
+# labelFilter: ["owner"]
+labelFilter: []
 
 # use redis as external log storage instead of an in memory store
 # recommended when using a HA setup with more then one replica

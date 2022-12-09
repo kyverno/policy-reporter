@@ -28,6 +28,10 @@ data:
     clusters:
       {{- toYaml . | nindent 4 }}
     {{- end }}
+    {{- with .Values.labelFilter }}
+    labelFilter:
+      {{- toYaml . | nindent 4 }}
+    {{- end }}
 
     {{- with .Values.redis }}
     redis:
