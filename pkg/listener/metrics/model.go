@@ -54,10 +54,11 @@ func CreateLabelGenerator(labels []string, names []string) LabelGenerator {
 
 	for index, label := range labels {
 		if strings.HasPrefix(label, ReportLabelPrefix) {
-			label = strings.TrimPrefix(label, ReportLabelPrefix)
+			label := strings.TrimPrefix(label, ReportLabelPrefix)
+			lIndex := index
 
 			chains = append(chains, func(m map[string]string, pr report.PolicyReport, _ report.Result) {
-				m[names[index]] = pr.Labels[label]
+				m[names[lIndex]] = pr.Labels[label]
 			})
 		}
 		if callback, ok := LabelGeneratorMapping[label]; ok {
