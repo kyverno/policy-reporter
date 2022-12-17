@@ -1,5 +1,10 @@
 # Changelog
 
+# 2.14.1
+
+* Policy Reporter
+    * Fix generate multiple custom metrics
+
 # 2.14.0
 * Policy Reporter
     * Persist also PolicyReport labels
