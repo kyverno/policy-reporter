@@ -73,6 +73,10 @@ spec:
     metadata:
       labels:
         app.kubernetes.io/name: policy-reporter
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/path: /metrics
+        prometheus.io/port: "8080"
     spec:
       serviceAccountName: policy-reporter
       automountServiceAccountToken: true
