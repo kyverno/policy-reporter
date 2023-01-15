@@ -1110,11 +1110,12 @@ func generateFilterWhere(filter api.Filter, active []string) (string, []interfac
 		argCounter += 2
 
 		where = append(where, fmt.Sprintf(
-			`(resource_namespace LIKE $%d OR resource_name LIKE $%d OR policy LIKE $%d OR rule LIKE $%d OR severity = $%d OR status = $%d)`,
+			`(resource_namespace LIKE $%d OR resource_name LIKE $%d OR policy LIKE $%d OR rule LIKE $%d OR severity = $%d OR status = $%d OR LOWER(resource_kind) = LOWER($%d))`,
 			likeIndex,
 			likeIndex,
 			likeIndex,
 			likeIndex,
+			equalIndex,
 			equalIndex,
 			equalIndex,
 		))
