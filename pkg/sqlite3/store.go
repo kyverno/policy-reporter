@@ -17,40 +17,40 @@ import (
 
 const (
 	reportSQL = `CREATE TABLE policy_report (
-		"id" TEXT NOT NULL PRIMARY KEY,		
-		"type" TEXT,
-		"namespace" TEXT,
-		"name" TEXT NOT NULL,
-		"labels" JSON DEFAULT '{}',
-		"skip" INTEGER DEFAULT 0,
-		"pass" INTEGER DEFAULT 0,
-		"warn" INTEGER DEFAULT 0,
-		"fail" INTEGER DEFAULT 0,
-		"error" INTEGER DEFAULT 0,
-		"created" INTEGER
-	);`
+    "id" TEXT NOT NULL PRIMARY KEY,   
+    "type" TEXT,
+    "namespace" TEXT,
+    "name" TEXT NOT NULL,
+    "labels" JSON DEFAULT '{}',
+    "skip" INTEGER DEFAULT 0,
+    "pass" INTEGER DEFAULT 0,
+    "warn" INTEGER DEFAULT 0,
+    "fail" INTEGER DEFAULT 0,
+    "error" INTEGER DEFAULT 0,
+    "created" INTEGER
+  );`
 
 	resultSQL = `CREATE TABLE policy_report_result (
-		"policy_report_id" TEXT NOT NULL,
-		"id" TEXT NOT NULL PRIMARY KEY,
-		"policy" TEXT,
-		"rule" TEXT,
-		"message" TEXT,
-		"scored" INTEGER,
-		"priority" TEXT,
-		"status" TEXT,
-		"severity" TEXT,
-		"category" TEXT,
-		"source" TEXT,
-		"resource_api_version" TEXT,
-		"resource_kind" TEXT,
-		"resource_name" TEXT,
-		"resource_namespace" TEXT,
-		"resource_uid" TEXT,
-		"properties" TEXT,
-		"timestamp" INTEGER,
-		FOREIGN KEY (policy_report_id) REFERENCES policy_report(id) ON DELETE CASCADE
-	);`
+    "policy_report_id" TEXT NOT NULL,
+    "id" TEXT NOT NULL PRIMARY KEY,
+    "policy" TEXT,
+    "rule" TEXT,
+    "message" TEXT,
+    "scored" INTEGER,
+    "priority" TEXT,
+    "status" TEXT,
+    "severity" TEXT,
+    "category" TEXT,
+    "source" TEXT,
+    "resource_api_version" TEXT,
+    "resource_kind" TEXT,
+    "resource_name" TEXT,
+    "resource_namespace" TEXT,
+    "resource_uid" TEXT,
+    "properties" TEXT,
+    "timestamp" INTEGER,
+    FOREIGN KEY (policy_report_id) REFERENCES policy_report(id) ON DELETE CASCADE
+  );`
 
 	resultInsertBaseSQL = "INSERT OR IGNORE INTO policy_report_result(policy_report_id, id, policy, rule, message, scored, priority, status, severity, category, source, resource_api_version, resource_kind, resource_name, resource_namespace, resource_uid, properties, timestamp) VALUES "
 )
@@ -100,7 +100,11 @@ func (s *policyReportStore) Get(id string) (report.PolicyReport, bool) {
 	}
 
 	r.CreationTimestamp = time.Unix(created, 0)
-	r.Labels = convertJSONToMap(labels)
+	r.Labels, err = convertJSONToMap(labels)
+	if err != nil {
+		log.Printf("[ERROR] failed to convert json to labels: %s\n", err)
+		return r, false
+	}
 
 	results, err := s.fetchResults(id)
 	if err != nil {
@@ -582,10 +586,10 @@ func (s *policyReportStore) FetchNamespacedStatusCounts(filter api.Filter) ([]ap
 	}
 
 	rows, err := s.db.Query(`
-		SELECT COUNT(result.id) as counter, resource_namespace, status 
-		FROM policy_report_result as result`+join+` WHERE resource_namespace != ""`+where+`
-		GROUP BY resource_namespace, status 
-		ORDER BY resource_namespace ASC`, args...)
+    SELECT COUNT(result.id) as counter, resource_namespace, status 
+    FROM policy_report_result as result`+join+` WHERE resource_namespace != ""`+where+`
+    GROUP BY resource_namespace, status 
+    ORDER BY resource_namespace ASC`, args...)
 
 	if err != nil {
 		return statusCounts, err
@@ -637,9 +641,9 @@ func (s *policyReportStore) FetchRuleStatusCounts(policy, rule string) ([]api.St
 	}
 
 	rows, err := s.db.Query(`
-		SELECT COUNT(id) as counter, status 
-		FROM policy_report_result`+whereClause+`
-		GROUP BY status`, args...)
+    SELECT COUNT(id) as counter, status 
+    FROM policy_report_result`+whereClause+`
+    GROUP BY status`, args...)
 
 	if err != nil {
 		return statusCounts, err
@@ -694,9 +698,9 @@ func (s *policyReportStore) FetchStatusCounts(filter api.Filter) ([]api.StatusCo
 	}
 
 	rows, err := s.db.Query(`
-		SELECT COUNT(result.id) as counter, status 
-		FROM policy_report_result as result`+join+` WHERE resource_namespace = ""`+where+`
-		GROUP BY status`, args...)
+    SELECT COUNT(result.id) as counter, status 
+    FROM policy_report_result as result`+join+` WHERE resource_namespace = ""`+where+`
+    GROUP BY status`, args...)
 
 	if err != nil {
 		return statusCounts, err
@@ -734,8 +738,8 @@ func (s *policyReportStore) FetchNamespacedResults(filter api.Filter, pagination
 	}
 
 	rows, err := s.db.Query(`
-		SELECT result.id, resource_namespace, resource_kind, resource_api_version, resource_name, message, policy, rule, severity, properties, status, category, timestamp
-		FROM policy_report_result as result`+join+` WHERE resource_namespace != ""`+where+` `+paginationString, args...)
+    SELECT result.id, resource_namespace, resource_kind, resource_api_version, resource_name, message, policy, rule, severity, properties, status, category, timestamp
+    FROM policy_report_result as result`+join+` WHERE resource_namespace != ""`+where+` `+paginationString, args...)
 
 	if err != nil {
 		return list, err
@@ -795,8 +799,8 @@ func (s *policyReportStore) FetchClusterResults(filter api.Filter, pagination ap
 	}
 
 	rows, err := s.db.Query(`
-		SELECT result.id, resource_namespace, resource_kind, resource_api_version, resource_name, message, policy, rule, severity, properties, status, category, timestamp
-		FROM policy_report_result as result`+join+` WHERE resource_namespace =""`+where+` `+paginationString, args...)
+    SELECT result.id, resource_namespace, resource_kind, resource_api_version, resource_name, message, policy, rule, severity, properties, status, category, timestamp
+    FROM policy_report_result as result`+join+` WHERE resource_namespace =""`+where+` `+paginationString, args...)
 
 	if err != nil {
 		return list, err
@@ -860,7 +864,11 @@ func (s *policyReportStore) FetchNamespacedReportLabels(filter api.Filter) (map[
 		if err != nil {
 			return list, err
 		}
-		labels := convertJSONToMap(item)
+		labels, err := convertJSONToMap(item)
+		if err != nil {
+			log.Printf("[ERROR] failed to convert json to labels: %s\n", err)
+		}
+
 		for key, value := range labels {
 			if _, ok := list[key]; ok && !contains(value, list[key]) {
 				list[key] = append(list[key], value)
@@ -893,7 +901,11 @@ func (s *policyReportStore) FetchClusterReportLabels(filter api.Filter) (map[str
 		if err != nil {
 			return list, err
 		}
-		labels := convertJSONToMap(item)
+		labels, err := convertJSONToMap(item)
+		if err != nil {
+			log.Printf("[ERROR] failed to convert json to labels: %s\n", err)
+		}
+
 		for key, value := range labels {
 			if _, ok := list[key]; ok && !contains(value, list[key]) {
 				list[key] = append(list[key], value)
@@ -969,27 +981,27 @@ func (s *policyReportStore) fetchResults(reportID string) ([]report.Result, erro
 	results := make([]report.Result, 0)
 
 	rows, err := s.db.Query(`
-		SELECT 
-			id,
-			policy,
-			rule,
-			message,
-			scored,
-			priority,
-			status,
-			severity, 
-			category, 
-			source, 
-			resource_api_version,
-			resource_kind,
-			resource_name,
-			resource_namespace,
-			resource_uid, 
-			properties,
-			timestamp
-		FROM policy_report_result
-		WHERE policy_report_id=$1
-	`, reportID)
+    SELECT 
+      id,
+      policy,
+      rule,
+      message,
+      scored,
+      priority,
+      status,
+      severity, 
+      category, 
+      source, 
+      resource_api_version,
+      resource_kind,
+      resource_name,
+      resource_namespace,
+      resource_uid, 
+      properties,
+      timestamp
+    FROM policy_report_result
+    WHERE policy_report_id=$1
+  `, reportID)
 	if err != nil {
 		return results, err
 	}
@@ -1110,11 +1122,12 @@ func generateFilterWhere(filter api.Filter, active []string) (string, []interfac
 		argCounter += 2
 
 		where = append(where, fmt.Sprintf(
-			`(resource_namespace LIKE $%d OR resource_name LIKE $%d OR policy LIKE $%d OR rule LIKE $%d OR severity = $%d OR status = $%d)`,
+			`(resource_namespace LIKE $%d OR resource_name LIKE $%d OR policy LIKE $%d OR rule LIKE $%d OR severity = $%d OR status = $%d OR LOWER(resource_kind) = LOWER($%d))`,
 			likeIndex,
 			likeIndex,
 			likeIndex,
 			likeIndex,
+			equalIndex,
 			equalIndex,
 			equalIndex,
 		))
@@ -1163,17 +1176,18 @@ func contains(source string, sources []string) bool {
 func convertMapToJSON(m map[string]string) string {
 	str, err := json.Marshal(m)
 	if err != nil {
+		log.Printf("[ERROR] failed to convert map to json: %s\n", err)
 		return "{}"
 	}
 
 	return string(str)
 }
 
-func convertJSONToMap(s string) map[string]string {
+func convertJSONToMap(s string) (map[string]string, error) {
 	m := make(map[string]string)
-	_ = json.Unmarshal([]byte(s), &m)
+	err := json.Unmarshal([]byte(s), &m)
 
-	return m
+	return m, err
 }
 
 // NewPolicyReportStore construct a PolicyReportStore
