@@ -404,7 +404,7 @@ func Test_PolicyReportStore(t *testing.T) {
 		}
 	})
 
-	t.Run("FetchNamespacedResults with SearchFilter", func(t *testing.T) {
+	t.Run("FetchNamespacedResults with SearchFilter::Severity", func(t *testing.T) {
 		items, err := store.FetchNamespacedResults(v1.Filter{Search: report.High}, pagination)
 		if err != nil {
 			t.Fatalf("Unexpected Error: %s", err)
@@ -414,7 +414,21 @@ func Test_PolicyReportStore(t *testing.T) {
 			t.Fatalf("Should return 1 namespaced result")
 		}
 		if items[0].Severity != report.High {
-			t.Fatalf("result with severity high")
+			t.Fatalf("result with severity high expected")
+		}
+	})
+
+	t.Run("FetchNamespacedResults with SearchFilter::Kind", func(t *testing.T) {
+		items, err := store.FetchNamespacedResults(v1.Filter{Search: "deployment"}, pagination)
+		if err != nil {
+			t.Fatalf("Unexpected Error: %s", err)
+		}
+
+		if len(items) != 1 {
+			t.Fatalf("Should return 1 namespaced result, got %d", len(items))
+		}
+		if items[0].Kind != "Deployment" {
+			t.Fatalf("result with kind Deployment expected")
 		}
 	})
 

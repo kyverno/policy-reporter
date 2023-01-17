@@ -178,6 +178,9 @@ tolerations: []
 # Anti-affinity to disallow deploying client and master nodes on the same worker node
 affinity: {}
 
+# Topology Spread Constraints to better spread pods
+topologySpreadConstraints: []
+
 # enable a NetworkPolicy for this chart. Useful on clusters where Network Policies are
 # used and configured in a default-deny fashion.
 networkPolicy:

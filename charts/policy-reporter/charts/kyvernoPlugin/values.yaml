@@ -87,16 +87,19 @@ tolerations: []
 # Anti-affinity to disallow deploying client and master nodes on the same worker node
 affinity: {}
 
+# Topology Spread Constraints to better spread pods
+topologySpreadConstraints: []
+
 # livenessProbe for policy-reporter-kyverno-plugin
 livenessProbe:
   httpGet:
-    path: /ready
+    path: /healthz
     port: rest
 
 # readinessProbe for policy-reporter-kyverno-plugin
 readinessProbe:
   httpGet:
-    path: /healthz
+    path: /ready
     port: rest
 
 # REST API
