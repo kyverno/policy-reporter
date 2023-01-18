@@ -11,7 +11,6 @@ The `policy-reporter` folder is the basic installation for Policy Reporter witho
 ### Installation
 
 ```bash
-kubectl apply -f https://raw.githubusercontent.com/kyverno/policy-reporter/main/manifest/policy-reporter/namespace.yaml
 kubectl apply -f https://raw.githubusercontent.com/kyverno/policy-reporter/main/manifest/policy-reporter/install.yaml
 ```
 
@@ -28,8 +27,6 @@ Configures Policy Reporter UI as Target for Policy Reporter.
 ### Installation
 
 ```bash
-kubectl apply -f https://raw.githubusercontent.com/kyverno/policy-reporter/main/manifest/policy-reporter-ui/namespace.yaml
-kubectl apply -f https://raw.githubusercontent.com/kyverno/policy-reporter/main/manifest/policy-reporter-ui/target-secret.yaml
 kubectl apply -f https://raw.githubusercontent.com/kyverno/policy-reporter/main/manifest/policy-reporter-ui/install.yaml
 ```
 
@@ -49,8 +46,6 @@ Configures Policy Reporter UI as Target for Policy Reporter and enables the Kyve
 ### Installation
 
 ```bash
-kubectl apply -f https://raw.githubusercontent.com/kyverno/policy-reporter/main/manifest/policy-reporter-kyverno-ui/namespace.yaml
-kubectl apply -f https://raw.githubusercontent.com/kyverno/policy-reporter/main/manifest/policy-reporter-kyverno-ui/target-secret.yaml
 kubectl apply -f https://raw.githubusercontent.com/kyverno/policy-reporter/main/manifest/policy-reporter-kyverno-ui/install.yaml
 ```
 
@@ -189,10 +184,7 @@ The `violations-email-report` folder can be used to install Policy Reporter only
 ### Installation
 
 ```bash
-kubectl apply -f https://raw.githubusercontent.com/kyverno/policy-reporter/main/manifest/violations-email-report/namespace.yaml
-kubectl apply -f https://raw.githubusercontent.com/kyverno/policy-reporter/main/manifest/violations-email-report/config-secret.yaml
-kubectl apply -f https://raw.githubusercontent.com/kyverno/policy-reporter/main/manifest/violations-email-report/serviceaccount.yaml
-kubectl apply -f https://raw.githubusercontent.com/kyverno/policy-reporter/main/manifest/violations-email-report/cronjob.yaml
+kubectl apply -f https://raw.githubusercontent.com/kyverno/policy-reporter/main/manifest/violations-email-report/install.yaml
 ```
 
 ### Configuration

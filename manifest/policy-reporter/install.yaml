@@ -1,5 +1,10 @@
 ---
 apiVersion: v1
+kind: Namespace
+metadata:
+  name: policy-reporter
+---
+apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: policy-reporter
