@@ -1,13 +1,14 @@
-FROM golang:1.19 as builder
+FROM golang:1.19-alpine as builder
 
 ARG LD_FLAGS='-s -w -linkmode external -extldflags "-static"'
 ARG TARGETPLATFORM
+ARG TARGETARCH
 
 WORKDIR /app
 COPY . .
 
 RUN export GOOS=$(echo ${TARGETPLATFORM} | cut -d / -f1) && \
-    export GOARCH=$(echo ${TARGETPLATFORM} | cut -d / -f2)
+    export GOARCH=$(TARGETARCH)
 
 RUN go env
 
