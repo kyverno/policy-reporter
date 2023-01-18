@@ -9,7 +9,7 @@ type PolicyReportStore interface {
 	Get(id string) (PolicyReport, bool)
 	// Add a PolicyReport to the Store
 	Add(r PolicyReport) error
-	// Add a PolicyReport to the Store
+	// Update a PolicyReport to the Store
 	Update(r PolicyReport) error
 	// Remove a PolicyReport with the given Type and ID from the Store
 	Remove(id string) error
