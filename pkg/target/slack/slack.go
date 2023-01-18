@@ -1,11 +1,11 @@
 package slack
 
 import (
-	"strings"
-
 	"github.com/kyverno/policy-reporter/pkg/report"
 	"github.com/kyverno/policy-reporter/pkg/target"
 	"github.com/kyverno/policy-reporter/pkg/target/http"
+	"golang.org/x/text/cases"
+	"golang.org/x/text/language"
 )
 
 // Options to configure the Slack target
@@ -172,10 +172,10 @@ func (s *client) newPayload(result report.Result) payload {
 		}
 
 		for property, value := range result.Properties {
-			propBlock.Fields = append(propBlock.Fields, field{Type: "mrkdwn", Text: "*" + strings.Title(property) + "*\n" + value})
+			propBlock.Fields = append(propBlock.Fields, field{Type: "mrkdwn", Text: "*" + cases.Title(language.English, cases.NoLower).String(property) + "*\n" + value})
 		}
 		for property, value := range s.customFields {
-			propBlock.Fields = append(propBlock.Fields, field{Type: "mrkdwn", Text: "*" + strings.Title(property) + "*\n" + value})
+			propBlock.Fields = append(propBlock.Fields, field{Type: "mrkdwn", Text: "*" + cases.Title(language.English, cases.NoLower).String(property) + "*\n" + value})
 		}
 
 		att.Blocks = append(att.Blocks, propBlock)

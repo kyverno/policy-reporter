@@ -5,6 +5,9 @@ import (
 	"strings"
 	"time"
 
+	"golang.org/x/text/cases"
+	"golang.org/x/text/language"
+
 	"github.com/kyverno/policy-reporter/pkg/email"
 )
 
@@ -18,7 +21,7 @@ func (o *Reporter) Report(sources []Source, format string) (email.Report, error)
 
 	vioTempl := template.New("violations.html").Funcs(template.FuncMap{
 		"color": email.ColorFromStatus,
-		"title": strings.Title,
+		"title": cases.Title(language.English, cases.NoLower),
 		"hasViolations": func(results map[string][]Result) bool {
 			return (len(results["warn"]) + len(results["fail"]) + len(results["error"])) > 0
 		},

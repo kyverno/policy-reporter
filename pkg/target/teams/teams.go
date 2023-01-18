@@ -1,8 +1,10 @@
 package teams
 
 import (
-	"strings"
 	"time"
+
+	"golang.org/x/text/cases"
+	"golang.org/x/text/language"
 
 	"github.com/kyverno/policy-reporter/pkg/report"
 	"github.com/kyverno/policy-reporter/pkg/target"
@@ -80,10 +82,10 @@ func newPayload(result report.Result, customFields map[string]string) payload {
 	}
 
 	for property, value := range result.Properties {
-		facts = append(facts, fact{strings.Title(property), value})
+		facts = append(facts, fact{cases.Title(language.English, cases.NoLower).String(property), value})
 	}
 	for property, value := range customFields {
-		facts = append(facts, fact{strings.Title(property), value})
+		facts = append(facts, fact{cases.Title(language.English, cases.NoLower).String(property), value})
 	}
 
 	timestamp := time.Now()
