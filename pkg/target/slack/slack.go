@@ -1,8 +1,7 @@
 package slack
 
 import (
-	"strings"
-
+	"github.com/kyverno/policy-reporter/pkg/helper"
 	"github.com/kyverno/policy-reporter/pkg/report"
 	"github.com/kyverno/policy-reporter/pkg/target"
 	"github.com/kyverno/policy-reporter/pkg/target/http"
@@ -172,10 +171,10 @@ func (s *client) newPayload(result report.Result) payload {
 		}
 
 		for property, value := range result.Properties {
-			propBlock.Fields = append(propBlock.Fields, field{Type: "mrkdwn", Text: "*" + strings.Title(property) + "*\n" + value})
+			propBlock.Fields = append(propBlock.Fields, field{Type: "mrkdwn", Text: "*" + helper.Caser.String(property) + "*\n" + value})
 		}
 		for property, value := range s.customFields {
-			propBlock.Fields = append(propBlock.Fields, field{Type: "mrkdwn", Text: "*" + strings.Title(property) + "*\n" + value})
+			propBlock.Fields = append(propBlock.Fields, field{Type: "mrkdwn", Text: "*" + helper.Caser.String(property) + "*\n" + value})
 		}
 
 		att.Blocks = append(att.Blocks, propBlock)

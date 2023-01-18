@@ -1,6 +1,7 @@
 package violations
 
 import (
+	"github.com/kyverno/policy-reporter/pkg/helper"
 	"html/template"
 	"strings"
 	"time"
@@ -18,7 +19,7 @@ func (o *Reporter) Report(sources []Source, format string) (email.Report, error)
 
 	vioTempl := template.New("violations.html").Funcs(template.FuncMap{
 		"color": email.ColorFromStatus,
-		"title": strings.Title,
+		"title": helper.Caser,
 		"hasViolations": func(results map[string][]Result) bool {
 			return (len(results["warn"]) + len(results["fail"]) + len(results["error"])) > 0
 		},

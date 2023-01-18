@@ -1,7 +1,7 @@
 package teams
 
 import (
-	"strings"
+	"github.com/kyverno/policy-reporter/pkg/helper"
 	"time"
 
 	"github.com/kyverno/policy-reporter/pkg/report"
@@ -80,10 +80,10 @@ func newPayload(result report.Result, customFields map[string]string) payload {
 	}
 
 	for property, value := range result.Properties {
-		facts = append(facts, fact{strings.Title(property), value})
+		facts = append(facts, fact{helper.Caser.String(property), value})
 	}
 	for property, value := range customFields {
-		facts = append(facts, fact{strings.Title(property), value})
+		facts = append(facts, fact{helper.Caser.String(property), value})
 	}
 
 	timestamp := time.Now()
