@@ -11,7 +11,7 @@ type EventPublisher interface {
 	UnregisterListener(string)
 	// GetListener returns a list of all registered Listeners
 	GetListener() map[string]PolicyReportListener
-	// Process LifecycleEvent with all registered listeners
+	// Publish Process LifecycleEvent with all registered listeners
 	Publish(event LifecycleEvent)
 }
 
