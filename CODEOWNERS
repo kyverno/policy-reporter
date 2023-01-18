@@ -1,0 +1,8 @@
+# Areas of code where @fengshunli always wants to be a reviewer/notified.
+/pkg/api @fengshunli
+/pkg/kubernetes/secrets @fengshunli
+/pkg/report @fengshunli
+/pkg/crd @fengshunli
+/pkg/email @fengshunli
+/pkg/listener @fengshunli
+/pkg/target @fengshunli
