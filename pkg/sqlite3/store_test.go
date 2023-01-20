@@ -11,6 +11,8 @@ import (
 
 var pagination = v1.Pagination{Page: 1, Offset: 20, Direction: "ASC", SortBy: []string{"resource_name"}}
 
+var polrPagination = v1.Pagination{Page: 1, Offset: 20, Direction: "ASC", SortBy: []string{"namespace"}}
+
 var result1 = report.Result{
 	ID:       "123",
 	Message:  "validation error: requests and limits required. Rule autogen-check-for-requests-and-limits failed at path /spec/template/spec/containers/0/resources/requests/",
@@ -662,6 +664,50 @@ func Test_PolicyReportStore(t *testing.T) {
 
 		if len(items["owner"]) != 1 && items["owner"][0] != "team-a" {
 			t.Fatalf("Should return policy-reporter as app value")
+		}
+	})
+
+	t.Run("CountPolicyReports", func(t *testing.T) {
+		items, err := store.CountPolicyReports(v1.Filter{Namespaces: []string{"test"}, ReportLabel: map[string]string{"scope": "namespaced"}})
+		if err != nil {
+			t.Fatalf("Unexpected Error: %s", err)
+		}
+
+		if items != 1 {
+			t.Fatalf("Should return one policy report, got %d", items)
+		}
+	})
+
+	t.Run("FetchPolicyReports", func(t *testing.T) {
+		items, err := store.FetchPolicyReports(v1.Filter{Namespaces: []string{"test"}, ReportLabel: map[string]string{"scope": "namespaced"}}, polrPagination)
+		if err != nil {
+			t.Fatalf("Unexpected Error: %s", err)
+		}
+
+		if len(items) != 1 {
+			t.Fatalf("Should return one policy report, got %d", len(items))
+		}
+	})
+
+	t.Run("CountClusterReports", func(t *testing.T) {
+		items, err := store.CountClusterPolicyReports(v1.Filter{ReportLabel: map[string]string{"scope": "cluster"}})
+		if err != nil {
+			t.Fatalf("Unexpected Error: %s", err)
+		}
+
+		if items != 1 {
+			t.Fatalf("Should return one policy report, got %d", items)
+		}
+	})
+
+	t.Run("FetchClusterReports", func(t *testing.T) {
+		items, err := store.FetchClusterPolicyReports(v1.Filter{ReportLabel: map[string]string{"scope": "cluster"}}, polrPagination)
+		if err != nil {
+			t.Fatalf("Unexpected Error: %s", err)
+		}
+
+		if len(items) != 1 {
+			t.Fatalf("Should return one policy report, got %d", len(items))
 		}
 	})
 

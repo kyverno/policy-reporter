@@ -46,6 +46,9 @@ func (s *httpServer) RegisterV1Handler(finder v1.PolicyReportFinder) {
 	s.mux.HandleFunc("/v1/namespaces", Gzip(v1.NamespaceListHandler(finder)))
 	s.mux.HandleFunc("/v1/rule-status-count", Gzip(v1.RuleStatusCountHandler(finder)))
 
+	s.mux.HandleFunc("/v1/policy-reports", Gzip(v1.PolicyReportListHandler(finder)))
+	s.mux.HandleFunc("/v1/cluster-policy-reports", Gzip(v1.ClusterPolicyReportListHandler(finder)))
+
 	s.mux.HandleFunc("/v1/namespaced-resources/policies", Gzip(v1.NamespacedResourcesPolicyListHandler(finder)))
 	s.mux.HandleFunc("/v1/namespaced-resources/rules", Gzip(v1.NamespacedResourcesRuleListHandler(finder)))
 	s.mux.HandleFunc("/v1/namespaced-resources/kinds", Gzip(v1.NamespacedResourcesKindListHandler(finder)))

@@ -204,6 +204,179 @@ func (s *policyReportStore) CleanUp() error {
 	return err
 }
 
+// FetchPolicyReports by filter and pagination
+func (s *policyReportStore) FetchPolicyReports(filter api.Filter, pagination api.Pagination) ([]*api.PolicyReport, error) {
+	whereParts := make([]string, 0)
+	args := make([]interface{}, 0)
+
+	var argCounter int
+	var where string
+
+	if len(filter.Namespaces) > 0 {
+		argCounter, whereParts, args = appendWhere(filter.Namespaces, "namespace", whereParts, args, argCounter)
+	} else {
+		whereParts = append(whereParts, `namespace != ""`)
+	}
+
+	if len(filter.ReportLabel) > 0 {
+		for key, value := range filter.ReportLabel {
+			argCounter++
+
+			whereParts = append(whereParts, fmt.Sprintf("json_extract(labels, '$.\"%s\"') = $%d", key, argCounter))
+			args = append(args, value)
+		}
+	}
+
+	paginationString := generatePagination(pagination)
+	where = strings.Join(whereParts, " AND ")
+
+	var list = make([]*api.PolicyReport, 0)
+
+	rows, err := s.db.Query(`SELECT id, namespace, name, labels, pass, skip, warn, fail, error FROM policy_report WHERE `+where+" "+paginationString, args...)
+	if err != nil {
+		return list, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var labels string
+		r := &api.PolicyReport{}
+		err := rows.Scan(&r.ID, &r.Namespace, &r.Name, &labels, &r.Pass, &r.Skip, &r.Warn, &r.Fail, &r.Error)
+		if err != nil {
+			log.Printf("[ERROR] failed to scan PolicyReport: %s", err)
+			return list, err
+		}
+
+		r.Labels, err = convertJSONToMap(labels)
+		if err != nil {
+			log.Printf("[ERROR] failed to convert json to labels: %s\n", err)
+			return list, err
+		}
+
+		list = append(list, r)
+	}
+
+	return list, nil
+}
+
+// CountPolicyReports by filter
+func (s *policyReportStore) CountPolicyReports(filter api.Filter) (int, error) {
+	whereParts := make([]string, 0)
+	args := make([]interface{}, 0)
+
+	var argCounter int
+	var where string
+
+	if len(filter.Namespaces) > 0 {
+		argCounter, whereParts, args = appendWhere(filter.Namespaces, "namespace", whereParts, args, argCounter)
+	} else {
+		whereParts = append(whereParts, `namespace != ""`)
+	}
+
+	if len(filter.ReportLabel) > 0 {
+		for key, value := range filter.ReportLabel {
+			argCounter++
+
+			whereParts = append(whereParts, fmt.Sprintf("json_extract(labels, '$.\"%s\"') = $%d", key, argCounter))
+			args = append(args, value)
+		}
+	}
+
+	where = strings.Join(whereParts, " AND ")
+	var count int
+
+	row := s.db.QueryRow(`SELECT count(id) FROM policy_report WHERE `+where, args...)
+	err := row.Scan(&count)
+	if err != nil {
+		return count, err
+	}
+
+	return count, nil
+}
+
+// FetchClusterPolicyReports by filter and pagination
+func (s *policyReportStore) FetchClusterPolicyReports(filter api.Filter, pagination api.Pagination) ([]*api.PolicyReport, error) {
+	whereParts := make([]string, 0)
+	args := make([]interface{}, 0)
+
+	var argCounter int
+	var where string
+
+	whereParts = append(whereParts, `namespace = ""`)
+
+	if len(filter.ReportLabel) > 0 {
+		for key, value := range filter.ReportLabel {
+			argCounter++
+
+			whereParts = append(whereParts, fmt.Sprintf("json_extract(labels, '$.\"%s\"') = $%d", key, argCounter))
+			args = append(args, value)
+		}
+	}
+
+	paginationString := generatePagination(pagination)
+	where = strings.Join(whereParts, " AND ")
+
+	var list = make([]*api.PolicyReport, 0)
+
+	rows, err := s.db.Query(`SELECT id, name, labels, pass, skip, warn, fail, error FROM policy_report WHERE `+where+" "+paginationString, args...)
+	if err != nil {
+		return list, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var labels string
+		r := &api.PolicyReport{}
+		err := rows.Scan(&r.ID, &r.Name, &labels, &r.Pass, &r.Skip, &r.Warn, &r.Fail, &r.Error)
+		if err != nil {
+			log.Printf("[ERROR] failed to scan PolicyReport: %s", err)
+			return list, err
+		}
+
+		r.Labels, err = convertJSONToMap(labels)
+		if err != nil {
+			log.Printf("[ERROR] failed to convert json to labels: %s\n", err)
+			return list, err
+		}
+
+		list = append(list, r)
+	}
+
+	return list, nil
+}
+
+// CountClusterPolicyReports by filter and pagination
+func (s *policyReportStore) CountClusterPolicyReports(filter api.Filter) (int, error) {
+	whereParts := make([]string, 0)
+	args := make([]interface{}, 0)
+
+	var argCounter int
+	var where string
+
+	whereParts = append(whereParts, `namespace = ""`)
+
+	if len(filter.ReportLabel) > 0 {
+		for key, value := range filter.ReportLabel {
+			argCounter++
+
+			whereParts = append(whereParts, fmt.Sprintf("json_extract(labels, '$.\"%s\"') = $%d", key, argCounter))
+			args = append(args, value)
+		}
+	}
+
+	where = strings.Join(whereParts, " AND ")
+
+	var count int
+
+	row := s.db.QueryRow(`SELECT count(id) FROM policy_report WHERE `+where, args...)
+	err := row.Scan(&count)
+	if err != nil {
+		return count, err
+	}
+
+	return count, nil
+}
+
 func (s *policyReportStore) FetchClusterPolicies(filter api.Filter) ([]string, error) {
 	list := make([]string, 0)
 

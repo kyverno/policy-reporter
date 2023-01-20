@@ -22,6 +22,14 @@ type Pagination struct {
 }
 
 type PolicyReportFinder interface {
+	// FetchClusterPolicyReports by filter and pagination
+	FetchClusterPolicyReports(Filter, Pagination) ([]*PolicyReport, error)
+	// FetchPolicyReports by filter and pagination
+	FetchPolicyReports(Filter, Pagination) ([]*PolicyReport, error)
+	// CountClusterPolicyReports by filter
+	CountClusterPolicyReports(Filter) (int, error)
+	// CountPolicyReports by filter
+	CountPolicyReports(Filter) (int, error)
 	// FetchClusterPolicies from current PolicyReportResults
 	FetchClusterPolicies(Filter) ([]string, error)
 	// FetchClusterRules from current PolicyReportResults
