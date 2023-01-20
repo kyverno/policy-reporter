@@ -8,7 +8,7 @@ type PolicyReportResultListener = func(PolicyReport, Result, bool)
 
 // PolicyReportClient watches for PolicyReport Events and executes registered callback
 type PolicyReportClient interface {
-	// WatchPolicyReports starts to watch for PolicyReport LifecycleEvent events
+	// Run WatchPolicyReports starts to watch for PolicyReport LifecycleEvent events
 	Run(stopper chan struct{}) error
 	// HasSynced the configured PolicyReport
 	HasSynced() bool

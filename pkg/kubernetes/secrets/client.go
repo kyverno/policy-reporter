@@ -27,11 +27,11 @@ type k8sClient struct {
 
 func (c *k8sClient) Get(ctx context.Context, name string) (Values, error) {
 	secret, err := c.client.Get(ctx, name, metav1.GetOptions{})
+	values := Values{}
 	if err != nil {
-		return Values{}, err
+		return values, err
 	}
 
-	values := Values{}
 	if host, ok := secret.Data["host"]; ok {
 		values.Host = string(host)
 	}

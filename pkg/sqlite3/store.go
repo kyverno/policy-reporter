@@ -232,10 +232,6 @@ func (s *policyReportStore) FetchPolicyReports(filter api.Filter, pagination api
 
 	var list = make([]*api.PolicyReport, 0)
 
-	query := `SELECT id, namespace, name, labels, pass, skip, warn, fail, error FROM policy_report WHERE ` + where + " " + paginationString
-
-	fmt.Println(query)
-
 	rows, err := s.db.Query(`SELECT id, namespace, name, labels, pass, skip, warn, fail, error FROM policy_report WHERE `+where+" "+paginationString, args...)
 	if err != nil {
 		return list, err

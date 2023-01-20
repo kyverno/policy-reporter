@@ -67,7 +67,7 @@ func NamespacedResourcesPolicyListHandler(finder PolicyReportFinder) http.Handle
 	}
 }
 
-// NamespacedResourcesPolicyListHandler REST API
+// NamespacedResourcesRuleListHandler REST API
 func NamespacedResourcesRuleListHandler(finder PolicyReportFinder) http.HandlerFunc {
 	return func(w http.ResponseWriter, req *http.Request) {
 		list, err := finder.FetchNamespacedRules(buildFilter(req))
