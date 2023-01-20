@@ -520,6 +520,46 @@ func Test_V1_API(t *testing.T) {
 			t.Errorf("handler returned unexpected body: got %v want %v", rr.Body.String(), expected)
 		}
 	})
+
+	t.Run("PolicyReportListHandler", func(t *testing.T) {
+		req, err := http.NewRequest("GET", "/v1/policy-reports?namespaces=test&labels=app:policy-reporter", nil)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		rr := httptest.NewRecorder()
+		handler := v1.PolicyReportListHandler(store)
+		handler.ServeHTTP(rr, req)
+
+		if status := rr.Code; status != http.StatusOK {
+			t.Errorf("handler returned wrong status code: got %v want %v", status, http.StatusOK)
+		}
+
+		expected := `{"items":[{"id":"7605991845421273693","name":"polr-test","namespace":"test","labels":{"app":"policy-reporter","scope":"namespace"},"pass":0,"skip":0,"warn":0,"error":0,"fail":1}],"count":1}`
+		if !strings.Contains(rr.Body.String(), expected) {
+			t.Errorf("handler returned unexpected body: got %v want %v", rr.Body.String(), expected)
+		}
+	})
+
+	t.Run("ClusterPolicyReportListHandler", func(t *testing.T) {
+		req, err := http.NewRequest("GET", "/v1/policy-reports?labels=app:policy-reporter", nil)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		rr := httptest.NewRecorder()
+		handler := v1.ClusterPolicyReportListHandler(store)
+		handler.ServeHTTP(rr, req)
+
+		if status := rr.Code; status != http.StatusOK {
+			t.Errorf("handler returned wrong status code: got %v want %v", status, http.StatusOK)
+		}
+
+		expected := `{"items":[{"id":"7174304213499286261","name":"cpolr","labels":{"app":"policy-reporter","scope":"cluster"},"pass":0,"skip":0,"warn":0,"error":0,"fail":0}],"count":1}`
+		if !strings.Contains(rr.Body.String(), expected) {
+			t.Errorf("handler returned unexpected body: got %v want %v", rr.Body.String(), expected)
+		}
+	})
 }
 
 func Test_TargetsAPI(t *testing.T) {

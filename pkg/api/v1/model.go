@@ -5,6 +5,23 @@ import (
 	"github.com/kyverno/policy-reporter/pkg/target"
 )
 
+type PolicyReport struct {
+	ID        string            `json:"id"`
+	Name      string            `json:"name"`
+	Namespace string            `json:"namespace,omitempty"`
+	Labels    map[string]string `json:"labels"`
+	Pass      int               `json:"pass"`
+	Skip      int               `json:"skip"`
+	Warn      int               `json:"warn"`
+	Error     int               `json:"error"`
+	Fail      int               `json:"fail"`
+}
+
+type PolicyReportList struct {
+	Items []*PolicyReport `json:"items"`
+	Count int             `json:"count"`
+}
+
 type ResultList struct {
 	Items []*ListResult `json:"items"`
 	Count int           `json:"count"`

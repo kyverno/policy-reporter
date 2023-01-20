@@ -23,6 +23,26 @@ func TargetsHandler(targets []target.Client) http.HandlerFunc {
 	}
 }
 
+// PolicyReportListHandler REST API
+func PolicyReportListHandler(finder PolicyReportFinder) http.HandlerFunc {
+	return func(w http.ResponseWriter, req *http.Request) {
+		filter := buildFilter(req)
+		count, err := finder.CountPolicyReports(filter)
+		list, err := finder.FetchPolicyReports(filter, buildPaginatiomn(req, []string{"namespace", "name"}))
+		helper.SendJSONResponse(w, PolicyReportList{Items: list, Count: count}, err)
+	}
+}
+
+// PolicyReportListHandler REST API
+func ClusterPolicyReportListHandler(finder PolicyReportFinder) http.HandlerFunc {
+	return func(w http.ResponseWriter, req *http.Request) {
+		filter := buildFilter(req)
+		count, err := finder.CountClusterPolicyReports(filter)
+		list, err := finder.FetchClusterPolicyReports(filter, buildPaginatiomn(req, []string{"namespace", "name"}))
+		helper.SendJSONResponse(w, PolicyReportList{Items: list, Count: count}, err)
+	}
+}
+
 // ClusterResourcesPolicyListHandler REST API
 func ClusterResourcesPolicyListHandler(finder PolicyReportFinder) http.HandlerFunc {
 	return func(w http.ResponseWriter, req *http.Request) {
@@ -159,7 +179,7 @@ func NamespacedResourcesResultHandler(finder PolicyReportFinder) http.HandlerFun
 	return func(w http.ResponseWriter, req *http.Request) {
 		filter := buildFilter(req)
 		count, err := finder.CountNamespacedResults(filter)
-		list, err := finder.FetchNamespacedResults(filter, buildPaginatiomn(req))
+		list, err := finder.FetchNamespacedResults(filter, buildPaginatiomn(req, defaultOrder))
 		helper.SendJSONResponse(w, ResultList{Items: list, Count: count}, err)
 	}
 }
@@ -169,7 +189,7 @@ func ClusterResourcesResultHandler(finder PolicyReportFinder) http.HandlerFunc {
 	return func(w http.ResponseWriter, req *http.Request) {
 		filter := buildFilter(req)
 		count, err := finder.CountClusterResults(filter)
-		list, err := finder.FetchClusterResults(filter, buildPaginatiomn(req))
+		list, err := finder.FetchClusterResults(filter, buildPaginatiomn(req, defaultOrder))
 		helper.SendJSONResponse(w, ResultList{Items: list, Count: count}, err)
 	}
 }
@@ -187,7 +207,7 @@ func NamespaceListHandler(finder PolicyReportFinder) http.HandlerFunc {
 	}
 }
 
-func buildPaginatiomn(req *http.Request) Pagination {
+func buildPaginatiomn(req *http.Request, defaultOrder []string) Pagination {
 	page, err := strconv.Atoi(req.URL.Query().Get("page"))
 	if err != nil || page < 1 {
 		page = 0
