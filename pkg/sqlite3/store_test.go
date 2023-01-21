@@ -645,7 +645,7 @@ func Test_PolicyReportStore(t *testing.T) {
 	})
 
 	t.Run("NamespacedLabels", func(t *testing.T) {
-		items, err := store.FetchNamespacedReportLabels(v1.Filter{Sources: []string{"Kyverno"}})
+		items, err := store.FetchNamespacedReportLabels(v1.Filter{Sources: []string{"Kyverno"}, Namespaces: []string{"test"}})
 		if err != nil {
 			t.Fatalf("Unexpected Error: %s", err)
 		}

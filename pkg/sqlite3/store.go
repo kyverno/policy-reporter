@@ -1021,7 +1021,7 @@ func (s *policyReportStore) CountClusterResults(filter api.Filter) (int, error) 
 func (s *policyReportStore) FetchNamespacedReportLabels(filter api.Filter) (map[string][]string, error) {
 	list := make(map[string][]string)
 
-	where, args := generateFilterWhere(filter, []string{"sources"})
+	where, args := generateFilterWhere(filter, []string{"sources", "report_namespaces"})
 	if len(where) > 0 {
 		where = " AND " + where
 	}
@@ -1043,12 +1043,21 @@ func (s *policyReportStore) FetchNamespacedReportLabels(filter api.Filter) (map[
 		}
 
 		for key, value := range labels {
-			if _, ok := list[key]; ok && !contains(value, list[key]) {
-				list[key] = append(list[key], value)
+			if value == "" {
 				continue
 			}
 
-			list[key] = []string{value}
+			_, ok := list[key]
+			contained := contains(value, list[key])
+
+			if ok && !contained {
+				list[key] = append(list[key], value)
+				continue
+			} else if ok && contained {
+				continue
+			} else if !ok {
+				list[key] = []string{value}
+			}
 		}
 	}
 
@@ -1262,6 +1271,9 @@ func generateFilterWhere(filter api.Filter, active []string) (string, []interfac
 
 	var argCounter int
 
+	if contains("report_namespaces", active) {
+		argCounter, where, args = appendWhere(filter.Namespaces, "report.namespace", where, args, argCounter)
+	}
 	if contains("namespaces", active) {
 		argCounter, where, args = appendWhere(filter.Namespaces, "resource_namespace", where, args, argCounter)
 	}
