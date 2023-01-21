@@ -1055,9 +1055,9 @@ func (s *policyReportStore) FetchNamespacedReportLabels(filter api.Filter) (map[
 				continue
 			} else if ok && contained {
 				continue
-			} else if !ok {
-				list[key] = []string{value}
 			}
+
+			list[key] = []string{value}
 		}
 	}
 
@@ -1089,8 +1089,13 @@ func (s *policyReportStore) FetchClusterReportLabels(filter api.Filter) (map[str
 		}
 
 		for key, value := range labels {
-			if _, ok := list[key]; ok && !contains(value, list[key]) {
+			_, ok := list[key]
+			contained := contains(value, list[key])
+
+			if ok && !contained {
 				list[key] = append(list[key], value)
+				continue
+			} else if ok && contained {
 				continue
 			}
 
