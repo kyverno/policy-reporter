@@ -1,5 +1,14 @@
 # Changelog
 
+# 2.15.0
+
+* Add values to configure `topologySpreadConstraints` for all components [[#241](https://github.com/kyverno/policy-reporter/pull/241) by [Kostavro](https://github.com/Kostavro)]
+* Fixing comment formats and deprecations [[#250](https://github.com/kyverno/policy-reporter/pull/250) by [fengshunli](https://github.com/fengshunli)]
+* Add new APIs for PolicyReport and ClusterPolicyReport metadata (`/v1/policy-reports`, `/v1/cluster-policy-reports`) [[#251](https://github.com/kyverno/policy-reporter/pull/251)
+* `search` filter also checks the resource kind
+* Use correct probes in core deployment [[#236](https://github.com/kyverno/policy-reporter/pull/236) by [rgarcia89](https://github.com/rgarcia89)]
+* Add source to PolicyReport Table and improve report-label API [[#252](https://github.com/kyverno/policy-reporter/pull/252)
+
 # 2.14.1
 
 * Policy Reporter
