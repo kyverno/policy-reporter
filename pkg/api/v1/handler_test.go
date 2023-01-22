@@ -97,6 +97,7 @@ var cresult2 = report.Result{
 var preport = report.PolicyReport{
 	ID:                report.GeneratePolicyReportID("polr-test", "test"),
 	Labels:            map[string]string{"app": "policy-reporter", "scope": "namespace"},
+	Source:            "Kyverno",
 	Name:              "polr-test",
 	Namespace:         "test",
 	Results:           []report.Result{result1, result2},
@@ -107,6 +108,7 @@ var preport = report.PolicyReport{
 var creport = report.PolicyReport{
 	ID:                report.GeneratePolicyReportID("cpolr", ""),
 	Labels:            map[string]string{"app": "policy-reporter", "scope": "cluster"},
+	Source:            "Kyverno",
 	Name:              "cpolr",
 	Results:           []report.Result{cresult1, cresult2},
 	Summary:           report.Summary{},
@@ -535,7 +537,7 @@ func Test_V1_API(t *testing.T) {
 			t.Errorf("handler returned wrong status code: got %v want %v", status, http.StatusOK)
 		}
 
-		expected := `{"items":[{"id":"7605991845421273693","name":"polr-test","namespace":"test","labels":{"app":"policy-reporter","scope":"namespace"},"pass":0,"skip":0,"warn":0,"error":0,"fail":1}],"count":1}`
+		expected := `{"items":[{"id":"7605991845421273693","name":"polr-test","namespace":"test","source":"Kyverno","labels":{"app":"policy-reporter","scope":"namespace"},"pass":0,"skip":0,"warn":0,"error":0,"fail":1}],"count":1}`
 		if !strings.Contains(rr.Body.String(), expected) {
 			t.Errorf("handler returned unexpected body: got %v want %v", rr.Body.String(), expected)
 		}
@@ -555,7 +557,7 @@ func Test_V1_API(t *testing.T) {
 			t.Errorf("handler returned wrong status code: got %v want %v", status, http.StatusOK)
 		}
 
-		expected := `{"items":[{"id":"7174304213499286261","name":"cpolr","labels":{"app":"policy-reporter","scope":"cluster"},"pass":0,"skip":0,"warn":0,"error":0,"fail":0}],"count":1}`
+		expected := `{"items":[{"id":"7174304213499286261","name":"cpolr","source":"Kyverno","labels":{"app":"policy-reporter","scope":"cluster"},"pass":0,"skip":0,"warn":0,"error":0,"fail":0}],"count":1}`
 		if !strings.Contains(rr.Body.String(), expected) {
 			t.Errorf("handler returned unexpected body: got %v want %v", rr.Body.String(), expected)
 		}

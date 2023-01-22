@@ -9,6 +9,7 @@ type PolicyReport struct {
 	ID        string            `json:"id"`
 	Name      string            `json:"name"`
 	Namespace string            `json:"namespace,omitempty"`
+	Source    string            `json:"source"`
 	Labels    map[string]string `json:"labels"`
 	Pass      int               `json:"pass"`
 	Skip      int               `json:"skip"`

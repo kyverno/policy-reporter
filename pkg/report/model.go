@@ -216,6 +216,7 @@ type Summary struct {
 type PolicyReport struct {
 	ID                string
 	Name              string
+	Source            string
 	Namespace         string
 	Labels            map[string]string
 	Results           []Result
