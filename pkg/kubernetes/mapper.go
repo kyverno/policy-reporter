@@ -35,6 +35,13 @@ func (m *mapper) MapPolicyReport(preport *v1alpha2.PolicyReport) report.PolicyRe
 		CreationTimestamp: preport.CreationTimestamp.Time,
 	}
 
+	var source string
+	if len(preport.Results) > 0 {
+		source = preport.Results[0].Source
+	}
+
+	r.Source = source
+
 	for _, result := range preport.Results {
 		if len(result.Resources) == 0 {
 			r.Results = append(r.Results, m.mapResult(result, report.Resource{}))
@@ -59,6 +66,13 @@ func (m *mapper) MapClusterPolicyReport(creport *v1alpha2.ClusterPolicyReport) r
 		Results:           make([]report.Result, 0),
 		CreationTimestamp: creport.CreationTimestamp.Time,
 	}
+
+	var source string
+	if len(creport.Results) > 0 {
+		source = creport.Results[0].Source
+	}
+
+	r.Source = source
 
 	for _, result := range creport.Results {
 		if len(result.Resources) == 0 {
