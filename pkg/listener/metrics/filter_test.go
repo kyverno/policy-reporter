@@ -3,8 +3,8 @@ package metrics_test
 import (
 	"testing"
 
+	"github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
 	"github.com/kyverno/policy-reporter/pkg/listener/metrics"
-	"github.com/kyverno/policy-reporter/pkg/report"
 	"github.com/kyverno/policy-reporter/pkg/validate"
 )
 
@@ -51,14 +51,14 @@ func Test_Vaildate(t *testing.T) {
 	})
 
 	t.Run("Disallow Report with matching exclude Status", func(t *testing.T) {
-		filter := metrics.NewResultFilter(validate.RuleSets{}, validate.RuleSets{Exclude: []string{report.Fail}}, validate.RuleSets{}, validate.RuleSets{}, validate.RuleSets{})
+		filter := metrics.NewResultFilter(validate.RuleSets{}, validate.RuleSets{Exclude: []string{v1alpha2.StatusFail}}, validate.RuleSets{}, validate.RuleSets{}, validate.RuleSets{})
 		if filter.Validate(result1) {
 			t.Error("Expected Validate returns false if Report status matches exclude pattern")
 		}
 	})
 
 	t.Run("Disallow Report with matching exclude Severity", func(t *testing.T) {
-		filter := metrics.NewResultFilter(validate.RuleSets{}, validate.RuleSets{}, validate.RuleSets{}, validate.RuleSets{}, validate.RuleSets{Exclude: []string{report.High}})
+		filter := metrics.NewResultFilter(validate.RuleSets{}, validate.RuleSets{}, validate.RuleSets{}, validate.RuleSets{}, validate.RuleSets{Exclude: []string{v1alpha2.SeverityHigh}})
 		if filter.Validate(result1) {
 			t.Error("Expected Validate returns false if Report severity matches exclude pattern")
 		}

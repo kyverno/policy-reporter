@@ -3,6 +3,7 @@ package report_test
 import (
 	"testing"
 
+	"github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
 	"github.com/kyverno/policy-reporter/pkg/report"
 	"github.com/kyverno/policy-reporter/pkg/validate"
 )
@@ -67,7 +68,7 @@ func Test_ResultFilter(t *testing.T) {
 	})
 	t.Run("filter result with a false validation", func(t *testing.T) {
 		filter := report.NewResultFilter()
-		filter.AddValidation(func(r report.Result) bool { return false })
+		filter.AddValidation(func(r v1alpha2.PolicyReportResult) bool { return false })
 		if filter.Validate(result1) {
 			t.Error("Expected result validates to false")
 		}
@@ -83,7 +84,7 @@ func Test_ReportFilter(t *testing.T) {
 	})
 	t.Run("filter result with a false validation", func(t *testing.T) {
 		filter := report.NewReportFilter()
-		filter.AddValidation(func(r report.PolicyReport) bool { return false })
+		filter.AddValidation(func(r v1alpha2.ReportInterface) bool { return false })
 		if filter.Validate(preport) {
 			t.Error("Expected result validates to false")
 		}

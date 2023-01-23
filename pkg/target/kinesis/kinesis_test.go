@@ -4,29 +4,36 @@ import (
 	"bytes"
 	"encoding/json"
 	"testing"
+	"time"
 
-	"github.com/kyverno/policy-reporter/pkg/report"
+	"github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
 	"github.com/kyverno/policy-reporter/pkg/target"
 	"github.com/kyverno/policy-reporter/pkg/target/kinesis"
+	corev1 "k8s.io/api/core/v1"
+	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-var completeResult = report.Result{
-	Message:    "validation error: requests and limits required. Rule autogen-check-for-requests-and-limits failed at path /spec/template/spec/containers/0/resources/requests/",
-	Policy:     "require-requests-and-limits-required",
-	Rule:       "autogen-check-for-requests-and-limits",
-	Priority:   report.WarningPriority,
-	Status:     report.Fail,
-	Severity:   report.High,
-	Category:   "resources",
-	Scored:     true,
-	Properties: map[string]string{"version": "1234"},
-	Resource: report.Resource{
+var seconds = time.Date(2021, time.February, 23, 15, 10, 0, 0, time.UTC).Unix()
+
+var completeResult = v1alpha2.PolicyReportResult{
+	Message:   "validation error: requests and limits required. Rule autogen-check-for-requests-and-limits failed at path /spec/template/spec/containers/0/resources/requests/",
+	Policy:    "require-requests-and-limits-required",
+	Rule:      "autogen-check-for-requests-and-limits",
+	Timestamp: v1.Timestamp{Seconds: seconds},
+	Priority:  v1alpha2.WarningPriority,
+	Result:    v1alpha2.StatusFail,
+	Severity:  v1alpha2.SeverityHigh,
+	Category:  "resources",
+	Scored:    true,
+	Source:    "Kyverno",
+	Resources: []corev1.ObjectReference{{
 		APIVersion: "v1",
 		Kind:       "Deployment",
 		Name:       "nginx",
 		Namespace:  "default",
 		UID:        "536ab69f-1b3c-4bd9-9ba4-274a56188409",
-	},
+	}},
+	Properties: map[string]string{"version": "1.2.0"},
 }
 
 type testClient struct {

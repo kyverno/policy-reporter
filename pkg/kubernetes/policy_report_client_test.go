@@ -31,7 +31,7 @@ func Test_PolicyReportWatcher(t *testing.T) {
 	})
 
 	kclient, rclient, _ := NewFakeCilent()
-	client := kubernetes.NewPolicyReportClient(kclient, NewMapper(), filter, publisher)
+	client := kubernetes.NewPolicyReportClient(kclient, filter, publisher)
 
 	err := client.Run(stop)
 	if err != nil {
@@ -65,7 +65,7 @@ func Test_ClusterPolicyReportWatcher(t *testing.T) {
 	})
 
 	kclient, _, rclient := NewFakeCilent()
-	client := kubernetes.NewPolicyReportClient(kclient, NewMapper(), filter, publisher)
+	client := kubernetes.NewPolicyReportClient(kclient, filter, publisher)
 
 	err := client.Run(stop)
 	if err != nil {
@@ -90,7 +90,7 @@ func Test_HasSynced(t *testing.T) {
 	defer close(stop)
 
 	kclient, _, _ := NewFakeCilent()
-	client := kubernetes.NewPolicyReportClient(kclient, NewMapper(), filter, report.NewEventPublisher())
+	client := kubernetes.NewPolicyReportClient(kclient, filter, report.NewEventPublisher())
 
 	err := client.Run(stop)
 	if err != nil {

@@ -19,7 +19,6 @@ type k8sPolicyReportClient struct {
 	fatcory      externalversions.SharedInformerFactory
 	v1alpha2     v1alpha2.Interface
 	synced       bool
-	mapper       Mapper
 	mx           *sync.Mutex
 	reportFilter *report.Filter
 }
@@ -57,31 +56,24 @@ func (k *k8sPolicyReportClient) configurePolicyReport() cache.SharedIndexInforme
 	polrInformer.AddEventHandler(cache.ResourceEventHandlerFuncs{
 		AddFunc: func(obj interface{}) {
 			if item, ok := obj.(*pr.PolicyReport); ok {
-				preport := k.mapper.MapPolicyReport(item)
-				if k.reportFilter.AllowReport(preport) {
-					k.debouncer.Add(report.LifecycleEvent{NewPolicyReport: preport, OldPolicyReport: report.PolicyReport{}, Type: report.Added})
+				if k.reportFilter.AllowReport(item) {
+					k.debouncer.Add(report.LifecycleEvent{NewPolicyReport: item, OldPolicyReport: nil, Type: report.Added})
 				}
 			}
 		},
 		DeleteFunc: func(obj interface{}) {
 			if item, ok := obj.(*pr.PolicyReport); ok {
-				preport := k.mapper.MapPolicyReport(item)
-				if k.reportFilter.AllowReport(preport) {
-					k.debouncer.Add(report.LifecycleEvent{NewPolicyReport: preport, OldPolicyReport: report.PolicyReport{}, Type: report.Deleted})
+				if k.reportFilter.AllowReport(item) {
+					k.debouncer.Add(report.LifecycleEvent{NewPolicyReport: item, OldPolicyReport: nil, Type: report.Deleted})
 				}
 			}
 		},
 		UpdateFunc: func(oldObj, newObj interface{}) {
 			if item, ok := newObj.(*pr.PolicyReport); ok {
-				preport := k.mapper.MapPolicyReport(item)
+				oldItem := oldObj.(*pr.PolicyReport)
 
-				var oreport report.PolicyReport
-				if oldItem, ok := oldObj.(*pr.PolicyReport); ok {
-					oreport = k.mapper.MapPolicyReport(oldItem)
-				}
-
-				if k.reportFilter.AllowReport(preport) {
-					k.debouncer.Add(report.LifecycleEvent{NewPolicyReport: preport, OldPolicyReport: oreport, Type: report.Updated})
+				if k.reportFilter.AllowReport(item) {
+					k.debouncer.Add(report.LifecycleEvent{NewPolicyReport: item, OldPolicyReport: oldItem, Type: report.Updated})
 				}
 			}
 		},
@@ -99,31 +91,24 @@ func (k *k8sPolicyReportClient) configureClusterPolicyReport() cache.SharedIndex
 	cpolrInformer.AddEventHandler(cache.ResourceEventHandlerFuncs{
 		AddFunc: func(obj interface{}) {
 			if item, ok := obj.(*pr.ClusterPolicyReport); ok {
-				preport := k.mapper.MapClusterPolicyReport(item)
-				if k.reportFilter.AllowReport(preport) {
-					k.debouncer.Add(report.LifecycleEvent{NewPolicyReport: preport, OldPolicyReport: report.PolicyReport{}, Type: report.Added})
+				if k.reportFilter.AllowReport(item) {
+					k.debouncer.Add(report.LifecycleEvent{NewPolicyReport: item, OldPolicyReport: nil, Type: report.Added})
 				}
 			}
 		},
 		DeleteFunc: func(obj interface{}) {
 			if item, ok := obj.(*pr.ClusterPolicyReport); ok {
-				preport := k.mapper.MapClusterPolicyReport(item)
-				if k.reportFilter.AllowReport(preport) {
-					k.debouncer.Add(report.LifecycleEvent{NewPolicyReport: preport, OldPolicyReport: report.PolicyReport{}, Type: report.Deleted})
+				if k.reportFilter.AllowReport(item) {
+					k.debouncer.Add(report.LifecycleEvent{NewPolicyReport: item, OldPolicyReport: nil, Type: report.Deleted})
 				}
 			}
 		},
 		UpdateFunc: func(oldObj, newObj interface{}) {
 			if item, ok := newObj.(*pr.ClusterPolicyReport); ok {
-				preport := k.mapper.MapClusterPolicyReport(item)
+				oldItem := oldObj.(*pr.ClusterPolicyReport)
 
-				var oreport report.PolicyReport
-				if oldItem, ok := oldObj.(*pr.ClusterPolicyReport); ok {
-					oreport = k.mapper.MapClusterPolicyReport(oldItem)
-				}
-
-				if k.reportFilter.AllowReport(preport) {
-					k.debouncer.Add(report.LifecycleEvent{NewPolicyReport: preport, OldPolicyReport: oreport, Type: report.Updated})
+				if k.reportFilter.AllowReport(item) {
+					k.debouncer.Add(report.LifecycleEvent{NewPolicyReport: item, OldPolicyReport: oldItem, Type: report.Updated})
 				}
 			}
 		},
@@ -137,14 +122,13 @@ func (k *k8sPolicyReportClient) configureClusterPolicyReport() cache.SharedIndex
 }
 
 // NewPolicyReportClient new Client for Policy Report Kubernetes API
-func NewPolicyReportClient(client versioned.Interface, mapper Mapper, reportFilter *report.Filter, publisher report.EventPublisher) report.PolicyReportClient {
+func NewPolicyReportClient(client versioned.Interface, reportFilter *report.Filter, publisher report.EventPublisher) report.PolicyReportClient {
 	fatcory := externalversions.NewSharedInformerFactory(client, time.Hour)
 	v1alpha2 := fatcory.Wgpolicyk8s().V1alpha2()
 
 	return &k8sPolicyReportClient{
 		fatcory:      fatcory,
 		v1alpha2:     v1alpha2,
-		mapper:       mapper,
 		mx:           &sync.Mutex{},
 		debouncer:    NewDebouncer(time.Minute, publisher),
 		reportFilter: reportFilter,

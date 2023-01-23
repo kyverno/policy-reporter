@@ -10,7 +10,10 @@ import (
 	"time"
 
 	api "github.com/kyverno/policy-reporter/pkg/api/v1"
+	"github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
 	"github.com/kyverno/policy-reporter/pkg/report"
+	corev1 "k8s.io/api/core/v1"
+	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	_ "github.com/mattn/go-sqlite3"
 )
@@ -38,7 +41,6 @@ const (
     "rule" TEXT,
     "message" TEXT,
     "scored" INTEGER,
-    "priority" TEXT,
     "status" TEXT,
     "severity" TEXT,
     "category" TEXT,
@@ -53,7 +55,7 @@ const (
     FOREIGN KEY (policy_report_id) REFERENCES policy_report(id) ON DELETE CASCADE
   );`
 
-	resultInsertBaseSQL = "INSERT OR IGNORE INTO policy_report_result(policy_report_id, id, policy, rule, message, scored, priority, status, severity, category, source, resource_api_version, resource_kind, resource_name, resource_namespace, resource_uid, properties, timestamp) VALUES "
+	resultInsertBaseSQL = "INSERT OR IGNORE INTO policy_report_result(policy_report_id, id, policy, rule, message, scored, status, severity, category, source, resource_api_version, resource_kind, resource_name, resource_namespace, resource_uid, properties, timestamp) VALUES "
 )
 
 type PolicyReportStore interface {
@@ -83,16 +85,16 @@ func (s *policyReportStore) CreateSchemas() error {
 }
 
 // Get an PolicyReport by Type and ID
-func (s *policyReportStore) Get(id string) (report.PolicyReport, bool) {
+func (s *policyReportStore) Get(id string) (v1alpha2.ReportInterface, bool) {
 	var created int64
 	var labels string
 
-	r := report.PolicyReport{
-		Summary: report.Summary{},
+	r := &v1alpha2.PolicyReport{
+		Summary: v1alpha2.PolicyReportSummary{},
 	}
 
-	row := s.db.QueryRow("SELECT namespace, source, name, labels, pass, skip, warn, fail, error, created FROM policy_report WHERE id=$1", id)
-	err := row.Scan(&r.Namespace, &r.Source, &r.Name, &labels, &r.Summary.Pass, &r.Summary.Skip, &r.Summary.Warn, &r.Summary.Fail, &r.Summary.Error, &created)
+	row := s.db.QueryRow("SELECT namespace, name, labels, pass, skip, warn, fail, error, created FROM policy_report WHERE id=$1", id)
+	err := row.Scan(&r.Namespace, &r.Name, &labels, &r.Summary.Pass, &r.Summary.Skip, &r.Summary.Warn, &r.Summary.Fail, &r.Summary.Error, &created)
 	if err == sql.ErrNoRows {
 		return r, false
 	} else if err != nil {
@@ -100,7 +102,7 @@ func (s *policyReportStore) Get(id string) (report.PolicyReport, bool) {
 		return r, false
 	}
 
-	r.CreationTimestamp = time.Unix(created, 0)
+	r.CreationTimestamp = v1.NewTime(time.Unix(created, 0))
 	r.Labels, err = convertJSONToMap(labels)
 	if err != nil {
 		log.Printf("[ERROR] failed to convert json to labels: %s\n", err)
@@ -119,14 +121,16 @@ func (s *policyReportStore) Get(id string) (report.PolicyReport, bool) {
 }
 
 // Add a PolicyReport to the Store
-func (s *policyReportStore) Add(r report.PolicyReport) error {
+func (s *policyReportStore) Add(r v1alpha2.ReportInterface) error {
 	stmt, err := s.db.Prepare("INSERT INTO policy_report(id, type, namespace, source, name, labels, pass, skip, warn, fail, error, created) values(?,?,?,?,?,?,?,?,?,?,?,?)")
 	if err != nil {
 		return err
 	}
 	defer stmt.Close()
 
-	_, err = stmt.Exec(r.GetIdentifier(), r.GetType(), r.Namespace, r.Source, r.Name, convertMapToJSON(r.Labels), r.Summary.Pass, r.Summary.Skip, r.Summary.Warn, r.Summary.Fail, r.Summary.Error, r.CreationTimestamp.Unix())
+	sum := r.GetSummary()
+
+	_, err = stmt.Exec(r.GetID(), report.GetType(r), r.GetNamespace(), r.GetSource(), r.GetName(), convertMapToJSON(r.GetLabels()), sum.Pass, sum.Skip, sum.Warn, sum.Fail, sum.Error, r.GetCreationTimestamp().Unix())
 	if err != nil {
 		return err
 	}
@@ -134,14 +138,16 @@ func (s *policyReportStore) Add(r report.PolicyReport) error {
 	return s.persistResults(r)
 }
 
-func (s *policyReportStore) Update(r report.PolicyReport) error {
+func (s *policyReportStore) Update(r v1alpha2.ReportInterface) error {
 	stmt, err := s.db.Prepare("UPDATE policy_report SET labels=?, pass=?, skip=?, warn=?, fail=?, error=?, created=? WHERE id=?")
 	if err != nil {
 		return err
 	}
 	defer stmt.Close()
 
-	_, err = stmt.Exec(convertMapToJSON(r.Labels), r.Summary.Pass, r.Summary.Skip, r.Summary.Warn, r.Summary.Fail, r.Summary.Error, r.CreationTimestamp.Unix(), r.GetIdentifier())
+	sum := r.GetSummary()
+
+	_, err = stmt.Exec(convertMapToJSON(r.GetLabels()), sum.Pass, sum.Skip, sum.Warn, sum.Fail, sum.Error, r.GetCreationTimestamp().Unix(), r.GetID())
 	if err != nil {
 		return err
 	}
@@ -152,7 +158,7 @@ func (s *policyReportStore) Update(r report.PolicyReport) error {
 	}
 	defer dstmt.Close()
 
-	_, err = dstmt.Exec(r.GetIdentifier())
+	_, err = dstmt.Exec(r.GetID())
 	if err != nil {
 		return err
 	}
@@ -733,11 +739,11 @@ func (s *policyReportStore) FetchNamespacedStatusCounts(filter api.Filter) ([]ap
 
 	if len(filter.Status) == 0 {
 		list = map[string][]api.NamespaceCount{
-			report.Pass:  make([]api.NamespaceCount, 0),
-			report.Fail:  make([]api.NamespaceCount, 0),
-			report.Warn:  make([]api.NamespaceCount, 0),
-			report.Error: make([]api.NamespaceCount, 0),
-			report.Skip:  make([]api.NamespaceCount, 0),
+			v1alpha2.StatusPass:  make([]api.NamespaceCount, 0),
+			v1alpha2.StatusFail:  make([]api.NamespaceCount, 0),
+			v1alpha2.StatusWarn:  make([]api.NamespaceCount, 0),
+			v1alpha2.StatusError: make([]api.NamespaceCount, 0),
+			v1alpha2.StatusSkip:  make([]api.NamespaceCount, 0),
 		}
 	} else {
 		list = map[string][]api.NamespaceCount{}
@@ -792,11 +798,11 @@ func (s *policyReportStore) FetchNamespacedStatusCounts(filter api.Filter) ([]ap
 
 func (s *policyReportStore) FetchRuleStatusCounts(policy, rule string) ([]api.StatusCount, error) {
 	list := map[string]api.StatusCount{
-		report.Pass:  {Status: report.Pass},
-		report.Fail:  {Status: report.Fail},
-		report.Warn:  {Status: report.Warn},
-		report.Error: {Status: report.Error},
-		report.Skip:  {Status: report.Skip},
+		v1alpha2.StatusPass:  {Status: v1alpha2.StatusPass},
+		v1alpha2.StatusFail:  {Status: v1alpha2.StatusFail},
+		v1alpha2.StatusWarn:  {Status: v1alpha2.StatusWarn},
+		v1alpha2.StatusError: {Status: v1alpha2.StatusError},
+		v1alpha2.StatusSkip:  {Status: v1alpha2.StatusSkip},
 	}
 
 	statusCounts := make([]api.StatusCount, 0, len(list))
@@ -845,11 +851,11 @@ func (s *policyReportStore) FetchStatusCounts(filter api.Filter) ([]api.StatusCo
 
 	if len(filter.Status) == 0 {
 		list = map[string]api.StatusCount{
-			report.Pass:  {Status: report.Pass},
-			report.Fail:  {Status: report.Fail},
-			report.Warn:  {Status: report.Warn},
-			report.Error: {Status: report.Error},
-			report.Skip:  {Status: report.Skip},
+			v1alpha2.StatusPass:  {Status: v1alpha2.StatusPass},
+			v1alpha2.StatusFail:  {Status: v1alpha2.StatusFail},
+			v1alpha2.StatusWarn:  {Status: v1alpha2.StatusWarn},
+			v1alpha2.StatusError: {Status: v1alpha2.StatusError},
+			v1alpha2.StatusSkip:  {Status: v1alpha2.StatusSkip},
 		}
 	} else {
 		list = map[string]api.StatusCount{}
@@ -1107,18 +1113,18 @@ func (s *policyReportStore) FetchClusterReportLabels(filter api.Filter) (map[str
 	return list, nil
 }
 
-func (s *policyReportStore) persistResults(report report.PolicyReport) error {
+func (s *policyReportStore) persistResults(report v1alpha2.ReportInterface) error {
 	var vals []interface{}
 	var sqlStr string
 
-	bulks := chunkSlice(report.ResultList(), 50)
+	bulks := chunkSlice(report.GetResults(), 50)
 
 	for _, list := range bulks {
 		sqlStr = resultInsertBaseSQL
 		vals = make([]interface{}, 0, len(list)*18)
 
 		for _, result := range list {
-			sqlStr += "(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?),"
+			sqlStr += "(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?),"
 
 			var props string
 			b, err := json.Marshal(result.Properties)
@@ -1126,26 +1132,30 @@ func (s *policyReportStore) persistResults(report report.PolicyReport) error {
 				props = string(b)
 			}
 
+			res := result.GetResource()
+			if res == nil {
+				res = &corev1.ObjectReference{}
+			}
+
 			vals = append(
 				vals,
-				report.GetIdentifier(),
-				result.GetIdentifier(),
+				report.GetID(),
+				result.GetID(),
 				result.Policy,
 				result.Rule,
 				result.Message,
 				result.Scored,
-				result.Priority,
-				result.Status,
+				string(result.Result),
 				result.Severity,
 				result.Category,
 				result.Source,
-				result.Resource.APIVersion,
-				result.Resource.Kind,
-				result.Resource.Name,
-				report.Namespace,
-				result.Resource.UID,
+				res.APIVersion,
+				res.Kind,
+				res.Name,
+				report.GetNamespace(),
+				res.UID,
 				props,
-				result.Timestamp.Unix(),
+				result.Timestamp.Seconds,
 			)
 		}
 
@@ -1165,8 +1175,8 @@ func (s *policyReportStore) persistResults(report report.PolicyReport) error {
 	return nil
 }
 
-func (s *policyReportStore) fetchResults(reportID string) ([]report.Result, error) {
-	results := make([]report.Result, 0)
+func (s *policyReportStore) fetchResults(reportID string) ([]v1alpha2.PolicyReportResult, error) {
+	results := make([]v1alpha2.PolicyReportResult, 0)
 
 	rows, err := s.db.Query(`
     SELECT 
@@ -1175,7 +1185,6 @@ func (s *policyReportStore) fetchResults(reportID string) ([]report.Result, erro
       rule,
       message,
       scored,
-      priority,
       status,
       severity, 
       category, 
@@ -1199,9 +1208,11 @@ func (s *policyReportStore) fetchResults(reportID string) ([]report.Result, erro
 	var timestamp int64
 
 	for rows.Next() {
-		result := report.Result{
-			Resource: report.Resource{},
+		result := v1alpha2.PolicyReportResult{
+			Resources: make([]corev1.ObjectReference, 0, 1),
 		}
+
+		resource := corev1.ObjectReference{}
 
 		err = rows.Scan(
 			&result.ID,
@@ -1209,16 +1220,15 @@ func (s *policyReportStore) fetchResults(reportID string) ([]report.Result, erro
 			&result.Rule,
 			&result.Message,
 			&result.Scored,
-			&result.Priority,
-			&result.Status,
+			&result.Result,
 			&result.Severity,
 			&result.Category,
 			&result.Source,
-			&result.Resource.APIVersion,
-			&result.Resource.Kind,
-			&result.Resource.Name,
-			&result.Resource.Namespace,
-			&result.Resource.UID,
+			&resource.APIVersion,
+			&resource.Kind,
+			&resource.Name,
+			&resource.Namespace,
+			&resource.UID,
 			&props,
 			&timestamp,
 		)
@@ -1231,7 +1241,11 @@ func (s *policyReportStore) fetchResults(reportID string) ([]report.Result, erro
 			result.Properties = make(map[string]string)
 		}
 
-		result.Timestamp = time.Unix(timestamp, 0)
+		result.Timestamp = v1.Timestamp{
+			Seconds: timestamp,
+		}
+
+		result.Resources = append(result.Resources, resource)
 
 		results = append(results, result)
 	}
@@ -1407,8 +1421,8 @@ func NewDatabase(dbFile string) (*sql.DB, error) {
 	return sql.Open("sqlite3", dbFile)
 }
 
-func chunkSlice(slice []report.Result, chunkSize int) [][]report.Result {
-	var chunks [][]report.Result
+func chunkSlice(slice []v1alpha2.PolicyReportResult, chunkSize int) [][]v1alpha2.PolicyReportResult {
+	var chunks [][]v1alpha2.PolicyReportResult
 	for i := 0; i < len(slice); i += chunkSize {
 		end := i + chunkSize
 

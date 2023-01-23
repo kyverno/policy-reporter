@@ -14,6 +14,9 @@ limitations under the License.
 package v1alpha2
 
 import (
+	"strconv"
+
+	"github.com/segmentio/fasthash/fnv1a"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -63,8 +66,24 @@ func (r *PolicyReport) SetResults(results []PolicyReportResult) {
 	r.Results = results
 }
 
-func (r *PolicyReport) SetSummary(summary PolicyReportSummary) {
-	r.Summary = summary
+func (r *PolicyReport) GetSummary() PolicyReportSummary {
+	return r.Summary
+}
+
+func (r *PolicyReport) GetSource() string {
+	if len(r.Results) == 0 {
+		return ""
+	}
+
+	return r.Results[0].Source
+}
+
+func (r *PolicyReport) GetID() string {
+	h1 := fnv1a.Init64
+	h1 = fnv1a.AddString64(h1, r.GetName())
+	h1 = fnv1a.AddString64(h1, r.GetNamespace())
+
+	return strconv.FormatUint(h1, 10)
 }
 
 // +kubebuilder:object:root=true

@@ -3,44 +3,49 @@ package target_test
 import (
 	"testing"
 
+	"github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
 	"github.com/kyverno/policy-reporter/pkg/report"
 	"github.com/kyverno/policy-reporter/pkg/target"
 	"github.com/kyverno/policy-reporter/pkg/validate"
+	corev1 "k8s.io/api/core/v1"
+	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-var result = report.Result{
+var result = v1alpha2.PolicyReportResult{
 	Message:  "validation error: requests and limits required. Rule autogen-check-for-requests-and-limits failed at path /spec/template/spec/containers/0/resources/requests/",
 	Policy:   "require-requests-and-limits-required",
 	Rule:     "autogen-check-for-requests-and-limits",
-	Priority: report.WarningPriority,
-	Status:   report.Fail,
-	Severity: report.High,
+	Priority: v1alpha2.WarningPriority,
+	Result:   v1alpha2.StatusFail,
+	Severity: v1alpha2.SeverityHigh,
 	Category: "resources",
 	Scored:   true,
 	Source:   "Kyverno",
-	Resource: report.Resource{
+	Resources: []corev1.ObjectReference{{
 		APIVersion: "v1",
 		Kind:       "Deployment",
 		Name:       "nginx",
 		Namespace:  "default",
 		UID:        "536ab69f-1b3c-4bd9-9ba4-274a56188409",
-	},
+	}},
 }
 
-var result2 = report.Result{
+var result2 = v1alpha2.PolicyReportResult{
 	Message:  "validation error: requests and limits required. Rule autogen-check-for-requests-and-limits failed at path /spec/template/spec/containers/0/resources/requests/",
 	Policy:   "require-requests-and-limits-required",
 	Rule:     "autogen-check-for-requests-and-limits",
-	Priority: report.WarningPriority,
-	Status:   report.Fail,
-	Severity: report.High,
+	Priority: v1alpha2.WarningPriority,
+	Result:   v1alpha2.StatusFail,
+	Severity: v1alpha2.SeverityHigh,
 	Category: "resources",
 	Scored:   true,
 	Source:   "Kyverno",
 }
 
-var preport = report.PolicyReport{
-	Labels: map[string]string{"app": "policy-reporter"},
+var preport = &v1alpha2.PolicyReport{
+	ObjectMeta: v1.ObjectMeta{
+		Labels: map[string]string{"app": "policy-reporter"},
+	},
 }
 
 func Test_BaseClient(t *testing.T) {
@@ -141,7 +146,7 @@ func Test_BaseClient(t *testing.T) {
 	t.Run("Validate Exclude Priority match", func(t *testing.T) {
 		filter := target.NewResultFilter(
 			validate.RuleSets{},
-			validate.RuleSets{Exclude: []string{report.WarningPriority.String()}},
+			validate.RuleSets{Exclude: []string{v1alpha2.WarningPriority.String()}},
 			validate.RuleSets{},
 			"",
 			make([]string, 0),
@@ -154,7 +159,7 @@ func Test_BaseClient(t *testing.T) {
 	t.Run("Validate Exclude Priority mismatch", func(t *testing.T) {
 		filter := target.NewResultFilter(
 			validate.RuleSets{},
-			validate.RuleSets{Exclude: []string{report.ErrorPriority.String()}},
+			validate.RuleSets{Exclude: []string{v1alpha2.ErrorPriority.String()}},
 			validate.RuleSets{},
 			"",
 			make([]string, 0),
@@ -167,7 +172,7 @@ func Test_BaseClient(t *testing.T) {
 	t.Run("Validate Include Priority match", func(t *testing.T) {
 		filter := target.NewResultFilter(
 			validate.RuleSets{},
-			validate.RuleSets{Include: []string{report.WarningPriority.String()}},
+			validate.RuleSets{Include: []string{v1alpha2.WarningPriority.String()}},
 			validate.RuleSets{},
 			"",
 			make([]string, 0),
@@ -180,7 +185,7 @@ func Test_BaseClient(t *testing.T) {
 	t.Run("Validate Exclude Priority mismatch", func(t *testing.T) {
 		filter := target.NewResultFilter(
 			validate.RuleSets{},
-			validate.RuleSets{Include: []string{report.ErrorPriority.String()}},
+			validate.RuleSets{Include: []string{v1alpha2.ErrorPriority.String()}},
 			validate.RuleSets{},
 			"",
 			make([]string, 0),
@@ -329,7 +334,7 @@ func Test_BaseClient(t *testing.T) {
 			SkipExistingOnStartup: true,
 		})
 
-		if client.Validate(report.PolicyReport{}, result) {
+		if client.Validate(&v1alpha2.PolicyReport{}, result) {
 			t.Errorf("Unexpected Validation Result")
 		}
 	})
@@ -341,7 +346,19 @@ func Test_BaseClient(t *testing.T) {
 			SkipExistingOnStartup: true,
 		})
 
-		if client.Validate(report.PolicyReport{}, result) {
+		if client.Validate(&v1alpha2.PolicyReport{}, result) {
+			t.Errorf("Unexpected Validation Result")
+		}
+	})
+
+	t.Run("Client nil Validation", func(t *testing.T) {
+		client := target.NewBaseClient(target.ClientOptions{
+			Name:                  "Client",
+			ReportFilter:          target.NewReportFilter(validate.RuleSets{Include: []string{"app"}}),
+			SkipExistingOnStartup: true,
+		})
+
+		if client.Validate(nil, result) {
 			t.Errorf("Unexpected Validation Result")
 		}
 	})
@@ -352,10 +369,10 @@ func Test_BaseClient(t *testing.T) {
 			SkipExistingOnStartup: true,
 		})
 
-		if !client.Validate(report.PolicyReport{}, result) {
+		if !client.Validate(&v1alpha2.PolicyReport{}, result) {
 			t.Errorf("Should fallback to true")
 		}
-		if client.MinimumPriority() != report.DefaultPriority.String() {
+		if client.MinimumPriority() != v1alpha2.DefaultPriority.String() {
 			t.Errorf("Should fallback to default priority")
 		}
 		if len(client.Sources()) != 0 || client.Sources() == nil {

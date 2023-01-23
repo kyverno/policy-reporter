@@ -3,7 +3,6 @@ package kubernetes_test
 import (
 	"sync"
 
-	"github.com/kyverno/policy-reporter/pkg/kubernetes"
 	"github.com/kyverno/policy-reporter/pkg/report"
 
 	"github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
@@ -17,10 +16,6 @@ func NewFakeCilent() (*fake.Clientset, v1alpha2client.PolicyReportInterface, v1a
 	client := fake.NewSimpleClientset()
 
 	return client, client.Wgpolicyk8sV1alpha2().PolicyReports("test"), client.Wgpolicyk8sV1alpha2().ClusterPolicyReports()
-}
-
-func NewMapper() kubernetes.Mapper {
-	return kubernetes.NewMapper(make(map[string]string))
 }
 
 type store struct {
@@ -47,10 +42,6 @@ func newStore(size int) *store {
 		store: make([]report.LifecycleEvent, 0, size),
 		rwm:   &sync.RWMutex{},
 	}
-}
-
-var priorityMap = map[string]string{
-	"priority-test": "warning",
 }
 
 var policyReportCRD = &v1alpha2.PolicyReport{
@@ -113,7 +104,7 @@ var policyReportCRD = &v1alpha2.PolicyReport{
 					UID:        "dfd57c50-f30c-4729-b63f-b1954d8988b3",
 				},
 			},
-			Properties: map[string]string{"version": "1.2.0", kubernetes.ResultIDKey: "123456"},
+			Properties: map[string]string{"version": "1.2.0", v1alpha2.ResultIDKey: "123456"},
 		},
 	},
 }
@@ -219,7 +210,7 @@ var enforceReportCRD = &v1alpha2.PolicyReport{
 					UID:        "",
 				},
 			},
-			Properties: map[string]string{"version": "1.2.0", kubernetes.ResultIDKey: "123456"},
+			Properties: map[string]string{"version": "1.2.0", v1alpha2.ResultIDKey: "123456"},
 		},
 	},
 }
@@ -316,35 +307,3 @@ var multiResourceClusterPolicyReportCRD = &v1alpha2.ClusterPolicyReport{
 		},
 	},
 }
-
-var result1ID string = report.GeneratePolicyReportResultID(
-	string(policyReportCRD.Results[0].Resources[0].UID),
-	policyReportCRD.Results[0].Resources[0].Name,
-	policyReportCRD.Results[0].Policy,
-	policyReportCRD.Results[0].Rule,
-	string(policyReportCRD.Results[0].Result),
-	policyReportCRD.Results[0].Message,
-	policyReportCRD.Results[0].Category,
-)
-
-var result2ID string = report.GeneratePolicyReportResultID(
-	"",
-	"",
-	policyReportCRD.Results[1].Policy,
-	policyReportCRD.Results[1].Rule,
-	string(policyReportCRD.Results[1].Result),
-	policyReportCRD.Results[1].Message,
-	policyReportCRD.Results[1].Category,
-)
-
-var result3ID string = "123456"
-
-var cresult1ID string = report.GeneratePolicyReportResultID(
-	string(clusterPolicyReportCRD.Results[0].Resources[0].UID),
-	clusterPolicyReportCRD.Results[0].Resources[0].Name,
-	clusterPolicyReportCRD.Results[0].Policy,
-	clusterPolicyReportCRD.Results[0].Rule,
-	string(clusterPolicyReportCRD.Results[0].Result),
-	clusterPolicyReportCRD.Results[0].Message,
-	clusterPolicyReportCRD.Results[0].Category,
-)

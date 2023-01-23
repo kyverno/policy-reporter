@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/kyverno/policy-reporter/pkg/cache"
+	"github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
 	"github.com/kyverno/policy-reporter/pkg/report"
 )
 
@@ -22,8 +23,8 @@ func (l *ResultListener) RegisterListener(listener report.PolicyReportResultList
 }
 
 func (l *ResultListener) Listen(event report.LifecycleEvent) {
-	if len(event.OldPolicyReport.Results) > 0 {
-		for _, result := range event.OldPolicyReport.Results {
+	if event.OldPolicyReport != nil && len(event.OldPolicyReport.GetResults()) > 0 {
+		for _, result := range event.OldPolicyReport.GetResults() {
 			l.cache.Add(result.ID)
 		}
 	}
@@ -35,30 +36,30 @@ func (l *ResultListener) Listen(event report.LifecycleEvent) {
 	var preExisted bool
 
 	if event.Type == report.Added {
-		preExisted = event.NewPolicyReport.CreationTimestamp.Before(l.startUp)
+		preExisted = event.NewPolicyReport.GetCreationTimestamp().Local().Before(l.startUp)
 
 		if l.skipExisting && preExisted {
 			return
 		}
 	}
 
-	if len(event.NewPolicyReport.Results) == 0 {
+	if len(event.NewPolicyReport.GetResults()) == 0 {
 		return
 	}
 
-	diff := event.NewPolicyReport.GetNewResults(event.OldPolicyReport)
+	diff := report.FindNewResults(event.NewPolicyReport, event.OldPolicyReport)
 
 	wg := sync.WaitGroup{}
 
 	for _, r := range diff {
-		if found := l.cache.Has(r.GetIdentifier()); found {
+		if found := l.cache.Has(r.GetID()); found {
 			continue
 		}
 
 		wg.Add(len(l.listener))
 
 		for _, cb := range l.listener {
-			go func(callback report.PolicyReportResultListener, result report.Result) {
+			go func(callback report.PolicyReportResultListener, result v1alpha2.PolicyReportResult) {
 				callback(event.NewPolicyReport, result, preExisted)
 				wg.Done()
 			}(cb, r)

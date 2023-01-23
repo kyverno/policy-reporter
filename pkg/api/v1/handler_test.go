@@ -8,111 +8,115 @@ import (
 	"time"
 
 	v1 "github.com/kyverno/policy-reporter/pkg/api/v1"
-	"github.com/kyverno/policy-reporter/pkg/report"
+	"github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
 	"github.com/kyverno/policy-reporter/pkg/sqlite3"
 	"github.com/kyverno/policy-reporter/pkg/target"
 	"github.com/kyverno/policy-reporter/pkg/target/loki"
+	corev1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-var result1 = report.Result{
+var seconds = time.Date(2022, 9, 6, 0, 0, 0, 0, time.UTC).Unix()
+
+var result1 = v1alpha2.PolicyReportResult{
 	ID:        "123",
 	Message:   "validation error: requests and limits required. Rule autogen-check-for-requests-and-limits failed at path /spec/template/spec/containers/0/resources/requests/",
 	Policy:    "require-requests-and-limits-required",
 	Rule:      "autogen-check-for-requests-and-limits",
-	Priority:  report.ErrorPriority,
-	Status:    report.Fail,
+	Priority:  v1alpha2.ErrorPriority,
+	Result:    v1alpha2.StatusFail,
 	Category:  "Best Practices",
-	Severity:  report.High,
+	Severity:  v1alpha2.SeverityHigh,
 	Scored:    true,
 	Source:    "Kyverno",
-	Timestamp: time.Date(2022, 9, 6, 0, 0, 0, 0, time.UTC),
-	Resource: report.Resource{
+	Timestamp: metav1.Timestamp{Seconds: seconds},
+	Resources: []corev1.ObjectReference{{
 		APIVersion: "v1",
 		Kind:       "Deployment",
 		Name:       "nginx",
 		Namespace:  "test",
 		UID:        "536ab69f-1b3c-4bd9-9ba4-274a56188409",
-	},
+	}},
 }
 
-var result2 = report.Result{
+var result2 = v1alpha2.PolicyReportResult{
 	ID:        "124",
 	Message:   "validation error: requests and limits required. Rule autogen-check-for-requests-and-limits failed at path /spec/template/spec/containers/0/resources/requests/",
 	Policy:    "require-requests-and-limits-required",
 	Rule:      "autogen-check-for-requests-and-limits",
-	Priority:  report.WarningPriority,
-	Status:    report.Pass,
+	Priority:  v1alpha2.WarningPriority,
+	Result:    v1alpha2.StatusPass,
 	Category:  "Best Practices",
 	Scored:    true,
 	Source:    "Kyverno",
-	Timestamp: time.Date(2022, 9, 6, 0, 0, 0, 0, time.UTC),
-	Resource: report.Resource{
+	Timestamp: metav1.Timestamp{Seconds: seconds},
+	Resources: []corev1.ObjectReference{{
 		APIVersion: "v1",
 		Kind:       "Pod",
 		Name:       "nginx",
 		Namespace:  "test",
 		UID:        "536ab69f-1b3c-4bd9-9ba4-274a56188419",
-	},
+	}},
 }
 
-var cresult1 = report.Result{
+var cresult1 = v1alpha2.PolicyReportResult{
 	ID:        "125",
 	Message:   "validation error: The label `test` is required. Rule check-for-labels-on-namespace",
 	Policy:    "require-ns-labels",
 	Rule:      "check-for-labels-on-namespace",
-	Priority:  report.ErrorPriority,
-	Status:    report.Pass,
+	Priority:  v1alpha2.ErrorPriority,
+	Result:    v1alpha2.StatusPass,
 	Category:  "Convention",
-	Severity:  report.Medium,
+	Severity:  v1alpha2.SeverityMedium,
 	Scored:    true,
 	Source:    "Kyverno",
-	Timestamp: time.Date(2022, 9, 6, 0, 0, 0, 0, time.UTC),
-	Resource: report.Resource{
+	Timestamp: metav1.Timestamp{Seconds: seconds},
+	Resources: []corev1.ObjectReference{{
 		APIVersion: "v1",
 		Kind:       "Namespace",
 		Name:       "test",
 		UID:        "536ab69f-1b3c-4bd9-9ba4-274a56188411",
-	},
+	}},
 }
 
-var cresult2 = report.Result{
+var cresult2 = v1alpha2.PolicyReportResult{
 	ID:       "126",
 	Message:  "validation error: The label `test` is required. Rule check-for-labels-on-namespace",
 	Policy:   "require-ns-labels",
 	Rule:     "check-for-labels-on-namespace",
-	Priority: report.WarningPriority,
-	Status:   report.Fail,
+	Priority: v1alpha2.WarningPriority,
+	Result:   v1alpha2.StatusFail,
 	Category: "Convention",
-	Severity: report.High,
+	Severity: v1alpha2.SeverityHigh,
 	Scored:   true,
 	Source:   "Kyverno",
-	Resource: report.Resource{
+	Resources: []corev1.ObjectReference{{
 		APIVersion: "v1",
 		Kind:       "Namespace",
 		Name:       "dev",
 		UID:        "536ab69f-1b3c-4bd9-9ba4-274a56188412",
+	}},
+}
+
+var preport = &v1alpha2.PolicyReport{
+	ObjectMeta: metav1.ObjectMeta{
+		Labels:            map[string]string{"app": "policy-reporter", "scope": "namespace"},
+		Name:              "polr-test",
+		Namespace:         "test",
+		CreationTimestamp: metav1.Now(),
 	},
+	Results: []v1alpha2.PolicyReportResult{result1, result2},
+	Summary: v1alpha2.PolicyReportSummary{Fail: 1},
 }
 
-var preport = report.PolicyReport{
-	ID:                report.GeneratePolicyReportID("polr-test", "test"),
-	Labels:            map[string]string{"app": "policy-reporter", "scope": "namespace"},
-	Source:            "Kyverno",
-	Name:              "polr-test",
-	Namespace:         "test",
-	Results:           []report.Result{result1, result2},
-	Summary:           report.Summary{Fail: 1},
-	CreationTimestamp: time.Now(),
-}
-
-var creport = report.PolicyReport{
-	ID:                report.GeneratePolicyReportID("cpolr", ""),
-	Labels:            map[string]string{"app": "policy-reporter", "scope": "cluster"},
-	Source:            "Kyverno",
-	Name:              "cpolr",
-	Results:           []report.Result{cresult1, cresult2},
-	Summary:           report.Summary{},
-	CreationTimestamp: time.Now(),
+var creport = &v1alpha2.ClusterPolicyReport{
+	ObjectMeta: metav1.ObjectMeta{
+		Labels:            map[string]string{"app": "policy-reporter", "scope": "cluster"},
+		Name:              "cpolr",
+		CreationTimestamp: metav1.Now(),
+	},
+	Results: []v1alpha2.PolicyReportResult{cresult1, cresult2},
+	Summary: v1alpha2.PolicyReportSummary{},
 }
 
 func Test_V1_API(t *testing.T) {

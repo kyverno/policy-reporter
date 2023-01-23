@@ -14,11 +14,16 @@ limitations under the License.
 package v1alpha2
 
 import (
+	"bytes"
 	"encoding/json"
+	"strconv"
 
+	"github.com/segmentio/fasthash/fnv1a"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
+
+const ResultIDKey = "resultID"
 
 // Status specifies state of a policy result
 const (
@@ -37,6 +42,90 @@ const (
 	SeverityLow      = "low"
 	SeverityInfo     = "info"
 )
+
+// Priority Enum for internal Result weighting
+type Priority int
+
+const (
+	DefaultPriority Priority = iota
+	DebugPriority
+	InfoPriority
+	WarningPriority
+	CriticalPriority
+	ErrorPriority
+)
+
+const (
+	defaultString  = ""
+	debugString    = "debug"
+	infoString     = "info"
+	warningString  = "warning"
+	errorString    = "error"
+	criticalString = "critical"
+)
+
+// String maps the internal weighting of Priorities to a String representation
+func (p Priority) String() string {
+	switch p {
+	case DebugPriority:
+		return debugString
+	case InfoPriority:
+		return infoString
+	case WarningPriority:
+		return warningString
+	case ErrorPriority:
+		return errorString
+	case CriticalPriority:
+		return criticalString
+	default:
+		return defaultString
+	}
+}
+
+// MarshalJSON marshals the enum as a quoted json string
+func (p Priority) MarshalJSON() ([]byte, error) {
+	buffer := bytes.NewBufferString(`"`)
+	buffer.WriteString(p.String())
+	buffer.WriteString(`"`)
+
+	return buffer.Bytes(), nil
+}
+
+// NewPriority creates a new Priority based an its string representation
+func NewPriority(p string) Priority {
+	switch p {
+	case debugString:
+		return DebugPriority
+	case infoString:
+		return InfoPriority
+	case warningString:
+		return WarningPriority
+	case errorString:
+		return ErrorPriority
+	case criticalString:
+		return CriticalPriority
+	default:
+		return DefaultPriority
+	}
+}
+
+// PriorityFromSeverity creates a Priority based on a Severity
+func PriorityFromSeverity(s PolicySeverity) Priority {
+	switch s {
+	case SeverityCritical:
+		return CriticalPriority
+	case SeverityHigh:
+		return ErrorPriority
+	case SeverityMedium:
+		return WarningPriority
+	case SeverityInfo:
+		return InfoPriority
+	case SeverityLow:
+		return InfoPriority
+	default:
+		return DebugPriority
+	}
+}
 
 // PolicyReportSummary provides a status count summary
 type PolicyReportSummary struct {
@@ -90,6 +179,7 @@ type PolicySeverity string
 
 // PolicyReportResult provides the result for an individual policy
 type PolicyReportResult struct {
+	ID string `json:"-"`
 	// Source is an identifier for the policy engine that manages this report
 	// +optional
 	Source string `json:"source"`
@@ -134,4 +224,56 @@ type PolicyReportResult struct {
 	// Severity indicates policy check result criticality
 	// +optional
 	Severity PolicySeverity `json:"severity,omitempty"`
+
+	Priority Priority `json:"-"`
+}
+
+func (r *PolicyReportResult) GetResource() *corev1.ObjectReference {
+	if len(r.Resources) == 0 {
+		return nil
+	}
+
+	return &r.Resources[0]
+}
+
+func (r *PolicyReportResult) HasResource() bool {
+	return len(r.Resources) > 0
+}
+
+func (r *PolicyReportResult) GetID() string {
+	if r.ID != "" {
+		return r.ID
+	}
+
+	if id, ok := r.Properties[ResultIDKey]; ok {
+		r.ID = id
+
+		return r.ID
+	}
+
+	h1 := fnv1a.Init64
+
+	res := r.GetResource()
+	if res != nil {
+		h1 = fnv1a.AddString64(h1, res.Name)
+		h1 = fnv1a.AddString64(h1, string(res.UID))
+	}
+
+	h1 = fnv1a.AddString64(h1, r.Policy)
+	h1 = fnv1a.AddString64(h1, r.Rule)
+	h1 = fnv1a.AddString64(h1, string(r.Result))
+	h1 = fnv1a.AddString64(h1, r.Category)
+	h1 = fnv1a.AddString64(h1, r.Message)
+
+	r.ID = strconv.FormatUint(h1, 10)
+
+	return r.ID
+}
+
+type ReportInterface interface {
+	metav1.Object
+	GetID() string
+	GetResults() []PolicyReportResult
+	GetSummary() PolicyReportSummary
+	GetSource() string
 }

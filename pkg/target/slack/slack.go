@@ -3,7 +3,7 @@ package slack
 import (
 	"strings"
 
-	"github.com/kyverno/policy-reporter/pkg/report"
+	"github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
 	"github.com/kyverno/policy-reporter/pkg/target"
 	"github.com/kyverno/policy-reporter/pkg/target/http"
 )
@@ -49,15 +49,15 @@ type client struct {
 	customFields map[string]string
 }
 
-var colors = map[report.Priority]string{
-	report.DebugPriority:    "#68c2ff",
-	report.InfoPriority:     "#36a64f",
-	report.WarningPriority:  "#f2c744",
-	report.CriticalPriority: "#b80707",
-	report.ErrorPriority:    "#e20b0b",
+var colors = map[v1alpha2.Priority]string{
+	v1alpha2.DebugPriority:    "#68c2ff",
+	v1alpha2.InfoPriority:     "#36a64f",
+	v1alpha2.WarningPriority:  "#f2c744",
+	v1alpha2.CriticalPriority: "#b80707",
+	v1alpha2.ErrorPriority:    "#e20b0b",
 }
 
-func (s *client) newPayload(result report.Result) payload {
+func (s *client) newPayload(result v1alpha2.PolicyReportResult) payload {
 	p := payload{
 		Attachments: make([]attachment, 0, 1),
 	}
@@ -89,7 +89,7 @@ func (s *client) newPayload(result report.Result) payload {
 			Type: "section",
 			Fields: []field{
 				{Type: "mrkdwn", Text: "*Priority*\n" + result.Priority.String()},
-				{Type: "mrkdwn", Text: "*Status*\n" + result.Status},
+				{Type: "mrkdwn", Text: "*Status*\n" + string(result.Result)},
 			},
 		},
 	)
@@ -103,7 +103,7 @@ func (s *client) newPayload(result report.Result) payload {
 		b.Fields = append(b.Fields, field{Type: "mrkdwn", Text: "*Category*\n" + result.Category})
 	}
 	if result.Severity != "" {
-		b.Fields = append(b.Fields, field{Type: "mrkdwn", Text: "*Severity*\n" + result.Severity})
+		b.Fields = append(b.Fields, field{Type: "mrkdwn", Text: "*Severity*\n" + string(result.Severity)})
 	}
 
 	if len(b.Fields) > 0 {
@@ -111,7 +111,7 @@ func (s *client) newPayload(result report.Result) payload {
 	}
 
 	if result.HasResource() {
-		res := result.Resource
+		res := result.GetResource()
 
 		att.Blocks = append(att.Blocks, block{Type: "section", Text: &text{Type: "mrkdwn", Text: "*Resource*"}})
 
@@ -135,7 +135,7 @@ func (s *client) newPayload(result report.Result) payload {
 				Type: "section",
 				Fields: []field{
 					{Type: "mrkdwn", Text: "*Name*\n" + res.Name},
-					{Type: "mrkdwn", Text: "*UID*\n" + res.UID},
+					{Type: "mrkdwn", Text: "*UID*\n" + string(res.UID)},
 				},
 			})
 		} else if res.UID == "" && res.APIVersion != "" {
@@ -186,7 +186,7 @@ func (s *client) newPayload(result report.Result) payload {
 	return p
 }
 
-func (s *client) Send(result report.Result) {
+func (s *client) Send(result v1alpha2.PolicyReportResult) {
 	req, err := http.CreateJSONRequest(s.Name(), "POST", s.webhook, s.newPayload(result))
 	if err != nil {
 		return

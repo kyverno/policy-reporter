@@ -4,7 +4,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/kyverno/policy-reporter/pkg/report"
+	"github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
 	"github.com/kyverno/policy-reporter/pkg/target"
 	"github.com/kyverno/policy-reporter/pkg/target/http"
 )
@@ -37,15 +37,15 @@ type payload struct {
 	Sections   []section `json:"sections"`
 }
 
-var colors = map[report.Priority]string{
-	report.DebugPriority:    "68c2ff",
-	report.InfoPriority:     "36a64f",
-	report.WarningPriority:  "f2c744",
-	report.CriticalPriority: "b80707",
-	report.ErrorPriority:    "e20b0b",
+var colors = map[v1alpha2.Priority]string{
+	v1alpha2.DebugPriority:    "68c2ff",
+	v1alpha2.InfoPriority:     "36a64f",
+	v1alpha2.WarningPriority:  "f2c744",
+	v1alpha2.CriticalPriority: "b80707",
+	v1alpha2.ErrorPriority:    "e20b0b",
 }
 
-func newPayload(result report.Result, customFields map[string]string) payload {
+func newPayload(result v1alpha2.PolicyReportResult, customFields map[string]string) payload {
 	facts := make([]fact, 0)
 
 	facts = append(facts, fact{"Policy", result.Policy})
@@ -60,16 +60,16 @@ func newPayload(result report.Result, customFields map[string]string) payload {
 		facts = append(facts, fact{"Category", result.Category})
 	}
 	if result.Severity != "" {
-		facts = append(facts, fact{"Severity", result.Severity})
+		facts = append(facts, fact{"Severity", string(result.Severity)})
 	}
 
 	if result.HasResource() {
-		res := result.Resource
+		res := result.GetResource()
 
 		facts = append(facts, fact{"Kind", res.Kind})
 		facts = append(facts, fact{"Name", res.Name})
 		if res.UID != "" {
-			facts = append(facts, fact{"UID", res.UID})
+			facts = append(facts, fact{"UID", string(res.UID)})
 		}
 		if res.Namespace != "" {
 			facts = append(facts, fact{"Namespace", res.Namespace})
@@ -87,8 +87,8 @@ func newPayload(result report.Result, customFields map[string]string) payload {
 	}
 
 	timestamp := time.Now()
-	if !result.Timestamp.IsZero() {
-		timestamp = result.Timestamp
+	if result.Timestamp.Seconds == 0 {
+		timestamp = time.Unix(result.Timestamp.Seconds, int64(result.Timestamp.Nanos))
 	}
 
 	sections := make([]section, 0, 1)
@@ -115,7 +115,7 @@ type client struct {
 	client       http.Client
 }
 
-func (s *client) Send(result report.Result) {
+func (s *client) Send(result v1alpha2.PolicyReportResult) {
 	req, err := http.CreateJSONRequest(s.Name(), "POST", s.webhook, newPayload(result, s.customFields))
 	if err != nil {
 		return

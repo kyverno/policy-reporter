@@ -2,44 +2,48 @@ package metrics_test
 
 import (
 	"testing"
-	"time"
 
+	"github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
 	"github.com/kyverno/policy-reporter/pkg/listener/metrics"
 	"github.com/kyverno/policy-reporter/pkg/report"
 	"github.com/kyverno/policy-reporter/pkg/validate"
 	"github.com/prometheus/client_golang/prometheus"
+	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 func Test_PolicyReportMetricGeneration(t *testing.T) {
-	report1 := report.PolicyReport{
-		ID:                "1",
-		Name:              "polr-test",
-		Namespace:         "test",
-		Summary:           report.Summary{Pass: 2, Fail: 1},
-		CreationTimestamp: time.Now(),
+	report1 := &v1alpha2.PolicyReport{
+		ObjectMeta: v1.ObjectMeta{
+			Name:              "polr-test",
+			Namespace:         "test",
+			CreationTimestamp: v1.Now(),
+		},
+		Summary: v1alpha2.PolicyReportSummary{Pass: 2, Fail: 1},
 	}
 
-	report2 := report.PolicyReport{
-		ID:                "1",
-		Name:              "polr-test",
-		Namespace:         "test",
-		Summary:           report.Summary{Pass: 3, Fail: 4},
-		CreationTimestamp: time.Now(),
+	report2 := &v1alpha2.PolicyReport{
+		ObjectMeta: v1.ObjectMeta{
+			Name:              "polr-test",
+			Namespace:         "test",
+			CreationTimestamp: v1.Now(),
+		},
+		Summary: v1alpha2.PolicyReportSummary{Pass: 3, Fail: 4},
 	}
 
-	report3 := report.PolicyReport{
-		ID:                "1",
-		Name:              "polr-dev",
-		Namespace:         "dev",
-		Summary:           report.Summary{Pass: 0, Fail: 1, Warn: 3},
-		CreationTimestamp: time.Now(),
+	report3 := &v1alpha2.PolicyReport{
+		ObjectMeta: v1.ObjectMeta{
+			Name:              "polr-dev",
+			Namespace:         "dev",
+			CreationTimestamp: v1.Now(),
+		},
+		Summary: v1alpha2.PolicyReportSummary{Pass: 0, Fail: 1, Warn: 3},
 	}
 
 	filter := metrics.NewReportFilter(validate.RuleSets{Exclude: []string{"dev"}}, validate.RuleSets{Exclude: []string{"Test"}})
 
 	t.Run("Added Metric", func(t *testing.T) {
 		handler := metrics.CreatePolicyReportMetricsListener(filter)
-		handler(report.LifecycleEvent{Type: report.Added, NewPolicyReport: report1, OldPolicyReport: report.PolicyReport{}})
+		handler(report.LifecycleEvent{Type: report.Added, NewPolicyReport: report1, OldPolicyReport: nil})
 
 		metricFam, err := prometheus.DefaultGatherer.Gather()
 		if err != nil {
@@ -72,7 +76,7 @@ func Test_PolicyReportMetricGeneration(t *testing.T) {
 
 	t.Run("Modified Metric", func(t *testing.T) {
 		handler := metrics.CreatePolicyReportMetricsListener(filter)
-		handler(report.LifecycleEvent{Type: report.Added, NewPolicyReport: report1, OldPolicyReport: report.PolicyReport{}})
+		handler(report.LifecycleEvent{Type: report.Added, NewPolicyReport: report1, OldPolicyReport: nil})
 		handler(report.LifecycleEvent{Type: report.Updated, NewPolicyReport: report2, OldPolicyReport: report1})
 
 		metricFam, err := prometheus.DefaultGatherer.Gather()
@@ -106,7 +110,7 @@ func Test_PolicyReportMetricGeneration(t *testing.T) {
 
 	t.Run("Deleted Metric", func(t *testing.T) {
 		handler := metrics.CreatePolicyReportMetricsListener(filter)
-		handler(report.LifecycleEvent{Type: report.Added, NewPolicyReport: report1, OldPolicyReport: report.PolicyReport{}})
+		handler(report.LifecycleEvent{Type: report.Added, NewPolicyReport: report1, OldPolicyReport: nil})
 		handler(report.LifecycleEvent{Type: report.Updated, NewPolicyReport: report2, OldPolicyReport: report1})
 		handler(report.LifecycleEvent{Type: report.Deleted, NewPolicyReport: report2, OldPolicyReport: report2})
 
@@ -123,7 +127,7 @@ func Test_PolicyReportMetricGeneration(t *testing.T) {
 
 	t.Run("Validate Metric Filter", func(t *testing.T) {
 		handler := metrics.CreatePolicyReportMetricsListener(filter)
-		handler(report.LifecycleEvent{Type: report.Added, NewPolicyReport: report3, OldPolicyReport: report.PolicyReport{}})
+		handler(report.LifecycleEvent{Type: report.Added, NewPolicyReport: report3, OldPolicyReport: nil})
 
 		metricFam, err := prometheus.DefaultGatherer.Gather()
 		if err != nil {

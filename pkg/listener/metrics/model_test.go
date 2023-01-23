@@ -8,6 +8,7 @@ import (
 
 func Test_LabelMappings(t *testing.T) {
 	results := map[string]string{}
+	res := result1.GetResource()
 
 	metrics.LabelGeneratorMapping["namespace"](results, preport, result1)
 	if val, ok := results["namespace"]; !ok && val != preport.Namespace {
@@ -26,15 +27,15 @@ func Test_LabelMappings(t *testing.T) {
 		t.Errorf("expected result for rule label not found: %s", val)
 	}
 	metrics.LabelGeneratorMapping["kind"](results, preport, result1)
-	if val, ok := results["kind"]; !ok && val != result1.Resource.Kind {
+	if val, ok := results["kind"]; !ok && val != res.Kind {
 		t.Errorf("expected result for kind label not found: %s", val)
 	}
 	metrics.LabelGeneratorMapping["name"](results, preport, result1)
-	if val, ok := results["name"]; !ok && val != result1.Resource.Name {
+	if val, ok := results["name"]; !ok && val != res.Name {
 		t.Errorf("expected result for name label not found: %s", val)
 	}
 	metrics.LabelGeneratorMapping["severity"](results, preport, result1)
-	if val, ok := results["severity"]; !ok && val != result1.Severity {
+	if val, ok := results["severity"]; !ok && val != string(result1.Severity) {
 		t.Errorf("expected result for severity label not found: %s", val)
 	}
 	metrics.LabelGeneratorMapping["category"](results, preport, result1)
@@ -46,7 +47,7 @@ func Test_LabelMappings(t *testing.T) {
 		t.Errorf("expected result for source label not found: %s", val)
 	}
 	metrics.LabelGeneratorMapping["status"](results, preport, result1)
-	if val, ok := results["status"]; !ok && val != result1.Status {
+	if val, ok := results["status"]; !ok && val != string(result1.Result) {
 		t.Errorf("expected result for status label not found: %s", val)
 	}
 }
