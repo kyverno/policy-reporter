@@ -1,12 +1,12 @@
 dependencies:
 - name: monitoring
   repository: ""
-  version: 2.6.0
+  version: 2.7.0
 - name: ui
   repository: ""
-  version: 2.7.2
+  version: 2.8.0
 - name: kyvernoPlugin
   repository: ""
   version: 1.5.1
-digest: sha256:42373a4f89c43d3b1edb0ba7945d281306af1c135e3dba8c2619d12871e63085
-generated: "2023-01-22T13:11:51.032276+01:00"
+digest: sha256:0aae5d507bf0978650c79559a04154de8ad37bb9222c3a3292730538180a4fd0
+generated: "2023-01-24T07:59:12.707808-07:00"
