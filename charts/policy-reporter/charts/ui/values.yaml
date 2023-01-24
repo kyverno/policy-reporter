@@ -1,5 +1,8 @@
 enabled: false
 
+# Override the chart name used for all resources
+nameOverride: ""
+
 image:
   registry: ghcr.io
   repository: kyverno/policy-reporter-ui

@@ -38,7 +38,7 @@ spec:
       serviceAccountName: {{ include "ui.serviceAccountName" . }}
       automountServiceAccountToken: false
       containers:
-        - name: {{ .Chart.Name }}
+        - name: {{ default .Chart.Name .Values.nameOverride }}
           image: "{{ .Values.image.registry }}/{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           {{- if .Values.securityContext }}

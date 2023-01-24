@@ -1,3 +1,6 @@
+# Override the chart name used for all resources
+nameOverride: ""
+
 plugins:
   kyverno: false
 
