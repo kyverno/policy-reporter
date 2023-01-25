@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
+	"github.com/kyverno/policy-reporter/pkg/fixtures"
 	"github.com/kyverno/policy-reporter/pkg/listener/metrics"
 	"github.com/kyverno/policy-reporter/pkg/report"
 	"github.com/kyverno/policy-reporter/pkg/validate"
@@ -24,7 +25,7 @@ func Test_DetailedResultMetricGeneration(t *testing.T) {
 			CreationTimestamp: v1.Now(),
 		},
 		Summary: v1alpha2.PolicyReportSummary{Pass: 2, Fail: 1},
-		Results: []v1alpha2.PolicyReportResult{result1, result2, result3},
+		Results: []v1alpha2.PolicyReportResult{fixtures.PassResult, fixtures.PassPodResult, fixtures.FailDisallowRuleResult},
 	}
 
 	report2 := &v1alpha2.PolicyReport{
@@ -34,7 +35,7 @@ func Test_DetailedResultMetricGeneration(t *testing.T) {
 			CreationTimestamp: v1.Now(),
 		},
 		Summary: v1alpha2.PolicyReportSummary{Pass: 0, Fail: 1},
-		Results: []v1alpha2.PolicyReportResult{result1, result3},
+		Results: []v1alpha2.PolicyReportResult{fixtures.PassResult, fixtures.FailDisallowRuleResult},
 	}
 
 	filter := metrics.NewResultFilter(validate.RuleSets{}, validate.RuleSets{}, validate.RuleSets{Exclude: []string{"disallow-policy"}}, validate.RuleSets{}, validate.RuleSets{})
@@ -54,10 +55,10 @@ func Test_DetailedResultMetricGeneration(t *testing.T) {
 		}
 
 		metrics := results.GetMetric()
-		if err = testResultMetricLabels(metrics[0], result2); err != nil {
+		if err = testResultMetricLabels(metrics[0], fixtures.PassPodResult); err != nil {
 			t.Error(err)
 		}
-		if err = testResultMetricLabels(metrics[1], result1); err != nil {
+		if err = testResultMetricLabels(metrics[1], fixtures.PassResult); err != nil {
 			t.Error(err)
 		}
 	})
@@ -80,7 +81,7 @@ func Test_DetailedResultMetricGeneration(t *testing.T) {
 		if len(metrics) != 1 {
 			t.Error("Expected one metric, the second metric should be deleted")
 		}
-		if err = testResultMetricLabels(metrics[0], result1); err != nil {
+		if err = testResultMetricLabels(metrics[0], fixtures.PassResult); err != nil {
 			t.Error(err)
 		}
 	})

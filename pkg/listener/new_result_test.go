@@ -6,6 +6,7 @@ import (
 
 	"github.com/kyverno/policy-reporter/pkg/cache"
 	"github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
+	"github.com/kyverno/policy-reporter/pkg/fixtures"
 	"github.com/kyverno/policy-reporter/pkg/listener"
 	"github.com/kyverno/policy-reporter/pkg/report"
 )
@@ -21,7 +22,7 @@ func Test_ResultListener(t *testing.T) {
 
 		slistener.Listen(report.LifecycleEvent{Type: report.Updated, NewPolicyReport: preport2, OldPolicyReport: preport1})
 
-		if called.GetID() != result2.GetID() {
+		if called.GetID() != fixtures.FailPodResult.GetID() {
 			t.Error("Expected Listener to be called with Result2")
 		}
 	})
@@ -60,7 +61,7 @@ func Test_ResultListener(t *testing.T) {
 		var called bool
 
 		rcache := cache.New(0, 5*time.Minute)
-		rcache.Add(result2.ID)
+		rcache.Add(fixtures.FailPodResult.ID)
 
 		slistener := listener.NewResultListener(true, rcache, time.Now())
 		slistener.RegisterListener(func(_ v1alpha2.ReportInterface, r v1alpha2.PolicyReportResult, b bool) {
@@ -78,7 +79,7 @@ func Test_ResultListener(t *testing.T) {
 		var called bool
 
 		rcache := cache.New(0, 5*time.Minute)
-		rcache.Add(result2.ID)
+		rcache.Add(fixtures.FailPodResult.ID)
 
 		slistener := listener.NewResultListener(true, rcache, time.Now())
 		slistener.RegisterListener(func(_ v1alpha2.ReportInterface, r v1alpha2.PolicyReportResult, b bool) {

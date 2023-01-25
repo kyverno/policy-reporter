@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
+	"github.com/kyverno/policy-reporter/pkg/fixtures"
 	"github.com/kyverno/policy-reporter/pkg/listener/metrics"
 	"github.com/kyverno/policy-reporter/pkg/report"
 	"github.com/kyverno/policy-reporter/pkg/validate"
@@ -24,8 +25,8 @@ func Test_CustomResultMetricGeneration(t *testing.T) {
 			Namespace:         "test",
 			CreationTimestamp: v1.Now(),
 		},
-		Summary: v1alpha2.PolicyReportSummary{Pass: 2, Fail: 1},
-		Results: []v1alpha2.PolicyReportResult{result1, result2, result3},
+		Summary: v1alpha2.PolicyReportSummary{Pass: 1, Fail: 1},
+		Results: []v1alpha2.PolicyReportResult{fixtures.PassResult, fixtures.FailPodResult, fixtures.FailDisallowRuleResult},
 	}
 
 	report2 := &v1alpha2.PolicyReport{
@@ -35,8 +36,8 @@ func Test_CustomResultMetricGeneration(t *testing.T) {
 			Namespace:         "test",
 			CreationTimestamp: v1.Now(),
 		},
-		Summary: v1alpha2.PolicyReportSummary{Pass: 0, Fail: 1},
-		Results: []v1alpha2.PolicyReportResult{result1, result3},
+		Summary: v1alpha2.PolicyReportSummary{Pass: 1, Fail: 1},
+		Results: []v1alpha2.PolicyReportResult{fixtures.FailResult, fixtures.FailPodResult, fixtures.FailDisallowRuleResult},
 	}
 
 	filter := metrics.NewResultFilter(validate.RuleSets{}, validate.RuleSets{}, validate.RuleSets{Exclude: []string{"disallow-policy"}}, validate.RuleSets{}, validate.RuleSets{})
@@ -56,10 +57,10 @@ func Test_CustomResultMetricGeneration(t *testing.T) {
 		}
 
 		metrics := results.GetMetric()
-		if err = testCustomResultMetricLabels(metrics[0], result2, 1); err != nil {
+		if err = testCustomResultMetricLabels(metrics[0], fixtures.FailPodResult, 1); err != nil {
 			t.Error(err)
 		}
-		if err = testCustomResultMetricLabels(metrics[1], result1, 1); err != nil {
+		if err = testCustomResultMetricLabels(metrics[1], fixtures.PassResult, 1); err != nil {
 			t.Error(err)
 		}
 	})
@@ -85,7 +86,7 @@ func Test_CustomResultMetricGeneration(t *testing.T) {
 		if len(metrics) != 1 {
 			t.Fatalf("Expected only one metric is left, got %d\n", len(metrics))
 		}
-		if err = testCustomResultMetricLabels(metrics[0], result1, 1); err != nil {
+		if err = testCustomResultMetricLabels(metrics[0], fixtures.FailResult, 2); err != nil {
 			t.Error(err)
 		}
 	})
@@ -131,10 +132,10 @@ func Test_CustomResultMetricGeneration(t *testing.T) {
 		if len(metrics) != 2 {
 			t.Fatalf("Expected only one metric is left, got %d\n", len(metrics))
 		}
-		if err = testCustomResultMetricLabels(metrics[0], result2, 1); err != nil {
+		if err = testCustomResultMetricLabels(metrics[0], fixtures.FailPodResult, 1); err != nil {
 			t.Error(err)
 		}
-		if err = testCustomResultMetricLabels(metrics[1], result1, 1); err != nil {
+		if err = testCustomResultMetricLabels(metrics[1], fixtures.PassResult, 1); err != nil {
 			t.Error(err)
 		}
 	})

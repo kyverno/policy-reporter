@@ -4,43 +4,12 @@ import (
 	"testing"
 
 	"github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
+	"github.com/kyverno/policy-reporter/pkg/fixtures"
 	"github.com/kyverno/policy-reporter/pkg/report"
 	"github.com/kyverno/policy-reporter/pkg/target"
 	"github.com/kyverno/policy-reporter/pkg/validate"
-	corev1 "k8s.io/api/core/v1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
-
-var result = v1alpha2.PolicyReportResult{
-	Message:  "validation error: requests and limits required. Rule autogen-check-for-requests-and-limits failed at path /spec/template/spec/containers/0/resources/requests/",
-	Policy:   "require-requests-and-limits-required",
-	Rule:     "autogen-check-for-requests-and-limits",
-	Priority: v1alpha2.WarningPriority,
-	Result:   v1alpha2.StatusFail,
-	Severity: v1alpha2.SeverityHigh,
-	Category: "resources",
-	Scored:   true,
-	Source:   "Kyverno",
-	Resources: []corev1.ObjectReference{{
-		APIVersion: "v1",
-		Kind:       "Deployment",
-		Name:       "nginx",
-		Namespace:  "default",
-		UID:        "536ab69f-1b3c-4bd9-9ba4-274a56188409",
-	}},
-}
-
-var result2 = v1alpha2.PolicyReportResult{
-	Message:  "validation error: requests and limits required. Rule autogen-check-for-requests-and-limits failed at path /spec/template/spec/containers/0/resources/requests/",
-	Policy:   "require-requests-and-limits-required",
-	Rule:     "autogen-check-for-requests-and-limits",
-	Priority: v1alpha2.WarningPriority,
-	Result:   v1alpha2.StatusFail,
-	Severity: v1alpha2.SeverityHigh,
-	Category: "resources",
-	Scored:   true,
-	Source:   "Kyverno",
-}
 
 var preport = &v1alpha2.PolicyReport{
 	ObjectMeta: v1.ObjectMeta{
@@ -58,7 +27,7 @@ func Test_BaseClient(t *testing.T) {
 			make([]string, 0),
 		)
 
-		if filter.Validate(result) {
+		if filter.Validate(fixtures.FailResult) {
 			t.Errorf("Unexpected Validation Result")
 		}
 	})
@@ -71,7 +40,7 @@ func Test_BaseClient(t *testing.T) {
 			[]string{"jsPolicy"},
 		)
 
-		if filter.Validate(result) {
+		if filter.Validate(fixtures.FailResult) {
 			t.Errorf("Unexpected Validation Result")
 		}
 	})
@@ -85,21 +54,21 @@ func Test_BaseClient(t *testing.T) {
 			make([]string, 0),
 		)
 
-		if !filter.Validate(result2) {
+		if !filter.Validate(fixtures.FailResultWithoutResource) {
 			t.Errorf("Unexpected Validation Result")
 		}
 	})
 
 	t.Run("Validate Exclude Namespace match", func(t *testing.T) {
 		filter := target.NewResultFilter(
-			validate.RuleSets{Exclude: []string{"default"}},
+			validate.RuleSets{Exclude: []string{"test"}},
 			validate.RuleSets{},
 			validate.RuleSets{},
 			"",
 			make([]string, 0),
 		)
 
-		if filter.Validate(result) {
+		if filter.Validate(fixtures.FailResult) {
 			t.Errorf("Unexpected Validation Result")
 		}
 	})
@@ -112,20 +81,20 @@ func Test_BaseClient(t *testing.T) {
 			make([]string, 0),
 		)
 
-		if !filter.Validate(result) {
+		if !filter.Validate(fixtures.FailResult) {
 			t.Errorf("Unexpected Validation Result")
 		}
 	})
 	t.Run("Validate Include Namespace match", func(t *testing.T) {
 		filter := target.NewResultFilter(
-			validate.RuleSets{Include: []string{"default"}},
+			validate.RuleSets{Include: []string{"test"}},
 			validate.RuleSets{},
 			validate.RuleSets{},
 			"",
 			make([]string, 0),
 		)
 
-		if !filter.Validate(result) {
+		if !filter.Validate(fixtures.FailResult) {
 			t.Errorf("Unexpected Validation Result")
 		}
 	})
@@ -138,7 +107,7 @@ func Test_BaseClient(t *testing.T) {
 			make([]string, 0),
 		)
 
-		if filter.Validate(result) {
+		if filter.Validate(fixtures.FailResult) {
 			t.Errorf("Unexpected Validation Result")
 		}
 	})
@@ -152,7 +121,7 @@ func Test_BaseClient(t *testing.T) {
 			make([]string, 0),
 		)
 
-		if filter.Validate(result) {
+		if filter.Validate(fixtures.FailResult) {
 			t.Errorf("Unexpected Validation Result")
 		}
 	})
@@ -165,7 +134,7 @@ func Test_BaseClient(t *testing.T) {
 			make([]string, 0),
 		)
 
-		if !filter.Validate(result) {
+		if !filter.Validate(fixtures.FailResult) {
 			t.Errorf("Unexpected Validation Result")
 		}
 	})
@@ -178,7 +147,7 @@ func Test_BaseClient(t *testing.T) {
 			make([]string, 0),
 		)
 
-		if !filter.Validate(result) {
+		if !filter.Validate(fixtures.FailResult) {
 			t.Errorf("Unexpected Validation Result")
 		}
 	})
@@ -191,7 +160,7 @@ func Test_BaseClient(t *testing.T) {
 			make([]string, 0),
 		)
 
-		if filter.Validate(result) {
+		if filter.Validate(fixtures.FailResult) {
 			t.Errorf("Unexpected Validation Result")
 		}
 	})
@@ -205,7 +174,7 @@ func Test_BaseClient(t *testing.T) {
 			make([]string, 0),
 		)
 
-		if filter.Validate(result) {
+		if filter.Validate(fixtures.FailResult) {
 			t.Errorf("Unexpected Validation Result")
 		}
 	})
@@ -218,7 +187,7 @@ func Test_BaseClient(t *testing.T) {
 			make([]string, 0),
 		)
 
-		if !filter.Validate(result) {
+		if !filter.Validate(fixtures.FailResult) {
 			t.Errorf("Unexpected Validation Result")
 		}
 	})
@@ -231,7 +200,7 @@ func Test_BaseClient(t *testing.T) {
 			make([]string, 0),
 		)
 
-		if !filter.Validate(result) {
+		if !filter.Validate(fixtures.FailResult) {
 			t.Errorf("Unexpected Validation Result")
 		}
 	})
@@ -244,7 +213,7 @@ func Test_BaseClient(t *testing.T) {
 			make([]string, 0),
 		)
 
-		if filter.Validate(result) {
+		if filter.Validate(fixtures.FailResult) {
 			t.Errorf("Unexpected Validation Result")
 		}
 	})
@@ -334,7 +303,7 @@ func Test_BaseClient(t *testing.T) {
 			SkipExistingOnStartup: true,
 		})
 
-		if client.Validate(&v1alpha2.PolicyReport{}, result) {
+		if client.Validate(&v1alpha2.PolicyReport{}, fixtures.FailResult) {
 			t.Errorf("Unexpected Validation Result")
 		}
 	})
@@ -346,7 +315,7 @@ func Test_BaseClient(t *testing.T) {
 			SkipExistingOnStartup: true,
 		})
 
-		if client.Validate(&v1alpha2.PolicyReport{}, result) {
+		if client.Validate(&v1alpha2.PolicyReport{}, fixtures.FailResult) {
 			t.Errorf("Unexpected Validation Result")
 		}
 	})
@@ -358,7 +327,7 @@ func Test_BaseClient(t *testing.T) {
 			SkipExistingOnStartup: true,
 		})
 
-		if client.Validate(nil, result) {
+		if client.Validate(nil, fixtures.FailResult) {
 			t.Errorf("Unexpected Validation Result")
 		}
 	})
@@ -369,7 +338,7 @@ func Test_BaseClient(t *testing.T) {
 			SkipExistingOnStartup: true,
 		})
 
-		if !client.Validate(&v1alpha2.PolicyReport{}, result) {
+		if !client.Validate(&v1alpha2.PolicyReport{}, fixtures.FailResult) {
 			t.Errorf("Should fallback to true")
 		}
 		if client.MinimumPriority() != v1alpha2.DefaultPriority.String() {

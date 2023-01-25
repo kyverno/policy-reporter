@@ -5,67 +5,8 @@ import (
 
 	"github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
 	ioprometheusclient "github.com/prometheus/client_model/go"
-	corev1 "k8s.io/api/core/v1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
-
-var result1 = v1alpha2.PolicyReportResult{
-	ID:       "1",
-	Message:  "validation error: requests and limits required. Rule autogen-check-for-requests-and-limits failed at path /spec/template/spec/containers/0/resources/requests/",
-	Policy:   "require-requests-and-limits-required",
-	Rule:     "autogen-check-for-requests-and-limits",
-	Priority: v1alpha2.ErrorPriority,
-	Result:   v1alpha2.StatusFail,
-	Severity: v1alpha2.SeverityHigh,
-	Category: "resources",
-	Scored:   true,
-	Resources: []corev1.ObjectReference{{
-		APIVersion: "v1",
-		Kind:       "Deployment",
-		Name:       "nginx",
-		Namespace:  "test",
-		UID:        "536ab69f-1b3c-4bd9-9ba4-274a56188409",
-	}},
-	Source: "Kyverno",
-}
-
-var result2 = v1alpha2.PolicyReportResult{
-	ID:       "2",
-	Message:  "validation error: requests and limits required. Rule autogen-check-for-requests-and-limits failed at path /spec/template/spec/containers/0/resources/requests/",
-	Policy:   "check-requests-and-limits-required",
-	Rule:     "check-for-requests-and-limits",
-	Priority: v1alpha2.WarningPriority,
-	Result:   v1alpha2.StatusPass,
-	Category: "resources",
-	Scored:   true,
-	Resources: []corev1.ObjectReference{{
-		APIVersion: "v1",
-		Kind:       "Deployment",
-		Name:       "nginx",
-		Namespace:  "test",
-		UID:        "535ab69f-1b3c-4bd9-9ba4-274a56188419",
-	}},
-	Source: "Kyverno",
-}
-
-var result3 = v1alpha2.PolicyReportResult{
-	ID:       "3",
-	Message:  "validation error: requests and limits required. Rule autogen-check-for-requests-and-limits failed at path /spec/template/spec/containers/0/resources/requests/",
-	Policy:   "disallow-policy",
-	Rule:     "check-for-requests-and-limits",
-	Priority: v1alpha2.WarningPriority,
-	Result:   v1alpha2.StatusPass,
-	Category: "resources",
-	Scored:   true,
-	Resources: []corev1.ObjectReference{{
-		APIVersion: "v1",
-		Kind:       "Deployment",
-		Name:       "nginx",
-		Namespace:  "test",
-		UID:        "535ab69f-1b3c-4bd9-9ba4-274a56188419",
-	}},
-	Source: "Kyverno",
-}
 
 var preport = &v1alpha2.PolicyReport{
 	ObjectMeta: v1.ObjectMeta{

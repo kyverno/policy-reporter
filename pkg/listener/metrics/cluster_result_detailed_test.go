@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
+	"github.com/kyverno/policy-reporter/pkg/fixtures"
 	"github.com/kyverno/policy-reporter/pkg/listener/metrics"
 	"github.com/kyverno/policy-reporter/pkg/report"
 	"github.com/kyverno/policy-reporter/pkg/validate"
@@ -22,8 +23,8 @@ func Test_DetailedClusterResultMetricGeneration(t *testing.T) {
 			Name:              "polr-test",
 			CreationTimestamp: v1.Now(),
 		},
-		Summary: v1alpha2.PolicyReportSummary{Pass: 2, Fail: 1},
-		Results: []v1alpha2.PolicyReportResult{result1, result2, result3},
+		Summary: v1alpha2.PolicyReportSummary{Pass: 1, Fail: 2},
+		Results: []v1alpha2.PolicyReportResult{fixtures.PassResult, fixtures.FailResultWithoutResource, fixtures.FailDisallowRuleResult},
 	}
 
 	report2 := &v1alpha2.PolicyReport{
@@ -31,8 +32,8 @@ func Test_DetailedClusterResultMetricGeneration(t *testing.T) {
 			Name:              "polr-test",
 			CreationTimestamp: v1.Now(),
 		},
-		Summary: v1alpha2.PolicyReportSummary{Pass: 0, Fail: 1},
-		Results: []v1alpha2.PolicyReportResult{result1, result3},
+		Summary: v1alpha2.PolicyReportSummary{Pass: 0, Fail: 2},
+		Results: []v1alpha2.PolicyReportResult{fixtures.FailResult, fixtures.FailDisallowRuleResult},
 	}
 
 	filter := metrics.NewResultFilter(validate.RuleSets{}, validate.RuleSets{}, validate.RuleSets{Exclude: []string{"disallow-policy"}}, validate.RuleSets{}, validate.RuleSets{})
@@ -52,10 +53,10 @@ func Test_DetailedClusterResultMetricGeneration(t *testing.T) {
 		}
 
 		metrics := results.GetMetric()
-		if err = testClusterResultMetricLabels(metrics[0], result2); err != nil {
+		if err = testClusterResultMetricLabels(metrics[0], fixtures.FailResultWithoutResource); err != nil {
 			t.Error(err)
 		}
-		if err = testClusterResultMetricLabels(metrics[1], result1); err != nil {
+		if err = testClusterResultMetricLabels(metrics[1], fixtures.PassResult); err != nil {
 			t.Error(err)
 		}
 	})
@@ -78,7 +79,7 @@ func Test_DetailedClusterResultMetricGeneration(t *testing.T) {
 		if len(metrics) != 1 {
 			t.Error("Expected one metric, the second metric should be deleted")
 		}
-		if err = testClusterResultMetricLabels(metrics[0], result1); err != nil {
+		if err = testClusterResultMetricLabels(metrics[0], fixtures.FailResult); err != nil {
 			t.Error(err)
 		}
 	})

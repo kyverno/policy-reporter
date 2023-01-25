@@ -4,69 +4,11 @@ import (
 	"encoding/json"
 	"net/http"
 	"testing"
-	"time"
 
-	"github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
+	"github.com/kyverno/policy-reporter/pkg/fixtures"
 	"github.com/kyverno/policy-reporter/pkg/target"
 	"github.com/kyverno/policy-reporter/pkg/target/teams"
-	corev1 "k8s.io/api/core/v1"
-	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
-
-var seconds = time.Date(2021, time.February, 23, 15, 10, 0, 0, time.UTC).Unix()
-
-var completeResult = v1alpha2.PolicyReportResult{
-	Message:   "validation error: requests and limits required. Rule autogen-check-for-requests-and-limits failed at path /spec/template/spec/containers/0/resources/requests/",
-	Policy:    "require-requests-and-limits-required",
-	Rule:      "autogen-check-for-requests-and-limits",
-	Timestamp: v1.Timestamp{Seconds: seconds},
-	Priority:  v1alpha2.WarningPriority,
-	Result:    v1alpha2.StatusFail,
-	Severity:  v1alpha2.SeverityHigh,
-	Category:  "resources",
-	Scored:    true,
-	Source:    "Kyverno",
-	Resources: []corev1.ObjectReference{{
-		APIVersion: "v1",
-		Kind:       "Deployment",
-		Name:       "nginx",
-		Namespace:  "default",
-		UID:        "536ab69f-1b3c-4bd9-9ba4-274a56188409",
-	}},
-	Properties: map[string]string{"version": "1.2.0"},
-}
-
-var minimalErrorResult = v1alpha2.PolicyReportResult{
-	Message:  "validation error: label required. Rule app-label-required failed at path /spec/template/spec/containers/0/resources/requests/",
-	Policy:   "app-label-requirement",
-	Priority: v1alpha2.ErrorPriority,
-	Result:   v1alpha2.StatusFail,
-	Scored:   true,
-}
-
-var minimalResult = v1alpha2.PolicyReportResult{
-	Message:  "validation error: label required. Rule app-label-required failed at path /spec/template/spec/containers/0/resources/requests/",
-	Policy:   "app-label-requirement",
-	Priority: v1alpha2.CriticalPriority,
-	Result:   v1alpha2.StatusFail,
-	Scored:   true,
-}
-
-var minimalInfoResult = v1alpha2.PolicyReportResult{
-	Message:  "validation error: label required. Rule app-label-required failed at path /spec/template/spec/containers/0/resources/requests/",
-	Policy:   "app-label-requirement",
-	Priority: v1alpha2.InfoPriority,
-	Result:   v1alpha2.StatusFail,
-	Scored:   true,
-}
-
-var minimalDebugResult = v1alpha2.PolicyReportResult{
-	Message:  "validation error: label required. Rule app-label-required failed at path /spec/template/spec/containers/0/resources/requests/",
-	Policy:   "app-label-requirement",
-	Priority: v1alpha2.DebugPriority,
-	Result:   v1alpha2.StatusFail,
-	Scored:   true,
-}
 
 type testClient struct {
 	callback   func(req *http.Request)
@@ -116,7 +58,7 @@ func Test_TeamsTarget(t *testing.T) {
 			CustomFields: map[string]string{"Cluster": "Name"},
 			HTTPClient:   testClient{callback, 200},
 		})
-		client.Send(completeResult)
+		client.Send(fixtures.CompleteTargetSendResult)
 	})
 
 	t.Run("Send Minimal Result", func(t *testing.T) {
@@ -153,7 +95,7 @@ func Test_TeamsTarget(t *testing.T) {
 			CustomFields: map[string]string{"Cluster": "Name"},
 			HTTPClient:   testClient{callback, 200},
 		})
-		client.Send(minimalResult)
+		client.Send(fixtures.MinimalTargetSendResult)
 	})
 	t.Run("Send Minimal InfoResult", func(t *testing.T) {
 		callback := func(req *http.Request) {
@@ -177,7 +119,7 @@ func Test_TeamsTarget(t *testing.T) {
 			CustomFields: map[string]string{"Cluster": "Name"},
 			HTTPClient:   testClient{callback, 200},
 		})
-		client.Send(minimalInfoResult)
+		client.Send(fixtures.InfoSendResult)
 	})
 	t.Run("Send Minimal ErrorResult", func(t *testing.T) {
 		callback := func(req *http.Request) {
@@ -201,7 +143,7 @@ func Test_TeamsTarget(t *testing.T) {
 			CustomFields: map[string]string{"Cluster": "Name"},
 			HTTPClient:   testClient{callback, 200},
 		})
-		client.Send(minimalErrorResult)
+		client.Send(fixtures.ErrorSendResult)
 	})
 	t.Run("Send Minimal Debug Result", func(t *testing.T) {
 		callback := func(req *http.Request) {
@@ -237,7 +179,7 @@ func Test_TeamsTarget(t *testing.T) {
 			CustomFields: map[string]string{"Cluster": "Name"},
 			HTTPClient:   testClient{callback, 200},
 		})
-		client.Send(minimalDebugResult)
+		client.Send(fixtures.DebugSendResult)
 	})
 	t.Run("Name", func(t *testing.T) {
 		client := teams.NewClient(teams.Options{

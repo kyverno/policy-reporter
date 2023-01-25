@@ -4,47 +4,10 @@ import (
 	"testing"
 
 	"github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
+	"github.com/kyverno/policy-reporter/pkg/fixtures"
 	"github.com/kyverno/policy-reporter/pkg/report"
-	corev1 "k8s.io/api/core/v1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
-
-var result1 = v1alpha2.PolicyReportResult{
-	ID:       "16097155368874536783",
-	Message:  "validation error: requests and limits required. Rule autogen-check-for-requests-and-limits failed at path /spec/template/spec/containers/0/resources/requests/",
-	Policy:   "require-requests-and-limits-required",
-	Rule:     "autogen-check-for-requests-and-limits",
-	Priority: v1alpha2.ErrorPriority,
-	Result:   v1alpha2.StatusFail,
-	Category: "resources",
-	Severity: v1alpha2.SeverityHigh,
-	Scored:   true,
-	Resources: []corev1.ObjectReference{{
-		APIVersion: "v1",
-		Kind:       "Deployment",
-		Name:       "nginx",
-		Namespace:  "test",
-		UID:        "536ab69f-1b3c-4bd9-9ba4-274a56188409",
-	}},
-}
-
-var result2 = v1alpha2.PolicyReportResult{
-	ID:       "2",
-	Message:  "validation error: requests and limits required. Rule autogen-check-for-requests-and-limits failed at path /spec/template/spec/containers/0/resources/requests/",
-	Policy:   "require-requests-and-limits-required",
-	Rule:     "autogen-check-for-requests-and-limits",
-	Priority: v1alpha2.ErrorPriority,
-	Result:   v1alpha2.StatusFail,
-	Category: "resources",
-	Scored:   true,
-	Resources: []corev1.ObjectReference{{
-		APIVersion: "v1",
-		Kind:       "Deployment",
-		Name:       "nginx",
-		Namespace:  "test",
-		UID:        "536ab69f-1b3c-4bd9-9ba4-274a56188419",
-	}},
-}
 
 var preport = &v1alpha2.PolicyReport{
 	ObjectMeta: v1.ObjectMeta{
@@ -101,7 +64,7 @@ func Test_FindNewEvents(t *testing.T) {
 			Namespace:         "test",
 			CreationTimestamp: v1.Now(),
 		},
-		Results: []v1alpha2.PolicyReportResult{result1},
+		Results: []v1alpha2.PolicyReportResult{fixtures.FailResult},
 		Summary: v1alpha2.PolicyReportSummary{},
 	}
 	preport2 := &v1alpha2.PolicyReport{
@@ -110,7 +73,7 @@ func Test_FindNewEvents(t *testing.T) {
 			Namespace:         "test",
 			CreationTimestamp: v1.Now(),
 		},
-		Results: []v1alpha2.PolicyReportResult{result1, result2},
+		Results: []v1alpha2.PolicyReportResult{fixtures.FailResult, fixtures.FailPodResult},
 		Summary: v1alpha2.PolicyReportSummary{},
 	}
 
@@ -118,7 +81,7 @@ func Test_FindNewEvents(t *testing.T) {
 	if len(diff) != 1 {
 		t.Fatal("should only return one new result")
 	}
-	if diff[0].GetResource().UID != result2.GetResource().UID {
+	if diff[0].GetResource().UID != fixtures.FailPodResult.GetResource().UID {
 		t.Fatal("should only return the new result2")
 	}
 
