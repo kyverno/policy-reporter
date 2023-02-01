@@ -276,4 +276,6 @@ type ReportInterface interface {
 	GetResults() []PolicyReportResult
 	GetSummary() PolicyReportSummary
 	GetSource() string
+	GetKinds() []string
+	GetSeverities() []string
 }

@@ -26,6 +26,8 @@ const (
     "name" TEXT NOT NULL,
     "source" TEXT,
     "labels" JSON DEFAULT '{}',
+    "kinds" JSON DEFAULT '[]',
+    "severities" JSON DEFAULT '[]',
     "skip" INTEGER DEFAULT 0,
     "pass" INTEGER DEFAULT 0,
     "warn" INTEGER DEFAULT 0,
@@ -103,11 +105,7 @@ func (s *policyReportStore) Get(id string) (v1alpha2.ReportInterface, bool) {
 	}
 
 	r.CreationTimestamp = v1.NewTime(time.Unix(created, 0))
-	r.Labels, err = convertJSONToMap(labels)
-	if err != nil {
-		log.Printf("[ERROR] failed to convert json to labels: %s\n", err)
-		return r, false
-	}
+	r.Labels = convertJSONToMap(labels)
 
 	results, err := s.fetchResults(id)
 	if err != nil {
@@ -122,7 +120,7 @@ func (s *policyReportStore) Get(id string) (v1alpha2.ReportInterface, bool) {
 
 // Add a PolicyReport to the Store
 func (s *policyReportStore) Add(r v1alpha2.ReportInterface) error {
-	stmt, err := s.db.Prepare("INSERT INTO policy_report(id, type, namespace, source, name, labels, pass, skip, warn, fail, error, created) values(?,?,?,?,?,?,?,?,?,?,?,?)")
+	stmt, err := s.db.Prepare("INSERT INTO policy_report(id, type, namespace, source, name, labels, kinds, severities, pass, skip, warn, fail, error, created) values(?,?,?,?,?,?,?,?,?,?,?,?,?,?)")
 	if err != nil {
 		return err
 	}
@@ -130,7 +128,22 @@ func (s *policyReportStore) Add(r v1alpha2.ReportInterface) error {
 
 	sum := r.GetSummary()
 
-	_, err = stmt.Exec(r.GetID(), report.GetType(r), r.GetNamespace(), r.GetSource(), r.GetName(), convertMapToJSON(r.GetLabels()), sum.Pass, sum.Skip, sum.Warn, sum.Fail, sum.Error, r.GetCreationTimestamp().Unix())
+	_, err = stmt.Exec(
+		r.GetID(),
+		report.GetType(r),
+		r.GetNamespace(),
+		r.GetSource(),
+		r.GetName(),
+		convertMapToJSON(r.GetLabels()),
+		convertSliveToJSON(r.GetKinds()),
+		convertSliveToJSON(r.GetSeverities()),
+		sum.Pass,
+		sum.Skip,
+		sum.Warn,
+		sum.Fail,
+		sum.Error,
+		r.GetCreationTimestamp().Unix(),
+	)
 	if err != nil {
 		return err
 	}
@@ -139,7 +152,7 @@ func (s *policyReportStore) Add(r v1alpha2.ReportInterface) error {
 }
 
 func (s *policyReportStore) Update(r v1alpha2.ReportInterface) error {
-	stmt, err := s.db.Prepare("UPDATE policy_report SET labels=?, pass=?, skip=?, warn=?, fail=?, error=?, created=? WHERE id=?")
+	stmt, err := s.db.Prepare("UPDATE policy_report SET labels=?, kinds=?, severities=?, pass=?, skip=?, warn=?, fail=?, error=?, created=? WHERE id=?")
 	if err != nil {
 		return err
 	}
@@ -147,7 +160,18 @@ func (s *policyReportStore) Update(r v1alpha2.ReportInterface) error {
 
 	sum := r.GetSummary()
 
-	_, err = stmt.Exec(convertMapToJSON(r.GetLabels()), sum.Pass, sum.Skip, sum.Warn, sum.Fail, sum.Error, r.GetCreationTimestamp().Unix(), r.GetID())
+	_, err = stmt.Exec(
+		convertMapToJSON(r.GetLabels()),
+		convertSliveToJSON(r.GetKinds()),
+		convertSliveToJSON(r.GetSeverities()),
+		sum.Pass,
+		sum.Skip,
+		sum.Warn,
+		sum.Fail,
+		sum.Error,
+		r.GetCreationTimestamp().Unix(),
+		r.GetID(),
+	)
 	if err != nil {
 		return err
 	}
@@ -254,11 +278,7 @@ func (s *policyReportStore) FetchPolicyReports(filter api.Filter, pagination api
 			return list, err
 		}
 
-		r.Labels, err = convertJSONToMap(labels)
-		if err != nil {
-			log.Printf("[ERROR] failed to convert json to labels: %s\n", err)
-			return list, err
-		}
+		r.Labels = convertJSONToMap(labels)
 
 		list = append(list, r)
 	}
@@ -340,11 +360,7 @@ func (s *policyReportStore) FetchClusterPolicyReports(filter api.Filter, paginat
 			return list, err
 		}
 
-		r.Labels, err = convertJSONToMap(labels)
-		if err != nil {
-			log.Printf("[ERROR] failed to convert json to labels: %s\n", err)
-			return list, err
-		}
+		r.Labels = convertJSONToMap(labels)
 
 		list = append(list, r)
 	}
@@ -542,17 +558,12 @@ func (s *policyReportStore) FetchCategories(filter api.Filter) ([]string, error)
 func (s *policyReportStore) FetchNamespacedKinds(filter api.Filter) ([]string, error) {
 	list := make([]string, 0)
 
-	where, args := generateFilterWhere(filter, []string{"sources", "categories", "policies", "rules", "namespaces"})
+	where, args := generateFilterWhere(filter, []string{"report_sources", "report_namespaces"})
 	if len(where) > 0 {
 		where = " AND " + where
 	}
 
-	join := ""
-	if len(filter.ReportLabel) > 0 {
-		join = " JOIN policy_report as report ON result.policy_report_id = report.id"
-	}
-
-	rows, err := s.db.Query(`SELECT DISTINCT resource_kind FROM policy_report_result as result`+join+` WHERE resource_kind != "" AND resource_namespace != ""`+where+` ORDER BY resource_kind ASC`, args...)
+	rows, err := s.db.Query(`SELECT report.kinds FROM policy_report as report WHERE report.namespace != ""`+where, args...)
 	if err != nil {
 		return list, err
 	}
@@ -564,7 +575,7 @@ func (s *policyReportStore) FetchNamespacedKinds(filter api.Filter) ([]string, e
 			return list, err
 		}
 
-		list = append(list, item)
+		list = appendUnique(list, convertJSONToSlice(item))
 	}
 
 	return list, nil
@@ -573,17 +584,12 @@ func (s *policyReportStore) FetchNamespacedKinds(filter api.Filter) ([]string, e
 func (s *policyReportStore) FetchClusterKinds(filter api.Filter) ([]string, error) {
 	list := make([]string, 0)
 
-	where, args := generateFilterWhere(filter, []string{"sources", "categories", "policies", "rules"})
+	where, args := generateFilterWhere(filter, []string{"report_sources"})
 	if len(where) > 0 {
 		where = " AND " + where
 	}
 
-	join := ""
-	if len(filter.ReportLabel) > 0 {
-		join = " JOIN policy_report as report ON result.policy_report_id = report.id"
-	}
-
-	rows, err := s.db.Query(`SELECT DISTINCT resource_kind FROM policy_report_result as result`+join+` WHERE resource_kind != "" AND resource_namespace == ""`+where+` ORDER BY resource_kind ASC`, args...)
+	rows, err := s.db.Query(`SELECT report.kinds FROM policy_report as report WHERE report.namespace = ""`+where, args...)
 	if err != nil {
 		return list, err
 	}
@@ -595,7 +601,7 @@ func (s *policyReportStore) FetchClusterKinds(filter api.Filter) ([]string, erro
 			return list, err
 		}
 
-		list = append(list, item)
+		list = appendUnique(list, convertJSONToSlice(item))
 	}
 
 	return list, nil
@@ -1044,12 +1050,8 @@ func (s *policyReportStore) FetchNamespacedReportLabels(filter api.Filter) (map[
 		if err != nil {
 			return list, err
 		}
-		labels, err := convertJSONToMap(item)
-		if err != nil {
-			log.Printf("[ERROR] failed to convert json to labels: %s\n", err)
-		}
 
-		for key, value := range labels {
+		for key, value := range convertJSONToMap(item) {
 			if value == "" {
 				continue
 			}
@@ -1090,12 +1092,8 @@ func (s *policyReportStore) FetchClusterReportLabels(filter api.Filter) (map[str
 		if err != nil {
 			return list, err
 		}
-		labels, err := convertJSONToMap(item)
-		if err != nil {
-			log.Printf("[ERROR] failed to convert json to labels: %s\n", err)
-		}
 
-		for key, value := range labels {
+		for key, value := range convertJSONToMap(item) {
 			_, ok := list[key]
 			contained := contains(value, list[key])
 
@@ -1381,21 +1379,48 @@ func contains(source string, sources []string) bool {
 	return false
 }
 
+func convertSliveToJSON(m []string) string {
+	str, err := json.Marshal(m)
+	if err != nil {
+		return "[]"
+	}
+
+	return string(str)
+}
+
 func convertMapToJSON(m map[string]string) string {
 	str, err := json.Marshal(m)
 	if err != nil {
-		log.Printf("[ERROR] failed to convert map to json: %s\n", err)
 		return "{}"
 	}
 
 	return string(str)
 }
 
-func convertJSONToMap(s string) (map[string]string, error) {
+func convertJSONToMap(s string) map[string]string {
 	m := make(map[string]string)
-	err := json.Unmarshal([]byte(s), &m)
+	_ = json.Unmarshal([]byte(s), &m)
 
-	return m, err
+	return m
+}
+
+func convertJSONToSlice(s string) []string {
+	m := make([]string, 0)
+	_ = json.Unmarshal([]byte(s), &m)
+
+	return m
+}
+
+func appendUnique(list, values []string) []string {
+	for _, v := range values {
+		if contains(v, list) {
+			continue
+		}
+
+		list = append(list, v)
+	}
+
+	return list
 }
 
 // NewPolicyReportStore construct a PolicyReportStore
