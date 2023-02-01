@@ -1,5 +1,8 @@
 # Changelog
 
+# 2.16.0
+* Add `nameOverride` to all charts [[#254](https://github.com/kyverno/policy-reporter/pull/254) by [mjnagel](https://github.com/mjnagel)]
+
 # 2.15.0
 
 * Add values to configure `topologySpreadConstraints` for all components [[#241](https://github.com/kyverno/policy-reporter/pull/241) by [Kostavro](https://github.com/Kostavro)]
