@@ -530,3 +530,8 @@ extraVolumes:
   volumeMounts: []
 
   volumes: []
+
+# If set the volume for sqlite is freely configurable below "- name: sqlite". If no value is set an emptyDir is used.
+sqliteVolume: {}
+  # emptyDir:
+  #   sizeLimit: 10Mi

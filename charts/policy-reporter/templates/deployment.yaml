@@ -100,7 +100,11 @@ spec:
           {{- end }}
       volumes:
       - name: sqlite
+        {{- if .Values.sqliteVolume }}
+          {{- toYaml .Values.sqliteVolume | nindent 8 }}
+        {{- else }}
         emptyDir: {}
+        {{- end }}
       - name: config-file
         secret:
           {{- if and .Values.existingTargetConfig.enabled .Values.existingTargetConfig.name }}
