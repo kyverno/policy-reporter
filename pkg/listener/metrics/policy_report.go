@@ -20,7 +20,7 @@ func CreatePolicyReportMetricsListener(filter *report.ReportFilter) report.Polic
 	var newReport v1alpha2.ReportInterface
 
 	return func(event report.LifecycleEvent) {
-		newReport = event.NewPolicyReport
+		newReport = event.PolicyReport
 		if !filter.Validate(newReport) {
 			return
 		}

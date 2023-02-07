@@ -29,9 +29,8 @@ const (
 
 // LifecycleEvent of PolicyReports
 type LifecycleEvent struct {
-	Type            Event
-	NewPolicyReport v1alpha2.ReportInterface
-	OldPolicyReport v1alpha2.ReportInterface
+	Type         Event
+	PolicyReport v1alpha2.ReportInterface
 }
 
 // ResourceType Enum defined for PolicyReport

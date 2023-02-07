@@ -2,11 +2,12 @@ package cache
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
-	"log"
 	"time"
 
 	goredis "github.com/go-redis/redis/v8"
+	"github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
 )
 
 type redisCache struct {
@@ -15,23 +16,31 @@ type redisCache struct {
 	ttl    time.Duration
 }
 
-func (r *redisCache) Add(id string) {
-	err := r.rdb.Set(context.Background(), r.generateKey(id), true, r.ttl).Err()
+func (r *RedisCache) AddReport(report v1alpha2.ReportInterface) {
+	list := make([]string, 0, len(report.GetResults()))
+	for _, result := range report.GetResults() {
+		list = append(list, result.GetID())
+	}
+
+	value, _ := json.Marshal(list)
+
+	r.rdb.Set(context.Background(), r.generateKey(report.GetID()), string(value), 0)
+}
+
+func (r *RedisCache) RemoveReport(id string) {
+	r.rdb.Del(context.Background(), r.generateKey(id))
+}
+
+func (r *RedisCache) GetResults(id string) []string {
+	list, err := r.rdb.Get(context.Background(), r.generateKey(id)).Result()
+	results := make([]string, 0)
 	if err != nil {
 		log.Printf("[ERROR] Failed to set result: %s\n", err)
 	}
-}
 
-func (r *redisCache) Has(id string) bool {
-	_, err := r.rdb.Get(context.Background(), r.generateKey(id)).Result()
-	if err == goredis.Nil {
-		return false
-	} else if err != nil {
-		log.Printf("[ERROR] Failed to get result: %s\n", err)
-		return false
-	}
+	json.Unmarshal([]byte(list), &results)
 
-	return true
+	return results
 }
 
 func (r *redisCache) generateKey(id string) string {

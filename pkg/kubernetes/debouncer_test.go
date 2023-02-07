@@ -25,20 +25,20 @@ func Test_Debouncer(t *testing.T) {
 		debouncer := kubernetes.NewDebouncer(200*time.Millisecond, publisher)
 
 		debouncer.Add(report.LifecycleEvent{
-			Type:            report.Added,
-			NewPolicyReport: fixtures.DefaultPolicyReport,
+			Type:         report.Added,
+			PolicyReport: fixtures.DefaultPolicyReport,
 		})
 
 		debouncer.Add(report.LifecycleEvent{
-			Type:            report.Updated,
-			NewPolicyReport: fixtures.MinPolicyReport,
+			Type:         report.Updated,
+			PolicyReport: fixtures.MinPolicyReport,
 		})
 
 		time.Sleep(10 * time.Millisecond)
 
 		debouncer.Add(report.LifecycleEvent{
-			Type:            report.Updated,
-			NewPolicyReport: fixtures.DefaultPolicyReport,
+			Type:         report.Updated,
+			PolicyReport: fixtures.DefaultPolicyReport,
 		})
 
 		wg.Wait()

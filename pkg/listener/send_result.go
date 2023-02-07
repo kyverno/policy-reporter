@@ -19,7 +19,9 @@ func NewSendResultListener(clients []target.Client, mapper report.Mapper) report
 			go func(target target.Client, re v1alpha2.ReportInterface, result v1alpha2.PolicyReportResult, preExisted bool) {
 				defer wg.Done()
 
-				result.Priority = mapper.ResolvePriority(result.Policy, result.Severity)
+				if result.Result == v1alpha2.StatusFail {
+					result.Priority = mapper.ResolvePriority(result.Policy, result.Severity)
+				}
 
 				if (preExisted && target.SkipExistingOnStartup()) || !target.Validate(re, result) {
 					return

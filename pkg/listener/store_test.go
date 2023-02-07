@@ -12,7 +12,7 @@ func Test_StoreListener(t *testing.T) {
 
 	t.Run("Save New Report", func(t *testing.T) {
 		slistener := listener.NewStoreListener(store)
-		slistener(report.LifecycleEvent{Type: report.Added, NewPolicyReport: preport1, OldPolicyReport: nil})
+		slistener(report.LifecycleEvent{Type: report.Added, PolicyReport: preport1})
 
 		if _, ok := store.Get(preport1.GetID()); !ok {
 			t.Error("Expected Report to be stored")
@@ -20,7 +20,7 @@ func Test_StoreListener(t *testing.T) {
 	})
 	t.Run("Update Modified Report", func(t *testing.T) {
 		slistener := listener.NewStoreListener(store)
-		slistener(report.LifecycleEvent{Type: report.Updated, NewPolicyReport: preport2, OldPolicyReport: preport1})
+		slistener(report.LifecycleEvent{Type: report.Updated, PolicyReport: preport2})
 
 		if preport, ok := store.Get(preport2.GetID()); !ok && len(preport.GetResults()) == 2 {
 			t.Error("Expected Report to be updated")
@@ -28,7 +28,7 @@ func Test_StoreListener(t *testing.T) {
 	})
 	t.Run("Remove Deleted Report", func(t *testing.T) {
 		slistener := listener.NewStoreListener(store)
-		slistener(report.LifecycleEvent{Type: report.Deleted, NewPolicyReport: preport2, OldPolicyReport: nil})
+		slistener(report.LifecycleEvent{Type: report.Deleted, PolicyReport: preport2})
 
 		if _, ok := store.Get(preport2.GetID()); ok {
 			t.Error("Expected Report to be removed")

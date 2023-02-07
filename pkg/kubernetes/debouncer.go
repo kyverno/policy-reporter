@@ -19,10 +19,10 @@ type debouncer struct {
 }
 
 func (d *debouncer) Add(event report.LifecycleEvent) {
-	cached, ok := d.events[event.NewPolicyReport.GetID()]
+	_, ok := d.events[event.PolicyReport.GetID()]
 	if event.Type != report.Updated && ok {
 		d.mutx.Lock()
-		delete(d.events, event.NewPolicyReport.GetID())
+		delete(d.events, event.PolicyReport.GetID())
 		d.mutx.Unlock()
 	}
 
@@ -31,18 +31,18 @@ func (d *debouncer) Add(event report.LifecycleEvent) {
 		return
 	}
 
-	if len(event.NewPolicyReport.GetResults()) == 0 && !ok {
+	if len(event.PolicyReport.GetResults()) == 0 && !ok {
 		d.mutx.Lock()
-		d.events[event.NewPolicyReport.GetID()] = event
+		d.events[event.PolicyReport.GetID()] = event
 		d.mutx.Unlock()
 
 		go func() {
 			time.Sleep(d.waitDuration)
 
 			d.mutx.Lock()
-			if event, ok := d.events[event.NewPolicyReport.GetID()]; ok {
+			if event, ok := d.events[event.PolicyReport.GetID()]; ok {
 				d.publisher.Publish(event)
-				delete(d.events, event.NewPolicyReport.GetID())
+				delete(d.events, event.PolicyReport.GetID())
 			}
 			d.mutx.Unlock()
 		}()
@@ -52,8 +52,7 @@ func (d *debouncer) Add(event report.LifecycleEvent) {
 
 	if ok {
 		d.mutx.Lock()
-		event.OldPolicyReport = cached.OldPolicyReport
-		d.events[event.NewPolicyReport.GetID()] = event
+		d.events[event.PolicyReport.GetID()] = event
 		d.mutx.Unlock()
 
 		return

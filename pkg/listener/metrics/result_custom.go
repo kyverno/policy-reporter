@@ -24,12 +24,10 @@ func CreateCustomResultMetricsListener(
 	gauge *prometheus.GaugeVec,
 	labelGenerator LabelGenerator,
 ) report.PolicyReportListener {
-	var newReport v1alpha2.ReportInterface
-	var oldReport v1alpha2.ReportInterface
+	cache := NewCache(filter, labelGenerator)
 
 	return func(event report.LifecycleEvent) {
-		newReport = event.NewPolicyReport
-		oldReport = event.OldPolicyReport
+		var newReport = event.PolicyReport
 
 		switch event.Type {
 		case report.Added:
@@ -40,13 +38,12 @@ func CreateCustomResultMetricsListener(
 
 				gauge.With(labelGenerator(newReport, result)).Inc()
 			}
-		case report.Updated:
-			for _, result := range oldReport.GetResults() {
-				if !filter.Validate(result) {
-					continue
-				}
 
-				decreaseOrDelete(gauge, labelGenerator(oldReport, result))
+			cache.AddReport(newReport)
+		case report.Updated:
+			items := cache.GetReportLabels(newReport.GetID())
+			for _, item := range items {
+				decreaseOrDelete(gauge, item.Labels, item.Value)
 			}
 
 			for _, result := range newReport.GetResults() {
@@ -56,30 +53,31 @@ func CreateCustomResultMetricsListener(
 
 				gauge.With(labelGenerator(newReport, result)).Inc()
 			}
-		case report.Deleted:
-			for _, result := range newReport.GetResults() {
-				if !filter.Validate(result) {
-					continue
-				}
 
-				decreaseOrDelete(gauge, labelGenerator(newReport, result))
+			cache.AddReport(newReport)
+		case report.Deleted:
+			items := cache.GetReportLabels(newReport.GetID())
+			for _, item := range items {
+				decreaseOrDelete(gauge, item.Labels, item.Value)
 			}
+
+			cache.Remove(newReport.GetID())
 		}
 	}
 }
 
-func decreaseOrDelete(vec *prometheus.GaugeVec, labels map[string]string) {
+func decreaseOrDelete(vec *prometheus.GaugeVec, labels map[string]string, gauge float64) {
 	m := &dto.Metric{}
 
 	err := vec.With(labels).Write(m)
 	if err != nil {
-		vec.With(labels).Dec()
+		vec.With(labels).Sub(gauge)
 		return
 	}
 
-	if *m.Gauge.Value == 1 {
+	if *m.Gauge.Value-gauge == 0 {
 		vec.Delete(labels)
 	} else {
-		vec.With(labels).Dec()
+		vec.With(labels).Sub(gauge)
 	}
 }

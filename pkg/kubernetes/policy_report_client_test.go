@@ -12,6 +12,7 @@ import (
 	"github.com/kyverno/policy-reporter/pkg/validate"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/client-go/util/workqueue"
 )
 
 var filter = report.NewFilter(false, validate.RuleSets{})
@@ -31,19 +32,33 @@ func Test_PolicyReportWatcher(t *testing.T) {
 		wg.Done()
 	})
 
-	kclient, rclient, _ := NewFakeCilent()
-	client := kubernetes.NewPolicyReportClient(kclient, filter, publisher)
+	restClient, polrClient, _ := NewFakeCilent()
 
-	err := client.Run(stop)
-	if err != nil {
-		t.Fatal(err)
-	}
+	queue := kubernetes.NewQueue(
+		kubernetes.NewDebouncer(0, publisher),
+		workqueue.NewNamedRateLimitingQueue(workqueue.DefaultControllerRateLimiter(), "test-queue"),
+		restClient.Wgpolicyk8sV1alpha2(),
+	)
 
-	rclient.Create(ctx, fixtures.DefaultPolicyReport, metav1.CreateOptions{})
+	kclient, rclient, _ := NewFakeMetaCilent()
+	client := kubernetes.NewPolicyReportClient(kclient, filter, queue)
+
+	go func() {
+		err := client.Run(stop)
+		if err != nil {
+			t.Error(err)
+		}
+	}()
+
+	polrClient.Create(ctx, fixtures.DefaultPolicyReport, metav1.CreateOptions{})
+
+	rclient.CreateFake(fixtures.DefaultMeta, metav1.CreateOptions{})
 	time.Sleep(10 * time.Millisecond)
-	rclient.Update(ctx, fixtures.DefaultPolicyReport, metav1.UpdateOptions{})
+
+	rclient.UpdateFake(fixtures.DefaultMeta, metav1.UpdateOptions{})
 	time.Sleep(10 * time.Millisecond)
-	rclient.Delete(ctx, fixtures.DefaultPolicyReport.Name, metav1.DeleteOptions{})
+
+	rclient.Delete(ctx, fixtures.DefaultMeta.Name, metav1.DeleteOptions{})
 
 	wg.Wait()
 
@@ -51,6 +66,7 @@ func Test_PolicyReportWatcher(t *testing.T) {
 		t.Error("Should receive the Added, Updated and Deleted Event")
 	}
 }
+
 func Test_ClusterPolicyReportWatcher(t *testing.T) {
 	ctx := context.Background()
 	stop := make(chan struct{})
@@ -65,18 +81,32 @@ func Test_ClusterPolicyReportWatcher(t *testing.T) {
 		wg.Done()
 	})
 
-	kclient, _, rclient := NewFakeCilent()
-	client := kubernetes.NewPolicyReportClient(kclient, filter, publisher)
+	restClient, _, polrClient := NewFakeCilent()
 
-	err := client.Run(stop)
-	if err != nil {
-		t.Fatal(err)
-	}
+	queue := kubernetes.NewQueue(
+		kubernetes.NewDebouncer(0, publisher),
+		workqueue.NewNamedRateLimitingQueue(workqueue.DefaultControllerRateLimiter(), "test-queue"),
+		restClient.Wgpolicyk8sV1alpha2(),
+	)
 
-	rclient.Create(ctx, fixtures.ClusterPolicyReport, metav1.CreateOptions{})
+	kclient, _, rclient := NewFakeMetaCilent()
+	client := kubernetes.NewPolicyReportClient(kclient, filter, queue)
+
+	go func() {
+		err := client.Run(stop)
+		if err != nil {
+			t.Error(err)
+		}
+	}()
+
+	polrClient.Create(ctx, fixtures.ClusterPolicyReport, metav1.CreateOptions{})
+
+	rclient.CreateFake(fixtures.DefaultClusterMeta, metav1.CreateOptions{})
 	time.Sleep(10 * time.Millisecond)
-	rclient.Update(ctx, fixtures.ClusterPolicyReport, metav1.UpdateOptions{})
+
+	rclient.UpdateFake(fixtures.DefaultClusterMeta, metav1.UpdateOptions{})
 	time.Sleep(10 * time.Millisecond)
+
 	rclient.Delete(ctx, fixtures.ClusterPolicyReport.Name, metav1.DeleteOptions{})
 
 	wg.Wait()
@@ -90,12 +120,20 @@ func Test_HasSynced(t *testing.T) {
 	stop := make(chan struct{})
 	defer close(stop)
 
-	kclient, _, _ := NewFakeCilent()
-	client := kubernetes.NewPolicyReportClient(kclient, filter, report.NewEventPublisher())
+	restClient, _, _ := NewFakeCilent()
 
-	err := client.Run(stop)
+	queue := kubernetes.NewQueue(
+		kubernetes.NewDebouncer(0, report.NewEventPublisher()),
+		workqueue.NewNamedRateLimitingQueue(workqueue.DefaultControllerRateLimiter(), "test-queue"),
+		restClient.Wgpolicyk8sV1alpha2(),
+	)
+
+	kclient, _, _ := NewFakeMetaCilent()
+	client := kubernetes.NewPolicyReportClient(kclient, filter, queue)
+
+	err := client.Sync(stop)
 	if err != nil {
-		t.Fatal(err)
+		t.Error(err)
 	}
 
 	if client.HasSynced() != true {

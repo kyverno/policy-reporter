@@ -15,12 +15,10 @@ func RegisterDetailedClusterResultGauge(name string) *prometheus.GaugeVec {
 }
 
 func CreateDetailedClusterResultMetricListener(filter *report.ResultFilter, gauge *prometheus.GaugeVec) report.PolicyReportListener {
-	var newReport v1alpha2.ReportInterface
-	var oldReport v1alpha2.ReportInterface
+	cache := NewCache(filter, generateClusterResultLabels)
 
 	return func(event report.LifecycleEvent) {
-		newReport = event.NewPolicyReport
-		oldReport = event.OldPolicyReport
+		var newReport = event.PolicyReport
 
 		switch event.Type {
 		case report.Added:
@@ -31,9 +29,12 @@ func CreateDetailedClusterResultMetricListener(filter *report.ResultFilter, gaug
 
 				gauge.With(generateClusterResultLabels(newReport, result)).Set(1)
 			}
+
+			cache.AddReport(newReport)
 		case report.Updated:
-			for _, result := range oldReport.GetResults() {
-				gauge.Delete(generateClusterResultLabels(oldReport, result))
+			items := cache.GetReportLabels(newReport.GetID())
+			for _, item := range items {
+				gauge.Delete(item.Labels)
 			}
 
 			for _, result := range newReport.GetResults() {
@@ -43,19 +44,20 @@ func CreateDetailedClusterResultMetricListener(filter *report.ResultFilter, gaug
 
 				gauge.With(generateClusterResultLabels(newReport, result)).Set(1)
 			}
-		case report.Deleted:
-			for _, result := range newReport.GetResults() {
-				if !filter.Validate(result) {
-					continue
-				}
 
-				gauge.Delete(generateClusterResultLabels(newReport, result))
+			cache.AddReport(newReport)
+		case report.Deleted:
+			items := cache.GetReportLabels(newReport.GetID())
+			for _, item := range items {
+				gauge.Delete(item.Labels)
 			}
+
+			cache.Remove(newReport.GetID())
 		}
 	}
 }
 
-func generateClusterResultLabels(report v1alpha2.ReportInterface, result v1alpha2.PolicyReportResult) prometheus.Labels {
+func generateClusterResultLabels(report v1alpha2.ReportInterface, result v1alpha2.PolicyReportResult) map[string]string {
 	labels := prometheus.Labels{
 		"rule":     result.Rule,
 		"policy":   result.Policy,

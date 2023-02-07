@@ -20,7 +20,7 @@ func CreateClusterPolicyReportMetricsListener(filter *report.ReportFilter) repor
 	var newReport v1alpha2.ReportInterface
 
 	return func(event report.LifecycleEvent) {
-		newReport = event.NewPolicyReport
+		newReport = event.PolicyReport
 		if !filter.Validate(newReport) {
 			return
 		}

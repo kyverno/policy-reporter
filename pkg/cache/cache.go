@@ -1,6 +1,7 @@
 package cache
 
 type Cache interface {
-	Has(id string) bool
-	Add(id string)
+	RemoveReport(id string)
+	AddReport(report v1alpha2.ReportInterface)
+	GetResults(id string) []string
 }

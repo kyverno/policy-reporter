@@ -103,13 +103,12 @@ func newRunCMD() *cobra.Command {
 
 			g.Go(server.Start)
 
-			stop := make(chan struct{})
-			defer close(stop)
+			g.Go(func() error {
+				stop := make(chan struct{})
+				defer close(stop)
 
-			err = client.Run(stop)
-			if err != nil {
-				return err
-			}
+				return client.Run(stop)
+			})
 
 			return g.Wait()
 		},

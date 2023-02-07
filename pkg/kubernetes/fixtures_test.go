@@ -5,9 +5,20 @@ import (
 
 	"github.com/kyverno/policy-reporter/pkg/report"
 
+	pr "github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
 	"github.com/kyverno/policy-reporter/pkg/crd/client/clientset/versioned/fake"
 	v1alpha2client "github.com/kyverno/policy-reporter/pkg/crd/client/clientset/versioned/typed/policyreport/v1alpha2"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	metafake "k8s.io/client-go/metadata/fake"
 )
+
+func NewFakeMetaCilent() (*metafake.FakeMetadataClient, metafake.MetadataClient, metafake.MetadataClient) {
+	schema := metafake.NewTestScheme()
+	metav1.AddMetaToScheme(schema)
+
+	client := metafake.NewSimpleMetadataClient(schema)
+	return client, client.Resource(pr.SchemeGroupVersion.WithResource("policyreports")).Namespace("test").(metafake.MetadataClient), client.Resource(pr.SchemeGroupVersion.WithResource("clusterpolicyreports")).(metafake.MetadataClient)
+}
 
 func NewFakeCilent() (*fake.Clientset, v1alpha2client.PolicyReportInterface, v1alpha2client.ClusterPolicyReportInterface) {
 	client := fake.NewSimpleClientset()

@@ -6,6 +6,8 @@ import (
 
 	"github.com/kyverno/policy-reporter/pkg/api"
 	"github.com/kyverno/policy-reporter/pkg/cache"
+	"github.com/kyverno/policy-reporter/pkg/crd/client/clientset/versioned"
+	wgpolicyk8sv1alpha2 "github.com/kyverno/policy-reporter/pkg/crd/client/clientset/versioned/typed/policyreport/v1alpha2"
 	"github.com/kyverno/policy-reporter/pkg/email"
 	"github.com/kyverno/policy-reporter/pkg/email/summary"
 	"github.com/kyverno/policy-reporter/pkg/email/violations"
@@ -21,11 +23,11 @@ import (
 	mail "github.com/xhit/go-simple-mail/v2"
 
 	goredis "github.com/go-redis/redis/v8"
-	"github.com/kyverno/policy-reporter/pkg/crd/client/clientset/versioned"
-	wgpolicyk8sv1alpha2 "github.com/kyverno/policy-reporter/pkg/crd/client/clientset/versioned/typed/policyreport/v1alpha2"
 	_ "github.com/mattn/go-sqlite3"
 	k8s "k8s.io/client-go/kubernetes"
+	"k8s.io/client-go/metadata"
 	"k8s.io/client-go/rest"
+	"k8s.io/client-go/util/workqueue"
 )
 
 // Resolver manages dependencies
@@ -103,6 +105,20 @@ func (r *Resolver) EventPublisher() report.EventPublisher {
 	r.publisher = s
 
 	return r.publisher
+}
+
+// EventPublisher resolver method
+func (r *Resolver) Queue() (*kubernetes.Queue, error) {
+	client, err := r.CRDClient()
+	if err != nil {
+		return nil, err
+	}
+
+	return kubernetes.NewQueue(
+		kubernetes.NewDebouncer(1*time.Minute, r.EventPublisher()),
+		workqueue.NewNamedRateLimitingQueue(workqueue.DefaultControllerRateLimiter(), "report-queue"),
+		client,
+	), nil
 }
 
 // RegisterSendResultListener resolver method
@@ -223,6 +239,15 @@ func (r *Resolver) CRDClient() (wgpolicyk8sv1alpha2.Wgpolicyk8sV1alpha2Interface
 	return client.Wgpolicyk8sV1alpha2(), nil
 }
 
+func (r *Resolver) CRDMetadataClient() (metadata.Interface, error) {
+	client, err := metadata.NewForConfig(r.k8sConfig)
+	if err != nil {
+		return nil, err
+	}
+
+	return client, nil
+}
+
 func (r *Resolver) SummaryGenerator() (*summary.Generator, error) {
 	client, err := r.CRDClient()
 	if err != nil {
@@ -285,12 +310,17 @@ func (r *Resolver) PolicyReportClient() (report.PolicyReportClient, error) {
 		return r.policyReportClient, nil
 	}
 
-	client, err := versioned.NewForConfig(r.k8sConfig)
+	client, err := r.CRDMetadataClient()
 	if err != nil {
 		return nil, err
 	}
 
-	r.policyReportClient = kubernetes.NewPolicyReportClient(client, r.ReportFilter(), r.EventPublisher())
+	queue, err := r.Queue()
+	if err != nil {
+		return nil, err
+	}
+
+	r.policyReportClient = kubernetes.NewPolicyReportClient(client, r.ReportFilter(), queue)
 
 	return r.policyReportClient, nil
 }

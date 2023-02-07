@@ -5,6 +5,10 @@ import (
 	"github.com/kyverno/policy-reporter/pkg/validate"
 )
 
+type Namespaced interface {
+	GetNamespace() string
+}
+
 type Filter struct {
 	disbaleClusterReports bool
 	namespace             validate.RuleSets
@@ -14,7 +18,7 @@ func (f *Filter) DisableClusterReports() bool {
 	return f.disbaleClusterReports
 }
 
-func (f *Filter) AllowReport(report v1alpha2.ReportInterface) bool {
+func (f *Filter) AllowReport(report Namespaced) bool {
 	return validate.Namespace(report.GetNamespace(), f.namespace)
 }
 

@@ -13,7 +13,7 @@ func Test_PublishLifecycleEvents(t *testing.T) {
 	var event report.LifecycleEvent
 
 	wg := sync.WaitGroup{}
-	wg.Add(1)
+	wg.Add(2)
 
 	publisher := report.NewEventPublisher()
 	publisher.RegisterListener("test", func(le report.LifecycleEvent) {
@@ -21,12 +21,14 @@ func Test_PublishLifecycleEvents(t *testing.T) {
 		wg.Done()
 	})
 
-	publisher.Publish(report.LifecycleEvent{Type: report.Updated, NewPolicyReport: &v1alpha2.PolicyReport{
+	publisher.Publish(report.LifecycleEvent{Type: report.Added, PolicyReport: &v1alpha2.PolicyReport{
 		ObjectMeta: v1.ObjectMeta{
 			Name:      "polr-test",
 			Namespace: "test",
 		},
-	}, OldPolicyReport: &v1alpha2.PolicyReport{
+	}})
+
+	publisher.Publish(report.LifecycleEvent{Type: report.Updated, PolicyReport: &v1alpha2.PolicyReport{
 		ObjectMeta: v1.ObjectMeta{
 			Name:      "polr-test",
 			Namespace: "test",
@@ -52,18 +54,13 @@ func Test_PublishDeleteLifecycleEvents(t *testing.T) {
 		wg.Done()
 	})
 
-	publisher.Publish(report.LifecycleEvent{Type: report.Updated, NewPolicyReport: &v1alpha2.PolicyReport{
-		ObjectMeta: v1.ObjectMeta{
-			Name:      "polr-test",
-			Namespace: "test",
-		},
-	}, OldPolicyReport: &v1alpha2.PolicyReport{
+	publisher.Publish(report.LifecycleEvent{Type: report.Added, PolicyReport: &v1alpha2.PolicyReport{
 		ObjectMeta: v1.ObjectMeta{
 			Name:      "polr-test",
 			Namespace: "test",
 		},
 	}})
-	publisher.Publish(report.LifecycleEvent{Type: report.Deleted, NewPolicyReport: &v1alpha2.PolicyReport{
+	publisher.Publish(report.LifecycleEvent{Type: report.Deleted, PolicyReport: &v1alpha2.PolicyReport{
 		ObjectMeta: v1.ObjectMeta{
 			Name:      "polr-test",
 			Namespace: "test",
