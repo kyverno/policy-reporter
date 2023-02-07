@@ -3,6 +3,7 @@ package metrics
 import (
 	"strings"
 
+	"github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
 	"github.com/kyverno/policy-reporter/pkg/report"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
@@ -16,7 +17,7 @@ var clusterPolicyGauge = promauto.NewGaugeVec(prometheus.GaugeOpts{
 func CreateClusterPolicyReportMetricsListener(filter *report.ReportFilter) report.PolicyReportListener {
 	prometheus.Register(clusterPolicyGauge)
 
-	var newReport report.PolicyReport
+	var newReport v1alpha2.ReportInterface
 
 	return func(event report.LifecycleEvent) {
 		newReport = event.NewPolicyReport
@@ -26,23 +27,23 @@ func CreateClusterPolicyReportMetricsListener(filter *report.ReportFilter) repor
 
 		switch event.Type {
 		case report.Added:
-			clusterPolicyGauge.WithLabelValues(newReport.Name, strings.Title(report.Skip)).Set(float64(newReport.Summary.Skip))
-			clusterPolicyGauge.WithLabelValues(newReport.Name, strings.Title(report.Pass)).Set(float64(newReport.Summary.Pass))
-			clusterPolicyGauge.WithLabelValues(newReport.Name, strings.Title(report.Warn)).Set(float64(newReport.Summary.Warn))
-			clusterPolicyGauge.WithLabelValues(newReport.Name, strings.Title(report.Fail)).Set(float64(newReport.Summary.Fail))
-			clusterPolicyGauge.WithLabelValues(newReport.Name, strings.Title(report.Error)).Set(float64(newReport.Summary.Error))
+			clusterPolicyGauge.WithLabelValues(newReport.GetName(), strings.Title(v1alpha2.StatusSkip)).Set(float64(newReport.GetSummary().Skip))
+			clusterPolicyGauge.WithLabelValues(newReport.GetName(), strings.Title(v1alpha2.StatusPass)).Set(float64(newReport.GetSummary().Pass))
+			clusterPolicyGauge.WithLabelValues(newReport.GetName(), strings.Title(v1alpha2.StatusWarn)).Set(float64(newReport.GetSummary().Warn))
+			clusterPolicyGauge.WithLabelValues(newReport.GetName(), strings.Title(v1alpha2.StatusFail)).Set(float64(newReport.GetSummary().Fail))
+			clusterPolicyGauge.WithLabelValues(newReport.GetName(), strings.Title(v1alpha2.StatusError)).Set(float64(newReport.GetSummary().Error))
 		case report.Updated:
-			clusterPolicyGauge.WithLabelValues(newReport.Name, strings.Title(report.Skip)).Set(float64(newReport.Summary.Skip))
-			clusterPolicyGauge.WithLabelValues(newReport.Name, strings.Title(report.Pass)).Set(float64(newReport.Summary.Pass))
-			clusterPolicyGauge.WithLabelValues(newReport.Name, strings.Title(report.Warn)).Set(float64(newReport.Summary.Warn))
-			clusterPolicyGauge.WithLabelValues(newReport.Name, strings.Title(report.Fail)).Set(float64(newReport.Summary.Fail))
-			clusterPolicyGauge.WithLabelValues(newReport.Name, strings.Title(report.Error)).Set(float64(newReport.Summary.Error))
+			clusterPolicyGauge.WithLabelValues(newReport.GetName(), strings.Title(v1alpha2.StatusSkip)).Set(float64(newReport.GetSummary().Skip))
+			clusterPolicyGauge.WithLabelValues(newReport.GetName(), strings.Title(v1alpha2.StatusPass)).Set(float64(newReport.GetSummary().Pass))
+			clusterPolicyGauge.WithLabelValues(newReport.GetName(), strings.Title(v1alpha2.StatusWarn)).Set(float64(newReport.GetSummary().Warn))
+			clusterPolicyGauge.WithLabelValues(newReport.GetName(), strings.Title(v1alpha2.StatusFail)).Set(float64(newReport.GetSummary().Fail))
+			clusterPolicyGauge.WithLabelValues(newReport.GetName(), strings.Title(v1alpha2.StatusError)).Set(float64(newReport.GetSummary().Error))
 		case report.Deleted:
-			clusterPolicyGauge.DeleteLabelValues(newReport.Name, strings.Title(report.Skip))
-			clusterPolicyGauge.DeleteLabelValues(newReport.Name, strings.Title(report.Pass))
-			clusterPolicyGauge.DeleteLabelValues(newReport.Name, strings.Title(report.Warn))
-			clusterPolicyGauge.DeleteLabelValues(newReport.Name, strings.Title(report.Fail))
-			clusterPolicyGauge.DeleteLabelValues(newReport.Name, strings.Title(report.Error))
+			clusterPolicyGauge.DeleteLabelValues(newReport.GetName(), strings.Title(v1alpha2.StatusSkip))
+			clusterPolicyGauge.DeleteLabelValues(newReport.GetName(), strings.Title(v1alpha2.StatusPass))
+			clusterPolicyGauge.DeleteLabelValues(newReport.GetName(), strings.Title(v1alpha2.StatusWarn))
+			clusterPolicyGauge.DeleteLabelValues(newReport.GetName(), strings.Title(v1alpha2.StatusFail))
+			clusterPolicyGauge.DeleteLabelValues(newReport.GetName(), strings.Title(v1alpha2.StatusError))
 		}
 	}
 }

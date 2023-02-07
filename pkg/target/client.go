@@ -4,6 +4,7 @@ import (
 	"strings"
 
 	"github.com/kyverno/go-wildcard"
+	"github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
 	"github.com/kyverno/policy-reporter/pkg/helper"
 	"github.com/kyverno/policy-reporter/pkg/report"
 	"github.com/kyverno/policy-reporter/pkg/validate"
@@ -12,13 +13,13 @@ import (
 // Client for a provided Target
 type Client interface {
 	// Send the given Result to the configured Target
-	Send(result report.Result)
+	Send(result v1alpha2.PolicyReportResult)
 	// SkipExistingOnStartup skips already existing PolicyReportResults on startup
 	SkipExistingOnStartup() bool
 	// Name is a unique identifier for each Target
 	Name() string
 	// Validate if a result should send
-	Validate(rep report.PolicyReport, result report.Result) bool
+	Validate(rep v1alpha2.ReportInterface, result v1alpha2.PolicyReportResult) bool
 	// MinimumPriority for a triggered Result to send to this target
 	MinimumPriority() string
 	// Sources of the Results which should send to this target, empty means all sources
@@ -31,31 +32,35 @@ func NewResultFilter(namespace, priority, policy validate.RuleSets, minimumPrior
 	f.MinimumPriority = minimumPriority
 
 	if len(sources) > 0 {
-		f.AddValidation(func(r report.Result) bool {
+		f.AddValidation(func(r v1alpha2.PolicyReportResult) bool {
 			return helper.Contains(r.Source, sources)
 		})
 	}
 
 	if namespace.Count() > 0 {
-		f.AddValidation(func(r report.Result) bool {
-			return validate.Namespace(r.Resource.Namespace, namespace)
+		f.AddValidation(func(r v1alpha2.PolicyReportResult) bool {
+			if r.GetResource() == nil {
+				return true
+			}
+
+			return validate.Namespace(r.GetResource().Namespace, namespace)
 		})
 	}
 
 	if minimumPriority != "" {
-		f.AddValidation(func(r report.Result) bool {
-			return r.Priority >= report.NewPriority(f.MinimumPriority)
+		f.AddValidation(func(r v1alpha2.PolicyReportResult) bool {
+			return r.Priority >= v1alpha2.NewPriority(f.MinimumPriority)
 		})
 	}
 
 	if policy.Count() > 0 {
-		f.AddValidation(func(r report.Result) bool {
+		f.AddValidation(func(r v1alpha2.PolicyReportResult) bool {
 			return validate.MatchRuleSet(r.Policy, policy)
 		})
 	}
 
 	if priority.Count() > 0 {
-		f.AddValidation(func(r report.Result) bool {
+		f.AddValidation(func(r v1alpha2.PolicyReportResult) bool {
 			return validate.ContainsRuleSet(r.Priority.String(), priority)
 		})
 	}
@@ -66,7 +71,7 @@ func NewResultFilter(namespace, priority, policy validate.RuleSets, minimumPrior
 func NewReportFilter(labels validate.RuleSets) *report.ReportFilter {
 	f := report.NewReportFilter()
 	if labels.Count() > 0 {
-		f.AddValidation(func(r report.PolicyReport) bool {
+		f.AddValidation(func(r v1alpha2.ReportInterface) bool {
 			if len(labels.Include) > 0 {
 				for _, label := range labels.Include {
 					parts := strings.Split(label, ":")
@@ -77,7 +82,7 @@ func NewReportFilter(labels validate.RuleSets) *report.ReportFilter {
 					labelName := strings.TrimSpace(parts[0])
 					labelValue := strings.TrimSpace(parts[1])
 
-					for key, value := range r.Labels {
+					for key, value := range r.GetLabels() {
 						if labelName == key && wildcard.Match(labelValue, value) {
 							return true
 						}
@@ -95,7 +100,7 @@ func NewReportFilter(labels validate.RuleSets) *report.ReportFilter {
 					labelName := strings.TrimSpace(parts[0])
 					labelValue := strings.TrimSpace(parts[1])
 
-					for key, value := range r.Labels {
+					for key, value := range r.GetLabels() {
 						if labelName == key && wildcard.Match(labelValue, value) {
 							return false
 						}
@@ -130,7 +135,7 @@ func (c *BaseClient) Name() string {
 
 func (c *BaseClient) MinimumPriority() string {
 	if c.resultFilter == nil {
-		return report.DefaultPriority.String()
+		return v1alpha2.DefaultPriority.String()
 	}
 
 	return c.resultFilter.MinimumPriority
@@ -144,7 +149,11 @@ func (c *BaseClient) Sources() []string {
 	return c.resultFilter.Sources
 }
 
-func (c *BaseClient) Validate(rep report.PolicyReport, result report.Result) bool {
+func (c *BaseClient) Validate(rep v1alpha2.ReportInterface, result v1alpha2.PolicyReportResult) bool {
+	if rep == nil {
+		return false
+	}
+
 	if c.reportFilter != nil && !c.reportFilter.Validate(rep) {
 		return false
 	}

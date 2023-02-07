@@ -1,79 +1,44 @@
 package listener_test
 
 import (
-	"time"
-
-	"github.com/kyverno/policy-reporter/pkg/report"
+	"github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
+	"github.com/kyverno/policy-reporter/pkg/fixtures"
+	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-var result1 = report.Result{
-	ID:       "123",
-	Message:  "validation error: requests and limits required. Rule autogen-check-for-requests-and-limits failed at path /spec/template/spec/containers/0/resources/requests/",
-	Policy:   "require-requests-and-limits-required",
-	Rule:     "autogen-check-for-requests-and-limits",
-	Priority: report.ErrorPriority,
-	Status:   report.Fail,
-	Category: "Best Practices",
-	Severity: report.High,
-	Scored:   true,
-	Source:   "Kyverno",
-	Resource: report.Resource{
-		APIVersion: "v1",
-		Kind:       "Deployment",
-		Name:       "nginx",
-		Namespace:  "test",
-		UID:        "536ab69f-1b3c-4bd9-9ba4-274a56188409",
+var preport1 = &v1alpha2.PolicyReport{
+	ObjectMeta: v1.ObjectMeta{
+		Name:              "polr-test",
+		Namespace:         "test",
+		CreationTimestamp: v1.Now(),
 	},
+	Results: []v1alpha2.PolicyReportResult{fixtures.FailResult},
+	Summary: v1alpha2.PolicyReportSummary{Fail: 1},
 }
 
-var result2 = report.Result{
-	ID:       "124",
-	Message:  "validation error: requests and limits required. Rule autogen-check-for-requests-and-limits failed at path /spec/template/spec/containers/0/resources/requests/",
-	Policy:   "require-requests-and-limits-required",
-	Rule:     "autogen-check-for-requests-and-limits",
-	Priority: report.WarningPriority,
-	Status:   report.Pass,
-	Category: "Best Practices",
-	Scored:   true,
-	Source:   "Kyverno",
-	Resource: report.Resource{
-		APIVersion: "v1",
-		Kind:       "Pod",
-		Name:       "nginx",
-		Namespace:  "test",
-		UID:        "536ab69f-1b3c-4bd9-9ba4-274a56188419",
+var preport2 = &v1alpha2.PolicyReport{
+	ObjectMeta: v1.ObjectMeta{
+		Name:              "polr-test",
+		Namespace:         "test",
+		CreationTimestamp: v1.Now(),
 	},
+	Results: []v1alpha2.PolicyReportResult{fixtures.FailResult, fixtures.FailPodResult},
+	Summary: v1alpha2.PolicyReportSummary{Fail: 1, Pass: 1},
 }
 
-var preport1 = report.PolicyReport{
-	ID:                report.GeneratePolicyReportID("polr-test", "test"),
-	Name:              "polr-test",
-	Namespace:         "test",
-	Results:           []report.Result{result1},
-	Summary:           report.Summary{Fail: 1},
-	CreationTimestamp: time.Now(),
+var preport3 = &v1alpha2.PolicyReport{
+	ObjectMeta: v1.ObjectMeta{
+		Name:              "polr-test",
+		Namespace:         "test",
+		CreationTimestamp: v1.Now(),
+	},
+	Results: []v1alpha2.PolicyReportResult{},
 }
 
-var preport2 = report.PolicyReport{
-	ID:                report.GeneratePolicyReportID("polr-test", "test"),
-	Name:              "polr-test",
-	Namespace:         "test",
-	Results:           []report.Result{result1, result2},
-	Summary:           report.Summary{Fail: 1, Pass: 1},
-	CreationTimestamp: time.Now(),
-}
-
-var preport3 = report.PolicyReport{
-	ID:                report.GeneratePolicyReportID("polr-test", "test"),
-	Name:              "polr-test",
-	Namespace:         "test",
-	Results:           []report.Result{},
-	CreationTimestamp: time.Now(),
-}
-
-var creport = report.PolicyReport{
-	Name:              "cpolr-test",
-	Summary:           report.Summary{},
-	Results:           []report.Result{result1, result2},
-	CreationTimestamp: time.Now(),
+var creport = &v1alpha2.ClusterPolicyReport{
+	ObjectMeta: v1.ObjectMeta{
+		Name:              "cpolr-test",
+		CreationTimestamp: v1.Now(),
+	},
+	Results: []v1alpha2.PolicyReportResult{fixtures.FailResult, fixtures.FailPodResult},
 }

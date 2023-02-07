@@ -2,135 +2,59 @@ package sqlite3_test
 
 import (
 	"testing"
-	"time"
 
 	v1 "github.com/kyverno/policy-reporter/pkg/api/v1"
-	"github.com/kyverno/policy-reporter/pkg/report"
+	"github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
+	"github.com/kyverno/policy-reporter/pkg/fixtures"
 	"github.com/kyverno/policy-reporter/pkg/sqlite3"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 var pagination = v1.Pagination{Page: 1, Offset: 20, Direction: "ASC", SortBy: []string{"resource_name"}}
 
 var polrPagination = v1.Pagination{Page: 1, Offset: 20, Direction: "ASC", SortBy: []string{"namespace"}}
 
-var result1 = report.Result{
-	ID:       "123",
-	Message:  "validation error: requests and limits required. Rule autogen-check-for-requests-and-limits failed at path /spec/template/spec/containers/0/resources/requests/",
-	Policy:   "require-requests-and-limits-required",
-	Rule:     "autogen-check-for-requests-and-limits",
-	Priority: report.ErrorPriority,
-	Status:   report.Fail,
-	Category: "resources",
-	Severity: report.High,
-	Scored:   true,
-	Source:   "Kyverno",
-	Resource: report.Resource{
-		APIVersion: "v1",
-		Kind:       "Deployment",
-		Name:       "nginx",
-		Namespace:  "test",
-		UID:        "536ab69f-1b3c-4bd9-9ba4-274a56188409",
+var preport = &v1alpha2.PolicyReport{
+	ObjectMeta: metav1.ObjectMeta{
+		Name:              "polr-test",
+		Namespace:         "test",
+		Labels:            map[string]string{"app": "policy-reporter", "scope": "namespaced"},
+		CreationTimestamp: metav1.Now(),
 	},
+	Results: []v1alpha2.PolicyReportResult{fixtures.FailResult},
+	Summary: v1alpha2.PolicyReportSummary{Fail: 1},
 }
 
-var result2 = report.Result{
-	ID:       "124",
-	Message:  "validation error: requests and limits required. Rule autogen-check-for-requests-and-limits failed at path /spec/template/spec/containers/0/resources/requests/",
-	Policy:   "require-requests-and-limits-required",
-	Rule:     "autogen-check-for-requests-and-limits",
-	Priority: report.WarningPriority,
-	Status:   report.Pass,
-	Category: "Best Practices",
-	Scored:   true,
-	Source:   "Kyverno",
-	Resource: report.Resource{
-		APIVersion: "v1",
-		Kind:       "Pod",
-		Name:       "nginx",
-		Namespace:  "test",
-		UID:        "536ab69f-1b3c-4bd9-9ba4-274a56188419",
+var dreport = &v1alpha2.PolicyReport{
+	ObjectMeta: metav1.ObjectMeta{
+		Name:              "polr-test",
+		Namespace:         "test",
+		Labels:            map[string]string{"app": "policy-reporter", "scope": "namespaced"},
+		CreationTimestamp: metav1.Now(),
 	},
+	Results: []v1alpha2.PolicyReportResult{fixtures.FailResult, fixtures.FailResult, fixtures.FailPodResult},
+	Summary: v1alpha2.PolicyReportSummary{Fail: 1},
 }
 
-var cresult1 = report.Result{
-	ID:       "125",
-	Message:  "validation error: The label `test` is required. Rule check-for-labels-on-namespace",
-	Policy:   "require-ns-labels",
-	Rule:     "check-for-labels-on-namespace",
-	Priority: report.ErrorPriority,
-	Status:   report.Pass,
-	Category: "namespaces",
-	Severity: report.Medium,
-	Scored:   true,
-	Source:   "Kyverno",
-	Resource: report.Resource{
-		APIVersion: "v1",
-		Kind:       "Namespace",
-		Name:       "test",
-		UID:        "536ab69f-1b3c-4bd9-9ba4-274a56188411",
+var ureport = &v1alpha2.PolicyReport{
+	ObjectMeta: metav1.ObjectMeta{
+		Name:              "polr-test",
+		Namespace:         "test",
+		Labels:            map[string]string{"app": "policy-reporter", "owner": "team-a", "scope": "namespaced"},
+		CreationTimestamp: metav1.Now(),
 	},
+	Results: []v1alpha2.PolicyReportResult{fixtures.FailResult, fixtures.PassPodResult},
+	Summary: v1alpha2.PolicyReportSummary{Fail: 1, Pass: 1},
 }
 
-var cresult2 = report.Result{
-	ID:       "126",
-	Message:  "validation error: The label `test` is required. Rule check-for-labels-on-namespace",
-	Policy:   "require-ns-labels",
-	Rule:     "check-for-labels-on-namespace",
-	Priority: report.WarningPriority,
-	Status:   report.Fail,
-	Category: "namespaces",
-	Severity: report.High,
-	Scored:   true,
-	Source:   "Kyverno",
-	Resource: report.Resource{
-		APIVersion: "v1",
-		Kind:       "Namespace",
-		Name:       "dev",
-		UID:        "536ab69f-1b3c-4bd9-9ba4-274a56188412",
+var creport = &v1alpha2.ClusterPolicyReport{
+	ObjectMeta: metav1.ObjectMeta{
+		Name:              "cpolr",
+		Labels:            map[string]string{"app": "policy-reporter", "scope": "cluster"},
+		CreationTimestamp: metav1.Now(),
 	},
-}
-
-var preport = report.PolicyReport{
-	ID:                report.GeneratePolicyReportID("polr-test", "test"),
-	Name:              "polr-test",
-	Namespace:         "test",
-	Source:            "Kyverno",
-	Labels:            map[string]string{"app": "policy-reporter", "scope": "namespaced"},
-	Results:           []report.Result{result1},
-	Summary:           report.Summary{Fail: 1},
-	CreationTimestamp: time.Now(),
-}
-
-var dreport = report.PolicyReport{
-	ID:                report.GeneratePolicyReportID("polr-test", "test"),
-	Name:              "polr-test",
-	Namespace:         "test",
-	Source:            "Kyverno",
-	Labels:            map[string]string{"app": "policy-reporter", "scope": "namespaced"},
-	Results:           []report.Result{result1, result1, result2},
-	Summary:           report.Summary{Fail: 1},
-	CreationTimestamp: time.Now(),
-}
-
-var ureport = report.PolicyReport{
-	ID:                report.GeneratePolicyReportID("polr-test", "test"),
-	Name:              "polr-test",
-	Namespace:         "test",
-	Source:            "Kyverno",
-	Labels:            map[string]string{"app": "policy-reporter", "owner": "team-a", "scope": "namespaced"},
-	Results:           []report.Result{result1, result2},
-	Summary:           report.Summary{Fail: 1, Pass: 1},
-	CreationTimestamp: time.Now(),
-}
-
-var creport = report.PolicyReport{
-	ID:                report.GeneratePolicyReportID("cpolr", ""),
-	Name:              "cpolr",
-	Source:            "Kyverno",
-	Labels:            map[string]string{"app": "policy-reporter", "scope": "cluster"},
-	Results:           []report.Result{cresult1, cresult2},
-	Summary:           report.Summary{},
-	CreationTimestamp: time.Now(),
+	Results: []v1alpha2.PolicyReportResult{fixtures.PassNamespaceResult, fixtures.FailNamespaceResult},
+	Summary: v1alpha2.PolicyReportSummary{},
 }
 
 func Test_PolicyReportStore(t *testing.T) {
@@ -139,7 +63,7 @@ func Test_PolicyReportStore(t *testing.T) {
 	store, _ := sqlite3.NewPolicyReportStore(db)
 
 	t.Run("Add/Get/Update PolicyReport", func(t *testing.T) {
-		_, ok := store.Get(preport.GetIdentifier())
+		_, ok := store.Get(preport.GetID())
 		if ok == true {
 			t.Fatalf("Should not be found in empty Store")
 		}
@@ -149,36 +73,36 @@ func Test_PolicyReportStore(t *testing.T) {
 			t.Fatalf("Unexpected error: %s", err)
 		}
 
-		r1, ok := store.Get(preport.GetIdentifier())
+		r1, ok := store.Get(preport.GetID())
 		if ok == false {
 			t.Errorf("Should be found in Store after adding report to the store")
 		}
-		if r1.Summary.Pass != 0 {
-			t.Errorf("Expected 0 Passed Results in Summary")
+		if r1.GetSummary().Pass != 0 {
+			t.Errorf("Expected 0 Passed Results in GetSummary()")
 		}
 
-		if r1.Labels["app"] != "policy-reporter" {
-			t.Errorf("Expected labels are persisted")
+		if r1.GetLabels()["app"] != "policy-reporter" {
+			t.Errorf("Expected Labels are persisted")
 		}
 
 		store.Update(ureport)
-		r2, _ := store.Get(preport.GetIdentifier())
-		if r2.Summary.Pass != 1 {
-			t.Errorf("Expected 1 Passed Results in Summary after Update")
+		r2, _ := store.Get(preport.GetID())
+		if r2.GetSummary().Pass != 1 {
+			t.Errorf("Expected 1 Passed Results in GetSummary() after Update")
 		}
 
-		if r2.Labels["owner"] != "team-a" {
-			t.Errorf("Expected labels are updated")
+		if r2.GetLabels()["owner"] != "team-a" {
+			t.Errorf("Expected Labels are updated")
 		}
 	})
 	t.Run("Add/Get ClusterPolicyReport", func(t *testing.T) {
-		_, ok := store.Get(creport.GetIdentifier())
+		_, ok := store.Get(creport.GetID())
 		if ok == true {
 			t.Fatalf("Should not be found in empty Store")
 		}
 
 		store.Add(creport)
-		_, ok = store.Get(creport.GetIdentifier())
+		_, ok = store.Get(creport.GetID())
 		if ok == false {
 			t.Errorf("Should be found in Store after adding report to the store")
 		}
@@ -257,22 +181,22 @@ func Test_PolicyReportStore(t *testing.T) {
 		var passed v1.NamespacedStatusCount
 		var failed v1.NamespacedStatusCount
 		for _, item := range items {
-			if item.Status == report.Pass {
+			if item.Status == v1alpha2.StatusPass {
 				passed = item
 			}
-			if item.Status == report.Fail {
+			if item.Status == v1alpha2.StatusFail {
 				failed = item
 			}
 		}
 
-		if passed.Status != report.Pass {
+		if passed.Status != v1alpha2.StatusPass {
 			t.Errorf("Expected Pass Counts as first item")
 		}
 		if passed.Items[0].Count != 1 {
 			t.Errorf("Expected count to be one for pass")
 		}
 
-		if failed.Status != report.Fail {
+		if failed.Status != v1alpha2.StatusFail {
 			t.Errorf("Expected Pass Counts as first item")
 		}
 		if failed.Items[0].Count != 1 {
@@ -281,14 +205,14 @@ func Test_PolicyReportStore(t *testing.T) {
 	})
 
 	t.Run("FetchNamespacedStatusCounts with StatusFilter", func(t *testing.T) {
-		items, err := store.FetchNamespacedStatusCounts(v1.Filter{Status: []string{report.Pass}, ReportLabel: map[string]string{"app": "policy-reporter"}})
+		items, err := store.FetchNamespacedStatusCounts(v1.Filter{Status: []string{v1alpha2.StatusPass}, ReportLabel: map[string]string{"app": "policy-reporter"}})
 		if err != nil {
 			t.Fatalf("Unexpected Error: %s", err)
 		}
 		if len(items) != 1 {
 			t.Fatalf("Should have only 1 item for pass counts")
 		}
-		if items[0].Status != report.Pass {
+		if items[0].Status != v1alpha2.StatusPass {
 			t.Errorf("Expected Pass Counts")
 		}
 		if items[0].Items[0].Count != 1 {
@@ -301,10 +225,10 @@ func Test_PolicyReportStore(t *testing.T) {
 		var passed v1.StatusCount
 		var failed v1.StatusCount
 		for _, item := range items {
-			if item.Status == report.Pass {
+			if item.Status == v1alpha2.StatusPass {
 				passed = item
 			}
-			if item.Status == report.Fail {
+			if item.Status == v1alpha2.StatusFail {
 				failed = item
 			}
 		}
@@ -329,10 +253,10 @@ func Test_PolicyReportStore(t *testing.T) {
 		var passed v1.StatusCount
 		var failed v1.StatusCount
 		for _, item := range items {
-			if item.Status == report.Pass {
+			if item.Status == v1alpha2.StatusPass {
 				passed = item
 			}
-			if item.Status == report.Fail {
+			if item.Status == v1alpha2.StatusFail {
 				failed = item
 			}
 		}
@@ -348,14 +272,14 @@ func Test_PolicyReportStore(t *testing.T) {
 	})
 
 	t.Run("FetchStatusCounts with StatusFilter", func(t *testing.T) {
-		items, err := store.FetchStatusCounts(v1.Filter{Status: []string{report.Pass}})
+		items, err := store.FetchStatusCounts(v1.Filter{Status: []string{v1alpha2.StatusPass}})
 		if err != nil {
 			t.Fatalf("Unexpected Error: %s", err)
 		}
 		if len(items) != 1 {
 			t.Fatalf("Should have only 1 item for pass counts")
 		}
-		if items[0].Status != report.Pass {
+		if items[0].Status != v1alpha2.StatusPass {
 			t.Errorf("Expected Pass Counts")
 		}
 		if items[0].Count != 1 {
@@ -375,7 +299,7 @@ func Test_PolicyReportStore(t *testing.T) {
 	})
 
 	t.Run("FetchNamespacedResults with SeverityFilter", func(t *testing.T) {
-		items, err := store.FetchNamespacedResults(v1.Filter{Severities: []string{report.High}}, pagination)
+		items, err := store.FetchNamespacedResults(v1.Filter{Severities: []string{v1alpha2.SeverityHigh}}, pagination)
 		if err != nil {
 			t.Fatalf("Unexpected Error: %s", err)
 		}
@@ -383,7 +307,7 @@ func Test_PolicyReportStore(t *testing.T) {
 		if len(items) != 1 {
 			t.Fatalf("Should return 1 namespaced result")
 		}
-		if items[0].Severity != report.High {
+		if items[0].Severity != v1alpha2.SeverityHigh {
 			t.Fatalf("result with severity high")
 		}
 	})
@@ -400,7 +324,7 @@ func Test_PolicyReportStore(t *testing.T) {
 	})
 
 	t.Run("CountNamespacedResults with SeverityFilter", func(t *testing.T) {
-		count, err := store.CountNamespacedResults(v1.Filter{Severities: []string{report.High}})
+		count, err := store.CountNamespacedResults(v1.Filter{Severities: []string{v1alpha2.SeverityHigh}})
 		if err != nil {
 			t.Fatalf("Unexpected Error: %s", err)
 		}
@@ -411,7 +335,7 @@ func Test_PolicyReportStore(t *testing.T) {
 	})
 
 	t.Run("FetchNamespacedResults with SearchFilter::Severity", func(t *testing.T) {
-		items, err := store.FetchNamespacedResults(v1.Filter{Search: report.High}, pagination)
+		items, err := store.FetchNamespacedResults(v1.Filter{Search: v1alpha2.SeverityHigh}, pagination)
 		if err != nil {
 			t.Fatalf("Unexpected Error: %s", err)
 		}
@@ -419,7 +343,7 @@ func Test_PolicyReportStore(t *testing.T) {
 		if len(items) != 1 {
 			t.Fatalf("Should return 1 namespaced result")
 		}
-		if items[0].Severity != report.High {
+		if items[0].Severity != v1alpha2.SeverityHigh {
 			t.Fatalf("result with severity high expected")
 		}
 	})
@@ -439,7 +363,7 @@ func Test_PolicyReportStore(t *testing.T) {
 	})
 
 	t.Run("FetchClusterResults", func(t *testing.T) {
-		items, err := store.FetchClusterResults(v1.Filter{Status: []string{report.Pass, report.Fail}, ReportLabel: map[string]string{"app": "policy-reporter"}}, pagination)
+		items, err := store.FetchClusterResults(v1.Filter{Status: []string{v1alpha2.StatusPass, v1alpha2.StatusFail}, ReportLabel: map[string]string{"app": "policy-reporter"}}, pagination)
 		if err != nil {
 			t.Fatalf("Unexpected Error: %s", err)
 		}
@@ -450,7 +374,7 @@ func Test_PolicyReportStore(t *testing.T) {
 	})
 
 	t.Run("CountClusterResults", func(t *testing.T) {
-		count, err := store.CountClusterResults(v1.Filter{Status: []string{report.Pass, report.Fail}, ReportLabel: map[string]string{"app": "policy-reporter"}})
+		count, err := store.CountClusterResults(v1.Filter{Status: []string{v1alpha2.StatusPass, v1alpha2.StatusFail}, ReportLabel: map[string]string{"app": "policy-reporter"}})
 		if err != nil {
 			t.Fatalf("Unexpected Error: %s", err)
 		}
@@ -461,7 +385,7 @@ func Test_PolicyReportStore(t *testing.T) {
 	})
 
 	t.Run("FetchClusterResults with SeverityFilter", func(t *testing.T) {
-		items, err := store.FetchClusterResults(v1.Filter{Severities: []string{report.High}}, pagination)
+		items, err := store.FetchClusterResults(v1.Filter{Severities: []string{v1alpha2.SeverityHigh}}, pagination)
 		if err != nil {
 			t.Fatalf("Unexpected Error: %s", err)
 		}
@@ -469,13 +393,13 @@ func Test_PolicyReportStore(t *testing.T) {
 		if len(items) != 1 {
 			t.Fatalf("Should return 1 namespaced result")
 		}
-		if items[0].Severity != report.High {
+		if items[0].Severity != v1alpha2.SeverityHigh {
 			t.Fatalf("result with severity high")
 		}
 	})
 
 	t.Run("FetchClusterResults with SearchFilter", func(t *testing.T) {
-		items, err := store.FetchClusterResults(v1.Filter{Search: report.High}, pagination)
+		items, err := store.FetchClusterResults(v1.Filter{Search: v1alpha2.SeverityHigh}, pagination)
 		if err != nil {
 			t.Fatalf("Unexpected Error: %s", err)
 		}
@@ -483,20 +407,20 @@ func Test_PolicyReportStore(t *testing.T) {
 		if len(items) != 1 {
 			t.Fatalf("Should return 1 namespaced result")
 		}
-		if items[0].Severity != report.High {
+		if items[0].Severity != v1alpha2.SeverityHigh {
 			t.Fatalf("result with severity high")
 		}
 	})
 
 	t.Run("FetchStatusCounts with StatusFilter", func(t *testing.T) {
-		items, err := store.FetchStatusCounts(v1.Filter{Status: []string{report.Pass}})
+		items, err := store.FetchStatusCounts(v1.Filter{Status: []string{v1alpha2.StatusPass}})
 		if err != nil {
 			t.Fatalf("Unexpected Error: %s", err)
 		}
 		if len(items) != 1 {
 			t.Fatalf("Should have only 1 item for pass counts")
 		}
-		if items[0].Status != report.Pass {
+		if items[0].Status != v1alpha2.StatusPass {
 			t.Errorf("Expected Pass Counts")
 		}
 		if items[0].Count != 1 {
@@ -538,8 +462,8 @@ func Test_PolicyReportStore(t *testing.T) {
 		if len(items) != 1 {
 			t.Errorf("Should Find 1 cluster scoped Policy")
 		}
-		if items[0] != "require-ns-labels" {
-			t.Errorf("Should return 'require-ns-labels' policy")
+		if items[0] != "require-ns-GetLabels()" {
+			t.Errorf("Should return 'require-ns-GetLabels()' policy")
 		}
 	})
 
@@ -551,8 +475,8 @@ func Test_PolicyReportStore(t *testing.T) {
 		if len(items) != 1 {
 			t.Errorf("Should Find 1 cluster scoped Policy")
 		}
-		if items[0] != "check-for-labels-on-namespace" {
-			t.Errorf("Should return 'check-for-labels-on-namespace' rule")
+		if items[0] != "check-for-GetLabels()-on-namespace" {
+			t.Errorf("Should return 'check-for-GetLabels()-on-namespace' rule")
 		}
 	})
 
@@ -648,14 +572,14 @@ func Test_PolicyReportStore(t *testing.T) {
 		}
 	})
 
-	t.Run("NamespacedLabels", func(t *testing.T) {
+	t.Run("NamespacedGetLabels()", func(t *testing.T) {
 		items, err := store.FetchNamespacedReportLabels(v1.Filter{Sources: []string{"Kyverno"}, Namespaces: []string{"test"}})
 		if err != nil {
 			t.Fatalf("Unexpected Error: %s", err)
 		}
 
 		if len(items) != 3 {
-			t.Fatalf("Should return 3 labels results")
+			t.Fatalf("Should return 3 GetLabels() results")
 		}
 
 		if len(items["scope"]) != 1 && items["scope"][0] != "namespaced" {
@@ -715,14 +639,14 @@ func Test_PolicyReportStore(t *testing.T) {
 		}
 	})
 
-	t.Run("ClusterLabels", func(t *testing.T) {
+	t.Run("ClusterGetLabels()", func(t *testing.T) {
 		items, err := store.FetchClusterReportLabels(v1.Filter{Sources: []string{"Kyverno"}})
 		if err != nil {
 			t.Fatalf("Unexpected Error: %s", err)
 		}
 
 		if len(items) != 2 {
-			t.Fatalf("Should return 2 labels results")
+			t.Fatalf("Should return 2 GetLabels() results")
 		}
 
 		if len(items["scope"]) != 1 && items["scope"][0] != "cluster" {
@@ -735,13 +659,13 @@ func Test_PolicyReportStore(t *testing.T) {
 	})
 
 	t.Run("Delete/Get", func(t *testing.T) {
-		_, ok := store.Get(preport.GetIdentifier())
+		_, ok := store.Get(preport.GetID())
 		if ok == false {
 			t.Errorf("Should be found in Store after adding report to the store")
 		}
 
-		store.Remove(preport.GetIdentifier())
-		_, ok = store.Get(preport.GetIdentifier())
+		store.Remove(preport.GetID())
+		_, ok = store.Get(preport.GetID())
 		if ok == true {
 			t.Fatalf("Should not be found after Remove report from Store")
 		}
@@ -763,17 +687,17 @@ func Test_PolicyReportStore(t *testing.T) {
 			t.Errorf("Should ignore duplicated ID: %s", err)
 		}
 
-		polr, ok := store.Get(preport.GetIdentifier())
+		polr, ok := store.Get(preport.GetID())
 		if ok == false {
 			t.Errorf("Should be found in Store after adding report to the store")
 		}
 
-		if len(polr.Results) != 2 {
+		if len(polr.GetResults()) != 2 {
 			t.Errorf("Should ignore duplicated result")
 		}
 
-		store.Remove(dreport.GetIdentifier())
-		_, ok = store.Get(dreport.GetIdentifier())
+		store.Remove(dreport.GetID())
+		_, ok = store.Get(dreport.GetID())
 		if ok == true {
 			t.Fatalf("Should not be found after Remove report from Store")
 		}

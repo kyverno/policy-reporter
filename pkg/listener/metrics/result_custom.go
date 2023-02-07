@@ -1,6 +1,7 @@
 package metrics
 
 import (
+	"github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
 	"github.com/kyverno/policy-reporter/pkg/report"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
@@ -15,16 +16,16 @@ func RegisterCustomResultGauge(name string, labelNames []string) *prometheus.Gau
 	}, labelNames)
 }
 
-type LabelGenerator = func(report.PolicyReport, report.Result) map[string]string
-type LabelCallback = func(map[string]string, report.PolicyReport, report.Result)
+type LabelGenerator = func(v1alpha2.ReportInterface, v1alpha2.PolicyReportResult) map[string]string
+type LabelCallback = func(map[string]string, v1alpha2.ReportInterface, v1alpha2.PolicyReportResult)
 
 func CreateCustomResultMetricsListener(
 	filter *report.ResultFilter,
 	gauge *prometheus.GaugeVec,
 	labelGenerator LabelGenerator,
 ) report.PolicyReportListener {
-	var newReport report.PolicyReport
-	var oldReport report.PolicyReport
+	var newReport v1alpha2.ReportInterface
+	var oldReport v1alpha2.ReportInterface
 
 	return func(event report.LifecycleEvent) {
 		newReport = event.NewPolicyReport
@@ -32,7 +33,7 @@ func CreateCustomResultMetricsListener(
 
 		switch event.Type {
 		case report.Added:
-			for _, result := range newReport.Results {
+			for _, result := range newReport.GetResults() {
 				if !filter.Validate(result) {
 					continue
 				}
@@ -40,7 +41,7 @@ func CreateCustomResultMetricsListener(
 				gauge.With(labelGenerator(newReport, result)).Inc()
 			}
 		case report.Updated:
-			for _, result := range oldReport.Results {
+			for _, result := range oldReport.GetResults() {
 				if !filter.Validate(result) {
 					continue
 				}
@@ -48,7 +49,7 @@ func CreateCustomResultMetricsListener(
 				decreaseOrDelete(gauge, labelGenerator(oldReport, result))
 			}
 
-			for _, result := range newReport.Results {
+			for _, result := range newReport.GetResults() {
 				if !filter.Validate(result) {
 					continue
 				}
@@ -56,7 +57,7 @@ func CreateCustomResultMetricsListener(
 				gauge.With(labelGenerator(newReport, result)).Inc()
 			}
 		case report.Deleted:
-			for _, result := range newReport.Results {
+			for _, result := range newReport.GetResults() {
 				if !filter.Validate(result) {
 					continue
 				}

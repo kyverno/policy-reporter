@@ -1,7 +1,7 @@
 package ui
 
 import (
-	"github.com/kyverno/policy-reporter/pkg/report"
+	"github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
 	"github.com/kyverno/policy-reporter/pkg/target"
 	"github.com/kyverno/policy-reporter/pkg/target/http"
 )
@@ -19,7 +19,7 @@ type client struct {
 	client http.Client
 }
 
-func (e *client) Send(result report.Result) {
+func (e *client) Send(result v1alpha2.PolicyReportResult) {
 	req, err := http.CreateJSONRequest(e.Name(), "POST", e.host, http.NewJSONResult(result))
 	if err != nil {
 		return

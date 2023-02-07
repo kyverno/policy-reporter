@@ -3,20 +3,23 @@ package listener
 import (
 	"sync"
 
+	"github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
 	"github.com/kyverno/policy-reporter/pkg/report"
 	"github.com/kyverno/policy-reporter/pkg/target"
 )
 
 const SendResults = "send_results_listener"
 
-func NewSendResultListener(clients []target.Client) report.PolicyReportResultListener {
-	return func(rep report.PolicyReport, r report.Result, e bool) {
+func NewSendResultListener(clients []target.Client, mapper report.Mapper) report.PolicyReportResultListener {
+	return func(rep v1alpha2.ReportInterface, r v1alpha2.PolicyReportResult, e bool) {
 		wg := &sync.WaitGroup{}
 		wg.Add(len(clients))
 
 		for _, t := range clients {
-			go func(target target.Client, re report.PolicyReport, result report.Result, preExisted bool) {
+			go func(target target.Client, re v1alpha2.ReportInterface, result v1alpha2.PolicyReportResult, preExisted bool) {
 				defer wg.Done()
+
+				result.Priority = mapper.ResolvePriority(result.Policy, result.Severity)
 
 				if (preExisted && target.SkipExistingOnStartup()) || !target.Validate(re, result) {
 					return

@@ -5,29 +5,10 @@ import (
 	"encoding/json"
 	"testing"
 
-	"github.com/kyverno/policy-reporter/pkg/report"
+	"github.com/kyverno/policy-reporter/pkg/fixtures"
 	"github.com/kyverno/policy-reporter/pkg/target"
 	"github.com/kyverno/policy-reporter/pkg/target/kinesis"
 )
-
-var completeResult = report.Result{
-	Message:    "validation error: requests and limits required. Rule autogen-check-for-requests-and-limits failed at path /spec/template/spec/containers/0/resources/requests/",
-	Policy:     "require-requests-and-limits-required",
-	Rule:       "autogen-check-for-requests-and-limits",
-	Priority:   report.WarningPriority,
-	Status:     report.Fail,
-	Severity:   report.High,
-	Category:   "resources",
-	Scored:     true,
-	Properties: map[string]string{"version": "1234"},
-	Resource: report.Resource{
-		APIVersion: "v1",
-		Kind:       "Deployment",
-		Name:       "nginx",
-		Namespace:  "default",
-		UID:        "536ab69f-1b3c-4bd9-9ba4-274a56188409",
-	},
-}
 
 type testClient struct {
 	err      error
@@ -44,7 +25,7 @@ func Test_KinesisTarget(t *testing.T) {
 	t.Run("Send", func(t *testing.T) {
 		callback := func(body *bytes.Buffer, key string) {
 			report := new(bytes.Buffer)
-			if err := json.NewEncoder(report).Encode(completeResult); err != nil {
+			if err := json.NewEncoder(report).Encode(fixtures.CompleteTargetSendResult); err != nil {
 				t.Errorf("Failed to encode report message: %s", err)
 			}
 
@@ -65,9 +46,9 @@ func Test_KinesisTarget(t *testing.T) {
 			CustomFields: map[string]string{"cluster": "name"},
 			Kinesis:      &testClient{nil, callback},
 		})
-		client.Send(completeResult)
+		client.Send(fixtures.CompleteTargetSendResult)
 
-		if len(completeResult.Properties) > 1 || completeResult.Properties["cluster"] != "" {
+		if len(fixtures.CompleteTargetSendResult.Properties) > 1 || fixtures.CompleteTargetSendResult.Properties["cluster"] != "" {
 			t.Error("expected customFields are not added to the actuel result")
 		}
 	})

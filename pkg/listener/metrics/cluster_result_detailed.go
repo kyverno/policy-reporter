@@ -1,6 +1,7 @@
 package metrics
 
 import (
+	"github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
 	"github.com/kyverno/policy-reporter/pkg/report"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
@@ -14,8 +15,8 @@ func RegisterDetailedClusterResultGauge(name string) *prometheus.GaugeVec {
 }
 
 func CreateDetailedClusterResultMetricListener(filter *report.ResultFilter, gauge *prometheus.GaugeVec) report.PolicyReportListener {
-	var newReport report.PolicyReport
-	var oldReport report.PolicyReport
+	var newReport v1alpha2.ReportInterface
+	var oldReport v1alpha2.ReportInterface
 
 	return func(event report.LifecycleEvent) {
 		newReport = event.NewPolicyReport
@@ -23,7 +24,7 @@ func CreateDetailedClusterResultMetricListener(filter *report.ResultFilter, gaug
 
 		switch event.Type {
 		case report.Added:
-			for _, result := range newReport.Results {
+			for _, result := range newReport.GetResults() {
 				if !filter.Validate(result) {
 					continue
 				}
@@ -31,11 +32,11 @@ func CreateDetailedClusterResultMetricListener(filter *report.ResultFilter, gaug
 				gauge.With(generateClusterResultLabels(newReport, result)).Set(1)
 			}
 		case report.Updated:
-			for _, result := range oldReport.Results {
+			for _, result := range oldReport.GetResults() {
 				gauge.Delete(generateClusterResultLabels(oldReport, result))
 			}
 
-			for _, result := range newReport.Results {
+			for _, result := range newReport.GetResults() {
 				if !filter.Validate(result) {
 					continue
 				}
@@ -43,7 +44,7 @@ func CreateDetailedClusterResultMetricListener(filter *report.ResultFilter, gaug
 				gauge.With(generateClusterResultLabels(newReport, result)).Set(1)
 			}
 		case report.Deleted:
-			for _, result := range newReport.Results {
+			for _, result := range newReport.GetResults() {
 				if !filter.Validate(result) {
 					continue
 				}
@@ -54,22 +55,22 @@ func CreateDetailedClusterResultMetricListener(filter *report.ResultFilter, gaug
 	}
 }
 
-func generateClusterResultLabels(report report.PolicyReport, result report.Result) prometheus.Labels {
+func generateClusterResultLabels(report v1alpha2.ReportInterface, result v1alpha2.PolicyReportResult) prometheus.Labels {
 	labels := prometheus.Labels{
 		"rule":     result.Rule,
 		"policy":   result.Policy,
-		"report":   report.Name,
+		"report":   report.GetName(),
 		"kind":     "",
 		"name":     "",
-		"status":   result.Status,
-		"severity": result.Severity,
+		"status":   string(result.Result),
+		"severity": string(result.Severity),
 		"category": result.Category,
 		"source":   result.Source,
 	}
 
 	if result.HasResource() {
-		labels["kind"] = result.Resource.Kind
-		labels["name"] = result.Resource.Name
+		labels["kind"] = result.GetResource().Kind
+		labels["name"] = result.GetResource().Name
 	}
 
 	return labels

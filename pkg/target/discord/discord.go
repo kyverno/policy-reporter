@@ -3,7 +3,7 @@ package discord
 import (
 	"strings"
 
-	"github.com/kyverno/policy-reporter/pkg/report"
+	"github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
 	"github.com/kyverno/policy-reporter/pkg/target"
 	"github.com/kyverno/policy-reporter/pkg/target/http"
 )
@@ -34,15 +34,15 @@ type embedField struct {
 	Inline bool   `json:"inline"`
 }
 
-var colors = map[report.Priority]string{
-	report.DebugPriority:    "12370112",
-	report.InfoPriority:     "3066993",
-	report.WarningPriority:  "15105570",
-	report.CriticalPriority: "15158332",
-	report.ErrorPriority:    "15158332",
+var colors = map[v1alpha2.Priority]string{
+	v1alpha2.DebugPriority:    "12370112",
+	v1alpha2.InfoPriority:     "3066993",
+	v1alpha2.WarningPriority:  "15105570",
+	v1alpha2.CriticalPriority: "15158332",
+	v1alpha2.ErrorPriority:    "15158332",
 }
 
-func newPayload(result report.Result, customFields map[string]string) payload {
+func newPayload(result v1alpha2.PolicyReportResult, customFields map[string]string) payload {
 	color := colors[result.Priority]
 
 	embedFields := make([]embedField, 0)
@@ -59,17 +59,19 @@ func newPayload(result report.Result, customFields map[string]string) payload {
 		embedFields = append(embedFields, embedField{"Category", result.Category, true})
 	}
 	if result.Severity != "" {
-		embedFields = append(embedFields, embedField{"Severity", result.Severity, true})
+		embedFields = append(embedFields, embedField{"Severity", string(result.Severity), true})
 	}
 
 	if result.HasResource() {
-		embedFields = append(embedFields, embedField{"Kind", result.Resource.Kind, true})
-		embedFields = append(embedFields, embedField{"Name", result.Resource.Name, true})
-		if result.Resource.Namespace != "" {
-			embedFields = append(embedFields, embedField{"Namespace", result.Resource.Namespace, true})
+		res := result.GetResource()
+
+		embedFields = append(embedFields, embedField{"Kind", res.Kind, true})
+		embedFields = append(embedFields, embedField{"Name", res.Name, true})
+		if res.Namespace != "" {
+			embedFields = append(embedFields, embedField{"Namespace", res.Namespace, true})
 		}
-		if result.Resource.APIVersion != "" {
-			embedFields = append(embedFields, embedField{"API Version", result.Resource.APIVersion, true})
+		if res.APIVersion != "" {
+			embedFields = append(embedFields, embedField{"API Version", res.APIVersion, true})
 		}
 	}
 
@@ -102,7 +104,7 @@ type client struct {
 	client       http.Client
 }
 
-func (d *client) Send(result report.Result) {
+func (d *client) Send(result v1alpha2.PolicyReportResult) {
 	req, err := http.CreateJSONRequest(d.Name(), "POST", d.webhook, newPayload(result, d.customFields))
 	if err != nil {
 		return

@@ -4,7 +4,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/kyverno/policy-reporter/pkg/report"
+	"github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
 	"github.com/kyverno/policy-reporter/pkg/target"
 	"github.com/kyverno/policy-reporter/pkg/target/http"
 )
@@ -31,17 +31,17 @@ type entry struct {
 	Line string `json:"line"`
 }
 
-func newLokiPayload(result report.Result, customLabels map[string]string) payload {
+func newLokiPayload(result v1alpha2.PolicyReportResult, customLabels map[string]string) payload {
 	timestamp := time.Now()
-	if !result.Timestamp.IsZero() {
-		timestamp = result.Timestamp
+	if result.Timestamp.Seconds != 0 {
+		timestamp = time.Unix(result.Timestamp.Seconds, int64(result.Timestamp.Nanos))
 	}
 
 	le := entry{Ts: timestamp.Format(time.RFC3339), Line: "[" + strings.ToUpper(result.Priority.String()) + "] " + result.Message}
 	ls := stream{Entries: []entry{le}}
 
 	var labels = []string{
-		"status=\"" + result.Status + "\"",
+		"status=\"" + string(result.Result) + "\"",
 		"policy=\"" + result.Policy + "\"",
 		"priority=\"" + result.Priority.String() + "\"",
 		"source=\"policy-reporter\"",
@@ -54,22 +54,23 @@ func newLokiPayload(result report.Result, customLabels map[string]string) payloa
 		labels = append(labels, "category=\""+result.Category+"\"")
 	}
 	if result.Severity != "" {
-		labels = append(labels, "severity=\""+result.Severity+"\"")
+		labels = append(labels, "severity=\""+string(result.Severity)+"\"")
 	}
 	if result.Source != "" {
 		labels = append(labels, "producer=\""+result.Source+"\"")
 	}
 	if result.HasResource() {
-		if result.Resource.APIVersion != "" {
-			labels = append(labels, "apiVersion=\""+result.Resource.APIVersion+"\"")
+		res := result.GetResource()
+		if res.APIVersion != "" {
+			labels = append(labels, "apiVersion=\""+res.APIVersion+"\"")
 		}
-		labels = append(labels, "kind=\""+result.Resource.Kind+"\"")
-		labels = append(labels, "name=\""+result.Resource.Name+"\"")
-		if result.Resource.UID != "" {
-			labels = append(labels, "uid=\""+result.Resource.UID+"\"")
+		labels = append(labels, "kind=\""+res.Kind+"\"")
+		labels = append(labels, "name=\""+res.Name+"\"")
+		if res.UID != "" {
+			labels = append(labels, "uid=\""+string(res.UID)+"\"")
 		}
-		if result.Resource.Namespace != "" {
-			labels = append(labels, "namespace=\""+result.Resource.Namespace+"\"")
+		if res.Namespace != "" {
+			labels = append(labels, "namespace=\""+res.Namespace+"\"")
 		}
 	}
 
@@ -93,7 +94,7 @@ type client struct {
 	customLabels map[string]string
 }
 
-func (l *client) Send(result report.Result) {
+func (l *client) Send(result v1alpha2.PolicyReportResult) {
 	req, err := http.CreateJSONRequest(l.Name(), "POST", l.host, newLokiPayload(result, l.customLabels))
 	if err != nil {
 		return

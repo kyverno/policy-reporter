@@ -6,41 +6,11 @@ import (
 	"net/http"
 	"strings"
 	"testing"
-	"time"
 
-	"github.com/kyverno/policy-reporter/pkg/report"
+	"github.com/kyverno/policy-reporter/pkg/fixtures"
 	"github.com/kyverno/policy-reporter/pkg/target"
 	"github.com/kyverno/policy-reporter/pkg/target/loki"
 )
-
-var completeResult = report.Result{
-	Message:   "validation error: requests and limits required. Rule autogen-check-for-requests-and-limits failed at path /spec/template/spec/containers/0/resources/requests/",
-	Policy:    "require-requests-and-limits-required",
-	Rule:      "autogen-check-for-requests-and-limits",
-	Timestamp: time.Date(2021, time.February, 23, 15, 10, 0, 0, time.UTC),
-	Priority:  report.WarningPriority,
-	Status:    report.Fail,
-	Severity:  report.High,
-	Category:  "resources",
-	Scored:    true,
-	Source:    "Kyverno",
-	Resource: report.Resource{
-		APIVersion: "v1",
-		Kind:       "Deployment",
-		Name:       "nginx",
-		Namespace:  "default",
-		UID:        "536ab69f-1b3c-4bd9-9ba4-274a56188409",
-	},
-	Properties: map[string]string{"version": "1.2.0"},
-}
-
-var minimalResult = report.Result{
-	Message:  "validation error: label required. Rule app-label-required failed at path /spec/template/spec/containers/0/resources/requests/",
-	Policy:   "app-label-requirement",
-	Priority: report.WarningPriority,
-	Status:   report.Fail,
-	Scored:   true,
-}
 
 type testClient struct {
 	callback   func(req *http.Request)
@@ -70,50 +40,50 @@ func Test_LokiTarget(t *testing.T) {
 				t.Errorf("Unexpected Host: %s", url)
 			}
 
-			expectedLine := fmt.Sprintf("[%s] %s", strings.ToUpper(completeResult.Priority.String()), completeResult.Message)
+			expectedLine := fmt.Sprintf("[%s] %s", strings.ToUpper(fixtures.CompleteTargetSendResult.Priority.String()), fixtures.CompleteTargetSendResult.Message)
 			labels, line := convertAndValidateBody(req, t)
 			if line != expectedLine {
 				t.Errorf("Unexpected LineContent: %s", line)
 			}
-			if !strings.Contains(labels, "policy=\""+completeResult.Policy+"\"") {
+			if !strings.Contains(labels, "policy=\""+fixtures.CompleteTargetSendResult.Policy+"\"") {
 				t.Error("Missing Content for Label 'policy'")
 			}
-			if !strings.Contains(labels, "status=\""+completeResult.Status+"\"") {
+			if !strings.Contains(labels, "status=\""+string(fixtures.CompleteTargetSendResult.Result)+"\"") {
 				t.Error("Missing Content for Label 'status'")
 			}
-			if !strings.Contains(labels, "priority=\""+completeResult.Priority.String()+"\"") {
+			if !strings.Contains(labels, "priority=\""+fixtures.CompleteTargetSendResult.Priority.String()+"\"") {
 				t.Error("Missing Content for Label 'priority'")
 			}
 			if !strings.Contains(labels, "source=\"policy-reporter\"") {
 				t.Error("Missing Content for Label 'policy-reporter'")
 			}
-			if !strings.Contains(labels, "rule=\""+completeResult.Rule+"\"") {
+			if !strings.Contains(labels, "rule=\""+fixtures.CompleteTargetSendResult.Rule+"\"") {
 				t.Error("Missing Content for Label 'rule'")
 			}
-			if !strings.Contains(labels, "category=\""+completeResult.Category+"\"") {
+			if !strings.Contains(labels, "category=\""+fixtures.CompleteTargetSendResult.Category+"\"") {
 				t.Error("Missing Content for Label 'category'")
 			}
-			if !strings.Contains(labels, "severity=\""+completeResult.Severity+"\"") {
+			if !strings.Contains(labels, "severity=\""+string(fixtures.CompleteTargetSendResult.Severity)+"\"") {
 				t.Error("Missing Content for Label 'severity'")
 			}
 			if !strings.Contains(labels, "custom=\"label\"") {
 				t.Error("Missing Content for Label 'severity'")
 			}
 
-			res := completeResult.Resource
+			res := fixtures.CompleteTargetSendResult.GetResource()
 			if !strings.Contains(labels, "kind=\""+res.Kind+"\"") {
 				t.Error("Missing Content for Label 'kind'")
 			}
 			if !strings.Contains(labels, "name=\""+res.Name+"\"") {
 				t.Error("Missing Content for Label 'name'")
 			}
-			if !strings.Contains(labels, "uid=\""+res.UID+"\"") {
+			if !strings.Contains(labels, "uid=\""+string(res.UID)+"\"") {
 				t.Error("Missing Content for Label 'uid'")
 			}
 			if !strings.Contains(labels, "namespace=\""+res.Namespace+"\"") {
 				t.Error("Missing Content for Label 'namespace'")
 			}
-			if !strings.Contains(labels, "version=\""+completeResult.Properties["version"]+"\"") {
+			if !strings.Contains(labels, "version=\""+fixtures.CompleteTargetSendResult.Properties["version"]+"\"") {
 				t.Error("Missing Content for Label 'version'")
 			}
 		}
@@ -126,7 +96,7 @@ func Test_LokiTarget(t *testing.T) {
 			CustomLabels: map[string]string{"custom": "label"},
 			HTTPClient:   testClient{callback, 200},
 		})
-		client.Send(completeResult)
+		client.Send(fixtures.CompleteTargetSendResult)
 	})
 
 	t.Run("Send Minimal Result", func(t *testing.T) {
@@ -143,18 +113,18 @@ func Test_LokiTarget(t *testing.T) {
 				t.Errorf("Unexpected Host: %s", url)
 			}
 
-			expectedLine := fmt.Sprintf("[%s] %s", strings.ToUpper(minimalResult.Priority.String()), minimalResult.Message)
+			expectedLine := fmt.Sprintf("[%s] %s", strings.ToUpper(fixtures.MinimalTargetSendResult.Priority.String()), fixtures.MinimalTargetSendResult.Message)
 			labels, line := convertAndValidateBody(req, t)
 			if line != expectedLine {
 				t.Errorf("Unexpected LineContent: %s", line)
 			}
-			if !strings.Contains(labels, "policy=\""+minimalResult.Policy+"\"") {
+			if !strings.Contains(labels, "policy=\""+fixtures.MinimalTargetSendResult.Policy+"\"") {
 				t.Error("Missing Content for Label 'policy'")
 			}
-			if !strings.Contains(labels, "status=\""+minimalResult.Status+"\"") {
+			if !strings.Contains(labels, "status=\""+string(fixtures.MinimalTargetSendResult.Result)+"\"") {
 				t.Error("Missing Content for Label 'status'")
 			}
-			if !strings.Contains(labels, "priority=\""+minimalResult.Priority.String()+"\"") {
+			if !strings.Contains(labels, "priority=\""+fixtures.MinimalTargetSendResult.Priority.String()+"\"") {
 				t.Error("Missing Content for Label 'priority'")
 			}
 			if !strings.Contains(labels, "source=\"policy-reporter\"") {
@@ -191,7 +161,7 @@ func Test_LokiTarget(t *testing.T) {
 			CustomLabels: map[string]string{"custom": "label"},
 			HTTPClient:   testClient{callback, 200},
 		})
-		client.Send(minimalResult)
+		client.Send(fixtures.MinimalTargetSendResult)
 	})
 	t.Run("Name", func(t *testing.T) {
 		client := loki.NewClient(loki.Options{

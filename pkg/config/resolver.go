@@ -33,7 +33,7 @@ import (
 type Resolver struct {
 	config             *Config
 	k8sConfig          *rest.Config
-	mapper             kubernetes.Mapper
+	mapper             report.Mapper
 	publisher          report.EventPublisher
 	policyStore        sqlite3.PolicyReportStore
 	policyReportClient report.PolicyReportClient
@@ -111,7 +111,7 @@ func (r *Resolver) RegisterSendResultListener() {
 	targets := r.TargetClients()
 	if len(targets) > 0 {
 		newResultListener := listener.NewResultListener(r.SkipExistingOnStartup(), r.ResultCache(), time.Now())
-		newResultListener.RegisterListener(listener.NewSendResultListener(targets))
+		newResultListener.RegisterListener(listener.NewSendResultListener(targets, r.Mapper()))
 
 		r.EventPublisher().RegisterListener(listener.NewResults, newResultListener.Listen)
 	}
@@ -142,12 +142,12 @@ func (r *Resolver) RegisterMetricsListener() {
 }
 
 // Mapper resolver method
-func (r *Resolver) Mapper() kubernetes.Mapper {
+func (r *Resolver) Mapper() report.Mapper {
 	if r.mapper != nil {
 		return r.mapper
 	}
 
-	mapper := kubernetes.NewMapper(r.config.PriorityMap)
+	mapper := report.NewMapper(r.config.PriorityMap)
 
 	r.mapper = mapper
 
@@ -291,7 +291,7 @@ func (r *Resolver) PolicyReportClient() (report.PolicyReportClient, error) {
 		return nil, err
 	}
 
-	r.policyReportClient = kubernetes.NewPolicyReportClient(client, r.Mapper(), r.ReportFilter(), r.EventPublisher())
+	r.policyReportClient = kubernetes.NewPolicyReportClient(client, r.ReportFilter(), r.EventPublisher())
 
 	return r.policyReportClient, nil
 }

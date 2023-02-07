@@ -5,6 +5,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/kyverno/policy-reporter/pkg/fixtures"
 	"github.com/kyverno/policy-reporter/pkg/kubernetes"
 	"github.com/kyverno/policy-reporter/pkg/report"
 )
@@ -25,19 +26,19 @@ func Test_Debouncer(t *testing.T) {
 
 		debouncer.Add(report.LifecycleEvent{
 			Type:            report.Added,
-			NewPolicyReport: mapper.MapPolicyReport(policyReportCRD),
+			NewPolicyReport: fixtures.DefaultPolicyReport,
 		})
 
 		debouncer.Add(report.LifecycleEvent{
 			Type:            report.Updated,
-			NewPolicyReport: mapper.MapPolicyReport(minPolicyReportCRD),
+			NewPolicyReport: fixtures.MinPolicyReport,
 		})
 
 		time.Sleep(10 * time.Millisecond)
 
 		debouncer.Add(report.LifecycleEvent{
 			Type:            report.Updated,
-			NewPolicyReport: mapper.MapPolicyReport(policyReportCRD),
+			NewPolicyReport: fixtures.DefaultPolicyReport,
 		})
 
 		wg.Wait()

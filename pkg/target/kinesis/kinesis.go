@@ -7,9 +7,10 @@ import (
 	"log"
 	"time"
 
+	"github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
 	"github.com/kyverno/policy-reporter/pkg/helper"
-	"github.com/kyverno/policy-reporter/pkg/report"
 	"github.com/kyverno/policy-reporter/pkg/target"
+	"github.com/kyverno/policy-reporter/pkg/target/http"
 )
 
 // Options to configure the Kinesis target
@@ -25,7 +26,7 @@ type client struct {
 	kinesis      helper.AWSClient
 }
 
-func (c *client) Send(result report.Result) {
+func (c *client) Send(result v1alpha2.PolicyReportResult) {
 	if len(c.customFields) > 0 {
 		props := make(map[string]string, 0)
 
@@ -42,11 +43,12 @@ func (c *client) Send(result report.Result) {
 
 	body := new(bytes.Buffer)
 
-	if err := json.NewEncoder(body).Encode(result); err != nil {
+	if err := json.NewEncoder(body).Encode(http.NewJSONResult(result)); err != nil {
 		log.Printf("[ERROR] %s : %v\n", c.Name(), err.Error())
 		return
 	}
-	key := fmt.Sprintf("%s-%s-%s", result.Policy, result.ID, result.Timestamp.Format(time.RFC3339Nano))
+	t := time.Unix(result.Timestamp.Seconds, int64(result.Timestamp.Nanos))
+	key := fmt.Sprintf("%s-%s-%s", result.Policy, result.ID, t.Format(time.RFC3339Nano))
 
 	err := c.kinesis.Upload(body, key)
 	if err != nil {

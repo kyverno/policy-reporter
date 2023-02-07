@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/kyverno/policy-reporter/pkg/email/summary"
+	"github.com/kyverno/policy-reporter/pkg/fixtures"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -15,13 +16,13 @@ func Test_CreateReport(t *testing.T) {
 
 	client, pClient, cClient := NewFakeCilent()
 
-	_, _ = pClient.Create(ctx, PolicyReportCRD, v1.CreateOptions{})
-	_, _ = pClient.Create(ctx, EmptyPolicyReportCRD, v1.CreateOptions{})
-	_, _ = client.PolicyReports("kyverno").Create(ctx, KyvernoPolicyReportCRD, v1.CreateOptions{})
+	_, _ = pClient.Create(ctx, fixtures.DefaultPolicyReport, v1.CreateOptions{})
+	_, _ = pClient.Create(ctx, fixtures.EmptyPolicyReport, v1.CreateOptions{})
+	_, _ = client.PolicyReports("kyverno").Create(ctx, fixtures.KyvernoPolicyReport, v1.CreateOptions{})
 
-	_, _ = cClient.Create(ctx, ClusterPolicyReportCRD, v1.CreateOptions{})
-	_, _ = cClient.Create(ctx, EmptyClusterPolicyReportCRD, v1.CreateOptions{})
-	_, _ = cClient.Create(ctx, KyvernoClusterPolicyReportCRD, v1.CreateOptions{})
+	_, _ = cClient.Create(ctx, fixtures.ClusterPolicyReport, v1.CreateOptions{})
+	_, _ = cClient.Create(ctx, fixtures.EmptyClusterPolicyReport, v1.CreateOptions{})
+	_, _ = cClient.Create(ctx, fixtures.KyvernoClusterPolicyReport, v1.CreateOptions{})
 
 	generator := summary.NewGenerator(client, filter, true)
 	data, err := generator.GenerateData(ctx)

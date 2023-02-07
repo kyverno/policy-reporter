@@ -9,8 +9,9 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"time"
 
-	"github.com/kyverno/policy-reporter/pkg/report"
+	"github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
 )
 
 // CreateJSONRequest for the given configuration
@@ -52,24 +53,28 @@ func ProcessHTTPResponse(target string, resp *http.Response, err error) {
 	}
 }
 
-func NewJSONResult(r report.Result) Result {
+func NewJSONResult(r v1alpha2.PolicyReportResult) Result {
+	res := Resource{}
+	if r.HasResource() {
+		resOb := r.GetResource()
+
+		res.Namespace = resOb.Namespace
+		res.APIVersion = resOb.APIVersion
+		res.Kind = resOb.Kind
+		res.Name = resOb.Name
+		res.UID = string(resOb.UID)
+	}
 	return Result{
-		Message:  r.Message,
-		Policy:   r.Policy,
-		Rule:     r.Rule,
-		Priority: r.Priority.String(),
-		Status:   r.Status,
-		Severity: r.Severity,
-		Category: r.Category,
-		Scored:   r.Scored,
-		Resource: Resource{
-			Namespace:  r.Resource.Namespace,
-			APIVersion: r.Resource.APIVersion,
-			Kind:       r.Resource.Kind,
-			Name:       r.Resource.Name,
-			UID:        r.Resource.UID,
-		},
-		CreationTimestamp: r.Timestamp,
+		Message:           r.Message,
+		Policy:            r.Policy,
+		Rule:              r.Rule,
+		Priority:          r.Priority.String(),
+		Status:            string(r.Result),
+		Severity:          string(r.Severity),
+		Category:          r.Category,
+		Scored:            r.Scored,
+		Resource:          res,
+		CreationTimestamp: time.Unix(r.Timestamp.Seconds, int64(r.Timestamp.Nanos)),
 	}
 }
 

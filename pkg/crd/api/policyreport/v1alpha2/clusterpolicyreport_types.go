@@ -17,6 +17,10 @@ limitations under the License.
 package v1alpha2
 
 import (
+	"strconv"
+
+	"github.com/kyverno/policy-reporter/pkg/helper"
+	"github.com/segmentio/fasthash/fnv1a"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -67,8 +71,56 @@ func (r *ClusterPolicyReport) SetResults(results []PolicyReportResult) {
 	r.Results = results
 }
 
-func (r *ClusterPolicyReport) SetSummary(summary PolicyReportSummary) {
-	r.Summary = summary
+func (r *ClusterPolicyReport) GetSummary() PolicyReportSummary {
+	return r.Summary
+}
+
+func (r *ClusterPolicyReport) GetSource() string {
+	if len(r.Results) == 0 {
+		return ""
+	}
+
+	return r.Results[0].Source
+}
+
+func (r *ClusterPolicyReport) GetID() string {
+	h1 := fnv1a.Init64
+	h1 = fnv1a.AddString64(h1, r.GetName())
+
+	return strconv.FormatUint(h1, 10)
+}
+
+func (r *ClusterPolicyReport) GetKinds() []string {
+	var list = make([]string, 0)
+	for _, k := range r.Results {
+		if !k.HasResource() {
+			continue
+		}
+
+		kind := k.GetResource().Kind
+
+		if kind == "" || helper.Contains(kind, list) {
+			continue
+		}
+
+		list = append(list, kind)
+	}
+
+	return list
+}
+
+func (r *ClusterPolicyReport) GetSeverities() []string {
+	var list = make([]string, 0)
+	for _, k := range r.Results {
+
+		if k.Severity == "" || helper.Contains(string(k.Severity), list) {
+			continue
+		}
+
+		list = append(list, string(k.Severity))
+	}
+
+	return list
 }
 
 // +kubebuilder:object:root=true

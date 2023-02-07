@@ -5,22 +5,24 @@ import (
 	"time"
 
 	"github.com/kyverno/policy-reporter/pkg/cache"
+	"github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
+	"github.com/kyverno/policy-reporter/pkg/fixtures"
 	"github.com/kyverno/policy-reporter/pkg/listener"
 	"github.com/kyverno/policy-reporter/pkg/report"
 )
 
 func Test_ResultListener(t *testing.T) {
 	t.Run("Publish Result", func(t *testing.T) {
-		var called report.Result
+		var called v1alpha2.PolicyReportResult
 
 		slistener := listener.NewResultListener(true, cache.New(0, 5*time.Minute), time.Now())
-		slistener.RegisterListener(func(_ report.PolicyReport, r report.Result, b bool) {
+		slistener.RegisterListener(func(_ v1alpha2.ReportInterface, r v1alpha2.PolicyReportResult, b bool) {
 			called = r
 		})
 
 		slistener.Listen(report.LifecycleEvent{Type: report.Updated, NewPolicyReport: preport2, OldPolicyReport: preport1})
 
-		if called.GetIdentifier() != result2.GetIdentifier() {
+		if called.GetID() != fixtures.FailPodResult.GetID() {
 			t.Error("Expected Listener to be called with Result2")
 		}
 	})
@@ -29,7 +31,7 @@ func Test_ResultListener(t *testing.T) {
 		var called bool
 
 		slistener := listener.NewResultListener(true, cache.New(0, 5*time.Minute), time.Now())
-		slistener.RegisterListener(func(_ report.PolicyReport, r report.Result, b bool) {
+		slistener.RegisterListener(func(_ v1alpha2.ReportInterface, r v1alpha2.PolicyReportResult, b bool) {
 			called = true
 		})
 
@@ -44,7 +46,7 @@ func Test_ResultListener(t *testing.T) {
 		var called bool
 
 		slistener := listener.NewResultListener(true, cache.New(0, 5*time.Minute), time.Now())
-		slistener.RegisterListener(func(_ report.PolicyReport, r report.Result, b bool) {
+		slistener.RegisterListener(func(_ v1alpha2.ReportInterface, r v1alpha2.PolicyReportResult, b bool) {
 			called = true
 		})
 
@@ -59,10 +61,10 @@ func Test_ResultListener(t *testing.T) {
 		var called bool
 
 		rcache := cache.New(0, 5*time.Minute)
-		rcache.Add(result2.ID)
+		rcache.Add(fixtures.FailPodResult.ID)
 
 		slistener := listener.NewResultListener(true, rcache, time.Now())
-		slistener.RegisterListener(func(_ report.PolicyReport, r report.Result, b bool) {
+		slistener.RegisterListener(func(_ v1alpha2.ReportInterface, r v1alpha2.PolicyReportResult, b bool) {
 			called = true
 		})
 
@@ -77,10 +79,10 @@ func Test_ResultListener(t *testing.T) {
 		var called bool
 
 		rcache := cache.New(0, 5*time.Minute)
-		rcache.Add(result2.ID)
+		rcache.Add(fixtures.FailPodResult.ID)
 
 		slistener := listener.NewResultListener(true, rcache, time.Now())
-		slistener.RegisterListener(func(_ report.PolicyReport, r report.Result, b bool) {
+		slistener.RegisterListener(func(_ v1alpha2.ReportInterface, r v1alpha2.PolicyReportResult, b bool) {
 			called = true
 		})
 

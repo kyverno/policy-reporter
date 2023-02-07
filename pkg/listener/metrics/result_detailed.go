@@ -1,6 +1,7 @@
 package metrics
 
 import (
+	"github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
 	"github.com/kyverno/policy-reporter/pkg/report"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
@@ -14,8 +15,8 @@ func RegisterDetailedResultGauge(name string) *prometheus.GaugeVec {
 }
 
 func CreateDetailedResultMetricListener(filter *report.ResultFilter, gauge *prometheus.GaugeVec) report.PolicyReportListener {
-	var newReport report.PolicyReport
-	var oldReport report.PolicyReport
+	var newReport v1alpha2.ReportInterface
+	var oldReport v1alpha2.ReportInterface
 
 	return func(event report.LifecycleEvent) {
 		newReport = event.NewPolicyReport
@@ -23,7 +24,7 @@ func CreateDetailedResultMetricListener(filter *report.ResultFilter, gauge *prom
 
 		switch event.Type {
 		case report.Added:
-			for _, result := range newReport.Results {
+			for _, result := range newReport.GetResults() {
 				if !filter.Validate(result) {
 					continue
 				}
@@ -31,11 +32,11 @@ func CreateDetailedResultMetricListener(filter *report.ResultFilter, gauge *prom
 				gauge.With(generateResultLabels(newReport, result)).Set(1)
 			}
 		case report.Updated:
-			for _, result := range oldReport.Results {
+			for _, result := range oldReport.GetResults() {
 				gauge.Delete(generateResultLabels(oldReport, result))
 			}
 
-			for _, result := range newReport.Results {
+			for _, result := range newReport.GetResults() {
 				if !filter.Validate(result) {
 					continue
 				}
@@ -43,7 +44,7 @@ func CreateDetailedResultMetricListener(filter *report.ResultFilter, gauge *prom
 				gauge.With(generateResultLabels(newReport, result)).Set(1)
 			}
 		case report.Deleted:
-			for _, result := range newReport.Results {
+			for _, result := range newReport.GetResults() {
 				if !filter.Validate(result) {
 					continue
 				}
@@ -54,23 +55,23 @@ func CreateDetailedResultMetricListener(filter *report.ResultFilter, gauge *prom
 	}
 }
 
-func generateResultLabels(report report.PolicyReport, result report.Result) prometheus.Labels {
+func generateResultLabels(report v1alpha2.ReportInterface, result v1alpha2.PolicyReportResult) prometheus.Labels {
 	labels := prometheus.Labels{
-		"namespace": report.Namespace,
+		"namespace": report.GetNamespace(),
 		"rule":      result.Rule,
 		"policy":    result.Policy,
-		"report":    report.Name,
+		"report":    report.GetName(),
 		"kind":      "",
 		"name":      "",
-		"status":    result.Status,
-		"severity":  result.Severity,
+		"status":    string(result.Result),
+		"severity":  string(result.Severity),
 		"category":  result.Category,
 		"source":    result.Source,
 	}
 
 	if result.HasResource() {
-		labels["kind"] = result.Resource.Kind
-		labels["name"] = result.Resource.Name
+		labels["kind"] = result.GetResource().Kind
+		labels["name"] = result.GetResource().Name
 	}
 
 	return labels

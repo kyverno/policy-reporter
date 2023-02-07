@@ -1,7 +1,7 @@
 package v1
 
 import (
-	"github.com/kyverno/policy-reporter/pkg/report"
+	"github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
 	"github.com/kyverno/policy-reporter/pkg/target"
 )
 
@@ -75,7 +75,7 @@ type Target struct {
 func mapTarget(t target.Client) Target {
 	minPrio := t.MinimumPriority()
 	if minPrio == "" {
-		minPrio = report.Priority(report.DebugPriority).String()
+		minPrio = v1alpha2.DebugPriority.String()
 	}
 
 	return Target{

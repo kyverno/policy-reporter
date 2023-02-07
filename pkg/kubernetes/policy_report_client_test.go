@@ -6,6 +6,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/kyverno/policy-reporter/pkg/fixtures"
 	"github.com/kyverno/policy-reporter/pkg/kubernetes"
 	"github.com/kyverno/policy-reporter/pkg/report"
 	"github.com/kyverno/policy-reporter/pkg/validate"
@@ -31,18 +32,18 @@ func Test_PolicyReportWatcher(t *testing.T) {
 	})
 
 	kclient, rclient, _ := NewFakeCilent()
-	client := kubernetes.NewPolicyReportClient(kclient, NewMapper(), filter, publisher)
+	client := kubernetes.NewPolicyReportClient(kclient, filter, publisher)
 
 	err := client.Run(stop)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	rclient.Create(ctx, policyReportCRD, metav1.CreateOptions{})
+	rclient.Create(ctx, fixtures.DefaultPolicyReport, metav1.CreateOptions{})
 	time.Sleep(10 * time.Millisecond)
-	rclient.Update(ctx, policyReportCRD, metav1.UpdateOptions{})
+	rclient.Update(ctx, fixtures.DefaultPolicyReport, metav1.UpdateOptions{})
 	time.Sleep(10 * time.Millisecond)
-	rclient.Delete(ctx, policyReportCRD.Name, metav1.DeleteOptions{})
+	rclient.Delete(ctx, fixtures.DefaultPolicyReport.Name, metav1.DeleteOptions{})
 
 	wg.Wait()
 
@@ -65,18 +66,18 @@ func Test_ClusterPolicyReportWatcher(t *testing.T) {
 	})
 
 	kclient, _, rclient := NewFakeCilent()
-	client := kubernetes.NewPolicyReportClient(kclient, NewMapper(), filter, publisher)
+	client := kubernetes.NewPolicyReportClient(kclient, filter, publisher)
 
 	err := client.Run(stop)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	rclient.Create(ctx, clusterPolicyReportCRD, metav1.CreateOptions{})
+	rclient.Create(ctx, fixtures.ClusterPolicyReport, metav1.CreateOptions{})
 	time.Sleep(10 * time.Millisecond)
-	rclient.Update(ctx, clusterPolicyReportCRD, metav1.UpdateOptions{})
+	rclient.Update(ctx, fixtures.ClusterPolicyReport, metav1.UpdateOptions{})
 	time.Sleep(10 * time.Millisecond)
-	rclient.Delete(ctx, clusterPolicyReportCRD.Name, metav1.DeleteOptions{})
+	rclient.Delete(ctx, fixtures.ClusterPolicyReport.Name, metav1.DeleteOptions{})
 
 	wg.Wait()
 
@@ -90,7 +91,7 @@ func Test_HasSynced(t *testing.T) {
 	defer close(stop)
 
 	kclient, _, _ := NewFakeCilent()
-	client := kubernetes.NewPolicyReportClient(kclient, NewMapper(), filter, report.NewEventPublisher())
+	client := kubernetes.NewPolicyReportClient(kclient, filter, report.NewEventPublisher())
 
 	err := client.Run(stop)
 	if err != nil {

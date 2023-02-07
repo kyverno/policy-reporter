@@ -3,41 +3,11 @@ package discord_test
 import (
 	"net/http"
 	"testing"
-	"time"
 
-	"github.com/kyverno/policy-reporter/pkg/report"
+	"github.com/kyverno/policy-reporter/pkg/fixtures"
 	"github.com/kyverno/policy-reporter/pkg/target"
 	"github.com/kyverno/policy-reporter/pkg/target/discord"
 )
-
-var completeResult = report.Result{
-	Message:   "validation error: requests and limits required. Rule autogen-check-for-requests-and-limits failed at path /spec/template/spec/containers/0/resources/requests/",
-	Policy:    "require-requests-and-limits-required",
-	Rule:      "autogen-check-for-requests-and-limits",
-	Timestamp: time.Date(2021, time.February, 23, 15, 10, 0, 0, time.UTC),
-	Priority:  report.WarningPriority,
-	Status:    report.Fail,
-	Severity:  report.High,
-	Category:  "resources",
-	Scored:    true,
-	Source:    "Kyverno",
-	Resource: report.Resource{
-		APIVersion: "v1",
-		Kind:       "Deployment",
-		Name:       "nginx",
-		Namespace:  "default",
-		UID:        "536ab69f-1b3c-4bd9-9ba4-274a56188409",
-	},
-	Properties: map[string]string{"version": "1.2.0"},
-}
-
-var minimalResult = report.Result{
-	Message:  "validation error: label required. Rule app-label-required failed at path /spec/template/spec/containers/0/resources/requests/",
-	Policy:   "app-label-requirement",
-	Priority: report.CriticalPriority,
-	Status:   report.Fail,
-	Scored:   true,
-}
 
 type testClient struct {
 	callback   func(req *http.Request)
@@ -75,7 +45,7 @@ func Test_LokiTarget(t *testing.T) {
 			Webhook:    "http://hook.discord:80",
 			HTTPClient: testClient{callback, 200},
 		})
-		client.Send(completeResult)
+		client.Send(fixtures.CompleteTargetSendResult)
 	})
 
 	t.Run("Send Minimal Result", func(t *testing.T) {
@@ -100,7 +70,7 @@ func Test_LokiTarget(t *testing.T) {
 			Webhook:    "http://hook.discord:80",
 			HTTPClient: testClient{callback, 200},
 		})
-		client.Send(minimalResult)
+		client.Send(fixtures.MinimalTargetSendResult)
 	})
 	t.Run("Name", func(t *testing.T) {
 		client := discord.NewClient(discord.Options{
