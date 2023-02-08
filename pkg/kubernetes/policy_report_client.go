@@ -68,21 +68,21 @@ func (k *k8sPolicyReportClient) configureInformer(informer cache.SharedIndexInfo
 		AddFunc: func(obj interface{}) {
 			if item, ok := obj.(*v1.PartialObjectMetadata); ok {
 				if k.reportFilter.AllowReport(item) {
-					k.queue.Add(report.Added, item)
+					k.queue.Add(item)
 				}
 			}
 		},
 		DeleteFunc: func(obj interface{}) {
 			if item, ok := obj.(*v1.PartialObjectMetadata); ok {
 				if k.reportFilter.AllowReport(item) {
-					k.queue.Add(report.Deleted, item)
+					k.queue.Add(item)
 				}
 			}
 		},
 		UpdateFunc: func(_, newObj interface{}) {
 			if item, ok := newObj.(*v1.PartialObjectMetadata); ok {
 				if k.reportFilter.AllowReport(item) {
-					k.queue.Add(report.Updated, item)
+					k.queue.Add(item)
 				}
 			}
 		},

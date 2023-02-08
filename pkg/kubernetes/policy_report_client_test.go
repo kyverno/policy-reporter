@@ -6,6 +6,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/kyverno/policy-reporter/pkg/cache"
 	"github.com/kyverno/policy-reporter/pkg/fixtures"
 	"github.com/kyverno/policy-reporter/pkg/kubernetes"
 	"github.com/kyverno/policy-reporter/pkg/report"
@@ -35,6 +36,7 @@ func Test_PolicyReportWatcher(t *testing.T) {
 	restClient, polrClient, _ := NewFakeCilent()
 
 	queue := kubernetes.NewQueue(
+		cache.New(),
 		kubernetes.NewDebouncer(0, publisher),
 		workqueue.NewNamedRateLimitingQueue(workqueue.DefaultControllerRateLimiter(), "test-queue"),
 		restClient.Wgpolicyk8sV1alpha2(),
@@ -53,11 +55,12 @@ func Test_PolicyReportWatcher(t *testing.T) {
 	polrClient.Create(ctx, fixtures.DefaultPolicyReport, metav1.CreateOptions{})
 
 	rclient.CreateFake(fixtures.DefaultMeta, metav1.CreateOptions{})
-	time.Sleep(10 * time.Millisecond)
+	time.Sleep(1 * time.Second)
 
 	rclient.UpdateFake(fixtures.DefaultMeta, metav1.UpdateOptions{})
-	time.Sleep(10 * time.Millisecond)
+	time.Sleep(1 * time.Second)
 
+	polrClient.Delete(ctx, fixtures.DefaultPolicyReport.Name, metav1.DeleteOptions{})
 	rclient.Delete(ctx, fixtures.DefaultMeta.Name, metav1.DeleteOptions{})
 
 	wg.Wait()
@@ -84,6 +87,7 @@ func Test_ClusterPolicyReportWatcher(t *testing.T) {
 	restClient, _, polrClient := NewFakeCilent()
 
 	queue := kubernetes.NewQueue(
+		cache.New(),
 		kubernetes.NewDebouncer(0, publisher),
 		workqueue.NewNamedRateLimitingQueue(workqueue.DefaultControllerRateLimiter(), "test-queue"),
 		restClient.Wgpolicyk8sV1alpha2(),
@@ -102,11 +106,12 @@ func Test_ClusterPolicyReportWatcher(t *testing.T) {
 	polrClient.Create(ctx, fixtures.ClusterPolicyReport, metav1.CreateOptions{})
 
 	rclient.CreateFake(fixtures.DefaultClusterMeta, metav1.CreateOptions{})
-	time.Sleep(10 * time.Millisecond)
+	time.Sleep(1 * time.Second)
 
 	rclient.UpdateFake(fixtures.DefaultClusterMeta, metav1.UpdateOptions{})
-	time.Sleep(10 * time.Millisecond)
+	time.Sleep(1 * time.Second)
 
+	polrClient.Delete(ctx, fixtures.ClusterPolicyReport.Name, metav1.DeleteOptions{})
 	rclient.Delete(ctx, fixtures.ClusterPolicyReport.Name, metav1.DeleteOptions{})
 
 	wg.Wait()
@@ -123,6 +128,7 @@ func Test_HasSynced(t *testing.T) {
 	restClient, _, _ := NewFakeCilent()
 
 	queue := kubernetes.NewQueue(
+		cache.New(),
 		kubernetes.NewDebouncer(0, report.NewEventPublisher()),
 		workqueue.NewNamedRateLimitingQueue(workqueue.DefaultControllerRateLimiter(), "test-queue"),
 		restClient.Wgpolicyk8sV1alpha2(),
