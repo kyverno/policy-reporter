@@ -3,9 +3,10 @@ package config_test
 import (
 	"testing"
 
+	"k8s.io/client-go/rest"
+
 	"github.com/kyverno/policy-reporter/pkg/config"
 	"github.com/kyverno/policy-reporter/pkg/report"
-	"k8s.io/client-go/rest"
 )
 
 var testConfig = &config.Config{
@@ -135,7 +136,7 @@ func Test_ResolveHasTargets(t *testing.T) {
 }
 
 func Test_ResolveSkipExistingOnStartup(t *testing.T) {
-	var testConfig = &config.Config{
+	testConfig := &config.Config{
 		Loki: config.Loki{
 			Host:            "http://localhost:3100",
 			SkipExisting:    true,
@@ -238,7 +239,7 @@ func Test_ResolveCache(t *testing.T) {
 	})
 
 	t.Run("Redis", func(t *testing.T) {
-		var redisConfig = &config.Config{
+		redisConfig := &config.Config{
 			Redis: config.Redis{
 				Enabled: true,
 				Address: "localhost:6379",
@@ -265,6 +266,20 @@ func Test_ResolveMapper(t *testing.T) {
 	mapper2 := resolver.Mapper()
 	if mapper1 != mapper2 {
 		t.Error("A second call resolver.Mapper() should return the cached first cache")
+	}
+}
+
+func Test_ResolveInMemoryCache(t *testing.T) {
+	resolver := config.NewResolver(testConfig, &rest.Config{})
+
+	cache1 := resolver.InMemoryCache()
+	if cache1 == nil {
+		t.Error("Error: Should return InMemoryCache")
+	}
+
+	cache2 := resolver.InMemoryCache()
+	if cache1 != cache2 {
+		t.Error("A second call resolver.InMemoryCache() should return the cached first cache")
 	}
 }
 

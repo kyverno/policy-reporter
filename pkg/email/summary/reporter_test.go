@@ -6,15 +6,16 @@ import (
 	"os"
 	"testing"
 
+	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
 	"github.com/kyverno/policy-reporter/pkg/email/summary"
 	"github.com/kyverno/policy-reporter/pkg/fixtures"
-	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 func Test_CreateReport(t *testing.T) {
 	ctx := context.Background()
 
-	client, pClient, cClient := NewFakeCilent()
+	client, pClient, cClient := NewFakeClient()
 
 	_, _ = pClient.Create(ctx, fixtures.DefaultPolicyReport, v1.CreateOptions{})
 	_, _ = pClient.Create(ctx, fixtures.EmptyPolicyReport, v1.CreateOptions{})

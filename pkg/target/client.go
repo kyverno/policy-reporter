@@ -4,6 +4,7 @@ import (
 	"strings"
 
 	"github.com/kyverno/go-wildcard"
+
 	"github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
 	"github.com/kyverno/policy-reporter/pkg/helper"
 	"github.com/kyverno/policy-reporter/pkg/report"

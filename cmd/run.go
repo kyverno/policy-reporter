@@ -5,14 +5,14 @@ import (
 	"flag"
 	"log"
 
-	"github.com/kyverno/policy-reporter/pkg/config"
-	"github.com/kyverno/policy-reporter/pkg/listener"
-
 	"github.com/spf13/cobra"
 	"golang.org/x/sync/errgroup"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
 	"k8s.io/klog"
+
+	"github.com/kyverno/policy-reporter/pkg/config"
+	"github.com/kyverno/policy-reporter/pkg/listener"
 )
 
 func newRunCMD() *cobra.Command {
@@ -103,13 +103,12 @@ func newRunCMD() *cobra.Command {
 
 			g.Go(server.Start)
 
-			stop := make(chan struct{})
-			defer close(stop)
+			g.Go(func() error {
+				stop := make(chan struct{})
+				defer close(stop)
 
-			err = client.Run(stop)
-			if err != nil {
-				return err
-			}
+				return client.Run(stop)
+			})
 
 			return g.Wait()
 		},

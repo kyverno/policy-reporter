@@ -1,10 +1,11 @@
 package metrics
 
 import (
-	"github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
-	"github.com/kyverno/policy-reporter/pkg/report"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
+
+	"github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
+	"github.com/kyverno/policy-reporter/pkg/report"
 )
 
 func RegisterDetailedResultGauge(name string) *prometheus.GaugeVec {
@@ -15,12 +16,10 @@ func RegisterDetailedResultGauge(name string) *prometheus.GaugeVec {
 }
 
 func CreateDetailedResultMetricListener(filter *report.ResultFilter, gauge *prometheus.GaugeVec) report.PolicyReportListener {
-	var newReport v1alpha2.ReportInterface
-	var oldReport v1alpha2.ReportInterface
+	cache := NewCache(filter, generateResultLabels)
 
 	return func(event report.LifecycleEvent) {
-		newReport = event.NewPolicyReport
-		oldReport = event.OldPolicyReport
+		newReport := event.PolicyReport
 
 		switch event.Type {
 		case report.Added:
@@ -31,9 +30,12 @@ func CreateDetailedResultMetricListener(filter *report.ResultFilter, gauge *prom
 
 				gauge.With(generateResultLabels(newReport, result)).Set(1)
 			}
+
+			cache.AddReport(newReport)
 		case report.Updated:
-			for _, result := range oldReport.GetResults() {
-				gauge.Delete(generateResultLabels(oldReport, result))
+			items := cache.GetReportLabels(newReport.GetID())
+			for _, item := range items {
+				gauge.Delete(item.Labels)
 			}
 
 			for _, result := range newReport.GetResults() {
@@ -43,19 +45,20 @@ func CreateDetailedResultMetricListener(filter *report.ResultFilter, gauge *prom
 
 				gauge.With(generateResultLabels(newReport, result)).Set(1)
 			}
-		case report.Deleted:
-			for _, result := range newReport.GetResults() {
-				if !filter.Validate(result) {
-					continue
-				}
 
-				gauge.Delete(generateResultLabels(newReport, result))
+			cache.AddReport(newReport)
+		case report.Deleted:
+			items := cache.GetReportLabels(newReport.GetID())
+			for _, item := range items {
+				gauge.Delete(item.Labels)
 			}
+
+			cache.Remove(newReport.GetID())
 		}
 	}
 }
 
-func generateResultLabels(report v1alpha2.ReportInterface, result v1alpha2.PolicyReportResult) prometheus.Labels {
+func generateResultLabels(report v1alpha2.ReportInterface, result v1alpha2.PolicyReportResult) map[string]string {
 	labels := prometheus.Labels{
 		"namespace": report.GetNamespace(),
 		"rule":      result.Rule,

@@ -4,12 +4,13 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/kyverno/policy-reporter/pkg/config"
-	"github.com/kyverno/policy-reporter/pkg/kubernetes/secrets"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes/fake"
 	v1 "k8s.io/client-go/kubernetes/typed/core/v1"
+
+	"github.com/kyverno/policy-reporter/pkg/config"
+	"github.com/kyverno/policy-reporter/pkg/kubernetes/secrets"
 )
 
 const secretName = "secret-values"
@@ -40,7 +41,6 @@ func Test_ResolveTarget(t *testing.T) {
 		if len(clients) != 2 {
 			t.Errorf("Expected 2 Client, got %d clients", len(clients))
 		}
-
 	})
 	t.Run("Elasticsearch", func(t *testing.T) {
 		clients := factory.ElasticsearchClients(testConfig.Elasticsearch)

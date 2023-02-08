@@ -17,10 +17,11 @@ limitations under the License.
 package v1alpha2
 
 import (
-	"github.com/kyverno/policy-reporter/pkg/crd/api/policyreport"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
+
+	"github.com/kyverno/policy-reporter/pkg/crd/api/policyreport"
 )
 
 // SchemeGroupVersion is group version used to register these objects

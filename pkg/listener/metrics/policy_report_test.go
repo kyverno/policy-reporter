@@ -3,12 +3,13 @@ package metrics_test
 import (
 	"testing"
 
+	"github.com/prometheus/client_golang/prometheus"
+	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
 	"github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
 	"github.com/kyverno/policy-reporter/pkg/listener/metrics"
 	"github.com/kyverno/policy-reporter/pkg/report"
 	"github.com/kyverno/policy-reporter/pkg/validate"
-	"github.com/prometheus/client_golang/prometheus"
-	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 func Test_PolicyReportMetricGeneration(t *testing.T) {
@@ -43,7 +44,7 @@ func Test_PolicyReportMetricGeneration(t *testing.T) {
 
 	t.Run("Added Metric", func(t *testing.T) {
 		handler := metrics.CreatePolicyReportMetricsListener(filter)
-		handler(report.LifecycleEvent{Type: report.Added, NewPolicyReport: report1, OldPolicyReport: nil})
+		handler(report.LifecycleEvent{Type: report.Added, PolicyReport: report1})
 
 		metricFam, err := prometheus.DefaultGatherer.Gather()
 		if err != nil {
@@ -76,8 +77,8 @@ func Test_PolicyReportMetricGeneration(t *testing.T) {
 
 	t.Run("Modified Metric", func(t *testing.T) {
 		handler := metrics.CreatePolicyReportMetricsListener(filter)
-		handler(report.LifecycleEvent{Type: report.Added, NewPolicyReport: report1, OldPolicyReport: nil})
-		handler(report.LifecycleEvent{Type: report.Updated, NewPolicyReport: report2, OldPolicyReport: report1})
+		handler(report.LifecycleEvent{Type: report.Added, PolicyReport: report1})
+		handler(report.LifecycleEvent{Type: report.Updated, PolicyReport: report2})
 
 		metricFam, err := prometheus.DefaultGatherer.Gather()
 		if err != nil {
@@ -110,9 +111,9 @@ func Test_PolicyReportMetricGeneration(t *testing.T) {
 
 	t.Run("Deleted Metric", func(t *testing.T) {
 		handler := metrics.CreatePolicyReportMetricsListener(filter)
-		handler(report.LifecycleEvent{Type: report.Added, NewPolicyReport: report1, OldPolicyReport: nil})
-		handler(report.LifecycleEvent{Type: report.Updated, NewPolicyReport: report2, OldPolicyReport: report1})
-		handler(report.LifecycleEvent{Type: report.Deleted, NewPolicyReport: report2, OldPolicyReport: report2})
+		handler(report.LifecycleEvent{Type: report.Added, PolicyReport: report1})
+		handler(report.LifecycleEvent{Type: report.Updated, PolicyReport: report2})
+		handler(report.LifecycleEvent{Type: report.Deleted, PolicyReport: report2})
 
 		metricFam, err := prometheus.DefaultGatherer.Gather()
 		if err != nil {
@@ -127,7 +128,7 @@ func Test_PolicyReportMetricGeneration(t *testing.T) {
 
 	t.Run("Validate Metric Filter", func(t *testing.T) {
 		handler := metrics.CreatePolicyReportMetricsListener(filter)
-		handler(report.LifecycleEvent{Type: report.Added, NewPolicyReport: report3, OldPolicyReport: nil})
+		handler(report.LifecycleEvent{Type: report.Added, PolicyReport: report3})
 
 		metricFam, err := prometheus.DefaultGatherer.Gather()
 		if err != nil {

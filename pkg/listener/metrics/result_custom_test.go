@@ -4,15 +4,16 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/prometheus/client_golang/prometheus"
+	ioprometheusclient "github.com/prometheus/client_model/go"
+	corev1 "k8s.io/api/core/v1"
+	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
 	"github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
 	"github.com/kyverno/policy-reporter/pkg/fixtures"
 	"github.com/kyverno/policy-reporter/pkg/listener/metrics"
 	"github.com/kyverno/policy-reporter/pkg/report"
 	"github.com/kyverno/policy-reporter/pkg/validate"
-	"github.com/prometheus/client_golang/prometheus"
-	ioprometheusclient "github.com/prometheus/client_model/go"
-	corev1 "k8s.io/api/core/v1"
-	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 func Test_CustomResultMetricGeneration(t *testing.T) {
@@ -26,7 +27,7 @@ func Test_CustomResultMetricGeneration(t *testing.T) {
 			CreationTimestamp: v1.Now(),
 		},
 		Summary: v1alpha2.PolicyReportSummary{Pass: 1, Fail: 1},
-		Results: []v1alpha2.PolicyReportResult{fixtures.PassResult, fixtures.FailPodResult, fixtures.FailDisallowRuleResult},
+		Results: []v1alpha2.PolicyReportResult{fixtures.PassResult, fixtures.PassResult, fixtures.FailPodResult, fixtures.FailDisallowRuleResult},
 	}
 
 	report2 := &v1alpha2.PolicyReport{
@@ -44,7 +45,7 @@ func Test_CustomResultMetricGeneration(t *testing.T) {
 
 	t.Run("Added Metric", func(t *testing.T) {
 		handler := metrics.CreateCustomResultMetricsListener(filter, gauge, metrics.CreateLabelGenerator([]string{"namespace", "policy", "status", "source", "label:app"}, []string{"namespace", "policy", "status", "source", "app"}))
-		handler(report.LifecycleEvent{Type: report.Added, NewPolicyReport: report1, OldPolicyReport: nil})
+		handler(report.LifecycleEvent{Type: report.Added, PolicyReport: report1})
 
 		metricFam, err := prometheus.DefaultGatherer.Gather()
 		if err != nil {
@@ -60,7 +61,7 @@ func Test_CustomResultMetricGeneration(t *testing.T) {
 		if err = testCustomResultMetricLabels(metrics[0], fixtures.FailPodResult, 1); err != nil {
 			t.Error(err)
 		}
-		if err = testCustomResultMetricLabels(metrics[1], fixtures.PassResult, 1); err != nil {
+		if err = testCustomResultMetricLabels(metrics[1], fixtures.PassResult, 2); err != nil {
 			t.Error(err)
 		}
 	})
@@ -69,8 +70,8 @@ func Test_CustomResultMetricGeneration(t *testing.T) {
 		gauge.Reset()
 
 		handler := metrics.CreateCustomResultMetricsListener(filter, gauge, metrics.CreateLabelGenerator([]string{"namespace", "policy", "status", "source", "label:app"}, []string{"namespace", "policy", "status", "source", "app"}))
-		handler(report.LifecycleEvent{Type: report.Added, NewPolicyReport: report1, OldPolicyReport: nil})
-		handler(report.LifecycleEvent{Type: report.Updated, NewPolicyReport: report2, OldPolicyReport: report1})
+		handler(report.LifecycleEvent{Type: report.Added, PolicyReport: report1})
+		handler(report.LifecycleEvent{Type: report.Updated, PolicyReport: report2})
 
 		metricFam, err := prometheus.DefaultGatherer.Gather()
 		if err != nil {
@@ -95,9 +96,9 @@ func Test_CustomResultMetricGeneration(t *testing.T) {
 		gauge.Reset()
 
 		handler := metrics.CreateCustomResultMetricsListener(filter, gauge, metrics.CreateLabelGenerator([]string{"namespace", "policy", "status", "source", "label:app"}, []string{"namespace", "policy", "status", "source", "app"}))
-		handler(report.LifecycleEvent{Type: report.Added, NewPolicyReport: report1, OldPolicyReport: nil})
-		handler(report.LifecycleEvent{Type: report.Updated, NewPolicyReport: report2, OldPolicyReport: report1})
-		handler(report.LifecycleEvent{Type: report.Deleted, NewPolicyReport: report2, OldPolicyReport: nil})
+		handler(report.LifecycleEvent{Type: report.Added, PolicyReport: report1})
+		handler(report.LifecycleEvent{Type: report.Updated, PolicyReport: report2})
+		handler(report.LifecycleEvent{Type: report.Deleted, PolicyReport: report2})
 
 		metricFam, err := prometheus.DefaultGatherer.Gather()
 		if err != nil {
@@ -114,9 +115,9 @@ func Test_CustomResultMetricGeneration(t *testing.T) {
 		gauge.Reset()
 
 		handler := metrics.CreateCustomResultMetricsListener(filter, gauge, metrics.CreateLabelGenerator([]string{"namespace", "policy", "status", "source", "label:app"}, []string{"namespace", "policy", "status", "source", "app"}))
-		handler(report.LifecycleEvent{Type: report.Added, NewPolicyReport: report1, OldPolicyReport: nil})
-		handler(report.LifecycleEvent{Type: report.Added, NewPolicyReport: report1, OldPolicyReport: nil})
-		handler(report.LifecycleEvent{Type: report.Deleted, NewPolicyReport: report1, OldPolicyReport: nil})
+		handler(report.LifecycleEvent{Type: report.Added, PolicyReport: report1})
+		handler(report.LifecycleEvent{Type: report.Added, PolicyReport: report1})
+		handler(report.LifecycleEvent{Type: report.Deleted, PolicyReport: report1})
 
 		metricFam, err := prometheus.DefaultGatherer.Gather()
 		if err != nil {
@@ -135,7 +136,7 @@ func Test_CustomResultMetricGeneration(t *testing.T) {
 		if err = testCustomResultMetricLabels(metrics[0], fixtures.FailPodResult, 1); err != nil {
 			t.Error(err)
 		}
-		if err = testCustomResultMetricLabels(metrics[1], fixtures.PassResult, 1); err != nil {
+		if err = testCustomResultMetricLabels(metrics[1], fixtures.PassResult, 2); err != nil {
 			t.Error(err)
 		}
 	})

@@ -21,9 +21,10 @@ package v1alpha2
 import (
 	"net/http"
 
+	rest "k8s.io/client-go/rest"
+
 	v1alpha2 "github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
 	"github.com/kyverno/policy-reporter/pkg/crd/client/clientset/versioned/scheme"
-	rest "k8s.io/client-go/rest"
 )
 
 type Wgpolicyk8sV1alpha2Interface interface {

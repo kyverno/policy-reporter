@@ -1,10 +1,22 @@
 package fixtures
 
 import (
-	"github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
 	corev1 "k8s.io/api/core/v1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
+	"github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
 )
+
+var DefaultMeta = &v1.PartialObjectMetadata{
+	ObjectMeta: v1.ObjectMeta{
+		Name:      "policy-report",
+		Namespace: "test",
+	},
+	TypeMeta: v1.TypeMeta{
+		Kind:       "PolicyReport",
+		APIVersion: "wgpolicyk8s.io/v1alpha2",
+	},
+}
 
 var DefaultPolicyReport = &v1alpha2.PolicyReport{
 	ObjectMeta: v1.ObjectMeta{
@@ -174,6 +186,16 @@ var EnforceReport = &v1alpha2.PolicyReport{
 			},
 			Properties: map[string]string{"version": "1.2.0", v1alpha2.ResultIDKey: "123456"},
 		},
+	},
+}
+
+var DefaultClusterMeta = &v1.PartialObjectMetadata{
+	ObjectMeta: v1.ObjectMeta{
+		Name: "cluster-policy-report",
+	},
+	TypeMeta: v1.TypeMeta{
+		Kind:       "ClusterPolicyReport",
+		APIVersion: "wgpolicyk8s.io/v1alpha2",
 	},
 }
 

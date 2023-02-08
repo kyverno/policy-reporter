@@ -8,7 +8,6 @@ import (
 
 func Test_Validations(t *testing.T) {
 	t.Run("Validate Source", func(t *testing.T) {
-
 		if validate.ContainsRuleSet("test", validate.RuleSets{Include: []string{"jsPolicy"}}) {
 			t.Errorf("Unexpected Validation Result")
 		}

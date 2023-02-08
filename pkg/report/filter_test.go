@@ -16,6 +16,7 @@ func Test_DisableClusterReports(t *testing.T) {
 		t.Error("Expected EnableClusterReports to return true as configured")
 	}
 }
+
 func Test_AllowReport(t *testing.T) {
 	t.Run("Allow ClusterReport", func(t *testing.T) {
 		filter := report.NewFilter(true, validate.RuleSets{Exclude: []string{"*"}})

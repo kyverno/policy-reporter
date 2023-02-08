@@ -3,8 +3,9 @@ package cmd
 import (
 	"flag"
 
-	"github.com/kyverno/policy-reporter/cmd/send"
 	"github.com/spf13/cobra"
+
+	"github.com/kyverno/policy-reporter/cmd/send"
 )
 
 func newSendCMD() *cobra.Command {

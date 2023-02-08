@@ -6,6 +6,7 @@ import (
 
 	"github.com/kyverno/policy-reporter/pkg/cache"
 	"github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
+	"github.com/kyverno/policy-reporter/pkg/helper"
 	"github.com/kyverno/policy-reporter/pkg/report"
 )
 
@@ -23,36 +24,32 @@ func (l *ResultListener) RegisterListener(listener report.PolicyReportResultList
 }
 
 func (l *ResultListener) Listen(event report.LifecycleEvent) {
-	if event.OldPolicyReport != nil && len(event.OldPolicyReport.GetResults()) > 0 {
-		for _, result := range event.OldPolicyReport.GetResults() {
-			l.cache.Add(result.ID)
-		}
+	if event.Type != report.Added && event.Type != report.Updated {
+		l.cache.RemoveReport(event.PolicyReport.GetID())
+		return
 	}
 
-	if event.Type != report.Added && event.Type != report.Updated {
+	if len(event.PolicyReport.GetResults()) == 0 {
 		return
 	}
 
 	var preExisted bool
 
 	if event.Type == report.Added {
-		preExisted = event.NewPolicyReport.GetCreationTimestamp().Local().Before(l.startUp)
+		preExisted = event.PolicyReport.GetCreationTimestamp().Local().Before(l.startUp)
 
 		if l.skipExisting && preExisted {
+			l.cache.AddReport(event.PolicyReport)
 			return
 		}
 	}
 
-	if len(event.NewPolicyReport.GetResults()) == 0 {
-		return
-	}
-
-	diff := report.FindNewResults(event.NewPolicyReport, event.OldPolicyReport)
-
 	wg := sync.WaitGroup{}
 
-	for _, r := range diff {
-		if found := l.cache.Has(r.GetID()); found {
+	existing := l.cache.GetResults(event.PolicyReport.GetID())
+
+	for _, r := range event.PolicyReport.GetResults() {
+		if helper.Contains(r.GetID(), existing) {
 			continue
 		}
 
@@ -60,11 +57,13 @@ func (l *ResultListener) Listen(event report.LifecycleEvent) {
 
 		for _, cb := range l.listener {
 			go func(callback report.PolicyReportResultListener, result v1alpha2.PolicyReportResult) {
-				callback(event.NewPolicyReport, result, preExisted)
+				callback(event.PolicyReport, result, preExisted)
 				wg.Done()
 			}(cb, r)
 		}
 	}
+
+	l.cache.AddReport(event.PolicyReport)
 
 	wg.Wait()
 }

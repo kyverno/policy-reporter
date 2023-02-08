@@ -3,8 +3,9 @@ package email_test
 import (
 	"testing"
 
-	"github.com/kyverno/policy-reporter/pkg/email"
 	mail "github.com/xhit/go-simple-mail/v2"
+
+	"github.com/kyverno/policy-reporter/pkg/email"
 )
 
 func Test_EncryptionFromString(t *testing.T) {

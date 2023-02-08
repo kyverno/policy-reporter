@@ -9,7 +9,7 @@ import (
 
 var filter = email.NewFilter(validate.RuleSets{}, validate.RuleSets{})
 
-func NewFakeCilent() (v1alpha2client.Wgpolicyk8sV1alpha2Interface, v1alpha2client.PolicyReportInterface, v1alpha2client.ClusterPolicyReportInterface) {
+func NewFakeClient() (v1alpha2client.Wgpolicyk8sV1alpha2Interface, v1alpha2client.PolicyReportInterface, v1alpha2client.ClusterPolicyReportInterface) {
 	client := fake.NewSimpleClientset().Wgpolicyk8sV1alpha2()
 
 	return client, client.PolicyReports("test"), client.ClusterPolicyReports()

@@ -3,11 +3,12 @@ package sqlite3_test
 import (
 	"testing"
 
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
 	v1 "github.com/kyverno/policy-reporter/pkg/api/v1"
 	"github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
 	"github.com/kyverno/policy-reporter/pkg/fixtures"
 	"github.com/kyverno/policy-reporter/pkg/sqlite3"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 var pagination = v1.Pagination{Page: 1, Offset: 20, Direction: "ASC", SortBy: []string{"resource_name"}}

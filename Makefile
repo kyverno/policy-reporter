@@ -39,3 +39,11 @@ docker-push:
 .PHONY: docker-push-dev
 docker-push-dev:
 	@docker buildx build --progress plane --platform $(PLATFORMS) --tag $(REPO):dev . --build-arg LD_FLAGS=$(LD_FLAGS) --push
+
+.PHONY: fmt
+fmt:
+	$(call print-target)
+	@echo "Running gci"
+	@go run github.com/daixiang0/gci@v0.9.1 write -s standard -s default -s "prefix(github.com/kyverno/policy-reporter)" .
+	@echo "Running gofumpt"
+	@go run mvdan.cc/gofumpt@v0.4.0 -w .

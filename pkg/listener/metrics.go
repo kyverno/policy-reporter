@@ -24,7 +24,7 @@ func NewMetricsListener(
 	resultListeners := ResultListeners(filter, reportFilter, mode, fields)
 
 	return func(event report.LifecycleEvent) {
-		if event.NewPolicyReport.GetNamespace() == "" {
+		if event.PolicyReport.GetNamespace() == "" {
 			resultListeners[1](event)
 		} else {
 			resultListeners[0](event)

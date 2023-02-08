@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"log"
 
+	_ "github.com/mattn/go-sqlite3"
+
 	"github.com/kyverno/policy-reporter/pkg/helper"
 	"github.com/kyverno/policy-reporter/pkg/kubernetes/secrets"
 	"github.com/kyverno/policy-reporter/pkg/report"
@@ -19,8 +21,6 @@ import (
 	"github.com/kyverno/policy-reporter/pkg/target/teams"
 	"github.com/kyverno/policy-reporter/pkg/target/ui"
 	"github.com/kyverno/policy-reporter/pkg/target/webhook"
-
-	_ "github.com/mattn/go-sqlite3"
 )
 
 // TargetFactory manages target creation

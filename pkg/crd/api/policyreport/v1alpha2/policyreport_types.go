@@ -16,10 +16,11 @@ package v1alpha2
 import (
 	"strconv"
 
-	"github.com/kyverno/policy-reporter/pkg/helper"
 	"github.com/segmentio/fasthash/fnv1a"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
+	"github.com/kyverno/policy-reporter/pkg/helper"
 )
 
 // +genclient
@@ -80,7 +81,7 @@ func (r *PolicyReport) GetSource() string {
 }
 
 func (r *PolicyReport) GetKinds() []string {
-	var list = make([]string, 0)
+	list := make([]string, 0)
 	for _, k := range r.Results {
 		if !k.HasResource() {
 			continue
@@ -99,7 +100,7 @@ func (r *PolicyReport) GetKinds() []string {
 }
 
 func (r *PolicyReport) GetSeverities() []string {
-	var list = make([]string, 0)
+	list := make([]string, 0)
 	for _, k := range r.Results {
 
 		if k.Severity == "" || helper.Contains(string(k.Severity), list) {

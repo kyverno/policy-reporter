@@ -5,19 +5,22 @@ import (
 	"sync"
 	"time"
 
-	"github.com/kyverno/policy-reporter/pkg/report"
+	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/client-go/informers"
+	"k8s.io/client-go/metadata"
+	"k8s.io/client-go/metadata/metadatainformer"
+	"k8s.io/client-go/tools/cache"
 
 	pr "github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
-	"github.com/kyverno/policy-reporter/pkg/crd/client/clientset/versioned"
-	"github.com/kyverno/policy-reporter/pkg/crd/client/informers/externalversions"
-	"github.com/kyverno/policy-reporter/pkg/crd/client/informers/externalversions/policyreport/v1alpha2"
-	"k8s.io/client-go/tools/cache"
+	"github.com/kyverno/policy-reporter/pkg/report"
 )
 
 type k8sPolicyReportClient struct {
-	debouncer    Debouncer
-	fatcory      externalversions.SharedInformerFactory
-	v1alpha2     v1alpha2.Interface
+	queue        *Queue
+	fatcory      metadatainformer.SharedInformerFactory
+	polr         informers.GenericInformer
+	cpolr        informers.GenericInformer
+	metaClient   metadata.Interface
 	synced       bool
 	mx           *sync.Mutex
 	reportFilter *report.Filter
@@ -27,13 +30,13 @@ func (k *k8sPolicyReportClient) HasSynced() bool {
 	return k.synced
 }
 
-func (k *k8sPolicyReportClient) Run(stopper chan struct{}) error {
+func (k *k8sPolicyReportClient) Sync(stopper chan struct{}) error {
 	var cpolrInformer cache.SharedIndexInformer
 
-	polrInformer := k.configurePolicyReport()
+	polrInformer := k.configureInformer(k.polr.Informer())
 
 	if !k.reportFilter.DisableClusterReports() {
-		cpolrInformer = k.configureClusterPolicyReport()
+		cpolrInformer = k.configureInformer(k.cpolr.Informer())
 	}
 
 	k.fatcory.Start(stopper)
@@ -51,86 +54,60 @@ func (k *k8sPolicyReportClient) Run(stopper chan struct{}) error {
 	return nil
 }
 
-func (k *k8sPolicyReportClient) configurePolicyReport() cache.SharedIndexInformer {
-	polrInformer := k.v1alpha2.PolicyReports().Informer()
-	polrInformer.AddEventHandler(cache.ResourceEventHandlerFuncs{
-		AddFunc: func(obj interface{}) {
-			if item, ok := obj.(*pr.PolicyReport); ok {
-				if k.reportFilter.AllowReport(item) {
-					k.debouncer.Add(report.LifecycleEvent{NewPolicyReport: item, OldPolicyReport: nil, Type: report.Added})
-				}
-			}
-		},
-		DeleteFunc: func(obj interface{}) {
-			if item, ok := obj.(*pr.PolicyReport); ok {
-				if k.reportFilter.AllowReport(item) {
-					k.debouncer.Add(report.LifecycleEvent{NewPolicyReport: item, OldPolicyReport: nil, Type: report.Deleted})
-				}
-			}
-		},
-		UpdateFunc: func(oldObj, newObj interface{}) {
-			if item, ok := newObj.(*pr.PolicyReport); ok {
-				oldItem := oldObj.(*pr.PolicyReport)
+func (k *k8sPolicyReportClient) Run(stopper chan struct{}) error {
+	if err := k.Sync(stopper); err != nil {
+		return err
+	}
 
-				if k.reportFilter.AllowReport(item) {
-					k.debouncer.Add(report.LifecycleEvent{NewPolicyReport: item, OldPolicyReport: oldItem, Type: report.Updated})
-				}
-			}
-		},
-	})
+	k.queue.Run(5, stopper)
 
-	polrInformer.SetWatchErrorHandler(func(_ *cache.Reflector, _ error) {
-		k.synced = false
-	})
-
-	return polrInformer
+	return nil
 }
 
-func (k *k8sPolicyReportClient) configureClusterPolicyReport() cache.SharedIndexInformer {
-	cpolrInformer := k.v1alpha2.ClusterPolicyReports().Informer()
-	cpolrInformer.AddEventHandler(cache.ResourceEventHandlerFuncs{
+func (k *k8sPolicyReportClient) configureInformer(informer cache.SharedIndexInformer) cache.SharedIndexInformer {
+	informer.AddEventHandler(cache.ResourceEventHandlerFuncs{
 		AddFunc: func(obj interface{}) {
-			if item, ok := obj.(*pr.ClusterPolicyReport); ok {
+			if item, ok := obj.(*v1.PartialObjectMetadata); ok {
 				if k.reportFilter.AllowReport(item) {
-					k.debouncer.Add(report.LifecycleEvent{NewPolicyReport: item, OldPolicyReport: nil, Type: report.Added})
+					k.queue.Add(item)
 				}
 			}
 		},
 		DeleteFunc: func(obj interface{}) {
-			if item, ok := obj.(*pr.ClusterPolicyReport); ok {
+			if item, ok := obj.(*v1.PartialObjectMetadata); ok {
 				if k.reportFilter.AllowReport(item) {
-					k.debouncer.Add(report.LifecycleEvent{NewPolicyReport: item, OldPolicyReport: nil, Type: report.Deleted})
+					k.queue.Add(item)
 				}
 			}
 		},
-		UpdateFunc: func(oldObj, newObj interface{}) {
-			if item, ok := newObj.(*pr.ClusterPolicyReport); ok {
-				oldItem := oldObj.(*pr.ClusterPolicyReport)
-
+		UpdateFunc: func(_, newObj interface{}) {
+			if item, ok := newObj.(*v1.PartialObjectMetadata); ok {
 				if k.reportFilter.AllowReport(item) {
-					k.debouncer.Add(report.LifecycleEvent{NewPolicyReport: item, OldPolicyReport: oldItem, Type: report.Updated})
+					k.queue.Add(item)
 				}
 			}
 		},
 	})
 
-	cpolrInformer.SetWatchErrorHandler(func(_ *cache.Reflector, _ error) {
+	informer.SetWatchErrorHandler(func(_ *cache.Reflector, _ error) {
 		k.synced = false
 	})
 
-	return cpolrInformer
+	return informer
 }
 
 // NewPolicyReportClient new Client for Policy Report Kubernetes API
-func NewPolicyReportClient(client versioned.Interface, reportFilter *report.Filter, publisher report.EventPublisher) report.PolicyReportClient {
-	fatcory := externalversions.NewSharedInformerFactory(client, time.Hour)
-	v1alpha2 := fatcory.Wgpolicyk8s().V1alpha2()
+func NewPolicyReportClient(metaClient metadata.Interface, reportFilter *report.Filter, queue *Queue) report.PolicyReportClient {
+	fatcory := metadatainformer.NewSharedInformerFactory(metaClient, 15*time.Minute)
+	polr := fatcory.ForResource(pr.SchemeGroupVersion.WithResource("policyreports"))
+	cpolr := fatcory.ForResource(pr.SchemeGroupVersion.WithResource("clusterpolicyreports"))
 
 	return &k8sPolicyReportClient{
 		fatcory:      fatcory,
-		v1alpha2:     v1alpha2,
+		polr:         polr,
+		cpolr:        cpolr,
 		mx:           &sync.Mutex{},
-		debouncer:    NewDebouncer(time.Minute, publisher),
+		queue:        queue,
 		reportFilter: reportFilter,
 	}
 }

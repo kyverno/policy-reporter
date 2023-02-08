@@ -1,8 +1,9 @@
 package fixtures
 
 import (
-	"github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
 	corev1 "k8s.io/api/core/v1"
+
+	"github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
 )
 
 var PassResult = v1alpha2.PolicyReportResult{
@@ -42,6 +43,18 @@ var PassPodResult = v1alpha2.PolicyReportResult{
 		Namespace:  "test",
 		UID:        "536ab69f-1b3c-4bd9-9ba4-274a56188419",
 	}},
+}
+
+var TrivyResult = v1alpha2.PolicyReportResult{
+	ID:       "124",
+	Message:  "validation error",
+	Policy:   "policy",
+	Rule:     "rule",
+	Priority: v1alpha2.WarningPriority,
+	Result:   v1alpha2.StatusFail,
+	Category: "Best Practices",
+	Scored:   true,
+	Source:   "Trivy",
 }
 
 var FailResult = v1alpha2.PolicyReportResult{
