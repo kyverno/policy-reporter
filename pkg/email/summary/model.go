@@ -33,6 +33,7 @@ func (s *Source) AddClusterSummary(sum v1alpha2.PolicyReportSummary) {
 
 func (s *Source) AddNamespacedSummary(ns string, sum v1alpha2.PolicyReportSummary) {
 	s.mx.Lock()
+	defer s.mx.Unlock()
 	if d, ok := s.NamespaceScopeSummary[ns]; ok {
 		d.Skip += sum.Skip
 		d.Pass += sum.Pass
@@ -48,7 +49,6 @@ func (s *Source) AddNamespacedSummary(ns string, sum v1alpha2.PolicyReportSummar
 			Error: sum.Error,
 		}
 	}
-	s.mx.Unlock()
 }
 
 func NewSource(name string, clusterReports bool) *Source {

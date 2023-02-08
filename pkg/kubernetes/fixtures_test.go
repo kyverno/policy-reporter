@@ -22,8 +22,8 @@ type store struct {
 
 func (s *store) Add(r report.LifecycleEvent) {
 	s.rwm.Lock()
+	defer s.rwm.Unlock()
 	s.store = append(s.store, r)
-	s.rwm.Unlock()
 }
 
 func (s *store) Get(index int) report.LifecycleEvent {
