@@ -58,8 +58,8 @@ type Source struct {
 
 func (s *Source) AddClusterResults(result []Result) {
 	s.crMX.Lock()
+	defer s.crMX.Unlock()
 	s.ClusterResults[result[0].Status] = append(s.ClusterResults[result[0].Status], result...)
-	s.crMX.Unlock()
 }
 
 func (s *Source) AddClusterPassed(results int) {
@@ -68,12 +68,13 @@ func (s *Source) AddClusterPassed(results int) {
 
 func (s *Source) AddNamespacedPassed(ns string, results int) {
 	s.passMX.Lock()
+	defer s.passMX.Unlock()
 	s.NamespacePassed[ns] += results
-	s.passMX.Unlock()
 }
 
 func (s *Source) AddNamespacedResults(ns string, result []Result) {
 	s.nrMX.Lock()
+	defer s.nrMX.Unlock()
 	if nr, ok := s.NamespaceResults[ns]; ok {
 		s.NamespaceResults[ns][result[0].Status] = append(nr[result[0].Status], result...)
 	} else {
@@ -85,11 +86,11 @@ func (s *Source) AddNamespacedResults(ns string, result []Result) {
 
 		s.NamespaceResults[ns][result[0].Status] = result
 	}
-	s.nrMX.Unlock()
 }
 
 func (s Source) InitResults(ns string) {
 	s.nrMX.Lock()
+	defer s.nrMX.Unlock()
 	if _, ok := s.NamespaceResults[ns]; !ok {
 		s.NamespaceResults[ns] = map[string][]Result{
 			v1alpha2.StatusWarn:  make([]Result, 0),
@@ -97,7 +98,6 @@ func (s Source) InitResults(ns string) {
 			v1alpha2.StatusError: make([]Result, 0),
 		}
 	}
-	s.nrMX.Unlock()
 }
 
 func NewSource(name string, clusterReports bool) *Source {
