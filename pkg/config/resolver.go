@@ -362,7 +362,7 @@ func (r *Resolver) ResultCache() cache.Cache {
 			2*time.Hour,
 		)
 	} else {
-		r.resultCache = cache.NewInMermoryCache()
+		r.resultCache = r.InMemoryCache()
 	}
 
 	return r.resultCache
