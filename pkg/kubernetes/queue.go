@@ -55,18 +55,6 @@ func (q *Queue) runWorker() {
 	}
 }
 
-func (q *Queue) record(key string) {
-	q.lock.Lock()
-	defer q.lock.Unlock()
-	q.cache.Insert(key)
-}
-
-func (q *Queue) forget(key string) {
-	q.lock.Lock()
-	defer q.lock.Unlock()
-	q.cache.Delete(key)
-}
-
 func (q *Queue) processNextItem() bool {
 	obj, quit := q.queue.Get()
 	if quit {
@@ -105,18 +93,27 @@ func (q *Queue) processNextItem() bool {
 			}
 		}
 
-		q.forget(key)
+		func() {
+			q.lock.Lock()
+			defer q.lock.Unlock()
+			q.cache.Delete(key)
+		}()
 		q.debouncer.Add(report.LifecycleEvent{Type: report.Deleted, PolicyReport: polr})
 
 		return true
 	}
 
-	event := report.Added
-	if q.cache.Has(key) {
-		event = report.Updated
-	} else {
-		q.record(key)
-	}
+	event := func() report.Event {
+		q.lock.Lock()
+		defer q.lock.Unlock()
+		event := report.Added
+		if q.cache.Has(key) {
+			event = report.Updated
+		} else {
+			q.cache.Insert(key)
+		}
+		return event
+	}()
 
 	q.handleErr(err, key)
 
@@ -150,5 +147,6 @@ func NewQueue(debouncer Debouncer, queue workqueue.RateLimitingInterface, client
 		queue:     queue,
 		client:    client,
 		cache:     sets.New[string](),
+		lock:      &sync.Mutex{},
 	}
 }

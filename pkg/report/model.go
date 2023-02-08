@@ -31,6 +31,10 @@ const (
 type LifecycleEvent struct {
 	Type         Event
 	PolicyReport v1alpha2.ReportInterface
+
+	NewItems      map[string]v1alpha2.PolicyReportResult
+	ModifiedItems map[string]v1alpha2.PolicyReportResult
+	DeletedItems  []string
 }
 
 // ResourceType Enum defined for PolicyReport
