@@ -44,6 +44,18 @@ var PassPodResult = v1alpha2.PolicyReportResult{
 	}},
 }
 
+var TrivyResult = v1alpha2.PolicyReportResult{
+	ID:       "124",
+	Message:  "validation error",
+	Policy:   "policy",
+	Rule:     "rule",
+	Priority: v1alpha2.WarningPriority,
+	Result:   v1alpha2.StatusFail,
+	Category: "Best Practices",
+	Scored:   true,
+	Source:   "Trivy",
+}
+
 var FailResult = v1alpha2.PolicyReportResult{
 	ID:       "123",
 	Message:  "validation error: requests and limits required. Rule autogen-check-for-requests-and-limits failed at path /spec/template/spec/containers/0/resources/requests/",

@@ -12,7 +12,7 @@ import (
 	metafake "k8s.io/client-go/metadata/fake"
 )
 
-func NewFakeMetaCilent() (*metafake.FakeMetadataClient, metafake.MetadataClient, metafake.MetadataClient) {
+func NewFakeMetaClient() (*metafake.FakeMetadataClient, metafake.MetadataClient, metafake.MetadataClient) {
 	schema := metafake.NewTestScheme()
 	metav1.AddMetaToScheme(schema)
 
@@ -20,7 +20,7 @@ func NewFakeMetaCilent() (*metafake.FakeMetadataClient, metafake.MetadataClient,
 	return client, client.Resource(pr.SchemeGroupVersion.WithResource("policyreports")).Namespace("test").(metafake.MetadataClient), client.Resource(pr.SchemeGroupVersion.WithResource("clusterpolicyreports")).(metafake.MetadataClient)
 }
 
-func NewFakeCilent() (*fake.Clientset, v1alpha2client.PolicyReportInterface, v1alpha2client.ClusterPolicyReportInterface) {
+func NewFakeClient() (*fake.Clientset, v1alpha2client.PolicyReportInterface, v1alpha2client.ClusterPolicyReportInterface) {
 	client := fake.NewSimpleClientset()
 
 	return client, client.Wgpolicyk8sV1alpha2().PolicyReports("test"), client.Wgpolicyk8sV1alpha2().ClusterPolicyReports()

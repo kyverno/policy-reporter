@@ -33,7 +33,7 @@ func Test_PolicyReportWatcher(t *testing.T) {
 		wg.Done()
 	})
 
-	restClient, polrClient, _ := NewFakeCilent()
+	restClient, polrClient, _ := NewFakeClient()
 
 	queue := kubernetes.NewQueue(
 		cache.New(),
@@ -42,7 +42,7 @@ func Test_PolicyReportWatcher(t *testing.T) {
 		restClient.Wgpolicyk8sV1alpha2(),
 	)
 
-	kclient, rclient, _ := NewFakeMetaCilent()
+	kclient, rclient, _ := NewFakeMetaClient()
 	client := kubernetes.NewPolicyReportClient(kclient, filter, queue)
 
 	go func() {
@@ -84,7 +84,7 @@ func Test_ClusterPolicyReportWatcher(t *testing.T) {
 		wg.Done()
 	})
 
-	restClient, _, polrClient := NewFakeCilent()
+	restClient, _, polrClient := NewFakeClient()
 
 	queue := kubernetes.NewQueue(
 		cache.New(),
@@ -93,7 +93,7 @@ func Test_ClusterPolicyReportWatcher(t *testing.T) {
 		restClient.Wgpolicyk8sV1alpha2(),
 	)
 
-	kclient, _, rclient := NewFakeMetaCilent()
+	kclient, _, rclient := NewFakeMetaClient()
 	client := kubernetes.NewPolicyReportClient(kclient, filter, queue)
 
 	go func() {
@@ -125,7 +125,7 @@ func Test_HasSynced(t *testing.T) {
 	stop := make(chan struct{})
 	defer close(stop)
 
-	restClient, _, _ := NewFakeCilent()
+	restClient, _, _ := NewFakeClient()
 
 	queue := kubernetes.NewQueue(
 		cache.New(),
@@ -134,7 +134,7 @@ func Test_HasSynced(t *testing.T) {
 		restClient.Wgpolicyk8sV1alpha2(),
 	)
 
-	kclient, _, _ := NewFakeMetaCilent()
+	kclient, _, _ := NewFakeMetaClient()
 	client := kubernetes.NewPolicyReportClient(kclient, filter, queue)
 
 	err := client.Sync(stop)

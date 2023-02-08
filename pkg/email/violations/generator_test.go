@@ -14,7 +14,7 @@ import (
 func Test_GenerateDataWithSingleSource(t *testing.T) {
 	ctx := context.Background()
 
-	client, pClient, cClient := NewFakeCilent()
+	client, pClient, cClient := NewFakeClient()
 
 	_, _ = pClient.Create(ctx, fixtures.DefaultPolicyReport, v1.CreateOptions{})
 	_, _ = cClient.Create(ctx, fixtures.PassClusterPolicyReport, v1.CreateOptions{})
@@ -67,7 +67,7 @@ func Test_GenerateDataWithSingleSource(t *testing.T) {
 func Test_GenerateDataWithMultipleSource(t *testing.T) {
 	ctx := context.Background()
 
-	client, pClient, cClient := NewFakeCilent()
+	client, pClient, cClient := NewFakeClient()
 
 	_, _ = pClient.Create(ctx, fixtures.DefaultPolicyReport, v1.CreateOptions{})
 	_, _ = pClient.Create(ctx, fixtures.EmptyPolicyReport, v1.CreateOptions{})
@@ -94,7 +94,7 @@ func Test_GenerateDataWithMultipleSource(t *testing.T) {
 func Test_GenerateDataWithSourceFilter(t *testing.T) {
 	ctx := context.Background()
 
-	client, pClient, cClient := NewFakeCilent()
+	client, pClient, cClient := NewFakeClient()
 
 	_, _ = pClient.Create(ctx, fixtures.DefaultPolicyReport, v1.CreateOptions{})
 	_, _ = pClient.Create(ctx, fixtures.EmptyPolicyReport, v1.CreateOptions{})
@@ -119,7 +119,7 @@ func Test_GenerateDataWithSourceFilter(t *testing.T) {
 func Test_FilterSourcesBySource(t *testing.T) {
 	ctx := context.Background()
 
-	client, pClient, cClient := NewFakeCilent()
+	client, pClient, cClient := NewFakeClient()
 
 	_, _ = pClient.Create(ctx, fixtures.DefaultPolicyReport, v1.CreateOptions{})
 	_, _ = pClient.Create(ctx, fixtures.EmptyPolicyReport, v1.CreateOptions{})
@@ -145,7 +145,7 @@ func Test_FilterSourcesBySource(t *testing.T) {
 func Test_FilterSourcesByNamespace(t *testing.T) {
 	ctx := context.Background()
 
-	client, pClient, cClient := NewFakeCilent()
+	client, pClient, cClient := NewFakeClient()
 
 	_, _ = pClient.Create(ctx, fixtures.DefaultPolicyReport, v1.CreateOptions{})
 	_, _ = pClient.Create(ctx, fixtures.EmptyPolicyReport, v1.CreateOptions{})
@@ -176,7 +176,7 @@ func Test_FilterSourcesByNamespace(t *testing.T) {
 func Test_RemoveEmptySource(t *testing.T) {
 	ctx := context.Background()
 
-	client, pClient, cClient := NewFakeCilent()
+	client, pClient, cClient := NewFakeClient()
 
 	_, _ = pClient.Create(ctx, fixtures.DefaultPolicyReport, v1.CreateOptions{})
 	_, _ = pClient.Create(ctx, fixtures.EmptyPolicyReport, v1.CreateOptions{})

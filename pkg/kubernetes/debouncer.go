@@ -26,7 +26,7 @@ func (d *debouncer) Add(event report.LifecycleEvent) {
 		d.mutx.Unlock()
 	}
 
-	if event.Type == report.Added || event.Type == report.Deleted {
+	if event.Type != report.Updated {
 		d.publisher.Publish(event)
 		return
 	}
@@ -50,12 +50,10 @@ func (d *debouncer) Add(event report.LifecycleEvent) {
 		return
 	}
 
-	if ok {
+	if len(event.PolicyReport.GetResults()) > 0 && ok {
 		d.mutx.Lock()
-		d.events[event.PolicyReport.GetID()] = event
+		delete(d.events, event.PolicyReport.GetID())
 		d.mutx.Unlock()
-
-		return
 	}
 
 	d.publisher.Publish(event)

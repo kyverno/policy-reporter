@@ -51,4 +51,13 @@ func Test_LabelMappings(t *testing.T) {
 	if val, ok := results["status"]; !ok && val != string(fixtures.FailPodResult.Result) {
 		t.Errorf("expected result for status label not found: %s", val)
 	}
+
+	metrics.LabelGeneratorMapping["name"](results, preport, fixtures.TrivyResult)
+	if val, ok := results["name"]; !ok && val != "" {
+		t.Errorf("expected empty name without resource, got: %s", val)
+	}
+	metrics.LabelGeneratorMapping["kind"](results, preport, fixtures.TrivyResult)
+	if val, ok := results["kind"]; !ok && val != "" {
+		t.Errorf("expected empty name without resource, got: %s", val)
+	}
 }

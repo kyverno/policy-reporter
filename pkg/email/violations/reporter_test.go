@@ -14,7 +14,7 @@ import (
 func Test_CreateReport(t *testing.T) {
 	ctx := context.Background()
 
-	client, pClient, cClient := NewFakeCilent()
+	client, pClient, cClient := NewFakeClient()
 
 	_, _ = pClient.Create(ctx, fixtures.DefaultPolicyReport, v1.CreateOptions{})
 	_, _ = pClient.Create(ctx, fixtures.EmptyPolicyReport, v1.CreateOptions{})
