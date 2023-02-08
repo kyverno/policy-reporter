@@ -13,12 +13,7 @@ type inMemoryCache struct {
 }
 
 func (c *inMemoryCache) AddReport(report v1alpha2.ReportInterface) {
-	list := make([]string, 0, len(report.GetResults()))
-	for _, result := range report.GetResults() {
-		list = append(list, result.GetID())
-	}
-
-	c.cache.Set(report.GetID(), list, gocache.NoExpiration)
+	c.cache.Set(report.GetID(), reportResultsIds(report), gocache.NoExpiration)
 }
 
 func (c *inMemoryCache) RemoveReport(id string) {
@@ -38,19 +33,7 @@ func (c *inMemoryCache) GetResults(id string) []string {
 	return list.([]string)
 }
 
-func (c *inMemoryCache) AddItem(key string, value interface{}) {
-	c.cache.Set(key, value, gocache.NoExpiration)
-}
-
-func (c *inMemoryCache) RemoveItem(key string) {
-	c.cache.Delete(key)
-}
-
-func (c *inMemoryCache) GetItem(key string) (interface{}, bool) {
-	return c.cache.Get(key)
-}
-
-func NewInMermoryCache() ItemCache {
+func NewInMermoryCache() Cache {
 	return &inMemoryCache{
 		cache: gocache.New(gocache.NoExpiration, 5*time.Minute),
 	}

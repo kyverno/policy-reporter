@@ -41,7 +41,6 @@ type Resolver struct {
 	leaderElector      *leaderelection.Client
 	targetClients      []target.Client
 	resultCache        cache.Cache
-	cache              cache.ItemCache
 	targetsCreated     bool
 }
 
@@ -116,7 +115,6 @@ func (r *Resolver) Queue() (*kubernetes.Queue, error) {
 	}
 
 	return kubernetes.NewQueue(
-		r.InMemoryCache(),
 		kubernetes.NewDebouncer(1*time.Minute, r.EventPublisher()),
 		workqueue.NewNamedRateLimitingQueue(workqueue.DefaultControllerRateLimiter(), "report-queue"),
 		client,
@@ -332,16 +330,6 @@ func (r *Resolver) ReportFilter() *report.Filter {
 		r.config.ReportFilter.ClusterReports.Disabled,
 		ToRuleSet(r.config.ReportFilter.Namespaces),
 	)
-}
-
-func (r *Resolver) InMemoryCache() cache.ItemCache {
-	if r.cache != nil {
-		return r.cache
-	}
-
-	r.cache = cache.NewInMermoryCache()
-
-	return r.cache
 }
 
 // ResultCache resolver method

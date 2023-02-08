@@ -19,10 +19,7 @@ type redisCache struct {
 }
 
 func (r *redisCache) AddReport(report v1alpha2.ReportInterface) {
-	list := make([]string, 0, len(report.GetResults()))
-	for _, result := range report.GetResults() {
-		list = append(list, result.GetID())
-	}
+	list := reportResultsIds(report)
 
 	value, _ := json.Marshal(list)
 

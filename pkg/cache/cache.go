@@ -7,10 +7,3 @@ type Cache interface {
 	AddReport(report v1alpha2.ReportInterface)
 	GetResults(id string) []string
 }
-
-type ItemCache interface {
-	Cache
-	AddItem(key string, value interface{})
-	GetItem(key string) (interface{}, bool)
-	RemoveItem(key string)
-}

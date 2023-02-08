@@ -3,6 +3,7 @@ package kubernetes
 import (
 	"context"
 	"log"
+	"sync"
 	"time"
 
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -15,13 +16,15 @@ import (
 	pr "github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
 	"github.com/kyverno/policy-reporter/pkg/crd/client/clientset/versioned/typed/policyreport/v1alpha2"
 	"github.com/kyverno/policy-reporter/pkg/report"
+	"k8s.io/apimachinery/pkg/util/sets"
 )
 
 type Queue struct {
 	queue     workqueue.RateLimitingInterface
 	client    v1alpha2.Wgpolicyk8sV1alpha2Interface
 	debouncer Debouncer
-	cache     Cache
+	lock      *sync.Mutex
+	cache     sets.Set[string]
 }
 
 func (q *Queue) Add(obj *v1.PartialObjectMetadata) error {
@@ -52,15 +55,27 @@ func (q *Queue) runWorker() {
 	}
 }
 
+func (q *Queue) record(key string) {
+	q.lock.Lock()
+	defer q.lock.Unlock()
+	q.cache.Insert(key)
+}
+
+func (q *Queue) forget(key string) {
+	q.lock.Lock()
+	defer q.lock.Unlock()
+	q.cache.Delete(key)
+}
+
 func (q *Queue) processNextItem() bool {
-	key, quit := q.queue.Get()
+	obj, quit := q.queue.Get()
 	if quit {
 		return false
 	}
-
+	key := obj.(string)
 	defer q.queue.Done(key)
 
-	namespace, name, err := cache.SplitMetaNamespaceKey(key.(string))
+	namespace, name, err := cache.SplitMetaNamespaceKey(key)
 	if err != nil {
 		q.queue.Forget(key)
 		return true
@@ -90,21 +105,22 @@ func (q *Queue) processNextItem() bool {
 			}
 		}
 
+		q.forget(key)
 		q.debouncer.Add(report.LifecycleEvent{Type: report.Deleted, PolicyReport: polr})
-		q.cache.RemoveItem(key.(string))
 
 		return true
 	}
 
 	event := report.Added
-	if _, ok := q.cache.GetItem(key.(string)); ok {
+	if q.cache.Has(key) {
 		event = report.Updated
+	} else {
+		q.record(key)
 	}
 
 	q.handleErr(err, key)
 
 	q.debouncer.Add(report.LifecycleEvent{Type: event, PolicyReport: polr})
-	q.cache.AddItem(key.(string), nil)
 
 	return true
 }
@@ -128,11 +144,11 @@ func (q *Queue) handleErr(err error, key interface{}) {
 	log.Printf("[WARNING] Dropping report %q out of the queue: %v", key, err)
 }
 
-func NewQueue(cache Cache, debouncer Debouncer, queue workqueue.RateLimitingInterface, client v1alpha2.Wgpolicyk8sV1alpha2Interface) *Queue {
+func NewQueue(debouncer Debouncer, queue workqueue.RateLimitingInterface, client v1alpha2.Wgpolicyk8sV1alpha2Interface) *Queue {
 	return &Queue{
 		debouncer: debouncer,
 		queue:     queue,
 		client:    client,
-		cache:     cache,
+		cache:     sets.New[string](),
 	}
 }

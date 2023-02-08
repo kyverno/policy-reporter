@@ -269,19 +269,19 @@ func Test_ResolveMapper(t *testing.T) {
 	}
 }
 
-func Test_ResolveInMemoryCache(t *testing.T) {
-	resolver := config.NewResolver(testConfig, &rest.Config{})
+// func Test_ResolveInMemoryCache(t *testing.T) {
+// 	resolver := config.NewResolver(testConfig, &rest.Config{})
 
-	cache1 := resolver.InMemoryCache()
-	if cache1 == nil {
-		t.Error("Error: Should return InMemoryCache")
-	}
+// 	cache1 := resolver.InMemoryCache()
+// 	if cache1 == nil {
+// 		t.Error("Error: Should return InMemoryCache")
+// 	}
 
-	cache2 := resolver.InMemoryCache()
-	if cache1 != cache2 {
-		t.Error("A second call resolver.InMemoryCache() should return the cached first cache")
-	}
-}
+// 	cache2 := resolver.InMemoryCache()
+// 	if cache1 != cache2 {
+// 		t.Error("A second call resolver.InMemoryCache() should return the cached first cache")
+// 	}
+// }
 
 func Test_ResolveReportFilter(t *testing.T) {
 	resolver := config.NewResolver(testConfig, &rest.Config{})
