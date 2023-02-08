@@ -1,10 +1,11 @@
 package metrics
 
 import (
-	"github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
-	"github.com/kyverno/policy-reporter/pkg/report"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
+
+	"github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
+	"github.com/kyverno/policy-reporter/pkg/report"
 )
 
 func RegisterDetailedResultGauge(name string) *prometheus.GaugeVec {
@@ -18,7 +19,7 @@ func CreateDetailedResultMetricListener(filter *report.ResultFilter, gauge *prom
 	cache := NewCache(filter, generateResultLabels)
 
 	return func(event report.LifecycleEvent) {
-		var newReport = event.PolicyReport
+		newReport := event.PolicyReport
 
 		switch event.Type {
 		case report.Added:

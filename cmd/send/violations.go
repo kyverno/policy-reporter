@@ -5,12 +5,12 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/kyverno/policy-reporter/pkg/config"
-	"github.com/kyverno/policy-reporter/pkg/email/violations"
-
 	"github.com/spf13/cobra"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
+
+	"github.com/kyverno/policy-reporter/pkg/config"
+	"github.com/kyverno/policy-reporter/pkg/email/violations"
 )
 
 func NewViolationsCMD() *cobra.Command {

@@ -4,12 +4,12 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	pprof "net/http/pprof"
+
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 
 	v1 "github.com/kyverno/policy-reporter/pkg/api/v1"
 	"github.com/kyverno/policy-reporter/pkg/target"
-	"github.com/prometheus/client_golang/prometheus/promhttp"
-
-	pprof "net/http/pprof"
 )
 
 // Server for the Lifecycle and optional HTTP REST API

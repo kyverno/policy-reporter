@@ -9,13 +9,13 @@ import (
 	"strings"
 	"time"
 
-	api "github.com/kyverno/policy-reporter/pkg/api/v1"
-	"github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
-	"github.com/kyverno/policy-reporter/pkg/report"
+	_ "github.com/mattn/go-sqlite3"
 	corev1 "k8s.io/api/core/v1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	_ "github.com/mattn/go-sqlite3"
+	api "github.com/kyverno/policy-reporter/pkg/api/v1"
+	"github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
+	"github.com/kyverno/policy-reporter/pkg/report"
 )
 
 const (
@@ -261,7 +261,7 @@ func (s *policyReportStore) FetchPolicyReports(filter api.Filter, pagination api
 	paginationString := generatePagination(pagination)
 	where = strings.Join(whereParts, " AND ")
 
-	var list = make([]*api.PolicyReport, 0)
+	list := make([]*api.PolicyReport, 0)
 
 	rows, err := s.db.Query(`SELECT id, namespace, source, name, labels, pass, skip, warn, fail, error FROM policy_report as report WHERE `+where+" "+paginationString, args...)
 	if err != nil {
@@ -343,7 +343,7 @@ func (s *policyReportStore) FetchClusterPolicyReports(filter api.Filter, paginat
 	paginationString := generatePagination(pagination)
 	where = strings.Join(whereParts, " AND ")
 
-	var list = make([]*api.PolicyReport, 0)
+	list := make([]*api.PolicyReport, 0)
 
 	rows, err := s.db.Query(`SELECT id, source, name, labels, pass, skip, warn, fail, error FROM policy_report as report WHERE `+where+" "+paginationString, args...)
 	if err != nil {
@@ -776,7 +776,6 @@ func (s *policyReportStore) FetchNamespacedStatusCounts(filter api.Filter) ([]ap
     FROM policy_report_result as result`+join+` WHERE resource_namespace != ""`+where+`
     GROUP BY resource_namespace, status 
     ORDER BY resource_namespace ASC`, args...)
-
 	if err != nil {
 		return statusCounts, err
 	}
@@ -830,7 +829,6 @@ func (s *policyReportStore) FetchRuleStatusCounts(policy, rule string) ([]api.St
     SELECT COUNT(id) as counter, status 
     FROM policy_report_result as result`+whereClause+`
     GROUP BY status`, args...)
-
 	if err != nil {
 		return statusCounts, err
 	}
@@ -887,7 +885,6 @@ func (s *policyReportStore) FetchStatusCounts(filter api.Filter) ([]api.StatusCo
     SELECT COUNT(result.id) as counter, status 
     FROM policy_report_result as result`+join+` WHERE resource_namespace = ""`+where+`
     GROUP BY status`, args...)
-
 	if err != nil {
 		return statusCounts, err
 	}
@@ -926,7 +923,6 @@ func (s *policyReportStore) FetchNamespacedResults(filter api.Filter, pagination
 	rows, err := s.db.Query(`
     SELECT result.id, resource_namespace, resource_kind, resource_api_version, resource_name, message, policy, rule, severity, properties, status, category, timestamp
     FROM policy_report_result as result`+join+` WHERE resource_namespace != ""`+where+` `+paginationString, args...)
-
 	if err != nil {
 		return list, err
 	}
@@ -987,7 +983,6 @@ func (s *policyReportStore) FetchClusterResults(filter api.Filter, pagination ap
 	rows, err := s.db.Query(`
     SELECT result.id, resource_namespace, resource_kind, resource_api_version, resource_name, message, policy, rule, severity, properties, status, category, timestamp
     FROM policy_report_result as result`+join+` WHERE resource_namespace =""`+where+` `+paginationString, args...)
-
 	if err != nil {
 		return list, err
 	}

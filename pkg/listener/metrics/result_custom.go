@@ -1,12 +1,12 @@
 package metrics
 
 import (
-	"github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
-	"github.com/kyverno/policy-reporter/pkg/report"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
-
 	dto "github.com/prometheus/client_model/go"
+
+	"github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
+	"github.com/kyverno/policy-reporter/pkg/report"
 )
 
 func RegisterCustomResultGauge(name string, labelNames []string) *prometheus.GaugeVec {
@@ -16,8 +16,10 @@ func RegisterCustomResultGauge(name string, labelNames []string) *prometheus.Gau
 	}, labelNames)
 }
 
-type LabelGenerator = func(v1alpha2.ReportInterface, v1alpha2.PolicyReportResult) map[string]string
-type LabelCallback = func(map[string]string, v1alpha2.ReportInterface, v1alpha2.PolicyReportResult)
+type (
+	LabelGenerator = func(v1alpha2.ReportInterface, v1alpha2.PolicyReportResult) map[string]string
+	LabelCallback  = func(map[string]string, v1alpha2.ReportInterface, v1alpha2.PolicyReportResult)
+)
 
 func CreateCustomResultMetricsListener(
 	filter *report.ResultFilter,
@@ -27,7 +29,7 @@ func CreateCustomResultMetricsListener(
 	cache := NewCache(filter, labelGenerator)
 
 	return func(event report.LifecycleEvent) {
-		var newReport = event.PolicyReport
+		newReport := event.PolicyReport
 
 		switch event.Type {
 		case report.Added:

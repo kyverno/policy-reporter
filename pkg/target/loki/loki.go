@@ -40,7 +40,7 @@ func newLokiPayload(result v1alpha2.PolicyReportResult, customLabels map[string]
 	le := entry{Ts: timestamp.Format(time.RFC3339), Line: "[" + strings.ToUpper(result.Priority.String()) + "] " + result.Message}
 	ls := stream{Entries: []entry{le}}
 
-	var labels = []string{
+	labels := []string{
 		"status=\"" + string(result.Result) + "\"",
 		"policy=\"" + result.Policy + "\"",
 		"priority=\"" + result.Priority.String() + "\"",

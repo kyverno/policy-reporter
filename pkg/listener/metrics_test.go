@@ -3,12 +3,12 @@ package listener_test
 import (
 	"testing"
 
+	"github.com/prometheus/client_golang/prometheus"
+	ioprometheusclient "github.com/prometheus/client_model/go"
+
 	"github.com/kyverno/policy-reporter/pkg/listener"
 	"github.com/kyverno/policy-reporter/pkg/listener/metrics"
 	"github.com/kyverno/policy-reporter/pkg/report"
-
-	"github.com/prometheus/client_golang/prometheus"
-	ioprometheusclient "github.com/prometheus/client_model/go"
 )
 
 func Test_SimpleMetricsListener(t *testing.T) {

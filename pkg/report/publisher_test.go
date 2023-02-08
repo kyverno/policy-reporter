@@ -4,9 +4,10 @@ import (
 	"sync"
 	"testing"
 
+	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
 	"github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
 	"github.com/kyverno/policy-reporter/pkg/report"
-	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 func Test_PublishLifecycleEvents(t *testing.T) {

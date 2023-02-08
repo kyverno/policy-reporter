@@ -4,6 +4,14 @@ import (
 	"database/sql"
 	"time"
 
+	goredis "github.com/go-redis/redis/v8"
+	_ "github.com/mattn/go-sqlite3"
+	mail "github.com/xhit/go-simple-mail/v2"
+	k8s "k8s.io/client-go/kubernetes"
+	"k8s.io/client-go/metadata"
+	"k8s.io/client-go/rest"
+	"k8s.io/client-go/util/workqueue"
+
 	"github.com/kyverno/policy-reporter/pkg/api"
 	"github.com/kyverno/policy-reporter/pkg/cache"
 	"github.com/kyverno/policy-reporter/pkg/crd/client/clientset/versioned"
@@ -20,14 +28,6 @@ import (
 	"github.com/kyverno/policy-reporter/pkg/sqlite3"
 	"github.com/kyverno/policy-reporter/pkg/target"
 	"github.com/kyverno/policy-reporter/pkg/validate"
-	mail "github.com/xhit/go-simple-mail/v2"
-
-	goredis "github.com/go-redis/redis/v8"
-	_ "github.com/mattn/go-sqlite3"
-	k8s "k8s.io/client-go/kubernetes"
-	"k8s.io/client-go/metadata"
-	"k8s.io/client-go/rest"
-	"k8s.io/client-go/util/workqueue"
 )
 
 // Resolver manages dependencies

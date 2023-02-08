@@ -4,11 +4,12 @@ import (
 	"context"
 	"testing"
 
+	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
 	"github.com/kyverno/policy-reporter/pkg/email"
 	"github.com/kyverno/policy-reporter/pkg/email/summary"
 	"github.com/kyverno/policy-reporter/pkg/fixtures"
 	"github.com/kyverno/policy-reporter/pkg/validate"
-	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 func Test_GenerateDataWithSingleSource(t *testing.T) {

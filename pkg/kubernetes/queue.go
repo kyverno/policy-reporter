@@ -5,15 +5,16 @@ import (
 	"log"
 	"time"
 
-	pr "github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
-	"github.com/kyverno/policy-reporter/pkg/crd/client/clientset/versioned/typed/policyreport/v1alpha2"
-	"github.com/kyverno/policy-reporter/pkg/report"
 	"k8s.io/apimachinery/pkg/api/errors"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/runtime"
 	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/client-go/tools/cache"
 	"k8s.io/client-go/util/workqueue"
+
+	pr "github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
+	"github.com/kyverno/policy-reporter/pkg/crd/client/clientset/versioned/typed/policyreport/v1alpha2"
+	"github.com/kyverno/policy-reporter/pkg/report"
 )
 
 type Queue struct {
@@ -50,6 +51,7 @@ func (q *Queue) runWorker() {
 	for q.processNextItem() {
 	}
 }
+
 func (q *Queue) processNextItem() bool {
 	key, quit := q.queue.Get()
 	if quit {

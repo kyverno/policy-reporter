@@ -7,6 +7,7 @@ import (
 	"time"
 
 	goredis "github.com/go-redis/redis/v8"
+
 	"github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
 )
 

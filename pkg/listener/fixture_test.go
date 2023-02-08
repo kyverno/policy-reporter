@@ -1,9 +1,10 @@
 package listener_test
 
 import (
+	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
 	"github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
 	"github.com/kyverno/policy-reporter/pkg/fixtures"
-	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 var preport1 = &v1alpha2.PolicyReport{

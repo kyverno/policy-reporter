@@ -6,9 +6,10 @@ import (
 	"os"
 	"testing"
 
+	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
 	"github.com/kyverno/policy-reporter/pkg/email/violations"
 	"github.com/kyverno/policy-reporter/pkg/fixtures"
-	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 func Test_CreateReport(t *testing.T) {

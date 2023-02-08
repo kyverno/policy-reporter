@@ -4,12 +4,13 @@ import (
 	"context"
 	"testing"
 
-	"github.com/kyverno/policy-reporter/pkg/kubernetes/secrets"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes/fake"
 	v1 "k8s.io/client-go/kubernetes/typed/core/v1"
+
+	"github.com/kyverno/policy-reporter/pkg/kubernetes/secrets"
 )
 
 const secretName = "secret-values"
