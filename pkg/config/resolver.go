@@ -14,7 +14,6 @@ import (
 	"github.com/kyverno/policy-reporter/pkg/leaderelection"
 	"github.com/kyverno/policy-reporter/pkg/listener"
 	"github.com/kyverno/policy-reporter/pkg/listener/metrics"
-	"github.com/kyverno/policy-reporter/pkg/redis"
 	"github.com/kyverno/policy-reporter/pkg/report"
 	"github.com/kyverno/policy-reporter/pkg/sqlite3"
 	"github.com/kyverno/policy-reporter/pkg/target"
@@ -310,7 +309,7 @@ func (r *Resolver) ResultCache() cache.Cache {
 	}
 
 	if r.config.Redis.Enabled {
-		r.resultCache = redis.New(
+		r.resultCache = cache.NewRedisCache(
 			r.config.Redis.Prefix,
 			goredis.NewClient(&goredis.Options{
 				Addr:     r.config.Redis.Address,
@@ -321,7 +320,7 @@ func (r *Resolver) ResultCache() cache.Cache {
 			2*time.Hour,
 		)
 	} else {
-		r.resultCache = cache.New(time.Minute*150, time.Minute*15)
+		r.resultCache = cache.NewInMermoryCache(time.Minute*150, time.Minute*15)
 	}
 
 	return r.resultCache
