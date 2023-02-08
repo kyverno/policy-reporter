@@ -48,16 +48,16 @@ func (s *policyReportStore) Get(id string) (v1alpha2.ReportInterface, bool) {
 
 func (s *policyReportStore) Add(r v1alpha2.ReportInterface) error {
 	s.rwm.Lock()
+	defer s.rwm.Unlock()
 	s.store[GetType(r)][r.GetID()] = r
-	s.rwm.Unlock()
 
 	return nil
 }
 
 func (s *policyReportStore) Update(r v1alpha2.ReportInterface) error {
 	s.rwm.Lock()
+	defer s.rwm.Unlock()
 	s.store[GetType(r)][r.GetID()] = r
-	s.rwm.Unlock()
 
 	return nil
 }
@@ -65,8 +65,8 @@ func (s *policyReportStore) Update(r v1alpha2.ReportInterface) error {
 func (s *policyReportStore) Remove(id string) error {
 	if r, ok := s.Get(id); ok {
 		s.rwm.Lock()
+		defer s.rwm.Unlock()
 		delete(s.store[GetType(r)], id)
-		s.rwm.Unlock()
 	}
 
 	return nil
@@ -74,11 +74,11 @@ func (s *policyReportStore) Remove(id string) error {
 
 func (s *policyReportStore) CleanUp() error {
 	s.rwm.Lock()
+	defer s.rwm.Unlock()
 	s.store = map[ResourceType]map[string]v1alpha2.ReportInterface{
 		PolicyReportType:        {},
 		ClusterPolicyReportType: {},
 	}
-	s.rwm.Unlock()
 
 	return nil
 }
