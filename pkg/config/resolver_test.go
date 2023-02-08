@@ -3,9 +3,7 @@ package config_test
 import (
 	"testing"
 
-	"github.com/kyverno/policy-reporter/pkg/cache"
 	"github.com/kyverno/policy-reporter/pkg/config"
-	"github.com/kyverno/policy-reporter/pkg/redis"
 	"github.com/kyverno/policy-reporter/pkg/report"
 	"k8s.io/client-go/rest"
 )
@@ -227,10 +225,6 @@ func Test_ResolveAPIServer(t *testing.T) {
 func Test_ResolveCache(t *testing.T) {
 	t.Run("InMemory", func(t *testing.T) {
 		resolver := config.NewResolver(testConfig, &rest.Config{})
-		_, ok := resolver.ResultCache().(*cache.InMemoryCache)
-		if !ok {
-			t.Error("Expected Cache to be InMemory Cache")
-		}
 
 		cache1 := resolver.ResultCache()
 		if cache1 == nil {
@@ -252,9 +246,10 @@ func Test_ResolveCache(t *testing.T) {
 		}
 
 		resolver := config.NewResolver(redisConfig, &rest.Config{})
-		_, ok := resolver.ResultCache().(*redis.RedisCache)
-		if !ok {
-			t.Error("Expected Cache to be Redis Cache")
+
+		cache1 := resolver.ResultCache()
+		if cache1 == nil {
+			t.Error("Error: Should return ResultCache")
 		}
 	})
 }

@@ -1,4 +1,4 @@
-package redis
+package cache
 
 import (
 	"context"
@@ -9,20 +9,20 @@ import (
 	goredis "github.com/go-redis/redis/v8"
 )
 
-type RedisCache struct {
+type redisCache struct {
 	rdb    *goredis.Client
 	prefix string
 	ttl    time.Duration
 }
 
-func (r *RedisCache) Add(id string) {
+func (r *redisCache) Add(id string) {
 	err := r.rdb.Set(context.Background(), r.generateKey(id), true, r.ttl).Err()
 	if err != nil {
 		log.Printf("[ERROR] Failed to set result: %s\n", err)
 	}
 }
 
-func (r *RedisCache) Has(id string) bool {
+func (r *redisCache) Has(id string) bool {
 	_, err := r.rdb.Get(context.Background(), r.generateKey(id)).Result()
 	if err == goredis.Nil {
 		return false
@@ -34,10 +34,10 @@ func (r *RedisCache) Has(id string) bool {
 	return true
 }
 
-func (r *RedisCache) generateKey(id string) string {
+func (r *redisCache) generateKey(id string) string {
 	return fmt.Sprintf("%s:%s", r.prefix, id)
 }
 
-func New(prefix string, rdb *goredis.Client, ttl time.Duration) *RedisCache {
-	return &RedisCache{rdb: rdb, prefix: prefix, ttl: ttl}
+func NewRedisCache(prefix string, rdb *goredis.Client, ttl time.Duration) Cache {
+	return &redisCache{rdb: rdb, prefix: prefix, ttl: ttl}
 }
