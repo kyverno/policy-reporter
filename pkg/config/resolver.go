@@ -41,7 +41,7 @@ type Resolver struct {
 	leaderElector      *leaderelection.Client
 	targetClients      []target.Client
 	resultCache        cache.Cache
-	cache              *cache.InMemoryCache
+	cache              cache.ItemCache
 	targetsCreated     bool
 }
 
@@ -334,12 +334,12 @@ func (r *Resolver) ReportFilter() *report.Filter {
 	)
 }
 
-func (r *Resolver) InMemoryCache() *cache.InMemoryCache {
+func (r *Resolver) InMemoryCache() cache.ItemCache {
 	if r.cache != nil {
 		return r.cache
 	}
 
-	r.cache = cache.New()
+	r.cache = cache.NewInMermoryCache()
 
 	return r.cache
 }
@@ -362,7 +362,7 @@ func (r *Resolver) ResultCache() cache.Cache {
 			2*time.Hour,
 		)
 	} else {
-		r.resultCache = cache.NewInMermoryCache(time.Minute*150, time.Minute*15)
+		r.resultCache = cache.NewInMermoryCache()
 	}
 
 	return r.resultCache

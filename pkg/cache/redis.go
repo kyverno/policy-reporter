@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"log"
 	"time"
 
 	goredis "github.com/go-redis/redis/v8"
@@ -17,7 +18,7 @@ type redisCache struct {
 	ttl    time.Duration
 }
 
-func (r *RedisCache) AddReport(report v1alpha2.ReportInterface) {
+func (r *redisCache) AddReport(report v1alpha2.ReportInterface) {
 	list := make([]string, 0, len(report.GetResults()))
 	for _, result := range report.GetResults() {
 		list = append(list, result.GetID())
@@ -28,11 +29,11 @@ func (r *RedisCache) AddReport(report v1alpha2.ReportInterface) {
 	r.rdb.Set(context.Background(), r.generateKey(report.GetID()), string(value), 0)
 }
 
-func (r *RedisCache) RemoveReport(id string) {
+func (r *redisCache) RemoveReport(id string) {
 	r.rdb.Del(context.Background(), r.generateKey(id))
 }
 
-func (r *RedisCache) GetResults(id string) []string {
+func (r *redisCache) GetResults(id string) []string {
 	list, err := r.rdb.Get(context.Background(), r.generateKey(id)).Result()
 	results := make([]string, 0)
 	if err != nil {

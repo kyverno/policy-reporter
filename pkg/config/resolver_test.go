@@ -5,7 +5,6 @@ import (
 
 	"k8s.io/client-go/rest"
 
-	"github.com/kyverno/policy-reporter/pkg/cache"
 	"github.com/kyverno/policy-reporter/pkg/config"
 	"github.com/kyverno/policy-reporter/pkg/report"
 )

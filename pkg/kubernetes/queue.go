@@ -104,7 +104,7 @@ func (q *Queue) processNextItem() bool {
 	q.handleErr(err, key)
 
 	q.debouncer.Add(report.LifecycleEvent{Type: event, PolicyReport: polr})
-	q.cache.AddItem(key.(string), true)
+	q.cache.AddItem(key.(string), nil)
 
 	return true
 }

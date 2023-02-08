@@ -36,7 +36,7 @@ func Test_PolicyReportWatcher(t *testing.T) {
 	restClient, polrClient, _ := NewFakeClient()
 
 	queue := kubernetes.NewQueue(
-		cache.New(),
+		cache.NewInMermoryCache(),
 		kubernetes.NewDebouncer(0, publisher),
 		workqueue.NewNamedRateLimitingQueue(workqueue.DefaultControllerRateLimiter(), "test-queue"),
 		restClient.Wgpolicyk8sV1alpha2(),
@@ -87,7 +87,7 @@ func Test_ClusterPolicyReportWatcher(t *testing.T) {
 	restClient, _, polrClient := NewFakeClient()
 
 	queue := kubernetes.NewQueue(
-		cache.New(),
+		cache.NewInMermoryCache(),
 		kubernetes.NewDebouncer(0, publisher),
 		workqueue.NewNamedRateLimitingQueue(workqueue.DefaultControllerRateLimiter(), "test-queue"),
 		restClient.Wgpolicyk8sV1alpha2(),
@@ -128,7 +128,7 @@ func Test_HasSynced(t *testing.T) {
 	restClient, _, _ := NewFakeClient()
 
 	queue := kubernetes.NewQueue(
-		cache.New(),
+		cache.NewInMermoryCache(),
 		kubernetes.NewDebouncer(0, report.NewEventPublisher()),
 		workqueue.NewNamedRateLimitingQueue(workqueue.DefaultControllerRateLimiter(), "test-queue"),
 		restClient.Wgpolicyk8sV1alpha2(),

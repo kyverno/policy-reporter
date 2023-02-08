@@ -15,7 +15,7 @@ func Test_ResultListener(t *testing.T) {
 	t.Run("Publish Result", func(t *testing.T) {
 		var called v1alpha2.PolicyReportResult
 
-		slistener := listener.NewResultListener(true, cache.New(), time.Now())
+		slistener := listener.NewResultListener(true, cache.NewInMermoryCache(), time.Now())
 		slistener.RegisterListener(func(_ v1alpha2.ReportInterface, r v1alpha2.PolicyReportResult, b bool) {
 			called = r
 		})
@@ -31,7 +31,7 @@ func Test_ResultListener(t *testing.T) {
 	t.Run("Ignore Delete Event", func(t *testing.T) {
 		var called bool
 
-		slistener := listener.NewResultListener(true, cache.New(), time.Now())
+		slistener := listener.NewResultListener(true, cache.NewInMermoryCache(), time.Now())
 		slistener.RegisterListener(func(_ v1alpha2.ReportInterface, r v1alpha2.PolicyReportResult, b bool) {
 			called = true
 		})
@@ -46,7 +46,7 @@ func Test_ResultListener(t *testing.T) {
 	t.Run("Ignore Added Results created before startup", func(t *testing.T) {
 		var called bool
 
-		slistener := listener.NewResultListener(true, cache.New(), time.Now())
+		slistener := listener.NewResultListener(true, cache.NewInMermoryCache(), time.Now())
 		slistener.RegisterListener(func(_ v1alpha2.ReportInterface, r v1alpha2.PolicyReportResult, b bool) {
 			called = true
 		})
@@ -61,7 +61,7 @@ func Test_ResultListener(t *testing.T) {
 	t.Run("Ignore CacheResults", func(t *testing.T) {
 		var called bool
 
-		rcache := cache.New()
+		rcache := cache.NewInMermoryCache()
 
 		slistener := listener.NewResultListener(true, rcache, time.Now())
 		slistener.RegisterListener(func(_ v1alpha2.ReportInterface, r v1alpha2.PolicyReportResult, b bool) {
@@ -79,7 +79,7 @@ func Test_ResultListener(t *testing.T) {
 	t.Run("Early Return if Results are empty", func(t *testing.T) {
 		var called bool
 
-		rcache := cache.New()
+		rcache := cache.NewInMermoryCache()
 
 		slistener := listener.NewResultListener(true, rcache, time.Now())
 		slistener.RegisterListener(func(_ v1alpha2.ReportInterface, r v1alpha2.PolicyReportResult, b bool) {
