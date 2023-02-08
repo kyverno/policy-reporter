@@ -17,7 +17,7 @@ func (c *inMemoryCache) Has(id string) bool {
 }
 
 func (c *inMemoryCache) Add(id string) {
-	c.cache.SetDefault(id, true)
+	c.cache.SetDefault(id, nil)
 }
 
 func NewInMermoryCache(defaultExpiration, cleanupInterval time.Duration) Cache {
