@@ -41,7 +41,6 @@ type Resolver struct {
 	leaderElector      *leaderelection.Client
 	targetClients      []target.Client
 	resultCache        cache.Cache
-	cache              cache.ItemCache
 	targetsCreated     bool
 }
 
@@ -116,7 +115,6 @@ func (r *Resolver) Queue() (*kubernetes.Queue, error) {
 	}
 
 	return kubernetes.NewQueue(
-		r.InMemoryCache(),
 		kubernetes.NewDebouncer(1*time.Minute, r.EventPublisher()),
 		workqueue.NewNamedRateLimitingQueue(workqueue.DefaultControllerRateLimiter(), "report-queue"),
 		client,
@@ -334,16 +332,6 @@ func (r *Resolver) ReportFilter() *report.Filter {
 	)
 }
 
-func (r *Resolver) InMemoryCache() cache.ItemCache {
-	if r.cache != nil {
-		return r.cache
-	}
-
-	r.cache = cache.NewInMermoryCache()
-
-	return r.cache
-}
-
 // ResultCache resolver method
 func (r *Resolver) ResultCache() cache.Cache {
 	if r.resultCache != nil {
@@ -362,7 +350,7 @@ func (r *Resolver) ResultCache() cache.Cache {
 			2*time.Hour,
 		)
 	} else {
-		r.resultCache = r.InMemoryCache()
+		r.resultCache = cache.NewInMermoryCache()
 	}
 
 	return r.resultCache
