@@ -269,6 +269,7 @@ type Config struct {
 	Webhook        Webhook        `mapstructure:"webhook"`
 	API            API            `mapstructure:"api"`
 	Kubeconfig     string         `mapstructure:"kubeconfig"`
+	WorkerCount    int            `mapstructure:"worker"`
 	DBFile         string         `mapstructure:"dbfile"`
 	Metrics        Metrics        `mapstructure:"metrics"`
 	REST           REST           `mapstructure:"rest"`

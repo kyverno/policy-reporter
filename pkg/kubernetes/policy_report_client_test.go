@@ -44,7 +44,7 @@ func Test_PolicyReportWatcher(t *testing.T) {
 	client := kubernetes.NewPolicyReportClient(kclient, filter, queue)
 
 	go func() {
-		err := client.Run(stop)
+		err := client.Run(1, stop)
 		if err != nil {
 			t.Error(err)
 		}
@@ -94,7 +94,7 @@ func Test_ClusterPolicyReportWatcher(t *testing.T) {
 	client := kubernetes.NewPolicyReportClient(kclient, filter, queue)
 
 	go func() {
-		err := client.Run(stop)
+		err := client.Run(1, stop)
 		if err != nil {
 			t.Error(err)
 		}

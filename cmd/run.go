@@ -106,8 +106,9 @@ func newRunCMD() *cobra.Command {
 			g.Go(func() error {
 				stop := make(chan struct{})
 				defer close(stop)
+				log.Printf("[INFO] start client with %d workers", c.WorkerCount)
 
-				return client.Run(stop)
+				return client.Run(c.WorkerCount, stop)
 			})
 
 			return g.Wait()
@@ -123,6 +124,7 @@ func newRunCMD() *cobra.Command {
 	cmd.PersistentFlags().BoolP("rest-enabled", "r", false, "Enable Policy Reporter's REST API")
 	cmd.PersistentFlags().Bool("profile", false, "Enable application profiling with pprof")
 	cmd.PersistentFlags().String("lease-name", "policy-reporter", "name of the LeaseLock")
+	cmd.PersistentFlags().Int("worker", 5, "amount of queue worker")
 
 	flag.Parse()
 

@@ -41,6 +41,10 @@ func Load(cmd *cobra.Command) (*Config, error) {
 		v.BindPFlag("kubeconfig", flag)
 	}
 
+	if flag := cmd.Flags().Lookup("worker"); flag != nil {
+		v.BindPFlag("worker", flag)
+	}
+
 	if flag := cmd.Flags().Lookup("port"); flag != nil {
 		v.BindPFlag("api.port", flag)
 	}

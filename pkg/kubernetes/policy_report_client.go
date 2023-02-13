@@ -54,12 +54,12 @@ func (k *k8sPolicyReportClient) Sync(stopper chan struct{}) error {
 	return nil
 }
 
-func (k *k8sPolicyReportClient) Run(stopper chan struct{}) error {
+func (k *k8sPolicyReportClient) Run(worker int, stopper chan struct{}) error {
 	if err := k.Sync(stopper); err != nil {
 		return err
 	}
 
-	k.queue.Run(5, stopper)
+	k.queue.Run(worker, stopper)
 
 	return nil
 }
