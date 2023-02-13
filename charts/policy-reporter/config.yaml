@@ -213,6 +213,8 @@ priorityMap:
   {{- toYaml . | nindent 2 }}
 {{- end }}
 
+worker: {{ .Values.worker }}
+
 metrics:
   mode: {{ .Values.metrics.mode }}
   {{- with .Values.metrics.filter }}

@@ -1,5 +1,13 @@
 # Changelog
 
+# 2.17.0
+* Policy Reporter
+    * Use metaclient to reduce informer memory usage
+    * Use workerqueue to control concurrent processing of PolicyReports
+    * Remove internal PolicyReport structures
+    * Make sqlite volume configurable [[#255](https://github.com/kyverno/policy-reporter/pull/255) by [monotek](https://github.com/monotek)]
+    * use defer to unlock when possible [[#259](https://github.com/kyverno/policy-reporter/pull/259) by [eddycharly](https://github.com/eddycharly)]
+
 # 2.16.0
 * Add `nameOverride` to all charts [[#254](https://github.com/kyverno/policy-reporter/pull/254) by [mjnagel](https://github.com/mjnagel)]
 

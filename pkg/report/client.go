@@ -11,7 +11,7 @@ type PolicyReportResultListener = func(v1alpha2.ReportInterface, v1alpha2.Policy
 // PolicyReportClient watches for PolicyReport Events and executes registered callback
 type PolicyReportClient interface {
 	// Run starts the informer and workerqueue
-	Run(stopper chan struct{}) error
+	Run(worker int, stopper chan struct{}) error
 	// Sync Report Informer and start watching for events
 	Sync(stopper chan struct{}) error
 	// HasSynced the configured PolicyReport
