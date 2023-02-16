@@ -28,6 +28,11 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
     steps:
+      - name: Copy Helm files
+        run: |
+          cp index.yaml ./docs/index.yaml
+          cp artifacthub-repo.yml ./docs/artifacthub-repo.yml
+
       - name: Checkout
         uses: actions/checkout@v3
       - name: Setup Pages
