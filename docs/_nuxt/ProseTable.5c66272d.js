@@ -1,1 +1,0 @@
-import{s as t}from"./index.52fe7a95.js";import{q as _,x as s,E as o,O as r}from"./runtime-core.esm-bundler.c752936e.js";const a={},n={class:"table-wrapper"};function c(e,d){return _(),s("div",n,[o("table",null,[r(e.$slots,"default",{},void 0,!0)])])}const p=t(a,[["render",c],["__scopeId","data-v-78f198db"]]);export{p as default};
