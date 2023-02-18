@@ -121,6 +121,10 @@ func (r *PolicyReport) GetID() string {
 	return strconv.FormatUint(h1, 10)
 }
 
+func (r *PolicyReport) GetScope() *corev1.ObjectReference {
+	return r.Scope
+}
+
 // +kubebuilder:object:root=true
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 

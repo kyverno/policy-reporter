@@ -273,6 +273,7 @@ func (r *PolicyReportResult) GetID() string {
 type ReportInterface interface {
 	metav1.Object
 	GetID() string
+	GetScope() *corev1.ObjectReference
 	GetResults() []PolicyReportResult
 	GetSummary() PolicyReportSummary
 	GetSource() string

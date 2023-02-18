@@ -38,7 +38,7 @@ const (
 
 	resultSQL = `CREATE TABLE policy_report_result (
     "policy_report_id" TEXT NOT NULL,
-    "id" TEXT NOT NULL PRIMARY KEY,
+    "id" TEXT NOT NULL,
     "policy" TEXT,
     "rule" TEXT,
     "message" TEXT,
@@ -54,6 +54,7 @@ const (
     "resource_uid" TEXT,
     "properties" TEXT,
     "timestamp" INTEGER,
+	PRIMARY KEY (policy_report_id, id),
     FOREIGN KEY (policy_report_id) REFERENCES policy_report(id) ON DELETE CASCADE
   );`
 
@@ -1126,7 +1127,9 @@ func (s *policyReportStore) persistResults(report v1alpha2.ReportInterface) erro
 			}
 
 			res := result.GetResource()
-			if res == nil {
+			if res == nil && report.GetScope() != nil {
+				res = report.GetScope()
+			} else if res == nil {
 				res = &corev1.ObjectReference{}
 			}
 

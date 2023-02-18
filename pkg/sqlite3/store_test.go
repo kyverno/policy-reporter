@@ -3,6 +3,7 @@ package sqlite3_test
 import (
 	"testing"
 
+	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	v1 "github.com/kyverno/policy-reporter/pkg/api/v1"
@@ -58,6 +59,23 @@ var creport = &v1alpha2.ClusterPolicyReport{
 	Summary: v1alpha2.PolicyReportSummary{},
 }
 
+var scopeReport = &v1alpha2.PolicyReport{
+	ObjectMeta: metav1.ObjectMeta{
+		Name:              "polr-scope-test",
+		Namespace:         "test",
+		CreationTimestamp: metav1.Now(),
+	},
+	Results: []v1alpha2.PolicyReportResult{fixtures.ScopeResult},
+	Summary: v1alpha2.PolicyReportSummary{Fail: 1, Pass: 0},
+	Scope: &corev1.ObjectReference{
+		APIVersion: "v1",
+		Kind:       "Deployment",
+		Name:       "nginx",
+		Namespace:  "test",
+		UID:        "536ab69f-1b3c-4bd9-9ba4-274a56188409",
+	},
+}
+
 func Test_PolicyReportStore(t *testing.T) {
 	db, _ := sqlite3.NewDatabase("test.db")
 	defer db.Close()
@@ -107,6 +125,31 @@ func Test_PolicyReportStore(t *testing.T) {
 		if ok == false {
 			t.Errorf("Should be found in Store after adding report to the store")
 		}
+	})
+	t.Run("Add/Get PolicyReport with ScopeResource", func(t *testing.T) {
+		_, ok := store.Get(scopeReport.GetID())
+		if ok == true {
+			t.Fatalf("Should not be found in empty Store")
+		}
+
+		err := store.Add(scopeReport)
+		if err != nil {
+			t.Fatalf("Unexpected add error: %s", err)
+		}
+
+		rep, ok := store.Get(scopeReport.GetID())
+		if ok == false {
+			t.Error("Should be found in Store after adding report to the store")
+		}
+		if len(rep.GetResults()) == 0 {
+			t.Fatal("Exptected at least one result on the report")
+		}
+		res := rep.GetResults()[0]
+		if !res.HasResource() {
+			t.Error("Expected scope resource set as result resource")
+		}
+
+		store.Remove(rep.GetID())
 	})
 
 	t.Run("FetchNamespacedKinds", func(t *testing.T) {

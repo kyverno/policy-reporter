@@ -165,3 +165,15 @@ var FailNamespaceResult = v1alpha2.PolicyReportResult{
 		UID:        "536ab69f-1b3c-4bd9-9ba4-274a56188412",
 	}},
 }
+
+var ScopeResult = v1alpha2.PolicyReportResult{
+	Message:  "validation error: requests and limits required. Rule autogen-check-for-requests-and-limits failed at path /spec/template/spec/containers/0/resources/requests/",
+	Policy:   "require-requests-and-limits-required",
+	Rule:     "autogen-check-for-requests-and-limits",
+	Priority: v1alpha2.WarningPriority,
+	Result:   v1alpha2.StatusFail,
+	Severity: v1alpha2.SeverityHigh,
+	Category: "resources",
+	Scored:   true,
+	Source:   "Kyverno",
+}

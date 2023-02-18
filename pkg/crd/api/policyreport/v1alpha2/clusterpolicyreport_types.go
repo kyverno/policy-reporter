@@ -124,6 +124,10 @@ func (r *ClusterPolicyReport) GetSeverities() []string {
 	return list
 }
 
+func (r *ClusterPolicyReport) GetScope() *corev1.ObjectReference {
+	return r.Scope
+}
+
 // +kubebuilder:object:root=true
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 
