@@ -26,14 +26,17 @@ func newRunCMD() *cobra.Command {
 			}
 
 			var k8sConfig *rest.Config
-			if c.Kubeconfig != "" {
-				k8sConfig, err = clientcmd.BuildConfigFromFlags("", c.Kubeconfig)
+			if c.K8sClient.Kubeconfig != "" {
+				k8sConfig, err = clientcmd.BuildConfigFromFlags("", c.K8sClient.Kubeconfig)
 			} else {
 				k8sConfig, err = rest.InClusterConfig()
 			}
 			if err != nil {
 				return err
 			}
+
+			k8sConfig.QPS = c.K8sClient.QPS
+			k8sConfig.Burst = c.K8sClient.Burst
 
 			resolver := config.NewResolver(c, k8sConfig)
 
@@ -125,6 +128,8 @@ func newRunCMD() *cobra.Command {
 	cmd.PersistentFlags().Bool("profile", false, "Enable application profiling with pprof")
 	cmd.PersistentFlags().String("lease-name", "policy-reporter", "name of the LeaseLock")
 	cmd.PersistentFlags().Int("worker", 5, "amount of queue worker")
+	cmd.PersistentFlags().Float32("qps", 20, "K8s RESTClient QPS")
+	cmd.PersistentFlags().Int("burst", 50, "K8s RESTClient burst")
 
 	flag.Parse()
 

@@ -24,8 +24,8 @@ func NewViolationsCMD() *cobra.Command {
 			}
 
 			var k8sConfig *rest.Config
-			if c.Kubeconfig != "" {
-				k8sConfig, err = clientcmd.BuildConfigFromFlags("", c.Kubeconfig)
+			if c.K8sClient.Kubeconfig != "" {
+				k8sConfig, err = clientcmd.BuildConfigFromFlags("", c.K8sClient.Kubeconfig)
 			} else {
 				k8sConfig, err = rest.InClusterConfig()
 			}

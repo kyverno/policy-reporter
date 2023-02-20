@@ -1,5 +1,6 @@
 .go-version
 .deploy
+.vscode
 /config.yaml
 build
 /test.yaml

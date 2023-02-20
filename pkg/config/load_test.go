@@ -39,8 +39,8 @@ func Test_Load(t *testing.T) {
 		t.Errorf("Unexpected Error: %s", err)
 	}
 
-	if c.Kubeconfig != "./config" {
-		t.Errorf("Unexpected TemplateDir Config: %s", c.Kubeconfig)
+	if c.K8sClient.Kubeconfig != "./config" {
+		t.Errorf("Unexpected TemplateDir Config: %s", c.K8sClient.Kubeconfig)
 	}
 	if c.API.Port != 8081 {
 		t.Errorf("Unexpected Port Config: %d", c.API.Port)
