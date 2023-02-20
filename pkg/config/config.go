@@ -255,6 +255,13 @@ type LeaderElection struct {
 	Enabled         bool   `mapstructure:"enabled"`
 }
 
+// K8sClient config struct
+type K8sClient struct {
+	QPS        float32 `mapstructure:"qps"`
+	Burst      int     `mapstructure:"burst"`
+	Kubeconfig string  `mapstructure:"kubeconfig"`
+}
+
 // Config of the PolicyReporter
 type Config struct {
 	Namespace      string         `mapstructure:"namespace"`
@@ -268,7 +275,6 @@ type Config struct {
 	UI             UI             `mapstructure:"ui"`
 	Webhook        Webhook        `mapstructure:"webhook"`
 	API            API            `mapstructure:"api"`
-	Kubeconfig     string         `mapstructure:"kubeconfig"`
 	WorkerCount    int            `mapstructure:"worker"`
 	DBFile         string         `mapstructure:"dbfile"`
 	Metrics        Metrics        `mapstructure:"metrics"`
@@ -279,4 +285,5 @@ type Config struct {
 	Profiling      Profiling      `mapstructure:"profiling"`
 	EmailReports   EmailReports   `mapstructure:"emailReports"`
 	LeaderElection LeaderElection `mapstructure:"leaderElection"`
+	K8sClient      K8sClient      `mapstructure:"k8sClient"`
 }

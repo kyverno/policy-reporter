@@ -37,12 +37,20 @@ func Load(cmd *cobra.Command) (*Config, error) {
 		log.Println("[INFO] No configuration file found")
 	}
 
-	if flag := cmd.Flags().Lookup("kubeconfig"); flag != nil {
-		v.BindPFlag("kubeconfig", flag)
-	}
-
 	if flag := cmd.Flags().Lookup("worker"); flag != nil {
 		v.BindPFlag("worker", flag)
+	}
+
+	if flag := cmd.Flags().Lookup("kubeconfig"); flag != nil {
+		v.BindPFlag("k8sClient.kubeconfig", flag)
+	}
+
+	if flag := cmd.Flags().Lookup("qps"); flag != nil {
+		v.BindPFlag("k8sClient.qps", flag)
+	}
+
+	if flag := cmd.Flags().Lookup("burst"); flag != nil {
+		v.BindPFlag("k8sClient.burst", flag)
 	}
 
 	if flag := cmd.Flags().Lookup("port"); flag != nil {
