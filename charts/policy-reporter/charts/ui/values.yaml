@@ -7,7 +7,7 @@ image:
   registry: ghcr.io
   repository: kyverno/policy-reporter-ui
   pullPolicy: IfNotPresent
-  tag: 1.7.2
+  tag: 1.8.0
 
 # possible default displayModes: light/dark
 displayMode: ""
@@ -46,6 +46,8 @@ clusters: []
 # - name: External Cluster
 #   api: https://policy-reporter.external.cluster                       # reachable external Policy Reporter REST API
 #   kyvernoApi: https://policy-reporter-kyverno-plugin.external.cluster # (optional) reachable external Policy Reporter Kyverno Plugin REST API
+#   skipTLS: false
+#   certificate: "/app/certs/root.ca"
 
 # define custom filter for policy report results based on (Cluster)PolicyReport labels
 # exmaple - use a owner label on all reports belonging to a dedicated team and add the label as additional custom filter
@@ -81,6 +83,10 @@ policyReporter:
 # configurations related to the RolicyReporter KyvernoPlugin API
 kyvernoPlugin:
   port: 8080
+
+# configure additional volumes to e.g. mount custom certificate for proxy TLS
+volumes: []
+volumeMounts: []
 
 imagePullSecrets: []
 

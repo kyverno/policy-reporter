@@ -67,12 +67,18 @@ spec:
             mountPath: /app/config.yaml
             subPath: config.yaml
             readOnly: true
+          {{- if .Values.volumes }}
+            {{- toYaml .Values.volumeMounts | nindent 10 }}
+          {{- end }}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
       volumes:
       - name: config-file
         configMap:
           name: {{ include "ui.fullname" . }}-config
+      {{- if .Values.volumes }}
+        {{- toYaml .Values.volumes | nindent 6 }}
+      {{- end }}
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
