@@ -2,3 +2,4 @@
 .dist
 config.yaml
 values.yaml
+.vscode
