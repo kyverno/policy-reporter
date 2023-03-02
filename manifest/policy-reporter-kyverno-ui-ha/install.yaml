@@ -308,7 +308,7 @@ spec:
     spec:
       containers:
         - name: ui
-          image: "ghcr.io/kyverno/policy-reporter-ui:1.7.2"
+          image: "ghcr.io/kyverno/policy-reporter-ui:1.8.0"
           imagePullPolicy: IfNotPresent
           securityContext:
             allowPrivilegeEscalation: false
@@ -371,7 +371,7 @@ spec:
         fsGroup: 1234
       containers:
         - name: policy-reporter
-          image: "ghcr.io/kyverno/policy-reporter:2.12.0"
+          image: "ghcr.io/kyverno/policy-reporter:2.13.0"
           imagePullPolicy: IfNotPresent
           securityContext:
             allowPrivilegeEscalation: false

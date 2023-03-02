@@ -7,6 +7,11 @@
     * Remove internal PolicyReport structures
     * Make sqlite volume configurable [[#255](https://github.com/kyverno/policy-reporter/pull/255) by [monotek](https://github.com/monotek)]
     * use defer to unlock when possible [[#259](https://github.com/kyverno/policy-reporter/pull/259) by [eddycharly](https://github.com/eddycharly)]
+* Policy Reporter UI
+    * New SSL configs for external clusters
+        * `skipTLS` to disable SSL verification
+        * `certificate` to configure a path to a custom CA for self signed URLs
+    * New Helm values `ui.volumes` and `ui.volumeMounts` to add your custom CAs as mounts to the UI deployment.
 
 # 2.16.0
 * Add `nameOverride` to all charts [[#254](https://github.com/kyverno/policy-reporter/pull/254) by [mjnagel](https://github.com/mjnagel)]
