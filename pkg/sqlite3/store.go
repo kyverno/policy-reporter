@@ -1441,7 +1441,7 @@ func NewDatabase(dbFile string) (*sql.DB, error) {
 	}
 	file.Close()
 
-	return sql.Open("sqlite3", dbFile)
+	return sql.Open("sqlite3", dbFile+"?cache=shared&_busy_timeout=5000")
 }
 
 func chunkSlice(slice []v1alpha2.PolicyReportResult, chunkSize int) [][]v1alpha2.PolicyReportResult {
