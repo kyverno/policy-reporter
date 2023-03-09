@@ -26,8 +26,6 @@ const (
     "name" TEXT NOT NULL,
     "source" TEXT,
     "labels" JSON DEFAULT '{}',
-    "kinds" JSON DEFAULT '[]',
-    "severities" JSON DEFAULT '[]',
     "skip" INTEGER DEFAULT 0,
     "pass" INTEGER DEFAULT 0,
     "warn" INTEGER DEFAULT 0,
@@ -58,7 +56,20 @@ const (
     FOREIGN KEY (policy_report_id) REFERENCES policy_report(id) ON DELETE CASCADE
   );`
 
+	policySQL = `CREATE TABLE policy_report_filter (
+	"policy_report_id" TEXT NOT NULL,
+	"namespace" TEXT,
+	"policy" TEXT,
+	"kind" TEXT,
+	"category" TEXT,
+	"severity" TEXT,
+	"status" TEXT,
+	"source" TEXT,
+	"count" INTEGER
+  );`
+
 	resultInsertBaseSQL = "INSERT OR IGNORE INTO policy_report_result(policy_report_id, id, policy, rule, message, scored, status, severity, category, source, resource_api_version, resource_kind, resource_name, resource_namespace, resource_uid, properties, timestamp) VALUES "
+	filterInsertBaseSQL = "INSERT OR IGNORE INTO policy_report_filter(policy_report_id, namespace, policy, status, severity, category, source, kind, count) VALUES "
 )
 
 type PolicyReportStore interface {
@@ -78,6 +89,11 @@ func (s *policyReportStore) CreateSchemas() error {
 	}
 
 	_, err = s.db.Exec(reportSQL)
+	if err != nil {
+		return err
+	}
+
+	_, err = s.db.Exec(policySQL)
 	if err != nil {
 		return err
 	}
@@ -121,7 +137,7 @@ func (s *policyReportStore) Get(id string) (v1alpha2.ReportInterface, bool) {
 
 // Add a PolicyReport to the Store
 func (s *policyReportStore) Add(r v1alpha2.ReportInterface) error {
-	stmt, err := s.db.Prepare("INSERT INTO policy_report(id, type, namespace, source, name, labels, kinds, severities, pass, skip, warn, fail, error, created) values(?,?,?,?,?,?,?,?,?,?,?,?,?,?)")
+	stmt, err := s.db.Prepare("INSERT INTO policy_report(id, type, namespace, source, name, labels, pass, skip, warn, fail, error, created) values(?,?,?,?,?,?,?,?,?,?,?,?)")
 	if err != nil {
 		return err
 	}
@@ -136,8 +152,6 @@ func (s *policyReportStore) Add(r v1alpha2.ReportInterface) error {
 		r.GetSource(),
 		r.GetName(),
 		convertMapToJSON(r.GetLabels()),
-		convertSliveToJSON(r.GetKinds()),
-		convertSliveToJSON(r.GetSeverities()),
 		sum.Pass,
 		sum.Skip,
 		sum.Warn,
@@ -149,11 +163,16 @@ func (s *policyReportStore) Add(r v1alpha2.ReportInterface) error {
 		return err
 	}
 
+	err = s.persistFilterValues(r)
+	if err != nil {
+		return err
+	}
+
 	return s.persistResults(r)
 }
 
 func (s *policyReportStore) Update(r v1alpha2.ReportInterface) error {
-	stmt, err := s.db.Prepare("UPDATE policy_report SET labels=?, kinds=?, severities=?, pass=?, skip=?, warn=?, fail=?, error=?, created=? WHERE id=?")
+	stmt, err := s.db.Prepare("UPDATE policy_report SET labels=?, pass=?, skip=?, warn=?, fail=?, error=?, created=? WHERE id=?")
 	if err != nil {
 		return err
 	}
@@ -163,8 +182,6 @@ func (s *policyReportStore) Update(r v1alpha2.ReportInterface) error {
 
 	_, err = stmt.Exec(
 		convertMapToJSON(r.GetLabels()),
-		convertSliveToJSON(r.GetKinds()),
-		convertSliveToJSON(r.GetSeverities()),
 		sum.Pass,
 		sum.Skip,
 		sum.Warn,
@@ -173,6 +190,22 @@ func (s *policyReportStore) Update(r v1alpha2.ReportInterface) error {
 		r.GetCreationTimestamp().Unix(),
 		r.GetID(),
 	)
+	if err != nil {
+		return err
+	}
+
+	fstmt, err := s.db.Prepare("DELETE FROM policy_report_filter WHERE policy_report_id=?")
+	if err != nil {
+		return err
+	}
+	defer fstmt.Close()
+
+	_, err = fstmt.Exec(r.GetID())
+	if err != nil {
+		return err
+	}
+
+	err = s.persistFilterValues(r)
 	if err != nil {
 		return err
 	}
@@ -204,6 +237,17 @@ func (s *policyReportStore) Remove(id string) error {
 		return err
 	}
 
+	fstmt, err := s.db.Prepare("DELETE FROM policy_report_filter WHERE policy_report_id=?")
+	if err != nil {
+		return err
+	}
+	defer fstmt.Close()
+
+	_, err = fstmt.Exec(id)
+	if err != nil {
+		return err
+	}
+
 	stmt, err = s.db.Prepare("DELETE FROM policy_report_result WHERE policy_report_id=?")
 	if err != nil {
 		return err
@@ -222,6 +266,17 @@ func (s *policyReportStore) CleanUp() error {
 	defer stmt.Close()
 
 	_, err = stmt.Exec()
+	if err != nil {
+		return err
+	}
+
+	fstmt, err := s.db.Prepare("DELETE FROM policy_report_filter")
+	if err != nil {
+		return err
+	}
+	defer fstmt.Close()
+
+	_, err = fstmt.Exec()
 	if err != nil {
 		return err
 	}
@@ -414,7 +469,7 @@ func (s *policyReportStore) FetchClusterPolicies(filter api.Filter) ([]string, e
 		join = " JOIN policy_report as report ON result.policy_report_id = report.id"
 	}
 
-	rows, err := s.db.Query(`SELECT DISTINCT policy FROM policy_report_result as result`+join+` WHERE resource_namespace == ""`+where+` ORDER BY policy ASC`, args...)
+	rows, err := s.db.Query(`SELECT DISTINCT policy FROM policy_report_filter as result`+join+` WHERE result.namespace == ""`+where+` ORDER BY policy ASC`, args...)
 	if err != nil {
 		return list, err
 	}
@@ -476,7 +531,7 @@ func (s *policyReportStore) FetchNamespacedPolicies(filter api.Filter) ([]string
 		join = " JOIN policy_report as report ON result.policy_report_id = report.id"
 	}
 
-	rows, err := s.db.Query(`SELECT DISTINCT policy FROM policy_report_result as result`+join+` WHERE resource_namespace != ""`+where+` ORDER BY policy ASC`, args...)
+	rows, err := s.db.Query(`SELECT DISTINCT policy FROM policy_report_filter as result`+join+` WHERE result.namespace != ""`+where+` ORDER BY policy ASC`, args...)
 	if err != nil {
 		return list, err
 	}
@@ -538,7 +593,7 @@ func (s *policyReportStore) FetchCategories(filter api.Filter) ([]string, error)
 		join = " JOIN policy_report as report ON result.policy_report_id = report.id"
 	}
 
-	rows, err := s.db.Query(`SELECT DISTINCT category FROM policy_report_result as result`+join+` WHERE category != ""`+where+` ORDER BY category ASC`, args...)
+	rows, err := s.db.Query(`SELECT DISTINCT category FROM policy_report_filter as result`+join+` WHERE category != ""`+where+` ORDER BY category ASC`, args...)
 	if err != nil {
 		return list, err
 	}
@@ -559,12 +614,17 @@ func (s *policyReportStore) FetchCategories(filter api.Filter) ([]string, error)
 func (s *policyReportStore) FetchNamespacedKinds(filter api.Filter) ([]string, error) {
 	list := make([]string, 0)
 
-	where, args := generateFilterWhere(filter, []string{"report_sources", "report_namespaces"})
+	where, args := generateFilterWhere(filter, []string{"sources", "filter_namespaces"})
 	if len(where) > 0 {
 		where = " AND " + where
 	}
 
-	rows, err := s.db.Query(`SELECT report.kinds FROM policy_report as report WHERE report.namespace != ""`+where, args...)
+	join := ""
+	if len(filter.ReportLabel) > 0 {
+		join = " JOIN policy_report as report ON result.policy_report_id = report.id"
+	}
+
+	rows, err := s.db.Query(`SELECT DISTINCT kind FROM policy_report_filter as result`+join+` WHERE result.namespace != "" AND kind != ""`+where+` ORDER BY kind ASC`, args...)
 	if err != nil {
 		return list, err
 	}
@@ -576,7 +636,7 @@ func (s *policyReportStore) FetchNamespacedKinds(filter api.Filter) ([]string, e
 			return list, err
 		}
 
-		list = appendUnique(list, convertJSONToSlice(item))
+		list = append(list, item)
 	}
 
 	return list, nil
@@ -585,12 +645,17 @@ func (s *policyReportStore) FetchNamespacedKinds(filter api.Filter) ([]string, e
 func (s *policyReportStore) FetchClusterKinds(filter api.Filter) ([]string, error) {
 	list := make([]string, 0)
 
-	where, args := generateFilterWhere(filter, []string{"report_sources"})
+	where, args := generateFilterWhere(filter, []string{"sources"})
 	if len(where) > 0 {
 		where = " AND " + where
 	}
 
-	rows, err := s.db.Query(`SELECT report.kinds FROM policy_report as report WHERE report.namespace = ""`+where, args...)
+	join := ""
+	if len(filter.ReportLabel) > 0 {
+		join = " JOIN policy_report as report ON result.policy_report_id = report.id"
+	}
+
+	rows, err := s.db.Query(`SELECT DISTINCT kind FROM policy_report_filter as result`+join+` WHERE result.namespace == "" AND kind != ""`+where+` ORDER BY kind ASC`, args...)
 	if err != nil {
 		return list, err
 	}
@@ -602,7 +667,7 @@ func (s *policyReportStore) FetchClusterKinds(filter api.Filter) ([]string, erro
 			return list, err
 		}
 
-		list = appendUnique(list, convertJSONToSlice(item))
+		list = append(list, item)
 	}
 
 	return list, nil
@@ -672,7 +737,7 @@ func (s *policyReportStore) FetchClusterResources(filter api.Filter) ([]*api.Res
 
 func (s *policyReportStore) FetchClusterSources() ([]string, error) {
 	list := make([]string, 0)
-	rows, err := s.db.Query(`SELECT DISTINCT source FROM policy_report_result as result WHERE source != "" AND resource_namespace == "" ORDER BY source ASC`)
+	rows, err := s.db.Query(`SELECT DISTINCT source FROM policy_report WHERE source != "" AND namespace == "" ORDER BY source ASC`)
 	if err != nil {
 		return list, err
 	}
@@ -692,7 +757,7 @@ func (s *policyReportStore) FetchClusterSources() ([]string, error) {
 
 func (s *policyReportStore) FetchNamespacedSources() ([]string, error) {
 	list := make([]string, 0)
-	rows, err := s.db.Query(`SELECT DISTINCT source FROM policy_report_result as result WHERE source != "" AND resource_namespace != "" ORDER BY source ASC`)
+	rows, err := s.db.Query(`SELECT DISTINCT source FROM policy_report WHERE source != "" AND namespace != "" ORDER BY source ASC`)
 	if err != nil {
 		return list, err
 	}
@@ -713,7 +778,7 @@ func (s *policyReportStore) FetchNamespacedSources() ([]string, error) {
 func (s *policyReportStore) FetchNamespaces(filter api.Filter) ([]string, error) {
 	list := make([]string, 0)
 
-	where, args := generateFilterWhere(filter, []string{"sources", "categories", "policies", "rules"})
+	where, args := generateFilterWhere(filter, []string{"sources", "categories", "policies"})
 	if len(where) > 0 {
 		where = " AND " + where
 	}
@@ -723,7 +788,7 @@ func (s *policyReportStore) FetchNamespaces(filter api.Filter) ([]string, error)
 		join = " JOIN policy_report as report ON result.policy_report_id = report.id"
 	}
 
-	rows, err := s.db.Query(`SELECT DISTINCT resource_namespace FROM policy_report_result as result`+join+` WHERE resource_namespace != ""`+where+` ORDER BY resource_namespace ASC`, args...)
+	rows, err := s.db.Query(`SELECT DISTINCT result.namespace FROM policy_report_filter as result`+join+` WHERE result.namespace != ""`+where+` ORDER BY result.namespace ASC`, args...)
 	if err != nil {
 		return list, err
 	}
@@ -762,7 +827,7 @@ func (s *policyReportStore) FetchNamespacedStatusCounts(filter api.Filter) ([]ap
 
 	statusCounts := make([]api.NamespacedStatusCount, 0, 5)
 
-	where, args := generateFilterWhere(filter, []string{"sources", "categories", "policies", "rules", "kinds", "namespaces", "status", "severities"})
+	where, args := generateFilterWhere(filter, []string{"sources", "categories", "policies", "kinds", "filter_namespaces", "status", "severities"})
 	if len(where) > 0 {
 		where = " AND " + where
 	}
@@ -773,10 +838,10 @@ func (s *policyReportStore) FetchNamespacedStatusCounts(filter api.Filter) ([]ap
 	}
 
 	rows, err := s.db.Query(`
-    SELECT COUNT(result.id) as counter, resource_namespace, status 
-    FROM policy_report_result as result`+join+` WHERE resource_namespace != ""`+where+`
-    GROUP BY resource_namespace, status 
-    ORDER BY resource_namespace ASC`, args...)
+    SELECT SUM(result.count) as counter, result.namespace, status 
+    FROM policy_report_filter as result`+join+` WHERE result.namespace != ""`+where+`
+    GROUP BY result.namespace, status 
+    ORDER BY result.namespace ASC`, args...)
 	if err != nil {
 		return statusCounts, err
 	}
@@ -872,7 +937,7 @@ func (s *policyReportStore) FetchStatusCounts(filter api.Filter) ([]api.StatusCo
 
 	statusCounts := make([]api.StatusCount, 0, len(list))
 
-	where, args := generateFilterWhere(filter, []string{"sources", "categories", "policies", "rules", "kinds", "status", "severities"})
+	where, args := generateFilterWhere(filter, []string{"sources", "categories", "policies", "kinds", "status", "severities"})
 	if len(where) > 0 {
 		where = " AND " + where
 	}
@@ -883,8 +948,8 @@ func (s *policyReportStore) FetchStatusCounts(filter api.Filter) ([]api.StatusCo
 	}
 
 	rows, err := s.db.Query(`
-    SELECT COUNT(result.id) as counter, status 
-    FROM policy_report_result as result`+join+` WHERE resource_namespace = ""`+where+`
+    SELECT SUM(result.count) as counter, status 
+    FROM policy_report_filter as result`+join+` WHERE result.namespace = ""`+where+`
     GROUP BY status`, args...)
 	if err != nil {
 		return statusCounts, err
@@ -1171,6 +1236,51 @@ func (s *policyReportStore) persistResults(report v1alpha2.ReportInterface) erro
 	return nil
 }
 
+func (s *policyReportStore) persistFilterValues(report v1alpha2.ReportInterface) error {
+	var vals []interface{}
+	var sqlStr string
+
+	values := api.ExtractFilterValues(report)
+
+	bulks := chunkSlice(values, 50)
+
+	for _, list := range bulks {
+		sqlStr = filterInsertBaseSQL
+		vals = make([]interface{}, 0, len(list)*18)
+
+		for _, result := range list {
+			sqlStr += "(?,?,?,?,?,?,?,?,?),"
+
+			vals = append(
+				vals,
+				result.ReportID,
+				result.Namespace,
+				result.Policy,
+				result.Result,
+				result.Severity,
+				result.Category,
+				result.Source,
+				result.Kind,
+				result.Count,
+			)
+		}
+
+		sqlStr = sqlStr[0 : len(sqlStr)-1]
+		rstmt, err := s.db.Prepare(sqlStr)
+		if err != nil {
+			return err
+		}
+		defer rstmt.Close()
+
+		_, err = rstmt.Exec(vals...)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
 func (s *policyReportStore) fetchResults(reportID string) ([]v1alpha2.PolicyReportResult, error) {
 	results := make([]v1alpha2.PolicyReportResult, 0)
 
@@ -1295,6 +1405,9 @@ func generateFilterWhere(filter api.Filter, active []string) (string, []interfac
 	}
 	if contains("namespaces", active) {
 		argCounter, where, args = appendWhere(filter.Namespaces, "result.resource_namespace", where, args, argCounter)
+	}
+	if contains("filter_namespaces", active) {
+		argCounter, where, args = appendWhere(filter.Namespaces, "result.namespace", where, args, argCounter)
 	}
 	if contains("policies", active) {
 		argCounter, where, args = appendWhere(filter.Policies, "result.policy", where, args, argCounter)
@@ -1444,8 +1557,8 @@ func NewDatabase(dbFile string) (*sql.DB, error) {
 	return sql.Open("sqlite3", dbFile+"?cache=shared")
 }
 
-func chunkSlice(slice []v1alpha2.PolicyReportResult, chunkSize int) [][]v1alpha2.PolicyReportResult {
-	var chunks [][]v1alpha2.PolicyReportResult
+func chunkSlice[K interface{}](slice []K, chunkSize int) [][]K {
+	var chunks [][]K
 	for i := 0; i < len(slice); i += chunkSize {
 		end := i + chunkSize
 
