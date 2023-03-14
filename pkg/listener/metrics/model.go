@@ -15,6 +15,7 @@ const (
 )
 
 const ReportLabelPrefix = "label:"
+const ReportPropertyPrefix = "property:"
 
 var LabelGeneratorMapping = map[string]LabelCallback{
 	"namespace": func(m map[string]string, pr v1alpha2.ReportInterface, _ v1alpha2.PolicyReportResult) {
@@ -70,8 +71,20 @@ func CreateLabelGenerator(labels []string, names []string) LabelGenerator {
 			chains = append(chains, func(m map[string]string, pr v1alpha2.ReportInterface, _ v1alpha2.PolicyReportResult) {
 				m[names[lIndex]] = pr.GetLabels()[label]
 			})
-		}
-		if callback, ok := LabelGeneratorMapping[label]; ok {
+		} else if strings.HasPrefix(label, ReportPropertyPrefix) {
+			label := strings.TrimPrefix(label, ReportPropertyPrefix)
+			pIndex := index
+
+			chains = append(chains, func(m map[string]string, _ v1alpha2.ReportInterface, r v1alpha2.PolicyReportResult) {
+				val := ""
+
+				if r.Properties != nil {
+					val = r.Properties[label]
+				}
+
+				m[names[pIndex]] = val
+			})
+		} else if callback, ok := LabelGeneratorMapping[label]; ok {
 			chains = append(chains, callback)
 		}
 	}
