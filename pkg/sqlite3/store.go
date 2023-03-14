@@ -1490,15 +1490,6 @@ func contains(source string, sources []string) bool {
 	return false
 }
 
-func convertSliveToJSON(m []string) string {
-	str, err := json.Marshal(m)
-	if err != nil {
-		return "[]"
-	}
-
-	return string(str)
-}
-
 func convertMapToJSON(m map[string]string) string {
 	str, err := json.Marshal(m)
 	if err != nil {
@@ -1513,25 +1504,6 @@ func convertJSONToMap(s string) map[string]string {
 	_ = json.Unmarshal([]byte(s), &m)
 
 	return m
-}
-
-func convertJSONToSlice(s string) []string {
-	m := make([]string, 0)
-	_ = json.Unmarshal([]byte(s), &m)
-
-	return m
-}
-
-func appendUnique(list, values []string) []string {
-	for _, v := range values {
-		if contains(v, list) {
-			continue
-		}
-
-		list = append(list, v)
-	}
-
-	return list
 }
 
 // NewPolicyReportStore construct a PolicyReportStore
