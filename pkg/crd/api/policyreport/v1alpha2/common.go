@@ -240,6 +240,14 @@ func (r *PolicyReportResult) HasResource() bool {
 	return len(r.Resources) > 0
 }
 
+func (r *PolicyReportResult) GetKind() string {
+	if !r.HasResource() {
+		return ""
+	}
+
+	return r.GetResource().Kind
+}
+
 func (r *PolicyReportResult) GetID() string {
 	if r.ID != "" {
 		return r.ID

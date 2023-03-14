@@ -3,11 +3,11 @@ package listener
 import (
 	"sync"
 
+	corev1 "k8s.io/api/core/v1"
+
 	"github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
 	"github.com/kyverno/policy-reporter/pkg/report"
 	"github.com/kyverno/policy-reporter/pkg/target"
-
-	corev1 "k8s.io/api/core/v1"
 )
 
 const SendResults = "send_results_listener"
