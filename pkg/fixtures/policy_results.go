@@ -24,6 +24,7 @@ var PassResult = v1alpha2.PolicyReportResult{
 		Namespace:  "test",
 		UID:        "536ab69f-1b3c-4bd9-9ba4-274a56188409",
 	}},
+	Properties: map[string]string{"xyz": "test"},
 }
 
 var PassPodResult = v1alpha2.PolicyReportResult{
@@ -43,6 +44,7 @@ var PassPodResult = v1alpha2.PolicyReportResult{
 		Namespace:  "test",
 		UID:        "536ab69f-1b3c-4bd9-9ba4-274a56188419",
 	}},
+	Properties: map[string]string{},
 }
 
 var TrivyResult = v1alpha2.PolicyReportResult{

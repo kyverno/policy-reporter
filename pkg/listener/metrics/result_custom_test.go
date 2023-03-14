@@ -17,7 +17,7 @@ import (
 )
 
 func Test_CustomResultMetricGeneration(t *testing.T) {
-	gauge := metrics.RegisterCustomResultGauge("policy_report_custom_result", []string{"namespace", "policy", "status", "source", "app"})
+	gauge := metrics.RegisterCustomResultGauge("policy_report_custom_result", []string{"namespace", "policy", "status", "source", "app", "xyz"})
 
 	report1 := &v1alpha2.PolicyReport{
 		ObjectMeta: v1.ObjectMeta{
@@ -44,7 +44,7 @@ func Test_CustomResultMetricGeneration(t *testing.T) {
 	filter := metrics.NewResultFilter(validate.RuleSets{}, validate.RuleSets{}, validate.RuleSets{Exclude: []string{"disallow-policy"}}, validate.RuleSets{}, validate.RuleSets{})
 
 	t.Run("Added Metric", func(t *testing.T) {
-		handler := metrics.CreateCustomResultMetricsListener(filter, gauge, metrics.CreateLabelGenerator([]string{"namespace", "policy", "status", "source", "label:app"}, []string{"namespace", "policy", "status", "source", "app"}))
+		handler := metrics.CreateCustomResultMetricsListener(filter, gauge, metrics.CreateLabelGenerator([]string{"namespace", "policy", "status", "source", "label:app", "property:xyz"}, []string{"namespace", "policy", "status", "source", "app", "xyz"}))
 		handler(report.LifecycleEvent{Type: report.Added, PolicyReport: report1})
 
 		metricFam, err := prometheus.DefaultGatherer.Gather()
@@ -69,7 +69,7 @@ func Test_CustomResultMetricGeneration(t *testing.T) {
 	t.Run("Modified Metric", func(t *testing.T) {
 		gauge.Reset()
 
-		handler := metrics.CreateCustomResultMetricsListener(filter, gauge, metrics.CreateLabelGenerator([]string{"namespace", "policy", "status", "source", "label:app"}, []string{"namespace", "policy", "status", "source", "app"}))
+		handler := metrics.CreateCustomResultMetricsListener(filter, gauge, metrics.CreateLabelGenerator([]string{"namespace", "policy", "status", "source", "label:app", "property:xyz"}, []string{"namespace", "policy", "status", "source", "app", "xyz"}))
 		handler(report.LifecycleEvent{Type: report.Added, PolicyReport: report1})
 		handler(report.LifecycleEvent{Type: report.Updated, PolicyReport: report2})
 
@@ -95,7 +95,7 @@ func Test_CustomResultMetricGeneration(t *testing.T) {
 	t.Run("Deleted Metric", func(t *testing.T) {
 		gauge.Reset()
 
-		handler := metrics.CreateCustomResultMetricsListener(filter, gauge, metrics.CreateLabelGenerator([]string{"namespace", "policy", "status", "source", "label:app"}, []string{"namespace", "policy", "status", "source", "app"}))
+		handler := metrics.CreateCustomResultMetricsListener(filter, gauge, metrics.CreateLabelGenerator([]string{"namespace", "policy", "status", "source", "label:app", "property:xyz"}, []string{"namespace", "policy", "status", "source", "app", "xyz"}))
 		handler(report.LifecycleEvent{Type: report.Added, PolicyReport: report1})
 		handler(report.LifecycleEvent{Type: report.Updated, PolicyReport: report2})
 		handler(report.LifecycleEvent{Type: report.Deleted, PolicyReport: report2})
@@ -114,7 +114,7 @@ func Test_CustomResultMetricGeneration(t *testing.T) {
 	t.Run("Decrease Metric", func(t *testing.T) {
 		gauge.Reset()
 
-		handler := metrics.CreateCustomResultMetricsListener(filter, gauge, metrics.CreateLabelGenerator([]string{"namespace", "policy", "status", "source", "label:app"}, []string{"namespace", "policy", "status", "source", "app"}))
+		handler := metrics.CreateCustomResultMetricsListener(filter, gauge, metrics.CreateLabelGenerator([]string{"namespace", "policy", "status", "source", "label:app", "property:xyz"}, []string{"namespace", "policy", "status", "source", "app", "xyz"}))
 		handler(report.LifecycleEvent{Type: report.Added, PolicyReport: report1})
 		handler(report.LifecycleEvent{Type: report.Added, PolicyReport: report1})
 		handler(report.LifecycleEvent{Type: report.Deleted, PolicyReport: report1})
@@ -190,6 +190,15 @@ func testCustomResultMetricLabels(metric *ioprometheusclient.Metric, result v1al
 		return fmt.Errorf("unexpected Name Label: %s", name)
 	}
 	if value := *metric.Label[index].Value; value != string(result.Result) {
+		return fmt.Errorf("unexpected Status Label Value: %s", value)
+	}
+
+	index++
+
+	if name := *metric.Label[index].Name; name != "xyz" {
+		return fmt.Errorf("unexpected Name Label: %s", name)
+	}
+	if value := *metric.Label[index].Value; value != result.Properties["xyz"] {
 		return fmt.Errorf("unexpected Status Label Value: %s", value)
 	}
 
