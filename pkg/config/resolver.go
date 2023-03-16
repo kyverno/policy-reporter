@@ -413,13 +413,14 @@ func (r *Resolver) Logger() (*zap.Logger, error) {
 	}
 
 	config := zap.Config{
-		Level:            zap.NewAtomicLevelAt(zapcore.Level(r.config.Logging.LogLevel)),
-		Development:      r.config.Logging.Development,
-		Sampling:         sampling,
-		Encoding:         ouput,
-		EncoderConfig:    encoder,
-		OutputPaths:      []string{"stderr"},
-		ErrorOutputPaths: []string{"stderr"},
+		Level:             zap.NewAtomicLevelAt(zapcore.Level(r.config.Logging.LogLevel)),
+		Development:       r.config.Logging.Development,
+		Sampling:          sampling,
+		Encoding:          ouput,
+		EncoderConfig:     encoder,
+		DisableStacktrace: !r.config.Logging.Development,
+		OutputPaths:       []string{"stderr"},
+		ErrorOutputPaths:  []string{"stderr"},
 	}
 
 	logger, err := config.Build()

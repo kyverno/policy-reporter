@@ -464,3 +464,17 @@ func Test_SMTP(t *testing.T) {
 		}
 	})
 }
+
+func Test_ResolveLogger(t *testing.T) {
+	resolver := config.NewResolver(testConfig, &rest.Config{})
+
+	logger1, _ := resolver.Logger()
+	if logger1 == nil {
+		t.Error("Error: Should return Logger")
+	}
+
+	logger2, _ := resolver.Logger()
+	if logger1 != logger2 {
+		t.Error("A second call resolver.Mapper() should return the cached first cache")
+	}
+}
