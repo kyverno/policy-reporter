@@ -1,31 +1,31 @@
 package listener
 
 import (
-	"log"
+	"go.uber.org/zap"
 
 	"github.com/kyverno/policy-reporter/pkg/report"
 )
 
 const Store = "store_listener"
 
-func NewStoreListener(store report.PolicyReportStore) report.PolicyReportListener {
+func NewStoreListener(store report.PolicyReportStore, logger *zap.Logger) report.PolicyReportListener {
 	return func(event report.LifecycleEvent) {
 		if event.Type == report.Deleted {
-			logOnError("remove", event.PolicyReport.GetName(), store.Remove(event.PolicyReport.GetID()))
+			logOnError(logger, "remove", event.PolicyReport.GetName(), store.Remove(event.PolicyReport.GetID()))
 			return
 		}
 
 		if event.Type == report.Updated {
-			logOnError("update", event.PolicyReport.GetName(), store.Update(event.PolicyReport))
+			logOnError(logger, "update", event.PolicyReport.GetName(), store.Update(event.PolicyReport))
 			return
 		}
 
-		logOnError("add", event.PolicyReport.GetName(), store.Add(event.PolicyReport))
+		logOnError(logger, "add", event.PolicyReport.GetName(), store.Add(event.PolicyReport))
 	}
 }
 
-func logOnError(operation, name string, err error) {
-	if err != nil {
-		log.Printf("[ERROR] Failed to %s Policy Report %s (%s)\n", operation, name, err.Error())
+func logOnError(logger *zap.Logger, operation, name string, err error) {
+	if logger != nil && err != nil {
+		logger.Error("failed to "+operation+" policy report", zap.String("name", name), zap.Error(err))
 	}
 }

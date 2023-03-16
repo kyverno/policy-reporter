@@ -96,6 +96,14 @@ networkPolicy:
       port: 6443
   ingress: []
 
+logging:
+  encoding: console # possible encodings are console and json
+  logLevel: 0 # default info
+  development: false # more human readable structure, enables stacktraces and removes log sampling
+
+api:
+  logging: false # enable API access and error logging
+
 # REST API
 rest:
   enabled: false

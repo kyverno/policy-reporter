@@ -3,13 +3,12 @@ package cmd
 import (
 	"context"
 	"flag"
-	"log"
 
 	"github.com/spf13/cobra"
+	"go.uber.org/zap"
 	"golang.org/x/sync/errgroup"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
-	"k8s.io/klog"
 
 	"github.com/kyverno/policy-reporter/pkg/config"
 	"github.com/kyverno/policy-reporter/pkg/listener"
@@ -39,6 +38,10 @@ func newRunCMD() *cobra.Command {
 			k8sConfig.Burst = c.K8sClient.Burst
 
 			resolver := config.NewResolver(c, k8sConfig)
+			logger, err := resolver.Logger()
+			if err != nil {
+				return err
+			}
 
 			client, err := resolver.PolicyReportClient()
 			if err != nil {
@@ -61,19 +64,19 @@ func newRunCMD() *cobra.Command {
 					return err
 				}
 
-				log.Println("[INFO] REST api enabled")
+				logger.Info("REST api enabled")
 				resolver.RegisterStoreListener(store)
 				server.RegisterV1Handler(store)
 			}
 
 			if c.Metrics.Enabled {
-				log.Println("[INFO] metrics enabled")
+				logger.Info("metrics enabled")
 				resolver.RegisterMetricsListener()
 				server.RegisterMetricsHandler()
 			}
 
 			if c.Profiling.Enabled {
-				log.Println("[INFO] pprof profiling enabled")
+				logger.Info("pprof profiling enabled")
 				server.RegisterProfilingHandler()
 			}
 
@@ -84,15 +87,15 @@ func newRunCMD() *cobra.Command {
 				}
 
 				elector.RegisterOnStart(func(c context.Context) {
-					klog.Info("started leadership")
+					logger.Info("started leadership")
 
 					resolver.RegisterSendResultListener()
 				}).RegisterOnNew(func(currentID, lockID string) {
 					if currentID != lockID {
-						klog.Infof("leadership by %s", currentID)
+						logger.Info("leadership", zap.String("leader", currentID))
 					}
 				}).RegisterOnStop(func() {
-					klog.Info("stopped leadership")
+					logger.Info("stopped leadership")
 
 					resolver.EventPublisher().UnregisterListener(listener.NewResults)
 				})
@@ -109,7 +112,7 @@ func newRunCMD() *cobra.Command {
 			g.Go(func() error {
 				stop := make(chan struct{})
 				defer close(stop)
-				log.Printf("[INFO] start client with %d workers", c.WorkerCount)
+				logger.Info("start client", zap.Int("worker", c.WorkerCount))
 
 				return client.Run(c.WorkerCount, stop)
 			})

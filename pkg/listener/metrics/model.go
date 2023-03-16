@@ -14,8 +14,10 @@ const (
 	Detailed Mode = "detailed"
 )
 
-const ReportLabelPrefix = "label:"
-const ReportPropertyPrefix = "property:"
+const (
+	ReportLabelPrefix    = "label:"
+	ReportPropertyPrefix = "property:"
+)
 
 var LabelGeneratorMapping = map[string]LabelCallback{
 	"namespace": func(m map[string]string, pr v1alpha2.ReportInterface, _ v1alpha2.PolicyReportResult) {

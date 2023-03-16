@@ -116,13 +116,13 @@ type client struct {
 }
 
 func (s *client) Send(result v1alpha2.PolicyReportResult) {
-	req, err := http.CreateJSONRequest(s.Name(), "POST", s.webhook, newPayload(result, s.customFields))
+	req, err := http.CreateJSONRequest(s.Name(), "POST", s.webhook, newPayload(result, s.customFields), s.Logger())
 	if err != nil {
 		return
 	}
 
 	resp, err := s.client.Do(req)
-	http.ProcessHTTPResponse(s.Name(), resp, err)
+	http.ProcessHTTPResponse(s.Name(), resp, err, s.Logger())
 }
 
 // NewClient creates a new teams.client to send Results to MS Teams

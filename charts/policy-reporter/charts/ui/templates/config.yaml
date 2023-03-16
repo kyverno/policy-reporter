@@ -38,3 +38,7 @@ data:
       {{- toYaml . | nindent 6 }}
     {{- end }}
 
+    {{- with .Values.logging }}
+    logging:
+      {{- toYaml . | nindent 6 }}
+    {{- end }}

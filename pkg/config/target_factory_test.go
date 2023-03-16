@@ -4,6 +4,7 @@ import (
 	"reflect"
 	"testing"
 
+	"go.uber.org/zap"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes/fake"
@@ -33,53 +34,55 @@ func newFakeClient() v1.SecretInterface {
 	}).CoreV1().Secrets("default")
 }
 
+var logger = zap.NewNop()
+
 func Test_ResolveTarget(t *testing.T) {
 	factory := config.NewTargetFactory("", nil)
 
 	t.Run("Loki", func(t *testing.T) {
-		clients := factory.LokiClients(testConfig.Loki)
+		clients := factory.LokiClients(testConfig.Loki, logger)
 		if len(clients) != 2 {
 			t.Errorf("Expected 2 Client, got %d clients", len(clients))
 		}
 	})
 	t.Run("Elasticsearch", func(t *testing.T) {
-		clients := factory.ElasticsearchClients(testConfig.Elasticsearch)
+		clients := factory.ElasticsearchClients(testConfig.Elasticsearch, logger)
 		if len(clients) != 2 {
 			t.Errorf("Expected 2 Client, got %d clients", len(clients))
 		}
 	})
 	t.Run("Slack", func(t *testing.T) {
-		clients := factory.SlackClients(testConfig.Slack)
+		clients := factory.SlackClients(testConfig.Slack, logger)
 		if len(clients) != 2 {
 			t.Error("Expected Client, got nil")
 		}
 	})
 	t.Run("Discord", func(t *testing.T) {
-		clients := factory.DiscordClients(testConfig.Discord)
+		clients := factory.DiscordClients(testConfig.Discord, logger)
 		if len(clients) != 2 {
 			t.Error("Expected Client, got nil")
 		}
 	})
 	t.Run("Teams", func(t *testing.T) {
-		clients := factory.TeamsClients(testConfig.Teams)
+		clients := factory.TeamsClients(testConfig.Teams, logger)
 		if len(clients) != 2 {
 			t.Errorf("Expected 2 Client, got %d clients", len(clients))
 		}
 	})
 	t.Run("Webhook", func(t *testing.T) {
-		clients := factory.WebhookClients(testConfig.Webhook)
+		clients := factory.WebhookClients(testConfig.Webhook, logger)
 		if len(clients) != 2 {
 			t.Errorf("Expected 2 Client, got %d clients", len(clients))
 		}
 	})
 	t.Run("S3", func(t *testing.T) {
-		clients := factory.S3Clients(testConfig.S3)
+		clients := factory.S3Clients(testConfig.S3, logger)
 		if len(clients) != 2 {
 			t.Errorf("Expected 2 Client, got %d clients", len(clients))
 		}
 	})
 	t.Run("Kinesis", func(t *testing.T) {
-		clients := factory.KinesisClients(testConfig.Kinesis)
+		clients := factory.KinesisClients(testConfig.Kinesis, logger)
 		if len(clients) != 2 {
 			t.Errorf("Expected 2 Client, got %d clients", len(clients))
 		}
@@ -90,82 +93,82 @@ func Test_ResolveTargetWithoutHost(t *testing.T) {
 	factory := config.NewTargetFactory("", nil)
 
 	t.Run("Loki", func(t *testing.T) {
-		if len(factory.LokiClients(config.Loki{})) != 0 {
+		if len(factory.LokiClients(config.Loki{}, logger)) != 0 {
 			t.Error("Expected Client to be nil if no host is configured")
 		}
 	})
 	t.Run("Elasticsearch", func(t *testing.T) {
-		if len(factory.ElasticsearchClients(config.Elasticsearch{})) != 0 {
+		if len(factory.ElasticsearchClients(config.Elasticsearch{}, logger)) != 0 {
 			t.Error("Expected Client to be nil if no host is configured")
 		}
 	})
 	t.Run("Slack", func(t *testing.T) {
-		if len(factory.SlackClients(config.Slack{})) != 0 {
+		if len(factory.SlackClients(config.Slack{}, logger)) != 0 {
 			t.Error("Expected Client to be nil if no host is configured")
 		}
 	})
 	t.Run("Discord", func(t *testing.T) {
-		if len(factory.DiscordClients(config.Discord{})) != 0 {
+		if len(factory.DiscordClients(config.Discord{}, logger)) != 0 {
 			t.Error("Expected Client to be nil if no host is configured")
 		}
 	})
 	t.Run("Teams", func(t *testing.T) {
-		if len(factory.TeamsClients(config.Teams{})) != 0 {
+		if len(factory.TeamsClients(config.Teams{}, logger)) != 0 {
 			t.Error("Expected Client to be nil if no host is configured")
 		}
 	})
 	t.Run("Webhook", func(t *testing.T) {
-		if len(factory.WebhookClients(config.Webhook{})) != 0 {
+		if len(factory.WebhookClients(config.Webhook{}, logger)) != 0 {
 			t.Error("Expected Client to be nil if no host is configured")
 		}
 	})
 	t.Run("S3.Endoint", func(t *testing.T) {
-		if len(factory.S3Clients(config.S3{})) != 0 {
+		if len(factory.S3Clients(config.S3{}, logger)) != 0 {
 			t.Error("Expected Client to be nil if no endpoint is configured")
 		}
 	})
 	t.Run("S3.AccessKey", func(t *testing.T) {
-		if len(factory.S3Clients(config.S3{Endpoint: "https://storage.yandexcloud.net"})) != 0 {
+		if len(factory.S3Clients(config.S3{Endpoint: "https://storage.yandexcloud.net"}, logger)) != 0 {
 			t.Error("Expected Client to be nil if no accessKey is configured")
 		}
 	})
 	t.Run("S3.SecretAccessKey", func(t *testing.T) {
-		if len(factory.S3Clients(config.S3{Endpoint: "https://storage.yandexcloud.net", AccessKeyID: "access"})) != 0 {
+		if len(factory.S3Clients(config.S3{Endpoint: "https://storage.yandexcloud.net", AccessKeyID: "access"}, logger)) != 0 {
 			t.Error("Expected Client to be nil if no secretAccessKey is configured")
 		}
 	})
 	t.Run("S3.Region", func(t *testing.T) {
-		if len(factory.S3Clients(config.S3{Endpoint: "https://storage.yandexcloud.net", AccessKeyID: "access", SecretAccessKey: "secret"})) != 0 {
+		if len(factory.S3Clients(config.S3{Endpoint: "https://storage.yandexcloud.net", AccessKeyID: "access", SecretAccessKey: "secret"}, logger)) != 0 {
 			t.Error("Expected Client to be nil if no region is configured")
 		}
 	})
 	t.Run("S3.Bucket", func(t *testing.T) {
-		if len(factory.S3Clients(config.S3{Endpoint: "https://storage.yandexcloud.net", AccessKeyID: "access", SecretAccessKey: "secret", Region: "ru-central1"})) != 0 {
+		if len(factory.S3Clients(config.S3{Endpoint: "https://storage.yandexcloud.net", AccessKeyID: "access", SecretAccessKey: "secret", Region: "ru-central1"}, logger)) != 0 {
 			t.Error("Expected Client to be nil if no bucket is configured")
 		}
 	})
 	t.Run("Kinesis.Endoint", func(t *testing.T) {
-		if len(factory.KinesisClients(config.Kinesis{})) != 0 {
+		if len(factory.KinesisClients(config.Kinesis{}, logger)) != 0 {
 			t.Error("Expected Client to be nil if no endpoint is configured")
 		}
 	})
 	t.Run("Kinesis.AccessKey", func(t *testing.T) {
-		if len(factory.KinesisClients(config.Kinesis{Endpoint: "https://yds.serverless.yandexcloud.net"})) != 0 {
+		if len(factory.KinesisClients(config.Kinesis{Endpoint: "https://yds.serverless.yandexcloud.net"}, logger)) != 0 {
 			t.Error("Expected Client to be nil if no accessKey is configured")
 		}
 	})
 	t.Run("Kinesis.SecretAccessKey", func(t *testing.T) {
-		if len(factory.KinesisClients(config.Kinesis{Endpoint: "https://yds.serverless.yandexcloud.net", AccessKeyID: "access"})) != 0 {
+		if len(factory.KinesisClients(config.Kinesis{Endpoint: "https://yds.serverless.yandexcloud.net", AccessKeyID: "access"}, logger)) != 0 {
 			t.Error("Expected Client to be nil if no secretAccessKey is configured")
 		}
 	})
 	t.Run("Kinesis.Region", func(t *testing.T) {
-		if len(factory.KinesisClients(config.Kinesis{Endpoint: "https://yds.serverless.yandexcloud.net", AccessKeyID: "access", SecretAccessKey: "secret"})) != 0 {
+		if len(factory.KinesisClients(config.Kinesis{Endpoint: "https://yds.serverless.yandexcloud.net", AccessKeyID: "access", SecretAccessKey: "secret"}, logger)) != 0 {
 			t.Error("Expected Client to be nil if no region is configured")
 		}
 	})
 	t.Run("Kinesis.StreamName", func(t *testing.T) {
-		if len(factory.KinesisClients(config.Kinesis{Endpoint: "https://yds.serverless.yandexcloud.net", AccessKeyID: "access", SecretAccessKey: "secret", Region: "ru-central1"})) != 0 {
+		if len(factory.KinesisClients(config.Kinesis{Endpoint: "https://yds.serverless.yandexcloud.net", AccessKeyID: "access", SecretAccessKey: "secret", Region: "ru-central1"}, logger)) != 0 {
 			t.Error("Expected Client to be nil if no bucket is configured")
 		}
 	})
@@ -175,7 +178,7 @@ func Test_GetValuesFromSecret(t *testing.T) {
 	factory := config.NewTargetFactory("default", secrets.NewClient(newFakeClient()))
 
 	t.Run("Get Loki values from Secret", func(t *testing.T) {
-		clients := factory.LokiClients(config.Loki{SecretRef: secretName})
+		clients := factory.LokiClients(config.Loki{SecretRef: secretName}, logger)
 		if len(clients) != 1 {
 			t.Error("Expected one client created")
 		}
@@ -187,7 +190,7 @@ func Test_GetValuesFromSecret(t *testing.T) {
 	})
 
 	t.Run("Get Elasticsearch values from Secret", func(t *testing.T) {
-		clients := factory.ElasticsearchClients(config.Elasticsearch{SecretRef: secretName})
+		clients := factory.ElasticsearchClients(config.Elasticsearch{SecretRef: secretName}, logger)
 		if len(clients) != 1 {
 			t.Error("Expected one client created")
 		}
@@ -211,7 +214,7 @@ func Test_GetValuesFromSecret(t *testing.T) {
 	})
 
 	t.Run("Get Discord values from Secret", func(t *testing.T) {
-		clients := factory.DiscordClients(config.Discord{SecretRef: secretName})
+		clients := factory.DiscordClients(config.Discord{SecretRef: secretName}, logger)
 		if len(clients) != 1 {
 			t.Error("Expected one client created")
 		}
@@ -225,7 +228,7 @@ func Test_GetValuesFromSecret(t *testing.T) {
 	})
 
 	t.Run("Get MS Teams values from Secret", func(t *testing.T) {
-		clients := factory.TeamsClients(config.Teams{SecretRef: secretName})
+		clients := factory.TeamsClients(config.Teams{SecretRef: secretName}, logger)
 		if len(clients) != 1 {
 			t.Error("Expected one client created")
 		}
@@ -239,7 +242,7 @@ func Test_GetValuesFromSecret(t *testing.T) {
 	})
 
 	t.Run("Get Slack values from Secret", func(t *testing.T) {
-		clients := factory.SlackClients(config.Slack{SecretRef: secretName})
+		clients := factory.SlackClients(config.Slack{SecretRef: secretName}, logger)
 		if len(clients) != 1 {
 			t.Error("Expected one client created")
 		}
@@ -253,7 +256,7 @@ func Test_GetValuesFromSecret(t *testing.T) {
 	})
 
 	t.Run("Get Webhook Authentication Token from Secret", func(t *testing.T) {
-		clients := factory.WebhookClients(config.Webhook{SecretRef: secretName})
+		clients := factory.WebhookClients(config.Webhook{SecretRef: secretName}, logger)
 		if len(clients) != 1 {
 			t.Error("Expected one client created")
 		}
@@ -267,28 +270,28 @@ func Test_GetValuesFromSecret(t *testing.T) {
 	})
 
 	t.Run("Get S3 values from Secret", func(t *testing.T) {
-		clients := factory.S3Clients(config.S3{SecretRef: secretName, Endpoint: "endoint", Bucket: "bucket", Region: "region"})
+		clients := factory.S3Clients(config.S3{SecretRef: secretName, Endpoint: "endoint", Bucket: "bucket", Region: "region"}, logger)
 		if len(clients) != 1 {
 			t.Error("Expected one client created")
 		}
 	})
 
 	t.Run("Get Kinesis values from Secret", func(t *testing.T) {
-		clients := factory.KinesisClients(config.Kinesis{SecretRef: secretName, Endpoint: "endpoint", StreamName: "stream", Region: "region"})
+		clients := factory.KinesisClients(config.Kinesis{SecretRef: secretName, Endpoint: "endpoint", StreamName: "stream", Region: "region"}, logger)
 		if len(clients) != 1 {
 			t.Error("Expected one client created")
 		}
 	})
 
 	t.Run("Get none existing secret skips target", func(t *testing.T) {
-		clients := factory.LokiClients(config.Loki{SecretRef: "no-exist"})
+		clients := factory.LokiClients(config.Loki{SecretRef: "no-exist"}, logger)
 		if len(clients) != 0 {
 			t.Error("Expected client are skipped")
 		}
 	})
 
 	t.Run("Get CustomFields from Slack", func(t *testing.T) {
-		clients := factory.SlackClients(config.Slack{CustomFields: map[string]string{"field": "value"}, Webhook: "http://localhost"})
+		clients := factory.SlackClients(config.Slack{CustomFields: map[string]string{"field": "value"}, Webhook: "http://localhost"}, logger)
 		if len(clients) != 1 {
 			t.Error("Expected one client created")
 		}
@@ -301,7 +304,7 @@ func Test_GetValuesFromSecret(t *testing.T) {
 		}
 	})
 	t.Run("Get CustomFields from Discord", func(t *testing.T) {
-		clients := factory.DiscordClients(config.Discord{CustomFields: map[string]string{"field": "value"}, Webhook: "http://localhost"})
+		clients := factory.DiscordClients(config.Discord{CustomFields: map[string]string{"field": "value"}, Webhook: "http://localhost"}, logger)
 		if len(clients) != 1 {
 			t.Error("Expected one client created")
 		}
@@ -314,7 +317,7 @@ func Test_GetValuesFromSecret(t *testing.T) {
 		}
 	})
 	t.Run("Get CustomFields from MS Teams", func(t *testing.T) {
-		clients := factory.TeamsClients(config.Teams{CustomFields: map[string]string{"field": "value"}, Webhook: "http://localhost"})
+		clients := factory.TeamsClients(config.Teams{CustomFields: map[string]string{"field": "value"}, Webhook: "http://localhost"}, logger)
 		if len(clients) != 1 {
 			t.Error("Expected one client created")
 		}
@@ -327,7 +330,7 @@ func Test_GetValuesFromSecret(t *testing.T) {
 		}
 	})
 	t.Run("Get CustomFields from Elasticsearch", func(t *testing.T) {
-		clients := factory.ElasticsearchClients(config.Elasticsearch{CustomFields: map[string]string{"field": "value"}, Host: "http://localhost"})
+		clients := factory.ElasticsearchClients(config.Elasticsearch{CustomFields: map[string]string{"field": "value"}, Host: "http://localhost"}, logger)
 		if len(clients) != 1 {
 			t.Error("Expected one client created")
 		}
@@ -340,7 +343,7 @@ func Test_GetValuesFromSecret(t *testing.T) {
 		}
 	})
 	t.Run("Get CustomFields from Webhook", func(t *testing.T) {
-		clients := factory.WebhookClients(config.Webhook{CustomFields: map[string]string{"field": "value"}, Host: "http://localhost"})
+		clients := factory.WebhookClients(config.Webhook{CustomFields: map[string]string{"field": "value"}, Host: "http://localhost"}, logger)
 		if len(clients) != 1 {
 			t.Error("Expected one client created")
 		}
@@ -353,7 +356,7 @@ func Test_GetValuesFromSecret(t *testing.T) {
 		}
 	})
 	t.Run("Get CustomFields from Kinesis", func(t *testing.T) {
-		clients := factory.KinesisClients(testConfig.Kinesis)
+		clients := factory.KinesisClients(testConfig.Kinesis, logger)
 		if len(clients) < 1 {
 			t.Error("Expected one client created")
 		}
@@ -366,7 +369,7 @@ func Test_GetValuesFromSecret(t *testing.T) {
 		}
 	})
 	t.Run("Get CustomFields from S3", func(t *testing.T) {
-		clients := factory.S3Clients(testConfig.S3)
+		clients := factory.S3Clients(testConfig.S3, logger)
 		if len(clients) < 1 {
 			t.Error("Expected one client created")
 		}
@@ -379,7 +382,7 @@ func Test_GetValuesFromSecret(t *testing.T) {
 		}
 	})
 	t.Run("Get CustomLabels from Loki", func(t *testing.T) {
-		clients := factory.LokiClients(config.Loki{CustomLabels: map[string]string{"label": "value"}, Host: "http://localhost"})
+		clients := factory.LokiClients(config.Loki{CustomLabels: map[string]string{"label": "value"}, Host: "http://localhost"}, logger)
 		if len(clients) < 1 {
 			t.Error("Expected one client created")
 		}

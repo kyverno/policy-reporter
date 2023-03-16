@@ -2,9 +2,9 @@ package violations
 
 import (
 	"context"
-	"log"
 	"sync"
 
+	"go.uber.org/zap"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
@@ -16,6 +16,7 @@ type Generator struct {
 	client         api.Wgpolicyk8sV1alpha2Interface
 	filter         email.Filter
 	clusterReports bool
+	logger         *zap.Logger
 }
 
 func (o *Generator) GenerateData(ctx context.Context) ([]Source, error) {
@@ -56,7 +57,7 @@ func (o *Generator) GenerateData(ctx context.Context) ([]Source, error) {
 
 				s.AddClusterPassed(report.Summary.Pass)
 
-				defer log.Printf("[INFO] Processed ClusterPolicyReport '%s'\n", report.Name)
+				o.logger.Info("Processed PolicyRepor", zap.String("name", report.Name))
 
 				length := len(report.Results)
 				if length == 0 || length == report.Summary.Pass+report.Summary.Skip {
@@ -105,7 +106,7 @@ func (o *Generator) GenerateData(ctx context.Context) ([]Source, error) {
 
 			s.AddNamespacedPassed(report.Namespace, report.Summary.Pass)
 
-			defer log.Printf("[INFO] Processed PolicyReport '%s'\n", report.Name)
+			defer o.logger.Info("Processed PolicyRepor", zap.String("name", report.Name))
 
 			length := len(report.Results)
 			if length == 0 || length == report.Summary.Pass+report.Summary.Skip {
@@ -132,8 +133,8 @@ func (o *Generator) GenerateData(ctx context.Context) ([]Source, error) {
 	return list, nil
 }
 
-func NewGenerator(client api.Wgpolicyk8sV1alpha2Interface, filter email.Filter, clusterReports bool) *Generator {
-	return &Generator{client, filter, clusterReports}
+func NewGenerator(client api.Wgpolicyk8sV1alpha2Interface, filter email.Filter, clusterReports bool, logger *zap.Logger) *Generator {
+	return &Generator{client, filter, clusterReports, logger}
 }
 
 func FilterSources(sources []Source, filter email.Filter, clusterReports bool) []Source {

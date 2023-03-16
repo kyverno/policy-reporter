@@ -37,7 +37,8 @@ func Test_S3Target(t *testing.T) {
 
 		client := s3.NewClient(s3.Options{
 			ClientOptions: target.ClientOptions{
-				Name: "S3",
+				Name:   "S3",
+				Logger: fixtures.Logger,
 			},
 			CustomFields: map[string]string{"cluster": "name"},
 			S3:           &testClient{nil, callback},
@@ -51,7 +52,8 @@ func Test_S3Target(t *testing.T) {
 	t.Run("Name", func(t *testing.T) {
 		client := s3.NewClient(s3.Options{
 			ClientOptions: target.ClientOptions{
-				Name: "S3",
+				Name:   "S3",
+				Logger: fixtures.Logger,
 			},
 			S3: &testClient{},
 		})

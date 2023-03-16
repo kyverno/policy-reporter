@@ -1,11 +1,11 @@
 package send
 
 import (
-	"log"
 	"strings"
 	"sync"
 
 	"github.com/spf13/cobra"
+	"go.uber.org/zap"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
 
@@ -34,6 +34,10 @@ func NewViolationsCMD() *cobra.Command {
 			}
 
 			resolver := config.NewResolver(c, k8sConfig)
+			logger, err := resolver.Logger()
+			if err != nil {
+				return err
+			}
 
 			generator, err := resolver.ViolationsGenerator()
 			if err != nil {
@@ -42,7 +46,7 @@ func NewViolationsCMD() *cobra.Command {
 
 			data, err := generator.GenerateData(cmd.Context())
 			if err != nil {
-				log.Printf("[ERROR] failed to generate report data: %s\n", err)
+				logger.Error("failed to generate report data", zap.Error(err))
 				return err
 			}
 
@@ -55,23 +59,23 @@ func NewViolationsCMD() *cobra.Command {
 				defer wg.Done()
 
 				if len(c.EmailReports.Violations.To) == 0 {
-					log.Print("[INFO] skipped - no email configured")
+					logger.Info("skipped - no email configured")
 					return
 				}
 
 				report, err := reporter.Report(data, c.EmailReports.Violations.Format)
 				if err != nil {
-					log.Printf("[ERROR] failed to create report: %s\n", err)
+					logger.Error("failed to create report", zap.Error(err))
 					return
 				}
 
 				err = resolver.EmailClient().Send(report, c.EmailReports.Violations.To)
 				if err != nil {
-					log.Printf("[ERROR] failed to send report: %s\n", err)
+					logger.Error("failed to send report", zap.Error(err))
 					return
 				}
 
-				log.Printf("[INFO] email sent to %s\n", strings.Join(c.EmailReports.Violations.To, ", "))
+				logger.Sugar().Infof("email sent to %s\n", strings.Join(c.EmailReports.Summary.To, ", "))
 			}()
 
 			for _, ch := range c.EmailReports.Violations.Channels {
@@ -79,29 +83,29 @@ func NewViolationsCMD() *cobra.Command {
 					defer wg.Done()
 
 					if len(channel.To) == 0 {
-						log.Print("[INFO] skipped - no channel email configured")
+						logger.Info("skipped - no channel email configured")
 						return
 					}
 
 					sources := violations.FilterSources(data, config.EmailReportFilterFromConfig(channel.Filter), !channel.Filter.DisableClusterReports)
 					if len(sources) == 0 {
-						log.Printf("[INFO] skip email - no results to send")
+						logger.Info("skip email - no results to send")
 						return
 					}
 
 					report, err := reporter.Report(sources, channel.Format)
 					if err != nil {
-						log.Printf("[ERROR] failed to create report: %s\n", err)
+						logger.Error("failed to create report", zap.Error(err))
 						return
 					}
 
 					err = resolver.EmailClient().Send(report, channel.To)
 					if err != nil {
-						log.Printf("[ERROR] failed to send report: %s\n", err)
+						logger.Error("failed to send report", zap.Error(err))
 						return
 					}
 
-					log.Printf("[INFO] email sent to %s\n", strings.Join(channel.To, ", "))
+					logger.Sugar().Infof("email sent to %s\n", strings.Join(channel.To, ", "))
 				}(ch)
 			}
 

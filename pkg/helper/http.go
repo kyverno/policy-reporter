@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"html"
-	"log"
 	"net/http"
 )
 
@@ -18,7 +17,6 @@ func SendJSONResponse(w http.ResponseWriter, list interface{}, err error) {
 	}
 
 	if err := json.NewEncoder(w).Encode(list); err != nil {
-		log.Println(err)
 		w.WriteHeader(http.StatusInternalServerError)
 		fmt.Fprintf(w, `{ "message": "%s" }`, html.EscapeString(err.Error()))
 	}

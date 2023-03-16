@@ -8,9 +8,13 @@ import (
 	"testing"
 	"time"
 
+	"go.uber.org/zap"
+
 	"github.com/kyverno/policy-reporter/pkg/api"
 	"github.com/kyverno/policy-reporter/pkg/target"
 )
+
+var logger = zap.NewNop()
 
 func Test_NewServer(t *testing.T) {
 	rnd := rand.New(rand.NewSource(time.Now().Unix())).Float64()
@@ -20,7 +24,7 @@ func Test_NewServer(t *testing.T) {
 
 	port := int(rnd * 10000)
 
-	server := api.NewServer(make([]target.Client, 0), port, func() bool { return true })
+	server := api.NewServer(make([]target.Client, 0), port, logger, func() bool { return true })
 
 	server.RegisterMetricsHandler()
 	server.RegisterV1Handler(nil)

@@ -3,9 +3,9 @@ package config
 import (
 	"context"
 	"fmt"
-	"log"
 
 	_ "github.com/mattn/go-sqlite3"
+	"go.uber.org/zap"
 
 	"github.com/kyverno/policy-reporter/pkg/helper"
 	"github.com/kyverno/policy-reporter/pkg/kubernetes/secrets"
@@ -30,7 +30,7 @@ type TargetFactory struct {
 }
 
 // LokiClients resolver method
-func (f *TargetFactory) LokiClients(config Loki) []target.Client {
+func (f *TargetFactory) LokiClients(config Loki, logger *zap.Logger) []target.Client {
 	clients := make([]target.Client, 0)
 	if config.Name == "" {
 		config.Name = "Loki"
@@ -39,7 +39,7 @@ func (f *TargetFactory) LokiClients(config Loki) []target.Client {
 		config.Path = "/api/prom/push"
 	}
 
-	if loki := f.createLokiClient(config, Loki{}); loki != nil {
+	if loki := f.createLokiClient(config, Loki{}, logger); loki != nil {
 		clients = append(clients, loki)
 	}
 	for i, channel := range config.Channels {
@@ -47,7 +47,7 @@ func (f *TargetFactory) LokiClients(config Loki) []target.Client {
 			channel.Name = fmt.Sprintf("Loki Channel %d", i+1)
 		}
 
-		if loki := f.createLokiClient(channel, config); loki != nil {
+		if loki := f.createLokiClient(channel, config, logger); loki != nil {
 			clients = append(clients, loki)
 		}
 	}
@@ -56,13 +56,13 @@ func (f *TargetFactory) LokiClients(config Loki) []target.Client {
 }
 
 // ElasticsearchClients resolver method
-func (f *TargetFactory) ElasticsearchClients(config Elasticsearch) []target.Client {
+func (f *TargetFactory) ElasticsearchClients(config Elasticsearch, logger *zap.Logger) []target.Client {
 	clients := make([]target.Client, 0)
 	if config.Name == "" {
 		config.Name = "Elasticsearch"
 	}
 
-	if es := f.createElasticsearchClient(config, Elasticsearch{}); es != nil {
+	if es := f.createElasticsearchClient(config, Elasticsearch{}, logger); es != nil {
 		clients = append(clients, es)
 	}
 	for i, channel := range config.Channels {
@@ -70,7 +70,7 @@ func (f *TargetFactory) ElasticsearchClients(config Elasticsearch) []target.Clie
 			channel.Name = fmt.Sprintf("Elasticsearch Channel %d", i+1)
 		}
 
-		if es := f.createElasticsearchClient(channel, config); es != nil {
+		if es := f.createElasticsearchClient(channel, config, logger); es != nil {
 			clients = append(clients, es)
 		}
 	}
@@ -79,13 +79,13 @@ func (f *TargetFactory) ElasticsearchClients(config Elasticsearch) []target.Clie
 }
 
 // SlackClients resolver method
-func (f *TargetFactory) SlackClients(config Slack) []target.Client {
+func (f *TargetFactory) SlackClients(config Slack, logger *zap.Logger) []target.Client {
 	clients := make([]target.Client, 0)
 	if config.Name == "" {
 		config.Name = "Slack"
 	}
 
-	if es := f.createSlackClient(config, Slack{}); es != nil {
+	if es := f.createSlackClient(config, Slack{}, logger); es != nil {
 		clients = append(clients, es)
 	}
 	for i, channel := range config.Channels {
@@ -93,7 +93,7 @@ func (f *TargetFactory) SlackClients(config Slack) []target.Client {
 			channel.Name = fmt.Sprintf("Slack Channel %d", i+1)
 		}
 
-		if es := f.createSlackClient(channel, config); es != nil {
+		if es := f.createSlackClient(channel, config, logger); es != nil {
 			clients = append(clients, es)
 		}
 	}
@@ -102,13 +102,13 @@ func (f *TargetFactory) SlackClients(config Slack) []target.Client {
 }
 
 // DiscordClients resolver method
-func (f *TargetFactory) DiscordClients(config Discord) []target.Client {
+func (f *TargetFactory) DiscordClients(config Discord, logger *zap.Logger) []target.Client {
 	clients := make([]target.Client, 0)
 	if config.Name == "" {
 		config.Name = "Discord"
 	}
 
-	if es := f.createDiscordClient(config, Discord{}); es != nil {
+	if es := f.createDiscordClient(config, Discord{}, logger); es != nil {
 		clients = append(clients, es)
 	}
 	for i, channel := range config.Channels {
@@ -116,7 +116,7 @@ func (f *TargetFactory) DiscordClients(config Discord) []target.Client {
 			channel.Name = fmt.Sprintf("Discord Channel %d", i+1)
 		}
 
-		if es := f.createDiscordClient(channel, config); es != nil {
+		if es := f.createDiscordClient(channel, config, logger); es != nil {
 			clients = append(clients, es)
 		}
 	}
@@ -125,13 +125,13 @@ func (f *TargetFactory) DiscordClients(config Discord) []target.Client {
 }
 
 // TeamsClients resolver method
-func (f *TargetFactory) TeamsClients(config Teams) []target.Client {
+func (f *TargetFactory) TeamsClients(config Teams, logger *zap.Logger) []target.Client {
 	clients := make([]target.Client, 0)
 	if config.Name == "" {
 		config.Name = "Teams"
 	}
 
-	if es := f.createTeamsClient(config, Teams{}); es != nil {
+	if es := f.createTeamsClient(config, Teams{}, logger); es != nil {
 		clients = append(clients, es)
 	}
 	for i, channel := range config.Channels {
@@ -139,7 +139,7 @@ func (f *TargetFactory) TeamsClients(config Teams) []target.Client {
 			channel.Name = fmt.Sprintf("Teams Channel %d", i+1)
 		}
 
-		if es := f.createTeamsClient(channel, config); es != nil {
+		if es := f.createTeamsClient(channel, config, logger); es != nil {
 			clients = append(clients, es)
 		}
 	}
@@ -148,13 +148,13 @@ func (f *TargetFactory) TeamsClients(config Teams) []target.Client {
 }
 
 // WebhookClients resolver method
-func (f *TargetFactory) WebhookClients(config Webhook) []target.Client {
+func (f *TargetFactory) WebhookClients(config Webhook, logger *zap.Logger) []target.Client {
 	clients := make([]target.Client, 0)
 	if config.Name == "" {
 		config.Name = "Webhook"
 	}
 
-	if es := f.createWebhookClient(config, Webhook{}); es != nil {
+	if es := f.createWebhookClient(config, Webhook{}, logger); es != nil {
 		clients = append(clients, es)
 	}
 	for i, channel := range config.Channels {
@@ -162,7 +162,7 @@ func (f *TargetFactory) WebhookClients(config Webhook) []target.Client {
 			channel.Name = fmt.Sprintf("Webhook Channel %d", i+1)
 		}
 
-		if es := f.createWebhookClient(channel, config); es != nil {
+		if es := f.createWebhookClient(channel, config, logger); es != nil {
 			clients = append(clients, es)
 		}
 	}
@@ -171,12 +171,12 @@ func (f *TargetFactory) WebhookClients(config Webhook) []target.Client {
 }
 
 // UIClient resolver method
-func (f *TargetFactory) UIClient(config UI) target.Client {
+func (f *TargetFactory) UIClient(config UI, logger *zap.Logger) target.Client {
 	if config.Host == "" {
 		return nil
 	}
 
-	log.Println("[INFO] UI configured")
+	logger.Info("UI configured")
 
 	return ui.NewClient(ui.Options{
 		ClientOptions: target.ClientOptions{
@@ -190,13 +190,13 @@ func (f *TargetFactory) UIClient(config UI) target.Client {
 }
 
 // S3Clients resolver method
-func (f *TargetFactory) S3Clients(config S3) []target.Client {
+func (f *TargetFactory) S3Clients(config S3, logger *zap.Logger) []target.Client {
 	clients := make([]target.Client, 0)
 	if config.Name == "" {
 		config.Name = "S3"
 	}
 
-	if es := f.createS3Client(config, S3{}); es != nil {
+	if es := f.createS3Client(config, S3{}, logger); es != nil {
 		clients = append(clients, es)
 	}
 	for i, channel := range config.Channels {
@@ -204,7 +204,7 @@ func (f *TargetFactory) S3Clients(config S3) []target.Client {
 			channel.Name = fmt.Sprintf("S3 Channel %d", i+1)
 		}
 
-		if es := f.createS3Client(channel, config); es != nil {
+		if es := f.createS3Client(channel, config, logger); es != nil {
 			clients = append(clients, es)
 		}
 	}
@@ -213,13 +213,13 @@ func (f *TargetFactory) S3Clients(config S3) []target.Client {
 }
 
 // KinesisClients resolver method
-func (f *TargetFactory) KinesisClients(config Kinesis) []target.Client {
+func (f *TargetFactory) KinesisClients(config Kinesis, logger *zap.Logger) []target.Client {
 	clients := make([]target.Client, 0)
 	if config.Name == "" {
 		config.Name = "Kinesis"
 	}
 
-	if es := f.createKinesisClient(config, Kinesis{}); es != nil {
+	if es := f.createKinesisClient(config, Kinesis{}, logger); es != nil {
 		clients = append(clients, es)
 	}
 	for i, channel := range config.Channels {
@@ -227,7 +227,7 @@ func (f *TargetFactory) KinesisClients(config Kinesis) []target.Client {
 			channel.Name = fmt.Sprintf("Kinesis Channel %d", i+1)
 		}
 
-		if es := f.createKinesisClient(channel, config); es != nil {
+		if es := f.createKinesisClient(channel, config, logger); es != nil {
 			clients = append(clients, es)
 		}
 	}
@@ -235,9 +235,9 @@ func (f *TargetFactory) KinesisClients(config Kinesis) []target.Client {
 	return clients
 }
 
-func (f *TargetFactory) createSlackClient(config Slack, parent Slack) target.Client {
+func (f *TargetFactory) createSlackClient(config Slack, parent Slack, logger *zap.Logger) target.Client {
 	if config.SecretRef != "" && f.secretClient != nil {
-		f.mapSecretValues(&config, config.SecretRef)
+		f.mapSecretValues(&config, config.SecretRef, logger)
 	}
 
 	if config.Webhook == "" {
@@ -252,7 +252,7 @@ func (f *TargetFactory) createSlackClient(config Slack, parent Slack) target.Cli
 		config.SkipExisting = parent.SkipExisting
 	}
 
-	log.Printf("[INFO] %s configured", config.Name)
+	logger.Sugar().Infof("%s configured", config.Name)
 
 	return slack.NewClient(slack.Options{
 		ClientOptions: target.ClientOptions{
@@ -260,6 +260,7 @@ func (f *TargetFactory) createSlackClient(config Slack, parent Slack) target.Cli
 			SkipExistingOnStartup: config.SkipExisting,
 			ResultFilter:          createResultFilter(config.Filter, config.MinimumPriority, config.Sources),
 			ReportFilter:          createReprotFilter(config.Filter),
+			Logger:                logger,
 		},
 		Webhook:      config.Webhook,
 		CustomFields: config.CustomFields,
@@ -267,9 +268,9 @@ func (f *TargetFactory) createSlackClient(config Slack, parent Slack) target.Cli
 	})
 }
 
-func (f *TargetFactory) createLokiClient(config Loki, parent Loki) target.Client {
+func (f *TargetFactory) createLokiClient(config Loki, parent Loki, logger *zap.Logger) target.Client {
 	if config.SecretRef != "" {
-		f.mapSecretValues(&config, config.SecretRef)
+		f.mapSecretValues(&config, config.SecretRef, logger)
 	}
 
 	if config.Host == "" && parent.Host == "" {
@@ -298,7 +299,7 @@ func (f *TargetFactory) createLokiClient(config Loki, parent Loki) target.Client
 		config.Path = parent.Path
 	}
 
-	log.Printf("[INFO] %s configured", config.Name)
+	logger.Sugar().Infof("%s configured", config.Name)
 
 	return loki.NewClient(loki.Options{
 		ClientOptions: target.ClientOptions{
@@ -313,9 +314,9 @@ func (f *TargetFactory) createLokiClient(config Loki, parent Loki) target.Client
 	})
 }
 
-func (f *TargetFactory) createElasticsearchClient(config Elasticsearch, parent Elasticsearch) target.Client {
+func (f *TargetFactory) createElasticsearchClient(config Elasticsearch, parent Elasticsearch, logger *zap.Logger) target.Client {
 	if config.SecretRef != "" && f.secretClient != nil {
-		f.mapSecretValues(&config, config.SecretRef)
+		f.mapSecretValues(&config, config.SecretRef, logger)
 	}
 
 	if config.Host == "" && parent.Host == "" {
@@ -360,7 +361,7 @@ func (f *TargetFactory) createElasticsearchClient(config Elasticsearch, parent E
 		config.SkipExisting = parent.SkipExisting
 	}
 
-	log.Printf("[INFO] %s configured", config.Name)
+	logger.Sugar().Infof("%s configured", config.Name)
 
 	return elasticsearch.NewClient(elasticsearch.Options{
 		ClientOptions: target.ClientOptions{
@@ -368,6 +369,7 @@ func (f *TargetFactory) createElasticsearchClient(config Elasticsearch, parent E
 			SkipExistingOnStartup: config.SkipExisting,
 			ResultFilter:          createResultFilter(config.Filter, config.MinimumPriority, config.Sources),
 			ReportFilter:          createReprotFilter(config.Filter),
+			Logger:                logger,
 		},
 		Host:         config.Host,
 		Username:     config.Username,
@@ -379,9 +381,9 @@ func (f *TargetFactory) createElasticsearchClient(config Elasticsearch, parent E
 	})
 }
 
-func (f *TargetFactory) createDiscordClient(config Discord, parent Discord) target.Client {
+func (f *TargetFactory) createDiscordClient(config Discord, parent Discord, logger *zap.Logger) target.Client {
 	if config.SecretRef != "" && f.secretClient != nil {
-		f.mapSecretValues(&config, config.SecretRef)
+		f.mapSecretValues(&config, config.SecretRef, logger)
 	}
 
 	if config.Webhook == "" {
@@ -396,7 +398,7 @@ func (f *TargetFactory) createDiscordClient(config Discord, parent Discord) targ
 		config.SkipExisting = parent.SkipExisting
 	}
 
-	log.Printf("[INFO] %s configured", config.Name)
+	logger.Sugar().Infof("%s configured", config.Name)
 
 	return discord.NewClient(discord.Options{
 		ClientOptions: target.ClientOptions{
@@ -404,6 +406,7 @@ func (f *TargetFactory) createDiscordClient(config Discord, parent Discord) targ
 			SkipExistingOnStartup: config.SkipExisting,
 			ResultFilter:          createResultFilter(config.Filter, config.MinimumPriority, config.Sources),
 			ReportFilter:          createReprotFilter(config.Filter),
+			Logger:                logger,
 		},
 		Webhook:      config.Webhook,
 		CustomFields: config.CustomFields,
@@ -411,9 +414,9 @@ func (f *TargetFactory) createDiscordClient(config Discord, parent Discord) targ
 	})
 }
 
-func (f *TargetFactory) createTeamsClient(config Teams, parent Teams) target.Client {
+func (f *TargetFactory) createTeamsClient(config Teams, parent Teams, logger *zap.Logger) target.Client {
 	if config.SecretRef != "" && f.secretClient != nil {
-		f.mapSecretValues(&config, config.SecretRef)
+		f.mapSecretValues(&config, config.SecretRef, logger)
 	}
 
 	if config.Webhook == "" {
@@ -440,7 +443,7 @@ func (f *TargetFactory) createTeamsClient(config Teams, parent Teams) target.Cli
 		config.SkipTLS = parent.SkipTLS
 	}
 
-	log.Printf("[INFO] %s configured", config.Name)
+	logger.Sugar().Infof("%s configured", config.Name)
 
 	return teams.NewClient(teams.Options{
 		ClientOptions: target.ClientOptions{
@@ -448,6 +451,7 @@ func (f *TargetFactory) createTeamsClient(config Teams, parent Teams) target.Cli
 			SkipExistingOnStartup: config.SkipExisting,
 			ResultFilter:          createResultFilter(config.Filter, config.MinimumPriority, config.Sources),
 			ReportFilter:          createReprotFilter(config.Filter),
+			Logger:                logger,
 		},
 		Webhook:      config.Webhook,
 		CustomFields: config.CustomFields,
@@ -455,9 +459,9 @@ func (f *TargetFactory) createTeamsClient(config Teams, parent Teams) target.Cli
 	})
 }
 
-func (f *TargetFactory) createWebhookClient(config Webhook, parent Webhook) target.Client {
+func (f *TargetFactory) createWebhookClient(config Webhook, parent Webhook, logger *zap.Logger) target.Client {
 	if config.SecretRef != "" && f.secretClient != nil {
-		f.mapSecretValues(&config, config.SecretRef)
+		f.mapSecretValues(&config, config.SecretRef, logger)
 	}
 
 	if config.Host == "" {
@@ -492,7 +496,7 @@ func (f *TargetFactory) createWebhookClient(config Webhook, parent Webhook) targ
 		config.Headers = headers
 	}
 
-	log.Printf("[INFO] %s configured", config.Name)
+	logger.Sugar().Infof("%s configured", config.Name)
 
 	return webhook.NewClient(webhook.Options{
 		ClientOptions: target.ClientOptions{
@@ -500,6 +504,7 @@ func (f *TargetFactory) createWebhookClient(config Webhook, parent Webhook) targ
 			SkipExistingOnStartup: config.SkipExisting,
 			ResultFilter:          createResultFilter(config.Filter, config.MinimumPriority, config.Sources),
 			ReportFilter:          createReprotFilter(config.Filter),
+			Logger:                logger,
 		},
 		Host:         config.Host,
 		Headers:      config.Headers,
@@ -508,9 +513,9 @@ func (f *TargetFactory) createWebhookClient(config Webhook, parent Webhook) targ
 	})
 }
 
-func (f *TargetFactory) createS3Client(config S3, parent S3) target.Client {
+func (f *TargetFactory) createS3Client(config S3, parent S3, logger *zap.Logger) target.Client {
 	if config.SecretRef != "" && f.secretClient != nil {
-		f.mapSecretValues(&config, config.SecretRef)
+		f.mapSecretValues(&config, config.SecretRef, logger)
 	}
 
 	if config.Endpoint == "" && parent.Endpoint == "" {
@@ -519,29 +524,31 @@ func (f *TargetFactory) createS3Client(config S3, parent S3) target.Client {
 		config.Endpoint = parent.Endpoint
 	}
 
+	sugar := logger.Sugar()
+
 	if config.AccessKeyID == "" && parent.AccessKeyID == "" {
-		log.Printf("[ERROR] %s.AccessKeyID has not been declared", config.Name)
+		sugar.Errorf("%s.AccessKeyID has not been declared", config.Name)
 		return nil
 	} else if config.AccessKeyID == "" {
 		config.AccessKeyID = parent.AccessKeyID
 	}
 
 	if config.SecretAccessKey == "" && parent.SecretAccessKey == "" {
-		log.Printf("[ERROR] %s.SecretAccessKey has not been declared", config.Name)
+		sugar.Errorf("%s.SecretAccessKey has not been declared", config.Name)
 		return nil
 	} else if config.SecretAccessKey == "" {
 		config.SecretAccessKey = parent.SecretAccessKey
 	}
 
 	if config.Region == "" && parent.Region == "" {
-		log.Printf("[ERROR] %s.Region has not been declared", config.Name)
+		sugar.Errorf("%s.Region has not been declared", config.Name)
 		return nil
 	} else if config.Region == "" {
 		config.Region = parent.Region
 	}
 
 	if config.Bucket == "" && parent.Bucket == "" {
-		log.Printf("[ERROR] %s.Bucket has not been declared", config.Name)
+		sugar.Errorf("%s.Bucket has not been declared", config.Name)
 		return nil
 	} else if config.Bucket == "" {
 		config.Bucket = parent.Bucket
@@ -570,7 +577,7 @@ func (f *TargetFactory) createS3Client(config S3, parent S3) target.Client {
 		config.PathStyle,
 	)
 
-	log.Printf("[INFO] %s configured", config.Name)
+	sugar.Infof("%s configured", config.Name)
 
 	return s3.NewClient(s3.Options{
 		ClientOptions: target.ClientOptions{
@@ -578,6 +585,7 @@ func (f *TargetFactory) createS3Client(config S3, parent S3) target.Client {
 			SkipExistingOnStartup: config.SkipExisting,
 			ResultFilter:          createResultFilter(config.Filter, config.MinimumPriority, config.Sources),
 			ReportFilter:          createReprotFilter(config.Filter),
+			Logger:                logger,
 		},
 		S3:           s3Client,
 		CustomFields: config.CustomFields,
@@ -585,9 +593,9 @@ func (f *TargetFactory) createS3Client(config S3, parent S3) target.Client {
 	})
 }
 
-func (f *TargetFactory) createKinesisClient(config Kinesis, parent Kinesis) target.Client {
+func (f *TargetFactory) createKinesisClient(config Kinesis, parent Kinesis, logger *zap.Logger) target.Client {
 	if config.SecretRef != "" && f.secretClient != nil {
-		f.mapSecretValues(&config, config.SecretRef)
+		f.mapSecretValues(&config, config.SecretRef, logger)
 	}
 
 	if config.Endpoint == "" && parent.Endpoint == "" {
@@ -596,29 +604,31 @@ func (f *TargetFactory) createKinesisClient(config Kinesis, parent Kinesis) targ
 		config.Endpoint = parent.Endpoint
 	}
 
+	sugar := logger.Sugar()
+
 	if config.AccessKeyID == "" && parent.AccessKeyID == "" {
-		log.Printf("[ERROR] %s.AccessKeyID has not been declared", config.Name)
+		sugar.Errorf("%s.AccessKeyID has not been declared", config.Name)
 		return nil
 	} else if config.AccessKeyID == "" {
 		config.AccessKeyID = parent.AccessKeyID
 	}
 
 	if config.SecretAccessKey == "" && parent.SecretAccessKey == "" {
-		log.Printf("[ERROR] %s.SecretAccessKey has not been declared", config.Name)
+		sugar.Errorf("%s.SecretAccessKey has not been declared", config.Name)
 		return nil
 	} else if config.SecretAccessKey == "" {
 		config.SecretAccessKey = parent.SecretAccessKey
 	}
 
 	if config.Region == "" && parent.Region == "" {
-		log.Printf("[ERROR] %s.Region has not been declared", config.Name)
+		sugar.Errorf("%s.Region has not been declared", config.Name)
 		return nil
 	} else if config.Region == "" {
 		config.Region = parent.Region
 	}
 
 	if config.StreamName == "" && parent.StreamName == "" {
-		log.Printf("[ERROR] %s.StreamName has not been declared", config.Name)
+		sugar.Errorf("%s.StreamName has not been declared", config.Name)
 		return nil
 	} else if config.StreamName == "" {
 		config.StreamName = parent.StreamName
@@ -640,7 +650,7 @@ func (f *TargetFactory) createKinesisClient(config Kinesis, parent Kinesis) targ
 		config.StreamName,
 	)
 
-	log.Printf("[INFO] %s configured", config.Name)
+	sugar.Infof("%s configured", config.Name)
 
 	return kinesis.NewClient(kinesis.Options{
 		ClientOptions: target.ClientOptions{
@@ -648,16 +658,17 @@ func (f *TargetFactory) createKinesisClient(config Kinesis, parent Kinesis) targ
 			SkipExistingOnStartup: config.SkipExisting,
 			ResultFilter:          createResultFilter(config.Filter, config.MinimumPriority, config.Sources),
 			ReportFilter:          createReprotFilter(config.Filter),
+			Logger:                logger,
 		},
 		CustomFields: config.CustomFields,
 		Kinesis:      kinesisClient,
 	})
 }
 
-func (f *TargetFactory) mapSecretValues(config any, ref string) {
+func (f *TargetFactory) mapSecretValues(config any, ref string, logger *zap.Logger) {
 	values, err := f.secretClient.Get(context.Background(), ref)
 	if err != nil {
-		log.Printf("[WARNING] failed to get secret reference: %s\n", err)
+		logger.Warn("failed to get secret reference", zap.Error(err))
 		return
 	}
 

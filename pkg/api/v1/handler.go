@@ -5,14 +5,27 @@ import (
 	"strconv"
 	"strings"
 
+	"go.uber.org/zap"
+
 	"github.com/kyverno/policy-reporter/pkg/helper"
 	"github.com/kyverno/policy-reporter/pkg/target"
 )
 
 var defaultOrder = []string{"resource_namespace", "resource_name", "resource_uid", "policy", "rule", "message"}
 
+type Handler struct {
+	logger *zap.Logger
+	finder PolicyReportFinder
+}
+
+func (h *Handler) logError(err error) {
+	if h.logger != nil && err != nil {
+		h.logger.Error("failed to load data", zap.Error(err))
+	}
+}
+
 // TargetsHandler for the Targets REST API
-func TargetsHandler(targets []target.Client) http.HandlerFunc {
+func (h *Handler) TargetsHandler(targets []target.Client) http.HandlerFunc {
 	apiTargets := make([]Target, 0, len(targets))
 	for _, t := range targets {
 		apiTargets = append(apiTargets, mapTarget(t))
@@ -24,185 +37,206 @@ func TargetsHandler(targets []target.Client) http.HandlerFunc {
 }
 
 // PolicyReportListHandler REST API
-func PolicyReportListHandler(finder PolicyReportFinder) http.HandlerFunc {
+func (h *Handler) PolicyReportListHandler() http.HandlerFunc {
 	return func(w http.ResponseWriter, req *http.Request) {
 		filter := buildFilter(req)
-		count, _ := finder.CountPolicyReports(filter)
-		list, err := finder.FetchPolicyReports(filter, buildPaginatiomn(req, []string{"namespace", "name"}))
+		count, _ := h.finder.CountPolicyReports(filter)
+		list, err := h.finder.FetchPolicyReports(filter, buildPaginatiomn(req, []string{"namespace", "name"}))
+		h.logError(err)
 		helper.SendJSONResponse(w, PolicyReportList{Items: list, Count: count}, err)
 	}
 }
 
 // PolicyReportListHandler REST API
-func ClusterPolicyReportListHandler(finder PolicyReportFinder) http.HandlerFunc {
+func (h *Handler) ClusterPolicyReportListHandler() http.HandlerFunc {
 	return func(w http.ResponseWriter, req *http.Request) {
 		filter := buildFilter(req)
-		count, _ := finder.CountClusterPolicyReports(filter)
-		list, err := finder.FetchClusterPolicyReports(filter, buildPaginatiomn(req, []string{"namespace", "name"}))
+		count, _ := h.finder.CountClusterPolicyReports(filter)
+		list, err := h.finder.FetchClusterPolicyReports(filter, buildPaginatiomn(req, []string{"namespace", "name"}))
+		h.logError(err)
 		helper.SendJSONResponse(w, PolicyReportList{Items: list, Count: count}, err)
 	}
 }
 
 // ClusterResourcesPolicyListHandler REST API
-func ClusterResourcesPolicyListHandler(finder PolicyReportFinder) http.HandlerFunc {
+func (h *Handler) ClusterResourcesPolicyListHandler() http.HandlerFunc {
 	return func(w http.ResponseWriter, req *http.Request) {
-		list, err := finder.FetchClusterPolicies(buildFilter(req))
+		list, err := h.finder.FetchClusterPolicies(buildFilter(req))
+		h.logError(err)
 		helper.SendJSONResponse(w, list, err)
 	}
 }
 
 // ClusterResourcesRuleListHandler REST API
-func ClusterResourcesRuleListHandler(finder PolicyReportFinder) http.HandlerFunc {
+func (h *Handler) ClusterResourcesRuleListHandler() http.HandlerFunc {
 	return func(w http.ResponseWriter, req *http.Request) {
-		list, err := finder.FetchClusterRules(buildFilter(req))
+		list, err := h.finder.FetchClusterRules(buildFilter(req))
+		h.logError(err)
 		helper.SendJSONResponse(w, list, err)
 	}
 }
 
 // NamespacedResourcesPolicyListHandler REST API
-func NamespacedResourcesPolicyListHandler(finder PolicyReportFinder) http.HandlerFunc {
+func (h *Handler) NamespacedResourcesPolicyListHandler() http.HandlerFunc {
 	return func(w http.ResponseWriter, req *http.Request) {
-		list, err := finder.FetchNamespacedPolicies(buildFilter(req))
+		list, err := h.finder.FetchNamespacedPolicies(buildFilter(req))
+		h.logError(err)
 		helper.SendJSONResponse(w, list, err)
 	}
 }
 
 // NamespacedResourcesRuleListHandler REST API
-func NamespacedResourcesRuleListHandler(finder PolicyReportFinder) http.HandlerFunc {
+func (h *Handler) NamespacedResourcesRuleListHandler() http.HandlerFunc {
 	return func(w http.ResponseWriter, req *http.Request) {
-		list, err := finder.FetchNamespacedRules(buildFilter(req))
+		list, err := h.finder.FetchNamespacedRules(buildFilter(req))
+		h.logError(err)
 		helper.SendJSONResponse(w, list, err)
 	}
 }
 
 // CategoryListHandler REST API
-func CategoryListHandler(finder PolicyReportFinder) http.HandlerFunc {
+func (h *Handler) CategoryListHandler() http.HandlerFunc {
 	return func(w http.ResponseWriter, req *http.Request) {
-		list, err := finder.FetchCategories(buildFilter(req))
+		list, err := h.finder.FetchCategories(buildFilter(req))
+		h.logError(err)
 		helper.SendJSONResponse(w, list, err)
 	}
 }
 
 // ClusterResourcesKindListHandler REST API
-func ClusterResourcesKindListHandler(finder PolicyReportFinder) http.HandlerFunc {
+func (h *Handler) ClusterResourcesKindListHandler() http.HandlerFunc {
 	return func(w http.ResponseWriter, req *http.Request) {
-		list, err := finder.FetchClusterKinds(buildFilter(req))
+		list, err := h.finder.FetchClusterKinds(buildFilter(req))
+		h.logError(err)
 		helper.SendJSONResponse(w, list, err)
 	}
 }
 
 // NamespacedResourcesKindListHandler REST API
-func NamespacedResourcesKindListHandler(finder PolicyReportFinder) http.HandlerFunc {
+func (h *Handler) NamespacedResourcesKindListHandler() http.HandlerFunc {
 	return func(w http.ResponseWriter, req *http.Request) {
-		list, err := finder.FetchNamespacedKinds(buildFilter(req))
+		list, err := h.finder.FetchNamespacedKinds(buildFilter(req))
+		h.logError(err)
 		helper.SendJSONResponse(w, list, err)
 	}
 }
 
 // ClusterResourcesListHandler REST API
-func ClusterResourcesListHandler(finder PolicyReportFinder) http.HandlerFunc {
+func (h *Handler) ClusterResourcesListHandler() http.HandlerFunc {
 	return func(w http.ResponseWriter, req *http.Request) {
-		list, err := finder.FetchClusterResources(buildFilter(req))
+		list, err := h.finder.FetchClusterResources(buildFilter(req))
+		h.logError(err)
 		helper.SendJSONResponse(w, list, err)
 	}
 }
 
 // NamespacedResourcesListHandler REST API
-func NamespacedResourcesListHandler(finder PolicyReportFinder) http.HandlerFunc {
+func (h *Handler) NamespacedResourcesListHandler() http.HandlerFunc {
 	return func(w http.ResponseWriter, req *http.Request) {
-		list, err := finder.FetchNamespacedResources(buildFilter(req))
+		list, err := h.finder.FetchNamespacedResources(buildFilter(req))
+		h.logError(err)
 		helper.SendJSONResponse(w, list, err)
 	}
 }
 
 // ClusterResourcesSourceListHandler REST API
-func ClusterResourcesSourceListHandler(finder PolicyReportFinder) http.HandlerFunc {
+func (h *Handler) ClusterResourcesSourceListHandler() http.HandlerFunc {
 	return func(w http.ResponseWriter, req *http.Request) {
-		list, err := finder.FetchClusterSources()
+		list, err := h.finder.FetchClusterSources()
+		h.logError(err)
 		helper.SendJSONResponse(w, list, err)
 	}
 }
 
 // NamespacedSourceListHandler REST API
-func NamespacedSourceListHandler(finder PolicyReportFinder) http.HandlerFunc {
+func (h *Handler) NamespacedSourceListHandler() http.HandlerFunc {
 	return func(w http.ResponseWriter, req *http.Request) {
-		list, err := finder.FetchNamespacedSources()
+		list, err := h.finder.FetchNamespacedSources()
+		h.logError(err)
 		helper.SendJSONResponse(w, list, err)
 	}
 }
 
 // NamespacedReportLabelListHandler REST API
-func NamespacedReportLabelListHandler(finder PolicyReportFinder) http.HandlerFunc {
+func (h *Handler) NamespacedReportLabelListHandler() http.HandlerFunc {
 	return func(w http.ResponseWriter, req *http.Request) {
-		list, err := finder.FetchNamespacedReportLabels(buildFilter(req))
+		list, err := h.finder.FetchNamespacedReportLabels(buildFilter(req))
+		h.logError(err)
 		helper.SendJSONResponse(w, list, err)
 	}
 }
 
 // ClusterReportLabelListHandler REST API
-func ClusterReportLabelListHandler(finder PolicyReportFinder) http.HandlerFunc {
+func (h *Handler) ClusterReportLabelListHandler() http.HandlerFunc {
 	return func(w http.ResponseWriter, req *http.Request) {
-		list, err := finder.FetchClusterReportLabels(buildFilter(req))
+		list, err := h.finder.FetchClusterReportLabels(buildFilter(req))
+		h.logError(err)
 		helper.SendJSONResponse(w, list, err)
 	}
 }
 
 // ClusterResourcesStatusCountHandler REST API
-func ClusterResourcesStatusCountHandler(finder PolicyReportFinder) http.HandlerFunc {
+func (h *Handler) ClusterResourcesStatusCountHandler() http.HandlerFunc {
 	return func(w http.ResponseWriter, req *http.Request) {
-		list, err := finder.FetchStatusCounts(buildFilter(req))
+		list, err := h.finder.FetchStatusCounts(buildFilter(req))
+		h.logError(err)
 		helper.SendJSONResponse(w, list, err)
 	}
 }
 
 // NamespacedResourcesStatusCountsHandler REST API
-func NamespacedResourcesStatusCountsHandler(finder PolicyReportFinder) http.HandlerFunc {
+func (h *Handler) NamespacedResourcesStatusCountsHandler() http.HandlerFunc {
 	return func(w http.ResponseWriter, req *http.Request) {
-		list, err := finder.FetchNamespacedStatusCounts(buildFilter(req))
+		list, err := h.finder.FetchNamespacedStatusCounts(buildFilter(req))
+		h.logError(err)
 		helper.SendJSONResponse(w, list, err)
 	}
 }
 
 // RuleStatusCountHandler REST API
-func RuleStatusCountHandler(finder PolicyReportFinder) http.HandlerFunc {
+func (h *Handler) RuleStatusCountHandler() http.HandlerFunc {
 	return func(w http.ResponseWriter, req *http.Request) {
-		list, err := finder.FetchRuleStatusCounts(
+		list, err := h.finder.FetchRuleStatusCounts(
 			req.URL.Query().Get("policy"),
 			req.URL.Query().Get("rule"),
 		)
+		h.logError(err)
 		helper.SendJSONResponse(w, list, err)
 	}
 }
 
 // NamespacedResourcesResultHandler REST API
-func NamespacedResourcesResultHandler(finder PolicyReportFinder) http.HandlerFunc {
+func (h *Handler) NamespacedResourcesResultHandler() http.HandlerFunc {
 	return func(w http.ResponseWriter, req *http.Request) {
 		filter := buildFilter(req)
-		count, _ := finder.CountNamespacedResults(filter)
-		list, err := finder.FetchNamespacedResults(filter, buildPaginatiomn(req, defaultOrder))
+		count, _ := h.finder.CountNamespacedResults(filter)
+		list, err := h.finder.FetchNamespacedResults(filter, buildPaginatiomn(req, defaultOrder))
+		h.logError(err)
 		helper.SendJSONResponse(w, ResultList{Items: list, Count: count}, err)
 	}
 }
 
 // ClusterResourcesResultHandler REST API
-func ClusterResourcesResultHandler(finder PolicyReportFinder) http.HandlerFunc {
+func (h *Handler) ClusterResourcesResultHandler() http.HandlerFunc {
 	return func(w http.ResponseWriter, req *http.Request) {
 		filter := buildFilter(req)
-		count, _ := finder.CountClusterResults(filter)
-		list, err := finder.FetchClusterResults(filter, buildPaginatiomn(req, defaultOrder))
+		count, _ := h.finder.CountClusterResults(filter)
+		list, err := h.finder.FetchClusterResults(filter, buildPaginatiomn(req, defaultOrder))
+		h.logError(err)
 		helper.SendJSONResponse(w, ResultList{Items: list, Count: count}, err)
 	}
 }
 
 // NamespaceListHandler REST API
-func NamespaceListHandler(finder PolicyReportFinder) http.HandlerFunc {
+func (h *Handler) NamespaceListHandler() http.HandlerFunc {
 	return func(w http.ResponseWriter, req *http.Request) {
-		list, err := finder.FetchNamespaces(Filter{
+		list, err := h.finder.FetchNamespaces(Filter{
 			Sources:    req.URL.Query()["sources"],
 			Categories: req.URL.Query()["categories"],
 			Policies:   req.URL.Query()["policies"],
 			Rules:      req.URL.Query()["rules"],
 		})
+		h.logError(err)
 		helper.SendJSONResponse(w, list, err)
 	}
 }
@@ -257,5 +291,12 @@ func buildFilter(req *http.Request) Filter {
 		Status:      req.URL.Query()["status"],
 		ReportLabel: labels,
 		Search:      req.URL.Query().Get("search"),
+	}
+}
+
+func NewHandler(finder PolicyReportFinder, logger *zap.Logger) *Handler {
+	return &Handler{
+		finder: finder,
+		logger: logger,
 	}
 }

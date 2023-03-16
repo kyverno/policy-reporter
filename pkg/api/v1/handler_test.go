@@ -138,6 +138,8 @@ func Test_V1_API(t *testing.T) {
 	store.Add(preport)
 	store.Add(creport)
 
+	handl := v1.NewHandler(store, nil)
+
 	t.Run("ClusterPolicyListHandler", func(t *testing.T) {
 		req, err := http.NewRequest("GET", "/v1/cluster-policies", nil)
 		if err != nil {
@@ -145,7 +147,7 @@ func Test_V1_API(t *testing.T) {
 		}
 
 		rr := httptest.NewRecorder()
-		handler := v1.ClusterResourcesPolicyListHandler(store)
+		handler := handl.ClusterResourcesPolicyListHandler()
 		handler.ServeHTTP(rr, req)
 
 		if status := rr.Code; status != http.StatusOK {
@@ -165,7 +167,7 @@ func Test_V1_API(t *testing.T) {
 		}
 
 		rr := httptest.NewRecorder()
-		handler := v1.ClusterResourcesRuleListHandler(store)
+		handler := handl.ClusterResourcesRuleListHandler()
 		handler.ServeHTTP(rr, req)
 
 		if status := rr.Code; status != http.StatusOK {
@@ -185,7 +187,7 @@ func Test_V1_API(t *testing.T) {
 		}
 
 		rr := httptest.NewRecorder()
-		handler := v1.NamespacedResourcesPolicyListHandler(store)
+		handler := handl.NamespacedResourcesPolicyListHandler()
 		handler.ServeHTTP(rr, req)
 
 		if status := rr.Code; status != http.StatusOK {
@@ -205,7 +207,7 @@ func Test_V1_API(t *testing.T) {
 		}
 
 		rr := httptest.NewRecorder()
-		handler := v1.NamespacedResourcesRuleListHandler(store)
+		handler := handl.NamespacedResourcesRuleListHandler()
 		handler.ServeHTTP(rr, req)
 
 		if status := rr.Code; status != http.StatusOK {
@@ -225,7 +227,7 @@ func Test_V1_API(t *testing.T) {
 		}
 
 		rr := httptest.NewRecorder()
-		handler := v1.CategoryListHandler(store)
+		handler := handl.CategoryListHandler()
 		handler.ServeHTTP(rr, req)
 
 		if status := rr.Code; status != http.StatusOK {
@@ -245,7 +247,7 @@ func Test_V1_API(t *testing.T) {
 		}
 
 		rr := httptest.NewRecorder()
-		handler := v1.ClusterResourcesKindListHandler(store)
+		handler := handl.ClusterResourcesKindListHandler()
 		handler.ServeHTTP(rr, req)
 
 		if status := rr.Code; status != http.StatusOK {
@@ -265,7 +267,7 @@ func Test_V1_API(t *testing.T) {
 		}
 
 		rr := httptest.NewRecorder()
-		handler := v1.NamespacedResourcesKindListHandler(store)
+		handler := handl.NamespacedResourcesKindListHandler()
 		handler.ServeHTTP(rr, req)
 
 		if status := rr.Code; status != http.StatusOK {
@@ -285,7 +287,7 @@ func Test_V1_API(t *testing.T) {
 		}
 
 		rr := httptest.NewRecorder()
-		handler := v1.ClusterResourcesListHandler(store)
+		handler := handl.ClusterResourcesListHandler()
 		handler.ServeHTTP(rr, req)
 
 		if status := rr.Code; status != http.StatusOK {
@@ -305,7 +307,7 @@ func Test_V1_API(t *testing.T) {
 		}
 
 		rr := httptest.NewRecorder()
-		handler := v1.NamespacedResourcesListHandler(store)
+		handler := handl.NamespacedResourcesListHandler()
 		handler.ServeHTTP(rr, req)
 
 		if status := rr.Code; status != http.StatusOK {
@@ -325,7 +327,7 @@ func Test_V1_API(t *testing.T) {
 		}
 
 		rr := httptest.NewRecorder()
-		handler := v1.ClusterResourcesSourceListHandler(store)
+		handler := handl.ClusterResourcesSourceListHandler()
 		handler.ServeHTTP(rr, req)
 
 		if status := rr.Code; status != http.StatusOK {
@@ -345,7 +347,7 @@ func Test_V1_API(t *testing.T) {
 		}
 
 		rr := httptest.NewRecorder()
-		handler := v1.NamespacedSourceListHandler(store)
+		handler := handl.NamespacedSourceListHandler()
 		handler.ServeHTTP(rr, req)
 
 		if status := rr.Code; status != http.StatusOK {
@@ -365,7 +367,7 @@ func Test_V1_API(t *testing.T) {
 		}
 
 		rr := httptest.NewRecorder()
-		handler := v1.ClusterResourcesStatusCountHandler(store)
+		handler := handl.ClusterResourcesStatusCountHandler()
 		handler.ServeHTTP(rr, req)
 
 		if status := rr.Code; status != http.StatusOK {
@@ -385,7 +387,7 @@ func Test_V1_API(t *testing.T) {
 		}
 
 		rr := httptest.NewRecorder()
-		handler := v1.NamespacedResourcesStatusCountsHandler(store)
+		handler := handl.NamespacedResourcesStatusCountsHandler()
 		handler.ServeHTTP(rr, req)
 
 		if status := rr.Code; status != http.StatusOK {
@@ -405,7 +407,7 @@ func Test_V1_API(t *testing.T) {
 		}
 
 		rr := httptest.NewRecorder()
-		handler := v1.RuleStatusCountHandler(store)
+		handler := handl.RuleStatusCountHandler()
 		handler.ServeHTTP(rr, req)
 
 		if status := rr.Code; status != http.StatusOK {
@@ -435,7 +437,7 @@ func Test_V1_API(t *testing.T) {
 		}
 
 		rr := httptest.NewRecorder()
-		handler := v1.NamespacedResourcesResultHandler(store)
+		handler := handl.NamespacedResourcesResultHandler()
 		handler.ServeHTTP(rr, req)
 
 		if status := rr.Code; status != http.StatusOK {
@@ -455,7 +457,7 @@ func Test_V1_API(t *testing.T) {
 		}
 
 		rr := httptest.NewRecorder()
-		handler := v1.ClusterResourcesResultHandler(store)
+		handler := handl.ClusterResourcesResultHandler()
 		handler.ServeHTTP(rr, req)
 
 		if status := rr.Code; status != http.StatusOK {
@@ -475,7 +477,7 @@ func Test_V1_API(t *testing.T) {
 		}
 
 		rr := httptest.NewRecorder()
-		handler := v1.NamespaceListHandler(store)
+		handler := handl.NamespaceListHandler()
 		handler.ServeHTTP(rr, req)
 
 		if status := rr.Code; status != http.StatusOK {
@@ -495,7 +497,7 @@ func Test_V1_API(t *testing.T) {
 		}
 
 		rr := httptest.NewRecorder()
-		handler := v1.ClusterReportLabelListHandler(store)
+		handler := handl.ClusterReportLabelListHandler()
 		handler.ServeHTTP(rr, req)
 
 		if status := rr.Code; status != http.StatusOK {
@@ -515,7 +517,7 @@ func Test_V1_API(t *testing.T) {
 		}
 
 		rr := httptest.NewRecorder()
-		handler := v1.NamespacedReportLabelListHandler(store)
+		handler := handl.NamespacedReportLabelListHandler()
 		handler.ServeHTTP(rr, req)
 
 		if status := rr.Code; status != http.StatusOK {
@@ -535,7 +537,7 @@ func Test_V1_API(t *testing.T) {
 		}
 
 		rr := httptest.NewRecorder()
-		handler := v1.PolicyReportListHandler(store)
+		handler := handl.PolicyReportListHandler()
 		handler.ServeHTTP(rr, req)
 
 		if status := rr.Code; status != http.StatusOK {
@@ -555,7 +557,7 @@ func Test_V1_API(t *testing.T) {
 		}
 
 		rr := httptest.NewRecorder()
-		handler := v1.ClusterPolicyReportListHandler(store)
+		handler := handl.ClusterPolicyReportListHandler()
 		handler.ServeHTTP(rr, req)
 
 		if status := rr.Code; status != http.StatusOK {
@@ -570,6 +572,8 @@ func Test_V1_API(t *testing.T) {
 }
 
 func Test_TargetsAPI(t *testing.T) {
+	handl := v1.NewHandler(nil, nil)
+
 	t.Run("Empty Respose", func(t *testing.T) {
 		req, err := http.NewRequest("GET", "/targets", nil)
 		if err != nil {
@@ -577,7 +581,7 @@ func Test_TargetsAPI(t *testing.T) {
 		}
 
 		rr := httptest.NewRecorder()
-		handler := v1.TargetsHandler(make([]target.Client, 0))
+		handler := handl.TargetsHandler(make([]target.Client, 0))
 
 		handler.ServeHTTP(rr, req)
 
@@ -598,7 +602,7 @@ func Test_TargetsAPI(t *testing.T) {
 		}
 
 		rr := httptest.NewRecorder()
-		handler := v1.TargetsHandler([]target.Client{
+		handler := handl.TargetsHandler([]target.Client{
 			loki.NewClient(loki.Options{
 				ClientOptions: target.ClientOptions{
 					Name:                  "Loki",

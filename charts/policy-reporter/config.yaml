@@ -250,3 +250,11 @@ leaderElection:
 redis:
   {{- toYaml . | nindent 2 }}
 {{- end }}
+
+{{- with .Values.logging }}
+logging:
+  {{- toYaml . | nindent 2 }}
+{{- end }}
+
+api:
+  logging: {{ .Values.api.logging }}

@@ -198,7 +198,8 @@ type EmailReports struct {
 
 // API configuration
 type API struct {
-	Port int `mapstructure:"port"`
+	Port    int  `mapstructure:"port"`
+	Logging bool `mapstructure:"logging"`
 }
 
 // REST configuration
@@ -262,6 +263,12 @@ type K8sClient struct {
 	Kubeconfig string  `mapstructure:"kubeconfig"`
 }
 
+type Logging struct {
+	LogLevel    int8   `mapstructure:"logLevel"`
+	Encoding    string `mapstructure:"encoding"`
+	Development bool   `mapstructure:"development"`
+}
+
 // Config of the PolicyReporter
 type Config struct {
 	Namespace      string         `mapstructure:"namespace"`
@@ -286,4 +293,5 @@ type Config struct {
 	EmailReports   EmailReports   `mapstructure:"emailReports"`
 	LeaderElection LeaderElection `mapstructure:"leaderElection"`
 	K8sClient      K8sClient      `mapstructure:"k8sClient"`
+	Logging        Logging        `mapstructure:"logging"`
 }

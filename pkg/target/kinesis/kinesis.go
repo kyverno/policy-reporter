@@ -4,8 +4,9 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"log"
 	"time"
+
+	"go.uber.org/zap"
 
 	"github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
 	"github.com/kyverno/policy-reporter/pkg/helper"
@@ -44,7 +45,7 @@ func (c *client) Send(result v1alpha2.PolicyReportResult) {
 	body := new(bytes.Buffer)
 
 	if err := json.NewEncoder(body).Encode(http.NewJSONResult(result)); err != nil {
-		log.Printf("[ERROR] %s : %v\n", c.Name(), err.Error())
+		c.Logger().Error("failed to encode result", zap.String("name", c.Name()), zap.Error(err))
 		return
 	}
 	t := time.Unix(result.Timestamp.Seconds, int64(result.Timestamp.Nanos))
@@ -52,11 +53,11 @@ func (c *client) Send(result v1alpha2.PolicyReportResult) {
 
 	err := c.kinesis.Upload(body, key)
 	if err != nil {
-		log.Printf("[ERROR] %s : Kinesis Upload error %v \n", c.Name(), err.Error())
+		c.Logger().Error("kinesis upload error", zap.String("name", c.Name()), zap.Error(err))
 		return
 	}
 
-	log.Printf("[INFO] %s PUSH OK", c.Name())
+	c.Logger().Info("PUSH OK", zap.String("name", c.Name()))
 }
 
 // NewClient creates a new Kinesis.client to send Results to AWS Kinesis compatible source

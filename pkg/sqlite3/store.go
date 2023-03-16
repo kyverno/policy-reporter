@@ -4,7 +4,6 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
-	"log"
 	"os"
 	"strings"
 	"time"
@@ -117,7 +116,6 @@ func (s *policyReportStore) Get(id string) (v1alpha2.ReportInterface, bool) {
 	if err == sql.ErrNoRows {
 		return r, false
 	} else if err != nil {
-		log.Printf("[ERROR] failed to select PolicyReport: %s", err)
 		return r, false
 	}
 
@@ -126,7 +124,6 @@ func (s *policyReportStore) Get(id string) (v1alpha2.ReportInterface, bool) {
 
 	results, err := s.fetchResults(id)
 	if err != nil {
-		log.Printf("[ERROR] failed to fetch Reports: %s\n", err)
 		return r, false
 	}
 
@@ -330,7 +327,6 @@ func (s *policyReportStore) FetchPolicyReports(filter api.Filter, pagination api
 		r := &api.PolicyReport{}
 		err := rows.Scan(&r.ID, &r.Namespace, &r.Source, &r.Name, &labels, &r.Pass, &r.Skip, &r.Warn, &r.Fail, &r.Error)
 		if err != nil {
-			log.Printf("[ERROR] failed to scan PolicyReport: %s", err)
 			return list, err
 		}
 
@@ -412,7 +408,6 @@ func (s *policyReportStore) FetchClusterPolicyReports(filter api.Filter, paginat
 		r := &api.PolicyReport{}
 		err := rows.Scan(&r.ID, &r.Source, &r.Name, &labels, &r.Pass, &r.Skip, &r.Warn, &r.Fail, &r.Error)
 		if err != nil {
-			log.Printf("[ERROR] failed to scan PolicyReport: %s", err)
 			return list, err
 		}
 

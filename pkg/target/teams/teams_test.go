@@ -52,7 +52,8 @@ func Test_TeamsTarget(t *testing.T) {
 
 		client := teams.NewClient(teams.Options{
 			ClientOptions: target.ClientOptions{
-				Name: "Teams",
+				Name:   "Teams",
+				Logger: fixtures.Logger,
 			},
 			Webhook:      "http://hook.teams:80",
 			CustomFields: map[string]string{"Cluster": "Name"},
@@ -89,7 +90,8 @@ func Test_TeamsTarget(t *testing.T) {
 
 		client := teams.NewClient(teams.Options{
 			ClientOptions: target.ClientOptions{
-				Name: "Teams",
+				Name:   "Teams",
+				Logger: fixtures.Logger,
 			},
 			Webhook:      "http://hook.teams:80",
 			CustomFields: map[string]string{"Cluster": "Name"},
@@ -113,7 +115,8 @@ func Test_TeamsTarget(t *testing.T) {
 
 		client := teams.NewClient(teams.Options{
 			ClientOptions: target.ClientOptions{
-				Name: "Teams",
+				Name:   "Teams",
+				Logger: fixtures.Logger,
 			},
 			Webhook:      "http://hook.teams:80",
 			CustomFields: map[string]string{"Cluster": "Name"},
@@ -137,7 +140,8 @@ func Test_TeamsTarget(t *testing.T) {
 
 		client := teams.NewClient(teams.Options{
 			ClientOptions: target.ClientOptions{
-				Name: "Teams",
+				Name:   "Teams",
+				Logger: fixtures.Logger,
 			},
 			Webhook:      "http://hook.teams:80",
 			CustomFields: map[string]string{"Cluster": "Name"},
@@ -173,7 +177,8 @@ func Test_TeamsTarget(t *testing.T) {
 
 		client := teams.NewClient(teams.Options{
 			ClientOptions: target.ClientOptions{
-				Name: "Teams",
+				Name:   "Teams",
+				Logger: fixtures.Logger,
 			},
 			Webhook:      "http://hook.teams:80",
 			CustomFields: map[string]string{"Cluster": "Name"},
@@ -184,7 +189,8 @@ func Test_TeamsTarget(t *testing.T) {
 	t.Run("Name", func(t *testing.T) {
 		client := teams.NewClient(teams.Options{
 			ClientOptions: target.ClientOptions{
-				Name: "Teams",
+				Name:   "Teams",
+				Logger: fixtures.Logger,
 			},
 			Webhook:      "http://hook.teams:80",
 			CustomFields: map[string]string{"Cluster": "Name"},

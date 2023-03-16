@@ -38,7 +38,7 @@ func (e *client) Send(result v1alpha2.PolicyReportResult) {
 		result.Properties = props
 	}
 
-	req, err := http.CreateJSONRequest(e.Name(), "POST", e.host, http.NewJSONResult(result))
+	req, err := http.CreateJSONRequest(e.Name(), "POST", e.host, http.NewJSONResult(result), e.Logger())
 	if err != nil {
 		return
 	}
@@ -48,7 +48,7 @@ func (e *client) Send(result v1alpha2.PolicyReportResult) {
 	}
 
 	resp, err := e.client.Do(req)
-	http.ProcessHTTPResponse(e.Name(), resp, err)
+	http.ProcessHTTPResponse(e.Name(), resp, err, e.Logger())
 }
 
 // NewClient creates a new loki.client to send Results to Elasticsearch

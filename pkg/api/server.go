@@ -7,6 +7,8 @@ import (
 	pprof "net/http/pprof"
 
 	"github.com/prometheus/client_golang/prometheus/promhttp"
+	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
 
 	v1 "github.com/kyverno/policy-reporter/pkg/api/v1"
 	"github.com/kyverno/policy-reporter/pkg/target"
@@ -33,39 +35,42 @@ type httpServer struct {
 	mux     *http.ServeMux
 	targets []target.Client
 	synced  func() bool
+	logger  *zap.Logger
 }
 
 func (s *httpServer) RegisterLifecycleHandler() {
-	s.mux.HandleFunc("/healthz", HealthzHandler(s.synced))
-	s.mux.HandleFunc("/ready", ReadyHandler(s.synced))
+	s.mux.HandleFunc("/healthz", HealthzHandler(s.synced, s.logger))
+	s.mux.HandleFunc("/ready", ReadyHandler(s.synced, s.logger))
 }
 
 func (s *httpServer) RegisterV1Handler(finder v1.PolicyReportFinder) {
-	s.mux.HandleFunc("/v1/targets", Gzip(v1.TargetsHandler(s.targets)))
-	s.mux.HandleFunc("/v1/categories", Gzip(v1.CategoryListHandler(finder)))
-	s.mux.HandleFunc("/v1/namespaces", Gzip(v1.NamespaceListHandler(finder)))
-	s.mux.HandleFunc("/v1/rule-status-count", Gzip(v1.RuleStatusCountHandler(finder)))
+	handler := v1.NewHandler(finder, s.logger)
 
-	s.mux.HandleFunc("/v1/policy-reports", Gzip(v1.PolicyReportListHandler(finder)))
-	s.mux.HandleFunc("/v1/cluster-policy-reports", Gzip(v1.ClusterPolicyReportListHandler(finder)))
+	s.mux.HandleFunc("/v1/targets", Gzip(handler.TargetsHandler(s.targets)))
+	s.mux.HandleFunc("/v1/categories", Gzip(handler.CategoryListHandler()))
+	s.mux.HandleFunc("/v1/namespaces", Gzip(handler.NamespaceListHandler()))
+	s.mux.HandleFunc("/v1/rule-status-count", Gzip(handler.RuleStatusCountHandler()))
 
-	s.mux.HandleFunc("/v1/namespaced-resources/policies", Gzip(v1.NamespacedResourcesPolicyListHandler(finder)))
-	s.mux.HandleFunc("/v1/namespaced-resources/rules", Gzip(v1.NamespacedResourcesRuleListHandler(finder)))
-	s.mux.HandleFunc("/v1/namespaced-resources/kinds", Gzip(v1.NamespacedResourcesKindListHandler(finder)))
-	s.mux.HandleFunc("/v1/namespaced-resources/resources", Gzip(v1.NamespacedResourcesListHandler(finder)))
-	s.mux.HandleFunc("/v1/namespaced-resources/sources", Gzip(v1.NamespacedSourceListHandler(finder)))
-	s.mux.HandleFunc("/v1/namespaced-resources/report-labels", Gzip(v1.NamespacedReportLabelListHandler(finder)))
-	s.mux.HandleFunc("/v1/namespaced-resources/status-counts", Gzip(v1.NamespacedResourcesStatusCountsHandler(finder)))
-	s.mux.HandleFunc("/v1/namespaced-resources/results", Gzip(v1.NamespacedResourcesResultHandler(finder)))
+	s.mux.HandleFunc("/v1/policy-reports", Gzip(handler.PolicyReportListHandler()))
+	s.mux.HandleFunc("/v1/cluster-policy-reports", Gzip(handler.ClusterPolicyReportListHandler()))
 
-	s.mux.HandleFunc("/v1/cluster-resources/policies", Gzip(v1.ClusterResourcesPolicyListHandler(finder)))
-	s.mux.HandleFunc("/v1/cluster-resources/rules", Gzip(v1.ClusterResourcesRuleListHandler(finder)))
-	s.mux.HandleFunc("/v1/cluster-resources/kinds", Gzip(v1.ClusterResourcesKindListHandler(finder)))
-	s.mux.HandleFunc("/v1/cluster-resources/resources", Gzip(v1.ClusterResourcesListHandler(finder)))
-	s.mux.HandleFunc("/v1/cluster-resources/sources", Gzip(v1.ClusterResourcesSourceListHandler(finder)))
-	s.mux.HandleFunc("/v1/cluster-resources/report-labels", Gzip(v1.ClusterReportLabelListHandler(finder)))
-	s.mux.HandleFunc("/v1/cluster-resources/status-counts", Gzip(v1.ClusterResourcesStatusCountHandler(finder)))
-	s.mux.HandleFunc("/v1/cluster-resources/results", Gzip(v1.ClusterResourcesResultHandler(finder)))
+	s.mux.HandleFunc("/v1/namespaced-resources/policies", Gzip(handler.NamespacedResourcesPolicyListHandler()))
+	s.mux.HandleFunc("/v1/namespaced-resources/rules", Gzip(handler.NamespacedResourcesRuleListHandler()))
+	s.mux.HandleFunc("/v1/namespaced-resources/kinds", Gzip(handler.NamespacedResourcesKindListHandler()))
+	s.mux.HandleFunc("/v1/namespaced-resources/resources", Gzip(handler.NamespacedResourcesListHandler()))
+	s.mux.HandleFunc("/v1/namespaced-resources/sources", Gzip(handler.NamespacedSourceListHandler()))
+	s.mux.HandleFunc("/v1/namespaced-resources/report-labels", Gzip(handler.NamespacedReportLabelListHandler()))
+	s.mux.HandleFunc("/v1/namespaced-resources/status-counts", Gzip(handler.NamespacedResourcesStatusCountsHandler()))
+	s.mux.HandleFunc("/v1/namespaced-resources/results", Gzip(handler.NamespacedResourcesResultHandler()))
+
+	s.mux.HandleFunc("/v1/cluster-resources/policies", Gzip(handler.ClusterResourcesPolicyListHandler()))
+	s.mux.HandleFunc("/v1/cluster-resources/rules", Gzip(handler.ClusterResourcesRuleListHandler()))
+	s.mux.HandleFunc("/v1/cluster-resources/kinds", Gzip(handler.ClusterResourcesKindListHandler()))
+	s.mux.HandleFunc("/v1/cluster-resources/resources", Gzip(handler.ClusterResourcesListHandler()))
+	s.mux.HandleFunc("/v1/cluster-resources/sources", Gzip(handler.ClusterResourcesSourceListHandler()))
+	s.mux.HandleFunc("/v1/cluster-resources/report-labels", Gzip(handler.ClusterReportLabelListHandler()))
+	s.mux.HandleFunc("/v1/cluster-resources/status-counts", Gzip(handler.ClusterResourcesStatusCountHandler()))
+	s.mux.HandleFunc("/v1/cluster-resources/results", Gzip(handler.ClusterResourcesResultHandler()))
 }
 
 func (s *httpServer) RegisterMetricsHandler() {
@@ -89,20 +94,49 @@ func (s *httpServer) Shutdown(ctx context.Context) error {
 }
 
 // NewServer constructor for a new API Server
-func NewServer(targets []target.Client, port int, synced func() bool) Server {
+func NewServer(targets []target.Client, port int, logger *zap.Logger, synced func() bool) Server {
 	mux := http.NewServeMux()
 
 	s := &httpServer{
 		targets: targets,
 		synced:  synced,
 		mux:     mux,
+		logger:  logger,
 		http: http.Server{
 			Addr:    fmt.Sprintf(":%d", port),
-			Handler: mux,
+			Handler: NewLoggerMiddleware(logger, mux),
 		},
 	}
 
 	s.RegisterLifecycleHandler()
 
 	return s
+}
+
+func NewLoggerMiddleware(logger *zap.Logger, mux http.Handler) http.Handler {
+	if logger == nil {
+		return mux
+	}
+
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		fields := []zapcore.Field{
+			zap.String("proto", r.Proto),
+			zap.String("user-agent", r.Header.Get("User-Agent")),
+			zap.String("path", r.URL.Path),
+		}
+
+		if query := r.URL.RawQuery; query != "" {
+			fields = append(fields, zap.String("query", query))
+		}
+		if ref := r.Header.Get("Referer"); ref != "" {
+			fields = append(fields, zap.String("referer", ref))
+		}
+		if scheme := r.URL.Scheme; scheme != "" {
+			fields = append(fields, zap.String("scheme", scheme))
+		}
+
+		logger.Debug("Serve", fields...)
+
+		mux.ServeHTTP(w, r)
+	})
 }
