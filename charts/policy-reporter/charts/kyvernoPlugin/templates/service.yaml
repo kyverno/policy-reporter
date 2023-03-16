@@ -21,7 +21,7 @@ metadata:
 spec:
   type: {{ .Values.service.type }}
   ports:
-    - port: 8080
+    - port: {{ .Values.service.port }}
       targetPort: {{ .Values.port.name }}
       protocol: TCP
       name: rest
