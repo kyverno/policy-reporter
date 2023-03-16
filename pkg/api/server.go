@@ -135,7 +135,7 @@ func NewLoggerMiddleware(logger *zap.Logger, mux http.Handler) http.Handler {
 			fields = append(fields, zap.String("scheme", scheme))
 		}
 
-		logger.Info("Serve", fields...)
+		logger.Debug("Serve", fields...)
 
 		mux.ServeHTTP(w, r)
 	})
