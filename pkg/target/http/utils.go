@@ -5,24 +5,25 @@ import (
 	"crypto/tls"
 	"crypto/x509"
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
 	"time"
 
+	"go.uber.org/zap"
+
 	"github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
 )
 
 // CreateJSONRequest for the given configuration
-func CreateJSONRequest(target, method, host string, payload interface{}) (*http.Request, error) {
+func CreateJSONRequest(target, method, host string, payload interface{}, logger *zap.Logger) (*http.Request, error) {
 	body := new(bytes.Buffer)
 
 	json.NewEncoder(body).Encode(payload)
 
 	req, err := http.NewRequest(method, host, body)
 	if err != nil {
-		log.Printf("[ERROR] %s : %v\n", target, err.Error())
+		logger.Error(target+": PUSH FAILED", zap.Error(err))
 		return nil, err
 	}
 
@@ -33,7 +34,7 @@ func CreateJSONRequest(target, method, host string, payload interface{}) (*http.
 }
 
 // ProcessHTTPResponse Logs Error or Success messages
-func ProcessHTTPResponse(target string, resp *http.Response, err error) {
+func ProcessHTTPResponse(target string, resp *http.Response, err error, logger *zap.Logger) {
 	defer func() {
 		if resp != nil && resp.Body != nil {
 			resp.Body.Close()
@@ -41,15 +42,14 @@ func ProcessHTTPResponse(target string, resp *http.Response, err error) {
 	}()
 
 	if err != nil {
-		log.Printf("[ERROR] %s PUSH failed: %s\n", target, err.Error())
+		logger.Error(target+": PUSH FAILED", zap.Error(err))
 	} else if resp.StatusCode >= 400 {
-		fmt.Printf("StatusCode: %d\n", resp.StatusCode)
 		buf := new(bytes.Buffer)
 		buf.ReadFrom(resp.Body)
 
-		log.Printf("[ERROR] %s PUSH failed [%d]: %s\n", target, resp.StatusCode, buf.String())
+		logger.Error(target+": PUSH FAILED", zap.Int("statusCode", resp.StatusCode), zap.String("body", buf.String()))
 	} else {
-		log.Printf("[INFO] %s PUSH OK\n", target)
+		logger.Info(target + ": PUSH OK")
 	}
 }
 

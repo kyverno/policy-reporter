@@ -4,8 +4,9 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"log"
 	"time"
+
+	"go.uber.org/zap"
 
 	"github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
 	"github.com/kyverno/policy-reporter/pkg/helper"
@@ -46,7 +47,7 @@ func (c *client) Send(result v1alpha2.PolicyReportResult) {
 	body := new(bytes.Buffer)
 
 	if err := json.NewEncoder(body).Encode(http.NewJSONResult(result)); err != nil {
-		log.Printf("[ERROR] %s : %v\n", c.Name(), err.Error())
+		c.Logger().Error(c.Name()+": encode error", zap.Error(err))
 		return
 	}
 	t := time.Unix(result.Timestamp.Seconds, int64(result.Timestamp.Nanos))
@@ -54,11 +55,11 @@ func (c *client) Send(result v1alpha2.PolicyReportResult) {
 
 	err := c.s3.Upload(body, key)
 	if err != nil {
-		log.Printf("[ERROR] %s : S3 Upload error %v \n", c.Name(), err.Error())
+		c.Logger().Error(c.Name()+": S3 Upload error", zap.Error(err))
 		return
 	}
 
-	log.Printf("[INFO] %s PUSH OK", c.Name())
+	c.Logger().Info(c.Name() + ": PUSH OK")
 }
 
 // NewClient creates a new S3.client to send Results to S3. It doesnt' work right now

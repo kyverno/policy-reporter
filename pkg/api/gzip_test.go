@@ -14,6 +14,8 @@ import (
 )
 
 func Test_GzipCompression(t *testing.T) {
+	handl := v1.NewHandler(nil, nil)
+
 	t.Run("GzipRespose", func(t *testing.T) {
 		req, err := http.NewRequest("GET", "/targets", nil)
 		if err != nil {
@@ -22,7 +24,7 @@ func Test_GzipCompression(t *testing.T) {
 		req.Header.Add("Accept-Encoding", "gzip")
 
 		rr := httptest.NewRecorder()
-		handler := api.Gzip(v1.TargetsHandler(make([]target.Client, 0)))
+		handler := api.Gzip(handl.TargetsHandler(make([]target.Client, 0)))
 
 		handler.ServeHTTP(rr, req)
 
@@ -48,7 +50,7 @@ func Test_GzipCompression(t *testing.T) {
 		}
 
 		rr := httptest.NewRecorder()
-		handler := api.Gzip(v1.TargetsHandler(make([]target.Client, 0)))
+		handler := api.Gzip(handl.TargetsHandler(make([]target.Client, 0)))
 
 		handler.ServeHTTP(rr, req)
 

@@ -3,8 +3,9 @@ package v1
 import (
 	"strconv"
 
-	"github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
 	"github.com/segmentio/fasthash/fnv1a"
+
+	"github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
 )
 
 type Filter struct {

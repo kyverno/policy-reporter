@@ -6,6 +6,7 @@ import (
 	"testing"
 	"time"
 
+	"go.uber.org/zap"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/util/workqueue"
 
@@ -38,10 +39,11 @@ func Test_PolicyReportWatcher(t *testing.T) {
 		kubernetes.NewDebouncer(0, publisher),
 		workqueue.NewNamedRateLimitingQueue(workqueue.DefaultControllerRateLimiter(), "test-queue"),
 		restClient.Wgpolicyk8sV1alpha2(),
+		zap.NewNop(),
 	)
 
 	kclient, rclient, _ := NewFakeMetaClient()
-	client := kubernetes.NewPolicyReportClient(kclient, filter, queue)
+	client := kubernetes.NewPolicyReportClient(kclient, filter, queue, zap.NewNop())
 
 	go func() {
 		err := client.Run(1, stop)
@@ -88,10 +90,11 @@ func Test_ClusterPolicyReportWatcher(t *testing.T) {
 		kubernetes.NewDebouncer(0, publisher),
 		workqueue.NewNamedRateLimitingQueue(workqueue.DefaultControllerRateLimiter(), "test-queue"),
 		restClient.Wgpolicyk8sV1alpha2(),
+		zap.NewNop(),
 	)
 
 	kclient, _, rclient := NewFakeMetaClient()
-	client := kubernetes.NewPolicyReportClient(kclient, filter, queue)
+	client := kubernetes.NewPolicyReportClient(kclient, filter, queue, zap.NewNop())
 
 	go func() {
 		err := client.Run(1, stop)
@@ -128,10 +131,11 @@ func Test_HasSynced(t *testing.T) {
 		kubernetes.NewDebouncer(0, report.NewEventPublisher()),
 		workqueue.NewNamedRateLimitingQueue(workqueue.DefaultControllerRateLimiter(), "test-queue"),
 		restClient.Wgpolicyk8sV1alpha2(),
+		zap.NewNop(),
 	)
 
 	kclient, _, _ := NewFakeMetaClient()
-	client := kubernetes.NewPolicyReportClient(kclient, filter, queue)
+	client := kubernetes.NewPolicyReportClient(kclient, filter, queue, zap.NewNop())
 
 	err := client.Sync(stop)
 	if err != nil {

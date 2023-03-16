@@ -4,6 +4,7 @@ import (
 	"strings"
 
 	"github.com/kyverno/go-wildcard"
+	"go.uber.org/zap"
 
 	"github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
 	"github.com/kyverno/policy-reporter/pkg/helper"
@@ -121,6 +122,7 @@ type BaseClient struct {
 	skipExistingOnStartup bool
 	resultFilter          *report.ResultFilter
 	reportFilter          *report.ReportFilter
+	logger                *zap.Logger
 }
 
 type ClientOptions struct {
@@ -128,10 +130,15 @@ type ClientOptions struct {
 	SkipExistingOnStartup bool
 	ResultFilter          *report.ResultFilter
 	ReportFilter          *report.ReportFilter
+	Logger                *zap.Logger
 }
 
 func (c *BaseClient) Name() string {
 	return c.name
+}
+
+func (c *BaseClient) Logger() *zap.Logger {
+	return c.logger
 }
 
 func (c *BaseClient) MinimumPriority() string {
@@ -171,5 +178,5 @@ func (c *BaseClient) SkipExistingOnStartup() bool {
 }
 
 func NewBaseClient(options ClientOptions) BaseClient {
-	return BaseClient{options.Name, options.SkipExistingOnStartup, options.ResultFilter, options.ReportFilter}
+	return BaseClient{options.Name, options.SkipExistingOnStartup, options.ResultFilter, options.ReportFilter, options.Logger}
 }

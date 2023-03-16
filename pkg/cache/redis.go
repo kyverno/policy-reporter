@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"log"
 	"time"
 
 	goredis "github.com/go-redis/redis/v8"
@@ -31,11 +30,8 @@ func (r *redisCache) RemoveReport(id string) {
 }
 
 func (r *redisCache) GetResults(id string) []string {
-	list, err := r.rdb.Get(context.Background(), r.generateKey(id)).Result()
+	list, _ := r.rdb.Get(context.Background(), r.generateKey(id)).Result()
 	results := make([]string, 0)
-	if err != nil {
-		log.Printf("[ERROR] Failed to set result: %s\n", err)
-	}
 
 	json.Unmarshal([]byte(list), &results)
 

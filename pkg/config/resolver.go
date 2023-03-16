@@ -7,6 +7,8 @@ import (
 	goredis "github.com/go-redis/redis/v8"
 	_ "github.com/mattn/go-sqlite3"
 	mail "github.com/xhit/go-simple-mail/v2"
+	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
 	k8s "k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/metadata"
 	"k8s.io/client-go/rest"
@@ -42,13 +44,20 @@ type Resolver struct {
 	targetClients      []target.Client
 	resultCache        cache.Cache
 	targetsCreated     bool
+	logger             *zap.Logger
 }
 
 // APIServer resolver method
 func (r *Resolver) APIServer(synced func() bool) api.Server {
+	var logger *zap.Logger
+	if r.config.API.Logging {
+		logger, _ = r.Logger()
+	}
+
 	return api.NewServer(
 		r.TargetClients(),
 		r.config.API.Port,
+		logger,
 		synced,
 	)
 }
@@ -113,11 +122,16 @@ func (r *Resolver) Queue() (*kubernetes.Queue, error) {
 	if err != nil {
 		return nil, err
 	}
+	logger, err := r.Logger()
+	if err != nil {
+		return nil, err
+	}
 
 	return kubernetes.NewQueue(
 		kubernetes.NewDebouncer(1*time.Minute, r.EventPublisher()),
 		workqueue.NewNamedRateLimitingQueue(workqueue.DefaultControllerRateLimiter(), "report-queue"),
 		client,
+		logger,
 	), nil
 }
 
@@ -134,7 +148,7 @@ func (r *Resolver) RegisterSendResultListener() {
 
 // RegisterSendResultListener resolver method
 func (r *Resolver) RegisterStoreListener(store report.PolicyReportStore) {
-	r.EventPublisher().RegisterListener(listener.Store, listener.NewStoreListener(store))
+	r.EventPublisher().RegisterListener(listener.Store, listener.NewStoreListener(store, r.logger))
 }
 
 // RegisterMetricsListener resolver method
@@ -192,20 +206,22 @@ func (r *Resolver) TargetClients() []target.Client {
 		return r.targetClients
 	}
 
+	logger, _ := r.Logger()
+
 	factory := r.TargetFactory()
 
 	clients := make([]target.Client, 0)
 
-	clients = append(clients, factory.LokiClients(r.config.Loki)...)
-	clients = append(clients, factory.ElasticsearchClients(r.config.Elasticsearch)...)
-	clients = append(clients, factory.SlackClients(r.config.Slack)...)
-	clients = append(clients, factory.DiscordClients(r.config.Discord)...)
-	clients = append(clients, factory.TeamsClients(r.config.Teams)...)
-	clients = append(clients, factory.S3Clients(r.config.S3)...)
-	clients = append(clients, factory.KinesisClients(r.config.Kinesis)...)
-	clients = append(clients, factory.WebhookClients(r.config.Webhook)...)
+	clients = append(clients, factory.LokiClients(r.config.Loki, logger)...)
+	clients = append(clients, factory.ElasticsearchClients(r.config.Elasticsearch, logger)...)
+	clients = append(clients, factory.SlackClients(r.config.Slack, logger)...)
+	clients = append(clients, factory.DiscordClients(r.config.Discord, logger)...)
+	clients = append(clients, factory.TeamsClients(r.config.Teams, logger)...)
+	clients = append(clients, factory.S3Clients(r.config.S3, logger)...)
+	clients = append(clients, factory.KinesisClients(r.config.Kinesis, logger)...)
+	clients = append(clients, factory.WebhookClients(r.config.Webhook, logger)...)
 
-	if ui := factory.UIClient(r.config.UI); ui != nil {
+	if ui := factory.UIClient(r.config.UI, logger); ui != nil {
 		clients = append(clients, ui)
 	}
 
@@ -258,6 +274,7 @@ func (r *Resolver) SummaryGenerator() (*summary.Generator, error) {
 		client,
 		EmailReportFilterFromConfig(r.config.EmailReports.Summary.Filter),
 		!r.config.EmailReports.Summary.Filter.DisableClusterReports,
+		r.logger,
 	), nil
 }
 
@@ -278,6 +295,7 @@ func (r *Resolver) ViolationsGenerator() (*violations.Generator, error) {
 		client,
 		EmailReportFilterFromConfig(r.config.EmailReports.Violations.Filter),
 		!r.config.EmailReports.Violations.Filter.DisableClusterReports,
+		r.logger,
 	), nil
 }
 
@@ -320,7 +338,12 @@ func (r *Resolver) PolicyReportClient() (report.PolicyReportClient, error) {
 		return nil, err
 	}
 
-	r.policyReportClient = kubernetes.NewPolicyReportClient(client, r.ReportFilter(), queue)
+	logger, err := r.Logger()
+	if err != nil {
+		return nil, err
+	}
+
+	r.policyReportClient = kubernetes.NewPolicyReportClient(client, r.ReportFilter(), queue, logger)
 
 	return r.policyReportClient, nil
 }
@@ -362,6 +385,51 @@ func NewResolver(config *Config, k8sConfig *rest.Config) Resolver {
 		config:    config,
 		k8sConfig: k8sConfig,
 	}
+}
+
+func (r *Resolver) Logger() (*zap.Logger, error) {
+	if r.logger != nil {
+		return r.logger, nil
+	}
+
+	encoder := zap.NewProductionEncoderConfig()
+	if r.config.Logging.Development {
+		encoder = zap.NewDevelopmentEncoderConfig()
+		encoder.EncodeTime = zapcore.TimeEncoderOfLayout("2006-01-02 15:04:05")
+	}
+
+	ouput := "json"
+	if r.config.Logging.Encoding != "json" {
+		ouput = "console"
+		encoder.EncodeCaller = nil
+	}
+
+	var sampling *zap.SamplingConfig
+	if !r.config.Logging.Development {
+		sampling = &zap.SamplingConfig{
+			Initial:    100,
+			Thereafter: 100,
+		}
+	}
+
+	config := zap.Config{
+		Level:            zap.NewAtomicLevelAt(zapcore.Level(r.config.Logging.LogLevel)),
+		Development:      r.config.Logging.Development,
+		Sampling:         sampling,
+		Encoding:         ouput,
+		EncoderConfig:    encoder,
+		OutputPaths:      []string{"stderr"},
+		ErrorOutputPaths: []string{"stderr"},
+	}
+
+	logger, err := config.Build()
+	if err != nil {
+		return nil, err
+	}
+
+	r.logger = logger
+
+	return r.logger, nil
 }
 
 func EmailReportFilterFromConfig(config EmailReportFilter) email.Filter {

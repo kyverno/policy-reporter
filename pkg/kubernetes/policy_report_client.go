@@ -5,6 +5,7 @@ import (
 	"sync"
 	"time"
 
+	"go.uber.org/zap"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/informers"
 	"k8s.io/client-go/metadata"
@@ -24,6 +25,7 @@ type k8sPolicyReportClient struct {
 	synced       bool
 	mx           *sync.Mutex
 	reportFilter *report.Filter
+	logger       *zap.Logger
 }
 
 func (k *k8sPolicyReportClient) HasSynced() bool {
@@ -50,6 +52,8 @@ func (k *k8sPolicyReportClient) Sync(stopper chan struct{}) error {
 	}
 
 	k.synced = true
+
+	k.logger.Info("informer sync completed")
 
 	return nil
 }
@@ -97,7 +101,7 @@ func (k *k8sPolicyReportClient) configureInformer(informer cache.SharedIndexInfo
 }
 
 // NewPolicyReportClient new Client for Policy Report Kubernetes API
-func NewPolicyReportClient(metaClient metadata.Interface, reportFilter *report.Filter, queue *Queue) report.PolicyReportClient {
+func NewPolicyReportClient(metaClient metadata.Interface, reportFilter *report.Filter, queue *Queue, logger *zap.Logger) report.PolicyReportClient {
 	fatcory := metadatainformer.NewSharedInformerFactory(metaClient, 15*time.Minute)
 	polr := fatcory.ForResource(pr.SchemeGroupVersion.WithResource("policyreports"))
 	cpolr := fatcory.ForResource(pr.SchemeGroupVersion.WithResource("clusterpolicyreports"))
@@ -109,5 +113,6 @@ func NewPolicyReportClient(metaClient metadata.Interface, reportFilter *report.F
 		mx:           &sync.Mutex{},
 		queue:        queue,
 		reportFilter: reportFilter,
+		logger:       logger,
 	}
 }

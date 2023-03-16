@@ -95,7 +95,7 @@ type client struct {
 }
 
 func (l *client) Send(result v1alpha2.PolicyReportResult) {
-	req, err := http.CreateJSONRequest(l.Name(), "POST", l.host, newLokiPayload(result, l.customLabels))
+	req, err := http.CreateJSONRequest(l.Name(), "POST", l.host, newLokiPayload(result, l.customLabels), l.Logger())
 	if err != nil {
 		return
 	}
@@ -103,7 +103,7 @@ func (l *client) Send(result v1alpha2.PolicyReportResult) {
 	req.Header.Set("Content-Type", "application/json")
 
 	resp, err := l.client.Do(req)
-	http.ProcessHTTPResponse(l.Name(), resp, err)
+	http.ProcessHTTPResponse(l.Name(), resp, err, l.Logger())
 }
 
 // NewClient creates a new loki.client to send Results to Loki

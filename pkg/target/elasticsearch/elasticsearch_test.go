@@ -45,7 +45,8 @@ func Test_ElasticsearchTarget(t *testing.T) {
 
 		client := elasticsearch.NewClient(elasticsearch.Options{
 			ClientOptions: target.ClientOptions{
-				Name: "Elasticsearch",
+				Name:   "Elasticsearch",
+				Logger: fixtures.Logger,
 			},
 			Host:         "http://localhost:9200",
 			Username:     "username",
@@ -74,7 +75,8 @@ func Test_ElasticsearchTarget(t *testing.T) {
 
 		client := elasticsearch.NewClient(elasticsearch.Options{
 			ClientOptions: target.ClientOptions{
-				Name: "Elasticsearch",
+				Name:   "Elasticsearch",
+				Logger: fixtures.Logger,
 			},
 			Host:       "http://localhost:9200",
 			Index:      "policy-reporter",
@@ -92,7 +94,8 @@ func Test_ElasticsearchTarget(t *testing.T) {
 
 		client := elasticsearch.NewClient(elasticsearch.Options{
 			ClientOptions: target.ClientOptions{
-				Name: "Elasticsearch",
+				Name:   "Elasticsearch",
+				Logger: fixtures.Logger,
 			},
 			Host:       "http://localhost:9200",
 			Index:      "policy-reporter",
@@ -110,7 +113,8 @@ func Test_ElasticsearchTarget(t *testing.T) {
 
 		client := elasticsearch.NewClient(elasticsearch.Options{
 			ClientOptions: target.ClientOptions{
-				Name: "Elasticsearch",
+				Name:   "Elasticsearch",
+				Logger: fixtures.Logger,
 			},
 			Host:       "http://localhost:9200",
 			Index:      "policy-reporter",
@@ -122,7 +126,8 @@ func Test_ElasticsearchTarget(t *testing.T) {
 	t.Run("Name", func(t *testing.T) {
 		client := elasticsearch.NewClient(elasticsearch.Options{
 			ClientOptions: target.ClientOptions{
-				Name: "Elasticsearch",
+				Name:   "Elasticsearch",
+				Logger: fixtures.Logger,
 			},
 			Host:       "http://localhost:9200",
 			Index:      "policy-reporter",
