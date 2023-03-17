@@ -16,7 +16,6 @@ type Generator struct {
 	client         api.Wgpolicyk8sV1alpha2Interface
 	filter         email.Filter
 	clusterReports bool
-	logger         *zap.Logger
 }
 
 func (o *Generator) GenerateData(ctx context.Context) ([]Source, error) {
@@ -57,7 +56,7 @@ func (o *Generator) GenerateData(ctx context.Context) ([]Source, error) {
 
 				s.AddClusterPassed(report.Summary.Pass)
 
-				o.logger.Info("Processed PolicyRepor", zap.String("name", report.Name))
+				zap.L().Info("Processed PolicyRepor", zap.String("name", report.Name))
 
 				length := len(report.Results)
 				if length == 0 || length == report.Summary.Pass+report.Summary.Skip {
@@ -106,7 +105,7 @@ func (o *Generator) GenerateData(ctx context.Context) ([]Source, error) {
 
 			s.AddNamespacedPassed(report.Namespace, report.Summary.Pass)
 
-			defer o.logger.Info("Processed PolicyRepor", zap.String("name", report.Name))
+			defer zap.L().Info("Processed PolicyRepor", zap.String("name", report.Name))
 
 			length := len(report.Results)
 			if length == 0 || length == report.Summary.Pass+report.Summary.Skip {
@@ -133,8 +132,8 @@ func (o *Generator) GenerateData(ctx context.Context) ([]Source, error) {
 	return list, nil
 }
 
-func NewGenerator(client api.Wgpolicyk8sV1alpha2Interface, filter email.Filter, clusterReports bool, logger *zap.Logger) *Generator {
-	return &Generator{client, filter, clusterReports, logger}
+func NewGenerator(client api.Wgpolicyk8sV1alpha2Interface, filter email.Filter, clusterReports bool) *Generator {
+	return &Generator{client, filter, clusterReports}
 }
 
 func FilterSources(sources []Source, filter email.Filter, clusterReports bool) []Source {

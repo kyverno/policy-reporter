@@ -25,7 +25,6 @@ type Queue struct {
 	debouncer Debouncer
 	lock      *sync.Mutex
 	cache     sets.Set[string]
-	logger    *zap.Logger
 }
 
 func (q *Queue) Add(obj *v1.PartialObjectMetadata) error {
@@ -130,7 +129,7 @@ func (q *Queue) handleErr(err error, key interface{}) {
 	}
 
 	if q.queue.NumRequeues(key) < 5 {
-		q.logger.Error("process error", zap.Any("key", key), zap.Error(err))
+		zap.L().Error("process error", zap.Any("key", key), zap.Error(err))
 
 		q.queue.AddRateLimited(key)
 		return
@@ -139,16 +138,15 @@ func (q *Queue) handleErr(err error, key interface{}) {
 	q.queue.Forget(key)
 
 	runtime.HandleError(err)
-	q.logger.Warn("dropping report out of queue", zap.Any("key", key), zap.Error(err))
+	zap.L().Warn("dropping report out of queue", zap.Any("key", key), zap.Error(err))
 }
 
-func NewQueue(debouncer Debouncer, queue workqueue.RateLimitingInterface, client v1alpha2.Wgpolicyk8sV1alpha2Interface, logger *zap.Logger) *Queue {
+func NewQueue(debouncer Debouncer, queue workqueue.RateLimitingInterface, client v1alpha2.Wgpolicyk8sV1alpha2Interface) *Queue {
 	return &Queue{
 		debouncer: debouncer,
 		queue:     queue,
 		client:    client,
 		cache:     sets.New[string](),
 		lock:      &sync.Mutex{},
-		logger:    logger,
 	}
 }

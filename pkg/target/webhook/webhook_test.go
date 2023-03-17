@@ -49,8 +49,7 @@ func Test_UITarget(t *testing.T) {
 
 		client := webhook.NewClient(webhook.Options{
 			ClientOptions: target.ClientOptions{
-				Name:   "UI",
-				Logger: fixtures.Logger,
+				Name: "UI",
 			},
 			Host:         "http://localhost:8080/webhook",
 			Headers:      map[string]string{"X-Code": "1234"},
@@ -66,8 +65,7 @@ func Test_UITarget(t *testing.T) {
 	t.Run("Name", func(t *testing.T) {
 		client := webhook.NewClient(webhook.Options{
 			ClientOptions: target.ClientOptions{
-				Name:   "HTTP",
-				Logger: fixtures.Logger,
+				Name: "HTTP",
 			},
 			Host:       "http://localhost:8080",
 			Headers:    map[string]string{"X-Code": "1234"},

@@ -41,8 +41,7 @@ func Test_KinesisTarget(t *testing.T) {
 
 		client := kinesis.NewClient(kinesis.Options{
 			ClientOptions: target.ClientOptions{
-				Name:   "Kinesis",
-				Logger: fixtures.Logger,
+				Name: "Kinesis",
 			},
 			CustomFields: map[string]string{"cluster": "name"},
 			Kinesis:      &testClient{nil, callback},
@@ -56,8 +55,7 @@ func Test_KinesisTarget(t *testing.T) {
 	t.Run("Name", func(t *testing.T) {
 		client := kinesis.NewClient(kinesis.Options{
 			ClientOptions: target.ClientOptions{
-				Name:   "Kinesis",
-				Logger: fixtures.Logger,
+				Name: "Kinesis",
 			},
 			Kinesis: &testClient{},
 		})

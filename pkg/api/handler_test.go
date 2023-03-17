@@ -5,8 +5,6 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"go.uber.org/zap"
-
 	"github.com/kyverno/policy-reporter/pkg/api"
 )
 
@@ -18,7 +16,7 @@ func Test_HealthzAPI(t *testing.T) {
 		}
 
 		rr := httptest.NewRecorder()
-		handler := api.HealthzHandler(func() bool { return true }, zap.NewNop())
+		handler := api.HealthzHandler(func() bool { return true })
 
 		handler.ServeHTTP(rr, req)
 
@@ -33,7 +31,7 @@ func Test_HealthzAPI(t *testing.T) {
 		}
 
 		rr := httptest.NewRecorder()
-		handler := api.HealthzHandler(func() bool { return false }, zap.NewNop())
+		handler := api.HealthzHandler(func() bool { return false })
 
 		handler.ServeHTTP(rr, req)
 
@@ -51,7 +49,7 @@ func Test_ReadyAPI(t *testing.T) {
 		}
 
 		rr := httptest.NewRecorder()
-		handler := api.ReadyHandler(func() bool { return true }, zap.NewNop())
+		handler := api.ReadyHandler(func() bool { return true })
 
 		handler.ServeHTTP(rr, req)
 
@@ -66,7 +64,7 @@ func Test_ReadyAPI(t *testing.T) {
 		}
 
 		rr := httptest.NewRecorder()
-		handler := api.ReadyHandler(func() bool { return false }, zap.NewNop())
+		handler := api.ReadyHandler(func() bool { return false })
 
 		handler.ServeHTTP(rr, req)
 

@@ -121,7 +121,7 @@ logging:
   development: false # more human readable structure, enables stacktraces and removes log sampling
 
 api:
-  logging: false # enable API access and error logging
+  logging: false # enable API access logging
 
 # REST API
 rest:

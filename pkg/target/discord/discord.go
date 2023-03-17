@@ -105,13 +105,13 @@ type client struct {
 }
 
 func (d *client) Send(result v1alpha2.PolicyReportResult) {
-	req, err := http.CreateJSONRequest(d.Name(), "POST", d.webhook, newPayload(result, d.customFields), d.Logger())
+	req, err := http.CreateJSONRequest(d.Name(), "POST", d.webhook, newPayload(result, d.customFields))
 	if err != nil {
 		return
 	}
 
 	resp, err := d.client.Do(req)
-	http.ProcessHTTPResponse(d.Name(), resp, err, d.Logger())
+	http.ProcessHTTPResponse(d.Name(), resp, err)
 }
 
 // NewClient creates a new loki.client to send Results to Discord

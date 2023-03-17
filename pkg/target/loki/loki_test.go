@@ -90,8 +90,7 @@ func Test_LokiTarget(t *testing.T) {
 
 		client := loki.NewClient(loki.Options{
 			ClientOptions: target.ClientOptions{
-				Name:   "Loki",
-				Logger: fixtures.Logger,
+				Name: "Loki",
 			},
 			Host:         "http://localhost:3100/api/prom/push",
 			CustomLabels: map[string]string{"custom": "label"},
@@ -156,8 +155,7 @@ func Test_LokiTarget(t *testing.T) {
 
 		client := loki.NewClient(loki.Options{
 			ClientOptions: target.ClientOptions{
-				Name:   "Loki",
-				Logger: fixtures.Logger,
+				Name: "Loki",
 			},
 			Host:         "http://localhost:3100/api/prom/push",
 			CustomLabels: map[string]string{"custom": "label"},
@@ -168,8 +166,7 @@ func Test_LokiTarget(t *testing.T) {
 	t.Run("Name", func(t *testing.T) {
 		client := loki.NewClient(loki.Options{
 			ClientOptions: target.ClientOptions{
-				Name:   "Loki",
-				Logger: fixtures.Logger,
+				Name: "Loki",
 			},
 			Host:         "http://localhost:3100/api/prom/push",
 			CustomLabels: map[string]string{"custom": "label"},

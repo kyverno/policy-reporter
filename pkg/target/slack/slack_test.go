@@ -40,8 +40,7 @@ func Test_SlackTarget(t *testing.T) {
 
 		client := slack.NewClient(slack.Options{
 			ClientOptions: target.ClientOptions{
-				Name:   "Slack",
-				Logger: fixtures.Logger,
+				Name: "Slack",
 			},
 			Webhook:      "http://hook.slack:80",
 			CustomFields: map[string]string{"Cluster": "Name"},
@@ -67,8 +66,7 @@ func Test_SlackTarget(t *testing.T) {
 
 		client := slack.NewClient(slack.Options{
 			ClientOptions: target.ClientOptions{
-				Name:   "Slack",
-				Logger: fixtures.Logger,
+				Name: "Slack",
 			},
 			Webhook:    "http://hook.slack:80",
 			HTTPClient: testClient{callback, 200},
@@ -93,8 +91,7 @@ func Test_SlackTarget(t *testing.T) {
 
 		client := slack.NewClient(slack.Options{
 			ClientOptions: target.ClientOptions{
-				Name:   "Slack",
-				Logger: fixtures.Logger,
+				Name: "Slack",
 			},
 			Webhook:    "http://hook.slack:80",
 			HTTPClient: testClient{callback, 200},
@@ -119,8 +116,7 @@ func Test_SlackTarget(t *testing.T) {
 
 		client := slack.NewClient(slack.Options{
 			ClientOptions: target.ClientOptions{
-				Name:   "Slack",
-				Logger: fixtures.Logger,
+				Name: "Slack",
 			},
 			Webhook:      "http://hook.slack:80",
 			CustomFields: map[string]string{"Cluster": "Name"},
@@ -146,8 +142,7 @@ func Test_SlackTarget(t *testing.T) {
 
 		client := slack.NewClient(slack.Options{
 			ClientOptions: target.ClientOptions{
-				Name:   "Slack",
-				Logger: fixtures.Logger,
+				Name: "Slack",
 			},
 			Webhook:      "http://hook.slack:80",
 			CustomFields: map[string]string{"Cluster": "Name"},
@@ -159,8 +154,7 @@ func Test_SlackTarget(t *testing.T) {
 	t.Run("Name", func(t *testing.T) {
 		client := slack.NewClient(slack.Options{
 			ClientOptions: target.ClientOptions{
-				Name:   "Slack",
-				Logger: fixtures.Logger,
+				Name: "Slack",
 			},
 			Webhook:      "http://hook.slack:80",
 			CustomFields: map[string]string{"Cluster": "Name"},
