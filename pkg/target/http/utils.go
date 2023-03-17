@@ -6,7 +6,6 @@ import (
 	"crypto/x509"
 	"encoding/json"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"time"
 
@@ -91,7 +90,7 @@ func NewClient(certificatePath string, skipTLS bool) *http.Client {
 	if certificatePath != "" {
 		caCert, err := ioutil.ReadFile(certificatePath)
 		if err != nil {
-			log.Printf("[ERROR] failed to read certificate: %s\n", certificatePath)
+			zap.L().Error("failed to read certificate", zap.String("path", certificatePath))
 			return client
 		}
 
