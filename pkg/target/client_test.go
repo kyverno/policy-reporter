@@ -3,7 +3,6 @@ package target_test
 import (
 	"testing"
 
-	"go.uber.org/zap"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
@@ -382,18 +381,6 @@ func Test_BaseClient(t *testing.T) {
 
 		if client.Name() != "Client" {
 			t.Error("Should return configured Name")
-		}
-	})
-	t.Run("Logger", func(t *testing.T) {
-		client := target.NewBaseClient(target.ClientOptions{
-			Name:                  "Client",
-			ResultFilter:          &report.ResultFilter{MinimumPriority: "error"},
-			SkipExistingOnStartup: true,
-			Logger:                zap.NewNop(),
-		})
-
-		if client.Logger() == nil {
-			t.Error("Should return logger")
 		}
 	})
 	t.Run("Sources", func(t *testing.T) {

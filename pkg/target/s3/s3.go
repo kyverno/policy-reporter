@@ -47,7 +47,7 @@ func (c *client) Send(result v1alpha2.PolicyReportResult) {
 	body := new(bytes.Buffer)
 
 	if err := json.NewEncoder(body).Encode(http.NewJSONResult(result)); err != nil {
-		c.Logger().Error(c.Name()+": encode error", zap.Error(err))
+		zap.L().Error(c.Name()+": encode error", zap.Error(err))
 		return
 	}
 	t := time.Unix(result.Timestamp.Seconds, int64(result.Timestamp.Nanos))
@@ -55,11 +55,11 @@ func (c *client) Send(result v1alpha2.PolicyReportResult) {
 
 	err := c.s3.Upload(body, key)
 	if err != nil {
-		c.Logger().Error(c.Name()+": S3 Upload error", zap.Error(err))
+		zap.L().Error(c.Name()+": S3 Upload error", zap.Error(err))
 		return
 	}
 
-	c.Logger().Info(c.Name() + ": PUSH OK")
+	zap.L().Info(c.Name() + ": PUSH OK")
 }
 
 // NewClient creates a new S3.client to send Results to S3. It doesnt' work right now

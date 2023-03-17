@@ -40,8 +40,7 @@ func Test_LokiTarget(t *testing.T) {
 
 		client := discord.NewClient(discord.Options{
 			ClientOptions: target.ClientOptions{
-				Name:   "Discord",
-				Logger: fixtures.Logger,
+				Name: "Discord",
 			},
 			Webhook:    "http://hook.discord:80",
 			HTTPClient: testClient{callback, 200},
@@ -66,8 +65,7 @@ func Test_LokiTarget(t *testing.T) {
 
 		client := discord.NewClient(discord.Options{
 			ClientOptions: target.ClientOptions{
-				Name:   "Discord",
-				Logger: fixtures.Logger,
+				Name: "Discord",
 			},
 			Webhook:    "http://hook.discord:80",
 			HTTPClient: testClient{callback, 200},
@@ -77,8 +75,7 @@ func Test_LokiTarget(t *testing.T) {
 	t.Run("Name", func(t *testing.T) {
 		client := discord.NewClient(discord.Options{
 			ClientOptions: target.ClientOptions{
-				Name:   "Discord",
-				Logger: fixtures.Logger,
+				Name: "Discord",
 			},
 			Webhook:    "http://hook.discord:80",
 			HTTPClient: testClient{},

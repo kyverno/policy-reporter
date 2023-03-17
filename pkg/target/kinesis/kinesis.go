@@ -45,7 +45,7 @@ func (c *client) Send(result v1alpha2.PolicyReportResult) {
 	body := new(bytes.Buffer)
 
 	if err := json.NewEncoder(body).Encode(http.NewJSONResult(result)); err != nil {
-		c.Logger().Error("failed to encode result", zap.String("name", c.Name()), zap.Error(err))
+		zap.L().Error("failed to encode result", zap.String("name", c.Name()), zap.Error(err))
 		return
 	}
 	t := time.Unix(result.Timestamp.Seconds, int64(result.Timestamp.Nanos))
@@ -53,11 +53,11 @@ func (c *client) Send(result v1alpha2.PolicyReportResult) {
 
 	err := c.kinesis.Upload(body, key)
 	if err != nil {
-		c.Logger().Error("kinesis upload error", zap.String("name", c.Name()), zap.Error(err))
+		zap.L().Error("kinesis upload error", zap.String("name", c.Name()), zap.Error(err))
 		return
 	}
 
-	c.Logger().Info("PUSH OK", zap.String("name", c.Name()))
+	zap.L().Info("PUSH OK", zap.String("name", c.Name()))
 }
 
 // NewClient creates a new Kinesis.client to send Results to AWS Kinesis compatible source

@@ -122,16 +122,11 @@ func (r *Resolver) Queue() (*kubernetes.Queue, error) {
 	if err != nil {
 		return nil, err
 	}
-	logger, err := r.Logger()
-	if err != nil {
-		return nil, err
-	}
 
 	return kubernetes.NewQueue(
 		kubernetes.NewDebouncer(1*time.Minute, r.EventPublisher()),
 		workqueue.NewNamedRateLimitingQueue(workqueue.DefaultControllerRateLimiter(), "report-queue"),
 		client,
-		logger,
 	), nil
 }
 
@@ -148,7 +143,7 @@ func (r *Resolver) RegisterSendResultListener() {
 
 // RegisterSendResultListener resolver method
 func (r *Resolver) RegisterStoreListener(store report.PolicyReportStore) {
-	r.EventPublisher().RegisterListener(listener.Store, listener.NewStoreListener(store, r.logger))
+	r.EventPublisher().RegisterListener(listener.Store, listener.NewStoreListener(store))
 }
 
 // RegisterMetricsListener resolver method
@@ -206,22 +201,20 @@ func (r *Resolver) TargetClients() []target.Client {
 		return r.targetClients
 	}
 
-	logger, _ := r.Logger()
-
 	factory := r.TargetFactory()
 
 	clients := make([]target.Client, 0)
 
-	clients = append(clients, factory.LokiClients(r.config.Loki, logger)...)
-	clients = append(clients, factory.ElasticsearchClients(r.config.Elasticsearch, logger)...)
-	clients = append(clients, factory.SlackClients(r.config.Slack, logger)...)
-	clients = append(clients, factory.DiscordClients(r.config.Discord, logger)...)
-	clients = append(clients, factory.TeamsClients(r.config.Teams, logger)...)
-	clients = append(clients, factory.S3Clients(r.config.S3, logger)...)
-	clients = append(clients, factory.KinesisClients(r.config.Kinesis, logger)...)
-	clients = append(clients, factory.WebhookClients(r.config.Webhook, logger)...)
+	clients = append(clients, factory.LokiClients(r.config.Loki)...)
+	clients = append(clients, factory.ElasticsearchClients(r.config.Elasticsearch)...)
+	clients = append(clients, factory.SlackClients(r.config.Slack)...)
+	clients = append(clients, factory.DiscordClients(r.config.Discord)...)
+	clients = append(clients, factory.TeamsClients(r.config.Teams)...)
+	clients = append(clients, factory.S3Clients(r.config.S3)...)
+	clients = append(clients, factory.KinesisClients(r.config.Kinesis)...)
+	clients = append(clients, factory.WebhookClients(r.config.Webhook)...)
 
-	if ui := factory.UIClient(r.config.UI, logger); ui != nil {
+	if ui := factory.UIClient(r.config.UI); ui != nil {
 		clients = append(clients, ui)
 	}
 
@@ -274,7 +267,6 @@ func (r *Resolver) SummaryGenerator() (*summary.Generator, error) {
 		client,
 		EmailReportFilterFromConfig(r.config.EmailReports.Summary.Filter),
 		!r.config.EmailReports.Summary.Filter.DisableClusterReports,
-		r.logger,
 	), nil
 }
 
@@ -295,7 +287,6 @@ func (r *Resolver) ViolationsGenerator() (*violations.Generator, error) {
 		client,
 		EmailReportFilterFromConfig(r.config.EmailReports.Violations.Filter),
 		!r.config.EmailReports.Violations.Filter.DisableClusterReports,
-		r.logger,
 	), nil
 }
 
@@ -338,12 +329,7 @@ func (r *Resolver) PolicyReportClient() (report.PolicyReportClient, error) {
 		return nil, err
 	}
 
-	logger, err := r.Logger()
-	if err != nil {
-		return nil, err
-	}
-
-	r.policyReportClient = kubernetes.NewPolicyReportClient(client, r.ReportFilter(), queue, logger)
+	r.policyReportClient = kubernetes.NewPolicyReportClient(client, r.ReportFilter(), queue)
 
 	return r.policyReportClient, nil
 }
@@ -429,6 +415,8 @@ func (r *Resolver) Logger() (*zap.Logger, error) {
 	}
 
 	r.logger = logger
+
+	zap.ReplaceGlobals(logger)
 
 	return r.logger, nil
 }

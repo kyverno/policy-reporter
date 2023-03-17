@@ -8,7 +8,7 @@ import (
 )
 
 // HealthzHandler for the Halthz REST API
-func HealthzHandler(synced func() bool, logger *zap.Logger) http.HandlerFunc {
+func HealthzHandler(synced func() bool) http.HandlerFunc {
 	return func(w http.ResponseWriter, req *http.Request) {
 		if !synced() {
 			w.Header().Set("Content-Type", "application/json; charset=UTF-8")
@@ -16,9 +16,7 @@ func HealthzHandler(synced func() bool, logger *zap.Logger) http.HandlerFunc {
 
 			fmt.Fprint(w, `{ "error": "Informers not in sync" }`)
 
-			if logger != nil {
-				logger.Warn("informers not synced yet, waiting for k8s client to complete startup")
-			}
+			zap.L().Warn("informers not synced yet, waiting for k8s client to complete startup")
 
 			return
 		}
@@ -31,7 +29,7 @@ func HealthzHandler(synced func() bool, logger *zap.Logger) http.HandlerFunc {
 }
 
 // ReadyHandler for the Halthz REST API
-func ReadyHandler(synced func() bool, logger *zap.Logger) http.HandlerFunc {
+func ReadyHandler(synced func() bool) http.HandlerFunc {
 	return func(w http.ResponseWriter, req *http.Request) {
 		if !synced() {
 			w.Header().Set("Content-Type", "application/json; charset=UTF-8")
@@ -39,9 +37,7 @@ func ReadyHandler(synced func() bool, logger *zap.Logger) http.HandlerFunc {
 
 			fmt.Fprint(w, `{ "error": "Informers not in sync" }`)
 
-			if logger != nil {
-				logger.Warn("informers not synced yet, waiting for k8s client to be up")
-			}
+			zap.L().Warn("informers not synced yet, waiting for k8s client to be up")
 
 			return
 		}

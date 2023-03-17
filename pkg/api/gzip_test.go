@@ -14,7 +14,7 @@ import (
 )
 
 func Test_GzipCompression(t *testing.T) {
-	handl := v1.NewHandler(nil, nil)
+	handl := v1.NewHandler(nil)
 
 	t.Run("GzipRespose", func(t *testing.T) {
 		req, err := http.NewRequest("GET", "/targets", nil)

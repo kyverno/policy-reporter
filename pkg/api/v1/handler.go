@@ -14,13 +14,12 @@ import (
 var defaultOrder = []string{"resource_namespace", "resource_name", "resource_uid", "policy", "rule", "message"}
 
 type Handler struct {
-	logger *zap.Logger
 	finder PolicyReportFinder
 }
 
 func (h *Handler) logError(err error) {
-	if h.logger != nil && err != nil {
-		h.logger.Error("failed to load data", zap.Error(err))
+	if err != nil {
+		zap.L().Error("failed to load data", zap.Error(err))
 	}
 }
 
@@ -294,9 +293,8 @@ func buildFilter(req *http.Request) Filter {
 	}
 }
 
-func NewHandler(finder PolicyReportFinder, logger *zap.Logger) *Handler {
+func NewHandler(finder PolicyReportFinder) *Handler {
 	return &Handler{
 		finder: finder,
-		logger: logger,
 	}
 }

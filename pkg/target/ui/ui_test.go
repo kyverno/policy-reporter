@@ -40,8 +40,7 @@ func Test_UITarget(t *testing.T) {
 
 		client := ui.NewClient(ui.Options{
 			ClientOptions: target.ClientOptions{
-				Name:   "UI",
-				Logger: fixtures.Logger,
+				Name: "UI",
 			},
 			Host:       "http://localhost:8080",
 			HTTPClient: testClient{callback, 200},
@@ -51,8 +50,7 @@ func Test_UITarget(t *testing.T) {
 	t.Run("Name", func(t *testing.T) {
 		client := ui.NewClient(ui.Options{
 			ClientOptions: target.ClientOptions{
-				Name:   "UI",
-				Logger: fixtures.Logger,
+				Name: "UI",
 			},
 			Host:       "http://localhost:8080",
 			HTTPClient: testClient{},

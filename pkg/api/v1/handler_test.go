@@ -138,7 +138,7 @@ func Test_V1_API(t *testing.T) {
 	store.Add(preport)
 	store.Add(creport)
 
-	handl := v1.NewHandler(store, nil)
+	handl := v1.NewHandler(store)
 
 	t.Run("ClusterPolicyListHandler", func(t *testing.T) {
 		req, err := http.NewRequest("GET", "/v1/cluster-policies", nil)
@@ -572,7 +572,7 @@ func Test_V1_API(t *testing.T) {
 }
 
 func Test_TargetsAPI(t *testing.T) {
-	handl := v1.NewHandler(nil, nil)
+	handl := v1.NewHandler(nil)
 
 	t.Run("Empty Respose", func(t *testing.T) {
 		req, err := http.NewRequest("GET", "/targets", nil)

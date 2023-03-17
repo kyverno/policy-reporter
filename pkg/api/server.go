@@ -39,12 +39,12 @@ type httpServer struct {
 }
 
 func (s *httpServer) RegisterLifecycleHandler() {
-	s.mux.HandleFunc("/healthz", HealthzHandler(s.synced, s.logger))
-	s.mux.HandleFunc("/ready", ReadyHandler(s.synced, s.logger))
+	s.mux.HandleFunc("/healthz", HealthzHandler(s.synced))
+	s.mux.HandleFunc("/ready", ReadyHandler(s.synced))
 }
 
 func (s *httpServer) RegisterV1Handler(finder v1.PolicyReportFinder) {
-	handler := v1.NewHandler(finder, s.logger)
+	handler := v1.NewHandler(finder)
 
 	s.mux.HandleFunc("/v1/targets", Gzip(handler.TargetsHandler(s.targets)))
 	s.mux.HandleFunc("/v1/categories", Gzip(handler.CategoryListHandler()))

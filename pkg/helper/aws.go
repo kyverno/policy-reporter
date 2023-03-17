@@ -3,13 +3,13 @@ package helper
 import (
 	"bytes"
 	"io"
-	"log"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/kinesis"
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
+	"go.uber.org/zap"
 )
 
 type AWSClient interface {
@@ -44,7 +44,7 @@ func NewS3Client(accessKeyID, secretAccessKey, region, endpoint, bucket string, 
 
 	sess, err := session.NewSession(config)
 	if err != nil {
-		log.Printf("[ERROR]: %v\n", "Error while creating S3 Session")
+		zap.L().Error("error while creating S3 session")
 		return nil
 	}
 
@@ -81,7 +81,7 @@ func NewKinesisClient(accessKeyID, secretAccessKey, region, endpoint, streamName
 		Credentials: credentials.NewStaticCredentials(accessKeyID, secretAccessKey, ""),
 	})
 	if err != nil {
-		log.Printf("[ERROR]: %v\n", "Error while creating S3 Session")
+		zap.L().Error("error while creating Kinesis session")
 		return nil
 	}
 

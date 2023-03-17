@@ -20,13 +20,13 @@ type client struct {
 }
 
 func (e *client) Send(result v1alpha2.PolicyReportResult) {
-	req, err := http.CreateJSONRequest(e.Name(), "POST", e.host, http.NewJSONResult(result), e.Logger())
+	req, err := http.CreateJSONRequest(e.Name(), "POST", e.host, http.NewJSONResult(result))
 	if err != nil {
 		return
 	}
 
 	resp, err := e.client.Do(req)
-	http.ProcessHTTPResponse(e.Name(), resp, err, e.Logger())
+	http.ProcessHTTPResponse(e.Name(), resp, err)
 }
 
 // NewClient creates a new loki.client to send Results to Elasticsearch

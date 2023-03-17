@@ -6,7 +6,6 @@ import (
 	"crypto/x509"
 	"encoding/json"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"time"
 
@@ -16,14 +15,14 @@ import (
 )
 
 // CreateJSONRequest for the given configuration
-func CreateJSONRequest(target, method, host string, payload interface{}, logger *zap.Logger) (*http.Request, error) {
+func CreateJSONRequest(target, method, host string, payload interface{}) (*http.Request, error) {
 	body := new(bytes.Buffer)
 
 	json.NewEncoder(body).Encode(payload)
 
 	req, err := http.NewRequest(method, host, body)
 	if err != nil {
-		logger.Error(target+": PUSH FAILED", zap.Error(err))
+		zap.L().Error(target+": PUSH FAILED", zap.Error(err))
 		return nil, err
 	}
 
@@ -34,7 +33,7 @@ func CreateJSONRequest(target, method, host string, payload interface{}, logger 
 }
 
 // ProcessHTTPResponse Logs Error or Success messages
-func ProcessHTTPResponse(target string, resp *http.Response, err error, logger *zap.Logger) {
+func ProcessHTTPResponse(target string, resp *http.Response, err error) {
 	defer func() {
 		if resp != nil && resp.Body != nil {
 			resp.Body.Close()
@@ -42,14 +41,14 @@ func ProcessHTTPResponse(target string, resp *http.Response, err error, logger *
 	}()
 
 	if err != nil {
-		logger.Error(target+": PUSH FAILED", zap.Error(err))
+		zap.L().Error(target+": PUSH FAILED", zap.Error(err))
 	} else if resp.StatusCode >= 400 {
 		buf := new(bytes.Buffer)
 		buf.ReadFrom(resp.Body)
 
-		logger.Error(target+": PUSH FAILED", zap.Int("statusCode", resp.StatusCode), zap.String("body", buf.String()))
+		zap.L().Error(target+": PUSH FAILED", zap.Int("statusCode", resp.StatusCode), zap.String("body", buf.String()))
 	} else {
-		logger.Info(target + ": PUSH OK")
+		zap.L().Info(target + ": PUSH OK")
 	}
 }
 
@@ -91,7 +90,7 @@ func NewClient(certificatePath string, skipTLS bool) *http.Client {
 	if certificatePath != "" {
 		caCert, err := ioutil.ReadFile(certificatePath)
 		if err != nil {
-			log.Printf("[ERROR] failed to read certificate: %s\n", certificatePath)
+			zap.L().Error("failed to read certificate", zap.String("path", certificatePath))
 			return client
 		}
 
