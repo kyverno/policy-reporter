@@ -1,5 +1,16 @@
 # Changelog
 
+# 2.18.0
+* Policy Reporter
+    * Improved logging configuration
+        * Support JSON logging
+        * Support log level
+    * optional API access logging with `api.logging` set to `true`
+    * New aggregation table for API performance improvements
+    * Helm Ingress template
+* Policy Reporter KyvernoPlugin
+    * Helm Ingress template
+
 # 2.17.0
 * Policy Reporter
     * Use metaclient to reduce informer memory usage

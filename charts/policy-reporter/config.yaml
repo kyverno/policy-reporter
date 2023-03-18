@@ -251,10 +251,10 @@ redis:
   {{- toYaml . | nindent 2 }}
 {{- end }}
 
-{{- with .Values.logging }}
 logging:
-  {{- toYaml . | nindent 2 }}
-{{- end }}
+  encoding: {{ .Values.logging.encoding }}
+  logLevel: {{ include "policyreporter.logLevel" . }}
+  development: {{ .Values.logging.development }}
 
 api:
   logging: {{ .Values.api.logging }}
