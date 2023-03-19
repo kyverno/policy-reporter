@@ -129,3 +129,12 @@ Create the name of the service account to use
     {{- .Release.Namespace -}}
 {{- end -}}
 {{- end -}}
+
+{{/* Get the namespace name. */}}
+{{- define "ui.logLevel" -}}
+{{- if .Values.api.logging -}}
+-1
+{{- else -}}
+{{- .Values.logging.logLevel -}}
+{{- end -}}
+{{- end -}}

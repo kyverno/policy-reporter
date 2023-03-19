@@ -38,7 +38,10 @@ data:
       {{- toYaml . | nindent 6 }}
     {{- end }}
 
-    {{- with .Values.logging }}
     logging:
-      {{- toYaml . | nindent 6 }}
-    {{- end }}
+      encoding: {{ .Values.logging.encoding }}
+      logLevel: {{ include "ui.logLevel" . }}
+      development: {{ .Values.logging.development }}
+
+    apiConfig:
+      logging: {{ .Values.api.logging }}

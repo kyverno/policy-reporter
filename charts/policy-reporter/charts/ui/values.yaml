@@ -67,10 +67,12 @@ labelFilter: []
 
 # Proxy request logging
 logging:
-  enabled: false # enables additional logging about proxy requests
   encoding: console # possible encodings are console and json
   logLevel: 0 # default info
   development: false # more human readable structure, removes log sampling
+
+api:
+  logging: false # enables access logging for proxy requests, sets log level to debug
 
 # use redis as external log storage instead of an in memory store
 # recommended when using a HA setup with more then one replica
