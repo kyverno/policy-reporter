@@ -21,25 +21,30 @@ type gcsClient struct {
 }
 
 func (c *gcsClient) Upload(body *bytes.Buffer, key string) error {
-	writer := c.client.Bucket(c.bucket).Object(key).NewWriter(context.Background())
+	object := c.client.Bucket(c.bucket).Object(key)
+
+	writer := object.NewWriter(context.Background())
 	defer writer.Close()
 
 	_, err := writer.Write(body.Bytes())
+	if err != nil {
+		return err
+	}
 
-	return err
+	return writer.Close()
 }
 
 // NewS3Client creates a new S3.client to send Results to S3
 func NewGCSClient(ctx context.Context, credentials, bucket string) GCPClient {
-	cred, err := google.CredentialsFromJSON(ctx, []byte(credentials))
+	cred, err := google.CredentialsFromJSON(ctx, []byte(credentials), storage.ScopeReadWrite)
 	if err != nil {
-		zap.L().Error("error while creating GCS credentials")
+		zap.L().Error("error while creating GCS credentials", zap.Error(err))
 		return nil
 	}
 
 	client, err := storage.NewClient(ctx, option.WithCredentials(cred))
 	if err != nil {
-		zap.L().Error("error while creating GCS client")
+		zap.L().Error("error while creating GCS client", zap.Error(err))
 		return nil
 	}
 

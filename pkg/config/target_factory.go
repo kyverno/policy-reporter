@@ -721,6 +721,9 @@ func (f *TargetFactory) createGCSClient(config GCS, parent GCS) target.Client {
 		config.Credentials,
 		config.Bucket,
 	)
+	if gcsClient == nil {
+		return nil
+	}
 
 	sugar.Infof("%s configured", config.Name)
 
