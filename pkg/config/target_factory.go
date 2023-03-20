@@ -13,6 +13,7 @@ import (
 	"github.com/kyverno/policy-reporter/pkg/target"
 	"github.com/kyverno/policy-reporter/pkg/target/discord"
 	"github.com/kyverno/policy-reporter/pkg/target/elasticsearch"
+	"github.com/kyverno/policy-reporter/pkg/target/gcs"
 	"github.com/kyverno/policy-reporter/pkg/target/http"
 	"github.com/kyverno/policy-reporter/pkg/target/kinesis"
 	"github.com/kyverno/policy-reporter/pkg/target/loki"
@@ -228,6 +229,29 @@ func (f *TargetFactory) KinesisClients(config Kinesis) []target.Client {
 		}
 
 		if es := f.createKinesisClient(channel, config); es != nil {
+			clients = append(clients, es)
+		}
+	}
+
+	return clients
+}
+
+// S3Clients resolver method
+func (f *TargetFactory) GCSClients(config GCS) []target.Client {
+	clients := make([]target.Client, 0)
+	if config.Name == "" {
+		config.Name = "Google Cloud Storage"
+	}
+
+	if es := f.createGCSClient(config, GCS{}); es != nil {
+		clients = append(clients, es)
+	}
+	for i, channel := range config.Channels {
+		if channel.Name == "" {
+			channel.Name = fmt.Sprintf("GCS Channel %d", i+1)
+		}
+
+		if es := f.createGCSClient(channel, config); es != nil {
 			clients = append(clients, es)
 		}
 	}
@@ -658,6 +682,61 @@ func (f *TargetFactory) createKinesisClient(config Kinesis, parent Kinesis) targ
 	})
 }
 
+func (f *TargetFactory) createGCSClient(config GCS, parent GCS) target.Client {
+	if config.SecretRef != "" && f.secretClient != nil {
+		f.mapSecretValues(&config, config.SecretRef)
+	}
+
+	if config.Bucket == "" && parent.Bucket == "" {
+		return nil
+	} else if config.Bucket == "" {
+		config.Bucket = parent.Bucket
+	}
+
+	sugar := zap.S()
+
+	if config.Credentials == "" && parent.Credentials == "" {
+		sugar.Errorf("%s.Credentials has not been declared", config.Name)
+		return nil
+	} else if config.Credentials == "" {
+		config.Credentials = parent.Credentials
+	}
+
+	if config.Prefix == "" && parent.Prefix == "" {
+		config.Prefix = "policy-reporter"
+	} else if config.Prefix == "" {
+		config.Prefix = parent.Prefix
+	}
+
+	if config.MinimumPriority == "" {
+		config.MinimumPriority = parent.MinimumPriority
+	}
+
+	if !config.SkipExisting {
+		config.SkipExisting = parent.SkipExisting
+	}
+
+	gcsClient := helper.NewGCSClient(
+		context.Background(),
+		config.Credentials,
+		config.Bucket,
+	)
+
+	sugar.Infof("%s configured", config.Name)
+
+	return gcs.NewClient(gcs.Options{
+		ClientOptions: target.ClientOptions{
+			Name:                  config.Name,
+			SkipExistingOnStartup: config.SkipExisting,
+			ResultFilter:          createResultFilter(config.Filter, config.MinimumPriority, config.Sources),
+			ReportFilter:          createReprotFilter(config.Filter),
+		},
+		Client:       gcsClient,
+		CustomFields: config.CustomFields,
+		Prefix:       config.Prefix,
+	})
+}
+
 func (f *TargetFactory) mapSecretValues(config any, ref string) {
 	values, err := f.secretClient.Get(context.Background(), ref)
 	if err != nil {
@@ -711,6 +790,11 @@ func (f *TargetFactory) mapSecretValues(config any, ref string) {
 		}
 		if values.SecretAccessKey != "" {
 			c.SecretAccessKey = values.SecretAccessKey
+		}
+
+	case *GCS:
+		if values.Credentials != "" {
+			c.Credentials = values.Credentials
 		}
 
 	case *Webhook:

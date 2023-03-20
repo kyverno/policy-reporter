@@ -104,6 +104,15 @@ var testConfig = &config.Config{
 		CustomFields:    map[string]string{"field": "value"},
 		Channels:        []config.Kinesis{{}},
 	},
+	GCS: config.GCS{
+		Credentials:     "Credentials",
+		Bucket:          "test",
+		SkipExisting:    true,
+		MinimumPriority: "debug",
+		Prefix:          "prefix",
+		CustomFields:    map[string]string{"field": "value"},
+		Channels:        []config.GCS{{}},
+	},
 	EmailReports: config.EmailReports{
 		Templates: config.EmailTemplates{
 			Dir: "../../templates",
@@ -122,7 +131,7 @@ var testConfig = &config.Config{
 func Test_ResolveTargets(t *testing.T) {
 	resolver := config.NewResolver(testConfig, &rest.Config{})
 
-	if count := len(resolver.TargetClients()); count != 17 {
+	if count := len(resolver.TargetClients()); count != 19 {
 		t.Errorf("Expected 17 Clients, got %d", count)
 	}
 }

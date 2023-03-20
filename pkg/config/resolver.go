@@ -213,6 +213,7 @@ func (r *Resolver) TargetClients() []target.Client {
 	clients = append(clients, factory.S3Clients(r.config.S3)...)
 	clients = append(clients, factory.KinesisClients(r.config.Kinesis)...)
 	clients = append(clients, factory.WebhookClients(r.config.Webhook)...)
+	clients = append(clients, factory.GCSClients(r.config.GCS)...)
 
 	if ui := factory.UIClient(r.config.UI); ui != nil {
 		clients = append(clients, ui)

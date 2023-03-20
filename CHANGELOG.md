@@ -8,6 +8,9 @@
     * optional API access logging with `api.logging` set to `true`
     * New aggregation table for API performance improvements
     * Helm Ingress template
+    * New Google Cloud Storage Target
+        * Requires `credentials` as JSON String and the `bucket` name
+        * Added in the helm valus under `target.gcs`
 * Policy Reporter KyvernoPlugin
     * Helm Ingress template
 

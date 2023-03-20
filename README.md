@@ -60,6 +60,7 @@ Policy Reporter supports the following [Targets](https://kyverno.github.io/polic
 * [MS Teams](https://kyverno.github.io/policy-reporter/core/targets#microsoft-teams)
 * [Policy Reporter UI](https://kyverno.github.io/policy-reporter/core/targets#policy-reporter-ui)
 * [S3](https://kyverno.github.io/policy-reporter/core/targets#s3-compatible-storage)
+* Google Cloud Storage
 
 
 ## Monitoring

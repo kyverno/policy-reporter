@@ -208,6 +208,30 @@ kinesis:
     {{- toYaml . | nindent 4 }}
   {{- end }}
 
+gcs:
+  credentials: {{ .Values.target.gcs.credentials }}
+  secretRef: {{ .Values.target.gcs.secretRef | quote }}
+  bucket: {{ .Values.target.gcs.bucket }}
+  prefix: {{ .Values.target.gcs.prefix }}
+  minimumPriority: {{ .Values.target.gcs.minimumPriority | quote }}
+  skipExistingOnStartup: {{ .Values.target.gcs.skipExistingOnStartup }}
+  {{- with .Values.target.gcs.sources }}
+  sources:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  {{- with .Values.target.gcs.customFields }}
+  customFields:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  {{- with .Values.target.gcs.filter }}
+  filter:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  {{- with .Values.target.gcs.channels }}
+  channels:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+
 {{- with .Values.policyPriorities }}
 priorityMap:
   {{- toYaml . | nindent 2 }}
