@@ -164,6 +164,21 @@ type Kinesis struct {
 	Channels        []Kinesis         `mapstructure:"channels"`
 }
 
+// GCS configuration
+type GCS struct {
+	Name            string            `mapstructure:"name"`
+	Credentials     string            `mapstructure:"credentials"`
+	Prefix          string            `mapstructure:"prefix"`
+	Bucket          string            `mapstructure:"bucket"`
+	SecretRef       string            `mapstructure:"secretRef"`
+	CustomFields    map[string]string `mapstructure:"customFields"`
+	SkipExisting    bool              `mapstructure:"skipExistingOnStartup"`
+	MinimumPriority string            `mapstructure:"minimumPriority"`
+	Filter          TargetFilter      `mapstructure:"filter"`
+	Sources         []string          `mapstructure:"sources"`
+	Channels        []GCS             `mapstructure:"channels"`
+}
+
 // SMTP configuration
 type SMTP struct {
 	Host       string `mapstructure:"host"`
@@ -279,6 +294,7 @@ type Config struct {
 	Teams          Teams          `mapstructure:"teams"`
 	S3             S3             `mapstructure:"s3"`
 	Kinesis        Kinesis        `mapstructure:"kinesis"`
+	GCS            GCS            `mapstructure:"gcs"`
 	UI             UI             `mapstructure:"ui"`
 	Webhook        Webhook        `mapstructure:"webhook"`
 	API            API            `mapstructure:"api"`

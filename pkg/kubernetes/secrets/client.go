@@ -15,6 +15,7 @@ type Values struct {
 	AccessKeyID     string
 	SecretAccessKey string
 	Token           string
+	Credentials     string
 }
 
 type Client interface {
@@ -58,6 +59,10 @@ func (c *k8sClient) Get(ctx context.Context, name string) (Values, error) {
 
 	if token, ok := secret.Data["token"]; ok {
 		values.Token = string(token)
+	}
+
+	if token, ok := secret.Data["credentials"]; ok {
+		values.Credentials = string(token)
 	}
 
 	return values, nil

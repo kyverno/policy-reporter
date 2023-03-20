@@ -30,6 +30,7 @@ func newFakeClient() v1.SecretInterface {
 			"accessKeyID":     []byte("accessKeyID"),
 			"secretAccessKey": []byte("secretAccessKey"),
 			"token":           []byte("token"),
+			"credentials":     []byte("credentials"),
 		},
 	}).CoreV1().Secrets("default")
 }
@@ -77,6 +78,12 @@ func Test_ResolveTarget(t *testing.T) {
 	})
 	t.Run("S3", func(t *testing.T) {
 		clients := factory.S3Clients(testConfig.S3)
+		if len(clients) != 2 {
+			t.Errorf("Expected 2 Client, got %d clients", len(clients))
+		}
+	})
+	t.Run("GCS", func(t *testing.T) {
+		clients := factory.GCSClients(testConfig.GCS)
 		if len(clients) != 2 {
 			t.Errorf("Expected 2 Client, got %d clients", len(clients))
 		}
@@ -170,6 +177,16 @@ func Test_ResolveTargetWithoutHost(t *testing.T) {
 	t.Run("Kinesis.StreamName", func(t *testing.T) {
 		if len(factory.KinesisClients(config.Kinesis{Endpoint: "https://yds.serverless.yandexcloud.net", AccessKeyID: "access", SecretAccessKey: "secret", Region: "ru-central1"})) != 0 {
 			t.Error("Expected Client to be nil if no bucket is configured")
+		}
+	})
+	t.Run("GCS.Bucket", func(t *testing.T) {
+		if len(factory.GCSClients(config.GCS{})) != 0 {
+			t.Error("Expected Client to be nil if no bucket is configured")
+		}
+	})
+	t.Run("GCS.Credentials", func(t *testing.T) {
+		if len(factory.GCSClients(config.GCS{Bucket: "policy-reporter"})) != 0 {
+			t.Error("Expected Client to be nil if no accessKey is configured")
 		}
 	})
 }
@@ -278,6 +295,13 @@ func Test_GetValuesFromSecret(t *testing.T) {
 
 	t.Run("Get Kinesis values from Secret", func(t *testing.T) {
 		clients := factory.KinesisClients(config.Kinesis{SecretRef: secretName, Endpoint: "endpoint", StreamName: "stream", Region: "region"})
+		if len(clients) != 1 {
+			t.Error("Expected one client created")
+		}
+	})
+
+	t.Run("Get GCS values from Secret", func(t *testing.T) {
+		clients := factory.GCSClients(config.GCS{SecretRef: secretName, Bucket: "bucket"})
 		if len(clients) != 1 {
 			t.Error("Expected one client created")
 		}
@@ -392,6 +416,19 @@ func Test_GetValuesFromSecret(t *testing.T) {
 		customFields := client.FieldByName("customLabels").MapKeys()
 		if customFields[0].String() != "label" {
 			t.Errorf("Expected customLabels are added")
+		}
+	})
+	t.Run("Get CustomFields from GCS", func(t *testing.T) {
+		clients := factory.GCSClients(testConfig.GCS)
+		if len(clients) < 1 {
+			t.Error("Expected one client created")
+		}
+
+		client := reflect.ValueOf(clients[0]).Elem()
+
+		customFields := client.FieldByName("customFields").MapKeys()
+		if customFields[0].String() != "field" {
+			t.Errorf("Expected customFields are added")
 		}
 	})
 }
