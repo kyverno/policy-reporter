@@ -13,6 +13,14 @@
         * Added in the helm valus under `target.gcs`
 * Policy Reporter KyvernoPlugin
     * Helm Ingress template
+    * Improved logging configuration
+        * Support JSON logging
+        * Support log level
+* Policy Reporter UI
+    * Improved logging configuration
+        * Support JSON logging
+        * Support log level
+        * Proxy Logging
 
 # 2.17.0
 * Policy Reporter

@@ -94,3 +94,12 @@ app.kubernetes.io/instance: {{ .Release.Name }}
     {{- .Release.Namespace -}}
 {{- end -}}
 {{- end -}}
+
+{{/* Get the namespace name. */}}
+{{- define "kyvernoplugin.logLevel" -}}
+{{- if .Values.api.logging -}}
+-1
+{{- else -}}
+{{- .Values.logging.logLevel -}}
+{{- end -}}
+{{- end -}}

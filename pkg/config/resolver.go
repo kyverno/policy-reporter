@@ -366,14 +366,7 @@ func (r *Resolver) ResultCache() cache.Cache {
 	return r.resultCache
 }
 
-// NewResolver constructor function
-func NewResolver(config *Config, k8sConfig *rest.Config) Resolver {
-	return Resolver{
-		config:    config,
-		k8sConfig: k8sConfig,
-	}
-}
-
+// Logger resolver method
 func (r *Resolver) Logger() (*zap.Logger, error) {
 	if r.logger != nil {
 		return r.logger, nil
@@ -420,6 +413,14 @@ func (r *Resolver) Logger() (*zap.Logger, error) {
 	zap.ReplaceGlobals(logger)
 
 	return r.logger, nil
+}
+
+// NewResolver constructor function
+func NewResolver(config *Config, k8sConfig *rest.Config) Resolver {
+	return Resolver{
+		config:    config,
+		k8sConfig: k8sConfig,
+	}
 }
 
 func EmailReportFilterFromConfig(config EmailReportFilter) email.Filter {

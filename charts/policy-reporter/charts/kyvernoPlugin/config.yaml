@@ -7,3 +7,11 @@ leaderElection:
   leaseDuration: {{ .Values.leaderElection.leaseDuration }}
   renewDeadline: {{ .Values.leaderElection.renewDeadline }}
   retryPeriod: {{ .Values.leaderElection.retryPeriod }}
+
+logging:
+  encoding: {{ .Values.logging.encoding }}
+  logLevel: {{ include "kyvernoplugin.logLevel" . }}
+  development: {{ .Values.logging.development }}
+
+api:
+  logging: {{ .Values.api.logging }}

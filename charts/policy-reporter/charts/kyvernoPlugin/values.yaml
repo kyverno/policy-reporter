@@ -2,7 +2,7 @@ image:
   registry: ghcr.io
   repository: kyverno/policy-reporter-kyverno-plugin
   pullPolicy: IfNotPresent
-  tag: 1.5.0
+  tag: 1.5.1
 
 imagePullSecrets: []
 
@@ -129,6 +129,14 @@ rest:
 # Prometheus Metrics API
 metrics:
   enabled: true
+
+logging:
+  encoding: console # possible encodings are console and json
+  logLevel: 0 # default info
+  development: false # more human readable structure, enables stacktraces and removes log sampling
+
+api:
+  logging: false # enable debug API access logging, sets logLevel to debug
 
 # create PolicyReports for enforce policies, 
 # based on Events created by Kyverno (>= v1.7.0)
