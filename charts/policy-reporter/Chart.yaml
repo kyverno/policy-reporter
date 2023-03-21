@@ -24,4 +24,4 @@ dependencies:
     version: "2.9.1"
   - name: kyvernoPlugin
     condition: kyvernoPlugin.enabled
-    version: "1.5.2"
+    version: "1.5.3"
