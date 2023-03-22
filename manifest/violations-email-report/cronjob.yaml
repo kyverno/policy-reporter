@@ -26,7 +26,7 @@ spec:
           restartPolicy: Never
           containers:
             - name: policy-reporter
-              image: "ghcr.io/kyverno/policy-reporter:2.13.0"
+              image: "ghcr.io/kyverno/policy-reporter:2.14.0"
               imagePullPolicy: IfNotPresent
               securityContext: 
                 allowPrivilegeEscalation: false
