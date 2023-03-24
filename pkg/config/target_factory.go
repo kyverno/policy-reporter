@@ -236,7 +236,7 @@ func (f *TargetFactory) KinesisClients(config Kinesis) []target.Client {
 	return clients
 }
 
-// S3Clients resolver method
+// GCSClients resolver method
 func (f *TargetFactory) GCSClients(config GCS) []target.Client {
 	clients := make([]target.Client, 0)
 	if config.Name == "" {
@@ -283,7 +283,7 @@ func (f *TargetFactory) createSlackClient(config Slack, parent Slack) target.Cli
 			Name:                  config.Name,
 			SkipExistingOnStartup: config.SkipExisting,
 			ResultFilter:          createResultFilter(config.Filter, config.MinimumPriority, config.Sources),
-			ReportFilter:          createReprotFilter(config.Filter),
+			ReportFilter:          createReportFilter(config.Filter),
 		},
 		Webhook:      config.Webhook,
 		CustomFields: config.CustomFields,
@@ -329,7 +329,7 @@ func (f *TargetFactory) createLokiClient(config Loki, parent Loki) target.Client
 			Name:                  config.Name,
 			SkipExistingOnStartup: config.SkipExisting,
 			ResultFilter:          createResultFilter(config.Filter, config.MinimumPriority, config.Sources),
-			ReportFilter:          createReprotFilter(config.Filter),
+			ReportFilter:          createReportFilter(config.Filter),
 		},
 		Host:         config.Host + config.Path,
 		CustomLabels: config.CustomLabels,
@@ -391,7 +391,7 @@ func (f *TargetFactory) createElasticsearchClient(config Elasticsearch, parent E
 			Name:                  config.Name,
 			SkipExistingOnStartup: config.SkipExisting,
 			ResultFilter:          createResultFilter(config.Filter, config.MinimumPriority, config.Sources),
-			ReportFilter:          createReprotFilter(config.Filter),
+			ReportFilter:          createReportFilter(config.Filter),
 		},
 		Host:         config.Host,
 		Username:     config.Username,
@@ -427,7 +427,7 @@ func (f *TargetFactory) createDiscordClient(config Discord, parent Discord) targ
 			Name:                  config.Name,
 			SkipExistingOnStartup: config.SkipExisting,
 			ResultFilter:          createResultFilter(config.Filter, config.MinimumPriority, config.Sources),
-			ReportFilter:          createReprotFilter(config.Filter),
+			ReportFilter:          createReportFilter(config.Filter),
 		},
 		Webhook:      config.Webhook,
 		CustomFields: config.CustomFields,
@@ -471,7 +471,7 @@ func (f *TargetFactory) createTeamsClient(config Teams, parent Teams) target.Cli
 			Name:                  config.Name,
 			SkipExistingOnStartup: config.SkipExisting,
 			ResultFilter:          createResultFilter(config.Filter, config.MinimumPriority, config.Sources),
-			ReportFilter:          createReprotFilter(config.Filter),
+			ReportFilter:          createReportFilter(config.Filter),
 		},
 		Webhook:      config.Webhook,
 		CustomFields: config.CustomFields,
@@ -523,7 +523,7 @@ func (f *TargetFactory) createWebhookClient(config Webhook, parent Webhook) targ
 			Name:                  config.Name,
 			SkipExistingOnStartup: config.SkipExisting,
 			ResultFilter:          createResultFilter(config.Filter, config.MinimumPriority, config.Sources),
-			ReportFilter:          createReprotFilter(config.Filter),
+			ReportFilter:          createReportFilter(config.Filter),
 		},
 		Host:         config.Host,
 		Headers:      config.Headers,
@@ -587,6 +587,18 @@ func (f *TargetFactory) createS3Client(config S3, parent S3) target.Client {
 		config.SkipExisting = parent.SkipExisting
 	}
 
+	if !config.BucketKeyEnabled {
+		config.BucketKeyEnabled = parent.BucketKeyEnabled
+	}
+
+	if config.SseKmsKeyId == "" {
+		config.SseKmsKeyId = parent.SseKmsKeyId
+	}
+
+	if config.ServerSideEncryption == "" {
+		config.ServerSideEncryption = parent.ServerSideEncryption
+	}
+
 	s3Client := helper.NewS3Client(
 		config.AccessKeyID,
 		config.SecretAccessKey,
@@ -594,6 +606,7 @@ func (f *TargetFactory) createS3Client(config S3, parent S3) target.Client {
 		config.Endpoint,
 		config.Bucket,
 		config.PathStyle,
+		helper.WithKMS(&config.BucketKeyEnabled, &config.SseKmsKeyId, &config.ServerSideEncryption),
 	)
 
 	sugar.Infof("%s configured", config.Name)
@@ -603,7 +616,7 @@ func (f *TargetFactory) createS3Client(config S3, parent S3) target.Client {
 			Name:                  config.Name,
 			SkipExistingOnStartup: config.SkipExisting,
 			ResultFilter:          createResultFilter(config.Filter, config.MinimumPriority, config.Sources),
-			ReportFilter:          createReprotFilter(config.Filter),
+			ReportFilter:          createReportFilter(config.Filter),
 		},
 		S3:           s3Client,
 		CustomFields: config.CustomFields,
@@ -675,7 +688,7 @@ func (f *TargetFactory) createKinesisClient(config Kinesis, parent Kinesis) targ
 			Name:                  config.Name,
 			SkipExistingOnStartup: config.SkipExisting,
 			ResultFilter:          createResultFilter(config.Filter, config.MinimumPriority, config.Sources),
-			ReportFilter:          createReprotFilter(config.Filter),
+			ReportFilter:          createReportFilter(config.Filter),
 		},
 		CustomFields: config.CustomFields,
 		Kinesis:      kinesisClient,
@@ -732,7 +745,7 @@ func (f *TargetFactory) createGCSClient(config GCS, parent GCS) target.Client {
 			Name:                  config.Name,
 			SkipExistingOnStartup: config.SkipExisting,
 			ResultFilter:          createResultFilter(config.Filter, config.MinimumPriority, config.Sources),
-			ReportFilter:          createReprotFilter(config.Filter),
+			ReportFilter:          createReportFilter(config.Filter),
 		},
 		Client:       gcsClient,
 		CustomFields: config.CustomFields,
@@ -786,6 +799,9 @@ func (f *TargetFactory) mapSecretValues(config any, ref string) {
 		if values.SecretAccessKey != "" {
 			c.SecretAccessKey = values.SecretAccessKey
 		}
+		if values.KmsKeyId != "" {
+			c.SseKmsKeyId = values.KmsKeyId
+		}
 
 	case *Kinesis:
 		if values.AccessKeyID != "" {
@@ -824,7 +840,7 @@ func createResultFilter(filter TargetFilter, minimumPriority string, sources []s
 	)
 }
 
-func createReprotFilter(filter TargetFilter) *report.ReportFilter {
+func createReportFilter(filter TargetFilter) *report.ReportFilter {
 	return target.NewReportFilter(
 		ToRuleSet(filter.ReportLabels),
 	)
