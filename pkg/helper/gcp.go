@@ -34,7 +34,7 @@ func (c *gcsClient) Upload(body *bytes.Buffer, key string) error {
 	return writer.Close()
 }
 
-// NewS3Client creates a new S3.client to send Results to S3
+// NewGCSClient creates a new S3.client to send Results to S3
 func NewGCSClient(ctx context.Context, credentials, bucket string) GCPClient {
 	cred, err := google.CredentialsFromJSON(ctx, []byte(credentials), storage.ScopeReadWrite)
 	if err != nil {
