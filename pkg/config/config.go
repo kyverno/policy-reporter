@@ -130,21 +130,24 @@ type Webhook struct {
 
 // S3 configuration
 type S3 struct {
-	Name            string            `mapstructure:"name"`
-	AccessKeyID     string            `mapstructure:"accessKeyID"`
-	SecretAccessKey string            `mapstructure:"secretAccessKey"`
-	Region          string            `mapstructure:"region"`
-	Endpoint        string            `mapstructure:"endpoint"`
-	Prefix          string            `mapstructure:"prefix"`
-	Bucket          string            `mapstructure:"bucket"`
-	PathStyle       bool              `mapstructure:"pathStyle"`
-	SecretRef       string            `mapstructure:"secretRef"`
-	CustomFields    map[string]string `mapstructure:"customFields"`
-	SkipExisting    bool              `mapstructure:"skipExistingOnStartup"`
-	MinimumPriority string            `mapstructure:"minimumPriority"`
-	Filter          TargetFilter      `mapstructure:"filter"`
-	Sources         []string          `mapstructure:"sources"`
-	Channels        []S3              `mapstructure:"channels"`
+	Name                 string            `mapstructure:"name"`
+	AccessKeyID          string            `mapstructure:"accessKeyID"`
+	SecretAccessKey      string            `mapstructure:"secretAccessKey"`
+	Region               string            `mapstructure:"region"`
+	Endpoint             string            `mapstructure:"endpoint"`
+	Prefix               string            `mapstructure:"prefix"`
+	Bucket               string            `mapstructure:"bucket"`
+	BucketKeyEnabled     bool              `mapstructure:"bucketKeyEnabled"`
+	SseKmsKeyId          string            `mapstructure:"sseKmsKeyId"`
+	ServerSideEncryption string            `mapstructure:"serverSideEncryption"`
+	PathStyle            bool              `mapstructure:"pathStyle"`
+	SecretRef            string            `mapstructure:"secretRef"`
+	CustomFields         map[string]string `mapstructure:"customFields"`
+	SkipExisting         bool              `mapstructure:"skipExistingOnStartup"`
+	MinimumPriority      string            `mapstructure:"minimumPriority"`
+	Filter               TargetFilter      `mapstructure:"filter"`
+	Sources              []string          `mapstructure:"sources"`
+	Channels             []S3              `mapstructure:"channels"`
 }
 
 // Kinesis configuration
