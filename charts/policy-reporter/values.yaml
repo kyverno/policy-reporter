@@ -459,6 +459,12 @@ target:
     endpoint: ""
     # S3 storage, bucket name
     bucket: ""
+    # S3 storage to use an S3 Bucket Key for object encryption with SSE-KMS
+    bucketKeyEnabled: false
+    # S3 storage KMS Key ID for object encryption with SSE-KMS
+    sseKmsKeyId: ""
+    # S3 storage server-side encryption algorithm used when storing this object in Amazon S3, AES256, aws:kms
+    serverSideEncryption: ""
     # S3 storage, force path style configuration
     pathStyle: false
     # name of prefix, keys will have format: s3://<bucket>/<prefix>/YYYY-MM-DD/YYYY-MM-DDTHH:mm:ss.s+01:00.json
