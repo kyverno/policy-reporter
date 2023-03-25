@@ -31,7 +31,7 @@ func newFakeClient() v1.SecretInterface {
 			"secretAccessKey": []byte("secretAccessKey"),
 			"kmsKeyId":        []byte("kmsKeyId"),
 			"token":           []byte("token"),
-			"credentials":     []byte("credentials"),
+			"credentials":     []byte(`{"token": "token", "type": "authorized_user"}`),
 		},
 	}).CoreV1().Secrets("default")
 }
@@ -197,7 +197,7 @@ func Test_ResolveTargetWithoutHost(t *testing.T) {
 	})
 	t.Run("Kinesis.StreamName", func(t *testing.T) {
 		if len(factory.KinesisClients(config.Kinesis{Endpoint: "https://yds.serverless.yandexcloud.net", AccessKeyID: "access", SecretAccessKey: "secret", Region: "ru-central1"})) != 0 {
-			t.Error("Expected Client to be nil if no bucket is configured")
+			t.Error("Expected Client to be nil if no stream name is configured")
 		}
 	})
 	t.Run("GCS.Bucket", func(t *testing.T) {
