@@ -18,21 +18,42 @@ type AWSClient interface {
 }
 
 type s3Client struct {
-	bucket   string
-	uploader *s3manager.Uploader
+	bucket               string
+	uploader             *s3manager.Uploader
+	bucketKeyEnabled     *bool
+	sseKmsKeyId          *string
+	serverSideEncryption *string
+}
+
+type Options func(s *s3Client)
+
+func WithKMS(bucketKeyEnabled *bool, sseKmsKeyId, serverSideEncryption *string) Options {
+	return func(s *s3Client) {
+		s.bucketKeyEnabled = bucketKeyEnabled
+		if *sseKmsKeyId != "" {
+			s.sseKmsKeyId = sseKmsKeyId
+		}
+
+		if *serverSideEncryption != "" {
+			s.serverSideEncryption = serverSideEncryption
+		}
+	}
 }
 
 func (s *s3Client) Upload(body *bytes.Buffer, key string) error {
 	_, err := s.uploader.Upload(&s3manager.UploadInput{
-		Bucket: aws.String(s.bucket),
-		Key:    aws.String(key),
-		Body:   body,
+		Bucket:               aws.String(s.bucket),
+		Key:                  aws.String(key),
+		Body:                 body,
+		BucketKeyEnabled:     s.bucketKeyEnabled,
+		SSEKMSKeyId:          s.sseKmsKeyId,
+		ServerSideEncryption: s.serverSideEncryption,
 	})
 	return err
 }
 
 // NewS3Client creates a new S3.client to send Results to S3
-func NewS3Client(accessKeyID, secretAccessKey, region, endpoint, bucket string, pathStyle bool) AWSClient {
+func NewS3Client(accessKeyID, secretAccessKey, region, endpoint, bucket string, pathStyle bool, opts ...Options) AWSClient {
 	config := &aws.Config{
 		Region:      aws.String(region),
 		Endpoint:    aws.String(endpoint),
@@ -48,10 +69,16 @@ func NewS3Client(accessKeyID, secretAccessKey, region, endpoint, bucket string, 
 		return nil
 	}
 
-	return &s3Client{
-		bucket,
-		s3manager.NewUploader(sess),
+	s3Client := &s3Client{
+		bucket:   bucket,
+		uploader: s3manager.NewUploader(sess),
 	}
+
+	for _, opt := range opts {
+		opt(s3Client)
+	}
+
+	return s3Client
 }
 
 type kinesisClient struct {

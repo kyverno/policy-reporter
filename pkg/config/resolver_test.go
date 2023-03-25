@@ -81,17 +81,20 @@ var testConfig = &config.Config{
 		}},
 	},
 	S3: config.S3{
-		AccessKeyID:     "AccessKey",
-		SecretAccessKey: "SecretAccessKey",
-		Bucket:          "test",
-		SkipExisting:    true,
-		MinimumPriority: "debug",
-		Endpoint:        "https://storage.yandexcloud.net",
-		PathStyle:       true,
-		Region:          "ru-central1",
-		Prefix:          "prefix",
-		CustomFields:    map[string]string{"field": "value"},
-		Channels:        []config.S3{{}},
+		AccessKeyID:          "AccessKey",
+		SecretAccessKey:      "SecretAccessKey",
+		Bucket:               "test",
+		BucketKeyEnabled:     false,
+		SseKmsKeyId:          "",
+		ServerSideEncryption: "",
+		SkipExisting:         true,
+		MinimumPriority:      "debug",
+		Endpoint:             "https://storage.yandexcloud.net",
+		PathStyle:            true,
+		Region:               "ru-central1",
+		Prefix:               "prefix",
+		CustomFields:         map[string]string{"field": "value"},
+		Channels:             []config.S3{{}},
 	},
 	Kinesis: config.Kinesis{
 		AccessKeyID:     "AccessKey",
@@ -105,7 +108,7 @@ var testConfig = &config.Config{
 		Channels:        []config.Kinesis{{}},
 	},
 	GCS: config.GCS{
-		Credentials:     "Credentials",
+		Credentials:     `{"token": "token", "type": "authorized_user"}`,
 		Bucket:          "test",
 		SkipExisting:    true,
 		MinimumPriority: "debug",
@@ -132,7 +135,7 @@ func Test_ResolveTargets(t *testing.T) {
 	resolver := config.NewResolver(testConfig, &rest.Config{})
 
 	if count := len(resolver.TargetClients()); count != 19 {
-		t.Errorf("Expected 17 Clients, got %d", count)
+		t.Errorf("Expected 19 Clients, got %d", count)
 	}
 }
 

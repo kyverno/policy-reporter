@@ -28,6 +28,7 @@ func newFakeClient() v1.SecretInterface {
 			"webhook":         []byte("http://localhost:9200/webhook"),
 			"accessKeyID":     []byte("accessKeyID"),
 			"secretAccessKey": []byte("secretAccessKey"),
+			"kmsKeyId":        []byte("kmsKeyId"),
 			"token":           []byte("token"),
 		},
 	}).CoreV1().Secrets("default")
@@ -68,6 +69,10 @@ func Test_Client(t *testing.T) {
 
 		if values.Token != "token" {
 			t.Errorf("Unexpected Token: %s", values.Token)
+		}
+
+		if values.KmsKeyId != "kmsKeyId" {
+			t.Errorf("Unexpected KmsKeyId: %s", values.KmsKeyId)
 		}
 	})
 

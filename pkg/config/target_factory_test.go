@@ -29,8 +29,9 @@ func newFakeClient() v1.SecretInterface {
 			"webhook":         []byte("http://localhost:9200/webhook"),
 			"accessKeyID":     []byte("accessKeyID"),
 			"secretAccessKey": []byte("secretAccessKey"),
+			"kmsKeyId":        []byte("kmsKeyId"),
 			"token":           []byte("token"),
-			"credentials":     []byte("credentials"),
+			"credentials":     []byte(`{"token": "token", "type": "authorized_user"}`),
 		},
 	}).CoreV1().Secrets("default")
 }
@@ -154,6 +155,26 @@ func Test_ResolveTargetWithoutHost(t *testing.T) {
 			t.Error("Expected Client to be nil if no bucket is configured")
 		}
 	})
+	t.Run("S3.SSE-S3", func(t *testing.T) {
+		if len(factory.S3Clients(config.S3{Endpoint: "https://storage.yandexcloud.net", AccessKeyID: "access", SecretAccessKey: "secret", Region: "ru-central1", ServerSideEncryption: "AES256"})) != 0 {
+			t.Error("Expected Client to be nil if server side encryption is not configured")
+		}
+	})
+	t.Run("S3.SSE-KMS", func(t *testing.T) {
+		if len(factory.S3Clients(config.S3{Endpoint: "https://storage.yandexcloud.net", AccessKeyID: "access", SecretAccessKey: "secret", Region: "ru-central1", ServerSideEncryption: "aws:kms"})) != 0 {
+			t.Error("Expected Client to be nil if server side encryption is not configured")
+		}
+	})
+	t.Run("S3.SSE-KMS-S3-KEY", func(t *testing.T) {
+		if len(factory.S3Clients(config.S3{Endpoint: "https://storage.yandexcloud.net", AccessKeyID: "access", SecretAccessKey: "secret", Region: "ru-central1", BucketKeyEnabled: true, ServerSideEncryption: "aws:kms"})) != 0 {
+			t.Error("Expected Client to be nil if server side encryption is not configured")
+		}
+	})
+	t.Run("S3.SSE-KMS-KEY-ID", func(t *testing.T) {
+		if len(factory.S3Clients(config.S3{Endpoint: "https://storage.yandexcloud.net", AccessKeyID: "access", SecretAccessKey: "secret", Region: "ru-central1", ServerSideEncryption: "aws:kms", SseKmsKeyId: "SseKmsKeyId"})) != 0 {
+			t.Error("Expected Client to be nil if server side encryption is not configured")
+		}
+	})
 	t.Run("Kinesis.Endoint", func(t *testing.T) {
 		if len(factory.KinesisClients(config.Kinesis{})) != 0 {
 			t.Error("Expected Client to be nil if no endpoint is configured")
@@ -176,7 +197,7 @@ func Test_ResolveTargetWithoutHost(t *testing.T) {
 	})
 	t.Run("Kinesis.StreamName", func(t *testing.T) {
 		if len(factory.KinesisClients(config.Kinesis{Endpoint: "https://yds.serverless.yandexcloud.net", AccessKeyID: "access", SecretAccessKey: "secret", Region: "ru-central1"})) != 0 {
-			t.Error("Expected Client to be nil if no bucket is configured")
+			t.Error("Expected Client to be nil if no stream name is configured")
 		}
 	})
 	t.Run("GCS.Bucket", func(t *testing.T) {
@@ -288,6 +309,13 @@ func Test_GetValuesFromSecret(t *testing.T) {
 
 	t.Run("Get S3 values from Secret", func(t *testing.T) {
 		clients := factory.S3Clients(config.S3{SecretRef: secretName, Endpoint: "endoint", Bucket: "bucket", Region: "region"})
+		if len(clients) != 1 {
+			t.Error("Expected one client created")
+		}
+	})
+
+	t.Run("Get S3 values from Secret with KMS", func(t *testing.T) {
+		clients := factory.S3Clients(config.S3{SecretRef: secretName, Endpoint: "endoint", Bucket: "bucket", Region: "region", BucketKeyEnabled: true, ServerSideEncryption: "aws:kms"})
 		if len(clients) != 1 {
 			t.Error("Expected one client created")
 		}
