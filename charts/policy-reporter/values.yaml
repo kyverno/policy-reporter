@@ -272,6 +272,8 @@ target:
     skipTLS: false
     # receive the host from an existing secret instead
     secretRef: ""
+    # Mounted secret path by Secrets Controller, secret should be in json format
+    mountedSecret: ""
     # loki api path, defaults to "/api/prom/push" (deprecated)
     path: ""
     # minimum priority "" < info < warning < critical < error
@@ -320,6 +322,8 @@ target:
     password: ""
     # receive the host, username and/or password from an existing secret instead
     secretRef: ""
+    # Mounted secret path by Secrets Controller, secret should be in json format
+    mountedSecret: ""
     # elasticsearch index rotation and index suffix
     # possible values: daily, monthly, annually, none (default: daily)
     rotation: ""
@@ -341,6 +345,8 @@ target:
     webhook: ""
     # receive the webhook from an existing secret instead
     secretRef: ""
+    # Mounted secret path by Secrets Controller, secret should be in json format
+    mountedSecret: ""
     # minimum priority "" < info < warning < critical < error
     minimumPriority: ""
     # list of sources which should send to slack
@@ -374,6 +380,8 @@ target:
     webhook: ""
     # receive the webhook from an existing secret instead
     secretRef: ""
+    # Mounted secret path by Secrets Controller, secret should be in json format
+    mountedSecret: ""
     # minimum priority "" < info < warning < critical < error
     minimumPriority: ""
     # list of sources which should send to discord
@@ -390,6 +398,8 @@ target:
     webhook: ""
     # receive the webhook from an existing secret instead
     secretRef: ""
+    # Mounted secret path by Secrets Controller, secret should be in json format
+    mountedSecret: ""
     # path to your custom certificate
     # can be added under extraVolumes
     certificate: ""
@@ -431,6 +441,8 @@ target:
     skipTLS: false
     # receive the host and/or token from an existing secret, the token is added as Authorization header
     secretRef: ""
+    # Mounted secret path by Secrets Controller, secret should be in json format
+    mountedSecret: ""
     # additional http headers
     headers: {}
     # minimum priority "" < info < warning < critical < error
@@ -453,6 +465,8 @@ target:
     secretAccessKey: ""
     # receive the accessKeyID and/or secretAccessKey from an existing secret instead
     secretRef: ""
+    # Mounted secret path by Secrets Controller, secret should be in json format
+    mountedSecret: ""
     # S3 storage region
     region: ""
     # S3 storage endpoint
@@ -489,6 +503,8 @@ target:
     secretAccessKey: ""
     # receive the accessKeyID and/or secretAccessKey from an existing secret instead
     secretRef: ""
+    # Mounted secret path by Secrets Controller, secret should be in json format
+    mountedSecret: ""
     # AWS region
     region: ""
     # AWS Kinesis endpoint
@@ -513,6 +529,8 @@ target:
     credentials: ""
     # receive the credentials from an existing secret instead
     secretRef: ""
+    # Mounted secret path by Secrets Controller, secret should be in json format
+    mountedSecret: ""
     # GCS Bucket
     bucket: ""
     # minimum priority "" < info < warning < critical < error

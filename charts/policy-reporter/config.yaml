@@ -158,6 +158,7 @@ s3:
   accessKeyID: {{ .Values.target.s3.accessKeyID }}
   secretAccessKey:  {{ .Values.target.s3.secretAccessKey }}
   secretRef: {{ .Values.target.s3.secretRef | quote }}
+  mountedSecret: {{ .Values.target.s3.mountedSecret }}
   region: {{ .Values.target.s3.region }}
   endpoint: {{ .Values.target.s3.endpoint }}
   bucket: {{ .Values.target.s3.bucket }}
