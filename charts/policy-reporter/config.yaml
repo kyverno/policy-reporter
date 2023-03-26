@@ -158,11 +158,12 @@ s3:
   accessKeyID: {{ .Values.target.s3.accessKeyID }}
   secretAccessKey:  {{ .Values.target.s3.secretAccessKey }}
   secretRef: {{ .Values.target.s3.secretRef | quote }}
+  mountedSecret: {{ .Values.target.s3.mountedSecret }}
   region: {{ .Values.target.s3.region }}
   endpoint: {{ .Values.target.s3.endpoint }}
   bucket: {{ .Values.target.s3.bucket }}
   bucketKeyEnabled: {{ .Values.target.s3.bucketKeyEnabled }}
-  sseKmsKeyId: {{ .Values.target.s3.sseKmsKeyId }}
+  kmsKeyId: {{ .Values.target.s3.kmsKeyId }}
   serverSideEncryption: { .Values.target.s3.serverSideEncryption }}
   pathStyle: {{ .Values.target.s3.pathStyle }}
   prefix: {{ .Values.target.s3.prefix }}

@@ -21,17 +21,17 @@ type s3Client struct {
 	bucket               string
 	uploader             *s3manager.Uploader
 	bucketKeyEnabled     *bool
-	sseKmsKeyId          *string
+	kmsKeyId             *string
 	serverSideEncryption *string
 }
 
 type Options func(s *s3Client)
 
-func WithKMS(bucketKeyEnabled *bool, sseKmsKeyId, serverSideEncryption *string) Options {
+func WithKMS(bucketKeyEnabled *bool, kmsKeyId, serverSideEncryption *string) Options {
 	return func(s *s3Client) {
 		s.bucketKeyEnabled = bucketKeyEnabled
-		if *sseKmsKeyId != "" {
-			s.sseKmsKeyId = sseKmsKeyId
+		if *kmsKeyId != "" {
+			s.kmsKeyId = kmsKeyId
 		}
 
 		if *serverSideEncryption != "" {
@@ -46,7 +46,7 @@ func (s *s3Client) Upload(body *bytes.Buffer, key string) error {
 		Key:                  aws.String(key),
 		Body:                 body,
 		BucketKeyEnabled:     s.bucketKeyEnabled,
-		SSEKMSKeyId:          s.sseKmsKeyId,
+		SSEKMSKeyId:          s.kmsKeyId,
 		ServerSideEncryption: s.serverSideEncryption,
 	})
 	return err

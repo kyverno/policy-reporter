@@ -2,7 +2,9 @@ package config
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
+	"os"
 
 	_ "github.com/mattn/go-sqlite3"
 	"go.uber.org/zap"
@@ -260,8 +262,11 @@ func (f *TargetFactory) GCSClients(config GCS) []target.Client {
 }
 
 func (f *TargetFactory) createSlackClient(config Slack, parent Slack) target.Client {
-	if config.SecretRef != "" && f.secretClient != nil {
-		f.mapSecretValues(&config, config.SecretRef)
+	if (config.SecretRef != "" && f.secretClient != nil) || config.MountedSecret != "" {
+		f.mapSecretValues(&config, config.SecretRef, config.MountedSecret)
+	}
+
+	if config.MountedSecret != "" {
 	}
 
 	if config.Webhook == "" {
@@ -292,8 +297,8 @@ func (f *TargetFactory) createSlackClient(config Slack, parent Slack) target.Cli
 }
 
 func (f *TargetFactory) createLokiClient(config Loki, parent Loki) target.Client {
-	if config.SecretRef != "" {
-		f.mapSecretValues(&config, config.SecretRef)
+	if (config.SecretRef != "" && f.secretClient != nil) || config.MountedSecret != "" {
+		f.mapSecretValues(&config, config.SecretRef, config.MountedSecret)
 	}
 
 	if config.Host == "" && parent.Host == "" {
@@ -338,8 +343,8 @@ func (f *TargetFactory) createLokiClient(config Loki, parent Loki) target.Client
 }
 
 func (f *TargetFactory) createElasticsearchClient(config Elasticsearch, parent Elasticsearch) target.Client {
-	if config.SecretRef != "" && f.secretClient != nil {
-		f.mapSecretValues(&config, config.SecretRef)
+	if (config.SecretRef != "" && f.secretClient != nil) || config.MountedSecret != "" {
+		f.mapSecretValues(&config, config.SecretRef, config.MountedSecret)
 	}
 
 	if config.Host == "" && parent.Host == "" {
@@ -404,8 +409,8 @@ func (f *TargetFactory) createElasticsearchClient(config Elasticsearch, parent E
 }
 
 func (f *TargetFactory) createDiscordClient(config Discord, parent Discord) target.Client {
-	if config.SecretRef != "" && f.secretClient != nil {
-		f.mapSecretValues(&config, config.SecretRef)
+	if (config.SecretRef != "" && f.secretClient != nil) || config.MountedSecret != "" {
+		f.mapSecretValues(&config, config.SecretRef, config.MountedSecret)
 	}
 
 	if config.Webhook == "" {
@@ -436,8 +441,8 @@ func (f *TargetFactory) createDiscordClient(config Discord, parent Discord) targ
 }
 
 func (f *TargetFactory) createTeamsClient(config Teams, parent Teams) target.Client {
-	if config.SecretRef != "" && f.secretClient != nil {
-		f.mapSecretValues(&config, config.SecretRef)
+	if (config.SecretRef != "" && f.secretClient != nil) || config.MountedSecret != "" {
+		f.mapSecretValues(&config, config.SecretRef, config.MountedSecret)
 	}
 
 	if config.Webhook == "" {
@@ -480,8 +485,8 @@ func (f *TargetFactory) createTeamsClient(config Teams, parent Teams) target.Cli
 }
 
 func (f *TargetFactory) createWebhookClient(config Webhook, parent Webhook) target.Client {
-	if config.SecretRef != "" && f.secretClient != nil {
-		f.mapSecretValues(&config, config.SecretRef)
+	if (config.SecretRef != "" && f.secretClient != nil) || config.MountedSecret != "" {
+		f.mapSecretValues(&config, config.SecretRef, config.MountedSecret)
 	}
 
 	if config.Host == "" {
@@ -533,8 +538,8 @@ func (f *TargetFactory) createWebhookClient(config Webhook, parent Webhook) targ
 }
 
 func (f *TargetFactory) createS3Client(config S3, parent S3) target.Client {
-	if config.SecretRef != "" && f.secretClient != nil {
-		f.mapSecretValues(&config, config.SecretRef)
+	if (config.SecretRef != "" && f.secretClient != nil) || config.MountedSecret != "" {
+		f.mapSecretValues(&config, config.SecretRef, config.MountedSecret)
 	}
 
 	if config.Endpoint == "" && parent.Endpoint == "" {
@@ -591,8 +596,8 @@ func (f *TargetFactory) createS3Client(config S3, parent S3) target.Client {
 		config.BucketKeyEnabled = parent.BucketKeyEnabled
 	}
 
-	if config.SseKmsKeyId == "" {
-		config.SseKmsKeyId = parent.SseKmsKeyId
+	if config.KmsKeyId == "" {
+		config.KmsKeyId = parent.KmsKeyId
 	}
 
 	if config.ServerSideEncryption == "" {
@@ -606,7 +611,7 @@ func (f *TargetFactory) createS3Client(config S3, parent S3) target.Client {
 		config.Endpoint,
 		config.Bucket,
 		config.PathStyle,
-		helper.WithKMS(&config.BucketKeyEnabled, &config.SseKmsKeyId, &config.ServerSideEncryption),
+		helper.WithKMS(&config.BucketKeyEnabled, &config.KmsKeyId, &config.ServerSideEncryption),
 	)
 
 	sugar.Infof("%s configured", config.Name)
@@ -625,8 +630,8 @@ func (f *TargetFactory) createS3Client(config S3, parent S3) target.Client {
 }
 
 func (f *TargetFactory) createKinesisClient(config Kinesis, parent Kinesis) target.Client {
-	if config.SecretRef != "" && f.secretClient != nil {
-		f.mapSecretValues(&config, config.SecretRef)
+	if (config.SecretRef != "" && f.secretClient != nil) || config.MountedSecret != "" {
+		f.mapSecretValues(&config, config.SecretRef, config.MountedSecret)
 	}
 
 	if config.Endpoint == "" && parent.Endpoint == "" {
@@ -696,8 +701,8 @@ func (f *TargetFactory) createKinesisClient(config Kinesis, parent Kinesis) targ
 }
 
 func (f *TargetFactory) createGCSClient(config GCS, parent GCS) target.Client {
-	if config.SecretRef != "" && f.secretClient != nil {
-		f.mapSecretValues(&config, config.SecretRef)
+	if (config.SecretRef != "" && f.secretClient != nil) || config.MountedSecret != "" {
+		f.mapSecretValues(&config, config.SecretRef, config.MountedSecret)
 	}
 
 	if config.Bucket == "" && parent.Bucket == "" {
@@ -753,11 +758,29 @@ func (f *TargetFactory) createGCSClient(config GCS, parent GCS) target.Client {
 	})
 }
 
-func (f *TargetFactory) mapSecretValues(config any, ref string) {
-	values, err := f.secretClient.Get(context.Background(), ref)
-	if err != nil {
-		zap.L().Warn("failed to get secret reference", zap.Error(err))
-		return
+func (f *TargetFactory) mapSecretValues(config any, ref, mountedSecret string) {
+	values := secrets.Values{}
+
+	if ref != "" {
+		secretValues, err := f.secretClient.Get(context.Background(), ref)
+		values = secretValues
+		if err != nil {
+			zap.L().Warn("failed to get secret reference", zap.Error(err))
+			return
+		}
+	}
+
+	if mountedSecret != "" {
+		file, err := os.ReadFile(mountedSecret)
+		if err != nil {
+			zap.L().Warn("failed to get mounted secret", zap.Error(err))
+			return
+		}
+		err = json.Unmarshal(file, &values)
+		if err != nil {
+			zap.L().Warn("failed to unmarshal mounted secret", zap.Error(err))
+			return
+		}
 	}
 
 	switch c := config.(type) {
@@ -800,7 +823,7 @@ func (f *TargetFactory) mapSecretValues(config any, ref string) {
 			c.SecretAccessKey = values.SecretAccessKey
 		}
 		if values.KmsKeyId != "" {
-			c.SseKmsKeyId = values.KmsKeyId
+			c.KmsKeyId = values.KmsKeyId
 		}
 
 	case *Kinesis:

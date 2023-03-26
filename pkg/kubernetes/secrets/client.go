@@ -8,15 +8,15 @@ import (
 )
 
 type Values struct {
-	Host            string
-	Webhook         string
-	Username        string
-	Password        string
-	AccessKeyID     string
-	SecretAccessKey string
-	KmsKeyId        string
-	Token           string
-	Credentials     string
+	Host            string `json:"host,omitempty"`
+	Webhook         string `json:"webhook,omitempty"`
+	Username        string `json:"username,omitempty"`
+	Password        string `json:"password,omitempty"`
+	AccessKeyID     string `json:"accessKeyID,omitempty"`
+	SecretAccessKey string `json:"secretAccessKey,omitempty"`
+	KmsKeyId        string `json:"kmsKeyId,omitempty"`
+	Token           string `json:"token,omitempty"`
+	Credentials     string `json:"credentials,omitempty"`
 }
 
 type Client interface {

@@ -34,6 +34,7 @@ type Loki struct {
 	Certificate     string            `mapstructure:"certificate"`
 	Path            string            `mapstructure:"path"`
 	SecretRef       string            `mapstructure:"secretRef"`
+	MountedSecret   string            `mapstructure:"mountedSecret"`
 	CustomLabels    map[string]string `mapstructure:"customLabels"`
 	SkipExisting    bool              `mapstructure:"skipExistingOnStartup"`
 	MinimumPriority string            `mapstructure:"minimumPriority"`
@@ -53,6 +54,7 @@ type Elasticsearch struct {
 	Username        string            `mapstructure:"username"`
 	Password        string            `mapstructure:"password"`
 	SecretRef       string            `mapstructure:"secretRef"`
+	MountedSecret   string            `mapstructure:"mountedSecret"`
 	CustomFields    map[string]string `mapstructure:"customFields"`
 	SkipExisting    bool              `mapstructure:"skipExistingOnStartup"`
 	MinimumPriority string            `mapstructure:"minimumPriority"`
@@ -66,6 +68,7 @@ type Slack struct {
 	Name            string            `mapstructure:"name"`
 	Webhook         string            `mapstructure:"webhook"`
 	SecretRef       string            `mapstructure:"secretRef"`
+	MountedSecret   string            `mapstructure:"mountedSecret"`
 	CustomFields    map[string]string `mapstructure:"customFields"`
 	SkipExisting    bool              `mapstructure:"skipExistingOnStartup"`
 	MinimumPriority string            `mapstructure:"minimumPriority"`
@@ -79,6 +82,7 @@ type Discord struct {
 	Name            string            `mapstructure:"name"`
 	Webhook         string            `mapstructure:"webhook"`
 	SecretRef       string            `mapstructure:"secretRef"`
+	MountedSecret   string            `mapstructure:"mountedSecret"`
 	CustomFields    map[string]string `mapstructure:"customFields"`
 	SkipExisting    bool              `mapstructure:"skipExistingOnStartup"`
 	MinimumPriority string            `mapstructure:"minimumPriority"`
@@ -92,6 +96,7 @@ type Teams struct {
 	Name            string            `mapstructure:"name"`
 	Webhook         string            `mapstructure:"webhook"`
 	SecretRef       string            `mapstructure:"secretRef"`
+	MountedSecret   string            `mapstructure:"mountedSecret"`
 	CustomFields    map[string]string `mapstructure:"customFields"`
 	SkipTLS         bool              `mapstructure:"skipTLS"`
 	Certificate     string            `mapstructure:"certificate"`
@@ -120,6 +125,7 @@ type Webhook struct {
 	Certificate     string            `mapstructure:"certificate"`
 	Headers         map[string]string `mapstructure:"headers"`
 	SecretRef       string            `mapstructure:"secretRef"`
+	MountedSecret   string            `mapstructure:"mountedSecret"`
 	CustomFields    map[string]string `mapstructure:"customFields"`
 	SkipExisting    bool              `mapstructure:"skipExistingOnStartup"`
 	MinimumPriority string            `mapstructure:"minimumPriority"`
@@ -138,10 +144,11 @@ type S3 struct {
 	Prefix               string            `mapstructure:"prefix"`
 	Bucket               string            `mapstructure:"bucket"`
 	BucketKeyEnabled     bool              `mapstructure:"bucketKeyEnabled"`
-	SseKmsKeyId          string            `mapstructure:"sseKmsKeyId"`
+	KmsKeyId             string            `mapstructure:"kmsKeyId"`
 	ServerSideEncryption string            `mapstructure:"serverSideEncryption"`
 	PathStyle            bool              `mapstructure:"pathStyle"`
 	SecretRef            string            `mapstructure:"secretRef"`
+	MountedSecret        string            `mapstructure:"mountedSecret"`
 	CustomFields         map[string]string `mapstructure:"customFields"`
 	SkipExisting         bool              `mapstructure:"skipExistingOnStartup"`
 	MinimumPriority      string            `mapstructure:"minimumPriority"`
@@ -159,6 +166,7 @@ type Kinesis struct {
 	Endpoint        string            `mapstructure:"endpoint"`
 	StreamName      string            `mapstructure:"streamName"`
 	SecretRef       string            `mapstructure:"secretRef"`
+	MountedSecret   string            `mapstructure:"mountedSecret"`
 	CustomFields    map[string]string `mapstructure:"customFields"`
 	SkipExisting    bool              `mapstructure:"skipExistingOnStartup"`
 	MinimumPriority string            `mapstructure:"minimumPriority"`
@@ -174,6 +182,7 @@ type GCS struct {
 	Prefix          string            `mapstructure:"prefix"`
 	Bucket          string            `mapstructure:"bucket"`
 	SecretRef       string            `mapstructure:"secretRef"`
+	MountedSecret   string            `mapstructure:"mountedSecret"`
 	CustomFields    map[string]string `mapstructure:"customFields"`
 	SkipExisting    bool              `mapstructure:"skipExistingOnStartup"`
 	MinimumPriority string            `mapstructure:"minimumPriority"`
