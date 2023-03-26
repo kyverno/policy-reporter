@@ -591,8 +591,8 @@ func (f *TargetFactory) createS3Client(config S3, parent S3) target.Client {
 		config.BucketKeyEnabled = parent.BucketKeyEnabled
 	}
 
-	if config.SseKmsKeyId == "" {
-		config.SseKmsKeyId = parent.SseKmsKeyId
+	if config.KmsKeyId == "" {
+		config.KmsKeyId = parent.KmsKeyId
 	}
 
 	if config.ServerSideEncryption == "" {
@@ -606,7 +606,7 @@ func (f *TargetFactory) createS3Client(config S3, parent S3) target.Client {
 		config.Endpoint,
 		config.Bucket,
 		config.PathStyle,
-		helper.WithKMS(&config.BucketKeyEnabled, &config.SseKmsKeyId, &config.ServerSideEncryption),
+		helper.WithKMS(&config.BucketKeyEnabled, &config.KmsKeyId, &config.ServerSideEncryption),
 	)
 
 	sugar.Infof("%s configured", config.Name)
@@ -800,7 +800,7 @@ func (f *TargetFactory) mapSecretValues(config any, ref string) {
 			c.SecretAccessKey = values.SecretAccessKey
 		}
 		if values.KmsKeyId != "" {
-			c.SseKmsKeyId = values.KmsKeyId
+			c.KmsKeyId = values.KmsKeyId
 		}
 
 	case *Kinesis:

@@ -171,7 +171,7 @@ func Test_ResolveTargetWithoutHost(t *testing.T) {
 		}
 	})
 	t.Run("S3.SSE-KMS-KEY-ID", func(t *testing.T) {
-		if len(factory.S3Clients(config.S3{Endpoint: "https://storage.yandexcloud.net", AccessKeyID: "access", SecretAccessKey: "secret", Region: "ru-central1", ServerSideEncryption: "aws:kms", SseKmsKeyId: "SseKmsKeyId"})) != 0 {
+		if len(factory.S3Clients(config.S3{Endpoint: "https://storage.yandexcloud.net", AccessKeyID: "access", SecretAccessKey: "secret", Region: "ru-central1", ServerSideEncryption: "aws:kms", KmsKeyId: "kmsKeyId"})) != 0 {
 			t.Error("Expected Client to be nil if server side encryption is not configured")
 		}
 	})

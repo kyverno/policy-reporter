@@ -138,7 +138,7 @@ type S3 struct {
 	Prefix               string            `mapstructure:"prefix"`
 	Bucket               string            `mapstructure:"bucket"`
 	BucketKeyEnabled     bool              `mapstructure:"bucketKeyEnabled"`
-	SseKmsKeyId          string            `mapstructure:"sseKmsKeyId"`
+	KmsKeyId             string            `mapstructure:"kmsKeyId"`
 	ServerSideEncryption string            `mapstructure:"serverSideEncryption"`
 	PathStyle            bool              `mapstructure:"pathStyle"`
 	SecretRef            string            `mapstructure:"secretRef"`
