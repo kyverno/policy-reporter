@@ -85,7 +85,7 @@ var testConfig = &config.Config{
 		SecretAccessKey:      "SecretAccessKey",
 		Bucket:               "test",
 		BucketKeyEnabled:     false,
-		SseKmsKeyId:          "",
+		KmsKeyId:             "",
 		ServerSideEncryption: "",
 		SkipExisting:         true,
 		MinimumPriority:      "debug",
