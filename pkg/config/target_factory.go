@@ -4,9 +4,10 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"os"
+
 	_ "github.com/mattn/go-sqlite3"
 	"go.uber.org/zap"
-	"os"
 
 	"github.com/kyverno/policy-reporter/pkg/helper"
 	"github.com/kyverno/policy-reporter/pkg/kubernetes/secrets"
@@ -266,7 +267,6 @@ func (f *TargetFactory) createSlackClient(config Slack, parent Slack) target.Cli
 	}
 
 	if config.MountedSecret != "" {
-
 	}
 
 	if config.Webhook == "" {

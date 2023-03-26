@@ -16,8 +16,10 @@ import (
 	"github.com/kyverno/policy-reporter/pkg/kubernetes/secrets"
 )
 
-const secretName = "secret-values"
-const mountedSecret = "/tmp/secrets-9999"
+const (
+	secretName    = "secret-values"
+	mountedSecret = "/tmp/secrets-9999"
+)
 
 func newFakeClient() v1.SecretInterface {
 	return fake.NewSimpleClientset(&corev1.Secret{
@@ -52,7 +54,7 @@ func mountSecret() {
 		Credentials:     `{"token": "token", "type": "authorized_user"}`,
 	}
 	file, _ := json.MarshalIndent(secretValues, "", " ")
-	_ = os.WriteFile(mountedSecret, file, 0644)
+	_ = os.WriteFile(mountedSecret, file, 0o644)
 }
 
 var logger = zap.NewNop()
