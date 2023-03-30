@@ -5,7 +5,7 @@ image:
   registry: ghcr.io
   repository: kyverno/policy-reporter
   pullPolicy: IfNotPresent
-  tag: 2.14.0
+  tag: 2.14.1
 
 imagePullSecrets: []
 
@@ -343,6 +343,8 @@ target:
   slack:
     # slack app webhook address
     webhook: ""
+    # slack channel
+    channel: ""
     # receive the webhook from an existing secret instead
     secretRef: ""
     # Mounted secret path by Secrets Controller, secret should be in json format
@@ -360,6 +362,7 @@ target:
     # add additional slack channels with different configurations and filters
     channels: []
 #    - webhook: "https://slack.webhook1"
+#      channel: ""
 #      filter:
 #        namespaces:
 #          include: ["develop"]

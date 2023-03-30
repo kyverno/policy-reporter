@@ -53,6 +53,7 @@ elasticsearch:
 
 slack:
   webhook: {{ .Values.target.slack.webhook | quote }}
+  channel: {{ .Values.target.slack.channel | quote }}
   secretRef: {{ .Values.target.slack.secretRef | quote }}
   minimumPriority: {{ .Values.target.slack.minimumPriority | quote }}
   skipExistingOnStartup: {{ .Values.target.slack.skipExistingOnStartup }}
