@@ -71,8 +71,8 @@ func Test_Client(t *testing.T) {
 			t.Errorf("Unexpected Token: %s", values.Token)
 		}
 
-		if values.KmsKeyId != "kmsKeyId" {
-			t.Errorf("Unexpected KmsKeyId: %s", values.KmsKeyId)
+		if values.KmsKeyID != "kmsKeyId" {
+			t.Errorf("Unexpected KmsKeyId: %s", values.KmsKeyID)
 		}
 	})
 

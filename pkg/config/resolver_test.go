@@ -11,68 +11,87 @@ import (
 
 var testConfig = &config.Config{
 	Loki: config.Loki{
-		Host:            "http://localhost:3100",
-		SkipExisting:    true,
-		MinimumPriority: "debug",
-		CustomLabels:    map[string]string{"label": "value"},
-		SkipTLS:         true,
+		Host: "http://localhost:3100",
+		TargetBaseOptions: config.TargetBaseOptions{
+			SkipExisting:    true,
+			MinimumPriority: "debug",
+			CustomFields:    map[string]string{"field": "value"},
+		},
+		SkipTLS: true,
 		Channels: []config.Loki{
 			{
-				CustomLabels: map[string]string{"label2": "value2"},
+				TargetBaseOptions: config.TargetBaseOptions{
+					CustomFields: map[string]string{"label2": "value2"},
+				},
 			},
 		},
 	},
 	Elasticsearch: config.Elasticsearch{
-		Host:            "http://localhost:9200",
-		Index:           "policy-reporter",
-		Rotation:        "daily",
-		SkipExisting:    true,
-		MinimumPriority: "debug",
-		SkipTLS:         true,
-		Channels:        []config.Elasticsearch{{}},
+		Host:     "http://localhost:9200",
+		Index:    "policy-reporter",
+		Rotation: "daily",
+		TargetBaseOptions: config.TargetBaseOptions{
+			SkipExisting:    true,
+			MinimumPriority: "debug",
+			CustomFields:    map[string]string{"field": "value"},
+		},
+		SkipTLS:  true,
+		Channels: []config.Elasticsearch{{}},
 	},
 	Slack: config.Slack{
-		Webhook:         "http://hook.slack:80",
-		SkipExisting:    true,
-		MinimumPriority: "debug",
-		CustomFields:    map[string]string{"field": "value"},
+		Webhook: "http://hook.slack:80",
+		TargetBaseOptions: config.TargetBaseOptions{
+			SkipExisting:    true,
+			MinimumPriority: "debug",
+			CustomFields:    map[string]string{"field": "value"},
+		},
 		Channels: []config.Slack{{
 			Webhook: "http://localhost:9200",
+		}, {
+			Channel: "general",
 		}},
 	},
 	Discord: config.Discord{
-		Webhook:         "http://hook.discord:80",
-		SkipExisting:    true,
-		MinimumPriority: "debug",
-		CustomFields:    map[string]string{"field": "value"},
+		Webhook: "http://hook.discord:80",
+		TargetBaseOptions: config.TargetBaseOptions{
+			SkipExisting:    true,
+			MinimumPriority: "debug",
+			CustomFields:    map[string]string{"field": "value"},
+		},
 		Channels: []config.Discord{{
 			Webhook: "http://localhost:9200",
 		}},
 	},
 	Teams: config.Teams{
-		Webhook:         "http://hook.teams:80",
-		SkipTLS:         true,
-		SkipExisting:    true,
-		MinimumPriority: "debug",
-		CustomFields:    map[string]string{"field": "value"},
+		TargetBaseOptions: config.TargetBaseOptions{
+			SkipExisting:    true,
+			MinimumPriority: "debug",
+			CustomFields:    map[string]string{"field": "value"},
+		},
+		Webhook: "http://hook.teams:80",
+		SkipTLS: true,
 		Channels: []config.Teams{{
 			Webhook: "http://localhost:9200",
 		}},
 	},
 	UI: config.UI{
-		Host:            "http://localhost:8080",
-		SkipExisting:    true,
-		MinimumPriority: "debug",
+		TargetBaseOptions: config.TargetBaseOptions{
+			SkipExisting:    true,
+			MinimumPriority: "debug",
+		},
+		Host: "http://localhost:8080",
 	},
 	Webhook: config.Webhook{
 		Host: "http://localhost:8080",
 		Headers: map[string]string{
 			"X-Custom": "Header",
 		},
-		SkipExisting:    true,
-		SkipTLS:         true,
-		MinimumPriority: "debug",
-		CustomFields:    map[string]string{"field": "value"},
+		TargetBaseOptions: config.TargetBaseOptions{
+			SkipExisting:    true,
+			MinimumPriority: "debug",
+			CustomFields:    map[string]string{"field": "value"},
+		},
+		SkipTLS: true,
 		Channels: []config.Webhook{{
 			Host: "http://localhost:8081",
 			Headers: map[string]string{
@@ -81,40 +100,46 @@ var testConfig = &config.Config{
 		}},
 	},
 	S3: config.S3{
+		TargetBaseOptions: config.TargetBaseOptions{
+			SkipExisting:    true,
+			MinimumPriority: "debug",
+			CustomFields:    map[string]string{"field": "value"},
+		},
 		AccessKeyID:          "AccessKey",
 		SecretAccessKey:      "SecretAccessKey",
 		Bucket:               "test",
 		BucketKeyEnabled:     false,
-		KmsKeyId:             "",
+		KmsKeyID:             "",
 		ServerSideEncryption: "",
-		SkipExisting:         true,
-		MinimumPriority:      "debug",
 		Endpoint:             "https://storage.yandexcloud.net",
 		PathStyle:            true,
 		Region:               "ru-central1",
 		Prefix:               "prefix",
-		CustomFields:         map[string]string{"field": "value"},
 		Channels:             []config.S3{{}},
 	},
 	Kinesis: config.Kinesis{
+		TargetBaseOptions: config.TargetBaseOptions{
+			SkipExisting:    true,
+			MinimumPriority: "debug",
+			CustomFields:    map[string]string{"field": "value"},
+		},
 		AccessKeyID:     "AccessKey",
 		SecretAccessKey: "SecretAccessKey",
 		StreamName:      "policy-reporter",
-		SkipExisting:    true,
-		MinimumPriority: "debug",
 		Endpoint:        "https://yds.serverless.yandexcloud.net",
 		Region:          "ru-central1",
-		CustomFields:    map[string]string{"field": "value"},
 		Channels:        []config.Kinesis{{}},
 	},
 	GCS: config.GCS{
-		Credentials:     `{"token": "token", "type": "authorized_user"}`,
-		Bucket:          "test",
-		SkipExisting:    true,
-		MinimumPriority: "debug",
-		Prefix:          "prefix",
-		CustomFields:    map[string]string{"field": "value"},
-		Channels:        []config.GCS{{}},
+		TargetBaseOptions: config.TargetBaseOptions{
+			SkipExisting:    true,
+			MinimumPriority: "debug",
+			CustomFields:    map[string]string{"field": "value"},
+		},
+		Credentials: `{"token": "token", "type": "authorized_user"}`,
+		Bucket:      "test",
+		Prefix:      "prefix",
+		Channels:    []config.GCS{{}},
 	},
 	EmailReports: config.EmailReports{
 		Templates: config.EmailTemplates{
@@ -134,7 +159,7 @@ var testConfig = &config.Config{
 func Test_ResolveTargets(t *testing.T) {
 	resolver := config.NewResolver(testConfig, &rest.Config{})
 
-	if count := len(resolver.TargetClients()); count != 19 {
+	if count := len(resolver.TargetClients()); count != 20 {
 		t.Errorf("Expected 19 Clients, got %d", count)
 	}
 }
@@ -150,14 +175,18 @@ func Test_ResolveHasTargets(t *testing.T) {
 func Test_ResolveSkipExistingOnStartup(t *testing.T) {
 	testConfig := &config.Config{
 		Loki: config.Loki{
-			Host:            "http://localhost:3100",
-			SkipExisting:    true,
-			MinimumPriority: "debug",
+			Host: "http://localhost:3100",
+			TargetBaseOptions: config.TargetBaseOptions{
+				SkipExisting:    true,
+				MinimumPriority: "debug",
+			},
 		},
 		Elasticsearch: config.Elasticsearch{
-			Host:            "http://localhost:9200",
-			SkipExisting:    true,
-			MinimumPriority: "debug",
+			Host: "http://localhost:9200",
+			TargetBaseOptions: config.TargetBaseOptions{
+				SkipExisting:    true,
+				MinimumPriority: "debug",
+			},
 		},
 	}
 

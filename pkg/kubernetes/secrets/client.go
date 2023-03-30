@@ -10,11 +10,12 @@ import (
 type Values struct {
 	Host            string `json:"host,omitempty"`
 	Webhook         string `json:"webhook,omitempty"`
+	Channel         string `json:"channel,omitempty"`
 	Username        string `json:"username,omitempty"`
 	Password        string `json:"password,omitempty"`
 	AccessKeyID     string `json:"accessKeyID,omitempty"`
 	SecretAccessKey string `json:"secretAccessKey,omitempty"`
-	KmsKeyId        string `json:"kmsKeyId,omitempty"`
+	KmsKeyID        string `json:"kmsKeyId,omitempty"`
 	Token           string `json:"token,omitempty"`
 	Credentials     string `json:"credentials,omitempty"`
 }
@@ -42,6 +43,10 @@ func (c *k8sClient) Get(ctx context.Context, name string) (Values, error) {
 		values.Webhook = string(webhook)
 	}
 
+	if channel, ok := secret.Data["channel"]; ok {
+		values.Channel = string(channel)
+	}
+
 	if username, ok := secret.Data["username"]; ok {
 		values.Username = string(username)
 	}
@@ -58,8 +63,8 @@ func (c *k8sClient) Get(ctx context.Context, name string) (Values, error) {
 		values.SecretAccessKey = string(secretAccessKey)
 	}
 
-	if kmsKeyId, ok := secret.Data["kmsKeyId"]; ok {
-		values.KmsKeyId = string(kmsKeyId)
+	if kmsKeyID, ok := secret.Data["kmsKeyId"]; ok {
+		values.KmsKeyID = string(kmsKeyID)
 	}
 
 	if token, ok := secret.Data["token"]; ok {
