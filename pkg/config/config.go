@@ -26,169 +26,118 @@ type MetricsFilter struct {
 	Sources    ValueFilter `mapstructure:"sources"`
 }
 
-// Loki configuration
-type Loki struct {
+type TargetBaseOptions struct {
 	Name            string            `mapstructure:"name"`
-	Host            string            `mapstructure:"host"`
-	SkipTLS         bool              `mapstructure:"skipTLS"`
-	Certificate     string            `mapstructure:"certificate"`
-	Path            string            `mapstructure:"path"`
-	SecretRef       string            `mapstructure:"secretRef"`
-	MountedSecret   string            `mapstructure:"mountedSecret"`
-	CustomLabels    map[string]string `mapstructure:"customLabels"`
-	SkipExisting    bool              `mapstructure:"skipExistingOnStartup"`
 	MinimumPriority string            `mapstructure:"minimumPriority"`
 	Filter          TargetFilter      `mapstructure:"filter"`
+	SecretRef       string            `mapstructure:"secretRef"`
+	MountedSecret   string            `mapstructure:"mountedSecret"`
 	Sources         []string          `mapstructure:"sources"`
-	Channels        []Loki            `mapstructure:"channels"`
+	CustomFields    map[string]string `mapstructure:"customFields"`
+	SkipExisting    bool              `mapstructure:"skipExistingOnStartup"`
+}
+
+// Loki configuration
+type Loki struct {
+	TargetBaseOptions `mapstructure:",squash"`
+	CustomLabels      map[string]string `mapstructure:"customLabels"`
+	Host              string            `mapstructure:"host"`
+	SkipTLS           bool              `mapstructure:"skipTLS"`
+	Certificate       string            `mapstructure:"certificate"`
+	Path              string            `mapstructure:"path"`
+	Channels          []Loki            `mapstructure:"channels"`
 }
 
 // Elasticsearch configuration
 type Elasticsearch struct {
-	Name            string            `mapstructure:"name"`
-	Host            string            `mapstructure:"host"`
-	SkipTLS         bool              `mapstructure:"skipTLS"`
-	Certificate     string            `mapstructure:"certificate"`
-	Index           string            `mapstructure:"index"`
-	Rotation        string            `mapstructure:"rotation"`
-	Username        string            `mapstructure:"username"`
-	Password        string            `mapstructure:"password"`
-	SecretRef       string            `mapstructure:"secretRef"`
-	MountedSecret   string            `mapstructure:"mountedSecret"`
-	CustomFields    map[string]string `mapstructure:"customFields"`
-	SkipExisting    bool              `mapstructure:"skipExistingOnStartup"`
-	MinimumPriority string            `mapstructure:"minimumPriority"`
-	Filter          TargetFilter      `mapstructure:"filter"`
-	Sources         []string          `mapstructure:"sources"`
-	Channels        []Elasticsearch   `mapstructure:"channels"`
+	TargetBaseOptions `mapstructure:",squash"`
+	Host              string          `mapstructure:"host"`
+	SkipTLS           bool            `mapstructure:"skipTLS"`
+	Certificate       string          `mapstructure:"certificate"`
+	Index             string          `mapstructure:"index"`
+	Rotation          string          `mapstructure:"rotation"`
+	Username          string          `mapstructure:"username"`
+	Password          string          `mapstructure:"password"`
+	Channels          []Elasticsearch `mapstructure:"channels"`
 }
 
 // Slack configuration
 type Slack struct {
-	Name            string            `mapstructure:"name"`
-	Webhook         string            `mapstructure:"webhook"`
-	SecretRef       string            `mapstructure:"secretRef"`
-	MountedSecret   string            `mapstructure:"mountedSecret"`
-	CustomFields    map[string]string `mapstructure:"customFields"`
-	SkipExisting    bool              `mapstructure:"skipExistingOnStartup"`
-	MinimumPriority string            `mapstructure:"minimumPriority"`
-	Filter          TargetFilter      `mapstructure:"filter"`
-	Sources         []string          `mapstructure:"sources"`
-	Channels        []Slack           `mapstructure:"channels"`
+	TargetBaseOptions `mapstructure:",squash"`
+	Webhook           string  `mapstructure:"webhook"`
+	Channel           string  `mapstructure:"channel"`
+	Channels          []Slack `mapstructure:"channels"`
 }
 
 // Discord configuration
 type Discord struct {
-	Name            string            `mapstructure:"name"`
-	Webhook         string            `mapstructure:"webhook"`
-	SecretRef       string            `mapstructure:"secretRef"`
-	MountedSecret   string            `mapstructure:"mountedSecret"`
-	CustomFields    map[string]string `mapstructure:"customFields"`
-	SkipExisting    bool              `mapstructure:"skipExistingOnStartup"`
-	MinimumPriority string            `mapstructure:"minimumPriority"`
-	Filter          TargetFilter      `mapstructure:"filter"`
-	Sources         []string          `mapstructure:"sources"`
-	Channels        []Discord         `mapstructure:"channels"`
+	TargetBaseOptions `mapstructure:",squash"`
+	Webhook           string    `mapstructure:"webhook"`
+	Channels          []Discord `mapstructure:"channels"`
 }
 
 // Teams configuration
 type Teams struct {
-	Name            string            `mapstructure:"name"`
-	Webhook         string            `mapstructure:"webhook"`
-	SecretRef       string            `mapstructure:"secretRef"`
-	MountedSecret   string            `mapstructure:"mountedSecret"`
-	CustomFields    map[string]string `mapstructure:"customFields"`
-	SkipTLS         bool              `mapstructure:"skipTLS"`
-	Certificate     string            `mapstructure:"certificate"`
-	SkipExisting    bool              `mapstructure:"skipExistingOnStartup"`
-	MinimumPriority string            `mapstructure:"minimumPriority"`
-	Filter          TargetFilter      `mapstructure:"filter"`
-	Sources         []string          `mapstructure:"sources"`
-	Channels        []Teams           `mapstructure:"channels"`
+	TargetBaseOptions `mapstructure:",squash"`
+	Webhook           string  `mapstructure:"webhook"`
+	SkipTLS           bool    `mapstructure:"skipTLS"`
+	Certificate       string  `mapstructure:"certificate"`
+	Channels          []Teams `mapstructure:"channels"`
 }
 
 // UI configuration
 type UI struct {
-	Host            string   `mapstructure:"host"`
-	SkipTLS         bool     `mapstructure:"skipTLS"`
-	Certificate     string   `mapstructure:"certificate"`
-	SkipExisting    bool     `mapstructure:"skipExistingOnStartup"`
-	MinimumPriority string   `mapstructure:"minimumPriority"`
-	Sources         []string `mapstructure:"sources"`
+	TargetBaseOptions `mapstructure:",squash"`
+	Host              string `mapstructure:"host"`
+	SkipTLS           bool   `mapstructure:"skipTLS"`
+	Certificate       string `mapstructure:"certificate"`
 }
 
 // Webhook configuration
 type Webhook struct {
-	Name            string            `mapstructure:"name"`
-	Host            string            `mapstructure:"host"`
-	SkipTLS         bool              `mapstructure:"skipTLS"`
-	Certificate     string            `mapstructure:"certificate"`
-	Headers         map[string]string `mapstructure:"headers"`
-	SecretRef       string            `mapstructure:"secretRef"`
-	MountedSecret   string            `mapstructure:"mountedSecret"`
-	CustomFields    map[string]string `mapstructure:"customFields"`
-	SkipExisting    bool              `mapstructure:"skipExistingOnStartup"`
-	MinimumPriority string            `mapstructure:"minimumPriority"`
-	Filter          TargetFilter      `mapstructure:"filter"`
-	Sources         []string          `mapstructure:"sources"`
-	Channels        []Webhook         `mapstructure:"channels"`
+	TargetBaseOptions `mapstructure:",squash"`
+	Host              string            `mapstructure:"host"`
+	SkipTLS           bool              `mapstructure:"skipTLS"`
+	Certificate       string            `mapstructure:"certificate"`
+	Headers           map[string]string `mapstructure:"headers"`
+	Channels          []Webhook         `mapstructure:"channels"`
 }
 
 // S3 configuration
 type S3 struct {
-	Name                 string            `mapstructure:"name"`
-	AccessKeyID          string            `mapstructure:"accessKeyID"`
-	SecretAccessKey      string            `mapstructure:"secretAccessKey"`
-	Region               string            `mapstructure:"region"`
-	Endpoint             string            `mapstructure:"endpoint"`
-	Prefix               string            `mapstructure:"prefix"`
-	Bucket               string            `mapstructure:"bucket"`
-	BucketKeyEnabled     bool              `mapstructure:"bucketKeyEnabled"`
-	KmsKeyId             string            `mapstructure:"kmsKeyId"`
-	ServerSideEncryption string            `mapstructure:"serverSideEncryption"`
-	PathStyle            bool              `mapstructure:"pathStyle"`
-	SecretRef            string            `mapstructure:"secretRef"`
-	MountedSecret        string            `mapstructure:"mountedSecret"`
-	CustomFields         map[string]string `mapstructure:"customFields"`
-	SkipExisting         bool              `mapstructure:"skipExistingOnStartup"`
-	MinimumPriority      string            `mapstructure:"minimumPriority"`
-	Filter               TargetFilter      `mapstructure:"filter"`
-	Sources              []string          `mapstructure:"sources"`
-	Channels             []S3              `mapstructure:"channels"`
+	TargetBaseOptions    `mapstructure:",squash"`
+	AccessKeyID          string `mapstructure:"accessKeyID"`
+	SecretAccessKey      string `mapstructure:"secretAccessKey"`
+	Region               string `mapstructure:"region"`
+	Endpoint             string `mapstructure:"endpoint"`
+	Prefix               string `mapstructure:"prefix"`
+	Bucket               string `mapstructure:"bucket"`
+	BucketKeyEnabled     bool   `mapstructure:"bucketKeyEnabled"`
+	KmsKeyID             string `mapstructure:"kmsKeyId"`
+	ServerSideEncryption string `mapstructure:"serverSideEncryption"`
+	PathStyle            bool   `mapstructure:"pathStyle"`
+	Channels             []S3   `mapstructure:"channels"`
 }
 
 // Kinesis configuration
 type Kinesis struct {
-	Name            string            `mapstructure:"name"`
-	AccessKeyID     string            `mapstructure:"accessKeyID"`
-	SecretAccessKey string            `mapstructure:"secretAccessKey"`
-	Region          string            `mapstructure:"region"`
-	Endpoint        string            `mapstructure:"endpoint"`
-	StreamName      string            `mapstructure:"streamName"`
-	SecretRef       string            `mapstructure:"secretRef"`
-	MountedSecret   string            `mapstructure:"mountedSecret"`
-	CustomFields    map[string]string `mapstructure:"customFields"`
-	SkipExisting    bool              `mapstructure:"skipExistingOnStartup"`
-	MinimumPriority string            `mapstructure:"minimumPriority"`
-	Filter          TargetFilter      `mapstructure:"filter"`
-	Sources         []string          `mapstructure:"sources"`
-	Channels        []Kinesis         `mapstructure:"channels"`
+	TargetBaseOptions `mapstructure:",squash"`
+	AccessKeyID       string    `mapstructure:"accessKeyID"`
+	SecretAccessKey   string    `mapstructure:"secretAccessKey"`
+	Region            string    `mapstructure:"region"`
+	Endpoint          string    `mapstructure:"endpoint"`
+	StreamName        string    `mapstructure:"streamName"`
+	Channels          []Kinesis `mapstructure:"channels"`
 }
 
 // GCS configuration
 type GCS struct {
-	Name            string            `mapstructure:"name"`
-	Credentials     string            `mapstructure:"credentials"`
-	Prefix          string            `mapstructure:"prefix"`
-	Bucket          string            `mapstructure:"bucket"`
-	SecretRef       string            `mapstructure:"secretRef"`
-	MountedSecret   string            `mapstructure:"mountedSecret"`
-	CustomFields    map[string]string `mapstructure:"customFields"`
-	SkipExisting    bool              `mapstructure:"skipExistingOnStartup"`
-	MinimumPriority string            `mapstructure:"minimumPriority"`
-	Filter          TargetFilter      `mapstructure:"filter"`
-	Sources         []string          `mapstructure:"sources"`
-	Channels        []GCS             `mapstructure:"channels"`
+	TargetBaseOptions `mapstructure:",squash"`
+	Credentials       string   `mapstructure:"credentials"`
+	Prefix            string   `mapstructure:"prefix"`
+	Bucket            string   `mapstructure:"bucket"`
+	Sources           []string `mapstructure:"sources"`
+	Channels          []GCS    `mapstructure:"channels"`
 }
 
 // SMTP configuration

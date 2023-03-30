@@ -266,7 +266,12 @@ func (f *TargetFactory) createSlackClient(config Slack, parent Slack) target.Cli
 		f.mapSecretValues(&config, config.SecretRef, config.MountedSecret)
 	}
 
-	if config.MountedSecret != "" {
+	if config.Webhook == "" && config.Channel == "" {
+		return nil
+	}
+
+	if config.Webhook == "" {
+		config.Webhook = parent.Webhook
 	}
 
 	if config.Webhook == "" {
@@ -291,6 +296,7 @@ func (f *TargetFactory) createSlackClient(config Slack, parent Slack) target.Cli
 			ReportFilter:          createReportFilter(config.Filter),
 		},
 		Webhook:      config.Webhook,
+		Channel:      config.Channel,
 		CustomFields: config.CustomFields,
 		HTTPClient:   http.NewClient("", false),
 	})
@@ -329,6 +335,16 @@ func (f *TargetFactory) createLokiClient(config Loki, parent Loki) target.Client
 
 	zap.S().Infof("%s configured", config.Name)
 
+	if config.CustomFields == nil {
+		config.CustomFields = make(map[string]string)
+	}
+
+	if config.CustomLabels != nil {
+		for k, v := range config.CustomLabels {
+			config.CustomFields[k] = v
+		}
+	}
+
 	return loki.NewClient(loki.Options{
 		ClientOptions: target.ClientOptions{
 			Name:                  config.Name,
@@ -337,7 +353,7 @@ func (f *TargetFactory) createLokiClient(config Loki, parent Loki) target.Client
 			ReportFilter:          createReportFilter(config.Filter),
 		},
 		Host:         config.Host + config.Path,
-		CustomLabels: config.CustomLabels,
+		CustomLabels: config.CustomFields,
 		HTTPClient:   http.NewClient(config.Certificate, config.SkipTLS),
 	})
 }
@@ -596,8 +612,8 @@ func (f *TargetFactory) createS3Client(config S3, parent S3) target.Client {
 		config.BucketKeyEnabled = parent.BucketKeyEnabled
 	}
 
-	if config.KmsKeyId == "" {
-		config.KmsKeyId = parent.KmsKeyId
+	if config.KmsKeyID == "" {
+		config.KmsKeyID = parent.KmsKeyID
 	}
 
 	if config.ServerSideEncryption == "" {
@@ -611,7 +627,7 @@ func (f *TargetFactory) createS3Client(config S3, parent S3) target.Client {
 		config.Endpoint,
 		config.Bucket,
 		config.PathStyle,
-		helper.WithKMS(&config.BucketKeyEnabled, &config.KmsKeyId, &config.ServerSideEncryption),
+		helper.WithKMS(&config.BucketKeyEnabled, &config.KmsKeyID, &config.ServerSideEncryption),
 	)
 
 	sugar.Infof("%s configured", config.Name)
@@ -792,6 +808,7 @@ func (f *TargetFactory) mapSecretValues(config any, ref, mountedSecret string) {
 	case *Slack:
 		if values.Webhook != "" {
 			c.Webhook = values.Webhook
+			c.Channel = values.Channel
 		}
 
 	case *Discord:
@@ -822,8 +839,8 @@ func (f *TargetFactory) mapSecretValues(config any, ref, mountedSecret string) {
 		if values.SecretAccessKey != "" {
 			c.SecretAccessKey = values.SecretAccessKey
 		}
-		if values.KmsKeyId != "" {
-			c.KmsKeyId = values.KmsKeyId
+		if values.KmsKeyID != "" {
+			c.KmsKeyID = values.KmsKeyID
 		}
 
 	case *Kinesis:

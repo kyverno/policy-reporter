@@ -12,6 +12,7 @@ import (
 type Options struct {
 	target.ClientOptions
 	Webhook      string
+	Channel      string
 	CustomFields map[string]string
 	HTTPClient   http.Client
 }
@@ -38,6 +39,7 @@ type attachment struct {
 }
 
 type payload struct {
+	Channel     string       `json:"channel,omitempty"`
 	Username    string       `json:"username,omitempty"`
 	Attachments []attachment `json:"attachments,omitempty"`
 }
@@ -45,6 +47,7 @@ type payload struct {
 type client struct {
 	target.BaseClient
 	webhook      string
+	channel      string
 	client       http.Client
 	customFields map[string]string
 }
@@ -201,6 +204,7 @@ func NewClient(options Options) target.Client {
 	return &client{
 		target.NewBaseClient(options.ClientOptions),
 		options.Webhook,
+		options.Channel,
 		options.HTTPClient,
 		options.CustomFields,
 	}
