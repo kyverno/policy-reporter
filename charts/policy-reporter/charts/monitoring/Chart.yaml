@@ -3,5 +3,5 @@ name: monitoring
 description: Policy Reporter Monitoring with predefined ServiceMonitor and Grafana Dashboards
 
 type: application
-version: 2.7.0
+version: 2.7.1
 appVersion: 0.0.0

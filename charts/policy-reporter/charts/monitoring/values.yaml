@@ -18,6 +18,8 @@ serviceMonitor:
   relabelings: []
   # see serviceMonitor.relabelings
   metricRelabelings: []
+  # optional namespaceSelector
+  namespaceSelector: {}
 
 kyverno:
   serviceMonitor:
@@ -27,6 +29,8 @@ kyverno:
     relabelings: []
     # see serviceMonitor.relabelings
     metricRelabelings: []
+    # optional namespaceSelector
+    namespaceSelector: {}
 
 grafana:
   # namespace for configMap of grafana dashboards
