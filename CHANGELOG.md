@@ -1,5 +1,11 @@
 # Changelog
 
+# 2.18.2
+
+* Policy Reporter UI
+    * Container signing and SBOM generation
+    * New config `api.overwriteHost` to control the proxy host behavior
+
 # 2.18.1
 
 * Signed Helm Chart

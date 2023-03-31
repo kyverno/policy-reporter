@@ -308,7 +308,7 @@ spec:
     spec:
       containers:
         - name: ui
-          image: "ghcr.io/kyverno/policy-reporter-ui:1.8.2"
+          image: "ghcr.io/kyverno/policy-reporter-ui:1.8.3"
           imagePullPolicy: IfNotPresent
           securityContext:
             allowPrivilegeEscalation: false
@@ -323,6 +323,7 @@ spec:
             - -config=/app/config.yaml
             - -policy-reporter=http://policy-reporter:8080
             - -kyverno-plugin=http://policy-reporter-kyverno-plugin:8080
+            - -overwrite-host
           ports:
             - name: http
               containerPort: 8080
@@ -371,7 +372,7 @@ spec:
         fsGroup: 1234
       containers:
         - name: policy-reporter
-          image: "ghcr.io/kyverno/policy-reporter:2.14.0"
+          image: "ghcr.io/kyverno/policy-reporter:2.14.1"
           imagePullPolicy: IfNotPresent
           securityContext:
             allowPrivilegeEscalation: false

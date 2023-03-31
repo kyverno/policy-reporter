@@ -7,7 +7,7 @@ image:
   registry: ghcr.io
   repository: kyverno/policy-reporter-ui
   pullPolicy: IfNotPresent
-  tag: 1.8.2
+  tag: 1.8.3
 
 # possible default displayModes: light/dark
 displayMode: ""
@@ -72,7 +72,8 @@ logging:
   development: false # more human readable structure, removes log sampling
 
 api:
-  logging: false # enables access logging for proxy requests, sets log level to debug
+  logging: false      # enables access logging for proxy requests, sets log level to debug
+  overwriteHost: true # overwrites request host and sets X-Forwarded--Host and X-Origin-Host headers
 
 # use redis as external log storage instead of an in memory store
 # recommended when using a HA setup with more then one replica
