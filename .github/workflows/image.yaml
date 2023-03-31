@@ -5,6 +5,11 @@ on:
       - v*
       - dev
 
+permissions:
+  contents: read
+  packages: write
+  id-token: write 
+
 jobs:
   push-policy-reporter:
     runs-on: ubuntu-latest
