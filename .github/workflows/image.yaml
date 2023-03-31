@@ -85,6 +85,6 @@ jobs:
       
       - shell: bash
         env:
-          COSIGN_REPOSITORY: ghcr.io/kyverno/signatures
+          COSIGN_REPOSITORY: ghcr.io/kyverno/sbom
         run: |
           cosign attach sbom --sbom ./policy-reporter-bom.cdx.json --type cyclonedx ghcr.io/kyverno/policy-reporter@${{ steps.push.outputs.digest }}
