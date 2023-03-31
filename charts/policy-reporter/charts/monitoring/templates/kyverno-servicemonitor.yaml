@@ -17,6 +17,10 @@ spec:
   selector:
     matchLabels:
         {{- include "kyvernoplugin.selectorLabels" . | nindent 8 }}
+  {{- with .Values.kyverno.serviceMonitor.namespaceSelector }}
+  namespaceSelector:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
   endpoints:
   - port: rest
     honorLabels: {{ .Values.kyverno.serviceMonitor.honorLabels }}

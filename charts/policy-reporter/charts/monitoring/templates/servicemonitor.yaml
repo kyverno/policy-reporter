@@ -16,6 +16,10 @@ spec:
   selector:
     matchLabels:
         {{- include "policyreporter.selectorLabels" . | nindent 8 }}
+  {{- with .Values.serviceMonitor.namespaceSelector }}
+  namespaceSelector:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
   endpoints:
   - port: http
     honorLabels: {{ .Values.serviceMonitor.honorLabels }}
