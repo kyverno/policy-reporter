@@ -12,7 +12,7 @@
 * Policy Reporter
     * New `channel` property for Slack targets to define the Slack channel to send the results too
     * New `mountedSecret` property to read target configs from a mounted secret [[#282](https://github.com/kyverno/policy-reporter/pull/282) by [rromic](https://github.com/rromic)]
-    * AWS KMS support for S3 target with new properties `bucketKeyEnabled`, `kmsKeyId` and `serverSideEncryption` [[#282](https://github.com/kyverno/policy-reporter/pull/282) by [rromic](https://github.com/rromic)]
+    * AWS KMS support for S3 target with new properties `bucketKeyEnabled`, `kmsKeyId` and `serverSideEncryption` [[#281](https://github.com/kyverno/policy-reporter/pull/281) by [rromic](https://github.com/rromic)]
         * Mountet secret needs to be in json format with keys defined in kubernetes/secrets Values struct.
 
 * Monitoring
