@@ -34,7 +34,7 @@ func Load(cmd *cobra.Command) (*Config, error) {
 	v.AutomaticEnv()
 
 	if err := v.ReadInConfig(); err != nil {
-		log.Println("[INFO] No configuration file found")
+		log.Printf("[INFO] No configuration file found: %v\n", err)
 	}
 
 	if flag := cmd.Flags().Lookup("worker"); flag != nil {

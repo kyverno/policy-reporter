@@ -165,7 +165,7 @@ s3:
   bucket: {{ .Values.target.s3.bucket }}
   bucketKeyEnabled: {{ .Values.target.s3.bucketKeyEnabled }}
   kmsKeyId: {{ .Values.target.s3.kmsKeyId }}
-  serverSideEncryption: { .Values.target.s3.serverSideEncryption }}
+  serverSideEncryption: {{ .Values.target.s3.serverSideEncryption }}
   pathStyle: {{ .Values.target.s3.pathStyle }}
   prefix: {{ .Values.target.s3.prefix }}
   minimumPriority: {{ .Values.target.s3.minimumPriority | quote }}
