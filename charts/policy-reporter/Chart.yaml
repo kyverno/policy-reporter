@@ -21,7 +21,7 @@ dependencies:
     version: "2.7.1"
   - name: ui
     condition: ui.enabled
-    version: "2.9.2"
+    version: "2.9.3"
   - name: kyvernoPlugin
     condition: kyvernoPlugin.enabled
-    version: "1.5.3"
+    version: "1.5.4"
