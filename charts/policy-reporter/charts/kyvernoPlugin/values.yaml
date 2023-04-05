@@ -6,6 +6,8 @@ image:
 
 imagePullSecrets: []
 
+priorityClassName: ""
+
 replicaCount: 1
 
 deploymentStrategy: {}
