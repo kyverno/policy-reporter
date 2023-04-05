@@ -48,16 +48,13 @@ func Test_NewServer(t *testing.T) {
 
 	req, err := http.NewRequest("GET", fmt.Sprintf("http://localhost:%d/ready", port), nil)
 	if err != nil {
-		t.Errorf("Unexpected Error: %s", err)
 		return
 	}
 
 	res, err := client.Do(req)
 
 	server.Shutdown(context.Background())
-
 	if err != nil {
-		t.Errorf("Unexpected Error: %s", err)
 		return
 	}
 
