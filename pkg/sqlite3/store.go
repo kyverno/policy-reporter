@@ -822,7 +822,7 @@ func (s *policyReportStore) FetchNamespacedStatusCounts(filter api.Filter) ([]ap
 
 	statusCounts := make([]api.NamespacedStatusCount, 0, 5)
 
-	where, args := generateFilterWhere(filter, []string{"sources", "categories", "policies", "kinds", "filter_namespaces", "status", "severities"})
+	where, args := generateFilterWhere(filter, []string{"sources", "categories", "policies", "filter_kinds", "filter_namespaces", "status", "severities"})
 	if len(where) > 0 {
 		where = " AND " + where
 	}
@@ -932,7 +932,7 @@ func (s *policyReportStore) FetchStatusCounts(filter api.Filter) ([]api.StatusCo
 
 	statusCounts := make([]api.StatusCount, 0, len(list))
 
-	where, args := generateFilterWhere(filter, []string{"sources", "categories", "policies", "kinds", "status", "severities"})
+	where, args := generateFilterWhere(filter, []string{"sources", "categories", "policies", "filter_kinds", "status", "severities"})
 	if len(where) > 0 {
 		where = " AND " + where
 	}
@@ -1403,6 +1403,9 @@ func generateFilterWhere(filter api.Filter, active []string) (string, []interfac
 	}
 	if contains("filter_namespaces", active) {
 		argCounter, where, args = appendWhere(filter.Namespaces, "result.namespace", where, args, argCounter)
+	}
+	if contains("filter_kinds", active) {
+		argCounter, where, args = appendWhere(filter.Namespaces, "result.kind", where, args, argCounter)
 	}
 	if contains("policies", active) {
 		argCounter, where, args = appendWhere(filter.Policies, "result.policy", where, args, argCounter)
