@@ -72,6 +72,7 @@ func NewJSONResult(r v1alpha2.PolicyReportResult) Result {
 		Severity:          string(r.Severity),
 		Category:          r.Category,
 		Scored:            r.Scored,
+		Properties:        r.Properties,
 		Resource:          res,
 		CreationTimestamp: time.Unix(r.Timestamp.Seconds, int64(r.Timestamp.Nanos)),
 	}

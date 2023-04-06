@@ -21,14 +21,15 @@ type Resource struct {
 
 // Result JSON structure for HTTP Requests
 type Result struct {
-	Message           string    `json:"message"`
-	Policy            string    `json:"policy"`
-	Rule              string    `json:"rule"`
-	Priority          string    `json:"priority"`
-	Status            string    `json:"status"`
-	Severity          string    `json:"severity,omitempty"`
-	Category          string    `json:"category,omitempty"`
-	Scored            bool      `json:"scored"`
-	Resource          Resource  `json:"resource"`
-	CreationTimestamp time.Time `json:"creationTimestamp"`
+	Message           string            `json:"message"`
+	Policy            string            `json:"policy"`
+	Rule              string            `json:"rule"`
+	Priority          string            `json:"priority"`
+	Status            string            `json:"status"`
+	Severity          string            `json:"severity,omitempty"`
+	Category          string            `json:"category,omitempty"`
+	Scored            bool              `json:"scored"`
+	Properties        map[string]string `json:"properties,omitempty"`
+	Resource          Resource          `json:"resource"`
+	CreationTimestamp time.Time         `json:"creationTimestamp"`
 }
