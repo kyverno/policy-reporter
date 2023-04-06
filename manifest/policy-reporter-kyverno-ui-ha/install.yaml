@@ -372,7 +372,7 @@ spec:
         fsGroup: 1234
       containers:
         - name: policy-reporter
-          image: "ghcr.io/kyverno/policy-reporter:2.14.1"
+          image: "ghcr.io/kyverno/policy-reporter:2.14.2"
           imagePullPolicy: IfNotPresent
           securityContext:
             allowPrivilegeEscalation: false

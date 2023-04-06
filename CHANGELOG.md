@@ -1,5 +1,12 @@
 # Changelog
 
+# 2.18.3
+* Policy Reporter
+    * new value to add `priorityClassName` to pods [[#283](https://github.com/kyverno/policy-reporter/pull/283) by [boniek83](https://github.com/boniek83)]
+    * fixed syntax error for policy reporter config.yaml [[#295](https://github.com/kyverno/policy-reporter/pull/295) by [nikolay-o](https://github.com/nikolay-o)]
+    * fixed customFields for kinesis targets [[#295](https://github.com/kyverno/policy-reporter/pull/295) by [nikolay-o](https://github.com/nikolay-o)]
+    * image signing and sbom generation for new Policy Reporter images
+
 # 2.18.2
 
 * Policy Reporter UI
