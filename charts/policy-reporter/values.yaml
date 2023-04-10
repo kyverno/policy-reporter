@@ -529,6 +529,34 @@ target:
     # add additional s3 channels with different configurations and filters
     channels: []
 
+  securityHub:
+    # AWS access key
+    accessKeyID: ""
+    # AWS secret access key
+    secretAccessKey: ""
+    # receive the accessKeyID and/or secretAccessKey from an existing secret instead
+    secretRef: ""
+    # Mounted secret path by Secrets Controller, secret should be in json format
+    mountedSecret: ""
+    # AWS region
+    region: ""
+    # AWS SecurityHub endpoint (optional)
+    endpoint: ""
+    # AWS accountID
+    accountID: ""
+    # minimum priority "" < info < warning < critical < error
+    minimumPriority: ""
+    # list of sources which should send to S3
+    sources: []
+    # Skip already existing PolicyReportResults on startup
+    skipExistingOnStartup: true
+    # Added as additional properties to each securityHub event
+    customFields: {}
+    # filter results send by namespaces, policies and priorities
+    filter: {}
+    # add additional s3 channels with different configurations and filters
+    channels: []
+
   gcs:
     # GCS (Google Cloud Storage) Service Accout Credentials
     credentials: ""

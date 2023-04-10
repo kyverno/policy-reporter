@@ -212,6 +212,7 @@ func (r *Resolver) TargetClients() []target.Client {
 	clients = append(clients, factory.TeamsClients(r.config.Teams)...)
 	clients = append(clients, factory.S3Clients(r.config.S3)...)
 	clients = append(clients, factory.KinesisClients(r.config.Kinesis)...)
+	clients = append(clients, factory.SecurityHubs(r.config.SecurityHub)...)
 	clients = append(clients, factory.WebhookClients(r.config.Webhook)...)
 	clients = append(clients, factory.GCSClients(r.config.GCS)...)
 
