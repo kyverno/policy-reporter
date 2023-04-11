@@ -213,6 +213,33 @@ kinesis:
     {{- toYaml . | nindent 4 }}
   {{- end }}
 
+securityHub:
+  accountID: {{ .Values.target.securityHub.accountID }}
+  accessKeyID: {{ .Values.target.securityHub.accessKeyID }}
+  secretAccessKey:  {{ .Values.target.securityHub.secretAccessKey }}
+  secretRef: {{ .Values.target.securityHub.secretRef | quote }}
+  region: {{ .Values.target.securityHub.region }}
+  endpoint: {{ .Values.target.securityHub.endpoint }}
+  streamName: {{ .Values.target.securityHub.streamName }}
+  minimumPriority: {{ .Values.target.securityHub.minimumPriority | quote }}
+  skipExistingOnStartup: {{ .Values.target.securityHub.skipExistingOnStartup }}
+  {{- with .Values.target.securityHub.sources }}
+  sources:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  {{- with .Values.target.securityHub.customFields }}
+  customFields:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  {{- with .Values.target.securityHub.filter }}
+  filter:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  {{- with .Values.target.securityHub.channels }}
+  channels:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+
 gcs:
   credentials: {{ .Values.target.gcs.credentials }}
   secretRef: {{ .Values.target.gcs.secretRef | quote }}

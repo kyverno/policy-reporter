@@ -130,6 +130,17 @@ type Kinesis struct {
 	Channels          []Kinesis `mapstructure:"channels"`
 }
 
+// SecurityHub configuration
+type SecurityHub struct {
+	TargetBaseOptions `mapstructure:",squash"`
+	AccountID         string        `mapstructure:"accountId"`
+	AccessKeyID       string        `mapstructure:"accessKeyID"`
+	SecretAccessKey   string        `mapstructure:"secretAccessKey"`
+	Region            string        `mapstructure:"region"`
+	Endpoint          string        `mapstructure:"endpoint"`
+	Channels          []SecurityHub `mapstructure:"channels"`
+}
+
 // GCS configuration
 type GCS struct {
 	TargetBaseOptions `mapstructure:",squash"`
@@ -255,6 +266,7 @@ type Config struct {
 	Teams          Teams          `mapstructure:"teams"`
 	S3             S3             `mapstructure:"s3"`
 	Kinesis        Kinesis        `mapstructure:"kinesis"`
+	SecurityHub    SecurityHub    `mapstructure:"securityHub"`
 	GCS            GCS            `mapstructure:"gcs"`
 	UI             UI             `mapstructure:"ui"`
 	Webhook        Webhook        `mapstructure:"webhook"`

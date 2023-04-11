@@ -9,6 +9,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/kinesis"
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
+	"github.com/aws/aws-sdk-go/service/securityhub"
 	"go.uber.org/zap"
 )
 
@@ -116,4 +117,25 @@ func NewKinesisClient(accessKeyID, secretAccessKey, region, endpoint, streamName
 		streamName,
 		kinesis.New(sess),
 	}
+}
+
+// NewHubClient creates a new SecurityHub client to send finding events
+func NewHubClient(accessKeyID, secretAccessKey, region, endpoint string) *securityhub.SecurityHub {
+	config := &aws.Config{
+		Region:      aws.String(region),
+		Credentials: credentials.NewStaticCredentials(accessKeyID, secretAccessKey, ""),
+	}
+
+	sess, err := session.NewSession(config)
+	if err != nil {
+		zap.L().Error("error while creating S3 session")
+		return nil
+	}
+
+	optional := make([]*aws.Config, 0)
+	if endpoint != "" {
+		optional = append(optional, aws.NewConfig().WithEndpoint(endpoint))
+	}
+
+	return securityhub.New(sess, optional...)
 }

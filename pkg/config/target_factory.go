@@ -20,6 +20,7 @@ import (
 	"github.com/kyverno/policy-reporter/pkg/target/kinesis"
 	"github.com/kyverno/policy-reporter/pkg/target/loki"
 	"github.com/kyverno/policy-reporter/pkg/target/s3"
+	"github.com/kyverno/policy-reporter/pkg/target/securityhub"
 	"github.com/kyverno/policy-reporter/pkg/target/slack"
 	"github.com/kyverno/policy-reporter/pkg/target/teams"
 	"github.com/kyverno/policy-reporter/pkg/target/ui"
@@ -231,6 +232,29 @@ func (f *TargetFactory) KinesisClients(config Kinesis) []target.Client {
 		}
 
 		if es := f.createKinesisClient(channel, config); es != nil {
+			clients = append(clients, es)
+		}
+	}
+
+	return clients
+}
+
+// SecurityHub resolver method
+func (f *TargetFactory) SecurityHubs(config SecurityHub) []target.Client {
+	clients := make([]target.Client, 0)
+	if config.Name == "" {
+		config.Name = "SecurityHub"
+	}
+
+	if es := f.createSecurityHub(config, SecurityHub{}); es != nil {
+		clients = append(clients, es)
+	}
+	for i, channel := range config.Channels {
+		if channel.Name == "" {
+			channel.Name = fmt.Sprintf("SecurityHub Channel %d", i+1)
+		}
+
+		if es := f.createSecurityHub(channel, config); es != nil {
 			clients = append(clients, es)
 		}
 	}
@@ -716,6 +740,75 @@ func (f *TargetFactory) createKinesisClient(config Kinesis, parent Kinesis) targ
 	})
 }
 
+func (f *TargetFactory) createSecurityHub(config SecurityHub, parent SecurityHub) target.Client {
+	if (config.SecretRef != "" && f.secretClient != nil) || config.MountedSecret != "" {
+		f.mapSecretValues(&config, config.SecretRef, config.MountedSecret)
+	}
+
+	if config.AccountID == "" && parent.AccountID == "" {
+		return nil
+	} else if config.AccountID == "" {
+		config.AccountID = parent.AccountID
+	}
+
+	sugar := zap.S()
+
+	if config.AccessKeyID == "" && parent.AccessKeyID == "" {
+		sugar.Errorf("%s.AccessKeyID has not been declared", config.Name)
+		return nil
+	} else if config.AccessKeyID == "" {
+		config.AccessKeyID = parent.AccessKeyID
+	}
+
+	if config.SecretAccessKey == "" && parent.SecretAccessKey == "" {
+		sugar.Errorf("%s.SecretAccessKey has not been declared", config.Name)
+		return nil
+	} else if config.SecretAccessKey == "" {
+		config.SecretAccessKey = parent.SecretAccessKey
+	}
+
+	if config.Region == "" && parent.Region == "" {
+		sugar.Errorf("%s.Region has not been declared", config.Name)
+		return nil
+	} else if config.Region == "" {
+		config.Region = parent.Region
+	}
+
+	if config.Endpoint == "" {
+		config.Endpoint = parent.Endpoint
+	}
+
+	if config.MinimumPriority == "" {
+		config.MinimumPriority = parent.MinimumPriority
+	}
+
+	if !config.SkipExisting {
+		config.SkipExisting = parent.SkipExisting
+	}
+
+	client := helper.NewHubClient(
+		config.AccessKeyID,
+		config.SecretAccessKey,
+		config.Region,
+		config.Endpoint,
+	)
+
+	sugar.Infof("%s configured", config.Name)
+
+	return securityhub.NewClient(securityhub.Options{
+		ClientOptions: target.ClientOptions{
+			Name:                  config.Name,
+			SkipExistingOnStartup: config.SkipExisting,
+			ResultFilter:          createResultFilter(config.Filter, config.MinimumPriority, config.Sources),
+			ReportFilter:          createReportFilter(config.Filter),
+		},
+		CustomFields: config.CustomFields,
+		Client:       client,
+		AccountID:    config.AccountID,
+		Region:       config.Region,
+	})
+}
+
 func (f *TargetFactory) createGCSClient(config GCS, parent GCS) target.Client {
 	if (config.SecretRef != "" && f.secretClient != nil) || config.MountedSecret != "" {
 		f.mapSecretValues(&config, config.SecretRef, config.MountedSecret)
@@ -849,6 +942,17 @@ func (f *TargetFactory) mapSecretValues(config any, ref, mountedSecret string) {
 		}
 		if values.SecretAccessKey != "" {
 			c.SecretAccessKey = values.SecretAccessKey
+		}
+
+	case *SecurityHub:
+		if values.AccessKeyID != "" {
+			c.AccessKeyID = values.AccessKeyID
+		}
+		if values.SecretAccessKey != "" {
+			c.SecretAccessKey = values.SecretAccessKey
+		}
+		if values.AccountID != "" {
+			c.AccountID = values.AccessKeyID
 		}
 
 	case *GCS:

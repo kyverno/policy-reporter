@@ -116,6 +116,12 @@ func Test_ResolveTarget(t *testing.T) {
 			t.Errorf("Expected 2 Client, got %d clients", len(clients))
 		}
 	})
+	t.Run("SecurityHub", func(t *testing.T) {
+		clients := factory.SecurityHubs(testConfig.SecurityHub)
+		if len(clients) != 2 {
+			t.Errorf("Expected 2 Client, got %d clients", len(clients))
+		}
+	})
 }
 
 func Test_ResolveTargetWithoutHost(t *testing.T) {
@@ -219,6 +225,26 @@ func Test_ResolveTargetWithoutHost(t *testing.T) {
 	t.Run("Kinesis.StreamName", func(t *testing.T) {
 		if len(factory.KinesisClients(config.Kinesis{Endpoint: "https://yds.serverless.yandexcloud.net", AccessKeyID: "access", SecretAccessKey: "secret", Region: "ru-central1"})) != 0 {
 			t.Error("Expected Client to be nil if no stream name is configured")
+		}
+	})
+	t.Run("SecurityHub.AccountID", func(t *testing.T) {
+		if len(factory.SecurityHubs(config.SecurityHub{})) != 0 {
+			t.Error("Expected Client to be nil if no accountID is configured")
+		}
+	})
+	t.Run("SecurityHub.AccessKey", func(t *testing.T) {
+		if len(factory.SecurityHubs(config.SecurityHub{AccountID: "accountID"})) != 0 {
+			t.Error("Expected Client to be nil if no accessKey is configured")
+		}
+	})
+	t.Run("SecurityHub.SecretAccessKey", func(t *testing.T) {
+		if len(factory.SecurityHubs(config.SecurityHub{AccountID: "accountID", AccessKeyID: "access"})) != 0 {
+			t.Error("Expected Client to be nil if no secretAccessKey is configured")
+		}
+	})
+	t.Run("SecurityHub.Region", func(t *testing.T) {
+		if len(factory.SecurityHubs(config.SecurityHub{AccountID: "accountID", AccessKeyID: "access", SecretAccessKey: "secret"})) != 0 {
+			t.Error("Expected Client to be nil if no region is configured")
 		}
 	})
 	t.Run("GCS.Bucket", func(t *testing.T) {

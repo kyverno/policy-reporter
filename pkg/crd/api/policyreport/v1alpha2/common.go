@@ -16,7 +16,9 @@ package v1alpha2
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"strconv"
+	"strings"
 
 	"github.com/segmentio/fasthash/fnv1a"
 	corev1 "k8s.io/api/core/v1"
@@ -276,6 +278,33 @@ func (r *PolicyReportResult) GetID() string {
 	r.ID = strconv.FormatUint(h1, 10)
 
 	return r.ID
+}
+
+func (r *PolicyReportResult) ResourceString() string {
+	if !r.HasResource() {
+		return ""
+	}
+
+	res := r.GetResource()
+	var resource string
+
+	if res.Namespace != "" {
+		resource = res.Namespace
+	}
+
+	if res.Kind != "" && resource != "" {
+		resource = fmt.Sprintf("%s/%s", resource, strings.ToLower(res.Kind))
+	} else if res.Kind != "" {
+		resource = strings.ToLower(res.Kind)
+	}
+
+	if res.Name != "" && resource != "" {
+		resource = fmt.Sprintf("%s/%s", resource, res.Name)
+	} else if res.Name != "" {
+		resource = res.Name
+	}
+
+	return resource
 }
 
 type ReportInterface interface {

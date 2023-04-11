@@ -130,6 +130,19 @@ var testConfig = &config.Config{
 		Region:          "ru-central1",
 		Channels:        []config.Kinesis{{}},
 	},
+	SecurityHub: config.SecurityHub{
+		TargetBaseOptions: config.TargetBaseOptions{
+			SkipExisting:    true,
+			MinimumPriority: "debug",
+			CustomFields:    map[string]string{"field": "value"},
+		},
+		AccessKeyID:     "AccessKey",
+		SecretAccessKey: "SecretAccessKey",
+		AccountID:       "AccountID",
+		Endpoint:        "https://yds.serverless.yandexcloud.net",
+		Region:          "ru-central1",
+		Channels:        []config.SecurityHub{{}},
+	},
 	GCS: config.GCS{
 		TargetBaseOptions: config.TargetBaseOptions{
 			SkipExisting:    true,
@@ -159,8 +172,8 @@ var testConfig = &config.Config{
 func Test_ResolveTargets(t *testing.T) {
 	resolver := config.NewResolver(testConfig, &rest.Config{})
 
-	if count := len(resolver.TargetClients()); count != 20 {
-		t.Errorf("Expected 19 Clients, got %d", count)
+	if count := len(resolver.TargetClients()); count != 22 {
+		t.Errorf("Expected 22 Clients, got %d", count)
 	}
 }
 
