@@ -1446,7 +1446,7 @@ func generateFilterWhere(filter api.Filter, active []string) (string, []interfac
 			equalIndex,
 			equalIndex,
 		))
-		args = append(args, filter.Search+"%", filter.Search)
+		args = append(args, "%"+filter.Search+"%", filter.Search)
 	}
 	if len(filter.ReportLabel) > 0 {
 		for key, value := range filter.ReportLabel {
