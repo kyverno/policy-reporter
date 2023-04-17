@@ -1524,7 +1524,13 @@ func NewDatabase(dbFile string) (*sql.DB, error) {
 	}
 	file.Close()
 
-	return sql.Open("sqlite3", dbFile+"?cache=shared")
+	db, err := sql.Open("sqlite3", dbFile+"?cache=shared")
+	if err != nil {
+		return nil, err
+	}
+	db.SetMaxOpenConns(1)
+
+	return db, nil
 }
 
 func chunkSlice[K interface{}](slice []K, chunkSize int) [][]K {
