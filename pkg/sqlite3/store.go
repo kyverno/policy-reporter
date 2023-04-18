@@ -1405,7 +1405,7 @@ func generateFilterWhere(filter api.Filter, active []string) (string, []interfac
 		argCounter, where, args = appendWhere(filter.Namespaces, "result.namespace", where, args, argCounter)
 	}
 	if contains("filter_kinds", active) {
-		argCounter, where, args = appendWhere(filter.Namespaces, "result.kind", where, args, argCounter)
+		argCounter, where, args = appendWhere(filter.Kinds, "result.kind", where, args, argCounter)
 	}
 	if contains("policies", active) {
 		argCounter, where, args = appendWhere(filter.Policies, "result.policy", where, args, argCounter)

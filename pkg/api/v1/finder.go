@@ -58,11 +58,16 @@ func (r ResultFilterValues) Hash() string {
 func ExtractFilterValues(polr v1alpha2.ReportInterface) []*ResultFilterValues {
 	mapping := make(map[string]*ResultFilterValues)
 	for _, res := range polr.GetResults() {
+		kind := res.GetKind()
+		if kind == "" && polr.GetScope() != nil {
+			kind = polr.GetScope().Namespace
+		}
+
 		value := &ResultFilterValues{
 			ReportID:  polr.GetID(),
 			Namespace: polr.GetNamespace(),
 			Source:    res.Source,
-			Kind:      res.GetKind(),
+			Kind:      kind,
 			Category:  res.Category,
 			Policy:    res.Policy,
 			Severity:  string(res.Severity),
