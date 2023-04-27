@@ -1,11 +1,13 @@
 package config
 
 import (
-	"database/sql"
+	"context"
 	"time"
 
 	goredis "github.com/go-redis/redis/v8"
 	_ "github.com/mattn/go-sqlite3"
+	"github.com/uptrace/bun"
+	"github.com/uptrace/bun/dialect"
 	mail "github.com/xhit/go-simple-mail/v2"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
@@ -18,6 +20,7 @@ import (
 	"github.com/kyverno/policy-reporter/pkg/cache"
 	"github.com/kyverno/policy-reporter/pkg/crd/client/clientset/versioned"
 	wgpolicyk8sv1alpha2 "github.com/kyverno/policy-reporter/pkg/crd/client/clientset/versioned/typed/policyreport/v1alpha2"
+	"github.com/kyverno/policy-reporter/pkg/database"
 	"github.com/kyverno/policy-reporter/pkg/email"
 	"github.com/kyverno/policy-reporter/pkg/email/summary"
 	"github.com/kyverno/policy-reporter/pkg/email/violations"
@@ -27,7 +30,6 @@ import (
 	"github.com/kyverno/policy-reporter/pkg/listener"
 	"github.com/kyverno/policy-reporter/pkg/listener/metrics"
 	"github.com/kyverno/policy-reporter/pkg/report"
-	"github.com/kyverno/policy-reporter/pkg/sqlite3"
 	"github.com/kyverno/policy-reporter/pkg/target"
 	"github.com/kyverno/policy-reporter/pkg/validate"
 )
@@ -38,13 +40,15 @@ type Resolver struct {
 	k8sConfig          *rest.Config
 	mapper             report.Mapper
 	publisher          report.EventPublisher
-	policyStore        sqlite3.PolicyReportStore
+	policyStore        *database.Store
+	database           *bun.DB
 	policyReportClient report.PolicyReportClient
 	leaderElector      *leaderelection.Client
 	targetClients      []target.Client
 	resultCache        cache.Cache
 	targetsCreated     bool
 	logger             *zap.Logger
+	resultListener     *listener.ResultListener
 }
 
 // APIServer resolver method
@@ -63,17 +67,43 @@ func (r *Resolver) APIServer(synced func() bool) api.Server {
 }
 
 // Database resolver method
-func (r *Resolver) Database() (*sql.DB, error) {
-	return sqlite3.NewDatabase(r.config.DBFile)
+func (r *Resolver) Database() *bun.DB {
+	if r.database != nil {
+		return r.database
+	}
+
+	factory := r.DatabaseFactory()
+
+	switch r.config.Database.Type {
+	case database.MySQL:
+		if r.database = factory.NewMySQL(r.config.Database); r.database != nil {
+			zap.L().Info("mysql connection created")
+			return r.database
+		}
+	case database.MariaDB:
+		if r.database = factory.NewMySQL(r.config.Database); r.database != nil {
+			zap.L().Info("mariadb connection created")
+			return r.database
+		}
+	case database.PostgreSQL:
+		if r.database = factory.NewPostgres(r.config.Database); r.database != nil {
+			zap.L().Info("postgres connection created")
+			return r.database
+		}
+	}
+
+	zap.L().Info("sqlite connection created")
+	r.database = factory.NewSQLite(r.config.DBFile)
+	return r.database
 }
 
 // PolicyReportStore resolver method
-func (r *Resolver) PolicyReportStore(db *sql.DB) (sqlite3.PolicyReportStore, error) {
+func (r *Resolver) PolicyReportStore(db *bun.DB) (*database.Store, error) {
 	if r.policyStore != nil {
 		return r.policyStore, nil
 	}
 
-	s, err := sqlite3.NewPolicyReportStore(db)
+	s, err := database.NewStore(db, r.config.Version)
 	r.policyStore = s
 
 	return r.policyStore, err
@@ -130,20 +160,49 @@ func (r *Resolver) Queue() (*kubernetes.Queue, error) {
 	), nil
 }
 
-// RegisterSendResultListener resolver method
-func (r *Resolver) RegisterSendResultListener() {
+// RegisterNewResultsListener resolver method
+func (r *Resolver) RegisterNewResultsListener() {
 	targets := r.TargetClients()
-	if len(targets) > 0 {
-		newResultListener := listener.NewResultListener(r.SkipExistingOnStartup(), r.ResultCache(), time.Now())
-		newResultListener.RegisterListener(listener.NewSendResultListener(targets, r.Mapper()))
-
-		r.EventPublisher().RegisterListener(listener.NewResults, newResultListener.Listen)
+	if len(targets) == 0 {
+		return
 	}
+
+	newResultListener := listener.NewResultListener(r.SkipExistingOnStartup(), r.ResultCache(), time.Now())
+	r.resultListener = newResultListener
+	r.EventPublisher().RegisterListener(listener.NewResults, newResultListener.Listen)
 }
 
 // RegisterSendResultListener resolver method
-func (r *Resolver) RegisterStoreListener(store report.PolicyReportStore) {
-	r.EventPublisher().RegisterListener(listener.Store, listener.NewStoreListener(store))
+func (r *Resolver) RegisterSendResultListener() {
+	targets := r.TargetClients()
+
+	if len(targets) == 0 {
+		return
+	}
+
+	if r.resultListener == nil {
+		r.RegisterNewResultsListener()
+	}
+
+	r.resultListener.RegisterListener(listener.NewSendResultListener(targets, r.Mapper()))
+}
+
+// RegisterSendResultListener resolver method
+func (r *Resolver) UnregisterSendResultListener() {
+	if r.ResultCache().Shared() {
+		r.EventPublisher().UnregisterListener(listener.NewResults)
+	}
+
+	if r.resultListener == nil {
+		return
+	}
+
+	r.resultListener.UnregisterListener()
+}
+
+// RegisterSendResultListener resolver method
+func (r *Resolver) RegisterStoreListener(ctx context.Context, store report.PolicyReportStore) {
+	r.EventPublisher().RegisterListener(listener.Store, listener.NewStoreListener(ctx, store))
 }
 
 // RegisterMetricsListener resolver method
@@ -190,7 +249,12 @@ func (r *Resolver) SecretClient() secrets.Client {
 
 func (r *Resolver) TargetFactory() *TargetFactory {
 	return &TargetFactory{
-		namespace:    r.config.Namespace,
+		secretClient: r.SecretClient(),
+	}
+}
+
+func (r *Resolver) DatabaseFactory() *DatabaseFactory {
+	return &DatabaseFactory{
 		secretClient: r.SecretClient(),
 	}
 }
@@ -228,6 +292,18 @@ func (r *Resolver) TargetClients() []target.Client {
 
 func (r *Resolver) HasTargets() bool {
 	return len(r.TargetClients()) > 0
+}
+
+func (r *Resolver) EnableLeaderElection() bool {
+	if !r.config.LeaderElection.Enabled {
+		return false
+	}
+
+	if !r.HasTargets() && r.Database().Dialect().Name() == dialect.SQLite {
+		return false
+	}
+
+	return true
 }
 
 // SkipExistingOnStartup config method

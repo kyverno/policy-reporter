@@ -16,6 +16,8 @@ type PolicyReport struct {
 	Warn      int               `json:"warn"`
 	Error     int               `json:"error"`
 	Fail      int               `json:"fail"`
+	Type      string            `json:"-"`
+	Created   int64             `json:"-"`
 }
 
 type PolicyReportList struct {
@@ -41,6 +43,7 @@ type NamespacedStatusCount struct {
 type NamespaceCount struct {
 	Namespace string `json:"namespace"`
 	Count     int    `json:"count"`
+	Status    string `json:"-"`
 }
 
 type Resource struct {
@@ -60,7 +63,7 @@ type ListResult struct {
 	Rule       string            `json:"rule"`
 	Status     string            `json:"status"`
 	Severity   string            `json:"severity,omitempty"`
-	Timestamp  int               `json:"timestamp,omitempty"`
+	Timestamp  int64             `json:"timestamp,omitempty"`
 	Properties map[string]string `json:"properties,omitempty"`
 }
 

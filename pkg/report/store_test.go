@@ -1,6 +1,7 @@
 package report_test
 
 import (
+	"context"
 	"testing"
 
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -9,19 +10,21 @@ import (
 	"github.com/kyverno/policy-reporter/pkg/report"
 )
 
+var ctx = context.Background()
+
 func Test_PolicyReportStore(t *testing.T) {
 	store := report.NewPolicyReportStore()
-	store.CreateSchemas()
+	store.CreateSchemas(ctx)
 
 	t.Run("Add/Get", func(t *testing.T) {
-		_, ok := store.Get(preport.GetID())
-		if ok == true {
+		_, err := store.Get(ctx, preport.GetID())
+		if err == nil {
 			t.Fatalf("Should not be found in empty Store")
 		}
 
-		store.Add(preport)
-		_, ok = store.Get(preport.GetID())
-		if ok == false {
+		store.Add(ctx, preport)
+		_, err = store.Get(ctx, preport.GetID())
+		if err != nil {
 			t.Errorf("Should be found in Store after adding report to the store")
 		}
 	})
@@ -37,38 +40,38 @@ func Test_PolicyReportStore(t *testing.T) {
 			Summary: v1alpha2.PolicyReportSummary{Skip: 1},
 		}
 
-		store.Add(preport)
-		r, _ := store.Get(preport.GetID())
+		store.Add(ctx, preport)
+		r, _ := store.Get(ctx, preport.GetID())
 		if r.GetSummary().Skip != 0 {
 			t.Errorf("Expected Summary.Skip to be 0")
 		}
 
-		store.Update(ureport)
-		r2, _ := store.Get(preport.GetID())
+		store.Update(ctx, ureport)
+		r2, _ := store.Get(ctx, preport.GetID())
 		if r2.GetSummary().Skip != 1 {
 			t.Errorf("Expected Summary.Skip to be 1 after update")
 		}
 	})
 
 	t.Run("Delete/Get", func(t *testing.T) {
-		_, ok := store.Get(preport.GetID())
-		if ok == false {
+		_, err := store.Get(ctx, preport.GetID())
+		if err != nil {
 			t.Errorf("Should be found in Store after adding report to the store")
 		}
 
-		store.Remove(preport.GetID())
-		_, ok = store.Get(preport.GetID())
-		if ok == true {
+		store.Remove(ctx, preport.GetID())
+		_, err = store.Get(ctx, preport.GetID())
+		if err == nil {
 			t.Fatalf("Should not be found after Remove report from Store")
 		}
 	})
 
 	t.Run("CleanUp", func(t *testing.T) {
-		store.Add(preport)
+		store.Add(ctx, preport)
 
-		store.CleanUp()
-		_, ok := store.Get(preport.GetID())
-		if ok == true {
+		store.CleanUp(ctx)
+		_, err := store.Get(ctx, preport.GetID())
+		if err == nil {
 			t.Fatalf("Should have no results after CleanUp")
 		}
 	})

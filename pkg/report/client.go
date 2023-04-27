@@ -1,6 +1,10 @@
 package report
 
-import "github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
+import (
+	"context"
+
+	"github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
+)
 
 // PolicyReportListener is called whenever a new PolicyReport comes in
 type PolicyReportListener = func(LifecycleEvent)
@@ -16,4 +20,5 @@ type PolicyReportClient interface {
 	Sync(stopper chan struct{}) error
 	// HasSynced the configured PolicyReport
 	HasSynced() bool
+	RefreshPolicyReports(context.Context) error
 }

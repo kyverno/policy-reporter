@@ -71,17 +71,12 @@ const (
 	filterInsertBaseSQL = "INSERT OR IGNORE INTO policy_report_filter(policy_report_id, namespace, policy, status, severity, category, source, kind, count) VALUES "
 )
 
-type PolicyReportStore interface {
-	report.PolicyReportStore
-	api.PolicyReportFinder
-}
-
-// policyReportStore caches the latest version of an PolicyReport
-type policyReportStore struct {
+// PolicyReportStore caches the latest version of an PolicyReport
+type PolicyReportStore struct {
 	db *sql.DB
 }
 
-func (s *policyReportStore) CreateSchemas() error {
+func (s *PolicyReportStore) CreateSchemas() error {
 	_, err := s.db.Exec("PRAGMA foreign_keys = ON")
 	if err != nil {
 		return err
@@ -103,7 +98,7 @@ func (s *policyReportStore) CreateSchemas() error {
 }
 
 // Get an PolicyReport by Type and ID
-func (s *policyReportStore) Get(id string) (v1alpha2.ReportInterface, bool) {
+func (s *PolicyReportStore) Get(id string) (v1alpha2.ReportInterface, bool) {
 	var created int64
 	var labels string
 
@@ -133,7 +128,7 @@ func (s *policyReportStore) Get(id string) (v1alpha2.ReportInterface, bool) {
 }
 
 // Add a PolicyReport to the Store
-func (s *policyReportStore) Add(r v1alpha2.ReportInterface) error {
+func (s *PolicyReportStore) Add(r v1alpha2.ReportInterface) error {
 	stmt, err := s.db.Prepare("INSERT INTO policy_report(id, type, namespace, source, name, labels, pass, skip, warn, fail, error, created) values(?,?,?,?,?,?,?,?,?,?,?,?)")
 	if err != nil {
 		return err
@@ -168,7 +163,7 @@ func (s *policyReportStore) Add(r v1alpha2.ReportInterface) error {
 	return s.persistResults(r)
 }
 
-func (s *policyReportStore) Update(r v1alpha2.ReportInterface) error {
+func (s *PolicyReportStore) Update(r v1alpha2.ReportInterface) error {
 	stmt, err := s.db.Prepare("UPDATE policy_report SET labels=?, pass=?, skip=?, warn=?, fail=?, error=?, created=? WHERE id=?")
 	if err != nil {
 		return err
@@ -222,7 +217,7 @@ func (s *policyReportStore) Update(r v1alpha2.ReportInterface) error {
 }
 
 // Remove a PolicyReport with the given Type and ID from the Store
-func (s *policyReportStore) Remove(id string) error {
+func (s *PolicyReportStore) Remove(id string) error {
 	stmt, err := s.db.Prepare("DELETE FROM policy_report WHERE id=?")
 	if err != nil {
 		return err
@@ -255,7 +250,7 @@ func (s *policyReportStore) Remove(id string) error {
 	return err
 }
 
-func (s *policyReportStore) CleanUp() error {
+func (s *PolicyReportStore) CleanUp() error {
 	stmt, err := s.db.Prepare("DELETE FROM policy_report")
 	if err != nil {
 		return err
@@ -289,7 +284,7 @@ func (s *policyReportStore) CleanUp() error {
 }
 
 // FetchPolicyReports by filter and pagination
-func (s *policyReportStore) FetchPolicyReports(filter api.Filter, pagination api.Pagination) ([]*api.PolicyReport, error) {
+func (s *PolicyReportStore) FetchPolicyReports(filter api.Filter, pagination api.Pagination) ([]*api.PolicyReport, error) {
 	whereParts := make([]string, 0)
 	args := make([]interface{}, 0)
 
@@ -339,7 +334,7 @@ func (s *policyReportStore) FetchPolicyReports(filter api.Filter, pagination api
 }
 
 // CountPolicyReports by filter
-func (s *policyReportStore) CountPolicyReports(filter api.Filter) (int, error) {
+func (s *PolicyReportStore) CountPolicyReports(filter api.Filter) (int, error) {
 	whereParts := make([]string, 0)
 	args := make([]interface{}, 0)
 
@@ -374,7 +369,7 @@ func (s *policyReportStore) CountPolicyReports(filter api.Filter) (int, error) {
 }
 
 // FetchClusterPolicyReports by filter and pagination
-func (s *policyReportStore) FetchClusterPolicyReports(filter api.Filter, pagination api.Pagination) ([]*api.PolicyReport, error) {
+func (s *PolicyReportStore) FetchClusterPolicyReports(filter api.Filter, pagination api.Pagination) ([]*api.PolicyReport, error) {
 	whereParts := make([]string, 0)
 	args := make([]interface{}, 0)
 
@@ -420,7 +415,7 @@ func (s *policyReportStore) FetchClusterPolicyReports(filter api.Filter, paginat
 }
 
 // CountClusterPolicyReports by filter and pagination
-func (s *policyReportStore) CountClusterPolicyReports(filter api.Filter) (int, error) {
+func (s *PolicyReportStore) CountClusterPolicyReports(filter api.Filter) (int, error) {
 	whereParts := make([]string, 0)
 	args := make([]interface{}, 0)
 
@@ -451,7 +446,7 @@ func (s *policyReportStore) CountClusterPolicyReports(filter api.Filter) (int, e
 	return count, nil
 }
 
-func (s *policyReportStore) FetchClusterPolicies(filter api.Filter) ([]string, error) {
+func (s *PolicyReportStore) FetchClusterPolicies(filter api.Filter) ([]string, error) {
 	list := make([]string, 0)
 
 	where, args := generateFilterWhere(filter, []string{"sources", "categories"})
@@ -482,7 +477,7 @@ func (s *policyReportStore) FetchClusterPolicies(filter api.Filter) ([]string, e
 	return list, nil
 }
 
-func (s *policyReportStore) FetchClusterRules(filter api.Filter) ([]string, error) {
+func (s *PolicyReportStore) FetchClusterRules(filter api.Filter) ([]string, error) {
 	list := make([]string, 0)
 
 	where, args := generateFilterWhere(filter, []string{"sources", "categories", "policies"})
@@ -513,7 +508,7 @@ func (s *policyReportStore) FetchClusterRules(filter api.Filter) ([]string, erro
 	return list, nil
 }
 
-func (s *policyReportStore) FetchNamespacedPolicies(filter api.Filter) ([]string, error) {
+func (s *PolicyReportStore) FetchNamespacedPolicies(filter api.Filter) ([]string, error) {
 	list := make([]string, 0)
 
 	where, args := generateFilterWhere(filter, []string{"sources", "categories"})
@@ -544,7 +539,7 @@ func (s *policyReportStore) FetchNamespacedPolicies(filter api.Filter) ([]string
 	return list, nil
 }
 
-func (s *policyReportStore) FetchNamespacedRules(filter api.Filter) ([]string, error) {
+func (s *PolicyReportStore) FetchNamespacedRules(filter api.Filter) ([]string, error) {
 	list := make([]string, 0)
 
 	where, args := generateFilterWhere(filter, []string{"sources", "categories", "policies"})
@@ -575,7 +570,7 @@ func (s *policyReportStore) FetchNamespacedRules(filter api.Filter) ([]string, e
 	return list, nil
 }
 
-func (s *policyReportStore) FetchCategories(filter api.Filter) ([]string, error) {
+func (s *PolicyReportStore) FetchCategories(filter api.Filter) ([]string, error) {
 	list := make([]string, 0)
 
 	where, args := generateFilterWhere(filter, []string{"sources"})
@@ -606,7 +601,7 @@ func (s *policyReportStore) FetchCategories(filter api.Filter) ([]string, error)
 	return list, nil
 }
 
-func (s *policyReportStore) FetchNamespacedKinds(filter api.Filter) ([]string, error) {
+func (s *PolicyReportStore) FetchNamespacedKinds(filter api.Filter) ([]string, error) {
 	list := make([]string, 0)
 
 	where, args := generateFilterWhere(filter, []string{"sources", "filter_namespaces"})
@@ -637,7 +632,7 @@ func (s *policyReportStore) FetchNamespacedKinds(filter api.Filter) ([]string, e
 	return list, nil
 }
 
-func (s *policyReportStore) FetchClusterKinds(filter api.Filter) ([]string, error) {
+func (s *PolicyReportStore) FetchClusterKinds(filter api.Filter) ([]string, error) {
 	list := make([]string, 0)
 
 	where, args := generateFilterWhere(filter, []string{"sources"})
@@ -668,7 +663,7 @@ func (s *policyReportStore) FetchClusterKinds(filter api.Filter) ([]string, erro
 	return list, nil
 }
 
-func (s *policyReportStore) FetchNamespacedResources(filter api.Filter) ([]*api.Resource, error) {
+func (s *PolicyReportStore) FetchNamespacedResources(filter api.Filter) ([]*api.Resource, error) {
 	list := make([]*api.Resource, 0)
 
 	where, args := generateFilterWhere(filter, []string{"sources", "categories", "policies", "rules", "namespaces", "kind"})
@@ -699,7 +694,7 @@ func (s *policyReportStore) FetchNamespacedResources(filter api.Filter) ([]*api.
 	return list, nil
 }
 
-func (s *policyReportStore) FetchClusterResources(filter api.Filter) ([]*api.Resource, error) {
+func (s *PolicyReportStore) FetchClusterResources(filter api.Filter) ([]*api.Resource, error) {
 	list := make([]*api.Resource, 0)
 
 	where, args := generateFilterWhere(filter, []string{"sources", "categories", "policies", "rules", "kind"})
@@ -730,7 +725,7 @@ func (s *policyReportStore) FetchClusterResources(filter api.Filter) ([]*api.Res
 	return list, nil
 }
 
-func (s *policyReportStore) FetchClusterSources() ([]string, error) {
+func (s *PolicyReportStore) FetchClusterSources() ([]string, error) {
 	list := make([]string, 0)
 	rows, err := s.db.Query(`SELECT DISTINCT source FROM policy_report WHERE source != "" AND namespace == "" ORDER BY source ASC`)
 	if err != nil {
@@ -750,7 +745,7 @@ func (s *policyReportStore) FetchClusterSources() ([]string, error) {
 	return list, nil
 }
 
-func (s *policyReportStore) FetchNamespacedSources() ([]string, error) {
+func (s *PolicyReportStore) FetchNamespacedSources() ([]string, error) {
 	list := make([]string, 0)
 	rows, err := s.db.Query(`SELECT DISTINCT source FROM policy_report WHERE source != "" AND namespace != "" ORDER BY source ASC`)
 	if err != nil {
@@ -770,7 +765,7 @@ func (s *policyReportStore) FetchNamespacedSources() ([]string, error) {
 	return list, nil
 }
 
-func (s *policyReportStore) FetchNamespaces(filter api.Filter) ([]string, error) {
+func (s *PolicyReportStore) FetchNamespaces(filter api.Filter) ([]string, error) {
 	list := make([]string, 0)
 
 	where, args := generateFilterWhere(filter, []string{"sources", "categories", "policies"})
@@ -801,7 +796,7 @@ func (s *policyReportStore) FetchNamespaces(filter api.Filter) ([]string, error)
 	return list, nil
 }
 
-func (s *policyReportStore) FetchNamespacedStatusCounts(filter api.Filter) ([]api.NamespacedStatusCount, error) {
+func (s *PolicyReportStore) FetchNamespacedStatusCounts(filter api.Filter) ([]api.NamespacedStatusCount, error) {
 	var list map[string][]api.NamespaceCount
 
 	if len(filter.Status) == 0 {
@@ -862,7 +857,7 @@ func (s *policyReportStore) FetchNamespacedStatusCounts(filter api.Filter) ([]ap
 	return statusCounts, nil
 }
 
-func (s *policyReportStore) FetchRuleStatusCounts(policy, rule string) ([]api.StatusCount, error) {
+func (s *PolicyReportStore) FetchRuleStatusCounts(policy, rule string) ([]api.StatusCount, error) {
 	list := map[string]api.StatusCount{
 		v1alpha2.StatusPass:  {Status: v1alpha2.StatusPass},
 		v1alpha2.StatusFail:  {Status: v1alpha2.StatusFail},
@@ -911,7 +906,7 @@ func (s *policyReportStore) FetchRuleStatusCounts(policy, rule string) ([]api.St
 	return statusCounts, nil
 }
 
-func (s *policyReportStore) FetchStatusCounts(filter api.Filter) ([]api.StatusCount, error) {
+func (s *PolicyReportStore) FetchStatusCounts(filter api.Filter) ([]api.StatusCount, error) {
 	var list map[string]api.StatusCount
 
 	if len(filter.Status) == 0 {
@@ -967,7 +962,7 @@ func (s *policyReportStore) FetchStatusCounts(filter api.Filter) ([]api.StatusCo
 	return statusCounts, nil
 }
 
-func (s *policyReportStore) FetchNamespacedResults(filter api.Filter, pagination api.Pagination) ([]*api.ListResult, error) {
+func (s *PolicyReportStore) FetchNamespacedResults(filter api.Filter, pagination api.Pagination) ([]*api.ListResult, error) {
 	list := []*api.ListResult{}
 
 	where, args := generateFilterWhere(filter, []string{"sources", "categories", "policies", "rules", "kinds", "resources", "status", "severities", "namespaces"})
@@ -1005,7 +1000,7 @@ func (s *policyReportStore) FetchNamespacedResults(filter api.Filter, pagination
 	return list, nil
 }
 
-func (s *policyReportStore) CountNamespacedResults(filter api.Filter) (int, error) {
+func (s *PolicyReportStore) CountNamespacedResults(filter api.Filter) (int, error) {
 	var count int
 
 	where, args := generateFilterWhere(filter, []string{"sources", "categories", "policies", "rules", "kinds", "resources", "status", "severities", "namespaces"})
@@ -1027,7 +1022,7 @@ func (s *policyReportStore) CountNamespacedResults(filter api.Filter) (int, erro
 	return count, nil
 }
 
-func (s *policyReportStore) FetchClusterResults(filter api.Filter, pagination api.Pagination) ([]*api.ListResult, error) {
+func (s *PolicyReportStore) FetchClusterResults(filter api.Filter, pagination api.Pagination) ([]*api.ListResult, error) {
 	list := []*api.ListResult{}
 
 	where, args := generateFilterWhere(filter, []string{"sources", "categories", "policies", "rules", "kinds", "resources", "status", "severities"})
@@ -1065,7 +1060,7 @@ func (s *policyReportStore) FetchClusterResults(filter api.Filter, pagination ap
 	return list, nil
 }
 
-func (s *policyReportStore) CountClusterResults(filter api.Filter) (int, error) {
+func (s *PolicyReportStore) CountClusterResults(filter api.Filter) (int, error) {
 	var count int
 
 	where, args := generateFilterWhere(filter, []string{"sources", "categories", "policies", "rules", "kinds", "resources", "status", "severities"})
@@ -1087,7 +1082,7 @@ func (s *policyReportStore) CountClusterResults(filter api.Filter) (int, error) 
 	return count, nil
 }
 
-func (s *policyReportStore) FetchNamespacedReportLabels(filter api.Filter) (map[string][]string, error) {
+func (s *PolicyReportStore) FetchNamespacedReportLabels(filter api.Filter) (map[string][]string, error) {
 	list := make(map[string][]string)
 
 	where, args := generateFilterWhere(filter, []string{"report_sources", "report_namespaces"})
@@ -1129,7 +1124,7 @@ func (s *policyReportStore) FetchNamespacedReportLabels(filter api.Filter) (map[
 	return list, nil
 }
 
-func (s *policyReportStore) FetchClusterReportLabels(filter api.Filter) (map[string][]string, error) {
+func (s *PolicyReportStore) FetchClusterReportLabels(filter api.Filter) (map[string][]string, error) {
 	list := make(map[string][]string)
 
 	where, args := generateFilterWhere(filter, []string{"report_sources"})
@@ -1167,7 +1162,7 @@ func (s *policyReportStore) FetchClusterReportLabels(filter api.Filter) (map[str
 	return list, nil
 }
 
-func (s *policyReportStore) persistResults(report v1alpha2.ReportInterface) error {
+func (s *PolicyReportStore) persistResults(report v1alpha2.ReportInterface) error {
 	var vals []interface{}
 	var sqlStr string
 
@@ -1231,7 +1226,7 @@ func (s *policyReportStore) persistResults(report v1alpha2.ReportInterface) erro
 	return nil
 }
 
-func (s *policyReportStore) persistFilterValues(report v1alpha2.ReportInterface) error {
+func (s *PolicyReportStore) persistFilterValues(report v1alpha2.ReportInterface) error {
 	var vals []interface{}
 	var sqlStr string
 
@@ -1276,7 +1271,7 @@ func (s *policyReportStore) persistFilterValues(report v1alpha2.ReportInterface)
 	return nil
 }
 
-func (s *policyReportStore) fetchResults(reportID string) ([]v1alpha2.PolicyReportResult, error) {
+func (s *PolicyReportStore) fetchResults(reportID string) ([]v1alpha2.PolicyReportResult, error) {
 	results := make([]v1alpha2.PolicyReportResult, 0)
 
 	rows, err := s.db.Query(`
@@ -1505,10 +1500,10 @@ func convertJSONToMap(s string) map[string]string {
 }
 
 // NewPolicyReportStore construct a PolicyReportStore
-func NewPolicyReportStore(db *sql.DB) (PolicyReportStore, error) {
+func NewPolicyReportStore(db *sql.DB) (*PolicyReportStore, error) {
 	var err error
 
-	s := &policyReportStore{db}
+	s := &PolicyReportStore{db}
 	if db != nil {
 		err = s.CreateSchemas()
 	}

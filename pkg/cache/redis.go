@@ -7,6 +7,7 @@ import (
 	"time"
 
 	goredis "github.com/go-redis/redis/v8"
+	"go.uber.org/zap"
 
 	"github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
 )
@@ -36,6 +37,23 @@ func (r *redisCache) GetResults(id string) []string {
 	json.Unmarshal([]byte(list), &results)
 
 	return results
+}
+
+func (r *redisCache) Shared() bool {
+	return true
+}
+
+func (r *redisCache) Clear() {
+	results := r.rdb.Keys(context.Background(), r.prefix+":*")
+
+	keys, err := results.Result()
+	if err != nil {
+		zap.L().Error("failed to find cache keys in redis", zap.Error(err))
+	}
+
+	for _, key := range keys {
+		r.rdb.Del(context.Background(), key)
+	}
 }
 
 func (r *redisCache) generateKey(id string) string {

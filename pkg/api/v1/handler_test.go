@@ -1,6 +1,7 @@
 package v1_test
 
 import (
+	"context"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -12,7 +13,7 @@ import (
 
 	v1 "github.com/kyverno/policy-reporter/pkg/api/v1"
 	"github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
-	"github.com/kyverno/policy-reporter/pkg/sqlite3"
+	"github.com/kyverno/policy-reporter/pkg/database"
 	"github.com/kyverno/policy-reporter/pkg/target"
 	"github.com/kyverno/policy-reporter/pkg/target/loki"
 )
@@ -120,8 +121,10 @@ var creport = &v1alpha2.ClusterPolicyReport{
 	Summary: v1alpha2.PolicyReportSummary{},
 }
 
+var ctx = context.Background()
+
 func Test_V1_API(t *testing.T) {
-	db, err := sqlite3.NewDatabase("test.db")
+	db, err := database.NewSQLiteDB("test.db")
 	if err != nil {
 		t.Error(err)
 	}
@@ -129,14 +132,15 @@ func Test_V1_API(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	store, err := sqlite3.NewPolicyReportStore(db)
+	store, err := database.NewStore(db, "test")
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer store.CleanUp()
+	store.PrepareDatabase(ctx)
+	defer store.CleanUp(ctx)
 
-	store.Add(preport)
-	store.Add(creport)
+	store.Add(ctx, preport)
+	store.Add(ctx, creport)
 
 	handl := v1.NewHandler(store)
 
@@ -220,21 +224,41 @@ func Test_V1_API(t *testing.T) {
 		}
 	})
 
-	t.Run("CategoryListHandler", func(t *testing.T) {
+	t.Run("NamespacedCategoryListHandler", func(t *testing.T) {
 		req, err := http.NewRequest("GET", "/v1/categories", nil)
 		if err != nil {
 			t.Fatal(err)
 		}
 
 		rr := httptest.NewRecorder()
-		handler := handl.CategoryListHandler()
+		handler := handl.NamespacedCategoryListHandler()
 		handler.ServeHTTP(rr, req)
 
 		if status := rr.Code; status != http.StatusOK {
 			t.Errorf("handler returned wrong status code: got %v want %v", status, http.StatusOK)
 		}
 
-		expected := `["Best Practices","Convention"]`
+		expected := `["Best Practices"]`
+		if !strings.Contains(rr.Body.String(), expected) {
+			t.Errorf("handler returned unexpected body: got %v want %v", rr.Body.String(), expected)
+		}
+	})
+
+	t.Run("ClusterCategoryListHandler", func(t *testing.T) {
+		req, err := http.NewRequest("GET", "/v1/categories", nil)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		rr := httptest.NewRecorder()
+		handler := handl.ClusterCategoryListHandler()
+		handler.ServeHTTP(rr, req)
+
+		if status := rr.Code; status != http.StatusOK {
+			t.Errorf("handler returned wrong status code: got %v want %v", status, http.StatusOK)
+		}
+
+		expected := `["Convention"]`
 		if !strings.Contains(rr.Body.String(), expected) {
 			t.Errorf("handler returned unexpected body: got %v want %v", rr.Body.String(), expected)
 		}
@@ -491,7 +515,7 @@ func Test_V1_API(t *testing.T) {
 	})
 
 	t.Run("ClusterReportLabelListHandler", func(t *testing.T) {
-		req, err := http.NewRequest("GET", "/v1/cluster-resources/report-labels?sources=kyverno", nil)
+		req, err := http.NewRequest("GET", "/v1/cluster-resources/report-labels?sources=Kyverno", nil)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -511,7 +535,7 @@ func Test_V1_API(t *testing.T) {
 	})
 
 	t.Run("ClusterReportLabelListHandler", func(t *testing.T) {
-		req, err := http.NewRequest("GET", "/v1/namespaced-resources/report-labels?sources=kyverno", nil)
+		req, err := http.NewRequest("GET", "/v1/namespaced-resources/report-labels?sources=Kyverno", nil)
 		if err != nil {
 			t.Fatal(err)
 		}

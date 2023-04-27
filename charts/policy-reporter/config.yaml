@@ -314,3 +314,14 @@ logging:
 
 api:
   logging: {{ .Values.api.logging }}
+
+database:
+  type: {{ .Values.database.type }}
+  database: {{ .Values.database.database }}
+  username: {{ .Values.database.username }}
+  password: {{ .Values.database.password }}
+  host: {{ .Values.database.host }}
+  enableSSL: {{ .Values.database.enableSSL }}
+  dsn: {{ .Values.database.dsn }}
+  secretRef: {{ .Values.database.secretRef }}
+  mountedSecret: {{ .Values.database.mountedSecret }}

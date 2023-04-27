@@ -1,8 +1,8 @@
 GO ?= go
 BUILD ?= build
 REPO ?= ghcr.io/kyverno/policy-reporter
-IMAGE_TAG ?= 2.8.1
-LD_FLAGS='-s -w -linkmode external -extldflags "-static"'
+IMAGE_TAG ?= 2.14.5
+LD_FLAGS=-s -w -linkmode external -extldflags "-static"
 PLATFORMS ?= linux/arm64,linux/amd64,linux/s390x
 
 all: build
@@ -29,16 +29,16 @@ build: prepare
 
 .PHONY: docker-build
 docker-build:
-	@docker buildx build --progress plane --platform $(PLATFORMS) --tag $(REPO):$(IMAGE_TAG) . --build-arg LD_FLAGS=$(LD_FLAGS)
+	@docker buildx build --progress plane --platform $(PLATFORMS)  --tag $(REPO):$(IMAGE_TAG) . --build-arg LD_FLAGS='$(LD_FLAGS) -X main.Version=$(IMAGE_TAG)'
 
 .PHONY: docker-push
 docker-push:
-	@docker buildx build --progress plane --platform $(PLATFORMS) --tag $(REPO):$(IMAGE_TAG) . --build-arg LD_FLAGS=$(LD_FLAGS) --push
-	@docker buildx build --progress plane --platform $(PLATFORMS) --tag $(REPO):latest . --build-arg LD_FLAGS=$(LD_FLAGS) --push
+	@docker buildx build --progress plane --platform $(PLATFORMS)  --tag $(REPO):$(IMAGE_TAG) . --build-arg LD_FLAGS='$(LD_FLAGS) -X main.Version=$(IMAGE_TAG)' --push
+	@docker buildx build --progress plane --platform $(PLATFORMS)  --tag $(REPO):latest . --build-arg LD_FLAGS='$(LD_FLAGS) -X main.Version=$(IMAGE_TAG)' --push
 
 .PHONY: docker-push-dev
 docker-push-dev:
-	@docker buildx build --progress plane --platform $(PLATFORMS) --tag $(REPO):dev . --build-arg LD_FLAGS=$(LD_FLAGS) --push
+	@docker buildx build --progress plane --platform $(PLATFORMS)  --tag $(REPO):dev . --build-arg LD_FLAGS='$(LD_FLAGS) -X main.Version=$(IMAGE_TAG)-dev' --push
 
 .PHONY: fmt
 fmt:

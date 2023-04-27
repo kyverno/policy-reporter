@@ -1,6 +1,7 @@
 package config_test
 
 import (
+	"context"
 	"testing"
 
 	"k8s.io/client-go/rest"
@@ -254,7 +255,7 @@ func Test_ResolveLeaderElectionClient(t *testing.T) {
 
 func Test_ResolvePolicyStore(t *testing.T) {
 	resolver := config.NewResolver(&config.Config{DBFile: "test.db"}, &rest.Config{})
-	db, _ := resolver.Database()
+	db := resolver.Database()
 	defer db.Close()
 
 	store1, err := resolver.PolicyReportStore(db)
@@ -401,7 +402,7 @@ func Test_ResolveSecretCClientWithInvalidK8sConfig(t *testing.T) {
 func Test_RegisterStoreListener(t *testing.T) {
 	t.Run("Register StoreListener", func(t *testing.T) {
 		resolver := config.NewResolver(testConfig, &rest.Config{})
-		resolver.RegisterStoreListener(report.NewPolicyReportStore())
+		resolver.RegisterStoreListener(context.Background(), report.NewPolicyReportStore())
 
 		if len(resolver.EventPublisher().GetListener()) != 1 {
 			t.Error("Expected one Listener to be registered")

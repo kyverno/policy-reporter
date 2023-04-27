@@ -169,6 +169,24 @@ kyvernoPlugin:
 monitoring:
   enabled: false
 
+database:
+  type: ""      # Database Type, supported: mysql, postgres, mariadb
+  database: ""  # Database Name  
+  username: "" 
+  password: ""
+  host: ""
+  enableSSL: false
+  # instead of configure the individual values you can also provide an DSN string
+  # example postgres: postgres://postgres:password@localhost:5432/postgres?sslmode=disable
+  # example mysql: root:password@tcp(localhost:3306)/test?tls=false
+  dsn: ""
+  # configure an existing secret as source for your values
+  # supported fields: username, password, host, dsn, database
+  secretRef: ""
+  # use an mounted secret as source for your values, required the information in JSON format
+  # supported fields: username, password, host, dsn, database
+  mountedSecret: ""
+
 global:
   # available plugins
   plugins:
