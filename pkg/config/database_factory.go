@@ -134,3 +134,9 @@ func (f *DatabaseFactory) mapSecretValues(config any, ref, mountedSecret string)
 		}
 	}
 }
+
+func NewDatabaseFactory(client secrets.Client) *DatabaseFactory {
+	return &DatabaseFactory{
+		secretClient: client,
+	}
+}

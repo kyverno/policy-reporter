@@ -111,15 +111,12 @@ func newRunCMD(version string) *cobra.Command {
 						resolver.RegisterStoreListener(ctx, store)
 
 						if readinessProbe.Running() {
-							logger.Debug("refresh database")
-							client.RefreshPolicyReports(cmd.Context())
+							logger.Debug("trigger informer restart")
+							client.Stop()
 						}
 					}
 
-					if resolver.HasTargets() {
-						logger.Info("register target pushes")
-						resolver.RegisterSendResultListener()
-					}
+					resolver.RegisterSendResultListener()
 
 					readinessProbe.Ready()
 				}).RegisterOnNew(func(currentID, lockID string) {
@@ -143,7 +140,7 @@ func newRunCMD(version string) *cobra.Command {
 				g.Go(func() error {
 					return elector.Run(cmd.Context())
 				})
-			} else if resolver.HasTargets() {
+			} else {
 				resolver.RegisterSendResultListener()
 			}
 
@@ -152,11 +149,16 @@ func newRunCMD(version string) *cobra.Command {
 			g.Go(func() error {
 				readinessProbe.Wait()
 
-				stop := make(chan struct{})
-				defer close(stop)
 				logger.Info("start client", zap.Int("worker", c.WorkerCount))
 
-				return client.Run(c.WorkerCount, stop)
+				for {
+					stop := make(chan struct{})
+					if err := client.Run(c.WorkerCount, stop); err != nil {
+						zap.L().Error("informer client error", zap.Error(err))
+					}
+
+					zap.L().Debug("informer restarts")
+				}
 			})
 
 			return g.Wait()

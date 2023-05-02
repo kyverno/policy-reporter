@@ -5,7 +5,7 @@ image:
   registry: ghcr.io
   repository: kyverno/policy-reporter
   pullPolicy: IfNotPresent
-  tag: 2.14.2
+  tag: 2.15.0
 
 imagePullSecrets: []
 
@@ -170,9 +170,10 @@ monitoring:
   enabled: false
 
 database:
-  type: ""      # Database Type, supported: mysql, postgres, mariadb
-  database: ""  # Database Name  
-  username: "" 
+  # Database Type, supported: mysql, postgres, mariadb
+  type: ""
+  database: "" # Database Name
+  username: ""
   password: ""
   host: ""
   enableSSL: false

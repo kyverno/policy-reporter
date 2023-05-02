@@ -37,6 +37,8 @@ func newFakeClient() v1.SecretInterface {
 			"kmsKeyId":        []byte("kmsKeyId"),
 			"token":           []byte("token"),
 			"credentials":     []byte(`{"token": "token", "type": "authorized_user"}`),
+			"database":        []byte("database"),
+			"dsn":             []byte(""),
 		},
 	}).CoreV1().Secrets("default")
 }
@@ -52,6 +54,8 @@ func mountSecret() {
 		KmsKeyID:        "kmsKeyId",
 		Token:           "token",
 		Credentials:     `{"token": "token", "type": "authorized_user"}`,
+		Database:        "database",
+		DSN:             "",
 	}
 	file, _ := json.MarshalIndent(secretValues, "", " ")
 	_ = os.WriteFile(mountedSecret, file, 0o644)

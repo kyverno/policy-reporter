@@ -19,6 +19,8 @@ func createCMD() *cobra.Command {
 	cmd.Flags().BoolP("rest-enabled", "r", false, "Enable Policy Reporter's REST API")
 	cmd.Flags().Bool("profile", false, "Enable application profiling with pprof")
 	cmd.Flags().StringP("template-dir", "t", "./templates", "template directory for email reports")
+	cmd.Flags().String("lease-name", "policy-reporter", "name of the LeaseLock")
+	cmd.Flags().String("pod-name", "policy-reporter", "name of the pod, used for leaderelection")
 
 	return cmd
 }
@@ -33,6 +35,8 @@ func Test_Load(t *testing.T) {
 	_ = cmd.Flags().Set("profile", "1")
 	_ = cmd.Flags().Set("template-dir", "/app/templates")
 	_ = cmd.Flags().Set("dbfile", "")
+	_ = cmd.Flags().Set("pod-name", "policy-reporter")
+	_ = cmd.Flags().Set("lease-name", "policy-reporter")
 
 	c, err := config.Load(cmd)
 	if err != nil {

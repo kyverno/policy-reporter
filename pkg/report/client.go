@@ -1,8 +1,6 @@
 package report
 
 import (
-	"context"
-
 	"github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
 )
 
@@ -20,5 +18,6 @@ type PolicyReportClient interface {
 	Sync(stopper chan struct{}) error
 	// HasSynced the configured PolicyReport
 	HasSynced() bool
-	RefreshPolicyReports(context.Context) error
+	// Stop the client
+	Stop()
 }

@@ -13,6 +13,7 @@ func NewCLI(version string) *cobra.Command {
 		Sends notifications to different targets like Grafana's Loki.`,
 	}
 
+	rootCmd.AddCommand(newVersionCMD(version))
 	rootCmd.AddCommand(newRunCMD(version))
 	rootCmd.AddCommand(newSendCMD())
 

@@ -9,7 +9,7 @@ image:
   registry: ghcr.io
   repository: kyverno/policy-reporter-ui
   pullPolicy: IfNotPresent
-  tag: 1.8.3
+  tag: 1.8.4
 
 # possible default displayModes: light/dark
 displayMode: ""

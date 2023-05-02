@@ -75,7 +75,7 @@ func (l *ResultListener) Listen(event report.LifecycleEvent) {
 			}
 
 			wg := sync.WaitGroup{}
-			wg.Add(len(l.listener))
+			wg.Add(listenerCount)
 
 			for _, cb := range l.listener {
 				go func(callback report.PolicyReportResultListener, result v1alpha2.PolicyReportResult) {

@@ -2,11 +2,6 @@ package v1
 
 import (
 	"context"
-	"strconv"
-
-	"github.com/segmentio/fasthash/fnv1a"
-
-	"github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
 )
 
 type Filter struct {
@@ -28,66 +23,6 @@ type Pagination struct {
 	Offset    int
 	SortBy    []string
 	Direction string
-}
-
-type ResultFilterValues struct {
-	ReportID  string
-	Namespace string
-	Source    string
-	Kind      string
-	Category  string
-	Policy    string
-	Severity  string
-	Result    string
-	Count     int
-}
-
-func (r ResultFilterValues) Hash() string {
-	h1 := fnv1a.Init64
-	h1 = fnv1a.AddString64(h1, r.ReportID)
-	h1 = fnv1a.AddString64(h1, r.Namespace)
-	h1 = fnv1a.AddString64(h1, r.Source)
-	h1 = fnv1a.AddString64(h1, r.Kind)
-	h1 = fnv1a.AddString64(h1, r.Category)
-	h1 = fnv1a.AddString64(h1, r.Policy)
-	h1 = fnv1a.AddString64(h1, r.Severity)
-	h1 = fnv1a.AddString64(h1, r.Result)
-
-	return strconv.FormatUint(h1, 10)
-}
-
-func ExtractFilterValues(polr v1alpha2.ReportInterface) []*ResultFilterValues {
-	mapping := make(map[string]*ResultFilterValues)
-	for _, res := range polr.GetResults() {
-		kind := res.GetKind()
-		if kind == "" && polr.GetScope() != nil {
-			kind = polr.GetScope().Namespace
-		}
-
-		value := &ResultFilterValues{
-			ReportID:  polr.GetID(),
-			Namespace: polr.GetNamespace(),
-			Source:    res.Source,
-			Kind:      kind,
-			Category:  res.Category,
-			Policy:    res.Policy,
-			Severity:  string(res.Severity),
-			Result:    string(res.Result),
-			Count:     1,
-		}
-
-		if item, ok := mapping[value.Hash()]; ok {
-			item.Count = item.Count + 1
-		} else {
-			mapping[value.Hash()] = value
-		}
-	}
-	list := make([]*ResultFilterValues, 0, len(mapping))
-	for _, v := range mapping {
-		list = append(list, v)
-	}
-
-	return list
 }
 
 type PolicyReportFinder interface {

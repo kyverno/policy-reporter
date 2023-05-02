@@ -1,18 +1,15 @@
 package cache
 
 import (
-	"sync"
 	"time"
 
 	gocache "github.com/patrickmn/go-cache"
 
 	"github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
-	"github.com/kyverno/policy-reporter/pkg/helper"
 )
 
 type inMemoryCache struct {
-	mx     *sync.RWMutex
-	caches map[string]*gocache.Cache
+	caches *gocache.Cache
 }
 
 func (c *inMemoryCache) AddReport(report v1alpha2.ReportInterface) {
@@ -20,49 +17,40 @@ func (c *inMemoryCache) AddReport(report v1alpha2.ReportInterface) {
 
 	if !ok {
 		cache = gocache.New(gocache.NoExpiration, 5*time.Minute)
-		c.addCache(report.GetID(), cache)
+		c.caches.Set(report.GetID(), cache, gocache.NoExpiration)
 	}
 
-	current := c.GetResults(report.GetID())
-	next := make([]string, 0, len(report.GetResults()))
+	next := make(map[string]bool)
 	for _, result := range report.GetResults() {
 		cache.Set(result.GetID(), nil, gocache.NoExpiration)
-		next = append(next, result.GetID())
+		next[result.GetID()] = true
 	}
 
-	for _, id := range current {
-		if !helper.Contains(id, next) {
+	for id, item := range cache.Items() {
+		if !next[id] && item.Expiration == 0 {
 			cache.Set(id, nil, 6*time.Hour)
 		}
 	}
+
+	c.caches.Set(report.GetID(), cache, gocache.NoExpiration)
 }
 
 func (c *inMemoryCache) RemoveReport(id string) {
 	cache, ok := c.getCache(id)
-
 	if !ok {
 		return
 	}
 
-	cache.Flush()
-	c.mx.Lock()
-	delete(c.caches, id)
-	c.mx.Unlock()
+	c.caches.Set(id, cache, 10*time.Minute)
 }
 
 func (c *inMemoryCache) getCache(id string) (*gocache.Cache, bool) {
-	c.mx.RLock()
-	defer c.mx.RUnlock()
+	cache, ok := c.caches.Get(id)
+	if !ok {
+		return nil, false
+	}
 
-	cache, ok := c.caches[id]
-
-	return cache, ok
-}
-
-func (c *inMemoryCache) addCache(id string, cache *gocache.Cache) {
-	c.mx.Lock()
-	defer c.mx.Unlock()
-	c.caches[id] = cache
+	return cache.(*gocache.Cache), ok
 }
 
 func (c *inMemoryCache) GetResults(id string) []string {
@@ -81,13 +69,11 @@ func (c *inMemoryCache) GetResults(id string) []string {
 }
 
 func (c *inMemoryCache) Clear() {
-	for id, cache := range c.caches {
-		cache.Flush()
-
-		c.mx.Lock()
-		delete(c.caches, id)
-		c.mx.Unlock()
+	for _, cache := range c.caches.Items() {
+		cache.Object.(*gocache.Cache).Flush()
 	}
+
+	c.caches.Flush()
 }
 
 func (c *inMemoryCache) Shared() bool {
@@ -95,8 +81,14 @@ func (c *inMemoryCache) Shared() bool {
 }
 
 func NewInMermoryCache() Cache {
+	cache := gocache.New(gocache.NoExpiration, 5*time.Minute)
+	cache.OnEvicted(func(s string, i interface{}) {
+		if c, ok := i.(*gocache.Cache); ok {
+			c.Flush()
+		}
+	})
+
 	return &inMemoryCache{
-		caches: make(map[string]*gocache.Cache),
-		mx:     new(sync.RWMutex),
+		caches: gocache.New(gocache.NoExpiration, 5*time.Minute),
 	}
 }
