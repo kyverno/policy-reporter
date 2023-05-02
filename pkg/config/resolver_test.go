@@ -1,11 +1,13 @@
 package config_test
 
 import (
+	"context"
 	"testing"
 
 	"k8s.io/client-go/rest"
 
 	"github.com/kyverno/policy-reporter/pkg/config"
+	"github.com/kyverno/policy-reporter/pkg/database"
 	"github.com/kyverno/policy-reporter/pkg/report"
 )
 
@@ -254,7 +256,7 @@ func Test_ResolveLeaderElectionClient(t *testing.T) {
 
 func Test_ResolvePolicyStore(t *testing.T) {
 	resolver := config.NewResolver(&config.Config{DBFile: "test.db"}, &rest.Config{})
-	db, _ := resolver.Database()
+	db := resolver.Database()
 	defer db.Close()
 
 	store1, err := resolver.PolicyReportStore(db)
@@ -401,7 +403,7 @@ func Test_ResolveSecretCClientWithInvalidK8sConfig(t *testing.T) {
 func Test_RegisterStoreListener(t *testing.T) {
 	t.Run("Register StoreListener", func(t *testing.T) {
 		resolver := config.NewResolver(testConfig, &rest.Config{})
-		resolver.RegisterStoreListener(report.NewPolicyReportStore())
+		resolver.RegisterStoreListener(context.Background(), report.NewPolicyReportStore())
 
 		if len(resolver.EventPublisher().GetListener()) != 1 {
 			t.Error("Expected one Listener to be registered")
@@ -531,4 +533,43 @@ func Test_ResolveLogger(t *testing.T) {
 	if logger1 != logger2 {
 		t.Error("A second call resolver.Mapper() should return the cached first cache")
 	}
+}
+
+func Test_ResolveEnableLeaderElection(t *testing.T) {
+	t.Run("general disabled", func(t *testing.T) {
+		resolver := config.NewResolver(&config.Config{
+			LeaderElection: config.LeaderElection{Enabled: false},
+			Loki:           config.Loki{Host: "localhost:3100"},
+			Database:       config.Database{Type: database.MySQL},
+		}, &rest.Config{})
+
+		if resolver.EnableLeaderElection() {
+			t.Error("leaderelection should be not enabled if its general disabled")
+		}
+	})
+
+	t.Run("no pushes and SQLite Database", func(t *testing.T) {
+		resolver := config.NewResolver(&config.Config{
+			LeaderElection: config.LeaderElection{Enabled: true},
+			Database:       config.Database{Type: database.SQLite},
+			DBFile:         "test.db",
+		}, &rest.Config{})
+
+		if resolver.EnableLeaderElection() {
+			t.Error("leaderelection should be not enabled if no pushes configured and SQLite is used")
+		}
+	})
+
+	t.Run("enabled if pushes defined", func(t *testing.T) {
+		resolver := config.NewResolver(&config.Config{
+			LeaderElection: config.LeaderElection{Enabled: true},
+			Database:       config.Database{Type: database.SQLite},
+			Loki:           config.Loki{Host: "localhost:3100"},
+			DBFile:         "test.db",
+		}, &rest.Config{})
+
+		if !resolver.EnableLeaderElection() {
+			t.Error("leaderelection should be enabled if general enabled and targets configured")
+		}
+	})
 }

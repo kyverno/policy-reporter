@@ -7,7 +7,6 @@ import (
 
 	"go.uber.org/zap"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/client-go/informers"
 	"k8s.io/client-go/metadata"
 	"k8s.io/client-go/metadata/metadatainformer"
 	"k8s.io/client-go/tools/cache"
@@ -16,31 +15,40 @@ import (
 	"github.com/kyverno/policy-reporter/pkg/report"
 )
 
+var (
+	polrResource  = pr.SchemeGroupVersion.WithResource("policyreports")
+	cpolrResource = pr.SchemeGroupVersion.WithResource("clusterpolicyreports")
+)
+
 type k8sPolicyReportClient struct {
 	queue        *Queue
-	fatcory      metadatainformer.SharedInformerFactory
-	polr         informers.GenericInformer
-	cpolr        informers.GenericInformer
 	metaClient   metadata.Interface
 	synced       bool
 	mx           *sync.Mutex
 	reportFilter *report.Filter
+	stopChan     chan struct{}
 }
 
 func (k *k8sPolicyReportClient) HasSynced() bool {
 	return k.synced
 }
 
+func (k *k8sPolicyReportClient) Stop() {
+	close(k.stopChan)
+}
+
 func (k *k8sPolicyReportClient) Sync(stopper chan struct{}) error {
+	factory := metadatainformer.NewSharedInformerFactory(k.metaClient, 15*time.Minute)
+
 	var cpolrInformer cache.SharedIndexInformer
 
-	polrInformer := k.configureInformer(k.polr.Informer())
+	polrInformer := k.configureInformer(factory.ForResource(polrResource).Informer())
 
 	if !k.reportFilter.DisableClusterReports() {
-		cpolrInformer = k.configureInformer(k.cpolr.Informer())
+		cpolrInformer = k.configureInformer(factory.ForResource(cpolrResource).Informer())
 	}
 
-	k.fatcory.Start(stopper)
+	factory.Start(stopper)
 
 	if !cache.WaitForCacheSync(stopper, polrInformer.HasSynced) {
 		return fmt.Errorf("failed to sync policy reports")
@@ -58,6 +66,8 @@ func (k *k8sPolicyReportClient) Sync(stopper chan struct{}) error {
 }
 
 func (k *k8sPolicyReportClient) Run(worker int, stopper chan struct{}) error {
+	k.stopChan = stopper
+
 	if err := k.Sync(stopper); err != nil {
 		return err
 	}
@@ -101,14 +111,8 @@ func (k *k8sPolicyReportClient) configureInformer(informer cache.SharedIndexInfo
 
 // NewPolicyReportClient new Client for Policy Report Kubernetes API
 func NewPolicyReportClient(metaClient metadata.Interface, reportFilter *report.Filter, queue *Queue) report.PolicyReportClient {
-	fatcory := metadatainformer.NewSharedInformerFactory(metaClient, 15*time.Minute)
-	polr := fatcory.ForResource(pr.SchemeGroupVersion.WithResource("policyreports"))
-	cpolr := fatcory.ForResource(pr.SchemeGroupVersion.WithResource("clusterpolicyreports"))
-
 	return &k8sPolicyReportClient{
-		fatcory:      fatcory,
-		polr:         polr,
-		cpolr:        cpolr,
+		metaClient:   metaClient,
 		mx:           &sync.Mutex{},
 		queue:        queue,
 		reportFilter: reportFilter,

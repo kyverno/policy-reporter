@@ -5,7 +5,7 @@ image:
   registry: ghcr.io
   repository: kyverno/policy-reporter
   pullPolicy: IfNotPresent
-  tag: 2.14.2
+  tag: 2.15.0
 
 imagePullSecrets: []
 
@@ -168,6 +168,25 @@ kyvernoPlugin:
 # Settings for the monitoring subchart
 monitoring:
   enabled: false
+
+database:
+  # Database Type, supported: mysql, postgres, mariadb
+  type: ""
+  database: "" # Database Name
+  username: ""
+  password: ""
+  host: ""
+  enableSSL: false
+  # instead of configure the individual values you can also provide an DSN string
+  # example postgres: postgres://postgres:password@localhost:5432/postgres?sslmode=disable
+  # example mysql: root:password@tcp(localhost:3306)/test?tls=false
+  dsn: ""
+  # configure an existing secret as source for your values
+  # supported fields: username, password, host, dsn, database
+  secretRef: ""
+  # use an mounted secret as source for your values, required the information in JSON format
+  # supported fields: username, password, host, dsn, database
+  mountedSecret: ""
 
 global:
   # available plugins

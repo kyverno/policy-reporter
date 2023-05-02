@@ -30,7 +30,6 @@ import (
 // TargetFactory manages target creation
 type TargetFactory struct {
 	secretClient secrets.Client
-	namespace    string
 }
 
 // LokiClients resolver method
@@ -990,6 +989,6 @@ func createReportFilter(filter TargetFilter) *report.ReportFilter {
 	)
 }
 
-func NewTargetFactory(namespace string, secretClient secrets.Client) *TargetFactory {
-	return &TargetFactory{namespace: namespace, secretClient: secretClient}
+func NewTargetFactory(secretClient secrets.Client) *TargetFactory {
+	return &TargetFactory{secretClient: secretClient}
 }

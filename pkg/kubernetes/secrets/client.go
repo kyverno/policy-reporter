@@ -19,6 +19,8 @@ type Values struct {
 	KmsKeyID        string `json:"kmsKeyId,omitempty"`
 	Token           string `json:"token,omitempty"`
 	Credentials     string `json:"credentials,omitempty"`
+	Database        string `json:"database,omitempty"`
+	DSN             string `json:"dsn,omitempty"`
 }
 
 type Client interface {
@@ -54,6 +56,14 @@ func (c *k8sClient) Get(ctx context.Context, name string) (Values, error) {
 
 	if password, ok := secret.Data["password"]; ok {
 		values.Password = string(password)
+	}
+
+	if database, ok := secret.Data["database"]; ok {
+		values.Database = string(database)
+	}
+
+	if dsn, ok := secret.Data["dsn"]; ok {
+		values.DSN = string(dsn)
 	}
 
 	if accessKeyID, ok := secret.Data["accessKeyID"]; ok {

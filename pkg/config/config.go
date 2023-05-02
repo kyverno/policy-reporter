@@ -256,8 +256,21 @@ type Logging struct {
 	Development bool   `mapstructure:"development"`
 }
 
+type Database struct {
+	Type          string `mapstructure:"type"`
+	DSN           string `mapstructure:"dsn"`
+	Username      string `mapstructure:"username"`
+	Password      string `mapstructure:"password"`
+	Database      string `mapstructure:"database"`
+	Host          string `mapstructure:"host"`
+	EnableSSL     bool   `mapstructure:"enableSSL"`
+	SecretRef     string `mapstructure:"secretRef"`
+	MountedSecret string `mapstructure:"mountedSecret"`
+}
+
 // Config of the PolicyReporter
 type Config struct {
+	Version        string
 	Namespace      string         `mapstructure:"namespace"`
 	Loki           Loki           `mapstructure:"loki"`
 	Elasticsearch  Elasticsearch  `mapstructure:"elasticsearch"`
@@ -283,4 +296,5 @@ type Config struct {
 	LeaderElection LeaderElection `mapstructure:"leaderElection"`
 	K8sClient      K8sClient      `mapstructure:"k8sClient"`
 	Logging        Logging        `mapstructure:"logging"`
+	Database       Database       `mapstructure:"database"`
 }

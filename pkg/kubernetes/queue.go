@@ -41,8 +41,6 @@ func (q *Queue) Add(obj *v1.PartialObjectMetadata) error {
 func (q *Queue) Run(workers int, stopCh chan struct{}) {
 	defer runtime.HandleCrash()
 
-	defer q.queue.ShutDown()
-
 	for i := 0; i < workers; i++ {
 		go wait.Until(q.runWorker, time.Second, stopCh)
 	}

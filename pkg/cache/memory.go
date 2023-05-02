@@ -9,32 +9,86 @@ import (
 )
 
 type inMemoryCache struct {
-	cache *gocache.Cache
+	caches *gocache.Cache
 }
 
 func (c *inMemoryCache) AddReport(report v1alpha2.ReportInterface) {
-	c.cache.Set(report.GetID(), reportResultsIds(report), gocache.NoExpiration)
+	cache, ok := c.getCache(report.GetID())
+
+	if !ok {
+		cache = gocache.New(gocache.NoExpiration, 5*time.Minute)
+		c.caches.Set(report.GetID(), cache, gocache.NoExpiration)
+	}
+
+	next := make(map[string]bool)
+	for _, result := range report.GetResults() {
+		cache.Set(result.GetID(), nil, gocache.NoExpiration)
+		next[result.GetID()] = true
+	}
+
+	for id, item := range cache.Items() {
+		if !next[id] && item.Expiration == 0 {
+			cache.Set(id, nil, 6*time.Hour)
+		}
+	}
+
+	c.caches.Set(report.GetID(), cache, gocache.NoExpiration)
 }
 
 func (c *inMemoryCache) RemoveReport(id string) {
-	val, ok := c.cache.Get(id)
-	if ok {
-		// don't remove it directly to prevent sending results from instantly recreated reports
-		c.cache.Set(id, val, 5*time.Minute)
+	cache, ok := c.getCache(id)
+	if !ok {
+		return
 	}
+
+	c.caches.Set(id, cache, 10*time.Minute)
+}
+
+func (c *inMemoryCache) getCache(id string) (*gocache.Cache, bool) {
+	cache, ok := c.caches.Get(id)
+	if !ok {
+		return nil, false
+	}
+
+	return cache.(*gocache.Cache), ok
 }
 
 func (c *inMemoryCache) GetResults(id string) []string {
-	list, ok := c.cache.Get(id)
+	list := make([]string, 0)
+
+	cache, ok := c.getCache(id)
 	if !ok {
-		return make([]string, 0)
+		return list
 	}
 
-	return list.([]string)
+	for id := range cache.Items() {
+		list = append(list, id)
+	}
+
+	return list
+}
+
+func (c *inMemoryCache) Clear() {
+	for _, cache := range c.caches.Items() {
+		cache.Object.(*gocache.Cache).Flush()
+	}
+
+	c.caches.Flush()
+}
+
+func (c *inMemoryCache) Shared() bool {
+	return false
 }
 
 func NewInMermoryCache() Cache {
+	cache := gocache.New(gocache.NoExpiration, 5*time.Minute)
+	cache.OnEvicted(func(s string, i interface{}) {
+		if c, ok := i.(*gocache.Cache); ok {
+			c.Flush()
+		}
+	})
+
 	return &inMemoryCache{
-		cache: gocache.New(gocache.NoExpiration, 5*time.Minute),
+		caches: gocache.New(gocache.NoExpiration, 5*time.Minute),
 	}
 }

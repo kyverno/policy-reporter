@@ -37,6 +37,8 @@ func newFakeClient() v1.SecretInterface {
 			"kmsKeyId":        []byte("kmsKeyId"),
 			"token":           []byte("token"),
 			"credentials":     []byte(`{"token": "token", "type": "authorized_user"}`),
+			"database":        []byte("database"),
+			"dsn":             []byte(""),
 		},
 	}).CoreV1().Secrets("default")
 }
@@ -52,6 +54,8 @@ func mountSecret() {
 		KmsKeyID:        "kmsKeyId",
 		Token:           "token",
 		Credentials:     `{"token": "token", "type": "authorized_user"}`,
+		Database:        "database",
+		DSN:             "",
 	}
 	file, _ := json.MarshalIndent(secretValues, "", " ")
 	_ = os.WriteFile(mountedSecret, file, 0o644)
@@ -60,7 +64,7 @@ func mountSecret() {
 var logger = zap.NewNop()
 
 func Test_ResolveTarget(t *testing.T) {
-	factory := config.NewTargetFactory("", nil)
+	factory := config.NewTargetFactory(nil)
 
 	t.Run("Loki", func(t *testing.T) {
 		clients := factory.LokiClients(testConfig.Loki)
@@ -125,7 +129,7 @@ func Test_ResolveTarget(t *testing.T) {
 }
 
 func Test_ResolveTargetWithoutHost(t *testing.T) {
-	factory := config.NewTargetFactory("", nil)
+	factory := config.NewTargetFactory(nil)
 
 	t.Run("Loki", func(t *testing.T) {
 		if len(factory.LokiClients(config.Loki{})) != 0 {
@@ -260,7 +264,7 @@ func Test_ResolveTargetWithoutHost(t *testing.T) {
 }
 
 func Test_GetValuesFromSecret(t *testing.T) {
-	factory := config.NewTargetFactory("default", secrets.NewClient(newFakeClient()))
+	factory := config.NewTargetFactory(secrets.NewClient(newFakeClient()))
 
 	t.Run("Get Loki values from Secret", func(t *testing.T) {
 		clients := factory.LokiClients(config.Loki{TargetBaseOptions: config.TargetBaseOptions{SecretRef: secretName}})
@@ -512,7 +516,7 @@ func Test_GetValuesFromSecret(t *testing.T) {
 }
 
 func Test_GetValuesFromMountedSecret(t *testing.T) {
-	factory := config.NewTargetFactory("", nil)
+	factory := config.NewTargetFactory(nil)
 	mountSecret()
 	defer os.Remove(mountedSecret)
 

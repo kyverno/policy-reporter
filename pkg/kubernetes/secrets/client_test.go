@@ -31,6 +31,8 @@ func newFakeClient() v1.SecretInterface {
 			"kmsKeyId":        []byte("kmsKeyId"),
 			"token":           []byte("token"),
 			"accountID":       []byte("accountID"),
+			"database":        []byte("database"),
+			"dsn":             []byte("dsn"),
 		},
 	}).CoreV1().Secrets("default")
 }
@@ -78,6 +80,14 @@ func Test_Client(t *testing.T) {
 
 		if values.AccountID != "accountID" {
 			t.Errorf("Unexpected AccountID: %s", values.AccountID)
+		}
+
+		if values.Database != "database" {
+			t.Errorf("Unexpected Database: %s", values.Database)
+		}
+
+		if values.DSN != "dsn" {
+			t.Errorf("Unexpected DSN: %s", values.DSN)
 		}
 	})
 

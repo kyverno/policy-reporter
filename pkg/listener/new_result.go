@@ -23,13 +23,24 @@ func (l *ResultListener) RegisterListener(listener report.PolicyReportResultList
 	l.listener = append(l.listener, listener)
 }
 
+func (l *ResultListener) UnregisterListener() {
+	l.listener = make([]report.PolicyReportResultListener, 0)
+}
+
 func (l *ResultListener) Listen(event report.LifecycleEvent) {
 	if event.Type != report.Added && event.Type != report.Updated {
 		l.cache.RemoveReport(event.PolicyReport.GetID())
 		return
 	}
 
-	if len(event.PolicyReport.GetResults()) == 0 {
+	resultCount := len(event.PolicyReport.GetResults())
+	if resultCount == 0 {
+		return
+	}
+
+	listenerCount := len(l.listener)
+	if listenerCount == 0 {
+		l.cache.AddReport(event.PolicyReport)
 		return
 	}
 
@@ -44,28 +55,42 @@ func (l *ResultListener) Listen(event report.LifecycleEvent) {
 		}
 	}
 
-	wg := sync.WaitGroup{}
-
 	existing := l.cache.GetResults(event.PolicyReport.GetID())
 
-	for _, r := range event.PolicyReport.GetResults() {
-		if helper.Contains(r.GetID(), existing) {
-			continue
-		}
+	grp := sync.WaitGroup{}
+	grp.Add(resultCount)
+	for _, res := range event.PolicyReport.GetResults() {
+		go func(r v1alpha2.PolicyReportResult) {
+			defer grp.Done()
 
-		wg.Add(len(l.listener))
+			if helper.Contains(r.GetID(), existing) {
+				return
+			}
 
-		for _, cb := range l.listener {
-			go func(callback report.PolicyReportResultListener, result v1alpha2.PolicyReportResult) {
-				callback(event.PolicyReport, result, preExisted)
-				wg.Done()
-			}(cb, r)
-		}
+			if r.Timestamp.Seconds > 0 {
+				created := time.Unix(r.Timestamp.Seconds, int64(r.Timestamp.Nanos))
+				if l.skipExisting && created.Local().Before(l.startUp) {
+					return
+				}
+			}
+
+			wg := sync.WaitGroup{}
+			wg.Add(listenerCount)
+
+			for _, cb := range l.listener {
+				go func(callback report.PolicyReportResultListener, result v1alpha2.PolicyReportResult) {
+					callback(event.PolicyReport, result, preExisted)
+					wg.Done()
+				}(cb, r)
+			}
+
+			wg.Wait()
+		}(res)
 	}
 
-	l.cache.AddReport(event.PolicyReport)
+	grp.Wait()
 
-	wg.Wait()
+	l.cache.AddReport(event.PolicyReport)
 }
 
 func NewResultListener(skipExisting bool, rcache cache.Cache, startUp time.Time) *ResultListener {

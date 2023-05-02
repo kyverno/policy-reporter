@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"time"
 
+	hub "github.com/aws/aws-sdk-go/service/securityhub"
 	"go.uber.org/zap"
 
-	hub "github.com/aws/aws-sdk-go/service/securityhub"
 	"github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
 	"github.com/kyverno/policy-reporter/pkg/target"
 )

@@ -1,5 +1,18 @@
 # Changelog
 
+# 2.19.0
+* Policy Reporter
+    * New AWS SecurityHub push target - See [values.yaml](https://github.com/kyverno/policy-reporter/blob/main/charts/policy-reporter/values.yaml#L550) for available configurations
+    * External DB support (PostgreSQL, MySQL, MariaDB) - See [values.yaml](https://github.com/kyverno/policy-reporter/blob/main/charts/policy-reporter/values.yaml#L172) for available configurations
+        * HA Mode support - only leader write into the DB
+        * Versioned Schema, autoupdated when another version is detected
+        * Configurable over values and secrets
+    * Cache improvements to reduce duplicated pushes
+    * Split Category API into namespaced scoped and cluster scoped API
+    * Support search for contained words in the results API
+* Policy Reporter UI
+    * Update API requests
+
 # 2.18.3
 * Policy Reporter
     * new value to add `priorityClassName` to pods [[#283](https://github.com/kyverno/policy-reporter/pull/283) by [boniek83](https://github.com/boniek83)]

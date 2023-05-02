@@ -39,8 +39,8 @@ func (h *Handler) TargetsHandler(targets []target.Client) http.HandlerFunc {
 func (h *Handler) PolicyReportListHandler() http.HandlerFunc {
 	return func(w http.ResponseWriter, req *http.Request) {
 		filter := buildFilter(req)
-		count, _ := h.finder.CountPolicyReports(filter)
-		list, err := h.finder.FetchPolicyReports(filter, buildPaginatiomn(req, []string{"namespace", "name"}))
+		count, _ := h.finder.CountPolicyReports(req.Context(), filter)
+		list, err := h.finder.FetchPolicyReports(req.Context(), filter, buildPaginatiomn(req, []string{"namespace", "name"}))
 		h.logError(err)
 		helper.SendJSONResponse(w, PolicyReportList{Items: list, Count: count}, err)
 	}
@@ -50,8 +50,8 @@ func (h *Handler) PolicyReportListHandler() http.HandlerFunc {
 func (h *Handler) ClusterPolicyReportListHandler() http.HandlerFunc {
 	return func(w http.ResponseWriter, req *http.Request) {
 		filter := buildFilter(req)
-		count, _ := h.finder.CountClusterPolicyReports(filter)
-		list, err := h.finder.FetchClusterPolicyReports(filter, buildPaginatiomn(req, []string{"namespace", "name"}))
+		count, _ := h.finder.CountClusterPolicyReports(req.Context(), filter)
+		list, err := h.finder.FetchClusterPolicyReports(req.Context(), filter, buildPaginatiomn(req, []string{"namespace", "name"}))
 		h.logError(err)
 		helper.SendJSONResponse(w, PolicyReportList{Items: list, Count: count}, err)
 	}
@@ -60,7 +60,7 @@ func (h *Handler) ClusterPolicyReportListHandler() http.HandlerFunc {
 // ClusterResourcesPolicyListHandler REST API
 func (h *Handler) ClusterResourcesPolicyListHandler() http.HandlerFunc {
 	return func(w http.ResponseWriter, req *http.Request) {
-		list, err := h.finder.FetchClusterPolicies(buildFilter(req))
+		list, err := h.finder.FetchClusterPolicies(req.Context(), buildFilter(req))
 		h.logError(err)
 		helper.SendJSONResponse(w, list, err)
 	}
@@ -69,7 +69,7 @@ func (h *Handler) ClusterResourcesPolicyListHandler() http.HandlerFunc {
 // ClusterResourcesRuleListHandler REST API
 func (h *Handler) ClusterResourcesRuleListHandler() http.HandlerFunc {
 	return func(w http.ResponseWriter, req *http.Request) {
-		list, err := h.finder.FetchClusterRules(buildFilter(req))
+		list, err := h.finder.FetchClusterRules(req.Context(), buildFilter(req))
 		h.logError(err)
 		helper.SendJSONResponse(w, list, err)
 	}
@@ -78,7 +78,7 @@ func (h *Handler) ClusterResourcesRuleListHandler() http.HandlerFunc {
 // NamespacedResourcesPolicyListHandler REST API
 func (h *Handler) NamespacedResourcesPolicyListHandler() http.HandlerFunc {
 	return func(w http.ResponseWriter, req *http.Request) {
-		list, err := h.finder.FetchNamespacedPolicies(buildFilter(req))
+		list, err := h.finder.FetchNamespacedPolicies(req.Context(), buildFilter(req))
 		h.logError(err)
 		helper.SendJSONResponse(w, list, err)
 	}
@@ -87,16 +87,25 @@ func (h *Handler) NamespacedResourcesPolicyListHandler() http.HandlerFunc {
 // NamespacedResourcesRuleListHandler REST API
 func (h *Handler) NamespacedResourcesRuleListHandler() http.HandlerFunc {
 	return func(w http.ResponseWriter, req *http.Request) {
-		list, err := h.finder.FetchNamespacedRules(buildFilter(req))
+		list, err := h.finder.FetchNamespacedRules(req.Context(), buildFilter(req))
 		h.logError(err)
 		helper.SendJSONResponse(w, list, err)
 	}
 }
 
 // CategoryListHandler REST API
-func (h *Handler) CategoryListHandler() http.HandlerFunc {
+func (h *Handler) ClusterCategoryListHandler() http.HandlerFunc {
 	return func(w http.ResponseWriter, req *http.Request) {
-		list, err := h.finder.FetchCategories(buildFilter(req))
+		list, err := h.finder.FetchClusterCategories(req.Context(), buildFilter(req))
+		h.logError(err)
+		helper.SendJSONResponse(w, list, err)
+	}
+}
+
+// CategoryListHandler REST API
+func (h *Handler) NamespacedCategoryListHandler() http.HandlerFunc {
+	return func(w http.ResponseWriter, req *http.Request) {
+		list, err := h.finder.FetchNamespacedCategories(req.Context(), buildFilter(req))
 		h.logError(err)
 		helper.SendJSONResponse(w, list, err)
 	}
@@ -105,7 +114,7 @@ func (h *Handler) CategoryListHandler() http.HandlerFunc {
 // ClusterResourcesKindListHandler REST API
 func (h *Handler) ClusterResourcesKindListHandler() http.HandlerFunc {
 	return func(w http.ResponseWriter, req *http.Request) {
-		list, err := h.finder.FetchClusterKinds(buildFilter(req))
+		list, err := h.finder.FetchClusterKinds(req.Context(), buildFilter(req))
 		h.logError(err)
 		helper.SendJSONResponse(w, list, err)
 	}
@@ -114,7 +123,7 @@ func (h *Handler) ClusterResourcesKindListHandler() http.HandlerFunc {
 // NamespacedResourcesKindListHandler REST API
 func (h *Handler) NamespacedResourcesKindListHandler() http.HandlerFunc {
 	return func(w http.ResponseWriter, req *http.Request) {
-		list, err := h.finder.FetchNamespacedKinds(buildFilter(req))
+		list, err := h.finder.FetchNamespacedKinds(req.Context(), buildFilter(req))
 		h.logError(err)
 		helper.SendJSONResponse(w, list, err)
 	}
@@ -123,7 +132,7 @@ func (h *Handler) NamespacedResourcesKindListHandler() http.HandlerFunc {
 // ClusterResourcesListHandler REST API
 func (h *Handler) ClusterResourcesListHandler() http.HandlerFunc {
 	return func(w http.ResponseWriter, req *http.Request) {
-		list, err := h.finder.FetchClusterResources(buildFilter(req))
+		list, err := h.finder.FetchClusterResources(req.Context(), buildFilter(req))
 		h.logError(err)
 		helper.SendJSONResponse(w, list, err)
 	}
@@ -132,7 +141,7 @@ func (h *Handler) ClusterResourcesListHandler() http.HandlerFunc {
 // NamespacedResourcesListHandler REST API
 func (h *Handler) NamespacedResourcesListHandler() http.HandlerFunc {
 	return func(w http.ResponseWriter, req *http.Request) {
-		list, err := h.finder.FetchNamespacedResources(buildFilter(req))
+		list, err := h.finder.FetchNamespacedResources(req.Context(), buildFilter(req))
 		h.logError(err)
 		helper.SendJSONResponse(w, list, err)
 	}
@@ -141,7 +150,7 @@ func (h *Handler) NamespacedResourcesListHandler() http.HandlerFunc {
 // ClusterResourcesSourceListHandler REST API
 func (h *Handler) ClusterResourcesSourceListHandler() http.HandlerFunc {
 	return func(w http.ResponseWriter, req *http.Request) {
-		list, err := h.finder.FetchClusterSources()
+		list, err := h.finder.FetchClusterSources(req.Context())
 		h.logError(err)
 		helper.SendJSONResponse(w, list, err)
 	}
@@ -150,7 +159,7 @@ func (h *Handler) ClusterResourcesSourceListHandler() http.HandlerFunc {
 // NamespacedSourceListHandler REST API
 func (h *Handler) NamespacedSourceListHandler() http.HandlerFunc {
 	return func(w http.ResponseWriter, req *http.Request) {
-		list, err := h.finder.FetchNamespacedSources()
+		list, err := h.finder.FetchNamespacedSources(req.Context())
 		h.logError(err)
 		helper.SendJSONResponse(w, list, err)
 	}
@@ -159,7 +168,7 @@ func (h *Handler) NamespacedSourceListHandler() http.HandlerFunc {
 // NamespacedReportLabelListHandler REST API
 func (h *Handler) NamespacedReportLabelListHandler() http.HandlerFunc {
 	return func(w http.ResponseWriter, req *http.Request) {
-		list, err := h.finder.FetchNamespacedReportLabels(buildFilter(req))
+		list, err := h.finder.FetchNamespacedReportLabels(req.Context(), buildFilter(req))
 		h.logError(err)
 		helper.SendJSONResponse(w, list, err)
 	}
@@ -168,7 +177,7 @@ func (h *Handler) NamespacedReportLabelListHandler() http.HandlerFunc {
 // ClusterReportLabelListHandler REST API
 func (h *Handler) ClusterReportLabelListHandler() http.HandlerFunc {
 	return func(w http.ResponseWriter, req *http.Request) {
-		list, err := h.finder.FetchClusterReportLabels(buildFilter(req))
+		list, err := h.finder.FetchClusterReportLabels(req.Context(), buildFilter(req))
 		h.logError(err)
 		helper.SendJSONResponse(w, list, err)
 	}
@@ -177,7 +186,7 @@ func (h *Handler) ClusterReportLabelListHandler() http.HandlerFunc {
 // ClusterResourcesStatusCountHandler REST API
 func (h *Handler) ClusterResourcesStatusCountHandler() http.HandlerFunc {
 	return func(w http.ResponseWriter, req *http.Request) {
-		list, err := h.finder.FetchStatusCounts(buildFilter(req))
+		list, err := h.finder.FetchClusterStatusCounts(req.Context(), buildFilter(req))
 		h.logError(err)
 		helper.SendJSONResponse(w, list, err)
 	}
@@ -186,7 +195,7 @@ func (h *Handler) ClusterResourcesStatusCountHandler() http.HandlerFunc {
 // NamespacedResourcesStatusCountsHandler REST API
 func (h *Handler) NamespacedResourcesStatusCountsHandler() http.HandlerFunc {
 	return func(w http.ResponseWriter, req *http.Request) {
-		list, err := h.finder.FetchNamespacedStatusCounts(buildFilter(req))
+		list, err := h.finder.FetchNamespacedStatusCounts(req.Context(), buildFilter(req))
 		h.logError(err)
 		helper.SendJSONResponse(w, list, err)
 	}
@@ -196,6 +205,7 @@ func (h *Handler) NamespacedResourcesStatusCountsHandler() http.HandlerFunc {
 func (h *Handler) RuleStatusCountHandler() http.HandlerFunc {
 	return func(w http.ResponseWriter, req *http.Request) {
 		list, err := h.finder.FetchRuleStatusCounts(
+			req.Context(),
 			req.URL.Query().Get("policy"),
 			req.URL.Query().Get("rule"),
 		)
@@ -208,8 +218,8 @@ func (h *Handler) RuleStatusCountHandler() http.HandlerFunc {
 func (h *Handler) NamespacedResourcesResultHandler() http.HandlerFunc {
 	return func(w http.ResponseWriter, req *http.Request) {
 		filter := buildFilter(req)
-		count, _ := h.finder.CountNamespacedResults(filter)
-		list, err := h.finder.FetchNamespacedResults(filter, buildPaginatiomn(req, defaultOrder))
+		count, _ := h.finder.CountNamespacedResults(req.Context(), filter)
+		list, err := h.finder.FetchNamespacedResults(req.Context(), filter, buildPaginatiomn(req, defaultOrder))
 		h.logError(err)
 		helper.SendJSONResponse(w, ResultList{Items: list, Count: count}, err)
 	}
@@ -219,8 +229,8 @@ func (h *Handler) NamespacedResourcesResultHandler() http.HandlerFunc {
 func (h *Handler) ClusterResourcesResultHandler() http.HandlerFunc {
 	return func(w http.ResponseWriter, req *http.Request) {
 		filter := buildFilter(req)
-		count, _ := h.finder.CountClusterResults(filter)
-		list, err := h.finder.FetchClusterResults(filter, buildPaginatiomn(req, defaultOrder))
+		count, _ := h.finder.CountClusterResults(req.Context(), filter)
+		list, err := h.finder.FetchClusterResults(req.Context(), filter, buildPaginatiomn(req, defaultOrder))
 		h.logError(err)
 		helper.SendJSONResponse(w, ResultList{Items: list, Count: count}, err)
 	}
@@ -229,7 +239,7 @@ func (h *Handler) ClusterResourcesResultHandler() http.HandlerFunc {
 // NamespaceListHandler REST API
 func (h *Handler) NamespaceListHandler() http.HandlerFunc {
 	return func(w http.ResponseWriter, req *http.Request) {
-		list, err := h.finder.FetchNamespaces(Filter{
+		list, err := h.finder.FetchNamespaces(req.Context(), Filter{
 			Sources:    req.URL.Query()["sources"],
 			Categories: req.URL.Query()["categories"],
 			Policies:   req.URL.Query()["policies"],
