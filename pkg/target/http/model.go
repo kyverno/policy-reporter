@@ -32,4 +32,5 @@ type Result struct {
 	Properties        map[string]string `json:"properties,omitempty"`
 	Resource          Resource          `json:"resource"`
 	CreationTimestamp time.Time         `json:"creationTimestamp"`
+	Source            string            `json:"source"`
 }
