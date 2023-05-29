@@ -2,6 +2,11 @@
 
 # 2.19.0
 * Policy Reporter
+    * AWS IRSA Authentication Support
+    * Add `source` attribute to JSON ouput [[#311](https://github.com/kyverno/policy-reporter/pull/311) by [nikolay-o](https://github.com/nikolay-o)]
+
+# 2.19.0
+* Policy Reporter
     * New AWS SecurityHub push target - See [values.yaml](https://github.com/kyverno/policy-reporter/blob/main/charts/policy-reporter/values.yaml#L550) for available configurations
     * External DB support (PostgreSQL, MySQL, MariaDB) - See [values.yaml](https://github.com/kyverno/policy-reporter/blob/main/charts/policy-reporter/values.yaml#L172) for available configurations
         * HA Mode support - only leader write into the DB
