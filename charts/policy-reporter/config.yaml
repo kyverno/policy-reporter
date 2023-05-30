@@ -4,6 +4,7 @@ loki:
   skipTLS: {{ .Values.target.loki.skipTLS }}
   path: {{ .Values.target.loki.path | quote }}
   secretRef: {{ .Values.target.loki.secretRef | quote }}
+  mountedSecret: {{ .Values.target.loki.mountedSecret | quote }}
   minimumPriority: {{ .Values.target.loki.minimumPriority | quote }}
   skipExistingOnStartup: {{ .Values.target.loki.skipExistingOnStartup }}
   {{- with .Values.target.loki.customLabels }}
@@ -30,6 +31,7 @@ elasticsearch:
   username: {{ .Values.target.elasticsearch.username | quote }}
   password: {{ .Values.target.elasticsearch.password | quote }}
   secretRef: {{ .Values.target.elasticsearch.secretRef | quote }}
+  mountedSecret: {{ .Values.target.elasticsearch.mountedSecret | quote }}
   index: {{ .Values.target.elasticsearch.index | default "policy-reporter" | quote }}
   rotation: {{ .Values.target.elasticsearch.rotation | default "daily" | quote }}
   minimumPriority: {{ .Values.target.elasticsearch.minimumPriority | quote }}
@@ -55,6 +57,7 @@ slack:
   webhook: {{ .Values.target.slack.webhook | quote }}
   channel: {{ .Values.target.slack.channel | quote }}
   secretRef: {{ .Values.target.slack.secretRef | quote }}
+  mountedSecret: {{ .Values.target.slack.mountedSecret | quote }}
   minimumPriority: {{ .Values.target.slack.minimumPriority | quote }}
   skipExistingOnStartup: {{ .Values.target.slack.skipExistingOnStartup }}
   {{- with .Values.target.slack.customFields }}
@@ -77,6 +80,7 @@ slack:
 discord:
   webhook: {{ .Values.target.discord.webhook | quote }}
   secretRef: {{ .Values.target.discord.secretRef | quote }}
+  mountedSecret: {{ .Values.target.discord.mountedSecret | quote }}
   minimumPriority: {{ .Values.target.discord.minimumPriority | quote }}
   skipExistingOnStartup: {{ .Values.target.discord.skipExistingOnStartup }}
   {{- with .Values.target.discord.customFields }}
@@ -101,6 +105,7 @@ teams:
   certificate: {{ .Values.target.teams.certificate | quote }}
   skipTLS: {{ .Values.target.teams.skipTLS }}
   secretRef: {{ .Values.target.teams.secretRef | quote }}
+  mountedSecret: {{ .Values.target.teams.mountedSecret | quote }}
   minimumPriority: {{ .Values.target.teams.minimumPriority | quote }}
   skipExistingOnStartup: {{ .Values.target.teams.skipExistingOnStartup }}
   {{- with .Values.target.teams.customFields }}
@@ -125,6 +130,7 @@ webhook:
   certificate: {{ .Values.target.webhook.certificate | quote }}
   skipTLS: {{ .Values.target.webhook.skipTLS }}
   secretRef: {{ .Values.target.webhook.secretRef | quote }}
+  mountedSecret: {{ .Values.target.webhook.mountedSecret | quote }}
   minimumPriority: {{ .Values.target.webhook.minimumPriority | quote }}
   skipExistingOnStartup: {{ .Values.target.webhook.skipExistingOnStartup }}
   {{- with .Values.target.webhook.sources }}
@@ -191,6 +197,7 @@ kinesis:
   accessKeyID: {{ .Values.target.kinesis.accessKeyID }}
   secretAccessKey:  {{ .Values.target.kinesis.secretAccessKey }}
   secretRef: {{ .Values.target.kinesis.secretRef | quote }}
+  mountedSecret: {{ .Values.target.kinesis.mountedSecret | quote }}
   region: {{ .Values.target.kinesis.region }}
   endpoint: {{ .Values.target.kinesis.endpoint }}
   streamName: {{ .Values.target.kinesis.streamName }}
@@ -218,6 +225,7 @@ securityHub:
   accessKeyID: {{ .Values.target.securityHub.accessKeyID }}
   secretAccessKey:  {{ .Values.target.securityHub.secretAccessKey }}
   secretRef: {{ .Values.target.securityHub.secretRef | quote }}
+  mountedSecret: {{ .Values.target.securityHub.mountedSecret | quote }}
   region: {{ .Values.target.securityHub.region }}
   endpoint: {{ .Values.target.securityHub.endpoint }}
   streamName: {{ .Values.target.securityHub.streamName }}
@@ -243,6 +251,7 @@ securityHub:
 gcs:
   credentials: {{ .Values.target.gcs.credentials }}
   secretRef: {{ .Values.target.gcs.secretRef | quote }}
+  mountedSecret: {{ .Values.target.gcs.mountedSecret | quote }}
   bucket: {{ .Values.target.gcs.bucket }}
   prefix: {{ .Values.target.gcs.prefix }}
   minimumPriority: {{ .Values.target.gcs.minimumPriority | quote }}
