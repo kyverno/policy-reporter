@@ -1,6 +1,11 @@
 # Changelog
 
-# 2.19.0
+# 2.19.2
+* Policy Reporter
+    * Fix mapping of `mountedSecret` for all missing targets
+    * Implement retry for `secretRef` secret fetching
+
+# 2.19.1
 * Policy Reporter
     * AWS IRSA Authentication Support
     * Add `source` attribute to JSON ouput [[#311](https://github.com/kyverno/policy-reporter/pull/311) by [nikolay-o](https://github.com/nikolay-o)]
