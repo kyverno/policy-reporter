@@ -23,6 +23,12 @@ spec:
   endpoints:
   - port: http
     honorLabels: {{ .Values.serviceMonitor.honorLabels }}
+    {{- if .Values.serviceMonitor.scrapeTimeout }}
+    scrapeTimeout: {{ .Values.serviceMonitor.scrapeTimeout }}
+    {{- end }}
+    {{- if .Values.serviceMonitor.interval }}
+    interval: {{ .Values.serviceMonitor.interval }}
+    {{- end }}
     relabelings:
     - action: labeldrop
       regex: pod|service|container

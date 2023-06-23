@@ -20,7 +20,11 @@ serviceMonitor:
   metricRelabelings: []
   # optional namespaceSelector
   namespaceSelector: {}
-
+  # optional scrapeTimeout
+  scrapeTimeout:
+  # optional scrape interval
+  interval:
+  
 kyverno:
   serviceMonitor:
     # HonorLabels chooses the metrics labels on collisions with target labels
@@ -31,6 +35,10 @@ kyverno:
     metricRelabelings: []
     # optional namespaceSelector
     namespaceSelector: {}
+    # optional scrapeTimeout
+    scrapeTimeout:
+    # optional scrape interval
+    interval:
 
 grafana:
   # namespace for configMap of grafana dashboards
