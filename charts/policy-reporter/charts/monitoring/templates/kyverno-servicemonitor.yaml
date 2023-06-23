@@ -24,6 +24,12 @@ spec:
   endpoints:
   - port: rest
     honorLabels: {{ .Values.kyverno.serviceMonitor.honorLabels }}
+    {{- if .Values.kyverno.serviceMonitor.scrapeTimeout }}
+    scrapeTimeout: {{ .Values.kyverno.serviceMonitor.scrapeTimeout }}
+    {{- end }}
+    {{- if .Values.kyverno.serviceMonitor.interval }}
+    interval: {{ .Values.kyverno.serviceMonitor.interval }}
+    {{- end }}
     relabelings:
     - action: labeldrop
       regex: pod|service|container
