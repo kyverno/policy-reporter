@@ -2,6 +2,9 @@
 
 # 2.19.3
 * Helm Chart
+    * Fix ingress TLS rendering
+# 2.19.3
+* Helm Chart
     * Fix Ingress TLS block [[#317](https://github.com/kyverno/policy-reporter/pull/317) by [rufusnufus](https://github.com/rufusnufus)]
     * Make inverval and scrapeTimeout configurable on ServiceMonitors [[#318](https://github.com/kyverno/policy-reporter/pull/318) by [fhielpos](https://github.com/fhielpos)]
 
