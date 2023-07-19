@@ -67,6 +67,9 @@ ingress:
   #  - secretName: chart-example-tls
   #    hosts:
   #      - chart-example.local
+podSecurityContext:
+  runAsUser: 1234
+  runAsGroup: 1234
 
 securityContext:
   runAsUser: 1234
@@ -140,12 +143,12 @@ logging:
 api:
   logging: false # enable debug API access logging, sets logLevel to debug
 
-# create PolicyReports for enforce policies, 
+# create PolicyReports for enforce policies,
 # based on Events created by Kyverno (>= v1.7.0)
 blockReports:
   enabled: false
   eventNamespace: default
-  results: 
+  results:
     maxPerReport: 200
     keepOnlyLatest: false
 
