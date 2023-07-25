@@ -167,42 +167,42 @@ func Test_ResolveTargetWithoutHost(t *testing.T) {
 		}
 	})
 	t.Run("S3.AccessKey", func(t *testing.T) {
-		if len(factory.S3Clients(config.S3{Endpoint: "https://storage.yandexcloud.net"})) != 0 {
+		if len(factory.S3Clients(config.S3{AWSConfig: config.AWSConfig{Endpoint: "https://storage.yandexcloud.net"}})) != 0 {
 			t.Error("Expected Client to be nil if no accessKey is configured")
 		}
 	})
 	t.Run("S3.SecretAccessKey", func(t *testing.T) {
-		if len(factory.S3Clients(config.S3{Endpoint: "https://storage.yandexcloud.net", AccessKeyID: "access"})) != 0 {
+		if len(factory.S3Clients(config.S3{AWSConfig: config.AWSConfig{Endpoint: "https://storage.yandexcloud.net", AccessKeyID: "access"}})) != 0 {
 			t.Error("Expected Client to be nil if no secretAccessKey is configured")
 		}
 	})
 	t.Run("S3.Region", func(t *testing.T) {
-		if len(factory.S3Clients(config.S3{Endpoint: "https://storage.yandexcloud.net", AccessKeyID: "access", SecretAccessKey: "secret"})) != 0 {
+		if len(factory.S3Clients(config.S3{AWSConfig: config.AWSConfig{Endpoint: "https://storage.yandexcloud.net", AccessKeyID: "access", SecretAccessKey: "secret"}})) != 0 {
 			t.Error("Expected Client to be nil if no region is configured")
 		}
 	})
 	t.Run("S3.Bucket", func(t *testing.T) {
-		if len(factory.S3Clients(config.S3{Endpoint: "https://storage.yandexcloud.net", AccessKeyID: "access", SecretAccessKey: "secret", Region: "ru-central1"})) != 0 {
+		if len(factory.S3Clients(config.S3{AWSConfig: config.AWSConfig{Endpoint: "https://storage.yandexcloud.net", AccessKeyID: "access", SecretAccessKey: "secret", Region: "ru-central1"}})) != 0 {
 			t.Error("Expected Client to be nil if no bucket is configured")
 		}
 	})
 	t.Run("S3.SSE-S3", func(t *testing.T) {
-		if len(factory.S3Clients(config.S3{Endpoint: "https://storage.yandexcloud.net", AccessKeyID: "access", SecretAccessKey: "secret", Region: "ru-central1", ServerSideEncryption: "AES256"})) != 0 {
+		if len(factory.S3Clients(config.S3{AWSConfig: config.AWSConfig{Endpoint: "https://storage.yandexcloud.net", AccessKeyID: "access", SecretAccessKey: "secret", Region: "ru-central1"}, ServerSideEncryption: "AES256"})) != 0 {
 			t.Error("Expected Client to be nil if server side encryption is not configured")
 		}
 	})
 	t.Run("S3.SSE-KMS", func(t *testing.T) {
-		if len(factory.S3Clients(config.S3{Endpoint: "https://storage.yandexcloud.net", AccessKeyID: "access", SecretAccessKey: "secret", Region: "ru-central1", ServerSideEncryption: "aws:kms"})) != 0 {
+		if len(factory.S3Clients(config.S3{AWSConfig: config.AWSConfig{Endpoint: "https://storage.yandexcloud.net", AccessKeyID: "access", SecretAccessKey: "secret", Region: "ru-central1"}, ServerSideEncryption: "aws:kms"})) != 0 {
 			t.Error("Expected Client to be nil if server side encryption is not configured")
 		}
 	})
 	t.Run("S3.SSE-KMS-S3-KEY", func(t *testing.T) {
-		if len(factory.S3Clients(config.S3{Endpoint: "https://storage.yandexcloud.net", AccessKeyID: "access", SecretAccessKey: "secret", Region: "ru-central1", BucketKeyEnabled: true, ServerSideEncryption: "aws:kms"})) != 0 {
+		if len(factory.S3Clients(config.S3{AWSConfig: config.AWSConfig{Endpoint: "https://storage.yandexcloud.net", AccessKeyID: "access", SecretAccessKey: "secret", Region: "ru-central1"}, BucketKeyEnabled: true, ServerSideEncryption: "aws:kms"})) != 0 {
 			t.Error("Expected Client to be nil if server side encryption is not configured")
 		}
 	})
 	t.Run("S3.SSE-KMS-KEY-ID", func(t *testing.T) {
-		if len(factory.S3Clients(config.S3{Endpoint: "https://storage.yandexcloud.net", AccessKeyID: "access", SecretAccessKey: "secret", Region: "ru-central1", ServerSideEncryption: "aws:kms", KmsKeyID: "kmsKeyId"})) != 0 {
+		if len(factory.S3Clients(config.S3{AWSConfig: config.AWSConfig{Endpoint: "https://storage.yandexcloud.net", AccessKeyID: "access", SecretAccessKey: "secret", Region: "ru-central1"}, ServerSideEncryption: "aws:kms", KmsKeyID: "kmsKeyId"})) != 0 {
 			t.Error("Expected Client to be nil if server side encryption is not configured")
 		}
 	})
@@ -212,22 +212,22 @@ func Test_ResolveTargetWithoutHost(t *testing.T) {
 		}
 	})
 	t.Run("Kinesis.AccessKey", func(t *testing.T) {
-		if len(factory.KinesisClients(config.Kinesis{Endpoint: "https://yds.serverless.yandexcloud.net"})) != 0 {
+		if len(factory.KinesisClients(config.Kinesis{AWSConfig: config.AWSConfig{Endpoint: "https://yds.serverless.yandexcloud.net"}})) != 0 {
 			t.Error("Expected Client to be nil if no accessKey is configured")
 		}
 	})
 	t.Run("Kinesis.SecretAccessKey", func(t *testing.T) {
-		if len(factory.KinesisClients(config.Kinesis{Endpoint: "https://yds.serverless.yandexcloud.net", AccessKeyID: "access"})) != 0 {
+		if len(factory.KinesisClients(config.Kinesis{AWSConfig: config.AWSConfig{Endpoint: "https://yds.serverless.yandexcloud.net", AccessKeyID: "access"}})) != 0 {
 			t.Error("Expected Client to be nil if no secretAccessKey is configured")
 		}
 	})
 	t.Run("Kinesis.Region", func(t *testing.T) {
-		if len(factory.KinesisClients(config.Kinesis{Endpoint: "https://yds.serverless.yandexcloud.net", AccessKeyID: "access", SecretAccessKey: "secret"})) != 0 {
+		if len(factory.KinesisClients(config.Kinesis{AWSConfig: config.AWSConfig{Endpoint: "https://yds.serverless.yandexcloud.net", AccessKeyID: "access", SecretAccessKey: "secret"}})) != 0 {
 			t.Error("Expected Client to be nil if no region is configured")
 		}
 	})
 	t.Run("Kinesis.StreamName", func(t *testing.T) {
-		if len(factory.KinesisClients(config.Kinesis{Endpoint: "https://yds.serverless.yandexcloud.net", AccessKeyID: "access", SecretAccessKey: "secret", Region: "ru-central1"})) != 0 {
+		if len(factory.KinesisClients(config.Kinesis{AWSConfig: config.AWSConfig{Endpoint: "https://yds.serverless.yandexcloud.net", AccessKeyID: "access", SecretAccessKey: "secret", Region: "ru-central1"}})) != 0 {
 			t.Error("Expected Client to be nil if no stream name is configured")
 		}
 	})
@@ -242,12 +242,12 @@ func Test_ResolveTargetWithoutHost(t *testing.T) {
 		}
 	})
 	t.Run("SecurityHub.SecretAccessKey", func(t *testing.T) {
-		if len(factory.SecurityHubs(config.SecurityHub{AccountID: "accountID", AccessKeyID: "access"})) != 0 {
+		if len(factory.SecurityHubs(config.SecurityHub{AccountID: "accountID", AWSConfig: config.AWSConfig{AccessKeyID: "access"}})) != 0 {
 			t.Error("Expected Client to be nil if no secretAccessKey is configured")
 		}
 	})
 	t.Run("SecurityHub.Region", func(t *testing.T) {
-		if len(factory.SecurityHubs(config.SecurityHub{AccountID: "accountID", AccessKeyID: "access", SecretAccessKey: "secret"})) != 0 {
+		if len(factory.SecurityHubs(config.SecurityHub{AccountID: "accountID", AWSConfig: config.AWSConfig{AccessKeyID: "access", SecretAccessKey: "secret"}})) != 0 {
 			t.Error("Expected Client to be nil if no region is configured")
 		}
 	})
@@ -359,21 +359,21 @@ func Test_GetValuesFromSecret(t *testing.T) {
 	})
 
 	t.Run("Get S3 values from Secret", func(t *testing.T) {
-		clients := factory.S3Clients(config.S3{TargetBaseOptions: config.TargetBaseOptions{SecretRef: secretName}, Endpoint: "endoint", Bucket: "bucket", Region: "region"})
+		clients := factory.S3Clients(config.S3{TargetBaseOptions: config.TargetBaseOptions{SecretRef: secretName}, AWSConfig: config.AWSConfig{Endpoint: "endoint", Region: "region"}, Bucket: "bucket"})
 		if len(clients) != 1 {
 			t.Error("Expected one client created")
 		}
 	})
 
 	t.Run("Get S3 values from Secret with KMS", func(t *testing.T) {
-		clients := factory.S3Clients(config.S3{TargetBaseOptions: config.TargetBaseOptions{SecretRef: secretName}, Endpoint: "endoint", Bucket: "bucket", Region: "region", BucketKeyEnabled: true, ServerSideEncryption: "aws:kms"})
+		clients := factory.S3Clients(config.S3{TargetBaseOptions: config.TargetBaseOptions{SecretRef: secretName}, AWSConfig: config.AWSConfig{Endpoint: "endoint", Region: "region"}, Bucket: "bucket", BucketKeyEnabled: true, ServerSideEncryption: "aws:kms"})
 		if len(clients) != 1 {
 			t.Error("Expected one client created")
 		}
 	})
 
 	t.Run("Get Kinesis values from Secret", func(t *testing.T) {
-		clients := factory.KinesisClients(config.Kinesis{TargetBaseOptions: config.TargetBaseOptions{SecretRef: secretName}, Endpoint: "endpoint", StreamName: "stream", Region: "region"})
+		clients := factory.KinesisClients(config.Kinesis{TargetBaseOptions: config.TargetBaseOptions{SecretRef: secretName}, AWSConfig: config.AWSConfig{Endpoint: "endpoint", Region: "region"}, StreamName: "stream"})
 		if len(clients) != 1 {
 			t.Error("Expected one client created")
 		}
@@ -613,21 +613,21 @@ func Test_GetValuesFromMountedSecret(t *testing.T) {
 	})
 
 	t.Run("Get S3 values from MountedSecret", func(t *testing.T) {
-		clients := factory.S3Clients(config.S3{TargetBaseOptions: config.TargetBaseOptions{MountedSecret: mountedSecret}, Endpoint: "endpoint", Bucket: "bucket", Region: "region"})
+		clients := factory.S3Clients(config.S3{TargetBaseOptions: config.TargetBaseOptions{MountedSecret: mountedSecret}, AWSConfig: config.AWSConfig{Endpoint: "endpoint", Region: "region"}, Bucket: "bucket"})
 		if len(clients) != 1 {
 			t.Error("Expected one client created")
 		}
 	})
 
 	t.Run("Get S3 values from MountedSecret with KMS", func(t *testing.T) {
-		clients := factory.S3Clients(config.S3{TargetBaseOptions: config.TargetBaseOptions{MountedSecret: mountedSecret}, Endpoint: "endpoint", Bucket: "bucket", Region: "region", BucketKeyEnabled: true, ServerSideEncryption: "aws:kms"})
+		clients := factory.S3Clients(config.S3{TargetBaseOptions: config.TargetBaseOptions{MountedSecret: mountedSecret}, AWSConfig: config.AWSConfig{Endpoint: "endpoint", Region: "region"}, Bucket: "bucket", BucketKeyEnabled: true, ServerSideEncryption: "aws:kms"})
 		if len(clients) != 1 {
 			t.Error("Expected one client created")
 		}
 	})
 
 	t.Run("Get Kinesis values from MountedSecret", func(t *testing.T) {
-		clients := factory.KinesisClients(config.Kinesis{TargetBaseOptions: config.TargetBaseOptions{MountedSecret: mountedSecret}, Endpoint: "endpoint", StreamName: "stream", Region: "region"})
+		clients := factory.KinesisClients(config.Kinesis{TargetBaseOptions: config.TargetBaseOptions{MountedSecret: mountedSecret}, AWSConfig: config.AWSConfig{Endpoint: "endpoint", Region: "region"}, StreamName: "stream"})
 		if len(clients) != 1 {
 			t.Error("Expected one client created")
 		}

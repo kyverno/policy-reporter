@@ -589,24 +589,21 @@ func (f *TargetFactory) createS3Client(config S3, parent S3) target.Client {
 
 	sugar := zap.S()
 
-	if config.AccessKeyID == "" && parent.AccessKeyID == "" {
-		sugar.Errorf("%s.AccessKeyID has not been declared", config.Name)
+	if err := checkAWSConfig(config.Name, config.AWSConfig, parent.AWSConfig); err != nil {
+		sugar.Error(err)
+
 		return nil
-	} else if config.AccessKeyID == "" {
+	}
+
+	if config.AccessKeyID == "" {
 		config.AccessKeyID = parent.AccessKeyID
 	}
 
-	if config.SecretAccessKey == "" && parent.SecretAccessKey == "" {
-		sugar.Errorf("%s.SecretAccessKey has not been declared", config.Name)
-		return nil
-	} else if config.SecretAccessKey == "" {
+	if config.SecretAccessKey == "" {
 		config.SecretAccessKey = parent.SecretAccessKey
 	}
 
-	if config.Region == "" && parent.Region == "" {
-		sugar.Errorf("%s.Region has not been declared", config.Name)
-		return nil
-	} else if config.Region == "" {
+	if config.Region == "" {
 		config.Region = parent.Region
 	}
 
@@ -680,25 +677,21 @@ func (f *TargetFactory) createKinesisClient(config Kinesis, parent Kinesis) targ
 	}
 
 	sugar := zap.S()
+	if err := checkAWSConfig(config.Name, config.AWSConfig, parent.AWSConfig); err != nil {
+		sugar.Error(err)
 
-	if config.AccessKeyID == "" && parent.AccessKeyID == "" {
-		sugar.Errorf("%s.AccessKeyID has not been declared", config.Name)
 		return nil
-	} else if config.AccessKeyID == "" {
+	}
+
+	if config.AccessKeyID == "" {
 		config.AccessKeyID = parent.AccessKeyID
 	}
 
-	if config.SecretAccessKey == "" && parent.SecretAccessKey == "" {
-		sugar.Errorf("%s.SecretAccessKey has not been declared", config.Name)
-		return nil
-	} else if config.SecretAccessKey == "" {
+	if config.SecretAccessKey == "" {
 		config.SecretAccessKey = parent.SecretAccessKey
 	}
 
-	if config.Region == "" && parent.Region == "" {
-		sugar.Errorf("%s.Region has not been declared", config.Name)
-		return nil
-	} else if config.Region == "" {
+	if config.Region == "" {
 		config.Region = parent.Region
 	}
 
@@ -751,25 +744,21 @@ func (f *TargetFactory) createSecurityHub(config SecurityHub, parent SecurityHub
 	}
 
 	sugar := zap.S()
+	if err := checkAWSConfig(config.Name, config.AWSConfig, parent.AWSConfig); err != nil {
+		sugar.Error(err)
 
-	if config.AccessKeyID == "" && parent.AccessKeyID == "" {
-		sugar.Errorf("%s.AccessKeyID has not been declared", config.Name)
 		return nil
-	} else if config.AccessKeyID == "" {
+	}
+
+	if config.AccessKeyID == "" {
 		config.AccessKeyID = parent.AccessKeyID
 	}
 
-	if config.SecretAccessKey == "" && parent.SecretAccessKey == "" {
-		sugar.Errorf("%s.SecretAccessKey has not been declared", config.Name)
-		return nil
-	} else if config.SecretAccessKey == "" {
+	if config.SecretAccessKey == "" {
 		config.SecretAccessKey = parent.SecretAccessKey
 	}
 
-	if config.Region == "" && parent.Region == "" {
-		sugar.Errorf("%s.Region has not been declared", config.Name)
-		return nil
-	} else if config.Region == "" {
+	if config.Region == "" {
 		config.Region = parent.Region
 	}
 
@@ -991,4 +980,25 @@ func createReportFilter(filter TargetFilter) *report.ReportFilter {
 
 func NewTargetFactory(secretClient secrets.Client) *TargetFactory {
 	return &TargetFactory{secretClient: secretClient}
+}
+
+func checkAWSConfig(name string, config AWSConfig, parent AWSConfig) error {
+	arn := os.Getenv("AWS_ROLE_ARN")
+	file := os.Getenv("AWS_WEB_IDENTITY_TOKEN_FILE")
+
+	noEnvConfig := arn == "" && file == ""
+
+	if noEnvConfig && (config.AccessKeyID == "" && parent.AccessKeyID == "") {
+		return fmt.Errorf("%s.AccessKeyID has not been declared", name)
+	}
+
+	if noEnvConfig && (config.SecretAccessKey == "" && parent.SecretAccessKey == "") {
+		return fmt.Errorf("%s.SecretAccessKey has not been declared", name)
+	}
+
+	if config.Region == "" && parent.Region == "" {
+		return fmt.Errorf("%s.Region has not been declared", name)
+	}
+
+	return nil
 }

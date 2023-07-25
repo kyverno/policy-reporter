@@ -103,13 +103,17 @@ type Webhook struct {
 	Channels          []Webhook         `mapstructure:"channels"`
 }
 
+type AWSConfig struct {
+	AccessKeyID     string `mapstructure:"accessKeyID"`
+	SecretAccessKey string `mapstructure:"secretAccessKey"`
+	Region          string `mapstructure:"region"`
+	Endpoint        string `mapstructure:"endpoint"`
+}
+
 // S3 configuration
 type S3 struct {
 	TargetBaseOptions    `mapstructure:",squash"`
-	AccessKeyID          string `mapstructure:"accessKeyID"`
-	SecretAccessKey      string `mapstructure:"secretAccessKey"`
-	Region               string `mapstructure:"region"`
-	Endpoint             string `mapstructure:"endpoint"`
+	AWSConfig            `mapstructure:",squash"`
 	Prefix               string `mapstructure:"prefix"`
 	Bucket               string `mapstructure:"bucket"`
 	BucketKeyEnabled     bool   `mapstructure:"bucketKeyEnabled"`
@@ -122,10 +126,7 @@ type S3 struct {
 // Kinesis configuration
 type Kinesis struct {
 	TargetBaseOptions `mapstructure:",squash"`
-	AccessKeyID       string    `mapstructure:"accessKeyID"`
-	SecretAccessKey   string    `mapstructure:"secretAccessKey"`
-	Region            string    `mapstructure:"region"`
-	Endpoint          string    `mapstructure:"endpoint"`
+	AWSConfig         `mapstructure:",squash"`
 	StreamName        string    `mapstructure:"streamName"`
 	Channels          []Kinesis `mapstructure:"channels"`
 }
@@ -133,11 +134,8 @@ type Kinesis struct {
 // SecurityHub configuration
 type SecurityHub struct {
 	TargetBaseOptions `mapstructure:",squash"`
+	AWSConfig         `mapstructure:",squash"`
 	AccountID         string        `mapstructure:"accountId"`
-	AccessKeyID       string        `mapstructure:"accessKeyID"`
-	SecretAccessKey   string        `mapstructure:"secretAccessKey"`
-	Region            string        `mapstructure:"region"`
-	Endpoint          string        `mapstructure:"endpoint"`
 	Channels          []SecurityHub `mapstructure:"channels"`
 }
 
