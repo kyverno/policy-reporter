@@ -18,6 +18,8 @@ import (
 	"go.uber.org/zap"
 )
 
+var enable = true
+
 type AWSClient interface {
 	// Upload given Data the configured AWS storage
 	Upload(body *bytes.Buffer, key string) error
@@ -147,26 +149,32 @@ func createConfig(accessKeyID, secretAccessKey, region, endpoint string) *aws.Co
 
 	sess := session.Must(session.NewSession(baseConfig))
 
+	var provider credentials.Provider
+
+	if accessKeyID != "" && secretAccessKey != "" {
+		provider = &credentials.StaticProvider{
+			Value: credentials.Value{
+				AccessKeyID:     accessKeyID,
+				SecretAccessKey: secretAccessKey,
+			},
+		}
+	} else if os.Getenv("AWS_ROLE_ARN") != "" && os.Getenv("AWS_WEB_IDENTITY_TOKEN_FILE") != "" {
+		provider = stscreds.NewWebIdentityRoleProvider(
+			sts.New(sess),
+			os.Getenv("AWS_ROLE_ARN"),
+			"",
+			os.Getenv("AWS_WEB_IDENTITY_TOKEN_FILE"),
+		)
+	} else {
+		provider = &ec2rolecreds.EC2RoleProvider{
+			Client: ec2metadata.New(sess),
+		}
+	}
+
 	return &aws.Config{
-		Region:   baseConfig.Region,
-		Endpoint: baseConfig.Endpoint,
-		Credentials: credentials.NewChainCredentials([]credentials.Provider{
-			&credentials.StaticProvider{
-				Value: credentials.Value{
-					AccessKeyID:     accessKeyID,
-					SecretAccessKey: secretAccessKey,
-				},
-			},
-			&credentials.EnvProvider{},
-			stscreds.NewWebIdentityRoleProvider(
-				sts.New(sess),
-				os.Getenv("AWS_ROLE_ARN"),
-				"",
-				os.Getenv("AWS_WEB_IDENTITY_TOKEN_FILE"),
-			),
-			&ec2rolecreds.EC2RoleProvider{
-				Client: ec2metadata.New(sess),
-			},
-		}),
+		Region:                        baseConfig.Region,
+		Endpoint:                      baseConfig.Endpoint,
+		CredentialsChainVerboseErrors: aws.Bool(true),
+		Credentials:                   credentials.NewCredentials(provider),
 	}
 }
