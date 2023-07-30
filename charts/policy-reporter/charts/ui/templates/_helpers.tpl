@@ -36,7 +36,7 @@ app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
 {{- end }}
 app.kubernetes.io/component: ui
 app.kubernetes.io/managed-by: {{ .Release.Service }}
-app.kubernetes.io/part-of: {{ include "policyreporter.name" . }}
+app.kubernetes.io/part-of: policy-reporter
 {{- with .Values.global.labels }}
 {{ toYaml . }}
 {{- end -}}
@@ -59,7 +59,7 @@ Pod labels
 {{- define "ui.podLabels" -}}
 helm.sh/chart: {{ include "ui.chart" . }}
 app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
-app.kubernetes.io/part-of: {{ include "policyreporter.name" . }}
+app.kubernetes.io/part-of: policy-reporter
 {{- end }}
 
 {{/*

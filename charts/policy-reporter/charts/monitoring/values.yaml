@@ -118,3 +118,16 @@ policyReportOverview:
     height: 10
   failingClusterPolicyRuleTable:
     height: 10
+
+# Should be set in the parent chart only
+global:
+  # available plugins
+  plugins:
+    # enable kyverno for Policy Reporter UI and monitoring
+    kyverno: false
+  # overwrite the fullname of all resources including subcharts
+  fullnameOverride: ""
+  # configure the namespace of all resources including subcharts
+  namespace: ""
+  # additional labels added on each resource
+  labels: {}
