@@ -1,6 +1,6 @@
 # Changelog
 
-# 2.19.3
+# 2.19.4
 * Helm Chart
     * Fix ingress TLS rendering
 # 2.19.3
