@@ -179,6 +179,7 @@ type EmailReports struct {
 	Summary     EmailReport    `mapstructure:"summary"`
 	Violations  EmailReport    `mapstructure:"violations"`
 	ClusterName string         `mapstructure:"clusterName"`
+	TitlePrefix string         `mapstructure:"titlePrefix"`
 }
 
 // API configuration

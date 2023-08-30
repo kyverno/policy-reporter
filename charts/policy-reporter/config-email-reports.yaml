@@ -1,5 +1,6 @@
 emailReports:
   clusterName: {{ .Values.emailReports.clusterName }}
+  titlePrefix: {{ .Values.emailReports.titlePrefix }}
   {{- with .Values.emailReports.smtp }}
   smtp:
     {{- toYaml . | nindent 4 }}

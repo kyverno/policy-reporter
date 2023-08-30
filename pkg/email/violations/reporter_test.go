@@ -38,7 +38,7 @@ func Test_CreateReport(t *testing.T) {
 
 	fmt.Println(path)
 
-	reporter := violations.NewReporter("../../../templates", "Cluster")
+	reporter := violations.NewReporter("../../../templates", "Cluster", "Report")
 	report, err := reporter.Report(data, "html")
 	if err != nil {
 		t.Fatalf("unexpected error: %s", err)
@@ -49,6 +49,9 @@ func Test_CreateReport(t *testing.T) {
 	}
 	if report.ClusterName != "Cluster" {
 		t.Fatal("expected clustername to be set")
+	}
+	if report.TitlePrefix != "Report" {
+		t.Fatal("expected titleprefix to be")
 	}
 	if report.Format != "html" {
 		t.Fatal("expected format to be set")
