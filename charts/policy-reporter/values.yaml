@@ -211,6 +211,7 @@ policyPriorities: {}
 
 emailReports:
   clusterName: "" # (optional) - displayed in the email report if configured
+  titlePrefix: "Report" # title prefix in the email subject
   smtp:
     secret: "" # (optional) secret name to provide the complete or partial SMTP configuration
     host: ""

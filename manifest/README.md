@@ -202,6 +202,7 @@ To configure your SMTP server and receiver emails use the following configuratio
 ```yaml
 emailReports:
   clusterName: '' # optional clustername shown in the Report
+  titlePrefix: 'Report' # title prefix in the email subject
   smtp:
     host: ''
     port: 465

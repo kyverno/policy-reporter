@@ -11,6 +11,7 @@ import (
 type Reporter struct {
 	templateDir string
 	clusterName string
+	titlePrefix string
 }
 
 func (o *Reporter) Report(sources []Source, format string) (email.Report, error) {
@@ -24,19 +25,20 @@ func (o *Reporter) Report(sources []Source, format string) (email.Report, error)
 	err = templ.Execute(b, struct {
 		Sources     []Source
 		ClusterName string
-	}{Sources: sources, ClusterName: o.clusterName})
+		TitlePrefix string
+	}{Sources: sources, ClusterName: o.clusterName, TitlePrefix: o.titlePrefix})
 	if err != nil {
 		return email.Report{}, err
 	}
 
 	return email.Report{
 		ClusterName: o.clusterName,
-		Title:       "Summary Report from " + time.Now().Format("2006-01-02"),
+		Title:       o.titlePrefix + " (summary) on " + o.clusterName + " from " + time.Now().Format("2006-01-02"),
 		Message:     b.String(),
 		Format:      format,
 	}, nil
 }
 
-func NewReporter(templateDir, clusterName string) *Reporter {
-	return &Reporter{templateDir, clusterName}
+func NewReporter(templateDir, clusterName string, titlePrefix string) *Reporter {
+	return &Reporter{templateDir, clusterName, titlePrefix}
 }
