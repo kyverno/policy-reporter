@@ -26,14 +26,23 @@ func (o *Reporter) Report(sources []Source, format string) (email.Report, error)
 		Sources     []Source
 		ClusterName string
 		TitlePrefix string
-	}{Sources: sources, ClusterName: o.clusterName, TitlePrefix: o.titlePrefix})
+	}{
+		Sources:     sources,
+		ClusterName: o.clusterName,
+		TitlePrefix: o.titlePrefix,
+	})
 	if err != nil {
 		return email.Report{}, err
 	}
 
+	titleCluster := " "
+	if o.clusterName != "" {
+		titleCluster = " on " + o.clusterName + " "
+	}
+
 	return email.Report{
 		ClusterName: o.clusterName,
-		Title:       o.titlePrefix + " (summary) on " + o.clusterName + " from " + time.Now().Format("2006-01-02"),
+		Title:       o.titlePrefix + " (summary)" + titleCluster + "from " + time.Now().Format("2006-01-02"),
 		Message:     b.String(),
 		Format:      format,
 	}, nil
