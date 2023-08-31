@@ -9,7 +9,6 @@ type Report struct {
 	Message     string
 	Format      string
 	ClusterName string
-	TitlePrefix string
 }
 
 type Reporter interface {
