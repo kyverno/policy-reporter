@@ -150,6 +150,33 @@ webhook:
     {{- toYaml . | nindent 4 }}
   {{- end }}
 
+telegram:
+  token: {{ .Values.target.telegram.token | quote }}
+  chatID: {{ .Values.target.telegram.chatID | quote }}
+  host: {{ .Values.target.telegram.host | quote }}
+  certificate: {{ .Values.target.telegram.certificate | quote }}
+  skipTLS: {{ .Values.target.telegram.skipTLS }}
+  secretRef: {{ .Values.target.telegram.secretRef | quote }}
+  mountedSecret: {{ .Values.target.telegram.mountedSecret | quote }}
+  minimumPriority: {{ .Values.target.telegram.minimumPriority | quote }}
+  skipExistingOnStartup: {{ .Values.target.telegram.skipExistingOnStartup }}
+  {{- with .Values.target.telegram.sources }}
+  sources:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  {{- with .Values.target.telegram.customFields }}
+  customFields:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  {{- with .Values.target.telegram.filter }}
+  filter:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  {{- with .Values.target.telegram.channels }}
+  channels:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+
 ui:
   host: {{ include "policyreporter.uihost" . }}
   certificate: {{ .Values.target.ui.certificate | quote }}

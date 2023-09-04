@@ -102,6 +102,12 @@ func Test_ResolveTarget(t *testing.T) {
 			t.Errorf("Expected 2 Client, got %d clients", len(clients))
 		}
 	})
+	t.Run("Telegram", func(t *testing.T) {
+		clients := factory.TelegramClients(testConfig.Telegram)
+		if len(clients) != 2 {
+			t.Errorf("Expected 2 Client, got %d clients", len(clients))
+		}
+	})
 	t.Run("S3", func(t *testing.T) {
 		clients := factory.S3Clients(testConfig.S3)
 		if len(clients) != 2 {
@@ -159,6 +165,11 @@ func Test_ResolveTargetWithoutHost(t *testing.T) {
 	t.Run("Webhook", func(t *testing.T) {
 		if len(factory.WebhookClients(config.Webhook{})) != 0 {
 			t.Error("Expected Client to be nil if no host is configured")
+		}
+	})
+	t.Run("Telegram", func(t *testing.T) {
+		if len(factory.TelegramClients(config.Telegram{})) != 0 {
+			t.Error("Expected Client to be nil if no chatID is configured")
 		}
 	})
 	t.Run("S3.Endoint", func(t *testing.T) {
@@ -358,6 +369,20 @@ func Test_GetValuesFromSecret(t *testing.T) {
 		}
 	})
 
+	t.Run("Get Telegram Token from Secret", func(t *testing.T) {
+		clients := factory.TelegramClients(config.Telegram{TargetBaseOptions: config.TargetBaseOptions{SecretRef: secretName}, ChatID: "1234"})
+		if len(clients) != 1 {
+			t.Error("Expected one client created")
+		}
+
+		client := reflect.ValueOf(clients[0]).Elem()
+
+		host := client.FieldByName("host").String()
+		if host != "http://localhost:9200/bottoken/sendMessage" {
+			t.Errorf("Expected host with token from secret, got %s", host)
+		}
+	})
+
 	t.Run("Get S3 values from Secret", func(t *testing.T) {
 		clients := factory.S3Clients(config.S3{TargetBaseOptions: config.TargetBaseOptions{SecretRef: secretName}, AWSConfig: config.AWSConfig{Endpoint: "endoint", Region: "region"}, Bucket: "bucket"})
 		if len(clients) != 1 {
@@ -447,6 +472,19 @@ func Test_GetValuesFromSecret(t *testing.T) {
 	})
 	t.Run("Get CustomFields from Webhook", func(t *testing.T) {
 		clients := factory.WebhookClients(config.Webhook{TargetBaseOptions: config.TargetBaseOptions{CustomFields: map[string]string{"field": "value"}}, Host: "http://localhost"})
+		if len(clients) != 1 {
+			t.Error("Expected one client created")
+		}
+
+		client := reflect.ValueOf(clients[0]).Elem()
+
+		customFields := client.FieldByName("customFields").MapKeys()
+		if customFields[0].String() != "field" {
+			t.Errorf("Expected customFields are added")
+		}
+	})
+	t.Run("Get CustomFields from Telegram", func(t *testing.T) {
+		clients := factory.TelegramClients(config.Telegram{TargetBaseOptions: config.TargetBaseOptions{CustomFields: map[string]string{"field": "value"}}, Token: "XXX", ChatID: "1234"})
 		if len(clients) != 1 {
 			t.Error("Expected one client created")
 		}
@@ -608,6 +646,20 @@ func Test_GetValuesFromMountedSecret(t *testing.T) {
 
 		token := client.FieldByName("headers").MapIndex(reflect.ValueOf("Authorization")).String()
 		if token != "token" {
+			t.Errorf("Expected token from mounted secret, got %s", token)
+		}
+	})
+
+	t.Run("Get Telegram Token from MountedSecret", func(t *testing.T) {
+		clients := factory.TelegramClients(config.Telegram{TargetBaseOptions: config.TargetBaseOptions{MountedSecret: mountedSecret}, ChatID: "123"})
+		if len(clients) != 1 {
+			t.Error("Expected one client created")
+		}
+
+		client := reflect.ValueOf(clients[0]).Elem()
+
+		token := client.FieldByName("host").String()
+		if token != "http://localhost:9200/bottoken/sendMessage" {
 			t.Errorf("Expected token from mounted secret, got %s", token)
 		}
 	})

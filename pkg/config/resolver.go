@@ -279,6 +279,7 @@ func (r *Resolver) TargetClients() []target.Client {
 	clients = append(clients, factory.SecurityHubs(r.config.SecurityHub)...)
 	clients = append(clients, factory.WebhookClients(r.config.Webhook)...)
 	clients = append(clients, factory.GCSClients(r.config.GCS)...)
+	clients = append(clients, factory.TelegramClients(r.config.Telegram)...)
 
 	if ui := factory.UIClient(r.config.UI); ui != nil {
 		clients = append(clients, ui)
