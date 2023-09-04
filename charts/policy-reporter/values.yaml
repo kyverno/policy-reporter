@@ -483,6 +483,37 @@ target:
     # add additional webhook channels with different configurations and filters
     channels: []
 
+  telegram:
+    # telegram bot token
+    token: ""
+    # telegram chat id
+    chatID: ""
+    # optional telegram proxy host
+    host: ""
+    # path to your custom certificate
+    # can be added under extraVolumes
+    certificate: ""
+    # skip TLS verification if necessary
+    skipTLS: false
+    # receive the host and/or token from an existing secret, the token is added as Authorization header
+    secretRef: ""
+    # Mounted secret path by Secrets Controller, secret should be in json format
+    mountedSecret: ""
+    # additional http headers
+    headers: {}
+    # minimum priority "" < info < warning < critical < error
+    minimumPriority: ""
+    # list of sources which should send to telegram
+    sources: []
+    # Skip already existing PolicyReportResults on startup
+    skipExistingOnStartup: true
+    # Added as additional properties to each notification
+    customFields: {}
+    # filter results send by namespaces, policies and priorities
+    filter: {}
+    # add additional telegram channels with different configurations and filters
+    channels: []
+
   s3:
     # S3 access key
     accessKeyID: ""

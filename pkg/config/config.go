@@ -103,6 +103,18 @@ type Webhook struct {
 	Channels          []Webhook         `mapstructure:"channels"`
 }
 
+// Telegram configuration
+type Telegram struct {
+	TargetBaseOptions `mapstructure:",squash"`
+	Host              string            `mapstructure:"host"`
+	Token             string            `mapstructure:"token"`
+	ChatID            string            `mapstructure:"chatID"`
+	SkipTLS           bool              `mapstructure:"skipTLS"`
+	Certificate       string            `mapstructure:"certificate"`
+	Headers           map[string]string `mapstructure:"headers"`
+	Channels          []Telegram        `mapstructure:"channels"`
+}
+
 type AWSConfig struct {
 	AccessKeyID     string `mapstructure:"accessKeyID"`
 	SecretAccessKey string `mapstructure:"secretAccessKey"`
@@ -282,6 +294,7 @@ type Config struct {
 	GCS            GCS            `mapstructure:"gcs"`
 	UI             UI             `mapstructure:"ui"`
 	Webhook        Webhook        `mapstructure:"webhook"`
+	Telegram       Telegram       `mapstructure:"telegram"`
 	API            API            `mapstructure:"api"`
 	WorkerCount    int            `mapstructure:"worker"`
 	DBFile         string         `mapstructure:"dbfile"`

@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"strings"
 
 	_ "github.com/mattn/go-sqlite3"
 	"go.uber.org/zap"
@@ -23,6 +24,7 @@ import (
 	"github.com/kyverno/policy-reporter/pkg/target/securityhub"
 	"github.com/kyverno/policy-reporter/pkg/target/slack"
 	"github.com/kyverno/policy-reporter/pkg/target/teams"
+	"github.com/kyverno/policy-reporter/pkg/target/telegram"
 	"github.com/kyverno/policy-reporter/pkg/target/ui"
 	"github.com/kyverno/policy-reporter/pkg/target/webhook"
 )
@@ -277,6 +279,29 @@ func (f *TargetFactory) GCSClients(config GCS) []target.Client {
 		}
 
 		if es := f.createGCSClient(channel, config); es != nil {
+			clients = append(clients, es)
+		}
+	}
+
+	return clients
+}
+
+// TelegramClients resolver method
+func (f *TargetFactory) TelegramClients(config Telegram) []target.Client {
+	clients := make([]target.Client, 0)
+	if config.Name == "" {
+		config.Name = "Telegram"
+	}
+
+	if es := f.createTelegramClient(config, Telegram{}); es != nil {
+		clients = append(clients, es)
+	}
+	for i, channel := range config.Channels {
+		if channel.Name == "" {
+			channel.Name = fmt.Sprintf("Webhook Channel %d", i+1)
+		}
+
+		if es := f.createTelegramClient(channel, config); es != nil {
 			clients = append(clients, es)
 		}
 	}
@@ -570,6 +595,73 @@ func (f *TargetFactory) createWebhookClient(config Webhook, parent Webhook) targ
 			ReportFilter:          createReportFilter(config.Filter),
 		},
 		Host:         config.Host,
+		Headers:      config.Headers,
+		CustomFields: config.CustomFields,
+		HTTPClient:   http.NewClient(config.Certificate, config.SkipTLS),
+	})
+}
+
+func (f *TargetFactory) createTelegramClient(config Telegram, parent Telegram) target.Client {
+	if (config.SecretRef != "" && f.secretClient != nil) || config.MountedSecret != "" {
+		f.mapSecretValues(&config, config.SecretRef, config.MountedSecret)
+	}
+
+	if config.Token == "" {
+		config.Token = parent.Token
+	}
+
+	if config.ChatID == "" || config.Token == "" {
+		return nil
+	}
+
+	if config.Host == "" {
+		config.Host = parent.Host
+	}
+
+	if config.Certificate == "" {
+		config.Certificate = parent.Certificate
+	}
+
+	if !config.SkipTLS {
+		config.SkipTLS = parent.SkipTLS
+	}
+
+	if config.MinimumPriority == "" {
+		config.MinimumPriority = parent.MinimumPriority
+	}
+
+	if !config.SkipExisting {
+		config.SkipExisting = parent.SkipExisting
+	}
+
+	if len(parent.Headers) > 0 {
+		headers := map[string]string{}
+		for header, value := range parent.Headers {
+			headers[header] = value
+		}
+		for header, value := range config.Headers {
+			headers[header] = value
+		}
+
+		config.Headers = headers
+	}
+
+	host := "https://api.telegram.org"
+	if config.Host != "" {
+		host = strings.TrimSuffix(config.Host, "/")
+	}
+
+	zap.S().Infof("%s configured", config.Name)
+
+	return telegram.NewClient(telegram.Options{
+		ClientOptions: target.ClientOptions{
+			Name:                  config.Name,
+			SkipExistingOnStartup: config.SkipExisting,
+			ResultFilter:          createResultFilter(config.Filter, config.MinimumPriority, config.Sources),
+			ReportFilter:          createReportFilter(config.Filter),
+		},
+		Host:         fmt.Sprintf("%s/bot%s/sendMessage", host, config.Token),
+		ChatID:       config.ChatID,
 		Headers:      config.Headers,
 		CustomFields: config.CustomFields,
 		HTTPClient:   http.NewClient(config.Certificate, config.SkipTLS),
@@ -958,6 +1050,13 @@ func (f *TargetFactory) mapSecretValues(config any, ref, mountedSecret string) {
 			}
 
 			c.Headers["Authorization"] = values.Token
+		}
+	case *Telegram:
+		if values.Token != "" {
+			c.Token = values.Token
+		}
+		if values.Host != "" {
+			c.Host = values.Host
 		}
 	}
 }

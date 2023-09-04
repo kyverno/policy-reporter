@@ -175,13 +175,22 @@ var testConfig = &config.Config{
 			Encryption: "ssl/tls",
 		},
 	},
+	Telegram: config.Telegram{
+		Token:  "XXX",
+		ChatID: "123456",
+		Channels: []config.Telegram{
+			{
+				ChatID: "1234567",
+			},
+		},
+	},
 }
 
 func Test_ResolveTargets(t *testing.T) {
 	resolver := config.NewResolver(testConfig, &rest.Config{})
 
-	if count := len(resolver.TargetClients()); count != 22 {
-		t.Errorf("Expected 22 Clients, got %d", count)
+	if count := len(resolver.TargetClients()); count != 24 {
+		t.Errorf("Expected 24 Clients, got %d", count)
 	}
 }
 
