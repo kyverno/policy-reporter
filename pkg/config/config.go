@@ -1,5 +1,7 @@
 package config
 
+import "github.com/kyverno/policy-reporter/pkg/target"
+
 type ValueFilter struct {
 	Include []string `mapstructure:"include"`
 	Exclude []string `mapstructure:"exclude"`
@@ -37,6 +39,54 @@ type TargetBaseOptions struct {
 	SkipExisting    bool              `mapstructure:"skipExistingOnStartup"`
 }
 
+func (config *TargetBaseOptions) MapBaseParent(parent TargetBaseOptions) {
+	if config.MinimumPriority == "" {
+		config.MinimumPriority = parent.MinimumPriority
+	}
+
+	if !config.SkipExisting {
+		config.SkipExisting = parent.SkipExisting
+	}
+}
+
+func (config *TargetBaseOptions) ClientOptions() target.ClientOptions {
+	return target.ClientOptions{
+		Name:                  config.Name,
+		SkipExistingOnStartup: config.SkipExisting,
+		ResultFilter:          createResultFilter(config.Filter, config.MinimumPriority, config.Sources),
+		ReportFilter:          createReportFilter(config.Filter),
+	}
+}
+
+type AWSConfig struct {
+	AccessKeyID     string `mapstructure:"accessKeyID"`
+	SecretAccessKey string `mapstructure:"secretAccessKey"`
+	Region          string `mapstructure:"region"`
+	Endpoint        string `mapstructure:"endpoint"`
+}
+
+func (config *AWSConfig) MapAWSParent(parent AWSConfig) {
+	if config.Endpoint == "" {
+		config.Endpoint = parent.Endpoint
+	}
+
+	if config.AccessKeyID == "" {
+		config.AccessKeyID = parent.AccessKeyID
+	}
+
+	if config.SecretAccessKey == "" {
+		config.SecretAccessKey = parent.SecretAccessKey
+	}
+
+	if config.Region == "" {
+		config.Region = parent.Region
+	}
+}
+
+type TargetOption interface {
+	BaseOptions() *TargetBaseOptions
+}
+
 // Loki configuration
 type Loki struct {
 	TargetBaseOptions `mapstructure:",squash"`
@@ -45,44 +95,44 @@ type Loki struct {
 	SkipTLS           bool              `mapstructure:"skipTLS"`
 	Certificate       string            `mapstructure:"certificate"`
 	Path              string            `mapstructure:"path"`
-	Channels          []Loki            `mapstructure:"channels"`
+	Channels          []*Loki           `mapstructure:"channels"`
 }
 
 // Elasticsearch configuration
 type Elasticsearch struct {
 	TargetBaseOptions `mapstructure:",squash"`
-	Host              string          `mapstructure:"host"`
-	SkipTLS           bool            `mapstructure:"skipTLS"`
-	Certificate       string          `mapstructure:"certificate"`
-	Index             string          `mapstructure:"index"`
-	Rotation          string          `mapstructure:"rotation"`
-	Username          string          `mapstructure:"username"`
-	Password          string          `mapstructure:"password"`
-	Channels          []Elasticsearch `mapstructure:"channels"`
+	Host              string           `mapstructure:"host"`
+	SkipTLS           bool             `mapstructure:"skipTLS"`
+	Certificate       string           `mapstructure:"certificate"`
+	Index             string           `mapstructure:"index"`
+	Rotation          string           `mapstructure:"rotation"`
+	Username          string           `mapstructure:"username"`
+	Password          string           `mapstructure:"password"`
+	Channels          []*Elasticsearch `mapstructure:"channels"`
 }
 
 // Slack configuration
 type Slack struct {
 	TargetBaseOptions `mapstructure:",squash"`
-	Webhook           string  `mapstructure:"webhook"`
-	Channel           string  `mapstructure:"channel"`
-	Channels          []Slack `mapstructure:"channels"`
+	Webhook           string   `mapstructure:"webhook"`
+	Channel           string   `mapstructure:"channel"`
+	Channels          []*Slack `mapstructure:"channels"`
 }
 
 // Discord configuration
 type Discord struct {
 	TargetBaseOptions `mapstructure:",squash"`
-	Webhook           string    `mapstructure:"webhook"`
-	Channels          []Discord `mapstructure:"channels"`
+	Webhook           string     `mapstructure:"webhook"`
+	Channels          []*Discord `mapstructure:"channels"`
 }
 
 // Teams configuration
 type Teams struct {
 	TargetBaseOptions `mapstructure:",squash"`
-	Webhook           string  `mapstructure:"webhook"`
-	SkipTLS           bool    `mapstructure:"skipTLS"`
-	Certificate       string  `mapstructure:"certificate"`
-	Channels          []Teams `mapstructure:"channels"`
+	Webhook           string   `mapstructure:"webhook"`
+	SkipTLS           bool     `mapstructure:"skipTLS"`
+	Certificate       string   `mapstructure:"certificate"`
+	Channels          []*Teams `mapstructure:"channels"`
 }
 
 // UI configuration
@@ -100,7 +150,7 @@ type Webhook struct {
 	SkipTLS           bool              `mapstructure:"skipTLS"`
 	Certificate       string            `mapstructure:"certificate"`
 	Headers           map[string]string `mapstructure:"headers"`
-	Channels          []Webhook         `mapstructure:"channels"`
+	Channels          []*Webhook        `mapstructure:"channels"`
 }
 
 // Telegram configuration
@@ -112,14 +162,17 @@ type Telegram struct {
 	SkipTLS           bool              `mapstructure:"skipTLS"`
 	Certificate       string            `mapstructure:"certificate"`
 	Headers           map[string]string `mapstructure:"headers"`
-	Channels          []Telegram        `mapstructure:"channels"`
+	Channels          []*Telegram       `mapstructure:"channels"`
 }
 
-type AWSConfig struct {
-	AccessKeyID     string `mapstructure:"accessKeyID"`
-	SecretAccessKey string `mapstructure:"secretAccessKey"`
-	Region          string `mapstructure:"region"`
-	Endpoint        string `mapstructure:"endpoint"`
+// GoogleChat configuration
+type GoogleChat struct {
+	TargetBaseOptions `mapstructure:",squash"`
+	Webhook           string            `mapstructure:"webhook"`
+	SkipTLS           bool              `mapstructure:"skipTLS"`
+	Certificate       string            `mapstructure:"certificate"`
+	Headers           map[string]string `mapstructure:"headers"`
+	Channels          []*GoogleChat     `mapstructure:"channels"`
 }
 
 // S3 configuration
@@ -132,23 +185,23 @@ type S3 struct {
 	KmsKeyID             string `mapstructure:"kmsKeyId"`
 	ServerSideEncryption string `mapstructure:"serverSideEncryption"`
 	PathStyle            bool   `mapstructure:"pathStyle"`
-	Channels             []S3   `mapstructure:"channels"`
+	Channels             []*S3  `mapstructure:"channels"`
 }
 
 // Kinesis configuration
 type Kinesis struct {
 	TargetBaseOptions `mapstructure:",squash"`
 	AWSConfig         `mapstructure:",squash"`
-	StreamName        string    `mapstructure:"streamName"`
-	Channels          []Kinesis `mapstructure:"channels"`
+	StreamName        string     `mapstructure:"streamName"`
+	Channels          []*Kinesis `mapstructure:"channels"`
 }
 
 // SecurityHub configuration
 type SecurityHub struct {
 	TargetBaseOptions `mapstructure:",squash"`
 	AWSConfig         `mapstructure:",squash"`
-	AccountID         string        `mapstructure:"accountId"`
-	Channels          []SecurityHub `mapstructure:"channels"`
+	AccountID         string         `mapstructure:"accountId"`
+	Channels          []*SecurityHub `mapstructure:"channels"`
 }
 
 // GCS configuration
@@ -158,7 +211,7 @@ type GCS struct {
 	Prefix            string   `mapstructure:"prefix"`
 	Bucket            string   `mapstructure:"bucket"`
 	Sources           []string `mapstructure:"sources"`
-	Channels          []GCS    `mapstructure:"channels"`
+	Channels          []*GCS   `mapstructure:"channels"`
 }
 
 // SMTP configuration
@@ -283,18 +336,19 @@ type Database struct {
 type Config struct {
 	Version        string
 	Namespace      string         `mapstructure:"namespace"`
-	Loki           Loki           `mapstructure:"loki"`
-	Elasticsearch  Elasticsearch  `mapstructure:"elasticsearch"`
-	Slack          Slack          `mapstructure:"slack"`
-	Discord        Discord        `mapstructure:"discord"`
-	Teams          Teams          `mapstructure:"teams"`
-	S3             S3             `mapstructure:"s3"`
-	Kinesis        Kinesis        `mapstructure:"kinesis"`
-	SecurityHub    SecurityHub    `mapstructure:"securityHub"`
-	GCS            GCS            `mapstructure:"gcs"`
-	UI             UI             `mapstructure:"ui"`
-	Webhook        Webhook        `mapstructure:"webhook"`
-	Telegram       Telegram       `mapstructure:"telegram"`
+	Loki           *Loki          `mapstructure:"loki"`
+	Elasticsearch  *Elasticsearch `mapstructure:"elasticsearch"`
+	Slack          *Slack         `mapstructure:"slack"`
+	Discord        *Discord       `mapstructure:"discord"`
+	Teams          *Teams         `mapstructure:"teams"`
+	S3             *S3            `mapstructure:"s3"`
+	Kinesis        *Kinesis       `mapstructure:"kinesis"`
+	SecurityHub    *SecurityHub   `mapstructure:"securityHub"`
+	GCS            *GCS           `mapstructure:"gcs"`
+	UI             *UI            `mapstructure:"ui"`
+	Webhook        *Webhook       `mapstructure:"webhook"`
+	Telegram       *Telegram      `mapstructure:"telegram"`
+	GoogleChat     *GoogleChat    `mapstructure:"googleChat"`
 	API            API            `mapstructure:"api"`
 	WorkerCount    int            `mapstructure:"worker"`
 	DBFile         string         `mapstructure:"dbfile"`

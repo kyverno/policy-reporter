@@ -12,7 +12,7 @@ import (
 )
 
 var testConfig = &config.Config{
-	Loki: config.Loki{
+	Loki: &config.Loki{
 		Host: "http://localhost:3100",
 		TargetBaseOptions: config.TargetBaseOptions{
 			SkipExisting:    true,
@@ -20,7 +20,7 @@ var testConfig = &config.Config{
 			CustomFields:    map[string]string{"field": "value"},
 		},
 		SkipTLS: true,
-		Channels: []config.Loki{
+		Channels: []*config.Loki{
 			{
 				TargetBaseOptions: config.TargetBaseOptions{
 					CustomFields: map[string]string{"label2": "value2"},
@@ -28,7 +28,7 @@ var testConfig = &config.Config{
 			},
 		},
 	},
-	Elasticsearch: config.Elasticsearch{
+	Elasticsearch: &config.Elasticsearch{
 		Host:     "http://localhost:9200",
 		Index:    "policy-reporter",
 		Rotation: "daily",
@@ -38,33 +38,33 @@ var testConfig = &config.Config{
 			CustomFields:    map[string]string{"field": "value"},
 		},
 		SkipTLS:  true,
-		Channels: []config.Elasticsearch{{}},
+		Channels: []*config.Elasticsearch{{}},
 	},
-	Slack: config.Slack{
+	Slack: &config.Slack{
 		Webhook: "http://hook.slack:80",
 		TargetBaseOptions: config.TargetBaseOptions{
 			SkipExisting:    true,
 			MinimumPriority: "debug",
 			CustomFields:    map[string]string{"field": "value"},
 		},
-		Channels: []config.Slack{{
+		Channels: []*config.Slack{{
 			Webhook: "http://localhost:9200",
 		}, {
 			Channel: "general",
 		}},
 	},
-	Discord: config.Discord{
+	Discord: &config.Discord{
 		Webhook: "http://hook.discord:80",
 		TargetBaseOptions: config.TargetBaseOptions{
 			SkipExisting:    true,
 			MinimumPriority: "debug",
 			CustomFields:    map[string]string{"field": "value"},
 		},
-		Channels: []config.Discord{{
+		Channels: []*config.Discord{{
 			Webhook: "http://localhost:9200",
 		}},
 	},
-	Teams: config.Teams{
+	Teams: &config.Teams{
 		TargetBaseOptions: config.TargetBaseOptions{
 			SkipExisting:    true,
 			MinimumPriority: "debug",
@@ -72,18 +72,18 @@ var testConfig = &config.Config{
 		},
 		Webhook: "http://hook.teams:80",
 		SkipTLS: true,
-		Channels: []config.Teams{{
+		Channels: []*config.Teams{{
 			Webhook: "http://localhost:9200",
 		}},
 	},
-	UI: config.UI{
+	UI: &config.UI{
 		TargetBaseOptions: config.TargetBaseOptions{
 			SkipExisting:    true,
 			MinimumPriority: "debug",
 		},
 		Host: "http://localhost:8080",
 	},
-	Webhook: config.Webhook{
+	Webhook: &config.Webhook{
 		Host: "http://localhost:8080",
 		Headers: map[string]string{
 			"X-Custom": "Header",
@@ -94,14 +94,14 @@ var testConfig = &config.Config{
 			CustomFields:    map[string]string{"field": "value"},
 		},
 		SkipTLS: true,
-		Channels: []config.Webhook{{
+		Channels: []*config.Webhook{{
 			Host: "http://localhost:8081",
 			Headers: map[string]string{
 				"X-Custom-2": "Header",
 			},
 		}},
 	},
-	S3: config.S3{
+	S3: &config.S3{
 		TargetBaseOptions: config.TargetBaseOptions{
 			SkipExisting:    true,
 			MinimumPriority: "debug",
@@ -119,9 +119,9 @@ var testConfig = &config.Config{
 		ServerSideEncryption: "",
 		PathStyle:            true,
 		Prefix:               "prefix",
-		Channels:             []config.S3{{}},
+		Channels:             []*config.S3{{}},
 	},
-	Kinesis: config.Kinesis{
+	Kinesis: &config.Kinesis{
 		TargetBaseOptions: config.TargetBaseOptions{
 			SkipExisting:    true,
 			MinimumPriority: "debug",
@@ -134,9 +134,9 @@ var testConfig = &config.Config{
 			Region:          "ru-central1",
 		},
 		StreamName: "policy-reporter",
-		Channels:   []config.Kinesis{{}},
+		Channels:   []*config.Kinesis{{}},
 	},
-	SecurityHub: config.SecurityHub{
+	SecurityHub: &config.SecurityHub{
 		TargetBaseOptions: config.TargetBaseOptions{
 			SkipExisting:    true,
 			MinimumPriority: "debug",
@@ -149,9 +149,9 @@ var testConfig = &config.Config{
 			Region:          "ru-central1",
 		},
 		AccountID: "AccountID",
-		Channels:  []config.SecurityHub{{}},
+		Channels:  []*config.SecurityHub{{}},
 	},
-	GCS: config.GCS{
+	GCS: &config.GCS{
 		TargetBaseOptions: config.TargetBaseOptions{
 			SkipExisting:    true,
 			MinimumPriority: "debug",
@@ -160,7 +160,7 @@ var testConfig = &config.Config{
 		Credentials: `{"token": "token", "type": "authorized_user"}`,
 		Bucket:      "test",
 		Prefix:      "prefix",
-		Channels:    []config.GCS{{}},
+		Channels:    []*config.GCS{{}},
 	},
 	EmailReports: config.EmailReports{
 		Templates: config.EmailTemplates{
@@ -175,22 +175,26 @@ var testConfig = &config.Config{
 			Encryption: "ssl/tls",
 		},
 	},
-	Telegram: config.Telegram{
+	Telegram: &config.Telegram{
 		Token:  "XXX",
 		ChatID: "123456",
-		Channels: []config.Telegram{
+		Channels: []*config.Telegram{
 			{
 				ChatID: "1234567",
 			},
 		},
+	},
+	GoogleChat: &config.GoogleChat{
+		Webhook:  "http://localhost:900/webhook",
+		Channels: []*config.GoogleChat{{}},
 	},
 }
 
 func Test_ResolveTargets(t *testing.T) {
 	resolver := config.NewResolver(testConfig, &rest.Config{})
 
-	if count := len(resolver.TargetClients()); count != 24 {
-		t.Errorf("Expected 24 Clients, got %d", count)
+	if count := len(resolver.TargetClients()); count != 26 {
+		t.Errorf("Expected 26 Clients, got %d", count)
 	}
 }
 
@@ -204,14 +208,14 @@ func Test_ResolveHasTargets(t *testing.T) {
 
 func Test_ResolveSkipExistingOnStartup(t *testing.T) {
 	testConfig := &config.Config{
-		Loki: config.Loki{
+		Loki: &config.Loki{
 			Host: "http://localhost:3100",
 			TargetBaseOptions: config.TargetBaseOptions{
 				SkipExisting:    true,
 				MinimumPriority: "debug",
 			},
 		},
-		Elasticsearch: config.Elasticsearch{
+		Elasticsearch: &config.Elasticsearch{
 			Host: "http://localhost:9200",
 			TargetBaseOptions: config.TargetBaseOptions{
 				SkipExisting:    true,
@@ -554,7 +558,7 @@ func Test_ResolveEnableLeaderElection(t *testing.T) {
 	t.Run("general disabled", func(t *testing.T) {
 		resolver := config.NewResolver(&config.Config{
 			LeaderElection: config.LeaderElection{Enabled: false},
-			Loki:           config.Loki{Host: "localhost:3100"},
+			Loki:           &config.Loki{Host: "localhost:3100"},
 			Database:       config.Database{Type: database.MySQL},
 		}, &rest.Config{})
 
@@ -579,7 +583,7 @@ func Test_ResolveEnableLeaderElection(t *testing.T) {
 		resolver := config.NewResolver(&config.Config{
 			LeaderElection: config.LeaderElection{Enabled: true},
 			Database:       config.Database{Type: database.SQLite},
-			Loki:           config.Loki{Host: "localhost:3100"},
+			Loki:           &config.Loki{Host: "localhost:3100"},
 			DBFile:         "test.db",
 		}, &rest.Config{})
 
