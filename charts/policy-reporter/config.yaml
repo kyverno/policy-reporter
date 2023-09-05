@@ -177,6 +177,31 @@ telegram:
     {{- toYaml . | nindent 4 }}
   {{- end }}
 
+googleChat:
+  webhook: {{ .Values.target.googleChat.webhook | quote }}
+  certificate: {{ .Values.target.googleChat.certificate | quote }}
+  skipTLS: {{ .Values.target.googleChat.skipTLS }}
+  secretRef: {{ .Values.target.googleChat.secretRef | quote }}
+  mountedSecret: {{ .Values.target.googleChat.mountedSecret | quote }}
+  minimumPriority: {{ .Values.target.googleChat.minimumPriority | quote }}
+  skipExistingOnStartup: {{ .Values.target.googleChat.skipExistingOnStartup }}
+  {{- with .Values.target.googleChat.sources }}
+  sources:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  {{- with .Values.target.googleChat.customFields }}
+  customFields:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  {{- with .Values.target.googleChat.filter }}
+  filter:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  {{- with .Values.target.googleChat.channels }}
+  channels:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+
 ui:
   host: {{ include "policyreporter.uihost" . }}
   certificate: {{ .Values.target.ui.certificate | quote }}

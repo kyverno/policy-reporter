@@ -17,6 +17,7 @@ import (
 	"github.com/kyverno/policy-reporter/pkg/target/discord"
 	"github.com/kyverno/policy-reporter/pkg/target/elasticsearch"
 	"github.com/kyverno/policy-reporter/pkg/target/gcs"
+	"github.com/kyverno/policy-reporter/pkg/target/googlechat"
 	"github.com/kyverno/policy-reporter/pkg/target/http"
 	"github.com/kyverno/policy-reporter/pkg/target/kinesis"
 	"github.com/kyverno/policy-reporter/pkg/target/loki"
@@ -35,22 +36,20 @@ type TargetFactory struct {
 }
 
 // LokiClients resolver method
-func (f *TargetFactory) LokiClients(config Loki) []target.Client {
+func (f *TargetFactory) LokiClients(config *Loki) []target.Client {
 	clients := make([]target.Client, 0)
-	if config.Name == "" {
-		config.Name = "Loki"
-	}
-	if config.Path == "" {
-		config.Path = "/api/prom/push"
+	if config == nil {
+		return clients
 	}
 
-	if loki := f.createLokiClient(config, Loki{}); loki != nil {
+	setFallback(&config.Name, "Loki")
+	setFallback(&config.Path, "/api/prom/push")
+
+	if loki := f.createLokiClient(config, &Loki{}); loki != nil {
 		clients = append(clients, loki)
 	}
 	for i, channel := range config.Channels {
-		if channel.Name == "" {
-			channel.Name = fmt.Sprintf("Loki Channel %d", i+1)
-		}
+		setFallback(&config.Name, fmt.Sprintf("Loki Channel %d", i+1))
 
 		if loki := f.createLokiClient(channel, config); loki != nil {
 			clients = append(clients, loki)
@@ -61,19 +60,20 @@ func (f *TargetFactory) LokiClients(config Loki) []target.Client {
 }
 
 // ElasticsearchClients resolver method
-func (f *TargetFactory) ElasticsearchClients(config Elasticsearch) []target.Client {
+func (f *TargetFactory) ElasticsearchClients(config *Elasticsearch) []target.Client {
 	clients := make([]target.Client, 0)
-	if config.Name == "" {
-		config.Name = "Elasticsearch"
+	if config == nil {
+		return clients
 	}
 
-	if es := f.createElasticsearchClient(config, Elasticsearch{}); es != nil {
+	setFallback(&config.Name, "Elasticsearch")
+
+	if es := f.createElasticsearchClient(config, &Elasticsearch{}); es != nil {
 		clients = append(clients, es)
 	}
+
 	for i, channel := range config.Channels {
-		if channel.Name == "" {
-			channel.Name = fmt.Sprintf("Elasticsearch Channel %d", i+1)
-		}
+		setFallback(&config.Name, fmt.Sprintf("Elasticsearch Channel %d", i+1))
 
 		if es := f.createElasticsearchClient(channel, config); es != nil {
 			clients = append(clients, es)
@@ -84,19 +84,19 @@ func (f *TargetFactory) ElasticsearchClients(config Elasticsearch) []target.Clie
 }
 
 // SlackClients resolver method
-func (f *TargetFactory) SlackClients(config Slack) []target.Client {
+func (f *TargetFactory) SlackClients(config *Slack) []target.Client {
 	clients := make([]target.Client, 0)
-	if config.Name == "" {
-		config.Name = "Slack"
+	if config == nil {
+		return clients
 	}
 
-	if es := f.createSlackClient(config, Slack{}); es != nil {
+	setFallback(&config.Name, "Slack")
+
+	if es := f.createSlackClient(config, &Slack{}); es != nil {
 		clients = append(clients, es)
 	}
 	for i, channel := range config.Channels {
-		if channel.Name == "" {
-			channel.Name = fmt.Sprintf("Slack Channel %d", i+1)
-		}
+		setFallback(&config.Name, fmt.Sprintf("Slack Channel %d", i+1))
 
 		if es := f.createSlackClient(channel, config); es != nil {
 			clients = append(clients, es)
@@ -107,19 +107,19 @@ func (f *TargetFactory) SlackClients(config Slack) []target.Client {
 }
 
 // DiscordClients resolver method
-func (f *TargetFactory) DiscordClients(config Discord) []target.Client {
+func (f *TargetFactory) DiscordClients(config *Discord) []target.Client {
 	clients := make([]target.Client, 0)
-	if config.Name == "" {
-		config.Name = "Discord"
+	if config == nil {
+		return clients
 	}
 
-	if es := f.createDiscordClient(config, Discord{}); es != nil {
+	setFallback(&config.Name, "Discord")
+
+	if es := f.createDiscordClient(config, &Discord{}); es != nil {
 		clients = append(clients, es)
 	}
 	for i, channel := range config.Channels {
-		if channel.Name == "" {
-			channel.Name = fmt.Sprintf("Discord Channel %d", i+1)
-		}
+		setFallback(&config.Name, fmt.Sprintf("Discord Channel %d", i+1))
 
 		if es := f.createDiscordClient(channel, config); es != nil {
 			clients = append(clients, es)
@@ -130,19 +130,19 @@ func (f *TargetFactory) DiscordClients(config Discord) []target.Client {
 }
 
 // TeamsClients resolver method
-func (f *TargetFactory) TeamsClients(config Teams) []target.Client {
+func (f *TargetFactory) TeamsClients(config *Teams) []target.Client {
 	clients := make([]target.Client, 0)
-	if config.Name == "" {
-		config.Name = "Teams"
+	if config == nil {
+		return clients
 	}
 
-	if es := f.createTeamsClient(config, Teams{}); es != nil {
+	setFallback(&config.Name, "Teams")
+
+	if es := f.createTeamsClient(config, &Teams{}); es != nil {
 		clients = append(clients, es)
 	}
 	for i, channel := range config.Channels {
-		if channel.Name == "" {
-			channel.Name = fmt.Sprintf("Teams Channel %d", i+1)
-		}
+		setFallback(&config.Name, fmt.Sprintf("Teams Channel %d", i+1))
 
 		if es := f.createTeamsClient(channel, config); es != nil {
 			clients = append(clients, es)
@@ -153,19 +153,19 @@ func (f *TargetFactory) TeamsClients(config Teams) []target.Client {
 }
 
 // WebhookClients resolver method
-func (f *TargetFactory) WebhookClients(config Webhook) []target.Client {
+func (f *TargetFactory) WebhookClients(config *Webhook) []target.Client {
 	clients := make([]target.Client, 0)
-	if config.Name == "" {
-		config.Name = "Webhook"
+	if config == nil {
+		return clients
 	}
 
-	if es := f.createWebhookClient(config, Webhook{}); es != nil {
+	setFallback(&config.Name, "Webhook")
+
+	if es := f.createWebhookClient(config, &Webhook{}); es != nil {
 		clients = append(clients, es)
 	}
 	for i, channel := range config.Channels {
-		if channel.Name == "" {
-			channel.Name = fmt.Sprintf("Webhook Channel %d", i+1)
-		}
+		setFallback(&config.Name, fmt.Sprintf("Webhook Channel %d", i+1))
 
 		if es := f.createWebhookClient(channel, config); es != nil {
 			clients = append(clients, es)
@@ -176,38 +176,34 @@ func (f *TargetFactory) WebhookClients(config Webhook) []target.Client {
 }
 
 // UIClient resolver method
-func (f *TargetFactory) UIClient(config UI) target.Client {
-	if config.Host == "" {
+func (f *TargetFactory) UIClient(config *UI) target.Client {
+	if config == nil || config.Host == "" {
 		return nil
 	}
 
 	zap.L().Info("UI configured")
 
 	return ui.NewClient(ui.Options{
-		ClientOptions: target.ClientOptions{
-			Name:                  "UI",
-			SkipExistingOnStartup: config.SkipExisting,
-			ResultFilter:          createResultFilter(TargetFilter{}, config.MinimumPriority, config.Sources),
-		},
-		Host:       config.Host,
-		HTTPClient: http.NewClient(config.Certificate, config.SkipTLS),
+		ClientOptions: config.ClientOptions(),
+		Host:          config.Host,
+		HTTPClient:    http.NewClient(config.Certificate, config.SkipTLS),
 	})
 }
 
 // S3Clients resolver method
-func (f *TargetFactory) S3Clients(config S3) []target.Client {
+func (f *TargetFactory) S3Clients(config *S3) []target.Client {
 	clients := make([]target.Client, 0)
-	if config.Name == "" {
-		config.Name = "S3"
+	if config == nil {
+		return clients
 	}
 
-	if es := f.createS3Client(config, S3{}); es != nil {
+	setFallback(&config.Name, "S3")
+
+	if es := f.createS3Client(config, &S3{}); es != nil {
 		clients = append(clients, es)
 	}
 	for i, channel := range config.Channels {
-		if channel.Name == "" {
-			channel.Name = fmt.Sprintf("S3 Channel %d", i+1)
-		}
+		setFallback(&config.Name, fmt.Sprintf("S3 Channel %d", i+1))
 
 		if es := f.createS3Client(channel, config); es != nil {
 			clients = append(clients, es)
@@ -218,19 +214,19 @@ func (f *TargetFactory) S3Clients(config S3) []target.Client {
 }
 
 // KinesisClients resolver method
-func (f *TargetFactory) KinesisClients(config Kinesis) []target.Client {
+func (f *TargetFactory) KinesisClients(config *Kinesis) []target.Client {
 	clients := make([]target.Client, 0)
-	if config.Name == "" {
-		config.Name = "Kinesis"
+	if config == nil {
+		return clients
 	}
 
-	if es := f.createKinesisClient(config, Kinesis{}); es != nil {
+	setFallback(&config.Name, "Kinesis")
+
+	if es := f.createKinesisClient(config, &Kinesis{}); es != nil {
 		clients = append(clients, es)
 	}
 	for i, channel := range config.Channels {
-		if channel.Name == "" {
-			channel.Name = fmt.Sprintf("Kinesis Channel %d", i+1)
-		}
+		setFallback(&config.Name, fmt.Sprintf("Kinesis Channel %d", i+1))
 
 		if es := f.createKinesisClient(channel, config); es != nil {
 			clients = append(clients, es)
@@ -241,19 +237,19 @@ func (f *TargetFactory) KinesisClients(config Kinesis) []target.Client {
 }
 
 // SecurityHub resolver method
-func (f *TargetFactory) SecurityHubs(config SecurityHub) []target.Client {
+func (f *TargetFactory) SecurityHubs(config *SecurityHub) []target.Client {
 	clients := make([]target.Client, 0)
-	if config.Name == "" {
-		config.Name = "SecurityHub"
+	if config == nil {
+		return clients
 	}
 
-	if es := f.createSecurityHub(config, SecurityHub{}); es != nil {
+	setFallback(&config.Name, "SecurityHub")
+
+	if es := f.createSecurityHub(config, &SecurityHub{}); es != nil {
 		clients = append(clients, es)
 	}
 	for i, channel := range config.Channels {
-		if channel.Name == "" {
-			channel.Name = fmt.Sprintf("SecurityHub Channel %d", i+1)
-		}
+		setFallback(&config.Name, fmt.Sprintf("SecurityHub Channel %d", i+1))
 
 		if es := f.createSecurityHub(channel, config); es != nil {
 			clients = append(clients, es)
@@ -264,19 +260,19 @@ func (f *TargetFactory) SecurityHubs(config SecurityHub) []target.Client {
 }
 
 // GCSClients resolver method
-func (f *TargetFactory) GCSClients(config GCS) []target.Client {
+func (f *TargetFactory) GCSClients(config *GCS) []target.Client {
 	clients := make([]target.Client, 0)
-	if config.Name == "" {
-		config.Name = "Google Cloud Storage"
+	if config == nil {
+		return clients
 	}
 
-	if es := f.createGCSClient(config, GCS{}); es != nil {
+	setFallback(&config.Name, "GoogleCloudStorage")
+
+	if es := f.createGCSClient(config, &GCS{}); es != nil {
 		clients = append(clients, es)
 	}
 	for i, channel := range config.Channels {
-		if channel.Name == "" {
-			channel.Name = fmt.Sprintf("GCS Channel %d", i+1)
-		}
+		setFallback(&config.Name, fmt.Sprintf("GCS Channel %d", i+1))
 
 		if es := f.createGCSClient(channel, config); es != nil {
 			clients = append(clients, es)
@@ -287,19 +283,19 @@ func (f *TargetFactory) GCSClients(config GCS) []target.Client {
 }
 
 // TelegramClients resolver method
-func (f *TargetFactory) TelegramClients(config Telegram) []target.Client {
+func (f *TargetFactory) TelegramClients(config *Telegram) []target.Client {
 	clients := make([]target.Client, 0)
-	if config.Name == "" {
-		config.Name = "Telegram"
+	if config == nil {
+		return clients
 	}
 
-	if es := f.createTelegramClient(config, Telegram{}); es != nil {
+	setFallback(&config.Name, "Telegram")
+
+	if es := f.createTelegramClient(config, &Telegram{}); es != nil {
 		clients = append(clients, es)
 	}
 	for i, channel := range config.Channels {
-		if channel.Name == "" {
-			channel.Name = fmt.Sprintf("Webhook Channel %d", i+1)
-		}
+		setFallback(&config.Name, fmt.Sprintf("Telegram Channel %d", i+1))
 
 		if es := f.createTelegramClient(channel, config); es != nil {
 			clients = append(clients, es)
@@ -309,77 +305,72 @@ func (f *TargetFactory) TelegramClients(config Telegram) []target.Client {
 	return clients
 }
 
-func (f *TargetFactory) createSlackClient(config Slack, parent Slack) target.Client {
+// GoogleChatClients resolver method
+func (f *TargetFactory) GoogleChatClients(config *GoogleChat) []target.Client {
+	clients := make([]target.Client, 0)
+	if config == nil {
+		return clients
+	}
+
+	setFallback(&config.Name, "GoogleChat")
+
+	if es := f.createGoogleChatClient(config, &GoogleChat{}); es != nil {
+		clients = append(clients, es)
+	}
+	for i, channel := range config.Channels {
+		setFallback(&config.Name, fmt.Sprintf("GoogleChat Channel %d", i+1))
+
+		if es := f.createGoogleChatClient(channel, config); es != nil {
+			clients = append(clients, es)
+		}
+	}
+
+	return clients
+}
+
+func (f *TargetFactory) createSlackClient(config, parent *Slack) target.Client {
 	if (config.SecretRef != "" && f.secretClient != nil) || config.MountedSecret != "" {
-		f.mapSecretValues(&config, config.SecretRef, config.MountedSecret)
+		f.mapSecretValues(config, config.SecretRef, config.MountedSecret)
 	}
 
 	if config.Webhook == "" && config.Channel == "" {
 		return nil
 	}
 
-	if config.Webhook == "" {
-		config.Webhook = parent.Webhook
-	}
+	setFallback(&config.Webhook, parent.Webhook)
 
 	if config.Webhook == "" {
 		return nil
 	}
 
-	if config.MinimumPriority == "" {
-		config.MinimumPriority = parent.MinimumPriority
-	}
-
-	if !config.SkipExisting {
-		config.SkipExisting = parent.SkipExisting
-	}
+	config.MapBaseParent(parent.TargetBaseOptions)
 
 	zap.S().Infof("%s configured", config.Name)
 
 	return slack.NewClient(slack.Options{
-		ClientOptions: target.ClientOptions{
-			Name:                  config.Name,
-			SkipExistingOnStartup: config.SkipExisting,
-			ResultFilter:          createResultFilter(config.Filter, config.MinimumPriority, config.Sources),
-			ReportFilter:          createReportFilter(config.Filter),
-		},
-		Webhook:      config.Webhook,
-		Channel:      config.Channel,
-		CustomFields: config.CustomFields,
-		HTTPClient:   http.NewClient("", false),
+		ClientOptions: config.ClientOptions(),
+		Webhook:       config.Webhook,
+		Channel:       config.Channel,
+		CustomFields:  config.CustomFields,
+		HTTPClient:    http.NewClient("", false),
 	})
 }
 
-func (f *TargetFactory) createLokiClient(config Loki, parent Loki) target.Client {
+func (f *TargetFactory) createLokiClient(config, parent *Loki) target.Client {
 	if (config.SecretRef != "" && f.secretClient != nil) || config.MountedSecret != "" {
-		f.mapSecretValues(&config, config.SecretRef, config.MountedSecret)
+		f.mapSecretValues(config, config.SecretRef, config.MountedSecret)
 	}
 
 	if config.Host == "" && parent.Host == "" {
 		return nil
-	} else if config.Host == "" {
-		config.Host = parent.Host
 	}
 
-	if config.Certificate == "" {
-		config.Certificate = parent.Certificate
-	}
+	setFallback(&config.Host, parent.Host)
+	setFallback(&config.Certificate, parent.Certificate)
+	setFallback(&config.Path, parent.Path)
+	setBool(&config.SkipTLS, parent.SkipTLS)
 
-	if !config.SkipTLS {
-		config.SkipTLS = parent.SkipTLS
-	}
-
-	if !config.SkipExisting {
-		config.SkipExisting = parent.SkipExisting
-	}
-
-	if config.MinimumPriority == "" {
-		config.MinimumPriority = parent.MinimumPriority
-	}
-
-	if config.Path == "" {
-		config.Path = parent.Path
-	}
+	config.MapBaseParent(parent.TargetBaseOptions)
 
 	zap.S().Infof("%s configured", config.Name)
 
@@ -394,184 +385,103 @@ func (f *TargetFactory) createLokiClient(config Loki, parent Loki) target.Client
 	}
 
 	return loki.NewClient(loki.Options{
-		ClientOptions: target.ClientOptions{
-			Name:                  config.Name,
-			SkipExistingOnStartup: config.SkipExisting,
-			ResultFilter:          createResultFilter(config.Filter, config.MinimumPriority, config.Sources),
-			ReportFilter:          createReportFilter(config.Filter),
-		},
-		Host:         config.Host + config.Path,
-		CustomLabels: config.CustomFields,
-		HTTPClient:   http.NewClient(config.Certificate, config.SkipTLS),
+		ClientOptions: config.ClientOptions(),
+		Host:          config.Host + config.Path,
+		CustomLabels:  config.CustomFields,
+		HTTPClient:    http.NewClient(config.Certificate, config.SkipTLS),
 	})
 }
 
-func (f *TargetFactory) createElasticsearchClient(config Elasticsearch, parent Elasticsearch) target.Client {
+func (f *TargetFactory) createElasticsearchClient(config, parent *Elasticsearch) target.Client {
 	if (config.SecretRef != "" && f.secretClient != nil) || config.MountedSecret != "" {
-		f.mapSecretValues(&config, config.SecretRef, config.MountedSecret)
+		f.mapSecretValues(config, config.SecretRef, config.MountedSecret)
 	}
 
 	if config.Host == "" && parent.Host == "" {
 		return nil
-	} else if config.Host == "" {
-		config.Host = parent.Host
 	}
 
-	if config.Certificate == "" {
-		config.Certificate = parent.Certificate
-	}
+	setFallback(&config.Host, parent.Host)
+	setFallback(&config.Certificate, parent.Certificate)
+	setBool(&config.SkipTLS, parent.SkipTLS)
+	setFallback(&config.Username, parent.Username)
+	setFallback(&config.Password, parent.Password)
+	setFallback(&config.Index, parent.Index, "policy-reporter")
+	setFallback(&config.Rotation, parent.Rotation, elasticsearch.Daily)
 
-	if !config.SkipTLS {
-		config.SkipTLS = parent.SkipTLS
-	}
-
-	if config.Username == "" {
-		config.Username = parent.Username
-	}
-
-	if config.Password == "" {
-		config.Password = parent.Password
-	}
-
-	if config.Index == "" && parent.Index == "" {
-		config.Index = "policy-reporter"
-	} else if config.Index == "" {
-		config.Index = parent.Index
-	}
-
-	if config.Rotation == "" && parent.Rotation == "" {
-		config.Rotation = elasticsearch.Daily
-	} else if config.Rotation == "" {
-		config.Rotation = parent.Rotation
-	}
-
-	if config.MinimumPriority == "" {
-		config.MinimumPriority = parent.MinimumPriority
-	}
-
-	if !config.SkipExisting {
-		config.SkipExisting = parent.SkipExisting
-	}
+	config.MapBaseParent(parent.TargetBaseOptions)
 
 	zap.S().Infof("%s configured", config.Name)
 
 	return elasticsearch.NewClient(elasticsearch.Options{
-		ClientOptions: target.ClientOptions{
-			Name:                  config.Name,
-			SkipExistingOnStartup: config.SkipExisting,
-			ResultFilter:          createResultFilter(config.Filter, config.MinimumPriority, config.Sources),
-			ReportFilter:          createReportFilter(config.Filter),
-		},
-		Host:         config.Host,
-		Username:     config.Username,
-		Password:     config.Password,
-		Rotation:     config.Rotation,
-		Index:        config.Index,
-		CustomFields: config.CustomFields,
-		HTTPClient:   http.NewClient(config.Certificate, config.SkipTLS),
+		ClientOptions: config.ClientOptions(),
+		Host:          config.Host,
+		Username:      config.Username,
+		Password:      config.Password,
+		Rotation:      config.Rotation,
+		Index:         config.Index,
+		CustomFields:  config.CustomFields,
+		HTTPClient:    http.NewClient(config.Certificate, config.SkipTLS),
 	})
 }
 
-func (f *TargetFactory) createDiscordClient(config Discord, parent Discord) target.Client {
+func (f *TargetFactory) createDiscordClient(config, parent *Discord) target.Client {
 	if (config.SecretRef != "" && f.secretClient != nil) || config.MountedSecret != "" {
-		f.mapSecretValues(&config, config.SecretRef, config.MountedSecret)
+		f.mapSecretValues(config, config.SecretRef, config.MountedSecret)
 	}
 
 	if config.Webhook == "" {
 		return nil
 	}
 
-	if config.MinimumPriority == "" {
-		config.MinimumPriority = parent.MinimumPriority
-	}
-
-	if !config.SkipExisting {
-		config.SkipExisting = parent.SkipExisting
-	}
+	config.MapBaseParent(parent.TargetBaseOptions)
 
 	zap.S().Infof("%s configured", config.Name)
 
 	return discord.NewClient(discord.Options{
-		ClientOptions: target.ClientOptions{
-			Name:                  config.Name,
-			SkipExistingOnStartup: config.SkipExisting,
-			ResultFilter:          createResultFilter(config.Filter, config.MinimumPriority, config.Sources),
-			ReportFilter:          createReportFilter(config.Filter),
-		},
-		Webhook:      config.Webhook,
-		CustomFields: config.CustomFields,
-		HTTPClient:   http.NewClient("", false),
+		ClientOptions: config.ClientOptions(),
+		Webhook:       config.Webhook,
+		CustomFields:  config.CustomFields,
+		HTTPClient:    http.NewClient("", false),
 	})
 }
 
-func (f *TargetFactory) createTeamsClient(config Teams, parent Teams) target.Client {
+func (f *TargetFactory) createTeamsClient(config, parent *Teams) target.Client {
 	if (config.SecretRef != "" && f.secretClient != nil) || config.MountedSecret != "" {
-		f.mapSecretValues(&config, config.SecretRef, config.MountedSecret)
+		f.mapSecretValues(config, config.SecretRef, config.MountedSecret)
 	}
 
 	if config.Webhook == "" {
 		return nil
 	}
 
-	if config.Certificate == "" {
-		config.Certificate = parent.Certificate
-	}
+	setFallback(&config.Certificate, parent.Certificate)
+	setBool(&config.SkipTLS, parent.SkipTLS)
 
-	if !config.SkipTLS {
-		config.SkipTLS = parent.SkipTLS
-	}
-
-	if config.MinimumPriority == "" {
-		config.MinimumPriority = parent.MinimumPriority
-	}
-
-	if !config.SkipExisting {
-		config.SkipExisting = parent.SkipExisting
-	}
-
-	if !config.SkipTLS {
-		config.SkipTLS = parent.SkipTLS
-	}
+	config.MapBaseParent(parent.TargetBaseOptions)
 
 	zap.S().Infof("%s configured", config.Name)
 
 	return teams.NewClient(teams.Options{
-		ClientOptions: target.ClientOptions{
-			Name:                  config.Name,
-			SkipExistingOnStartup: config.SkipExisting,
-			ResultFilter:          createResultFilter(config.Filter, config.MinimumPriority, config.Sources),
-			ReportFilter:          createReportFilter(config.Filter),
-		},
-		Webhook:      config.Webhook,
-		CustomFields: config.CustomFields,
-		HTTPClient:   http.NewClient(config.Certificate, config.SkipTLS),
+		ClientOptions: config.ClientOptions(),
+		Webhook:       config.Webhook,
+		CustomFields:  config.CustomFields,
+		HTTPClient:    http.NewClient(config.Certificate, config.SkipTLS),
 	})
 }
 
-func (f *TargetFactory) createWebhookClient(config Webhook, parent Webhook) target.Client {
+func (f *TargetFactory) createWebhookClient(config, parent *Webhook) target.Client {
 	if (config.SecretRef != "" && f.secretClient != nil) || config.MountedSecret != "" {
-		f.mapSecretValues(&config, config.SecretRef, config.MountedSecret)
+		f.mapSecretValues(config, config.SecretRef, config.MountedSecret)
 	}
 
 	if config.Host == "" {
 		return nil
 	}
 
-	if config.Certificate == "" {
-		config.Certificate = parent.Certificate
-	}
-
-	if !config.SkipTLS {
-		config.SkipTLS = parent.SkipTLS
-	}
-
-	if config.MinimumPriority == "" {
-		config.MinimumPriority = parent.MinimumPriority
-	}
-
-	if !config.SkipExisting {
-		config.SkipExisting = parent.SkipExisting
-	}
+	setFallback(&config.Certificate, parent.Certificate)
+	setBool(&config.SkipTLS, parent.SkipTLS)
+	config.MapBaseParent(parent.TargetBaseOptions)
 
 	if len(parent.Headers) > 0 {
 		headers := map[string]string{}
@@ -588,51 +498,30 @@ func (f *TargetFactory) createWebhookClient(config Webhook, parent Webhook) targ
 	zap.S().Infof("%s configured", config.Name)
 
 	return webhook.NewClient(webhook.Options{
-		ClientOptions: target.ClientOptions{
-			Name:                  config.Name,
-			SkipExistingOnStartup: config.SkipExisting,
-			ResultFilter:          createResultFilter(config.Filter, config.MinimumPriority, config.Sources),
-			ReportFilter:          createReportFilter(config.Filter),
-		},
-		Host:         config.Host,
-		Headers:      config.Headers,
-		CustomFields: config.CustomFields,
-		HTTPClient:   http.NewClient(config.Certificate, config.SkipTLS),
+		ClientOptions: config.ClientOptions(),
+		Host:          config.Host,
+		Headers:       config.Headers,
+		CustomFields:  config.CustomFields,
+		HTTPClient:    http.NewClient(config.Certificate, config.SkipTLS),
 	})
 }
 
-func (f *TargetFactory) createTelegramClient(config Telegram, parent Telegram) target.Client {
+func (f *TargetFactory) createTelegramClient(config, parent *Telegram) target.Client {
 	if (config.SecretRef != "" && f.secretClient != nil) || config.MountedSecret != "" {
-		f.mapSecretValues(&config, config.SecretRef, config.MountedSecret)
+		f.mapSecretValues(config, config.SecretRef, config.MountedSecret)
 	}
 
-	if config.Token == "" {
-		config.Token = parent.Token
-	}
+	setFallback(&config.Token, parent.Token)
 
 	if config.ChatID == "" || config.Token == "" {
 		return nil
 	}
 
-	if config.Host == "" {
-		config.Host = parent.Host
-	}
+	setFallback(&config.Host, parent.Host)
+	setFallback(&config.Certificate, parent.Certificate)
+	setBool(&config.SkipTLS, parent.SkipTLS)
 
-	if config.Certificate == "" {
-		config.Certificate = parent.Certificate
-	}
-
-	if !config.SkipTLS {
-		config.SkipTLS = parent.SkipTLS
-	}
-
-	if config.MinimumPriority == "" {
-		config.MinimumPriority = parent.MinimumPriority
-	}
-
-	if !config.SkipExisting {
-		config.SkipExisting = parent.SkipExisting
-	}
+	config.MapBaseParent(parent.TargetBaseOptions)
 
 	if len(parent.Headers) > 0 {
 		headers := map[string]string{}
@@ -654,29 +543,61 @@ func (f *TargetFactory) createTelegramClient(config Telegram, parent Telegram) t
 	zap.S().Infof("%s configured", config.Name)
 
 	return telegram.NewClient(telegram.Options{
-		ClientOptions: target.ClientOptions{
-			Name:                  config.Name,
-			SkipExistingOnStartup: config.SkipExisting,
-			ResultFilter:          createResultFilter(config.Filter, config.MinimumPriority, config.Sources),
-			ReportFilter:          createReportFilter(config.Filter),
-		},
-		Host:         fmt.Sprintf("%s/bot%s/sendMessage", host, config.Token),
-		ChatID:       config.ChatID,
-		Headers:      config.Headers,
-		CustomFields: config.CustomFields,
-		HTTPClient:   http.NewClient(config.Certificate, config.SkipTLS),
+		ClientOptions: config.ClientOptions(),
+		Host:          fmt.Sprintf("%s/bot%s/sendMessage", host, config.Token),
+		ChatID:        config.ChatID,
+		Headers:       config.Headers,
+		CustomFields:  config.CustomFields,
+		HTTPClient:    http.NewClient(config.Certificate, config.SkipTLS),
 	})
 }
 
-func (f *TargetFactory) createS3Client(config S3, parent S3) target.Client {
+func (f *TargetFactory) createGoogleChatClient(config, parent *GoogleChat) target.Client {
 	if (config.SecretRef != "" && f.secretClient != nil) || config.MountedSecret != "" {
-		f.mapSecretValues(&config, config.SecretRef, config.MountedSecret)
+		f.mapSecretValues(config, config.SecretRef, config.MountedSecret)
 	}
 
-	if config.Endpoint == "" && parent.Endpoint == "" {
+	setFallback(&config.Webhook, parent.Webhook)
+
+	if config.Webhook == "" {
 		return nil
-	} else if config.Endpoint == "" {
-		config.Endpoint = parent.Endpoint
+	}
+
+	setFallback(&config.Certificate, parent.Certificate)
+	setBool(&config.SkipTLS, parent.SkipTLS)
+	config.MapBaseParent(parent.TargetBaseOptions)
+
+	if len(parent.Headers) > 0 {
+		headers := map[string]string{}
+		for header, value := range parent.Headers {
+			headers[header] = value
+		}
+		for header, value := range config.Headers {
+			headers[header] = value
+		}
+
+		config.Headers = headers
+	}
+
+	zap.S().Infof("%s configured", config.Name)
+
+	return googlechat.NewClient(googlechat.Options{
+		ClientOptions: config.ClientOptions(),
+		Webhook:       config.Webhook,
+		Headers:       config.Headers,
+		CustomFields:  config.CustomFields,
+		HTTPClient:    http.NewClient(config.Certificate, config.SkipTLS),
+	})
+}
+
+func (f *TargetFactory) createS3Client(config, parent *S3) target.Client {
+	if (config.SecretRef != "" && f.secretClient != nil) || config.MountedSecret != "" {
+		f.mapSecretValues(config, config.SecretRef, config.MountedSecret)
+	}
+
+	config.MapAWSParent(parent.AWSConfig)
+	if config.Endpoint == "" {
+		return nil
 	}
 
 	sugar := zap.S()
@@ -687,50 +608,18 @@ func (f *TargetFactory) createS3Client(config S3, parent S3) target.Client {
 		return nil
 	}
 
-	if config.AccessKeyID == "" {
-		config.AccessKeyID = parent.AccessKeyID
-	}
-
-	if config.SecretAccessKey == "" {
-		config.SecretAccessKey = parent.SecretAccessKey
-	}
-
-	if config.Region == "" {
-		config.Region = parent.Region
-	}
-
-	if config.Bucket == "" && parent.Bucket == "" {
+	setFallback(&config.Bucket, parent.Bucket)
+	if config.Bucket == "" {
 		sugar.Errorf("%s.Bucket has not been declared", config.Name)
 		return nil
-	} else if config.Bucket == "" {
-		config.Bucket = parent.Bucket
 	}
 
-	if config.Prefix == "" && parent.Prefix == "" {
-		config.Prefix = "policy-reporter"
-	} else if config.Prefix == "" {
-		config.Prefix = parent.Prefix
-	}
+	setFallback(&config.Prefix, parent.Prefix, "policy-reporter")
+	setFallback(&config.KmsKeyID, parent.KmsKeyID)
+	setFallback(&config.ServerSideEncryption, parent.ServerSideEncryption)
+	setBool(&config.BucketKeyEnabled, parent.BucketKeyEnabled)
 
-	if config.MinimumPriority == "" {
-		config.MinimumPriority = parent.MinimumPriority
-	}
-
-	if !config.SkipExisting {
-		config.SkipExisting = parent.SkipExisting
-	}
-
-	if !config.BucketKeyEnabled {
-		config.BucketKeyEnabled = parent.BucketKeyEnabled
-	}
-
-	if config.KmsKeyID == "" {
-		config.KmsKeyID = parent.KmsKeyID
-	}
-
-	if config.ServerSideEncryption == "" {
-		config.ServerSideEncryption = parent.ServerSideEncryption
-	}
+	config.MapBaseParent(parent.TargetBaseOptions)
 
 	s3Client := helper.NewS3Client(
 		config.AccessKeyID,
@@ -745,27 +634,21 @@ func (f *TargetFactory) createS3Client(config S3, parent S3) target.Client {
 	sugar.Infof("%s configured", config.Name)
 
 	return s3.NewClient(s3.Options{
-		ClientOptions: target.ClientOptions{
-			Name:                  config.Name,
-			SkipExistingOnStartup: config.SkipExisting,
-			ResultFilter:          createResultFilter(config.Filter, config.MinimumPriority, config.Sources),
-			ReportFilter:          createReportFilter(config.Filter),
-		},
-		S3:           s3Client,
-		CustomFields: config.CustomFields,
-		Prefix:       config.Prefix,
+		ClientOptions: config.ClientOptions(),
+		S3:            s3Client,
+		CustomFields:  config.CustomFields,
+		Prefix:        config.Prefix,
 	})
 }
 
-func (f *TargetFactory) createKinesisClient(config Kinesis, parent Kinesis) target.Client {
+func (f *TargetFactory) createKinesisClient(config, parent *Kinesis) target.Client {
 	if (config.SecretRef != "" && f.secretClient != nil) || config.MountedSecret != "" {
-		f.mapSecretValues(&config, config.SecretRef, config.MountedSecret)
+		f.mapSecretValues(config, config.SecretRef, config.MountedSecret)
 	}
 
-	if config.Endpoint == "" && parent.Endpoint == "" {
+	config.MapAWSParent(parent.AWSConfig)
+	if config.Endpoint == "" {
 		return nil
-	} else if config.Endpoint == "" {
-		config.Endpoint = parent.Endpoint
 	}
 
 	sugar := zap.S()
@@ -775,32 +658,13 @@ func (f *TargetFactory) createKinesisClient(config Kinesis, parent Kinesis) targ
 		return nil
 	}
 
-	if config.AccessKeyID == "" {
-		config.AccessKeyID = parent.AccessKeyID
-	}
-
-	if config.SecretAccessKey == "" {
-		config.SecretAccessKey = parent.SecretAccessKey
-	}
-
-	if config.Region == "" {
-		config.Region = parent.Region
-	}
-
-	if config.StreamName == "" && parent.StreamName == "" {
+	setFallback(&config.StreamName, parent.StreamName)
+	if config.StreamName == "" {
 		sugar.Errorf("%s.StreamName has not been declared", config.Name)
 		return nil
-	} else if config.StreamName == "" {
-		config.StreamName = parent.StreamName
 	}
 
-	if config.MinimumPriority == "" {
-		config.MinimumPriority = parent.MinimumPriority
-	}
-
-	if !config.SkipExisting {
-		config.SkipExisting = parent.SkipExisting
-	}
+	config.MapBaseParent(parent.TargetBaseOptions)
 
 	kinesisClient := helper.NewKinesisClient(
 		config.AccessKeyID,
@@ -813,26 +677,20 @@ func (f *TargetFactory) createKinesisClient(config Kinesis, parent Kinesis) targ
 	sugar.Infof("%s configured", config.Name)
 
 	return kinesis.NewClient(kinesis.Options{
-		ClientOptions: target.ClientOptions{
-			Name:                  config.Name,
-			SkipExistingOnStartup: config.SkipExisting,
-			ResultFilter:          createResultFilter(config.Filter, config.MinimumPriority, config.Sources),
-			ReportFilter:          createReportFilter(config.Filter),
-		},
-		CustomFields: config.CustomFields,
-		Kinesis:      kinesisClient,
+		ClientOptions: config.ClientOptions(),
+		CustomFields:  config.CustomFields,
+		Kinesis:       kinesisClient,
 	})
 }
 
-func (f *TargetFactory) createSecurityHub(config SecurityHub, parent SecurityHub) target.Client {
+func (f *TargetFactory) createSecurityHub(config, parent *SecurityHub) target.Client {
 	if (config.SecretRef != "" && f.secretClient != nil) || config.MountedSecret != "" {
-		f.mapSecretValues(&config, config.SecretRef, config.MountedSecret)
+		f.mapSecretValues(config, config.SecretRef, config.MountedSecret)
 	}
 
-	if config.AccountID == "" && parent.AccountID == "" {
+	setFallback(&config.AccountID, parent.AccountID)
+	if config.AccountID == "" {
 		return nil
-	} else if config.AccountID == "" {
-		config.AccountID = parent.AccountID
 	}
 
 	sugar := zap.S()
@@ -842,29 +700,8 @@ func (f *TargetFactory) createSecurityHub(config SecurityHub, parent SecurityHub
 		return nil
 	}
 
-	if config.AccessKeyID == "" {
-		config.AccessKeyID = parent.AccessKeyID
-	}
-
-	if config.SecretAccessKey == "" {
-		config.SecretAccessKey = parent.SecretAccessKey
-	}
-
-	if config.Region == "" {
-		config.Region = parent.Region
-	}
-
-	if config.Endpoint == "" {
-		config.Endpoint = parent.Endpoint
-	}
-
-	if config.MinimumPriority == "" {
-		config.MinimumPriority = parent.MinimumPriority
-	}
-
-	if !config.SkipExisting {
-		config.SkipExisting = parent.SkipExisting
-	}
+	config.MapAWSParent(parent.AWSConfig)
+	config.MapBaseParent(parent.TargetBaseOptions)
 
 	client := helper.NewHubClient(
 		config.AccessKeyID,
@@ -876,52 +713,35 @@ func (f *TargetFactory) createSecurityHub(config SecurityHub, parent SecurityHub
 	sugar.Infof("%s configured", config.Name)
 
 	return securityhub.NewClient(securityhub.Options{
-		ClientOptions: target.ClientOptions{
-			Name:                  config.Name,
-			SkipExistingOnStartup: config.SkipExisting,
-			ResultFilter:          createResultFilter(config.Filter, config.MinimumPriority, config.Sources),
-			ReportFilter:          createReportFilter(config.Filter),
-		},
-		CustomFields: config.CustomFields,
-		Client:       client,
-		AccountID:    config.AccountID,
-		Region:       config.Region,
+		ClientOptions: config.ClientOptions(),
+		CustomFields:  config.CustomFields,
+		Client:        client,
+		AccountID:     config.AccountID,
+		Region:        config.Region,
 	})
 }
 
-func (f *TargetFactory) createGCSClient(config GCS, parent GCS) target.Client {
+func (f *TargetFactory) createGCSClient(config, parent *GCS) target.Client {
 	if (config.SecretRef != "" && f.secretClient != nil) || config.MountedSecret != "" {
-		f.mapSecretValues(&config, config.SecretRef, config.MountedSecret)
+		f.mapSecretValues(config, config.SecretRef, config.MountedSecret)
 	}
 
-	if config.Bucket == "" && parent.Bucket == "" {
+	setFallback(&config.Bucket, parent.Bucket)
+	if config.Bucket == "" {
 		return nil
-	} else if config.Bucket == "" {
-		config.Bucket = parent.Bucket
 	}
 
 	sugar := zap.S()
 
-	if config.Credentials == "" && parent.Credentials == "" {
+	setFallback(&config.Credentials, parent.Credentials)
+	if config.Credentials == "" {
 		sugar.Errorf("%s.Credentials has not been declared", config.Name)
 		return nil
-	} else if config.Credentials == "" {
-		config.Credentials = parent.Credentials
 	}
 
-	if config.Prefix == "" && parent.Prefix == "" {
-		config.Prefix = "policy-reporter"
-	} else if config.Prefix == "" {
-		config.Prefix = parent.Prefix
-	}
+	setFallback(&config.Prefix, parent.Prefix, "policy-reporter")
 
-	if config.MinimumPriority == "" {
-		config.MinimumPriority = parent.MinimumPriority
-	}
-
-	if !config.SkipExisting {
-		config.SkipExisting = parent.SkipExisting
-	}
+	config.MapBaseParent(parent.TargetBaseOptions)
 
 	gcsClient := helper.NewGCSClient(
 		context.Background(),
@@ -935,15 +755,10 @@ func (f *TargetFactory) createGCSClient(config GCS, parent GCS) target.Client {
 	sugar.Infof("%s configured", config.Name)
 
 	return gcs.NewClient(gcs.Options{
-		ClientOptions: target.ClientOptions{
-			Name:                  config.Name,
-			SkipExistingOnStartup: config.SkipExisting,
-			ResultFilter:          createResultFilter(config.Filter, config.MinimumPriority, config.Sources),
-			ReportFilter:          createReportFilter(config.Filter),
-		},
-		Client:       gcsClient,
-		CustomFields: config.CustomFields,
-		Prefix:       config.Prefix,
+		ClientOptions: config.ClientOptions(),
+		Client:        gcsClient,
+		CustomFields:  config.CustomFields,
+		Prefix:        config.Prefix,
 	})
 }
 
@@ -1058,6 +873,10 @@ func (f *TargetFactory) mapSecretValues(config any, ref, mountedSecret string) {
 		if values.Host != "" {
 			c.Host = values.Host
 		}
+	case *GoogleChat:
+		if values.Webhook != "" {
+			c.Webhook = values.Webhook
+		}
 	}
 }
 
@@ -1100,4 +919,21 @@ func checkAWSConfig(name string, config AWSConfig, parent AWSConfig) error {
 	}
 
 	return nil
+}
+
+func setFallback(config *string, parents ...string) {
+	if *config == "" {
+		for _, p := range parents {
+			if p != "" {
+				*config = p
+				return
+			}
+		}
+	}
+}
+
+func setBool(config *bool, parent bool) {
+	if *config == false {
+		*config = parent
+	}
 }
