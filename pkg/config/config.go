@@ -247,10 +247,17 @@ type EmailReports struct {
 	TitlePrefix string         `mapstructure:"titlePrefix"`
 }
 
+// BasicAuth configuration
+type BasicAuth struct {
+	Username string `mapstructure:"username"`
+	Password string `mapstructure:"password"`
+}
+
 // API configuration
 type API struct {
-	Port    int  `mapstructure:"port"`
-	Logging bool `mapstructure:"logging"`
+	Port      int       `mapstructure:"port"`
+	Logging   bool      `mapstructure:"logging"`
+	BasicAuth BasicAuth `mapstructure:"basicAuth"`
 }
 
 // REST configuration

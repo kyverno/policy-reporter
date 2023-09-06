@@ -50,6 +50,9 @@ clusters: []
 #   kyvernoApi: https://policy-reporter-kyverno-plugin.external.cluster # (optional) reachable external Policy Reporter Kyverno Plugin REST API
 #   skipTLS: false
 #   certificate: "/app/certs/root.ca"
+#   basicAuth:
+#     username: ""
+#     password: ""
 
 # define custom filter for policy report results based on (Cluster)PolicyReport labels
 # exmaple - use a owner label on all reports belonging to a dedicated team and add the label as additional custom filter
@@ -220,3 +223,9 @@ global:
   namespace: ""
   # additional labels added on each resource
   labels: {}
+  # basicAuth for APIs and metrics
+  basicAuth:
+    # HTTP BasicAuth username
+    username: ""
+    # HTTP BasicAuth password
+    password: ""

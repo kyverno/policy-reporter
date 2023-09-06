@@ -58,10 +58,19 @@ func (r *Resolver) APIServer(synced func() bool) api.Server {
 		logger, _ = r.Logger()
 	}
 
+	var auth *api.BasicAuth
+	if r.config.API.BasicAuth.Username != "" && r.config.API.BasicAuth.Password != "" {
+		auth = &api.BasicAuth{
+			Username: r.config.API.BasicAuth.Username,
+			Password: r.config.API.BasicAuth.Password,
+		}
+	}
+
 	return api.NewServer(
 		r.TargetClients(),
 		r.config.API.Port,
 		logger,
+		auth,
 		synced,
 	)
 }
