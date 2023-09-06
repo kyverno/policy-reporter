@@ -52,10 +52,24 @@ type Resolver struct {
 }
 
 // APIServer resolver method
-func (r *Resolver) APIServer(synced func() bool) api.Server {
+func (r *Resolver) APIServer(ctx context.Context, synced func() bool) api.Server {
 	var logger *zap.Logger
 	if r.config.API.Logging {
 		logger, _ = r.Logger()
+	}
+
+	if r.config.API.BasicAuth.SecretRef != "" {
+		values, err := r.SecretClient().Get(ctx, r.config.API.BasicAuth.SecretRef)
+		if err != nil {
+			zap.L().Error("failed to load basic auth secret", zap.Error(err))
+		}
+
+		if values.Username != "" {
+			r.config.API.BasicAuth.Username = values.Username
+		}
+		if values.Password != "" {
+			r.config.API.BasicAuth.Password = values.Password
+		}
 	}
 
 	var auth *api.BasicAuth
@@ -64,6 +78,8 @@ func (r *Resolver) APIServer(synced func() bool) api.Server {
 			Username: r.config.API.BasicAuth.Username,
 			Password: r.config.API.BasicAuth.Password,
 		}
+
+		zap.L().Info("API BasicAuth enabled")
 	}
 
 	return api.NewServer(

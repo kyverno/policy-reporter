@@ -78,6 +78,21 @@ spec:
           {{- end }}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
+          {{- if .Values.global.basicAuth.secretRef }}
+          env:
+          - name: API_AUTH_USERNAME
+            valueFrom:
+              secretKeyRef:
+                name: {{ .Values.global.basicAuth.secretRef }}
+                key: username
+                optional: false
+          - name: API_AUTH_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: {{ .Values.global.basicAuth.secretRef }}
+                key: password
+                optional: false
+          {{- end }}
       volumes:
       - name: config-file
         configMap:

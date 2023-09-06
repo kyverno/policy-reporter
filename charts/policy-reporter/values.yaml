@@ -207,6 +207,8 @@ global:
     username: ""
     # HTTP BasicAuth password
     password: ""
+    # read credentials from secret
+    secretRef: ""
 
 # configure mappings from policy to priority
 # you can use default to configure a default priority for fail results

@@ -201,4 +201,6 @@ global:
     username: ""
     # HTTP BasicAuth password
     password: ""
+    # read credentials from secret
+    secretRef: ""
 

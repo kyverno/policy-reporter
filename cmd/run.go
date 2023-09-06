@@ -52,7 +52,7 @@ func newRunCMD(version string) *cobra.Command {
 				return err
 			}
 
-			server := resolver.APIServer(client.HasSynced)
+			server := resolver.APIServer(cmd.Context(), client.HasSynced)
 
 			g := &errgroup.Group{}
 

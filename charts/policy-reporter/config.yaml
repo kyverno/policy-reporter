@@ -378,6 +378,7 @@ api:
   basicAuth:
     username: {{ .Values.global.basicAuth.username }}
     password: {{ .Values.global.basicAuth.password }}
+    secretRef: {{ .Values.global.basicAuth.secretRef }}
 
 database:
   type: {{ .Values.database.type }}

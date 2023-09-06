@@ -30,6 +30,15 @@ spec:
       username:
         name: {{ include "monitoring.fullname" . }}-auth
         key: username
+        key: username
+    {{- else if .Values.global.basicAuth.secretRef }}
+    basicAuth:
+      password:
+        name: {{ .Values.global.basicAuth.secretRef }}
+        key: password
+      username:
+        name: {{ .Values.global.basicAuth.secretRef }}
+        key: username
     {{- end }}
     honorLabels: {{ .Values.serviceMonitor.honorLabels }}
     {{- if .Values.serviceMonitor.scrapeTimeout }}
