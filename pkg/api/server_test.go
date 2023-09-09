@@ -24,7 +24,13 @@ func Test_NewServer(t *testing.T) {
 
 	port := int(rnd * 10000)
 
-	server := api.NewServer(make([]target.Client, 0), port, logger, nil, func() bool { return true })
+	server := api.NewServer(
+		make([]target.Client, 0),
+		port,
+		logger,
+		nil,
+		func() bool { return true },
+	)
 
 	server.RegisterMetricsHandler()
 	server.RegisterV1Handler(nil)
@@ -63,4 +69,18 @@ func Test_NewServer(t *testing.T) {
 	}
 
 	<-serviceDone
+}
+
+func Test_SetupServerWithAuth(t *testing.T) {
+	server := api.NewServer(
+		make([]target.Client, 0),
+		8080,
+		logger,
+		&api.BasicAuth{Username: "user", Password: "password"},
+		func() bool { return true },
+	)
+
+	server.RegisterMetricsHandler()
+	server.RegisterV1Handler(nil)
+	server.RegisterProfilingHandler()
 }
