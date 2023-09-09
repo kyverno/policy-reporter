@@ -39,7 +39,7 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       serviceAccountName: {{ include "ui.serviceAccountName" . }}
-      automountServiceAccountToken: false
+      automountServiceAccountToken: true
       containers:
         - name: {{ default .Chart.Name .Values.nameOverride }}
           image: "{{ .Values.image.registry }}/{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
@@ -78,21 +78,11 @@ spec:
           {{- end }}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
-          {{- if .Values.global.basicAuth.secretRef }}
           env:
-          - name: API_AUTH_USERNAME
+          - name: POD_NAMESPACE
             valueFrom:
-              secretKeyRef:
-                name: {{ .Values.global.basicAuth.secretRef }}
-                key: username
-                optional: false
-          - name: API_AUTH_PASSWORD
-            valueFrom:
-              secretKeyRef:
-                name: {{ .Values.global.basicAuth.secretRef }}
-                key: password
-                optional: false
-          {{- end }}
+              fieldRef:
+                fieldPath: metadata.namespace
       volumes:
       - name: config-file
         configMap:

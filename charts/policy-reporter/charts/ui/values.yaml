@@ -9,7 +9,7 @@ image:
   registry: ghcr.io
   repository: kyverno/policy-reporter-ui
   pullPolicy: IfNotPresent
-  tag: 1.8.4
+  tag: 1.9.0
 
 # possible default displayModes: light/dark
 displayMode: ""
@@ -50,7 +50,8 @@ clusters: []
 #   kyvernoApi: https://policy-reporter-kyverno-plugin.external.cluster # (optional) reachable external Policy Reporter Kyverno Plugin REST API
 #   skipTLS: false
 #   certificate: "/app/certs/root.ca"
-#   basicAuth:
+#   secreRef: "" # name of an existing secret to read the clusterconfiguration from, supported keys: api, kyvernoApi, username, password, skipTLS, certificate
+#   basicAuth:   # added as HTTP BasicAuthentication Header for all requests against api and kyvernoApi
 #     username: ""
 #     password: ""
 
