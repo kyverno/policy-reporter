@@ -146,12 +146,16 @@ resources: {}
 
 serviceAccount:
   # Specifies whether a service account should be created
-  create: false
+  create: true
   # Annotations to add to the service account
   annotations: {}
   # The name of the service account to use.
   # If not set and create is true, a name is generated using the fullname template
   name: ""
+
+# Create secret reader role and rolebinding
+rbac:
+  enabled: true
 
 service:
   enabled: true

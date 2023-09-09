@@ -181,6 +181,8 @@ func (f *TargetFactory) UIClient(config *UI) target.Client {
 		return nil
 	}
 
+	setFallback(&config.Name, "UI")
+
 	zap.L().Info("UI configured")
 
 	return ui.NewClient(ui.Options{
