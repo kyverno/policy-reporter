@@ -8,6 +8,37 @@ metadata:
     app.kubernetes.io/name: policy-reporter
 ---
 apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  labels:
+    app.kubernetes.io/name: policy-reporter
+  name: policy-reporter-secret-reader
+  namespace: policy-reporter
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - secrets
+  verbs:
+  - get
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  labels:
+    app.kubernetes.io/name: policy-reporter
+  name: policy-reporter-secret-reader
+  namespace: policy-reporter
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: policy-reporter-secret-reader
+subjects:
+- kind: ServiceAccount
+  name: policy-reporter
+  namespace: policy-reporter
+---
+apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
   labels:
@@ -37,6 +68,45 @@ roleRef:
 subjects:
 - kind: "ServiceAccount"
   name: policy-reporter
+  namespace: policy-reporter
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: policy-reporter-ui
+  namespace: policy-reporter
+  labels:
+    app.kubernetes.io/name: policy-reporter
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  labels:
+    app.kubernetes.io/name: policy-reporter
+  name: policy-reporter-ui-secret-reader
+  namespace: policy-reporter
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - secrets
+  verbs:
+  - get
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  labels:
+    app.kubernetes.io/name: policy-reporter
+  name: policy-reporter-ui-secret-reader
+  namespace: policy-reporter
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: policy-reporter-ui-secret-reader
+subjects:
+- kind: ServiceAccount
+  name: policy-reporter-ui
   namespace: policy-reporter
 ---
 apiVersion: v1
@@ -91,10 +161,11 @@ spec:
       labels:
         app.kubernetes.io/name: policy-reporter-ui
     spec:
-      automountServiceAccountToken: false
+      serviceAccountName: policy-reporter-ui
+      automountServiceAccountToken: true
       containers:
         - name: ui
-          image: "ghcr.io/kyverno/policy-reporter-ui:1.8.4"
+          image: "ghcr.io/kyverno/policy-reporter-ui:1.9.0"
           imagePullPolicy: IfNotPresent
           securityContext:
             allowPrivilegeEscalation: false
@@ -120,8 +191,12 @@ spec:
             httpGet:
               path: /
               port: http
-          resources:
-            {}
+          resources: {}
+          env:
+            - name: POD_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -148,7 +223,7 @@ spec:
         fsGroup: 1234
       containers:
         - name: policy-reporter
-          image: "ghcr.io/kyverno/policy-reporter:2.15.2"
+          image: "ghcr.io/kyverno/policy-reporter:2.16.0"
           imagePullPolicy: IfNotPresent
           securityContext:
             allowPrivilegeEscalation: false
@@ -175,8 +250,12 @@ spec:
             httpGet:
               path: /ready
               port: http
-          resources:
-            {}
+          resources: {}
+          env:
+          - name: POD_NAMESPACE
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.namespace
           volumeMounts:
           - name: sqlite
             mountPath: /sqlite

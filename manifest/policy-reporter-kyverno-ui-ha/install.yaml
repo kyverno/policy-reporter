@@ -10,6 +10,37 @@ metadata:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
+  labels:
+    app.kubernetes.io/name: policy-reporter
+  name: policy-reporter-secret-reader
+  namespace: policy-reporter
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - secrets
+  verbs:
+  - get
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  labels:
+    app.kubernetes.io/name: policy-reporter
+  name: policy-reporter-secret-reader
+  namespace: policy-reporter
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: policy-reporter-secret-reader
+subjects:
+- kind: ServiceAccount
+  name: policy-reporter
+  namespace: policy-reporter
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
   name: policy-reporter-leaderelection
 rules:
 - apiGroups:
@@ -76,6 +107,37 @@ metadata:
   labels:
     app.kubernetes.io/name: kyverno-plugin
     app.kubernetes.io/instance: policy-reporter
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  labels:
+    app.kubernetes.io/name: policy-reporter
+  name: policy-reporter-kyverno-plugin-secret-reader
+  namespace: policy-reporter
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - secrets
+  verbs:
+  - get
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  labels:
+    app.kubernetes.io/name: policy-reporter
+  name: policy-reporter-kyverno-plugin-secret-reader
+  namespace: policy-reporter
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: policy-reporter-kyverno-plugin-secret-reader
+subjects:
+- kind: ServiceAccount
+  name: policy-reporter-kyverno-plugin
+  namespace: policy-reporter
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
@@ -159,6 +221,45 @@ subjects:
   namespace: policy-reporter
 ---
 apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: policy-reporter-ui
+  namespace: policy-reporter
+  labels:
+    app.kubernetes.io/name: policy-reporter
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  labels:
+    app.kubernetes.io/name: policy-reporter
+  name: policy-reporter-ui-secret-reader
+  namespace: policy-reporter
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - secrets
+  verbs:
+  - get
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  labels:
+    app.kubernetes.io/name: policy-reporter
+  name: policy-reporter-ui-secret-reader
+  namespace: policy-reporter
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: policy-reporter-ui-secret-reader
+subjects:
+- kind: ServiceAccount
+  name: policy-reporter-ui
+  namespace: policy-reporter
+---
+apiVersion: v1
 kind: Service
 metadata:
   name: policy-reporter-kyverno-plugin
@@ -238,7 +339,7 @@ spec:
       automountServiceAccountToken: true
       containers:
         - name: "kyverno-plugin"
-          image: "ghcr.io/kyverno/policy-reporter-kyverno-plugin:1.5.1"
+          image: "ghcr.io/kyverno/policy-reporter-kyverno-plugin:1.6.0"
           imagePullPolicy: IfNotPresent
           securityContext:
             allowPrivilegeEscalation: false
@@ -306,9 +407,11 @@ spec:
         app.kubernetes.io/name: policy-reporter-ui
         app.kubernetes.io/instance: policy-reporter
     spec:
+      serviceAccountName: policy-reporter-ui
+      automountServiceAccountToken: true
       containers:
         - name: ui
-          image: "ghcr.io/kyverno/policy-reporter-ui:1.8.4"
+          image: "ghcr.io/kyverno/policy-reporter-ui:1.9.0"
           imagePullPolicy: IfNotPresent
           securityContext:
             allowPrivilegeEscalation: false
@@ -337,6 +440,11 @@ spec:
               path: /
               port: http
           resources: {}
+          env:
+          - name: POD_NAMESPACE
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.namespace
           volumeMounts:
           - name: config-file
             mountPath: /app/config.yaml
@@ -372,7 +480,7 @@ spec:
         fsGroup: 1234
       containers:
         - name: policy-reporter
-          image: "ghcr.io/kyverno/policy-reporter:2.15.2"
+          image: "ghcr.io/kyverno/policy-reporter:2.16.0"
           imagePullPolicy: IfNotPresent
           securityContext:
             allowPrivilegeEscalation: false

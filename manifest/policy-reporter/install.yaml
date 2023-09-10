@@ -8,6 +8,37 @@ metadata:
     app.kubernetes.io/name: policy-reporter
 ---
 apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  labels:
+    app.kubernetes.io/name: policy-reporter
+  name: policy-reporter-secret-reader
+  namespace: policy-reporter
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - secrets
+  verbs:
+  - get
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  labels:
+    app.kubernetes.io/name: policy-reporter
+  name: policy-reporter-secret-reader
+  namespace: policy-reporter
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: policy-reporter-secret-reader
+subjects:
+- kind: ServiceAccount
+  name: policy-reporter
+  namespace: policy-reporter
+---
+apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
   labels:
@@ -82,7 +113,7 @@ spec:
       automountServiceAccountToken: true
       containers:
         - name: policy-reporter
-          image: "ghcr.io/kyverno/policy-reporter:2.15.2"
+          image: "ghcr.io/kyverno/policy-reporter:2.16.0"
           imagePullPolicy: IfNotPresent
           securityContext:
             allowPrivilegeEscalation: false
@@ -108,8 +139,12 @@ spec:
             httpGet:
               path: /ready
               port: http
-          resources:
-            {}
+          resources: {}
+          env:
+          - name: POD_NAMESPACE
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.namespace
           volumeMounts:
           - name: config-file
             mountPath: /app/config.yaml
