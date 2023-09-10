@@ -53,9 +53,6 @@ spec:
             {{- if or .Values.plugins.kyverno .Values.global.plugins.kyverno }}
             - -kyverno-plugin=http://{{ include "ui.kyvernoPluginServiceName" . }}:{{ .Values.kyvernoPlugin.port }}
             {{- end }}
-            {{- if .Values.api.overwriteHost }}
-            - -overwrite-host
-            {{- end }}
           ports:
             - name: http
               containerPort: 8080
