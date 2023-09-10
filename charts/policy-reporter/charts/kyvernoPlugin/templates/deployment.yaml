@@ -75,16 +75,30 @@ spec:
             mountPath: /app/config.yaml
             subPath: config.yaml
             readOnly: true
-          {{- if or .Values.leaderElection.enabled (gt (int .Values.replicaCount) 1) }}
           env:
-          - name: POD_NAME
-            valueFrom:
-              fieldRef:
-                fieldPath: metadata.name
           - name: POD_NAMESPACE
             valueFrom:
               fieldRef:
                 fieldPath: metadata.namespace
+          {{- if or .Values.leaderElection.enabled (gt (int .Values.replicaCount) 1) }}
+          - name: POD_NAME
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.name
+          {{- end }}
+          {{- if .Values.global.basicAuth.secretRef }}
+          - name: API_AUTH_USERNAME
+            valueFrom:
+              secretKeyRef:
+                name: {{ .Values.global.basicAuth.secretRef }}
+                key: username
+                optional: false
+          - name: API_AUTH_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: {{ .Values.global.basicAuth.secretRef }}
+                key: password
+                optional: false
           {{- end }}
       volumes:
       - name: config-file

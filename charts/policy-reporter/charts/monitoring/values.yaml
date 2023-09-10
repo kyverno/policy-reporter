@@ -131,3 +131,11 @@ global:
   namespace: ""
   # additional labels added on each resource
   labels: {}
+  # basicAuth for APIs and metrics
+  basicAuth:
+    # HTTP BasicAuth username
+    username: ""
+    # HTTP BasicAuth password
+    password: ""
+    # read credentials from secret
+    secretRef: ""

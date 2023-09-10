@@ -15,3 +15,7 @@ logging:
 
 api:
   logging: {{ .Values.api.logging }}
+  basicAuth:
+    username: {{ .Values.global.basicAuth.username }}
+    password: {{ .Values.global.basicAuth.password }}
+    secretRef: {{ .Values.global.basicAuth.secretRef }}

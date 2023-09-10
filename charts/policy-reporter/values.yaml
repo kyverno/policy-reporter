@@ -5,7 +5,7 @@ image:
   registry: ghcr.io
   repository: kyverno/policy-reporter
   pullPolicy: IfNotPresent
-  tag: 2.15.4
+  tag: 2.16.0
 
 imagePullSecrets: []
 
@@ -201,6 +201,14 @@ global:
   namespace: ""
   # additional labels added on each resource
   labels: {}
+  # basicAuth for APIs and metrics
+  basicAuth:
+    # HTTP BasicAuth username
+    username: ""
+    # HTTP BasicAuth password
+    password: ""
+    # read credentials from secret
+    secretRef: ""
 
 # configure mappings from policy to priority
 # you can use default to configure a default priority for fail results

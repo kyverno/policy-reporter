@@ -23,6 +23,23 @@ spec:
   {{- end }}
   endpoints:
   - port: rest
+    {{- if and .Values.global.basicAuth.username .Values.global.basicAuth.password }}
+    basicAuth:
+      password:
+        name: {{ include "monitoring.fullname" . }}-auth
+        key: password
+      username:
+        name: {{ include "monitoring.fullname" . }}-auth
+        key: username
+    {{- else if .Values.global.basicAuth.secretRef }}
+    basicAuth:
+      password:
+        name: {{ .Values.global.basicAuth.secretRef }}
+        key: password
+      username:
+        name: {{ .Values.global.basicAuth.secretRef }}
+        key: username
+    {{- end }}
     honorLabels: {{ .Values.kyverno.serviceMonitor.honorLabels }}
     {{- if .Values.kyverno.serviceMonitor.scrapeTimeout }}
     scrapeTimeout: {{ .Values.kyverno.serviceMonitor.scrapeTimeout }}

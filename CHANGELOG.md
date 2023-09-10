@@ -1,5 +1,18 @@
 # Changelog
 
+# 2.20.0
+* Policy Reporter
+    * Support GoogleChat as new notification target
+    * Support Telegram as new notification target
+    * Support HTTP BasicAuth for API and metrics
+    * Go update to v1.21
+* Policy Reporter UI
+    * Support HTTP BasicAuth authenticated API calls
+    * Go update to v1.21
+* Policy Reporter KyvernoPlugin
+    * Support HTTP BasicAuth for API and metrics
+    * Go update to v1.21
+
 # 2.19.4
 * Helm Chart
     * Fix ingress TLS rendering

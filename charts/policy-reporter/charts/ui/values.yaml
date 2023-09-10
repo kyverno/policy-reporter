@@ -9,7 +9,7 @@ image:
   registry: ghcr.io
   repository: kyverno/policy-reporter-ui
   pullPolicy: IfNotPresent
-  tag: 1.8.4
+  tag: 1.9.0
 
 # possible default displayModes: light/dark
 displayMode: ""
@@ -50,6 +50,10 @@ clusters: []
 #   kyvernoApi: https://policy-reporter-kyverno-plugin.external.cluster # (optional) reachable external Policy Reporter Kyverno Plugin REST API
 #   skipTLS: false
 #   certificate: "/app/certs/root.ca"
+#   secreRef: "" # name of an existing secret to read the clusterconfiguration from, supported keys: api, kyvernoApi, username, password, skipTLS, certificate
+#   basicAuth:   # added as HTTP BasicAuthentication Header for all requests against api and kyvernoApi
+#     username: ""
+#     password: ""
 
 # define custom filter for policy report results based on (Cluster)PolicyReport labels
 # exmaple - use a owner label on all reports belonging to a dedicated team and add the label as additional custom filter
@@ -142,12 +146,16 @@ resources: {}
 
 serviceAccount:
   # Specifies whether a service account should be created
-  create: false
+  create: true
   # Annotations to add to the service account
   annotations: {}
   # The name of the service account to use.
   # If not set and create is true, a name is generated using the fullname template
   name: ""
+
+# Create secret reader role and rolebinding
+rbac:
+  enabled: true
 
 service:
   enabled: true
@@ -220,3 +228,11 @@ global:
   namespace: ""
   # additional labels added on each resource
   labels: {}
+  # basicAuth for APIs and metrics
+  basicAuth:
+    # HTTP BasicAuth username
+    username: ""
+    # HTTP BasicAuth password
+    password: ""
+    # read credentials from secret
+    secretRef: ""

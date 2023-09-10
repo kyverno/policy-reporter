@@ -36,6 +36,17 @@ type httpServer struct {
 	targets []target.Client
 	synced  func() bool
 	logger  *zap.Logger
+	auth    *BasicAuth
+}
+
+func (s *httpServer) middleware(handler http.HandlerFunc) http.HandlerFunc {
+	handler = Gzip(handler)
+
+	if s.auth != nil {
+		handler = HTTPBasic(s.auth, handler)
+	}
+
+	return handler
 }
 
 func (s *httpServer) RegisterLifecycleHandler() {
@@ -46,36 +57,43 @@ func (s *httpServer) RegisterLifecycleHandler() {
 func (s *httpServer) RegisterV1Handler(finder v1.PolicyReportFinder) {
 	handler := v1.NewHandler(finder)
 
-	s.mux.HandleFunc("/v1/targets", Gzip(handler.TargetsHandler(s.targets)))
-	s.mux.HandleFunc("/v1/namespaces", Gzip(handler.NamespaceListHandler()))
-	s.mux.HandleFunc("/v1/rule-status-count", Gzip(handler.RuleStatusCountHandler()))
+	s.mux.HandleFunc("/v1/targets", s.middleware(handler.TargetsHandler(s.targets)))
+	s.mux.HandleFunc("/v1/namespaces", s.middleware(handler.NamespaceListHandler()))
+	s.mux.HandleFunc("/v1/rule-status-count", s.middleware(handler.RuleStatusCountHandler()))
 
-	s.mux.HandleFunc("/v1/policy-reports", Gzip(handler.PolicyReportListHandler()))
-	s.mux.HandleFunc("/v1/cluster-policy-reports", Gzip(handler.ClusterPolicyReportListHandler()))
+	s.mux.HandleFunc("/v1/policy-reports", s.middleware(handler.PolicyReportListHandler()))
+	s.mux.HandleFunc("/v1/cluster-policy-reports", s.middleware(handler.ClusterPolicyReportListHandler()))
 
-	s.mux.HandleFunc("/v1/namespaced-resources/categories", Gzip(handler.NamespacedCategoryListHandler()))
-	s.mux.HandleFunc("/v1/namespaced-resources/policies", Gzip(handler.NamespacedResourcesPolicyListHandler()))
-	s.mux.HandleFunc("/v1/namespaced-resources/rules", Gzip(handler.NamespacedResourcesRuleListHandler()))
-	s.mux.HandleFunc("/v1/namespaced-resources/kinds", Gzip(handler.NamespacedResourcesKindListHandler()))
-	s.mux.HandleFunc("/v1/namespaced-resources/resources", Gzip(handler.NamespacedResourcesListHandler()))
-	s.mux.HandleFunc("/v1/namespaced-resources/sources", Gzip(handler.NamespacedSourceListHandler()))
-	s.mux.HandleFunc("/v1/namespaced-resources/report-labels", Gzip(handler.NamespacedReportLabelListHandler()))
-	s.mux.HandleFunc("/v1/namespaced-resources/status-counts", Gzip(handler.NamespacedResourcesStatusCountsHandler()))
-	s.mux.HandleFunc("/v1/namespaced-resources/results", Gzip(handler.NamespacedResourcesResultHandler()))
+	s.mux.HandleFunc("/v1/namespaced-resources/categories", s.middleware(handler.NamespacedCategoryListHandler()))
+	s.mux.HandleFunc("/v1/namespaced-resources/policies", s.middleware(handler.NamespacedResourcesPolicyListHandler()))
+	s.mux.HandleFunc("/v1/namespaced-resources/rules", s.middleware(handler.NamespacedResourcesRuleListHandler()))
+	s.mux.HandleFunc("/v1/namespaced-resources/kinds", s.middleware(handler.NamespacedResourcesKindListHandler()))
+	s.mux.HandleFunc("/v1/namespaced-resources/resources", s.middleware(handler.NamespacedResourcesListHandler()))
+	s.mux.HandleFunc("/v1/namespaced-resources/sources", s.middleware(handler.NamespacedSourceListHandler()))
+	s.mux.HandleFunc("/v1/namespaced-resources/report-labels", s.middleware(handler.NamespacedReportLabelListHandler()))
+	s.mux.HandleFunc("/v1/namespaced-resources/status-counts", s.middleware(handler.NamespacedResourcesStatusCountsHandler()))
+	s.mux.HandleFunc("/v1/namespaced-resources/results", s.middleware(handler.NamespacedResourcesResultHandler()))
 
-	s.mux.HandleFunc("/v1/cluster-resources/policies", Gzip(handler.ClusterResourcesPolicyListHandler()))
-	s.mux.HandleFunc("/v1/cluster-resources/rules", Gzip(handler.ClusterResourcesRuleListHandler()))
-	s.mux.HandleFunc("/v1/cluster-resources/kinds", Gzip(handler.ClusterResourcesKindListHandler()))
-	s.mux.HandleFunc("/v1/cluster-resources/resources", Gzip(handler.ClusterResourcesListHandler()))
+	s.mux.HandleFunc("/v1/cluster-resources/policies", s.middleware(handler.ClusterResourcesPolicyListHandler()))
+	s.mux.HandleFunc("/v1/cluster-resources/rules", s.middleware(handler.ClusterResourcesRuleListHandler()))
+	s.mux.HandleFunc("/v1/cluster-resources/kinds", s.middleware(handler.ClusterResourcesKindListHandler()))
+	s.mux.HandleFunc("/v1/cluster-resources/resources", s.middleware(handler.ClusterResourcesListHandler()))
 	s.mux.HandleFunc("/v1/cluster-resources/sources", Gzip(handler.ClusterResourcesSourceListHandler()))
-	s.mux.HandleFunc("/v1/cluster-resources/report-labels", Gzip(handler.ClusterReportLabelListHandler()))
-	s.mux.HandleFunc("/v1/cluster-resources/status-counts", Gzip(handler.ClusterResourcesStatusCountHandler()))
-	s.mux.HandleFunc("/v1/cluster-resources/results", Gzip(handler.ClusterResourcesResultHandler()))
-	s.mux.HandleFunc("/v1/cluster-resources/categories", Gzip(handler.ClusterCategoryListHandler()))
+	s.mux.HandleFunc("/v1/cluster-resources/report-labels", s.middleware(handler.ClusterReportLabelListHandler()))
+	s.mux.HandleFunc("/v1/cluster-resources/status-counts", s.middleware(handler.ClusterResourcesStatusCountHandler()))
+	s.mux.HandleFunc("/v1/cluster-resources/results", s.middleware(handler.ClusterResourcesResultHandler()))
+	s.mux.HandleFunc("/v1/cluster-resources/categories", s.middleware(handler.ClusterCategoryListHandler()))
 }
 
 func (s *httpServer) RegisterMetricsHandler() {
-	s.mux.Handle("/metrics", promhttp.Handler())
+	handler := promhttp.Handler()
+
+	if s.auth != nil {
+		s.mux.HandleFunc("/metrics", HTTPBasic(s.auth, handler.ServeHTTP))
+		return
+	}
+
+	s.mux.Handle("/metrics", handler)
 }
 
 func (s *httpServer) RegisterProfilingHandler() {
@@ -95,7 +113,7 @@ func (s *httpServer) Shutdown(ctx context.Context) error {
 }
 
 // NewServer constructor for a new API Server
-func NewServer(targets []target.Client, port int, logger *zap.Logger, synced func() bool) Server {
+func NewServer(targets []target.Client, port int, logger *zap.Logger, auth *BasicAuth, synced func() bool) Server {
 	mux := http.NewServeMux()
 
 	s := &httpServer{
@@ -103,6 +121,7 @@ func NewServer(targets []target.Client, port int, logger *zap.Logger, synced fun
 		synced:  synced,
 		mux:     mux,
 		logger:  logger,
+		auth:    auth,
 		http: http.Server{
 			Addr:    fmt.Sprintf(":%d", port),
 			Handler: NewLoggerMiddleware(logger, mux),
