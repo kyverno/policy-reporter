@@ -5,8 +5,8 @@ import (
 	"crypto/tls"
 	"crypto/x509"
 	"encoding/json"
-	"io/ioutil"
 	"net/http"
+	"os"
 	"time"
 
 	"go.uber.org/zap"
@@ -86,11 +86,11 @@ func NewClient(certificatePath string, skipTLS bool) *http.Client {
 	}
 
 	client := &http.Client{
-		Transport: transport,
+		Transport: NewLoggingRoundTripper(transport),
 	}
 
 	if certificatePath != "" {
-		caCert, err := ioutil.ReadFile(certificatePath)
+		caCert, err := os.ReadFile(certificatePath)
 		if err != nil {
 			zap.L().Error("failed to read certificate", zap.String("path", certificatePath))
 			return client
