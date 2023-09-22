@@ -4,15 +4,14 @@ ARG LD_FLAGS='-s -w -linkmode external -extldflags "-static"'
 ARG TARGETPLATFORM
 
 WORKDIR /app
-COPY . .
 
 RUN export GOOS=$(echo ${TARGETPLATFORM} | cut -d / -f1) && \
     export GOARCH=$(echo ${TARGETPLATFORM} | cut -d / -f2)
 
-RUN go env
+COPY go.* ./
+RUN go env && go mod download
 
-RUN go get -d -v \
-    && go install -v
+COPY . .
 
 RUN CGO_ENABLED=1 go build -ldflags="${LD_FLAGS}" -tags="sqlite_unlock_notify" -o /app/build/policyreporter -v
 
