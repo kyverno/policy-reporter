@@ -153,7 +153,7 @@ func MapPolicyReportFilter(polr v1alpha2.ReportInterface) []*PolicyReportFilter 
 	for _, res := range polr.GetResults() {
 		kind := res.GetKind()
 		if kind == "" && polr.GetScope() != nil {
-			kind = polr.GetScope().Namespace
+			kind = polr.GetScope().Kind
 		}
 
 		value := &PolicyReportFilter{
