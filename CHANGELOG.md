@@ -1,5 +1,11 @@
 # Changelog
 
+# 2.20.1
+* Policy Reporter
+    * fix: scope kind mapping
+    * feat: add debug http logging [[#346](https://github.com/kyverno/policy-reporter/pull/346) by [blakepettersson](https://github.com/blakepettersson)]
+    * build: cache go mod [[#345](https://github.com/kyverno/policy-reporter/pull/345) by [blakepettersson](https://github.com/blakepettersson)]
+
 # 2.20.0
 * Policy Reporter
     * Support GoogleChat as new notification target
