@@ -598,7 +598,7 @@ func (f *TargetFactory) createS3Client(config, parent *S3) target.Client {
 	}
 
 	config.MapAWSParent(parent.AWSConfig)
-	if config.Endpoint == "" {
+	if config.Endpoint == "" && !hasAWSIdentity() {
 		return nil
 	}
 
@@ -902,11 +902,15 @@ func NewTargetFactory(secretClient secrets.Client) *TargetFactory {
 	return &TargetFactory{secretClient: secretClient}
 }
 
-func checkAWSConfig(name string, config AWSConfig, parent AWSConfig) error {
+func hasAWSIdentity() bool {
 	arn := os.Getenv("AWS_ROLE_ARN")
 	file := os.Getenv("AWS_WEB_IDENTITY_TOKEN_FILE")
 
-	noEnvConfig := arn == "" && file == ""
+	return arn != "" && file != ""
+}
+
+func checkAWSConfig(name string, config AWSConfig, parent AWSConfig) error {
+	noEnvConfig := !hasAWSIdentity()
 
 	if noEnvConfig && (config.AccessKeyID == "" && parent.AccessKeyID == "") {
 		return fmt.Errorf("%s.AccessKeyID has not been declared", name)
