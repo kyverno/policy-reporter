@@ -78,4 +78,7 @@ type PolicyReportFinder interface {
 	FetchClusterReportLabels(context.Context, Filter) (map[string][]string, error)
 	// FetchNamespacedReportLabels from PolicyReports
 	FetchNamespacedReportLabels(context.Context, Filter) (map[string][]string, error)
+
+	FetchFindingCounts(context.Context, Filter) (*Findings, error)
+	FetchSources(context.Context) ([]string, error)
 }

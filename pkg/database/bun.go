@@ -21,6 +21,7 @@ import (
 
 	api "github.com/kyverno/policy-reporter/pkg/api/v1"
 	"github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
+	"github.com/kyverno/policy-reporter/pkg/helper"
 	"github.com/kyverno/policy-reporter/pkg/report"
 )
 
@@ -39,6 +40,11 @@ type Store struct {
 
 	jsonExtractLayout string
 }
+
+var (
+	withNamespace    bool = true
+	withClusterscope bool = false
+)
 
 func (s *Store) CreateSchemas(ctx context.Context) error {
 	if s.db.Dialect().Name() == dialect.SQLite {
@@ -359,19 +365,68 @@ func (s *Store) FetchClusterResources(ctx context.Context, filter api.Filter) ([
 }
 
 func (s *Store) FetchClusterPolicies(ctx context.Context, filter api.Filter) ([]string, error) {
-	return s.fetchFilterOptions(ctx, "policy", filter, false)
+	return s.fetchFilterOptions(ctx, "policy", filter, &withClusterscope)
 }
 
 func (s *Store) FetchClusterKinds(ctx context.Context, filter api.Filter) ([]string, error) {
-	return s.fetchFilterOptions(ctx, "kind", filter, false)
+	return s.fetchFilterOptions(ctx, "kind", filter, &withClusterscope)
 }
 
 func (s *Store) FetchClusterCategories(ctx context.Context, filter api.Filter) ([]string, error) {
-	return s.fetchFilterOptions(ctx, "category", filter, false)
+	return s.fetchFilterOptions(ctx, "category", filter, &withClusterscope)
 }
 
 func (s *Store) FetchClusterSources(ctx context.Context) ([]string, error) {
-	return s.fetchFilterOptions(ctx, "source", api.Filter{}, false)
+	return s.fetchFilterOptions(ctx, "source", api.Filter{}, &withClusterscope)
+}
+
+func (s *Store) FetchSources(ctx context.Context) ([]string, error) {
+	return s.fetchFilterOptions(ctx, "source", api.Filter{}, nil)
+}
+
+func (s *Store) FetchFindingCounts(ctx context.Context, filter api.Filter) (*api.Findings, error) {
+	query := s.db.
+		NewSelect().
+		TableExpr("policy_report_filter as f").
+		ColumnExpr("SUM(f.count) as count, f.result as status, source").
+		Where("status IN (?)", bun.In([]string{v1alpha2.StatusPass, v1alpha2.StatusFail, v1alpha2.StatusWarn, v1alpha2.StatusError})).
+		Group("status", "source")
+
+	if len(filter.ReportLabel) > 0 {
+		query.Join("JOIN policy_report AS pr ON pr.id = f.policy_report_id")
+	}
+
+	s.addFilter(query, filter)
+	addPolicyReportFilterFilter(query, filter)
+
+	results := make([]api.StatusCount, 0)
+
+	err := query.Scan(ctx, &results)
+	if err != nil {
+		zap.L().Error("failed to load cluster status counts", zap.Error(err))
+		return nil, err
+	}
+
+	findings := make(map[string]*api.FindingCounts, 0)
+	total := 0
+	for _, count := range results {
+		if finding, ok := findings[count.Source]; ok {
+			finding.Counts[count.Status] = count.Count
+			finding.Total = finding.Total + count.Count
+		} else {
+			findings[count.Source] = &api.FindingCounts{
+				Source: count.Source,
+				Total:  count.Count,
+				Counts: map[string]int{
+					count.Status: count.Count,
+				},
+			}
+		}
+
+		total += count.Count
+	}
+
+	return &api.Findings{Counts: helper.ToList(findings), Total: total}, nil
 }
 
 func (s *Store) FetchClusterStatusCounts(ctx context.Context, filter api.Filter) ([]api.StatusCount, error) {
@@ -514,23 +569,23 @@ func (s *Store) FetchNamespacedResources(ctx context.Context, filter api.Filter)
 }
 
 func (s *Store) FetchNamespacedPolicies(ctx context.Context, filter api.Filter) ([]string, error) {
-	return s.fetchFilterOptions(ctx, "policy", filter, true)
+	return s.fetchFilterOptions(ctx, "policy", filter, &withNamespace)
 }
 
 func (s *Store) FetchNamespacedKinds(ctx context.Context, filter api.Filter) ([]string, error) {
-	return s.fetchFilterOptions(ctx, "kind", filter, true)
+	return s.fetchFilterOptions(ctx, "kind", filter, &withNamespace)
 }
 
 func (s *Store) FetchNamespacedCategories(ctx context.Context, filter api.Filter) ([]string, error) {
-	return s.fetchFilterOptions(ctx, "category", filter, true)
+	return s.fetchFilterOptions(ctx, "category", filter, &withNamespace)
 }
 
 func (s *Store) FetchNamespacedSources(ctx context.Context) ([]string, error) {
-	return s.fetchFilterOptions(ctx, "source", api.Filter{}, true)
+	return s.fetchFilterOptions(ctx, "source", api.Filter{}, &withNamespace)
 }
 
 func (s *Store) FetchNamespaces(ctx context.Context, filter api.Filter) ([]string, error) {
-	return s.fetchFilterOptions(ctx, "f.namespace", filter, true)
+	return s.fetchFilterOptions(ctx, "f.namespace", filter, &withNamespace)
 }
 
 func (s *Store) FetchNamespacedStatusCounts(ctx context.Context, filter api.Filter) ([]api.NamespacedStatusCount, error) {
@@ -747,7 +802,7 @@ func (s *Store) fetchResults(ctx context.Context, id string) ([]v1alpha2.PolicyR
 	return list, nil
 }
 
-func (s *Store) fetchFilterOptions(ctx context.Context, option string, filter api.Filter, namespaced bool) ([]string, error) {
+func (s *Store) fetchFilterOptions(ctx context.Context, option string, filter api.Filter, namespaced *bool) ([]string, error) {
 	list := make([]string, 0)
 
 	query := s.db.
@@ -758,9 +813,9 @@ func (s *Store) fetchFilterOptions(ctx context.Context, option string, filter ap
 		Order(option+" ASC").
 		Where(`? != ''`, bun.Ident(option))
 
-	if namespaced {
+	if *namespaced == true {
 		query.Where(`f.namespace != ''`)
-	} else {
+	} else if *namespaced == false {
 		query.Where(`f.namespace = ''`)
 	}
 

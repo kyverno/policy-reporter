@@ -250,6 +250,29 @@ func (h *Handler) NamespaceListHandler() http.HandlerFunc {
 	}
 }
 
+func (h *Handler) FetchFindingCountsHandler() http.HandlerFunc {
+	return func(w http.ResponseWriter, req *http.Request) {
+		list, err := h.finder.FetchFindingCounts(req.Context(), Filter{
+			Status:     req.URL.Query()["status"],
+			Sources:    req.URL.Query()["sources"],
+			Categories: req.URL.Query()["categories"],
+			Policies:   req.URL.Query()["policies"],
+			Rules:      req.URL.Query()["rules"],
+		})
+		h.logError(err)
+		helper.SendJSONResponse(w, list, err)
+	}
+}
+
+// SourceListHandler REST API
+func (h *Handler) SourceListHandler() http.HandlerFunc {
+	return func(w http.ResponseWriter, req *http.Request) {
+		list, err := h.finder.FetchSources(req.Context())
+		h.logError(err)
+		helper.SendJSONResponse(w, list, err)
+	}
+}
+
 func buildPagination(req *http.Request, defaultOrder []string) Pagination {
 	page, err := strconv.Atoi(req.URL.Query().Get("page"))
 	if err != nil || page < 1 {

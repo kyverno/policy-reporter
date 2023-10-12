@@ -83,6 +83,9 @@ func (s *httpServer) RegisterV1Handler(finder v1.PolicyReportFinder) {
 	s.mux.HandleFunc("/v1/cluster-resources/status-counts", s.middleware(handler.ClusterResourcesStatusCountHandler()))
 	s.mux.HandleFunc("/v1/cluster-resources/results", s.middleware(handler.ClusterResourcesResultHandler()))
 	s.mux.HandleFunc("/v1/cluster-resources/categories", s.middleware(handler.ClusterCategoryListHandler()))
+
+	s.mux.HandleFunc("/v1/sources", s.middleware(handler.SourceListHandler()))
+	s.mux.HandleFunc("/v1/finding-counts", s.middleware(handler.FetchFindingCountsHandler()))
 }
 
 func (s *httpServer) RegisterMetricsHandler() {

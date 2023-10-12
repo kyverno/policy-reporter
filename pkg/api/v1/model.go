@@ -31,10 +31,20 @@ type ResultList struct {
 }
 
 type StatusCount struct {
+	Source string `json:"source,omitempty"`
 	Status string `json:"status"`
 	Count  int    `json:"count"`
 }
 
+type Findings struct {
+	Total  int             `json:"total"`
+	Counts []*FindingCounts `json:"counts"`
+}
+type FindingCounts struct {
+	Total  int            `json:"total"`
+	Source string         `json:"source"`
+	Counts map[string]int `json:"counts"`
+}
 type NamespacedStatusCount struct {
 	Status string           `json:"status"`
 	Items  []NamespaceCount `json:"items"`
