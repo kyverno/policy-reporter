@@ -1,10 +1,12 @@
 package securityhub
 
 import (
+	"context"
 	"fmt"
 	"time"
 
-	hub "github.com/aws/aws-sdk-go/service/securityhub"
+	hub "github.com/aws/aws-sdk-go-v2/service/securityhub"
+	"github.com/aws/aws-sdk-go-v2/service/securityhub/types"
 	"go.uber.org/zap"
 
 	"github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
@@ -15,7 +17,7 @@ import (
 type Options struct {
 	target.ClientOptions
 	CustomFields map[string]string
-	Client       *hub.SecurityHub
+	Client       *hub.Client
 	AccountID    string
 	Region       string
 }
@@ -23,7 +25,7 @@ type Options struct {
 type client struct {
 	target.BaseClient
 	customFields map[string]string
-	hub          *hub.SecurityHub
+	hub          *hub.Client
 	accountID    string
 	region       string
 }
@@ -41,37 +43,37 @@ func (c *client) Send(result v1alpha2.PolicyReportResult) {
 
 	t := time.Unix(result.Timestamp.Seconds, int64(result.Timestamp.Nanos))
 
-	res, err := c.hub.BatchImportFindings(&hub.BatchImportFindingsInput{
-		Findings: []*hub.AwsSecurityFinding{
+	res, err := c.hub.BatchImportFindings(context.TODO(), &hub.BatchImportFindingsInput{
+		Findings: []types.AwsSecurityFinding{
 			{
 				Id:            &result.ID,
 				AwsAccountId:  &c.accountID,
 				SchemaVersion: toPointer("2018-10-08"),
 				ProductArn:    toPointer("arn:aws:securityhub:" + c.region + ":" + c.accountID + ":product/" + c.accountID + "/default"),
 				GeneratorId:   toPointer(fmt.Sprintf("%s/%s", result.Source, generator)),
-				Types:         []*string{toPointer("Software and Configuration Checks")},
+				Types:         []string{"Software and Configuration Checks"},
 				CreatedAt:     toPointer(t.Format("2006-01-02T15:04:05.999999999Z07:00")),
 				UpdatedAt:     toPointer(t.Format("2006-01-02T15:04:05.999999999Z07:00")),
-				Severity: &hub.Severity{
+				Severity: &types.Severity{
 					Label: mapSeverity(result.Severity),
 				},
 				Title:       &title,
 				Description: &result.Message,
-				ProductFields: map[string]*string{
-					"Product Name": toPointer("Policy Reporter"),
+				ProductFields: map[string]string{
+					"Product Name": "Policy Reporter",
 				},
-				Resources: []*hub.Resource{
+				Resources: []types.Resource{
 					{
 						Type:      toPointer("Other"),
 						Region:    &c.region,
-						Partition: toPointer("aws"),
+						Partition: types.PartitionAws,
 						Id:        mapResourceID(result),
-						Details: &hub.ResourceDetails{
+						Details: &types.ResourceDetails{
 							Other: c.mapOtherDetails(result),
 						},
 					},
 				},
-				RecordState: toPointer(hub.RecordStateActive),
+				RecordState: types.RecordStateActive,
 			},
 		},
 	})
@@ -80,26 +82,26 @@ func (c *client) Send(result v1alpha2.PolicyReportResult) {
 		return
 	}
 
-	zap.L().Info(c.Name()+": PUSH OK", zap.Int64("successCount", *res.SuccessCount), zap.Int64("failedCount", *res.FailedCount))
+	zap.L().Info(c.Name()+": PUSH OK", zap.Int32("successCount", res.SuccessCount), zap.Int32("failedCount", res.FailedCount))
 }
 
-func (c *client) mapOtherDetails(result v1alpha2.PolicyReportResult) map[string]*string {
-	details := map[string]*string{
-		"Source":   &result.Source,
-		"Category": &result.Category,
-		"Policy":   &result.Policy,
-		"Rule":     &result.Rule,
-		"Result":   toPointer(string(result.Result)),
-		"Priority": toPointer(result.Priority.String()),
+func (c *client) mapOtherDetails(result v1alpha2.PolicyReportResult) map[string]string {
+	details := map[string]string{
+		"Source":   result.Source,
+		"Category": result.Category,
+		"Policy":   result.Policy,
+		"Rule":     result.Rule,
+		"Result":   string(result.Result),
+		"Priority": result.Priority.String(),
 	}
 
 	if len(c.customFields) > 0 {
 		for property, value := range c.customFields {
-			details[property] = &value
+			details[property] = value
 		}
 
 		for property, value := range result.Properties {
-			details[property] = &value
+			details[property] = value
 		}
 	}
 
@@ -107,19 +109,19 @@ func (c *client) mapOtherDetails(result v1alpha2.PolicyReportResult) map[string]
 		res := result.GetResource()
 
 		if res.APIVersion != "" {
-			details["Resource APIVersion"] = &res.APIVersion
+			details["Resource APIVersion"] = res.APIVersion
 		}
 		if res.Kind != "" {
-			details["Resource Kind"] = &res.Kind
+			details["Resource Kind"] = res.Kind
 		}
 		if res.Namespace != "" {
-			details["Resource Namespace"] = &res.Namespace
+			details["Resource Namespace"] = res.Namespace
 		}
 		if res.Name != "" {
-			details["Resource Name"] = &res.Name
+			details["Resource Name"] = res.Name
 		}
 		if res.UID != "" {
-			details["Resource UID"] = toPointer(string(res.UID))
+			details["Resource UID"] = string(res.UID)
 		}
 	}
 
@@ -141,20 +143,20 @@ func toPointer[T any](value T) *T {
 	return &value
 }
 
-func mapSeverity(s v1alpha2.PolicySeverity) *string {
+func mapSeverity(s v1alpha2.PolicySeverity) types.SeverityLabel {
 	switch s {
 	case v1alpha2.SeverityInfo:
-		return toPointer(hub.SeverityLabelInformational)
+		return types.SeverityLabelInformational
 	case v1alpha2.SeverityLow:
-		return toPointer(hub.SeverityLabelLow)
+		return types.SeverityLabelLow
 	case v1alpha2.SeverityMedium:
-		return toPointer(hub.SeverityLabelMedium)
+		return types.SeverityLabelMedium
 	case v1alpha2.SeverityHigh:
-		return toPointer(hub.SeverityLabelHigh)
+		return types.SeverityLabelHigh
 	case v1alpha2.SeverityCritical:
-		return toPointer(hub.SeverityLabelCritical)
+		return types.SeverityLabelCritical
 	default:
-		return toPointer(hub.SeverityLabelInformational)
+		return types.SeverityLabelInformational
 	}
 }
 

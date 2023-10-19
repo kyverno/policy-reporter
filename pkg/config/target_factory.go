@@ -616,6 +616,7 @@ func (f *TargetFactory) createS3Client(config, parent *S3) target.Client {
 		return nil
 	}
 
+	setFallback(&config.Region, os.Getenv("AWS_REGION"))
 	setFallback(&config.Prefix, parent.Prefix, "policy-reporter")
 	setFallback(&config.KmsKeyID, parent.KmsKeyID)
 	setFallback(&config.ServerSideEncryption, parent.ServerSideEncryption)
@@ -630,7 +631,7 @@ func (f *TargetFactory) createS3Client(config, parent *S3) target.Client {
 		config.Endpoint,
 		config.Bucket,
 		config.PathStyle,
-		helper.WithKMS(&config.BucketKeyEnabled, &config.KmsKeyID, &config.ServerSideEncryption),
+		helper.WithKMS(config.BucketKeyEnabled, &config.KmsKeyID, &config.ServerSideEncryption),
 	)
 
 	sugar.Infof("%s configured", config.Name)

@@ -4,12 +4,13 @@ import (
 	"testing"
 	"time"
 
+	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
 	"github.com/kyverno/policy-reporter/pkg/cache"
 	"github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
 	"github.com/kyverno/policy-reporter/pkg/fixtures"
 	"github.com/kyverno/policy-reporter/pkg/listener"
 	"github.com/kyverno/policy-reporter/pkg/report"
-	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 func Test_ResultListener(t *testing.T) {

@@ -2,9 +2,10 @@ package http
 
 import (
 	"fmt"
-	"go.uber.org/zap"
 	"net/http"
 	"net/http/httputil"
+
+	"go.uber.org/zap"
 )
 
 func NewLoggingRoundTripper(roundTripper http.RoundTripper) http.RoundTripper {

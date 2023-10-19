@@ -5,15 +5,18 @@ import (
 	"text/template"
 	"time"
 
+	"go.uber.org/zap"
+	corev1 "k8s.io/api/core/v1"
+
 	"github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
 	"github.com/kyverno/policy-reporter/pkg/target"
 	"github.com/kyverno/policy-reporter/pkg/target/http"
-	"go.uber.org/zap"
-	corev1 "k8s.io/api/core/v1"
 )
 
-const messageTempl string = `[{{ .Priority }}] {{ or .Result.Policy .Result.Rule }}`
-const resourceTempl string = `{{ if .Namespace }}[{{ .Namespace }}] {{ end }} {{ .APIVersion }}/{{ .Kind }} {{ .Name }}`
+const (
+	messageTempl  string = `[{{ .Priority }}] {{ or .Result.Policy .Result.Rule }}`
+	resourceTempl string = `{{ if .Namespace }}[{{ .Namespace }}] {{ end }} {{ .APIVersion }}/{{ .Kind }} {{ .Name }}`
+)
 
 type values struct {
 	Result   v1alpha2.PolicyReportResult
@@ -94,7 +97,7 @@ func mapPayload(result v1alpha2.PolicyReportResult) (*Payload, error) {
 		return nil, err
 	}
 
-	var prio = result.Priority.String()
+	prio := result.Priority.String()
 	if prio == "" {
 		prio = v1alpha2.DebugPriority.String()
 	}
