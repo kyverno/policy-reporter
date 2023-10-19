@@ -3,9 +3,10 @@ package config_test
 import (
 	"testing"
 
+	"github.com/uptrace/bun/dialect"
+
 	"github.com/kyverno/policy-reporter/pkg/config"
 	"github.com/kyverno/policy-reporter/pkg/kubernetes/secrets"
-	"github.com/uptrace/bun/dialect"
 )
 
 func Test_ResolveDatabase(t *testing.T) {

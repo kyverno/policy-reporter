@@ -26,8 +26,7 @@ func escape(text interface{}) string {
 	return replacer.Replace(fmt.Sprintf("%v", text))
 }
 
-var (
-	notificationTempl = `*\[Policy Reporter\] \[{{ .Priority }}\] {{ escape (or .Result.Policy .Result.Rule) }}*
+var notificationTempl = `*\[Policy Reporter\] \[{{ .Priority }}\] {{ escape (or .Result.Policy .Result.Rule) }}*
 {{- if .Resource }}
 
 *Resource*: {{ .Resource.Kind }} {{ if .Resource.Namespace }}{{ escape .Resource.Namespace }}/{{ end }}{{ escape .Resource.Name }}
@@ -49,7 +48,6 @@ var (
 {{ range $key, $value := .Result.Properties }}• *{{ escape $key }}*: {{ escape $value }}
 {{ end }}
 `
-)
 
 type Payload struct {
 	Text                  string `json:"text,omitempty"`
@@ -119,7 +117,7 @@ func (e *client) Send(result v1alpha2.PolicyReportResult) {
 		res = result.GetResource()
 	}
 
-	var prio = result.Priority.String()
+	prio := result.Priority.String()
 	if prio == "" {
 		prio = v1alpha2.DebugPriority.String()
 	}
