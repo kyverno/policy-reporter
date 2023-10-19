@@ -1,4 +1,4 @@
-{{- if and (and .Values.serviceAccount.create .Values.rbac.enabled) (or .Values.leaderElection.enabled (gt (int .Values.replicaCount) 1)) -}}
+{{- if and .Values.rbac.enabled (or .Values.leaderElection.enabled (gt (int .Values.replicaCount) 1)) -}}
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
