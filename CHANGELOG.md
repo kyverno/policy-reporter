@@ -1,5 +1,15 @@
 # Changelog
 
+# 2.21.0
+* Policy Reporter
+    * Migrate to AWS SDK v2
+    * Dependency Update
+    * Create Roles/ Rolebindings when service account is not managed [[#348](https://github.com/kyverno/policy-reporter/pull/348) by [josqu4red](https://github.com/josqu4red)]
+* Policy Reporter UI
+    * Update GO dependencies
+* Policy Reporter Kyverno Plugin
+    * Update GO dependencies
+
 # 2.20.1
 * Policy Reporter
     * fix: scope kind mapping
