@@ -1,6 +1,6 @@
 # Policy Reporter
 
-![Version: v2.20.1](https://img.shields.io/badge/Version-v2.20.1-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v2.16.1](https://img.shields.io/badge/AppVersion-v2.16.1-informational?style=flat-square)
+![Version: v2.21.0](https://img.shields.io/badge/Version-v2.21.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v2.17.0](https://img.shields.io/badge/AppVersion-v2.17.0-informational?style=flat-square)
 
 ## Motivation
 
