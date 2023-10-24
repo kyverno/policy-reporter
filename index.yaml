@@ -3,6 +3,37 @@ entries:
   policy-reporter:
   - apiVersion: v2
     appVersion: 2.17.0
+    created: "2023-10-24T10:17:10.163872+02:00"
+    dependencies:
+    - condition: monitoring.enabled
+      name: monitoring
+      repository: ""
+      version: 2.8.1
+    - condition: ui.enabled
+      name: ui
+      repository: ""
+      version: 2.10.1
+    - condition: kyvernoPlugin.enabled
+      name: kyvernoPlugin
+      repository: ""
+      version: 1.6.1
+    description: 'Policy Reporter watches for PolicyReport Resources. It creates Prometheus
+      Metrics and can send rule validation events to different targets like Loki,
+      Elasticsearch, Slack or Discord '
+    digest: 208a3ff0ddae0e9f533ad081e65dfbd377232e0e123820fd2f68b7b1dd31a5fe
+    home: https://kyverno.github.io/policy-reporter
+    icon: https://github.com/kyverno/kyverno/raw/main/img/logo.png
+    maintainers:
+    - name: Frank Jogeleit
+    name: policy-reporter
+    sources:
+    - https://github.com/kyverno/policy-reporter
+    type: application
+    urls:
+    - https://github.com/kyverno/policy-reporter/releases/download/policy-reporter-2.21.1/policy-reporter-2.21.1.tgz
+    version: 2.21.1
+  - apiVersion: v2
+    appVersion: 2.17.0
     created: "2023-10-21T15:31:00.100405+02:00"
     dependencies:
     - condition: monitoring.enabled
@@ -3383,4 +3414,4 @@ entries:
     urls:
     - https://github.com/kyverno/policy-reporter/releases/download/policy-reporter-0.2.0/policy-reporter-0.2.0.tgz
     version: 0.2.0
-generated: "2023-10-21T15:31:00.101167+02:00"
+generated: "2023-10-24T10:17:10.164357+02:00"
