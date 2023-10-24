@@ -3,6 +3,12 @@
 {{- if and .Values.grafana.dashboards.multicluster.enabled .Values.grafana.dashboards.multicluster.label }}
 {{- $filters = append $filters .Values.grafana.dashboards.multicluster.label }}
 {{- end }}
+
+{{- $nsLabel := "exported_namespace" }}
+{{- if .Values.serviceMonitor.honorLabels }}
+{{- $nsLabel = "namespace" }}
+{{- end }}
+
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -119,10 +125,10 @@ data:
         "pluginVersion": "7.1.5",
         "targets": [
             {
-            "expr": "sum(policy_report_result{policy=~\"$policy\", category=~\"$category\", severity=~\"$severity\", source=~\"$source\", kind=~\"$kind\", exported_namespace=~\"$namespace\", status=\"pass\"{{ range $filters }}, {{.}}=~\"${{.}}\"{{ end }} } > 0) by (exported_namespace)",
+            "expr": "sum(policy_report_result{policy=~\"$policy\", category=~\"$category\", severity=~\"$severity\", source=~\"$source\", kind=~\"$kind\", {{ $nsLabel }}=~\"$namespace\", status=\"pass\"{{ range $filters }}, {{.}}=~\"${{.}}\"{{ end }} } > 0) by ({{ $nsLabel }})",
             "instant": true,
             "interval": "",
-            "legendFormat": "{{`{{ exported_namespace }}`}}",
+            "legendFormat": "{{ printf `{{%s}}` $nsLabel }}",
             "refId": "A"
             }
         ],
@@ -174,10 +180,10 @@ data:
         "pluginVersion": "7.1.5",
         "targets": [
             {
-            "expr": "sum(policy_report_result{policy=~\"$policy\", category=~\"$category\", severity=~\"$severity\", source=~\"$source\", kind=~\"$kind\", exported_namespace=~\"$namespace\", status=\"fail\"{{ range $filters }}, {{.}}=~\"${{.}}\"{{ end }} } > 0) by (exported_namespace)",
+            "expr": "sum(policy_report_result{policy=~\"$policy\", category=~\"$category\", severity=~\"$severity\", source=~\"$source\", kind=~\"$kind\", {{ $nsLabel }}=~\"$namespace\", status=\"fail\"{{ range $filters }}, {{.}}=~\"${{.}}\"{{ end }} } > 0) by ({{ $nsLabel }})",
             "instant": true,
             "interval": "",
-            "legendFormat": "{{`{{ exported_namespace }}`}}",
+            "legendFormat": "{{ printf `{{%s}}` $nsLabel }}",
             "refId": "A"
             }
         ],
@@ -230,10 +236,10 @@ data:
         "pluginVersion": "7.1.5",
         "targets": [
             {
-            "expr": "sum(policy_report_result{policy=~\"$policy\", category=~\"$category\", severity=~\"$severity\", source=~\"$source\", kind=~\"$kind\", exported_namespace=~\"$namespace\", status=\"warn\"{{ range $filters }}, {{.}}=~\"${{.}}\"{{ end }} } > 0) by (exported_namespace)",
+            "expr": "sum(policy_report_result{policy=~\"$policy\", category=~\"$category\", severity=~\"$severity\", source=~\"$source\", kind=~\"$kind\", {{ $nsLabel }}=~\"$namespace\", status=\"warn\"{{ range $filters }}, {{.}}=~\"${{.}}\"{{ end }} } > 0) by ({{ $nsLabel }})",
             "instant": true,
             "interval": "",
-            "legendFormat": "{{`{{ exported_namespace }}`}}",
+            "legendFormat": "{{ printf `{{%s}}` $nsLabel }}",
             "refId": "A"
             }
         ],
@@ -285,10 +291,10 @@ data:
         "pluginVersion": "7.1.5",
         "targets": [
             {
-            "expr": "sum(policy_report_result{policy=~\"$policy\", category=~\"$category\", severity=~\"$severity\", source=~\"$source\", kind=~\"$kind\", exported_namespace=~\"$namespace\", status=\"error\"{{ range $filters }}, {{.}}=~\"${{.}}\"{{ end }} } > 0) by (exported_namespace)",
+            "expr": "sum(policy_report_result{policy=~\"$policy\", category=~\"$category\", severity=~\"$severity\", source=~\"$source\", kind=~\"$kind\", {{ $nsLabel }}=~\"$namespace\", status=\"error\"{{ range $filters }}, {{.}}=~\"${{.}}\"{{ end }} } > 0) by ({{ $nsLabel }})",
             "instant": true,
             "interval": "",
-            "legendFormat": "{{`{{ exported_namespace }}`}}",
+            "legendFormat": "{{ printf `{{%s}}` $nsLabel }}",
             "refId": "A"
             }
         ],
@@ -348,9 +354,9 @@ data:
         "steppedLine": false,
         "targets": [
             {
-            "expr": "sum(policy_report_result{policy=~\"$policy\", category=~\"$category\", severity=~\"$severity\", source=~\"$source\", kind=~\"$kind\", exported_namespace=~\"$namespace\"{{ range $filters }}, {{.}}=~\"${{.}}\"{{ end }} } > 0) by (status, exported_namespace)",
+            "expr": "sum(policy_report_result{policy=~\"$policy\", category=~\"$category\", severity=~\"$severity\", source=~\"$source\", kind=~\"$kind\", {{ $nsLabel }}=~\"$namespace\"{{ range $filters }}, {{.}}=~\"${{.}}\"{{ end }} } > 0) by (status, {{ $nsLabel }})",
             "interval": "",
-            "legendFormat": "{{`{{ exported_namespace }}`}} {{`{{ status }}`}}",
+            "legendFormat": "{{ printf `{{%s}}` $nsLabel }} {{`{{ status }}`}}",
             "refId": "A"
             }
         ],
@@ -436,7 +442,7 @@ data:
         "pluginVersion": "7.1.5",
         "targets": [
             {
-            "expr": "sum(policy_report_result{policy=~\"$policy\", category=~\"$category\", severity=~\"$severity\", source=~\"$source\", kind=~\"$kind\", exported_namespace=~\"$namespace\", status=\"pass\"{{ range $filters }}, {{.}}=~\"${{.}}\"{{ end }} }) by (exported_namespace,category,policy,rule,kind,name,severity,status,source{{ range $filters }},{{.}}{{ end }} )",
+            "expr": "sum(policy_report_result{policy=~\"$policy\", category=~\"$category\", severity=~\"$severity\", source=~\"$source\", kind=~\"$kind\", {{ $nsLabel }}=~\"$namespace\", status=\"pass\"{{ range $filters }}, {{.}}=~\"${{.}}\"{{ end }} }) by ({{ $nsLabel }},category,policy,rule,kind,name,severity,status,source{{ range $filters }},{{.}}{{ end }} )",
             "format": "table",
             "instant": true,
             "interval": "",
@@ -460,7 +466,7 @@ data:
                     "Time": 0,
                     "source": 1,
                     "category": 2,
-                    "exported_namespace": 3,
+                    "{{ $nsLabel }}": 3,
                     "kind": 4,
                     "name": 5,
                     "policy": 6,
@@ -470,7 +476,7 @@ data:
                     "Value": 9
                 },
                 "renameByName": {
-                "exported_namespace": "namespace"
+                "{{ $nsLabel }}": "namespace"
                 }
             }
             }
@@ -516,7 +522,7 @@ data:
         "pluginVersion": "7.1.5",
         "targets": [
             {
-            "expr": "sum(policy_report_result{policy=~\"$policy\", category=~\"$category\", severity=~\"$severity\", source=~\"$source\", kind=~\"$kind\", exported_namespace=~\"$namespace\", status=\"fail\"{{ range $filters }}, {{.}}=~\"${{.}}\"{{ end }} }) by (exported_namespace,category,policy,rule,kind,name,severity,status,source{{ range $filters }},{{.}}{{ end }})",
+            "expr": "sum(policy_report_result{policy=~\"$policy\", category=~\"$category\", severity=~\"$severity\", source=~\"$source\", kind=~\"$kind\", {{ $nsLabel }}=~\"$namespace\", status=\"fail\"{{ range $filters }}, {{.}}=~\"${{.}}\"{{ end }} }) by ({{ $nsLabel }},category,policy,rule,kind,name,severity,status,source{{ range $filters }},{{.}}{{ end }})",
             "format": "table",
             "instant": true,
             "interval": "",
@@ -540,7 +546,7 @@ data:
                     "Time": 0,
                     "source": 1,
                     "category": 2,
-                    "exported_namespace": 3,
+                    "{{ $nsLabel }}": 3,
                     "kind": 4,
                     "name": 5,
                     "policy": 6,
@@ -550,7 +556,7 @@ data:
                     "Value": 9
                 },
                 "renameByName": {
-                "exported_namespace": "namespace"
+                "{{ $nsLabel }}": "namespace"
                 }
             }
             }
@@ -593,7 +599,7 @@ data:
         "pluginVersion": "7.1.5",
         "targets": [
             {
-            "expr": "sum(policy_report_result{policy=~\"$policy\", category=~\"$category\", severity=~\"$severity\", source=~\"$source\", kind=~\"$kind\", exported_namespace=~\"$namespace\", status=\"warn\"{{ range $filters }}, {{.}}=~\"${{.}}\"{{ end }} }) by (exported_namespace,category,policy,rule,kind,name,severity,status,source{{ range $filters }},{{.}}{{ end }} )",
+            "expr": "sum(policy_report_result{policy=~\"$policy\", category=~\"$category\", severity=~\"$severity\", source=~\"$source\", kind=~\"$kind\", {{ $nsLabel }}=~\"$namespace\", status=\"warn\"{{ range $filters }}, {{.}}=~\"${{.}}\"{{ end }} }) by ({{ $nsLabel }},category,policy,rule,kind,name,severity,status,source{{ range $filters }},{{.}}{{ end }} )",
             "format": "table",
             "instant": true,
             "interval": "",
@@ -617,7 +623,7 @@ data:
                     "Time": 0,
                     "source": 1,
                     "category": 2,
-                    "exported_namespace": 3,
+                    "{{ $nsLabel }}": 3,
                     "kind": 4,
                     "name": 5,
                     "policy": 6,
@@ -627,7 +633,7 @@ data:
                     "Value": 9
                 },
                 "renameByName": {
-                "exported_namespace": "namespace"
+                "{{ $nsLabel }}": "namespace"
                 }
             }
             }
@@ -670,7 +676,7 @@ data:
         "pluginVersion": "7.1.5",
         "targets": [
             {
-            "expr": "sum(policy_report_result{policy=~\"$policy\", category=~\"$category\", severity=~\"$severity\", source=~\"$source\", kind=~\"$kind\", exported_namespace=~\"$namespace\", status=\"error\"{{ range $filters }}, {{.}}=~\"${{.}}\"{{ end }} }) by (exported_namespace,category,policy,rule,kind,name,severity,status,source{{ range $filters }},{{.}}{{ end }} )",
+            "expr": "sum(policy_report_result{policy=~\"$policy\", category=~\"$category\", severity=~\"$severity\", source=~\"$source\", kind=~\"$kind\", {{ $nsLabel }}=~\"$namespace\", status=\"error\"{{ range $filters }}, {{.}}=~\"${{.}}\"{{ end }} }) by ({{ $nsLabel }},category,policy,rule,kind,name,severity,status,source{{ range $filters }},{{.}}{{ end }} )",
             "format": "table",
             "instant": true,
             "interval": "",
@@ -694,7 +700,7 @@ data:
                     "Time": 0,
                     "Value": 9,
                     "category": 1,
-                    "exported_namespace": 3,
+                    "{{ $nsLabel }}": 3,
                     "kind": 4,
                     "name": 5,
                     "policy": 6,
@@ -703,7 +709,7 @@ data:
                     "status": 8
                 },
                 "renameByName": {
-                "exported_namespace": "namespace"
+                "{{ $nsLabel }}": "namespace"
                 }
             }
             }
@@ -795,14 +801,14 @@ data:
         {
             "allValue": ".*",
             "datasource": "${DS_PROMETHEUS}",
-            "definition": "label_values(policy_report_result, exported_namespace)",
+            "definition": "label_values(policy_report_result, {{ $nsLabel }})",
             "hide": 0,
             "includeAll": true,
             "label": "Namespace",
             "multi": true,
             "name": "namespace",
             "options": [],
-            "query": "label_values(policy_report_result, exported_namespace)",
+            "query": "label_values(policy_report_result, {{ $nsLabel }})",
             "refresh": 2,
             "regex": "",
             "skipUrlSync": false,

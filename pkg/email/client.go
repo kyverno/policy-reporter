@@ -33,29 +33,22 @@ func (c *Client) Send(report Report, to []string) error {
 		return err
 	}
 
-	for _, to := range to {
-		msg := mail.NewMSG().
-			SetFrom(fmt.Sprintf("Policy Reporter <%s>", c.from)).
-			AddTo(to).
-			SetSubject(report.Title)
+	msg := mail.NewMSG().
+		SetFrom(fmt.Sprintf("Policy Reporter <%s>", c.from)).
+		AddTo(to...).
+		SetSubject(report.Title)
 
-		if strings.ToLower(report.Format) == "html" || report.Format == "" {
-			msg.SetBody(mail.TextHTML, report.Message)
-		} else {
-			msg.SetBody(mail.TextPlain, report.Message)
-		}
-
-		if msg.Error != nil {
-			return msg.Error
-		}
-
-		err = msg.Send(client)
-		if err != nil {
-			return err
-		}
+	if strings.ToLower(report.Format) == "html" || report.Format == "" {
+		msg.SetBody(mail.TextHTML, report.Message)
+	} else {
+		msg.SetBody(mail.TextPlain, report.Message)
 	}
 
-	return nil
+	if msg.Error != nil {
+		return msg.Error
+	}
+
+	return msg.Send(client)
 }
 
 func NewClient(from string, server *mail.SMTPServer) *Client {

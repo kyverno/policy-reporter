@@ -3,6 +3,12 @@
 {{- if and .Values.grafana.dashboards.multicluster.enabled .Values.grafana.dashboards.multicluster.label }}
 {{- $filters = append $filters .Values.grafana.dashboards.multicluster.label }}
 {{- end }}
+
+{{- $nsLabel := "exported_namespace" }}
+{{- if .Values.serviceMonitor.honorLabels }}
+{{- $nsLabel = "namespace" }}
+{{- end }}
+
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -472,7 +478,7 @@ data:
                     "Value": 8
                 },
                 "renameByName": {
-                "exported_namespace": "namespace"
+                "{{ $nsLabel }}": "namespace"
                 }
             }
             }
@@ -551,7 +557,7 @@ data:
                     "Value": 8
                 },
                 "renameByName": {
-                "exported_namespace": "namespace"
+                "{{ $nsLabel }}": "namespace"
                 }
             }
             }
@@ -627,7 +633,7 @@ data:
                     "Value": 8
                 },
                 "renameByName": {
-                "exported_namespace": "namespace"
+                "{{ $nsLabel }}": "namespace"
                 }
             }
             }
@@ -703,7 +709,7 @@ data:
                     "Value": 8
                 },
                 "renameByName": {
-                "exported_namespace": "namespace"
+                "{{ $nsLabel }}": "namespace"
                 }
             }
             }

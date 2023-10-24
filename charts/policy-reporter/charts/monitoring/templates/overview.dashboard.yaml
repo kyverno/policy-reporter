@@ -3,6 +3,12 @@
 {{- if and .Values.grafana.dashboards.multicluster.enabled .Values.grafana.dashboards.multicluster.label }}
 {{- $filters = append $filters .Values.grafana.dashboards.multicluster.label }}
 {{- end }}
+
+{{- $nsLabel := "exported_namespace" }}
+{{- if .Values.serviceMonitor.honorLabels }}
+{{- $nsLabel = "namespace" }}
+{{- end }}
+
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -109,10 +115,10 @@ data:
         "pluginVersion": "7.1.5",
         "targets": [
             {
-            "expr": "sum(policy_report_result{policy=~\"$policy\", category=~\"$category\", severity=~\"$severity\", source=~\"$source\", kind=~\"$kind\", exported_namespace=~\"$namespace\", status=~\"fail|error\"{{ range $filters }}, {{.}}=~\"${{.}}\"{{ end }} } > 0) by (exported_namespace)",
+            "expr": "sum(policy_report_result{policy=~\"$policy\", category=~\"$category\", severity=~\"$severity\", source=~\"$source\", kind=~\"$kind\", {{ $nsLabel }}=~\"$namespace\", status=~\"fail|error\"{{ range $filters }}, {{.}}=~\"${{.}}\"{{ end }} } > 0) by ({{ $nsLabel }})",
             "instant": true,
             "interval": "",
-            "legendFormat": "{{`{{ exported_namespace }}`}}",
+            "legendFormat": "{{ printf `{{%s}}` $nsLabel }}",
             "refId": "A"
             }
         ],
@@ -238,7 +244,7 @@ data:
             "refId": "A"
             },
             {
-            "expr": "sum(policy_report_result{policy=~\"$policy\", category=~\"$category\", severity=~\"$severity\", source=~\"$source\", kind=~\"$kind\", exported_namespace=~\"$namespace\", status=~\"fail|error\"{{ range $filters }}, {{.}}=~\"${{.}}\"{{ end }} } > 0) by (policy)",
+            "expr": "sum(policy_report_result{policy=~\"$policy\", category=~\"$category\", severity=~\"$severity\", source=~\"$source\", kind=~\"$kind\", {{ $nsLabel }}=~\"$namespace\", status=~\"fail|error\"{{ range $filters }}, {{.}}=~\"${{.}}\"{{ end }} } > 0) by (policy)",
             "interval": "",
             "legendFormat": "{{`{{ policy }}`}}",
             "refId": "B"
@@ -323,11 +329,11 @@ data:
         "pluginVersion": "7.1.5",
         "targets": [
             {
-            "expr": "sum(policy_report_result{policy=~\"$policy\", category=~\"$category\", severity=~\"$severity\", source=~\"$source\", kind=~\"$kind\", exported_namespace=~\"$namespace\", status=~\"fail|error\"{{ range $filters }}, {{.}}=~\"${{.}}\"{{ end }} }) by (exported_namespace,policy,rule,kind,name,status,category,severity,source{{ range $filters }},{{.}}{{ end }})",
+            "expr": "sum(policy_report_result{policy=~\"$policy\", category=~\"$category\", severity=~\"$severity\", source=~\"$source\", kind=~\"$kind\", {{ $nsLabel }}=~\"$namespace\", status=~\"fail|error\"{{ range $filters }}, {{.}}=~\"${{.}}\"{{ end }} }) by ({{ $nsLabel }},policy,rule,kind,name,status,category,severity,source{{ range $filters }},{{.}}{{ end }})",
             "format": "table",
             "instant": true,
             "interval": "",
-            "legendFormat": "{{`{{ exported_namespace }}`}}: {{`{{ policy }}`}}",
+            "legendFormat": "{{ printf `{{%s}}` $nsLabel }}: {{`{{ policy }}`}}",
             "refId": "A"
             }
         ],
@@ -346,7 +352,7 @@ data:
                 "source": 0,
                 "category": 1,
                 "severity": 2,
-                "exported_namespace": 3,
+                "{{ $nsLabel }}": 3,
                 "kind": 4,
                 "name": 5,
                 "policy": 6,
@@ -354,7 +360,7 @@ data:
                 "status": 8
                 },
                 "renameByName": {
-                "exported_namespace": "namespace"
+                "{{ $nsLabel }}": "namespace"
                 }
             }
             }
@@ -526,14 +532,14 @@ data:
         {
             "allValue": ".*",
             "datasource": "${DS_PROMETHEUS}",
-            "definition": "label_values({__name__= \"policy_report_result\", status=~\"fail|error\"}, exported_namespace)",
+            "definition": "label_values({__name__= \"policy_report_result\", status=~\"fail|error\"}, {{ $nsLabel }})",
             "hide": 0,
             "includeAll": true,
             "label": "Namespace",
             "multi": true,
             "name": "namespace",
             "options": [],
-            "query": "label_values({__name__= \"policy_report_result\", status=~\"fail|error\"}, exported_namespace)",
+            "query": "label_values({__name__= \"policy_report_result\", status=~\"fail|error\"}, {{ $nsLabel }})",
             "refresh": 2,
             "regex": "",
             "skipUrlSync": false,

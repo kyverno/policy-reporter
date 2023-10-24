@@ -1,5 +1,9 @@
 # Changelog
 
+# 2.21.1
+* Helm Chart
+    * Use correct namespace label based on the `monitoring.serviceMonitor.honorLabels` configuration in all Dashboards
+
 # 2.21.0
 * Policy Reporter
     * Migrate to AWS SDK v2
