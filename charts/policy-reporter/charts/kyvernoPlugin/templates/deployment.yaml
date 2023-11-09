@@ -45,7 +45,9 @@ spec:
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      securityContext:  {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      {{- if .Values.podSecurityContext }}
+      securityContext: {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      {{- end }}
       serviceAccountName: {{ include "kyvernoplugin.serviceAccountName" . }}
       automountServiceAccountToken: true
       containers:
