@@ -60,6 +60,9 @@ var LabelGeneratorMapping = map[string]LabelCallback{
 	"status": func(m map[string]string, _ v1alpha2.ReportInterface, r v1alpha2.PolicyReportResult) {
 		m["status"] = string(r.Result)
 	},
+	"message": func(m map[string]string, _ v1alpha2.ReportInterface, r v1alpha2.PolicyReportResult) {
+		m["message"] = r.Message
+	},
 }
 
 func CreateLabelGenerator(labels []string, names []string) LabelGenerator {
