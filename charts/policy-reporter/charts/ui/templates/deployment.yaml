@@ -7,6 +7,7 @@ metadata:
     {{- include "ui.labels" . | nindent 4 }}
 spec:
   replicas: {{ .Values.replicaCount }}
+  revisionHistoryLimit: {{ .Values.revisionHistoryLimit }}
   {{- if .Values.deploymentStrategy }}
   strategy:
     {{- toYaml .Values.deploymentStrategy | nindent 4 }}

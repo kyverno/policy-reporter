@@ -108,6 +108,8 @@ imagePullSecrets: []
 
 replicaCount: 1
 
+revisionHistoryLimit: 10
+
 deploymentStrategy: {}
   # rollingUpdate:
   #  maxSurge: 25%
