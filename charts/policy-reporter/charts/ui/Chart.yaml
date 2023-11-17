@@ -3,5 +3,5 @@ name: ui
 description: Policy Reporter UI
 
 type: application
-version: 2.10.1
+version: 2.10.2
 appVersion: 1.9.1

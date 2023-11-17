@@ -82,7 +82,7 @@ func (c *client) Send(result v1alpha2.PolicyReportResult) {
 		return
 	}
 
-	zap.L().Info(c.Name()+": PUSH OK", zap.Int32("successCount", res.SuccessCount), zap.Int32("failedCount", res.FailedCount))
+	zap.L().Info(c.Name()+": PUSH OK", zap.Int32("successCount", *res.SuccessCount), zap.Int32("failedCount", *res.FailedCount))
 }
 
 func (c *client) mapOtherDetails(result v1alpha2.PolicyReportResult) map[string]string {
