@@ -96,7 +96,7 @@ func (q *Queue) processNextItem() bool {
 			defer q.lock.Unlock()
 			q.cache.Delete(key)
 		}()
-		q.debouncer.Add(report.LifecycleEvent{Type: report.Deleted, PolicyReport: polr})
+		q.debouncer.Add(report.LifecycleEvent{Type: report.Deleted, PolicyReport: mapResource(polr)})
 
 		return true
 	}
@@ -118,6 +118,19 @@ func (q *Queue) processNextItem() bool {
 	q.debouncer.Add(report.LifecycleEvent{Type: event, PolicyReport: polr})
 
 	return true
+}
+
+// each result needs to know its resource it belongs to, to generate internal unique IDs
+func mapResource(polr pr.ReportInterface) pr.ReportInterface {
+	for _, r := range polr.GetResults() {
+		scope := polr.GetScope()
+
+		if len(r.Resources) == 0 && scope != nil {
+			r.Resources = append(r.Resources, *scope)
+		}
+	}
+
+	return polr
 }
 
 func (q *Queue) handleErr(err error, key interface{}) {

@@ -1,5 +1,12 @@
 # Changelog
 
+# 2.21.2
+* Policy Reporter
+    * Fix ID generation for Policy Reports which using `scope` as resource reference
+* Helm Chart
+    * fix: Add chart parameters for setting `revisionHistoryLimit` [[#363](https://github.com/kyverno/policy-reporter/pull/363) by [bodgit](https://github.com/bodgit)]
+    * fix: allow not setting `.Values.podSecurityContext` for kyvernoPlugin [[#361](https://github.com/kyverno/policy-reporter/pull/361) by [haraldsk](https://github.com/haraldsk)]
+
 # 2.21.1
 * Helm Chart
     * Use correct namespace label based on the `monitoring.serviceMonitor.honorLabels` configuration in all Dashboards
