@@ -1,8 +1,13 @@
 # Changelog
 
+# Next
+* Policy Reporter v2.17.3
+    * Fix handling if metric cache fallback
+
 # 2.21.2
-* Policy Reporter
+* Policy Reporter v2.17.2
     * Fix ID generation for Policy Reports which using `scope` as resource reference
+    * Add optional `message` metric label
 * Helm Chart
     * fix: Add chart parameters for setting `revisionHistoryLimit` [[#363](https://github.com/kyverno/policy-reporter/pull/363) by [bodgit](https://github.com/bodgit)]
     * fix: allow not setting `.Values.podSecurityContext` for kyvernoPlugin [[#361](https://github.com/kyverno/policy-reporter/pull/361) by [haraldsk](https://github.com/haraldsk)]
