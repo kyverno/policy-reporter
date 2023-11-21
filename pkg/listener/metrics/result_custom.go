@@ -60,7 +60,9 @@ func CreateCustomResultMetricsListener(
 		case report.Deleted:
 			items := cache.GetReportLabels(newReport.GetID())
 			for _, item := range items {
-				decreaseOrDelete(gauge, item.Labels, item.Value)
+				if len(item.Labels) > 0 {
+					decreaseOrDelete(gauge, item.Labels, item.Value)
+				}
 			}
 
 			cache.Remove(newReport.GetID())

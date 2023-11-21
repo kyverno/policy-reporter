@@ -61,10 +61,7 @@ func (c *Cache) GetReportLabels(id string) []*CacheItem {
 		return item.([]*CacheItem)
 	}
 
-	return []*CacheItem{{
-		Labels: make(prometheus.Labels),
-		Value:  0,
-	}}
+	return []*CacheItem{}
 }
 
 func labelHash(labels prometheus.Labels) string {
