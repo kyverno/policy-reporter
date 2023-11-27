@@ -9,6 +9,7 @@ import (
 
 	api "github.com/kyverno/policy-reporter/pkg/api/v1"
 	"github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
+	"github.com/kyverno/policy-reporter/pkg/helper"
 	"github.com/kyverno/policy-reporter/pkg/report"
 )
 
@@ -44,6 +45,16 @@ type Resource struct {
 	UID        string
 }
 
+func (r Resource) ID() string {
+	h1 := fnv1a.Init64
+	h1 = fnv1a.AddString64(h1, r.Namespace)
+	h1 = fnv1a.AddString64(h1, r.Name)
+	h1 = fnv1a.AddString64(h1, r.Kind)
+	h1 = fnv1a.AddString64(h1, r.APIVersion)
+
+	return strconv.FormatUint(h1, 10)
+}
+
 type PolicyReportResult struct {
 	bun.BaseModel `bun:"table:policy_report_result,alias:r" json:"-"`
 
@@ -62,10 +73,24 @@ type PolicyReportResult struct {
 	Created        int64
 }
 
+type ResourceResult struct {
+	bun.BaseModel `bun:"table:policy_report_resource,alias:res" json:"-"`
+
+	ID             string   `bun:",pk"`
+	PolicyReportID string   `bun:"policy_report_id,pk"`
+	Resource       Resource `bun:"embed:resource_"`
+	Source         string   `bun:",pk"`
+	Pass           int
+	Warn           int
+	Fail           int
+	Error          int
+	Skip           int
+}
+
 type PolicyReportFilter struct {
 	bun.BaseModel `bun:"table:policy_report_filter,alias:f"`
 
-	PolicyReportID string `bund:"policy_report_id"`
+	PolicyReportID string `bun:"policy_report_id"`
 	Namespace      string
 	Policy         string
 	Kind           string
@@ -203,4 +228,76 @@ func MapListResult(results []*PolicyReportResult) []*api.ListResult {
 	}
 
 	return list
+}
+
+func MapResourceResult(results []*ResourceResult) []*api.ResourceResult {
+	list := make([]*api.ResourceResult, 0, len(results))
+	for _, res := range results {
+		list = append(list, &api.ResourceResult{
+			ID:         res.ID,
+			UID:        res.Resource.UID,
+			Namespace:  res.Resource.Namespace,
+			Kind:       res.Resource.Kind,
+			APIVersion: res.Resource.APIVersion,
+			Name:       res.Resource.Name,
+			Source:     res.Source,
+			Pass:       res.Pass,
+			Skip:       res.Skip,
+			Warn:       res.Warn,
+			Fail:       res.Fail,
+			Error:      res.Error,
+		})
+	}
+
+	return list
+}
+func MapPolicyReportResource(polr v1alpha2.ReportInterface) []*ResourceResult {
+	mapping := make(map[string]*ResourceResult)
+	for _, res := range polr.GetResults() {
+		resource := polr.GetScope()
+		if res.HasResource() {
+			resource = res.GetResource()
+		}
+
+		if resource == nil {
+			continue
+		}
+
+		r := Resource{
+			APIVersion: resource.APIVersion,
+			Kind:       resource.Kind,
+			UID:        string(resource.UID),
+			Namespace:  resource.Namespace,
+			Name:       resource.Name,
+		}
+
+		id := r.ID()
+
+		value, ok := mapping[id]
+		if !ok {
+			value = &ResourceResult{
+				ID:             id,
+				PolicyReportID: polr.GetID(),
+				Resource:       r,
+				Source:         res.Source,
+			}
+
+			mapping[id] = value
+		}
+
+		switch res.Result {
+		case v1alpha2.StatusPass:
+			value.Pass = value.Pass + 1
+		case v1alpha2.StatusSkip:
+			value.Skip = value.Skip + 1
+		case v1alpha2.StatusWarn:
+			value.Warn = value.Warn + 1
+		case v1alpha2.StatusFail:
+			value.Fail = value.Fail + 1
+		case v1alpha2.StatusError:
+			value.Error = value.Error + 1
+		}
+	}
+
+	return helper.ToList(mapping)
 }

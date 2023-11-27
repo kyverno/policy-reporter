@@ -258,6 +258,7 @@ func (h *Handler) FetchFindingCountsHandler() http.HandlerFunc {
 			Categories: req.URL.Query()["categories"],
 			Policies:   req.URL.Query()["policies"],
 			Rules:      req.URL.Query()["rules"],
+			Kinds:      req.URL.Query()["kinds"],
 		})
 		h.logError(err)
 		helper.SendJSONResponse(w, list, err)
@@ -268,6 +269,38 @@ func (h *Handler) FetchFindingCountsHandler() http.HandlerFunc {
 func (h *Handler) SourceListHandler() http.HandlerFunc {
 	return func(w http.ResponseWriter, req *http.Request) {
 		list, err := h.finder.FetchSources(req.Context())
+		h.logError(err)
+		helper.SendJSONResponse(w, list, err)
+	}
+}
+
+// NamespacedResourceResultsHandler REST API
+func (h *Handler) NamespacedResourceResultsHandler() http.HandlerFunc {
+	return func(w http.ResponseWriter, req *http.Request) {
+		filter := buildFilter(req)
+		count, _ := h.finder.CountNamespacedResourceResults(req.Context(), filter)
+		list, err := h.finder.FetchNamespacedResourceResults(req.Context(), filter, buildPagination(req, []string{"resource_namespace", "resource_name", "resource_uid"}))
+		h.logError(err)
+		helper.SendJSONResponse(w, ResourceResultList{Items: list, Count: count}, err)
+	}
+}
+
+// ClusterResourceResultsHandler REST API
+func (h *Handler) ClusterResourceResultsHandler() http.HandlerFunc {
+	return func(w http.ResponseWriter, req *http.Request) {
+		filter := buildFilter(req)
+		count, _ := h.finder.CountClusterResourceResults(req.Context(), filter)
+		list, err := h.finder.FetchClusterResourceResults(req.Context(), filter, buildPagination(req, []string{"resource_namespace", "resource_name", "resource_uid"}))
+		h.logError(err)
+		helper.SendJSONResponse(w, ResourceResultList{Items: list, Count: count}, err)
+	}
+}
+
+// ResourceResultsHandler REST API
+func (h *Handler) ResourceResultsHandler() http.HandlerFunc {
+	return func(w http.ResponseWriter, req *http.Request) {
+		filter := buildFilter(req)
+		list, err := h.finder.FetchResourceResults(req.Context(), req.URL.Query().Get("id"), filter)
 		h.logError(err)
 		helper.SendJSONResponse(w, list, err)
 	}

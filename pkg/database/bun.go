@@ -42,8 +42,8 @@ type Store struct {
 }
 
 var (
-	withNamespace    bool = true
-	withClusterscope bool = false
+	withNamespace    = true
+	withClusterscope = false
 )
 
 func (s *Store) CreateSchemas(ctx context.Context) error {
@@ -83,6 +83,14 @@ func (s *Store) CreateSchemas(ctx context.Context) error {
 		Exec(ctx)
 	logOnError("create policy_report_filter table", err)
 
+	_, err = s.db.
+		NewCreateTable().
+		IfNotExists().
+		Model((*ResourceResult)(nil)).
+		ForeignKey(`(policy_report_id) REFERENCES policy_report(id) ON DELETE CASCADE`).
+		Exec(ctx)
+	logOnError("create policy_report_resource table", err)
+
 	return err
 }
 
@@ -111,6 +119,12 @@ func (s *Store) DropSchema(ctx context.Context) error {
 		Exec(ctx)
 	logOnError("drop policy_report table", err)
 
+	_, err = s.db.NewDropTable().
+		IfExists().
+		Model((*ResourceResult)(nil)).
+		Exec(ctx)
+	logOnError("drop policy_report_resource table", err)
+
 	return err
 }
 
@@ -129,9 +143,37 @@ func (s *Store) Add(ctx context.Context, report v1alpha2.ReportInterface) error 
 		}
 	}
 
+	resources := chunkSlice(MapPolicyReportResource(report), 50)
+	for _, list := range resources {
+		exp := s.db.NewInsert().Model(&list)
+		if s.SQLDialect() == dialect.MySQL {
+			exp.
+				On("DUPLICATE KEY UPDATE").
+				Set("pass = pass + VALUES(pass)").
+				Set("warn = warn + VALUES(warn)").
+				Set("fail = fail + VALUES(fail)").
+				Set("error = error + VALUES(error)").
+				Set("skip = skip + VALUES(skip)")
+		} else {
+			exp.
+				On("CONFLICT (id, source, policy_report_id) DO UPDATE").
+				Set("pass = pass + EXCLUDED.pass").
+				Set("warn = warn + EXCLUDED.warn").
+				Set("fail = fail + EXCLUDED.fail").
+				Set("error = error + EXCLUDED.error").
+				Set("skip = skip + EXCLUDED.skip")
+		}
+
+		_, err = exp.Exec(ctx)
+		if err != nil {
+			zap.L().Error("failed to bulk import policy report resources", zap.Error(err))
+			return err
+		}
+	}
+
 	results := chunkSlice(MapPolicyReportResults(report), 50)
 	for _, list := range results {
-		_, err = s.db.NewInsert().Ignore().Model(&list).Exec(ctx)
+		_, err = s.db.NewInsert().Model(&list).Exec(ctx)
 		if err != nil {
 			zap.L().Error("failed to bulk import policy report results", zap.Error(err))
 			return err
@@ -719,6 +761,92 @@ func (s *Store) CountNamespacedResults(ctx context.Context, filter api.Filter) (
 	return query.Count(ctx)
 }
 
+func (s *Store) FetchNamespacedResourceResults(ctx context.Context, filter api.Filter, pagination api.Pagination) ([]*api.ResourceResult, error) {
+	results := make([]*ResourceResult, 0)
+
+	query := s.db.
+		NewSelect().
+		Model(&results).
+		ColumnExpr("id, resource_uid, resource_kind, resource_api_version, resource_namespace, resource_name, SUM(pass) as pass, SUM(warn) as warn, SUM(fail) as fail, SUM(error) as error, SUM(skip) as skip").
+		Group("id", "resource_uid", "resource_kind", "resource_api_version", "resource_namespace", "resource_name").
+		Where(`resource_namespace != ''`)
+
+	addPolicyReportResourceFilter(query, filter)
+	addPagination(query, pagination)
+
+	err := query.Scan(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	return MapResourceResult(results), nil
+}
+
+func (s *Store) CountNamespacedResourceResults(ctx context.Context, filter api.Filter) (int, error) {
+	query := s.db.
+		NewSelect().
+		Model((*ResourceResult)(nil)).
+		Group("id").
+		Where(`resource_namespace != ''`)
+
+	addPolicyReportResourceFilter(query, filter)
+
+	return query.Count(ctx)
+}
+
+func (s *Store) FetchClusterResourceResults(ctx context.Context, filter api.Filter, pagination api.Pagination) ([]*api.ResourceResult, error) {
+	results := make([]*ResourceResult, 0)
+
+	query := s.db.
+		NewSelect().
+		Model(&results).
+		ColumnExpr("id, resource_uid, resource_kind, resource_api_version, resource_namespace, resource_name, SUM(pass) as pass, SUM(warn) as warn, SUM(fail) as fail, SUM(error) as error, SUM(skip) as skip").
+		Where(`resource_namespace = ''`).
+		Group("id", "resource_uid", "resource_kind", "resource_api_version", "resource_namespace", "resource_name")
+
+	addPolicyReportResourceFilter(query, filter)
+	addPagination(query, pagination)
+
+	err := query.Scan(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	return MapResourceResult(results), nil
+}
+
+func (s *Store) CountClusterResourceResults(ctx context.Context, filter api.Filter) (int, error) {
+	query := s.db.
+		NewSelect().
+		Model((*ResourceResult)(nil)).
+		Where(`resource_namespace = ''`).
+		Group("id")
+
+	addPolicyReportResourceFilter(query, filter)
+
+	return query.Count(ctx)
+}
+
+func (s *Store) FetchResourceResults(ctx context.Context, id string, filter api.Filter) ([]*api.ResourceResult, error) {
+	results := make([]*ResourceResult, 0)
+
+	query := s.db.
+		NewSelect().
+		Model(&results).
+		ColumnExpr("id, resource_uid, resource_kind, resource_api_version, resource_namespace, resource_name, SUM(pass) as pass, SUM(warn) as warn, SUM(fail) as fail, SUM(error) as error, SUM(skip) as skip").
+		Where(`id = ?`, id).
+		Order("source ASC").
+		Group("id", "resource_uid", "resource_kind", "resource_api_version", "resource_namespace", "resource_name", "source")
+
+	addPolicyReportResourceFilter(query, filter)
+
+	err := query.Scan(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	return MapResourceResult(results), nil
+}
 func (s *Store) Get(ctx context.Context, id string) (v1alpha2.ReportInterface, error) {
 	polr := &PolicyReport{}
 
@@ -958,6 +1086,25 @@ func addPolicyReportResultFilter(query *bun.SelectQuery, filter api.Filter) {
 
 	if filter.Search != "" {
 		query.Where(`(resource_namespace LIKE ?0 OR resource_name LIKE ?0 OR policy LIKE ?0 OR rule LIKE ?0 OR severity = ?1 OR result = ?1 OR LOWER(resource_kind) = LOWER(?1))`, "%"+filter.Search+"%", filter.Search)
+	}
+}
+
+func addPolicyReportResourceFilter(query *bun.SelectQuery, filter api.Filter) {
+	if len(filter.Namespaces) > 0 {
+		query.Where("res.resource_namespace IN (?)", bun.In(filter.Namespaces))
+	}
+	if len(filter.Kinds) > 0 {
+		query.Where("res.resource_kind IN (?)", bun.In(filter.Kinds))
+	}
+	if len(filter.Resources) > 0 {
+		query.Where("res.resource_name IN (?)", bun.In(filter.Resources))
+	}
+	if len(filter.Sources) > 0 {
+		query.Where("res.source IN (?)", bun.In(filter.Sources))
+	}
+
+	if filter.Search != "" {
+		query.Where(`(resource_namespace LIKE ?0 OR resource_name LIKE ?0 OR LOWER(resource_kind) = LOWER(?1))`, "%"+filter.Search+"%", filter.Search)
 	}
 }
 

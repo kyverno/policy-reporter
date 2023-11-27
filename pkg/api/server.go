@@ -73,6 +73,7 @@ func (s *httpServer) RegisterV1Handler(finder v1.PolicyReportFinder) {
 	s.mux.HandleFunc("/v1/namespaced-resources/report-labels", s.middleware(handler.NamespacedReportLabelListHandler()))
 	s.mux.HandleFunc("/v1/namespaced-resources/status-counts", s.middleware(handler.NamespacedResourcesStatusCountsHandler()))
 	s.mux.HandleFunc("/v1/namespaced-resources/results", s.middleware(handler.NamespacedResourcesResultHandler()))
+	s.mux.HandleFunc("/v1/namespaced-resources/resource-results", s.middleware(handler.NamespacedResourceResultsHandler()))
 
 	s.mux.HandleFunc("/v1/cluster-resources/policies", s.middleware(handler.ClusterResourcesPolicyListHandler()))
 	s.mux.HandleFunc("/v1/cluster-resources/rules", s.middleware(handler.ClusterResourcesRuleListHandler()))
@@ -83,9 +84,11 @@ func (s *httpServer) RegisterV1Handler(finder v1.PolicyReportFinder) {
 	s.mux.HandleFunc("/v1/cluster-resources/status-counts", s.middleware(handler.ClusterResourcesStatusCountHandler()))
 	s.mux.HandleFunc("/v1/cluster-resources/results", s.middleware(handler.ClusterResourcesResultHandler()))
 	s.mux.HandleFunc("/v1/cluster-resources/categories", s.middleware(handler.ClusterCategoryListHandler()))
+	s.mux.HandleFunc("/v1/cluster-resources/resource-results", s.middleware(handler.ClusterResourceResultsHandler()))
 
 	s.mux.HandleFunc("/v1/sources", s.middleware(handler.SourceListHandler()))
 	s.mux.HandleFunc("/v1/finding-counts", s.middleware(handler.FetchFindingCountsHandler()))
+	s.mux.HandleFunc("/v1/resource-results", s.middleware(handler.ResourceResultsHandler()))
 }
 
 func (s *httpServer) RegisterMetricsHandler() {

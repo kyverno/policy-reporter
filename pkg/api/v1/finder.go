@@ -81,4 +81,10 @@ type PolicyReportFinder interface {
 
 	FetchFindingCounts(context.Context, Filter) (*Findings, error)
 	FetchSources(context.Context) ([]string, error)
+
+	FetchNamespacedResourceResults(context.Context, Filter, Pagination) ([]*ResourceResult, error)
+	FetchClusterResourceResults(context.Context, Filter, Pagination) ([]*ResourceResult, error)
+	CountNamespacedResourceResults(context.Context, Filter) (int, error)
+	CountClusterResourceResults(context.Context, Filter) (int, error)
+	FetchResourceResults(context.Context, string, Filter) ([]*ResourceResult, error)
 }
