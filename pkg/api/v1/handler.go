@@ -239,12 +239,7 @@ func (h *Handler) ClusterResourcesResultHandler() http.HandlerFunc {
 // NamespaceListHandler REST API
 func (h *Handler) NamespaceListHandler() http.HandlerFunc {
 	return func(w http.ResponseWriter, req *http.Request) {
-		list, err := h.finder.FetchNamespaces(req.Context(), Filter{
-			Sources:    req.URL.Query()["sources"],
-			Categories: req.URL.Query()["categories"],
-			Policies:   req.URL.Query()["policies"],
-			Rules:      req.URL.Query()["rules"],
-		})
+		list, err := h.finder.FetchNamespaces(req.Context(), buildFilter(req))
 		h.logError(err)
 		helper.SendJSONResponse(w, list, err)
 	}
@@ -252,14 +247,7 @@ func (h *Handler) NamespaceListHandler() http.HandlerFunc {
 
 func (h *Handler) FetchFindingCountsHandler() http.HandlerFunc {
 	return func(w http.ResponseWriter, req *http.Request) {
-		list, err := h.finder.FetchFindingCounts(req.Context(), Filter{
-			Status:     req.URL.Query()["status"],
-			Sources:    req.URL.Query()["sources"],
-			Categories: req.URL.Query()["categories"],
-			Policies:   req.URL.Query()["policies"],
-			Rules:      req.URL.Query()["rules"],
-			Kinds:      req.URL.Query()["kinds"],
-		})
+		list, err := h.finder.FetchFindingCounts(req.Context(), buildFilter(req))
 		h.logError(err)
 		helper.SendJSONResponse(w, list, err)
 	}
@@ -356,6 +344,7 @@ func buildFilter(req *http.Request) Filter {
 		Status:      req.URL.Query()["status"],
 		ReportLabel: labels,
 		Search:      req.URL.Query().Get("search"),
+		ResourceID:  req.URL.Query().Get("resource_id"),
 	}
 }
 

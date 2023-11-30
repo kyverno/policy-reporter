@@ -45,7 +45,7 @@ type Resource struct {
 	UID        string
 }
 
-func (r Resource) ID() string {
+func (r Resource) GetID() string {
 	h1 := fnv1a.Init64
 	h1 = fnv1a.AddString64(h1, r.Namespace)
 	h1 = fnv1a.AddString64(h1, r.Name)
@@ -59,7 +59,8 @@ type PolicyReportResult struct {
 	bun.BaseModel `bun:"table:policy_report_result,alias:r" json:"-"`
 
 	ID             string   `bun:",pk" json:"id"`
-	PolicyReportID string   `bund:"policy_report_id" json:"-"`
+	PolicyReportID string   `bun:"policy_report_id" json:"-"`
+	ResourceID     string   `bun:"resource_id"`
 	Resource       Resource `bun:"embed:resource_"`
 	Policy         string
 	Rule           string
@@ -147,26 +148,29 @@ func MapPolicyReportResults(polr v1alpha2.ReportInterface) []*PolicyReportResult
 			ns = polr.GetNamespace()
 		}
 
+		resource := Resource{
+			APIVersion: res.APIVersion,
+			Kind:       res.Kind,
+			Name:       res.Name,
+			Namespace:  ns,
+			UID:        string(res.UID),
+		}
+
 		list = append(list, &PolicyReportResult{
 			ID:             result.GetID(),
 			PolicyReportID: polr.GetID(),
-			Resource: Resource{
-				APIVersion: res.APIVersion,
-				Kind:       res.Kind,
-				Name:       res.Name,
-				Namespace:  ns,
-				UID:        string(res.UID),
-			},
-			Policy:     result.Policy,
-			Rule:       result.Rule,
-			Source:     result.Source,
-			Scored:     result.Scored,
-			Message:    result.Message,
-			Result:     string(result.Result),
-			Severity:   string(result.Severity),
-			Category:   result.Category,
-			Properties: result.Properties,
-			Created:    result.Timestamp.Seconds,
+			ResourceID:     resource.GetID(),
+			Resource:       resource,
+			Policy:         result.Policy,
+			Rule:           result.Rule,
+			Source:         result.Source,
+			Scored:         result.Scored,
+			Message:        result.Message,
+			Result:         string(result.Result),
+			Severity:       string(result.Severity),
+			Category:       result.Category,
+			Properties:     result.Properties,
+			Created:        result.Timestamp.Seconds,
 		})
 	}
 
@@ -271,7 +275,7 @@ func MapPolicyReportResource(polr v1alpha2.ReportInterface) []*ResourceResult {
 			Name:       resource.Name,
 		}
 
-		id := r.ID()
+		id := r.GetID()
 
 		value, ok := mapping[id]
 		if !ok {

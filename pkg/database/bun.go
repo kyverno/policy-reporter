@@ -145,26 +145,7 @@ func (s *Store) Add(ctx context.Context, report v1alpha2.ReportInterface) error 
 
 	resources := chunkSlice(MapPolicyReportResource(report), 50)
 	for _, list := range resources {
-		exp := s.db.NewInsert().Model(&list)
-		if s.SQLDialect() == dialect.MySQL {
-			exp.
-				On("DUPLICATE KEY UPDATE").
-				Set("pass = pass + VALUES(pass)").
-				Set("warn = warn + VALUES(warn)").
-				Set("fail = fail + VALUES(fail)").
-				Set("error = error + VALUES(error)").
-				Set("skip = skip + VALUES(skip)")
-		} else {
-			exp.
-				On("CONFLICT (id, source, policy_report_id) DO UPDATE").
-				Set("pass = pass + EXCLUDED.pass").
-				Set("warn = warn + EXCLUDED.warn").
-				Set("fail = fail + EXCLUDED.fail").
-				Set("error = error + EXCLUDED.error").
-				Set("skip = skip + EXCLUDED.skip")
-		}
-
-		_, err = exp.Exec(ctx)
+		_, err = s.db.NewInsert().Model(&list).Exec(ctx)
 		if err != nil {
 			zap.L().Error("failed to bulk import policy report resources", zap.Error(err))
 			return err
@@ -833,7 +814,7 @@ func (s *Store) FetchResourceResults(ctx context.Context, id string, filter api.
 	query := s.db.
 		NewSelect().
 		Model(&results).
-		ColumnExpr("id, resource_uid, resource_kind, resource_api_version, resource_namespace, resource_name, SUM(pass) as pass, SUM(warn) as warn, SUM(fail) as fail, SUM(error) as error, SUM(skip) as skip").
+		ColumnExpr("id, resource_uid, resource_kind, resource_api_version, resource_namespace, resource_name, source, SUM(pass) as pass, SUM(warn) as warn, SUM(fail) as fail, SUM(error) as error, SUM(skip) as skip").
 		Where(`id = ?`, id).
 		Order("source ASC").
 		Group("id", "resource_uid", "resource_kind", "resource_api_version", "resource_namespace", "resource_name", "source")
@@ -1080,6 +1061,9 @@ func addPolicyReportResultFilter(query *bun.SelectQuery, filter api.Filter) {
 	if len(filter.Resources) > 0 {
 		query.Where("r.resource_name IN (?)", bun.In(filter.Resources))
 	}
+	if filter.ResourceID != "" {
+		query.Where("r.resource_id = ?", filter.ResourceID)
+	}
 	if len(filter.Sources) > 0 {
 		query.Where("r.source IN (?)", bun.In(filter.Sources))
 	}
@@ -1101,6 +1085,9 @@ func addPolicyReportResourceFilter(query *bun.SelectQuery, filter api.Filter) {
 	}
 	if len(filter.Sources) > 0 {
 		query.Where("res.source IN (?)", bun.In(filter.Sources))
+	}
+	if filter.ResourceID != "" {
+		query.Where("res.id = ?", filter.ResourceID)
 	}
 
 	if filter.Search != "" {

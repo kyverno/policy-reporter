@@ -14,6 +14,7 @@ type Filter struct {
 	Severities  []string
 	Status      []string
 	Resources   []string
+	ResourceID  string
 	ReportLabel map[string]string
 	Search      string
 }
