@@ -108,6 +108,8 @@ spec:
                     key: encryption
                     optional: true
               {{- end }}
+              resources:
+                {{- toYaml .Values.emailReports.resources | nindent 16 }}
           volumes:
           - name: config-file
             secret:
