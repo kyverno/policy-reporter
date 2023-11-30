@@ -5,7 +5,7 @@ image:
   registry: ghcr.io
   repository: kyverno/policy-reporter
   pullPolicy: IfNotPresent
-  tag: 2.17.2
+  tag: 2.17.4
 
 imagePullSecrets: []
 
@@ -283,6 +283,13 @@ emailReports:
     #        include: ['team-a-*']
     #      sources:
     #        include: ['Kyverno']
+  resources: {}
+  # limits:
+  #   memory: 100Mi
+  #   cpu: 10m
+  # requests:
+  #   memory: 75Mi
+  #   cpu: 5m
 
 # Reference a configuration which already exists instead of creating one
 existingTargetConfig:

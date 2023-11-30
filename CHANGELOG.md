@@ -1,10 +1,12 @@
 # Changelog
 
-# Next
+# 2.21.3
 * Policy Reporter v2.17.4
     * Fix Result Resource mapping
 * Policy Reporter v2.17.3
     * Fix handling if metric cache fallback
+* Helm Chart
+    * Configure `resources` for email report CronJobs via `emailReports.resources`
 
 # 2.21.2
 * Policy Reporter v2.17.2
