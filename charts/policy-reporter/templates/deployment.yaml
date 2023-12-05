@@ -102,6 +102,9 @@ spec:
               fieldRef:
                 fieldPath: metadata.name
           {{- end }}
+          {{- with .Values.envVars }}
+          {{- . | toYaml | trim | nindent 10 }}
+          {{- end }}
       volumes:
       - name: sqlite
         {{- if .Values.sqliteVolume }}
