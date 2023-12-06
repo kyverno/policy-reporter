@@ -103,6 +103,9 @@ spec:
                 key: password
                 optional: false
           {{- end }}
+          {{- with .Values.envVars }}
+          {{- . | toYaml | trim | nindent 10 }}
+          {{- end }}
       volumes:
       - name: config-file
         secret:

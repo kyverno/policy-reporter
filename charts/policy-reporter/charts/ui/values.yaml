@@ -83,7 +83,7 @@ api:
 
 # use redis as external log storage instead of an in memory store
 # recommended when using a HA setup with more then one replica
-# to get all logs on each instance 
+# to get all logs on each instance
 redis:
   enabled: false
   address: ""
@@ -133,6 +133,9 @@ podAnnotations: {}
 
 # Key/value pairs that are attached to pods.
 podLabels: {}
+
+# Allow additional env variables to be added
+envVars: []
 
 resources: {}
   # We usually recommend not to specify default resources and to leave this as a conscious
