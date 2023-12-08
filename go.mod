@@ -26,6 +26,7 @@ require (
 	github.com/uptrace/bun/dialect/pgdialect v1.1.16
 	github.com/uptrace/bun/dialect/sqlitedialect v1.1.16
 	github.com/uptrace/bun/driver/pgdriver v1.1.16
+	github.com/uptrace/bun/extra/bundebug v1.1.16
 	github.com/xhit/go-simple-mail/v2 v2.16.0
 	go.uber.org/zap v1.26.0
 	golang.org/x/sync v0.5.0
@@ -99,7 +100,6 @@ require (
 	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/tmthrgd/go-hex v0.0.0-20190904060850-447a3041c3bc // indirect
 	github.com/toorop/go-dkim v0.0.0-20201103131630-e1cd1a0a5208 // indirect
-	github.com/uptrace/bun/extra/bundebug v1.1.16 // indirect
 	github.com/vmihailenco/msgpack/v5 v5.4.1 // indirect
 	github.com/vmihailenco/tagparser/v2 v2.0.0 // indirect
 	go.opencensus.io v0.24.0 // indirect

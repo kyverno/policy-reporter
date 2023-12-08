@@ -36,15 +36,31 @@ type StatusCount struct {
 	Count  int    `json:"count"`
 }
 
+type Category struct {
+	Name  string `json:"name"`
+	Pass  int    `json:"pass"`
+	Skip  int    `json:"skip"`
+	Warn  int    `json:"warn"`
+	Error int    `json:"error"`
+	Fail  int    `json:"fail"`
+}
+
+type Source struct {
+	Name       string     `json:"name"`
+	Categories []Category `json:"categories"`
+}
+
 type Findings struct {
 	Total  int              `json:"total"`
 	Counts []*FindingCounts `json:"counts"`
 }
+
 type FindingCounts struct {
 	Total  int            `json:"total"`
 	Source string         `json:"source"`
 	Counts map[string]int `json:"counts"`
 }
+
 type NamespacedStatusCount struct {
 	Status string           `json:"status"`
 	Items  []NamespaceCount `json:"items"`
@@ -56,9 +72,24 @@ type NamespaceCount struct {
 	Status    string `json:"-"`
 }
 
+type ResourceStatusCount struct {
+	Status string          `json:"status"`
+	Items  []ResourceCount `json:"items"`
+}
+
+type ResourceCount struct {
+	Source string `json:"source"`
+	Count  int    `json:"count"`
+	Status string `json:"-"`
+}
+
 type Resource struct {
-	Name string `json:"name"`
-	Kind string `json:"kind"`
+	ID         string `json:"id,omitempty"`
+	UID        string `json:"uid,omitempty"`
+	Name       string `json:"name,omitempty"`
+	Namespace  string `json:"namespace,omitempty"`
+	Kind       string `json:"kind,omitempty"`
+	APIVersion string `json:"apiVersion,omitempty"`
 }
 
 type ResourceResult struct {

@@ -403,8 +403,55 @@ func (s *Store) FetchClusterSources(ctx context.Context) ([]string, error) {
 	return s.fetchFilterOptions(ctx, "source", api.Filter{}, &withClusterscope)
 }
 
-func (s *Store) FetchSources(ctx context.Context) ([]string, error) {
-	return s.fetchFilterOptions(ctx, "source", api.Filter{}, nil)
+func (s *Store) FetchSources(ctx context.Context, resource string) ([]*api.Source, error) {
+	query := s.db.
+		NewSelect().
+		TableExpr("policy_report_resource as r").
+		Distinct().
+		ColumnExpr("source, category, SUM(pass) as pass, SUM(warn) as warn, SUM(fail) as fail, SUM(error) as error, SUM(skip) as skip").
+		Group("source", "category").
+		Order("source ASC", "category ASC")
+
+	if resource != "" {
+		query.Where("id = ?", resource)
+	}
+
+	results := make([]*ResourceResult, 0)
+
+	err := query.Scan(ctx, &results)
+	if err != nil {
+		zap.L().Error("failed to load cluster status counts", zap.Error(err))
+		return nil, err
+	}
+
+	list := make(map[string]*api.Source, 0)
+	for _, r := range results {
+		if s, ok := list[r.Source]; ok {
+			s.Categories = append(s.Categories, api.Category{
+				Name:  r.Category,
+				Pass:  r.Pass,
+				Fail:  r.Fail,
+				Warn:  r.Warn,
+				Error: r.Error,
+				Skip:  r.Skip,
+			})
+			continue
+		}
+
+		list[r.Source] = &api.Source{
+			Name: r.Source,
+			Categories: []api.Category{{
+				Name:  r.Category,
+				Pass:  r.Pass,
+				Fail:  r.Fail,
+				Warn:  r.Warn,
+				Error: r.Error,
+				Skip:  r.Skip,
+			}},
+		}
+	}
+
+	return helper.ToList(list), nil
 }
 
 func (s *Store) FetchFindingCounts(ctx context.Context, filter api.Filter) (*api.Findings, error) {
@@ -742,6 +789,42 @@ func (s *Store) CountNamespacedResults(ctx context.Context, filter api.Filter) (
 	return query.Count(ctx)
 }
 
+func (s *Store) FetchResults(ctx context.Context, id string, filter api.Filter, pagination api.Pagination) ([]*api.ListResult, error) {
+	results := make([]*PolicyReportResult, 0)
+
+	query := s.db.
+		NewSelect().
+		Model(&results).
+		Where(`r.resource_id = ?`, id)
+
+	s.addFilter(query, filter)
+	addPolicyReportResultFilter(query, filter)
+	addPagination(query, pagination)
+
+	err := query.Scan(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	return MapListResult(results), nil
+}
+
+func (s *Store) CountResults(ctx context.Context, id string, filter api.Filter) (int, error) {
+	query := s.db.
+		NewSelect().
+		Model((*PolicyReportResult)(nil)).
+		Where(`r.resource_id = ?`, id)
+
+	if len(filter.ReportLabel) > 0 {
+		query.Join("JOIN policy_report AS pr ON pr.id = r.policy_report_id")
+	}
+
+	s.addFilter(query, filter)
+	addPolicyReportResultFilter(query, filter)
+
+	return query.Count(ctx)
+}
+
 func (s *Store) FetchNamespacedResourceResults(ctx context.Context, filter api.Filter, pagination api.Pagination) ([]*api.ResourceResult, error) {
 	results := make([]*ResourceResult, 0)
 
@@ -828,6 +911,85 @@ func (s *Store) FetchResourceResults(ctx context.Context, id string, filter api.
 
 	return MapResourceResult(results), nil
 }
+
+func (s *Store) FetchResource(ctx context.Context, id string) (*api.Resource, error) {
+	result := ResourceResult{}
+
+	query := s.db.
+		NewSelect().
+		Model(&result).
+		ColumnExpr("id, resource_uid, resource_kind, resource_api_version, resource_namespace, resource_name").
+		Where(`id = ?`, id).
+		Limit(1)
+
+	err := query.Scan(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	return &api.Resource{
+		ID:         result.ID,
+		UID:        result.Resource.UID,
+		APIVersion: result.Resource.APIVersion,
+		Kind:       result.Resource.Kind,
+		Name:       result.Resource.Name,
+		Namespace:  result.Resource.Namespace,
+	}, nil
+}
+
+func (s *Store) FetchResourceStatusCounts(ctx context.Context, resourceID string, filter api.Filter) ([]api.ResourceStatusCount, error) {
+	var list map[string][]api.ResourceCount
+
+	if len(filter.Status) == 0 {
+		list = map[string][]api.ResourceCount{
+			v1alpha2.StatusPass:  make([]api.ResourceCount, 0),
+			v1alpha2.StatusFail:  make([]api.ResourceCount, 0),
+			v1alpha2.StatusWarn:  make([]api.ResourceCount, 0),
+			v1alpha2.StatusError: make([]api.ResourceCount, 0),
+			v1alpha2.StatusSkip:  make([]api.ResourceCount, 0),
+		}
+	} else {
+		list = map[string][]api.ResourceCount{}
+
+		for _, status := range filter.Status {
+			list[status] = make([]api.ResourceCount, 0)
+		}
+	}
+
+	statusCounts := make([]api.ResourceStatusCount, 0, 5)
+	counts := make([]api.ResourceCount, 0)
+
+	query := s.db.
+		NewSelect().
+		TableExpr("policy_report_result as r").
+		ColumnExpr("COUNT(r.resource_id) as count, r.result as status, r.source").
+		Where(`r.resource_id = ?`, resourceID).
+		Group("status", "source").
+		Order("source ASC")
+
+	s.addFilter(query, filter)
+	addPolicyReportResultFilter(query, filter)
+
+	err := query.Scan(ctx, &counts)
+	if err != nil {
+		zap.L().Error("failed to load resource status counts", zap.Error(err))
+		return nil, err
+	}
+
+	for _, count := range counts {
+		list[count.Status] = append(list[count.Status], count)
+	}
+
+	for status, items := range list {
+		statusCounts = append(statusCounts, api.ResourceStatusCount{
+			Status: status,
+			Items:  items,
+		})
+	}
+
+	return statusCounts, nil
+}
+
 func (s *Store) Get(ctx context.Context, id string) (v1alpha2.ReportInterface, error) {
 	polr := &PolicyReport{}
 

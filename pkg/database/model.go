@@ -81,6 +81,7 @@ type ResourceResult struct {
 	PolicyReportID string   `bun:"policy_report_id,pk"`
 	Resource       Resource `bun:"embed:resource_"`
 	Source         string   `bun:",pk"`
+	Category       string   `bun:"category,pk"`
 	Pass           int
 	Warn           int
 	Fail           int
@@ -275,15 +276,16 @@ func MapPolicyReportResource(polr v1alpha2.ReportInterface) []*ResourceResult {
 			Name:       resource.Name,
 		}
 
-		id := r.GetID()
+		id := r.GetID() + res.Category + polr.GetID()
 
 		value, ok := mapping[id]
 		if !ok {
 			value = &ResourceResult{
-				ID:             id,
+				ID:             r.GetID(),
 				PolicyReportID: polr.GetID(),
 				Resource:       r,
 				Source:         res.Source,
+				Category:       res.Category,
 			}
 
 			mapping[id] = value

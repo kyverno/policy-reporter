@@ -256,7 +256,7 @@ func (h *Handler) FetchFindingCountsHandler() http.HandlerFunc {
 // SourceListHandler REST API
 func (h *Handler) SourceListHandler() http.HandlerFunc {
 	return func(w http.ResponseWriter, req *http.Request) {
-		list, err := h.finder.FetchSources(req.Context())
+		list, err := h.finder.FetchSources(req.Context(), req.URL.Query().Get("id"))
 		h.logError(err)
 		helper.SendJSONResponse(w, list, err)
 	}
@@ -270,6 +270,17 @@ func (h *Handler) NamespacedResourceResultsHandler() http.HandlerFunc {
 		list, err := h.finder.FetchNamespacedResourceResults(req.Context(), filter, buildPagination(req, []string{"resource_namespace", "resource_name", "resource_uid"}))
 		h.logError(err)
 		helper.SendJSONResponse(w, ResourceResultList{Items: list, Count: count}, err)
+	}
+}
+
+// ResourcesResultHandler REST API
+func (h *Handler) ResultHandler() http.HandlerFunc {
+	return func(w http.ResponseWriter, req *http.Request) {
+		filter := buildFilter(req)
+		count, _ := h.finder.CountResults(req.Context(), req.URL.Query().Get("id"), filter)
+		list, err := h.finder.FetchResults(req.Context(), req.URL.Query().Get("id"), filter, buildPagination(req, defaultOrder))
+		h.logError(err)
+		helper.SendJSONResponse(w, ResultList{Items: list, Count: count}, err)
 	}
 }
 
@@ -289,6 +300,24 @@ func (h *Handler) ResourceResultsHandler() http.HandlerFunc {
 	return func(w http.ResponseWriter, req *http.Request) {
 		filter := buildFilter(req)
 		list, err := h.finder.FetchResourceResults(req.Context(), req.URL.Query().Get("id"), filter)
+		h.logError(err)
+		helper.SendJSONResponse(w, list, err)
+	}
+}
+
+// ResourceStatusCountsHandler REST API
+func (h *Handler) ResourceStatusCountsHandler() http.HandlerFunc {
+	return func(w http.ResponseWriter, req *http.Request) {
+		list, err := h.finder.FetchResourceStatusCounts(req.Context(), req.URL.Query().Get("id"), buildFilter(req))
+		h.logError(err)
+		helper.SendJSONResponse(w, list, err)
+	}
+}
+
+// ResourceHandler REST API
+func (h *Handler) ResourceHandler() http.HandlerFunc {
+	return func(w http.ResponseWriter, req *http.Request) {
+		list, err := h.finder.FetchResource(req.Context(), req.URL.Query().Get("id"))
 		h.logError(err)
 		helper.SendJSONResponse(w, list, err)
 	}
