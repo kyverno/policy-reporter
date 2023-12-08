@@ -33,5 +33,3 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           linting: off
           charts_dir: charts
-          app_version: ${{ env.APP_VERSION }}
-          chart_version: ${{ env.CHART_VERSION }}
