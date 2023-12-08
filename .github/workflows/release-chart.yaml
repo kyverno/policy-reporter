@@ -25,8 +25,8 @@ jobs:
       - name: Set version
         run: |
           set -e
-          echo "APP_VERSION=3.0.0.alpha-${{ env.TAG }}" >> $GITHUB_ENV
-          echo "CHART_VERSION=policy-reporter-alpha-${{ env.TAG }}" >> $GITHUB_ENV
+          echo "APP_VERSION=3.0.alpha-${{ env.TAG }}" >> $GITHUB_ENV
+          echo "CHART_VERSION=3.0.alpha-${{ env.TAG }}" >> $GITHUB_ENV
       - name: Run chart-releaser
         uses: stefanprodan/helm-gh-pages@0ad2bb377311d61ac04ad9eb6f252fb68e207260 #v1.7.0
         with:
