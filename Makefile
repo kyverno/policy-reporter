@@ -18,12 +18,12 @@ TIMESTAMP           := $(shell date '+%Y-%m-%d_%I:%M:%S%p')
 GOOS                ?= $(shell go env GOOS)
 GOARCH              ?= $(shell go env GOARCH)
 REGISTRY            ?= ghcr.io
-REPO                ?= kyverno
+OWNER               ?= kyverno
 IMAGE               ?= policy-reporter
 LD_FLAGS            := -s -w -linkmode external -extldflags "-static"
 LOCAL_PLATFORM      := linux/$(GOARCH)
 PLATFORMS           := linux/arm64,linux/amd64,linux/s390x
-REPO                := $(REGISTRY)/$(REPO)/$(IMAGE)
+REPO                := $(REGISTRY)/$(OWNER)/$(IMAGE)
 COMMA               := ,
 
 ifndef VERSION

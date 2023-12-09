@@ -46,14 +46,11 @@ spec:
           image: "{{ .Values.image.registry }}/{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           {{- if .Values.securityContext }}
-          securityContext: {{ include "ui.securityContext" . | nindent 12 }}
+          securityContext: {{- include "ui.securityContext" . | nindent 12 }}
           {{- end }}
           args:
-            - -config=/app/config.yaml
-            - -policy-reporter=http://{{ include "ui.policyReportServiceName" . }}:{{ .Values.policyReporter.port }}
-            {{- if or .Values.plugins.kyverno .Values.global.plugins.kyverno }}
-            - -kyverno-plugin=http://{{ include "ui.kyvernoPluginServiceName" . }}:{{ .Values.kyvernoPlugin.port }}
-            {{- end }}
+            - run
+            - --config=/app/config.yaml
           ports:
             - name: http
               containerPort: 8080

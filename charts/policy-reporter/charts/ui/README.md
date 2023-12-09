@@ -1,6 +1,6 @@
 # ui
 
-![Version: 2.10.2](https://img.shields.io/badge/Version-2.10.2-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 1.9.1](https://img.shields.io/badge/AppVersion-1.9.1-informational?style=flat-square)
+![Version: 2.0.0-alpha](https://img.shields.io/badge/Version-2.0.0--alpha-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 2.0.0-alpha](https://img.shields.io/badge/AppVersion-2.0.0--alpha-informational?style=flat-square)
 
 Policy Reporter UI
 
@@ -14,33 +14,27 @@ Policy Reporter UI
 | image.registry | string | `"ghcr.io"` |  |
 | image.repository | string | `"kyverno/policy-reporter-ui"` |  |
 | image.pullPolicy | string | `"IfNotPresent"` |  |
-| image.tag | string | `"1.9.1"` |  |
+| image.tag | string | `"59749d3ec2f2b73aede3ed5393d9c83cc762bc2f"` |  |
 | displayMode | string | `""` |  |
-| refreshInterval | int | `10000` |  |
 | annotations | object | `{}` |  |
-| log.size | int | `200` |  |
-| views.dashboard.policyReports | bool | `true` |  |
-| views.dashboard.clusterPolicyReports | bool | `true` |  |
-| views.logs | bool | `true` |  |
-| views.policyReports | bool | `true` |  |
-| views.clusterPolicyReports | bool | `true` |  |
-| views.kyvernoPolicies | bool | `true` |  |
-| views.kyvernoVerifyImages | bool | `true` |  |
 | plugins.kyverno | bool | `false` |  |
-| clusterName | string | `""` |  |
+| clusterName | string | `"default"` |  |
 | clusters | list | `[]` |  |
 | labelFilter | list | `[]` |  |
+| defaultFilter.resources[0] | string | `"Deployment"` |  |
+| defaultFilter.resources[1] | string | `"CronJob"` |  |
+| defaultFilter.resources[2] | string | `"DaemonSet"` |  |
+| defaultFilter.resources[3] | string | `"StatefulSet"` |  |
+| defaultFilter.resources[4] | string | `"Service"` |  |
+| defaultFilter.resources[5] | string | `"Secret"` |  |
+| defaultFilter.resources[6] | string | `"ConfigMap"` |  |
+| defaultFilter.clusterResources[0] | string | `"Node"` |  |
+| defaultFilter.clusterResources[1] | string | `"Namespace"` |  |
+| logging.enabled | bool | `false` |  |
 | logging.encoding | string | `"console"` |  |
 | logging.logLevel | int | `0` |  |
 | logging.development | bool | `false` |  |
-| api.logging | bool | `false` |  |
-| api.overwriteHost | bool | `true` |  |
-| redis.enabled | bool | `false` |  |
-| redis.address | string | `""` |  |
-| redis.database | int | `0` |  |
-| redis.prefix | string | `"policy-reporter-ui"` |  |
-| redis.username | string | `""` |  |
-| redis.password | string | `""` |  |
+| server.overwriteHost | bool | `true` |  |
 | policyReporter.port | int | `8080` |  |
 | kyvernoPlugin.port | int | `8080` |  |
 | volumes | list | `[]` |  |

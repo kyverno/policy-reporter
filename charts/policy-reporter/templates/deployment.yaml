@@ -57,7 +57,7 @@ spec:
           image: "{{ .Values.image.registry }}/{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           {{- if .Values.securityContext }}
-          securityContext: {{ include "policyreporter.securityContext" . | nindent 12 }}
+          securityContext: {{- include "policyreporter.securityContext" . | nindent 12 }}
           {{- end }}
           args:
             - --port={{ .Values.port.number }}
