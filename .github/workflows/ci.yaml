@@ -4,7 +4,7 @@ on:
   push:
     branches:
       - main
-      - alpha
+      - 3.x
 
     paths-ignore:
       - README.md

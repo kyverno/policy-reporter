@@ -3,7 +3,7 @@ name: release-chart
 on:
   push:
     tags:
-      - 'policy-reporter-alpha-chart-v*'
+      - 'policy-reporter-preview-chart-v*'
 
 jobs:
   helm-chart:
@@ -14,27 +14,25 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+        with:
+          fetch-depth: 0
+
       - name: Verify Helm Docs
         run: |
           set -e
           make verify-helm-docs
+
+      - name: Configure Git
+        run: |
+          git config user.name "$GITHUB_ACTOR"
+          git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
+
       - name: Install Helm
         uses: azure/setup-helm@5119fcb9089d432beecbf79bb2c7915207344b78 # v3.5
         with:
           version: v3.10.3
-      - name: Set Tag
-        run: |
-          set -e
-          echo "TAG=$(git rev-parse --short "$GITHUB_SHA")" >> "$GITHUB_ENV"
-      - name: Set version
-        run: |
-          set -e
-          TAG=${{ github.ref_name }}
-          echo "CHART_VERSION=${TAG#policy-reporter-alpha-chart--}" >> $GITHUB_ENV
+
       - name: Run chart-releaser
-        uses: stefanprodan/helm-gh-pages@0ad2bb377311d61ac04ad9eb6f252fb68e207260 #v1.7.0
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          linting: off
-          charts_dir: charts
-          chart_version: ${{ env.CHART_VERSION }}
+        uses: helm/chart-releaser-action@a917fd15b20e8b64b94d9158ad54cd6345335584 # v1.6.0
+        env:
+          CR_TOKEN: "${{ secrets.GITHUB_TOKEN }}"

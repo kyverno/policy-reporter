@@ -1,4 +1,4 @@
-# policy-reporter-alpha
+# policy-reporter-preview
 
 Policy Reporter watches for PolicyReport Resources.
 It creates Prometheus Metrics and can send rule validation events to different targets like Loki, Elasticsearch, Slack or Discord
