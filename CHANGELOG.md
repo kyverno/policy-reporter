@@ -1,5 +1,9 @@
 # Changelog
 
+# 2.21.4
+* Helm Chart
+    * Allow additional env variables to be added [[#378](https://github.com/kyverno/policy-reporter/pull/378) by [kbcbals](https://github.com/kbcbals)]
+
 # 2.21.3
 * Policy Reporter v2.17.4
     * Fix Result Resource mapping
