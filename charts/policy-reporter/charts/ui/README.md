@@ -1,6 +1,6 @@
 # ui
 
-![Version: 2.0.0-alpha](https://img.shields.io/badge/Version-2.0.0--alpha-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 2.0.0-alpha](https://img.shields.io/badge/AppVersion-2.0.0--alpha-informational?style=flat-square)
+![Version: 3.0.0-alpha](https://img.shields.io/badge/Version-3.0.0--alpha-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 2.0.0-alpha](https://img.shields.io/badge/AppVersion-2.0.0--alpha-informational?style=flat-square)
 
 Policy Reporter UI
 
@@ -14,7 +14,7 @@ Policy Reporter UI
 | image.registry | string | `"ghcr.io"` |  |
 | image.repository | string | `"kyverno/policy-reporter-ui"` |  |
 | image.pullPolicy | string | `"IfNotPresent"` |  |
-| image.tag | string | `"59749d3ec2f2b73aede3ed5393d9c83cc762bc2f"` |  |
+| image.tag | string | `"53ac00b"` |  |
 | displayMode | string | `""` |  |
 | annotations | object | `{}` |  |
 | plugins.kyverno | bool | `false` |  |

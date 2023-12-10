@@ -122,7 +122,7 @@ Check the [Documentation](https://kyverno.github.io/policy-reporter/guide/02-get
 | database.mountedSecret | string | `""` |  |
 | global.plugins.kyverno | bool | `false` |  |
 | global.backend | string | `""` |  |
-| global.fullnameOverride | string | `""` |  |
+| global.fullnameOverride | string | `"policy-reporter"` |  |
 | global.namespace | string | `""` |  |
 | global.labels | object | `{}` |  |
 | global.basicAuth.username | string | `""` |  |
@@ -347,7 +347,7 @@ Check the [Documentation](https://kyverno.github.io/policy-reporter/guide/02-get
 |------------|------|---------|
 |  | kyvernoPlugin | 1.6.2 |
 |  | monitoring | 2.8.1 |
-|  | ui | 2.10.2 |
+|  | ui | 3.0.0-alpha |
 
 ## Maintainers
 

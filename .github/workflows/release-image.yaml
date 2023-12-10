@@ -4,6 +4,11 @@ on:
     branches:
       - 3.x
 
+    paths-ignore:
+      - README.md
+      - charts/**
+      - manifest/**
+
 permissions:
   contents: read
   packages: write
