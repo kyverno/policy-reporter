@@ -16,6 +16,7 @@ type Values struct {
 	Channel         string `json:"channel,omitempty"`
 	Username        string `json:"username,omitempty"`
 	Password        string `json:"password,omitempty"`
+	ApiKey          string `json:"apiKey,omitempty"`
 	AccessKeyID     string `json:"accessKeyID,omitempty"`
 	SecretAccessKey string `json:"secretAccessKey,omitempty"`
 	AccountID       string `json:"accountID,omitempty"`
@@ -85,6 +86,10 @@ func (c *k8sClient) Get(ctx context.Context, name string) (Values, error) {
 
 	if password, ok := secret.Data["password"]; ok {
 		values.Password = string(password)
+	}
+
+	if apiKey, ok := secret.Data["apiKey"]; ok {
+		values.ApiKey = string(apiKey)
 	}
 
 	if database, ok := secret.Data["database"]; ok {

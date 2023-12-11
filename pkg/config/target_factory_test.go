@@ -31,6 +31,7 @@ func newFakeClient() v1.SecretInterface {
 			"host":            []byte("http://localhost:9200"),
 			"username":        []byte("username"),
 			"password":        []byte("password"),
+			"apiKey":          []byte("apiKey"),
 			"webhook":         []byte("http://localhost:9200/webhook"),
 			"accessKeyID":     []byte("accessKeyID"),
 			"secretAccessKey": []byte("secretAccessKey"),
@@ -49,6 +50,7 @@ func mountSecret() {
 		Webhook:         "http://localhost:9200/webhook",
 		Username:        "username",
 		Password:        "password",
+		ApiKey:          "apiKey",
 		AccessKeyID:     "accessKeyId",
 		SecretAccessKey: "secretAccessKey",
 		KmsKeyID:        "kmsKeyId",
@@ -331,6 +333,11 @@ func Test_GetValuesFromSecret(t *testing.T) {
 		password := client.FieldByName("password").String()
 		if password != "password" {
 			t.Errorf("Expected password from secret, got %s", password)
+		}
+
+		apiKey := client.FieldByName("apiKey").String()
+		if apiKey != "apiKey" {
+			t.Errorf("Expected apiKey from secret, got %s", apiKey)
 		}
 	})
 
@@ -638,6 +645,11 @@ func Test_GetValuesFromMountedSecret(t *testing.T) {
 		password := client.FieldByName("password").String()
 		if password != "password" {
 			t.Errorf("Expected password from mounted secret, got %s", password)
+		}
+
+		apiKey := client.FieldByName("apiKey").String()
+		if apiKey != "apiKey" {
+			t.Errorf("Expected apiKey from secret, got %s", apiKey)
 		}
 	})
 

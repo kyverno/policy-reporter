@@ -14,6 +14,7 @@ type Options struct {
 	Host         string
 	Username     string
 	Password     string
+	ApiKey       string
 	Index        string
 	Rotation     string
 	CustomFields map[string]string
@@ -37,6 +38,7 @@ type client struct {
 	index        string
 	username     string
 	password     string
+	apiKey       string
 	rotation     Rotation
 	customFields map[string]string
 	client       http.Client
@@ -76,6 +78,8 @@ func (e *client) Send(result v1alpha2.PolicyReportResult) {
 
 	if e.username != "" {
 		req.SetBasicAuth(e.username, e.password)
+	} else if e.apiKey != "" {
+		req.Header.Add("Authorization", "ApiKey "+e.apiKey)
 	}
 
 	resp, err := e.client.Do(req)
@@ -90,6 +94,7 @@ func NewClient(options Options) target.Client {
 		options.Index,
 		options.Username,
 		options.Password,
+		options.ApiKey,
 		options.Rotation,
 		options.CustomFields,
 		options.HTTPClient,

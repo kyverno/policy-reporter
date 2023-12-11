@@ -108,6 +108,7 @@ type Elasticsearch struct {
 	Rotation          string           `mapstructure:"rotation"`
 	Username          string           `mapstructure:"username"`
 	Password          string           `mapstructure:"password"`
+	ApiKey            string           `mapstructure:"apiKey"`
 	Channels          []*Elasticsearch `mapstructure:"channels"`
 }
 

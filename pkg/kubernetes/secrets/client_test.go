@@ -25,6 +25,7 @@ func newFakeClient() v1.SecretInterface {
 			"host":            []byte("http://localhost:9200"),
 			"username":        []byte("username"),
 			"password":        []byte("password"),
+			"apiKey":          []byte("apiKey"),
 			"webhook":         []byte("http://localhost:9200/webhook"),
 			"accessKeyID":     []byte("accessKeyID"),
 			"secretAccessKey": []byte("secretAccessKey"),
@@ -60,6 +61,10 @@ func Test_Client(t *testing.T) {
 
 		if values.Password != "password" {
 			t.Errorf("Unexpected Password: %s", values.Password)
+		}
+
+		if values.ApiKey != "apiKey" {
+			t.Errorf("Unexpected ApiKey: %s", values.ApiKey)
 		}
 
 		if values.AccessKeyID != "accessKeyID" {

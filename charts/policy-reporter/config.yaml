@@ -30,6 +30,7 @@ elasticsearch:
   skipTLS: {{ .Values.target.elasticsearch.skipTLS }}
   username: {{ .Values.target.elasticsearch.username | quote }}
   password: {{ .Values.target.elasticsearch.password | quote }}
+  apiKey: {{ .Values.target.elasticsearch.password | quote }}
   secretRef: {{ .Values.target.elasticsearch.secretRef | quote }}
   mountedSecret: {{ .Values.target.elasticsearch.mountedSecret | quote }}
   index: {{ .Values.target.elasticsearch.index | default "policy-reporter" | quote }}
