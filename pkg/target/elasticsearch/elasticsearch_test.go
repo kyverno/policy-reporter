@@ -50,6 +50,7 @@ func Test_ElasticsearchTarget(t *testing.T) {
 			Host:         "http://localhost:9200",
 			Username:     "username",
 			Password:     "password",
+			ApiKey:       "ApiKey",
 			Index:        "policy-reporter",
 			Rotation:     elasticsearch.Annually,
 			HTTPClient:   testClient{callback, 200},

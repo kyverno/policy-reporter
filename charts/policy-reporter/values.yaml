@@ -362,7 +362,9 @@ target:
     username: ""
     # elasticsearch password für HTTP Basic Auth
     password: ""
-    # receive the host, username and/or password from an existing secret instead
+    # elasticsearch apiKey für apiKey authentication
+    apiKey: ""
+    # receive the host, username and/or password,apiKey from an existing secret instead
     secretRef: ""
     # Mounted secret path by Secrets Controller, secret should be in json format
     mountedSecret: ""
