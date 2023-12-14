@@ -742,3 +742,8 @@ extraVolumes:
 sqliteVolume: {}
   # emptyDir:
   #   sizeLimit: 10Mi
+
+# If set the volume for /tmp is freely configurable below "- name: tmp". If no value is set an emptyDir is used.
+tmpVolume: {}
+  # emptyDir:
+  #   sizeLimit: 10Mi

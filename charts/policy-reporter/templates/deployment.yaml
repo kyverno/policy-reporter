@@ -88,6 +88,8 @@ spec:
             subPath: config.yaml
             {{- end }}
             readOnly: true
+          - name: tmp
+            mountPath: /tmp
           {{- with .Values.extraVolumes.volumeMounts }}
           {{ toYaml . | nindent 10 | trim }}
           {{- end }}
@@ -120,6 +122,12 @@ spec:
           secretName: {{ include "policyreporter.fullname" . }}-config
           {{- end }}
           optional: true
+      - name: tmp
+        {{- if .Values.tmpVolume }}
+          {{- toYaml .Values.tmpVolume | nindent 8 }}
+        {{- else }}
+        emptyDir: {}
+        {{- end }}
       {{- with .Values.extraVolumes.volumes }}
       {{ toYaml . | nindent 6 | trim }}
       {{- end }}
