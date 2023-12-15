@@ -2,7 +2,10 @@
 
 # 2.21.5
 * Helm Chart
-    * Add `annotations` UI values to UI deployment
+    * Policy Reporter UI
+        * Add `annotations` UI values to UI deployment
+    * Policy Reporter
+        * Add `/tmp` volume for SQLite [[#380](https://github.com/kyverno/policy-reporter/pull/380) by [mikebryant](https://github.com/mikebryant)]
 
 # 2.21.4
 * Helm Chart
