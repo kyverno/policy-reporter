@@ -1,5 +1,9 @@
 # Changelog
 
+# 2.21.5
+* Helm Chart
+    * Add `annotations` UI values to UI deployment
+
 # 2.21.4
 * Helm Chart
     * Allow additional env variables to be added [[#378](https://github.com/kyverno/policy-reporter/pull/378) by [kbcbals](https://github.com/kbcbals)]
