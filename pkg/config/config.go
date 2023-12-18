@@ -297,6 +297,7 @@ type ClusterReportFilter struct {
 // ReportFilter configuration
 type ReportFilter struct {
 	Namespaces     ValueFilter         `mapstructure:"namespaces"`
+	Sources        ValueFilter         `mapstructure:"sources"`
 	ClusterReports ClusterReportFilter `mapstructure:"clusterReports"`
 }
 

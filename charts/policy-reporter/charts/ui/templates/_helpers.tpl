@@ -115,9 +115,9 @@ Create the name of the service account to use
 
 {{- define "ui.securityContext" -}}
 {{- if semverCompare "<1.19" .Capabilities.KubeVersion.Version }}
-{{ toYaml (omit .Values.securityContext "seccompProfile") }}
+{{- toYaml (omit .Values.securityContext "seccompProfile") }}
 {{- else }}
-{{ toYaml .Values.securityContext }}
+{{- toYaml .Values.securityContext }}
 {{- end }}
 {{- end }}
 
@@ -127,14 +127,5 @@ Create the name of the service account to use
     {{- .Values.global.namespace -}}
 {{- else -}}
     {{- .Release.Namespace -}}
-{{- end -}}
-{{- end -}}
-
-{{/* Get the namespace name. */}}
-{{- define "ui.logLevel" -}}
-{{- if .Values.api.logging -}}
--1
-{{- else -}}
-{{- .Values.logging.logLevel -}}
 {{- end -}}
 {{- end -}}

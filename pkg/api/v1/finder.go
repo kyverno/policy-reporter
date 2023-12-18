@@ -14,6 +14,7 @@ type Filter struct {
 	Severities  []string
 	Status      []string
 	Resources   []string
+	ResourceID  string
 	ReportLabel map[string]string
 	Search      string
 }
@@ -78,4 +79,18 @@ type PolicyReportFinder interface {
 	FetchClusterReportLabels(context.Context, Filter) (map[string][]string, error)
 	// FetchNamespacedReportLabels from PolicyReports
 	FetchNamespacedReportLabels(context.Context, Filter) (map[string][]string, error)
+
+	FetchFindingCounts(context.Context, Filter) (*Findings, error)
+	FetchSources(context.Context, string) ([]*Source, error)
+
+	FetchNamespacedResourceResults(context.Context, Filter, Pagination) ([]*ResourceResult, error)
+	FetchClusterResourceResults(context.Context, Filter, Pagination) ([]*ResourceResult, error)
+	CountNamespacedResourceResults(context.Context, Filter) (int, error)
+	CountClusterResourceResults(context.Context, Filter) (int, error)
+	FetchResourceResults(context.Context, string, Filter) ([]*ResourceResult, error)
+	FetchResourceStatusCounts(context.Context, string, Filter) ([]ResourceStatusCount, error)
+	FetchResource(ctx context.Context, id string) (*Resource, error)
+
+	FetchResults(context.Context, string, Filter, Pagination) ([]*ListResult, error)
+	CountResults(context.Context, string, Filter) (int, error)
 }
