@@ -3,7 +3,7 @@
 Policy Reporter watches for PolicyReport Resources.
 It creates Prometheus Metrics and can send rule validation events to different targets like Loki, Elasticsearch, Slack or Discord
 
-![Version: 3.0.0-alpha](https://img.shields.io/badge/Version-3.0.0--alpha-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 3.0.0-alpha](https://img.shields.io/badge/AppVersion-3.0.0--alpha-informational?style=flat-square)
+![Version: 3.0.0-alpha.2](https://img.shields.io/badge/Version-3.0.0--alpha.2-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 3.0.0-alpha](https://img.shields.io/badge/AppVersion-3.0.0--alpha-informational?style=flat-square)
 
 ## Documentation
 
@@ -54,7 +54,7 @@ Check the [Documentation](https://kyverno.github.io/policy-reporter/guide/02-get
 | image.registry | string | `"ghcr.io"` |  |
 | image.repository | string | `"kyverno/policy-reporter"` |  |
 | image.pullPolicy | string | `"IfNotPresent"` |  |
-| image.tag | string | `"f4fa523"` |  |
+| image.tag | string | `"6fab7d5"` |  |
 | imagePullSecrets | list | `[]` |  |
 | priorityClassName | string | `""` |  |
 | replicaCount | int | `1` |  |
@@ -345,9 +345,9 @@ Check the [Documentation](https://kyverno.github.io/policy-reporter/guide/02-get
 
 | Repository | Name | Version |
 |------------|------|---------|
-|  | kyvernoPlugin | 1.6.2 |
+|  | kyvernoPlugin | 1.6.3 |
 |  | monitoring | 2.8.1 |
-|  | ui | 3.0.0-alpha |
+|  | ui | 3.0.0-alpha.2 |
 
 ## Maintainers
 
