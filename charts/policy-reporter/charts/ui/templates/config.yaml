@@ -11,42 +11,40 @@ metadata:
     {{- include "ui.labels" . | nindent 4 }}
 data:
   config.yaml: |-
-    logSize: {{ .Values.log.size }}
-    displayMode: {{ .Values.displayMode | quote }}
-    refreshInterval: {{ .Values.refreshInterval }}
-    clusterName: {{ .Values.clusterName | quote }}
-    views:
-      dashboard:
-        policyReports: {{ .Values.views.dashboard.policyReports }}
-        clusterPolicyReports: {{ .Values.views.dashboard.clusterPolicyReports }}
-      logs: {{ .Values.views.logs }}
-      policyReports: {{ .Values.views.policyReports }}
-      clusterPolicyReports: {{ .Values.views.clusterPolicyReports }}
-      kyvernoPolicies: {{ .Values.views.kyvernoPolicies }}
-      kyvernoVerifyImages: {{ .Values.views.kyvernoVerifyImages }}
-    {{- with .Values.clusters }}
     clusters:
-      {{- toYaml . | nindent 4 }}
-    {{- end }}
-    {{- with .Values.labelFilter }}
-    labelFilter:
-      {{- toYaml . | nindent 4 }}
-    {{- end }}
-
-    {{- with .Values.redis }}
-    redis:
-      {{- toYaml . | nindent 6 }}
-    {{- end }}
-
-    logging:
-      encoding: {{ .Values.logging.encoding }}
-      logLevel: {{ include "ui.logLevel" . }}
-      development: {{ .Values.logging.development }}
-
-    apiConfig:
-      logging: {{ .Values.api.logging }}
-      overwriteHost: {{ .Values.api.overwriteHost }}
+    - name: {{ .Values.clusterName | quote }}
+      host: http://{{ include "ui.policyReportServiceName" . }}:{{ .Values.policyReporter.port }}
+      {{- if or .Values.global.basicAuth.username .Values.global.basicAuth.secretRef }}
       basicAuth:
         username: {{ .Values.global.basicAuth.username }}
         password: {{ .Values.global.basicAuth.password }}
         secretRef: {{ .Values.global.basicAuth.secretRef }}
+      {{- end }}
+      {{- if or .Values.plugins.kyverno .Values.global.plugins.kyverno }}
+      plugins:
+      - name: kyverno
+        host: http://{{ include "ui.kyvernoPluginServiceName" . }}:{{ .Values.kyvernoPlugin.port }}
+      {{- end }}
+    {{- with .Values.clusters }}
+      {{- toYaml . | nindent 4 }}
+    {{- end }}
+    
+    ui:
+      {{- with .Values.labelFilter }}
+      labelFilter:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.defaultFilter }}
+      defaultFilter:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+
+    logging:
+      enabled: {{ .Values.logging.enabled }}
+      encoding: {{ .Values.logging.encoding }}
+      logLevel: {{ .Values.logging.logLevel }}
+      development: {{ .Values.logging.development }}
+
+    server:
+      overwriteHost: {{ .Values.server.overwriteHost }}
+      mode: release

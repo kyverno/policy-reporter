@@ -9,45 +9,28 @@ image:
   registry: ghcr.io
   repository: kyverno/policy-reporter-ui
   pullPolicy: IfNotPresent
-  tag: 1.9.1
+  tag: 53ac00b
 
 # possible default displayModes: light/dark
 displayMode: ""
 
-# default refreshInterval, set 0 to disable it
-refreshInterval: 10000
-
 # Key/value pairs that are attached to all resources.
 annotations: {}
-
-log:
-  # holds the latest 200 validation results in the UI Log
-  size: 200
-
-# enable/disable views as needed in the Policy Reporter UI
-# disabled log view will also disable the UI as push target
-views:
-  dashboard:
-    policyReports: true
-    clusterPolicyReports: true
-  logs: true
-  policyReports: true
-  clusterPolicyReports: true
-  kyvernoPolicies: true
-  kyvernoVerifyImages: true
 
 plugins:
   kyverno: false
 
 # Custom Cluster Name which is used in the ClusterSelect, if you configured additional clusters below.
-clusterName: ""
+clusterName: "default"
 
 # Attention: be sure that your APIs are not accessable for the outside world
 # Use tools like VPN, private Networks or internal Network Load Balancer to expose your APIs in a secure way to the UI
 clusters: []
 # - name: External Cluster
-#   api: https://policy-reporter.external.cluster                       # reachable external Policy Reporter REST API
-#   kyvernoApi: https://policy-reporter-kyverno-plugin.external.cluster # (optional) reachable external Policy Reporter Kyverno Plugin REST API
+#   host: https://policy-reporter.external.cluster                       # reachable external Policy Reporter REST API
+#   plugins: 
+#   - name: kyverno
+#     host: https://policy-reporter-kyverno-plugin.external.cluster     # (optional) reachable external Policy Reporter Kyverno Plugin REST API
 #   skipTLS: false
 #   certificate: "/app/certs/root.ca"
 #   secreRef: "" # name of an existing secret to read the clusterconfiguration from, supported keys: api, kyvernoApi, username, password, skipTLS, certificate
@@ -71,26 +54,28 @@ clusters: []
 # labelFilter: ["owner"]
 labelFilter: []
 
+defaultFilter:
+  resources:
+    - Deployment
+    - CronJob
+    - DaemonSet
+    - StatefulSet
+    - Service
+    - Secret
+    - ConfigMap
+  clusterResources:
+    - Node
+    - Namespace
+
 # Proxy request logging
 logging:
-  encoding: console # possible encodings are console and json
-  logLevel: 0 # default info
+  enabled: false     # enables access logging for proxy requests
+  encoding: console  # possible encodings are console and json
+  logLevel: 0        # default info
   development: false # more human readable structure, removes log sampling
 
-api:
-  logging: false      # enables access logging for proxy requests, sets log level to debug
+server:
   overwriteHost: true # overwrites request host and sets X-Forwarded--Host and X-Origin-Host headers
-
-# use redis as external log storage instead of an in memory store
-# recommended when using a HA setup with more then one replica
-# to get all logs on each instance
-redis:
-  enabled: false
-  address: ""
-  database: 0
-  prefix: "policy-reporter-ui"
-  username: ""
-  password: ""
 
 # configurations related to the PolicyReporter API
 policyReporter:
@@ -133,9 +118,6 @@ podAnnotations: {}
 
 # Key/value pairs that are attached to pods.
 podLabels: {}
-
-# Allow additional env variables to be added
-envVars: []
 
 resources: {}
   # We usually recommend not to specify default resources and to leave this as a conscious

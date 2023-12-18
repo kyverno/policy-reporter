@@ -5,7 +5,7 @@ image:
   registry: ghcr.io
   repository: kyverno/policy-reporter
   pullPolicy: IfNotPresent
-  tag: 2.17.4
+  tag: f4fa523
 
 imagePullSecrets: []
 
@@ -75,9 +75,6 @@ podAnnotations: {}
 
 # Key/value pairs that are attached to pods.
 podLabels: {}
-
-# Allow additional env variables to be added
-envVars: []
 
 resources: {}
   # We usually recommend not to specify default resources and to leave this as a conscious
@@ -201,7 +198,7 @@ global:
   # The name of service policy-report. Defaults to ReleaseName.
   backend: ""
   # overwrite the fullname of all resources including subcharts
-  fullnameOverride: ""
+  fullnameOverride: "policy-reporter"
   # configure the namespace of all resources including subcharts
   namespace: ""
   # additional labels added on each resource
@@ -286,13 +283,6 @@ emailReports:
     #        include: ['team-a-*']
     #      sources:
     #        include: ['Kyverno']
-  resources: {}
-  # limits:
-  #   memory: 100Mi
-  #   cpu: 10m
-  # requests:
-  #   memory: 75Mi
-  #   cpu: 5m
 
 # Reference a configuration which already exists instead of creating one
 existingTargetConfig:
@@ -362,9 +352,7 @@ target:
     username: ""
     # elasticsearch password für HTTP Basic Auth
     password: ""
-    # elasticsearch apiKey für apiKey authentication
-    apiKey: ""
-    # receive the host, username and/or password,apiKey from an existing secret instead
+    # receive the host, username and/or password from an existing secret instead
     secretRef: ""
     # Mounted secret path by Secrets Controller, secret should be in json format
     mountedSecret: ""
@@ -740,10 +728,5 @@ extraVolumes:
 
 # If set the volume for sqlite is freely configurable below "- name: sqlite". If no value is set an emptyDir is used.
 sqliteVolume: {}
-  # emptyDir:
-  #   sizeLimit: 10Mi
-
-# If set the volume for /tmp is freely configurable below "- name: tmp". If no value is set an emptyDir is used.
-tmpVolume: {}
   # emptyDir:
   #   sizeLimit: 10Mi
