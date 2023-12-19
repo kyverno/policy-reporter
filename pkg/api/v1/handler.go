@@ -298,8 +298,7 @@ func (h *Handler) ClusterResourceResultsHandler() http.HandlerFunc {
 // ResourceResultsHandler REST API
 func (h *Handler) ResourceResultsHandler() http.HandlerFunc {
 	return func(w http.ResponseWriter, req *http.Request) {
-		filter := buildFilter(req)
-		list, err := h.finder.FetchResourceResults(req.Context(), req.URL.Query().Get("id"), filter)
+		list, err := h.finder.FetchResourceResults(req.Context(), req.URL.Query().Get("id"), buildFilter(req))
 		h.logError(err)
 		helper.SendJSONResponse(w, list, err)
 	}
@@ -361,6 +360,21 @@ func buildFilter(req *http.Request) Filter {
 		labels[strings.TrimSpace(parts[0])] = strings.TrimSpace(parts[1])
 	}
 
+	exclude := map[string][]string{}
+	for _, sourceKind := range req.URL.Query()["exclude"] {
+		parts := strings.Split(sourceKind, ":")
+		length := len(parts)
+		if length < 2 {
+			continue
+		}
+
+		if l, ok := exclude[strings.TrimSpace(parts[length-2])]; ok {
+			exclude[strings.TrimSpace(parts[length-2])] = append(l, strings.TrimSpace(parts[length-1]))
+		} else {
+			exclude[strings.TrimSpace(parts[length-2])] = []string{strings.TrimSpace(parts[length-1])}
+		}
+	}
+
 	return Filter{
 		Namespaces:  req.URL.Query()["namespaces"],
 		Kinds:       req.URL.Query()["kinds"],
@@ -374,6 +388,7 @@ func buildFilter(req *http.Request) Filter {
 		ReportLabel: labels,
 		Search:      req.URL.Query().Get("search"),
 		ResourceID:  req.URL.Query().Get("resource_id"),
+		Exclude:     exclude,
 	}
 }
 
