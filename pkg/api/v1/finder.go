@@ -16,6 +16,7 @@ type Filter struct {
 	Resources   []string
 	ResourceID  string
 	ReportLabel map[string]string
+	Exclude     map[string][]string
 	Search      string
 }
 

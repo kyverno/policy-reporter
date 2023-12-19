@@ -1201,33 +1201,68 @@ func createSQLiteDB(dbFile string) (*sql.DB, error) {
 func addPolicyReportFilterFilter(query *bun.SelectQuery, filter api.Filter) {
 	if len(filter.Namespaces) > 0 {
 		query.Where("f.namespace IN (?)", bun.In(filter.Namespaces))
+	} else if len(filter.Namespaces) == 1 {
+		query.Where("f.namespace = ?", filter.Namespaces[0])
 	}
+
 	if len(filter.Kinds) > 0 {
 		query.Where("f.kind IN (?)", bun.In(filter.Kinds))
+	} else if len(filter.Kinds) == 1 {
+		query.Where("f.kind = ?", filter.Kinds[0])
 	}
+
 	if len(filter.Sources) > 0 {
 		query.Where("f.source IN (?)", bun.In(filter.Sources))
+	} else if len(filter.Sources) == 1 {
+		query.Where("f.source = ?", filter.Sources[0])
+	}
+
+	if len(filter.Kinds) == 0 && len(filter.Exclude) > 0 {
+		for source, kind := range filter.Exclude {
+			query.Where("(f.source != ? OR (f.source = ? AND f.kind NOT IN (?)))", source, source, bun.In(kind))
+		}
 	}
 }
 
 func addPolicyReportResultFilter(query *bun.SelectQuery, filter api.Filter) {
-	if len(filter.Namespaces) > 0 {
+	if len(filter.Namespaces) > 1 {
 		query.Where("r.resource_namespace IN (?)", bun.In(filter.Namespaces))
+	} else if len(filter.Namespaces) == 1 {
+		query.Where("r.resource_namespace = ?", filter.Namespaces[0])
 	}
+
 	if len(filter.Rules) > 0 {
 		query.Where("r.rule IN (?)", bun.In(filter.Rules))
+	} else if len(filter.ReportLabel) == 1 {
+		query.Where("r.rule = ?", filter.Rules[0])
 	}
+
 	if len(filter.Kinds) > 0 {
 		query.Where("r.resource_kind IN (?)", bun.In(filter.Kinds))
+	} else if len(filter.Kinds) == 1 {
+		query.Where("r.resource_kind = ?", filter.Kinds[0])
 	}
+
 	if len(filter.Resources) > 0 {
 		query.Where("r.resource_name IN (?)", bun.In(filter.Resources))
+	} else if len(filter.Resources) == 1 {
+		query.Where("r.resource_name = ?", filter.Resources[0])
 	}
+
 	if filter.ResourceID != "" {
 		query.Where("r.resource_id = ?", filter.ResourceID)
 	}
+
 	if len(filter.Sources) > 0 {
 		query.Where("r.source IN (?)", bun.In(filter.Sources))
+	} else if len(filter.Sources) == 1 {
+		query.Where("r.source = ?", filter.Sources[0])
+	}
+
+	if len(filter.Kinds) == 0 && len(filter.Exclude) > 0 {
+		for source, kind := range filter.Exclude {
+			query.Where("(r.source != ? OR (r.source = ? AND r.resource_kind NOT IN (?)))", source, source, bun.In(kind))
+		}
 	}
 
 	if filter.Search != "" {
@@ -1238,21 +1273,42 @@ func addPolicyReportResultFilter(query *bun.SelectQuery, filter api.Filter) {
 func addPolicyReportResourceFilter(query *bun.SelectQuery, filter api.Filter) {
 	if len(filter.Namespaces) > 0 {
 		query.Where("res.resource_namespace IN (?)", bun.In(filter.Namespaces))
+	} else if len(filter.Namespaces) == 1 {
+		query.Where("res.resource_namespace = ?", filter.Namespaces[0])
 	}
+
 	if len(filter.Kinds) > 0 {
 		query.Where("res.resource_kind IN (?)", bun.In(filter.Kinds))
+	} else if len(filter.Kinds) == 1 {
+		query.Where("res.resource_kind = ?", filter.Kinds[0])
 	}
+
 	if len(filter.Resources) > 0 {
 		query.Where("res.resource_name IN (?)", bun.In(filter.Resources))
+	} else if len(filter.Resources) == 1 {
+		query.Where("res.resource_name = ?", filter.Resources[0])
 	}
+
 	if len(filter.Sources) > 0 {
 		query.Where("res.source IN (?)", bun.In(filter.Sources))
+	} else if len(filter.Sources) == 1 {
+		query.Where("res.source = ?", filter.Sources[0])
 	}
+
 	if len(filter.Categories) > 0 {
 		query.Where("res.category IN (?)", bun.In(filter.Categories))
+	} else if len(filter.Categories) == 1 {
+		query.Where("res.category = ?", filter.Categories[0])
 	}
+
 	if filter.ResourceID != "" {
 		query.Where("res.id = ?", filter.ResourceID)
+	}
+
+	if len(filter.Kinds) == 0 && len(filter.Exclude) > 0 {
+		for source, kind := range filter.Exclude {
+			query.Where("(res.source != ? OR (res.source = ? AND res.resource_kind NOT IN (?)))", source, source, bun.In(kind))
+		}
 	}
 
 	if filter.Search != "" {
@@ -1263,24 +1319,40 @@ func addPolicyReportResourceFilter(query *bun.SelectQuery, filter api.Filter) {
 func addPolicyReportFilter(query *bun.SelectQuery, filter api.Filter) {
 	if len(filter.Namespaces) > 0 {
 		query.Where("pr.namespace IN (?)", bun.In(filter.Namespaces))
+	} else if len(filter.Namespaces) == 1 {
+		query.Where("pr.namespace = ?", filter.Namespaces[0])
 	}
+
 	if len(filter.Sources) > 0 {
 		query.Where("pr.source IN (?)", bun.In(filter.Sources))
+	} else if len(filter.Sources) == 1 {
+		query.Where("pr.source = ?", filter.Sources[0])
 	}
 }
 
 func (s *Store) addFilter(query *bun.SelectQuery, filter api.Filter) {
 	if len(filter.Policies) > 0 {
 		query.Where("policy IN (?)", bun.In(filter.Policies))
+	} else if len(filter.Policies) == 1 {
+		query.Where("policy = ?", filter.Policies[0])
 	}
+
 	if len(filter.Categories) > 0 {
 		query.Where("category IN (?)", bun.In(filter.Categories))
+	} else if len(filter.Categories) == 1 {
+		query.Where("category = ?", filter.Categories[0])
 	}
+
 	if len(filter.Severities) > 0 {
 		query.Where("severity IN (?)", bun.In(filter.Severities))
+	} else if len(filter.Severities) == 1 {
+		query.Where("severity = ?", filter.Severities[0])
 	}
+
 	if len(filter.Status) > 0 {
 		query.Where("result IN (?)", bun.In(filter.Status))
+	} else if len(filter.Status) == 1 {
+		query.Where("result = ?", filter.Status[0])
 	}
 
 	if len(filter.ReportLabel) > 0 {
