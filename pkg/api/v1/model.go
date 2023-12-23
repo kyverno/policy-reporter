@@ -107,6 +107,14 @@ type ResourceResult struct {
 	Error      int    `json:"error"`
 }
 
+type PolicyResult struct {
+	Source   string         `json:"source,omitempty"`
+	Category string         `json:"category,omitempty"`
+	Policy   string         `json:"policy"`
+	Severity string         `json:"severity,omitempty"`
+	Results  map[string]int `json:"results"`
+}
+
 type ResourceResultList struct {
 	Items []*ResourceResult `json:"items"`
 	Count int               `json:"count"`

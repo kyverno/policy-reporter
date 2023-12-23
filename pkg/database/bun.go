@@ -197,7 +197,7 @@ func (s *Store) FetchPolicyReports(ctx context.Context, filter api.Filter, pagin
 	list := []*api.PolicyReport{}
 	query := s.db.NewSelect().Model((*PolicyReport)(nil))
 
-	s.addFilter(query, filter)
+	s.addFilter(query, filter, "r")
 	addPolicyReportFilter(query, filter)
 	query.Where(`pr.type = ?`, report.PolicyReportType)
 
@@ -214,7 +214,7 @@ func (s *Store) FetchPolicyReports(ctx context.Context, filter api.Filter, pagin
 func (s *Store) CountPolicyReports(ctx context.Context, filter api.Filter) (int, error) {
 	query := s.db.NewSelect().Model((*PolicyReport)(nil))
 
-	s.addFilter(query, filter)
+	s.addFilter(query, filter, "r")
 	addPolicyReportFilter(query, filter)
 	query.Where(`pr.type = ?`, report.PolicyReportType)
 
@@ -271,7 +271,7 @@ func (s *Store) FetchClusterPolicyReports(ctx context.Context, filter api.Filter
 	list := []*api.PolicyReport{}
 	query := s.db.NewSelect().Model((*PolicyReport)(nil))
 
-	s.addFilter(query, filter)
+	s.addFilter(query, filter, "r")
 	addPolicyReportFilter(query, filter)
 	query.Where(`pr.type = ?`, report.ClusterPolicyReportType)
 
@@ -288,7 +288,7 @@ func (s *Store) FetchClusterPolicyReports(ctx context.Context, filter api.Filter
 func (s *Store) CountClusterPolicyReports(ctx context.Context, filter api.Filter) (int, error) {
 	query := s.db.NewSelect().Model((*PolicyReport)(nil))
 
-	s.addFilter(query, filter)
+	s.addFilter(query, filter, "r")
 	addPolicyReportFilter(query, filter)
 	query.Where(`pr.type = ?`, report.ClusterPolicyReportType)
 
@@ -352,11 +352,7 @@ func (s *Store) FetchClusterRules(ctx context.Context, filter api.Filter) ([]str
 		Order("rule ASC").
 		Where(`r.resource_namespace = ''`)
 
-	if len(filter.ReportLabel) > 0 {
-		query.Join("JOIN policy_report AS pr ON pr.id = r.policy_report_id")
-	}
-
-	s.addFilter(query, filter)
+	s.addFilter(query, filter, "r")
 	addPolicyReportResultFilter(query, filter)
 
 	query.Scan(ctx, &list)
@@ -375,11 +371,7 @@ func (s *Store) FetchClusterResources(ctx context.Context, filter api.Filter) ([
 		Order("kind ASC", "name ASC").
 		Where(`r.resource_namespace = ''`)
 
-	if len(filter.ReportLabel) > 0 {
-		query.Join("JOIN policy_report AS pr ON pr.id = r.policy_report_id")
-	}
-
-	s.addFilter(query, filter)
+	s.addFilter(query, filter, "r")
 	addPolicyReportResultFilter(query, filter)
 
 	query.Scan(ctx, &list)
@@ -403,18 +395,20 @@ func (s *Store) FetchClusterSources(ctx context.Context) ([]string, error) {
 	return s.fetchFilterOptions(ctx, "source", api.Filter{}, &withClusterscope)
 }
 
-func (s *Store) FetchSources(ctx context.Context, resource string) ([]*api.Source, error) {
+func (s *Store) FetchSources(ctx context.Context, resource string, filter api.Filter) ([]*api.Source, error) {
 	query := s.db.
 		NewSelect().
-		TableExpr("policy_report_resource as r").
+		TableExpr("policy_report_resource as res").
 		Distinct().
-		ColumnExpr("source, category, SUM(pass) as pass, SUM(warn) as warn, SUM(fail) as fail, SUM(error) as error, SUM(skip) as skip").
-		Group("source", "category").
-		Order("source ASC", "category ASC")
+		ColumnExpr("res.source, res.category, SUM(res.pass) as pass, SUM(res.warn) as warn, SUM(res.fail) as fail, SUM(res.error) as error, SUM(res.skip) as skip").
+		Group("res.source", "res.category").
+		Order("res.source ASC", "res.category ASC")
 
 	if resource != "" {
-		query.Where("id = ?", resource)
+		query.Where("res.id = ?", resource)
 	}
+
+	addPolicyReportResourceFilter(query, filter)
 
 	results := make([]*ResourceResult, 0)
 
@@ -458,15 +452,11 @@ func (s *Store) FetchFindingCounts(ctx context.Context, filter api.Filter) (*api
 	query := s.db.
 		NewSelect().
 		TableExpr("policy_report_filter as f").
-		ColumnExpr("SUM(f.count) as count, f.result as status, source").
+		ColumnExpr("SUM(f.count) as count, f.result as status, f.source").
 		Where("status IN (?)", bun.In([]string{v1alpha2.StatusPass, v1alpha2.StatusFail, v1alpha2.StatusWarn, v1alpha2.StatusError})).
-		Group("status", "source")
+		Group("status", "f.source")
 
-	if len(filter.ReportLabel) > 0 {
-		query.Join("JOIN policy_report AS pr ON pr.id = f.policy_report_id")
-	}
-
-	s.addFilter(query, filter)
+	s.addFilter(query, filter, "f")
 	addPolicyReportFilterFilter(query, filter)
 
 	results := make([]api.StatusCount, 0)
@@ -528,11 +518,7 @@ func (s *Store) FetchClusterStatusCounts(ctx context.Context, filter api.Filter)
 		Where(`f.namespace = ''`).
 		Group("status")
 
-	if len(filter.ReportLabel) > 0 {
-		query.Join("JOIN policy_report AS pr ON pr.id = f.policy_report_id")
-	}
-
-	s.addFilter(query, filter)
+	s.addFilter(query, filter, "f")
 	addPolicyReportFilterFilter(query, filter)
 
 	err := query.Scan(ctx, &results)
@@ -560,11 +546,7 @@ func (s *Store) FetchClusterResults(ctx context.Context, filter api.Filter, pagi
 		Model(&results).
 		Where(`r.resource_namespace = ''`)
 
-	if len(filter.ReportLabel) > 0 {
-		query.Join("JOIN policy_report AS pr ON pr.id = r.policy_report_id")
-	}
-
-	s.addFilter(query, filter)
+	s.addFilter(query, filter, "r")
 	addPolicyReportResultFilter(query, filter)
 	addPagination(query, pagination)
 
@@ -582,11 +564,7 @@ func (s *Store) CountClusterResults(ctx context.Context, filter api.Filter) (int
 		Model((*PolicyReportResult)(nil)).
 		Where(`r.resource_namespace = ''`)
 
-	if len(filter.ReportLabel) > 0 {
-		query.Join("JOIN policy_report AS pr ON pr.id = r.policy_report_id")
-	}
-
-	s.addFilter(query, filter)
+	s.addFilter(query, filter, "r")
 	addPolicyReportResultFilter(query, filter)
 
 	return query.Count(ctx)
@@ -603,11 +581,7 @@ func (s *Store) FetchNamespacedRules(ctx context.Context, filter api.Filter) ([]
 		Order("rule ASC").
 		Where(`r.resource_namespace != ''`)
 
-	if len(filter.ReportLabel) > 0 {
-		query.Join("JOIN policy_report AS pr ON pr.id = r.policy_report_id")
-	}
-
-	s.addFilter(query, filter)
+	s.addFilter(query, filter, "r")
 	addPolicyReportResultFilter(query, filter)
 
 	query.Scan(ctx, &list)
@@ -626,11 +600,7 @@ func (s *Store) FetchNamespacedResources(ctx context.Context, filter api.Filter)
 		Order("kind ASC", "name ASC").
 		Where(`r.resource_namespace != ''`)
 
-	if len(filter.ReportLabel) > 0 {
-		query.Join("JOIN policy_report AS pr ON pr.id = r.policy_report_id")
-	}
-
-	s.addFilter(query, filter)
+	s.addFilter(query, filter, "r")
 	addPolicyReportResultFilter(query, filter)
 
 	query.Scan(ctx, &list)
@@ -688,11 +658,7 @@ func (s *Store) FetchNamespacedStatusCounts(ctx context.Context, filter api.Filt
 		Group("f.namespace", "status").
 		Order("f.namespace ASC")
 
-	if len(filter.ReportLabel) > 0 {
-		query.Join("JOIN policy_report AS pr ON pr.id = f.policy_report_id")
-	}
-
-	s.addFilter(query, filter)
+	s.addFilter(query, filter, "f")
 	addPolicyReportFilterFilter(query, filter)
 
 	err := query.Scan(ctx, &counts)
@@ -757,11 +723,7 @@ func (s *Store) FetchNamespacedResults(ctx context.Context, filter api.Filter, p
 		Model(&results).
 		Where(`r.resource_namespace != ''`)
 
-	if len(filter.ReportLabel) > 0 {
-		query.Join("JOIN policy_report AS pr ON pr.id = r.policy_report_id")
-	}
-
-	s.addFilter(query, filter)
+	s.addFilter(query, filter, "r")
 	addPolicyReportResultFilter(query, filter)
 	addPagination(query, pagination)
 
@@ -779,11 +741,7 @@ func (s *Store) CountNamespacedResults(ctx context.Context, filter api.Filter) (
 		Model((*PolicyReportResult)(nil)).
 		Where(`r.resource_namespace != ''`)
 
-	if len(filter.ReportLabel) > 0 {
-		query.Join("JOIN policy_report AS pr ON pr.id = r.policy_report_id")
-	}
-
-	s.addFilter(query, filter)
+	s.addFilter(query, filter, "r")
 	addPolicyReportResultFilter(query, filter)
 
 	return query.Count(ctx)
@@ -797,7 +755,7 @@ func (s *Store) FetchResults(ctx context.Context, id string, filter api.Filter, 
 		Model(&results).
 		Where(`r.resource_id = ?`, id)
 
-	s.addFilter(query, filter)
+	s.addFilter(query, filter, "r")
 	addPolicyReportResultFilter(query, filter)
 	addPagination(query, pagination)
 
@@ -815,11 +773,7 @@ func (s *Store) CountResults(ctx context.Context, id string, filter api.Filter) 
 		Model((*PolicyReportResult)(nil)).
 		Where(`r.resource_id = ?`, id)
 
-	if len(filter.ReportLabel) > 0 {
-		query.Join("JOIN policy_report AS pr ON pr.id = r.policy_report_id")
-	}
-
-	s.addFilter(query, filter)
+	s.addFilter(query, filter, "r")
 	addPolicyReportResultFilter(query, filter)
 
 	return query.Count(ctx)
@@ -831,10 +785,11 @@ func (s *Store) FetchNamespacedResourceResults(ctx context.Context, filter api.F
 	query := s.db.
 		NewSelect().
 		Model(&results).
-		ColumnExpr("id, resource_uid, resource_kind, resource_api_version, resource_namespace, resource_name, SUM(pass) as pass, SUM(warn) as warn, SUM(fail) as fail, SUM(error) as error, SUM(skip) as skip").
-		Group("id", "resource_uid", "resource_kind", "resource_api_version", "resource_namespace", "resource_name").
+		ColumnExpr("res.id, resource_uid, resource_kind, resource_api_version, resource_namespace, resource_name, SUM(res.pass) as pass, SUM(res.warn) as warn, SUM(res.fail) as fail, SUM(res.error) as error, SUM(res.skip) as skip").
+		Group("res.id", "resource_uid", "resource_kind", "resource_api_version", "resource_namespace", "resource_name").
 		Where(`resource_namespace != ''`)
 
+	s.addPRFilter(query, filter)
 	addPolicyReportResourceFilter(query, filter)
 	addPagination(query, pagination)
 
@@ -850,9 +805,10 @@ func (s *Store) CountNamespacedResourceResults(ctx context.Context, filter api.F
 	query := s.db.
 		NewSelect().
 		Model((*ResourceResult)(nil)).
-		Group("id").
+		Group("res.id").
 		Where(`resource_namespace != ''`)
 
+	s.addPRFilter(query, filter)
 	addPolicyReportResourceFilter(query, filter)
 
 	return query.Count(ctx)
@@ -864,10 +820,11 @@ func (s *Store) FetchClusterResourceResults(ctx context.Context, filter api.Filt
 	query := s.db.
 		NewSelect().
 		Model(&results).
-		ColumnExpr("id, resource_uid, resource_kind, resource_api_version, resource_namespace, resource_name, SUM(pass) as pass, SUM(warn) as warn, SUM(fail) as fail, SUM(error) as error, SUM(skip) as skip").
+		ColumnExpr("res.id, resource_uid, resource_kind, resource_api_version, resource_namespace, resource_name, SUM(res.pass) as pass, SUM(res.warn) as warn, SUM(res.fail) as fail, SUM(res.error) as error, SUM(res.skip) as skip").
 		Where(`resource_namespace = ''`).
-		Group("id", "resource_uid", "resource_kind", "resource_api_version", "resource_namespace", "resource_name")
+		Group("res.id", "resource_uid", "resource_kind", "resource_api_version", "resource_namespace", "resource_name")
 
+	s.addPRFilter(query, filter)
 	addPolicyReportResourceFilter(query, filter)
 	addPagination(query, pagination)
 
@@ -884,8 +841,9 @@ func (s *Store) CountClusterResourceResults(ctx context.Context, filter api.Filt
 		NewSelect().
 		Model((*ResourceResult)(nil)).
 		Where(`resource_namespace = ''`).
-		Group("id")
+		Group("res.id")
 
+	s.addPRFilter(query, filter)
 	addPolicyReportResourceFilter(query, filter)
 
 	return query.Count(ctx)
@@ -897,10 +855,10 @@ func (s *Store) FetchResourceResults(ctx context.Context, id string, filter api.
 	query := s.db.
 		NewSelect().
 		Model(&results).
-		ColumnExpr("id, resource_uid, resource_kind, resource_api_version, resource_namespace, resource_name, source, SUM(pass) as pass, SUM(warn) as warn, SUM(fail) as fail, SUM(error) as error, SUM(skip) as skip").
-		Where(`id = ?`, id).
+		ColumnExpr("res.id, resource_uid, resource_kind, resource_api_version, resource_namespace, resource_name, source, SUM(pass) as pass, SUM(warn) as warn, SUM(fail) as fail, SUM(error) as error, SUM(skip) as skip").
+		Where(`res.id = ?`, id).
 		Order("source ASC").
-		Group("id", "resource_uid", "resource_kind", "resource_api_version", "resource_namespace", "resource_name", "source")
+		Group("res.id", "resource_uid", "resource_kind", "resource_api_version", "resource_namespace", "resource_name", "source")
 
 	addPolicyReportResourceFilter(query, filter)
 
@@ -918,8 +876,8 @@ func (s *Store) FetchResource(ctx context.Context, id string) (*api.Resource, er
 	query := s.db.
 		NewSelect().
 		Model(&result).
-		ColumnExpr("id, resource_uid, resource_kind, resource_api_version, resource_namespace, resource_name").
-		Where(`id = ?`, id).
+		ColumnExpr("res.id, resource_uid, resource_kind, resource_api_version, resource_namespace, resource_name").
+		Where(`res.id = ?`, id).
 		Limit(1)
 
 	err := query.Scan(ctx)
@@ -967,7 +925,7 @@ func (s *Store) FetchResourceStatusCounts(ctx context.Context, resourceID string
 		Group("status", "source").
 		Order("source ASC")
 
-	s.addFilter(query, filter)
+	s.addFilter(query, filter, "r")
 	addPolicyReportResultFilter(query, filter)
 
 	err := query.Scan(ctx, &counts)
@@ -988,6 +946,54 @@ func (s *Store) FetchResourceStatusCounts(ctx context.Context, resourceID string
 	}
 
 	return statusCounts, nil
+}
+
+func (s *Store) FetchPolicies(ctx context.Context, filter api.Filter) (any, error) {
+	results := make([]*PolicyReportFilter, 0)
+
+	query := s.db.
+		NewSelect().
+		Model(&results).
+		ColumnExpr("f.severity, f.category, f.policy, f.source, f.result, SUM(f.count) as count").
+		Order("f.source ASC", "f.category").
+		Group("f.category", "f.policy", "f.source", "f.result", "f.severity")
+
+	s.addFilter(query, filter, "f")
+	addPolicyReportFilterFilter(query, filter)
+
+	if filter.Search != "" {
+		query.Where(`(f.policy LIKE ?0 OR LOWER(f.kind) = LOWER(?1))`, "%"+filter.Search+"%", filter.Search)
+	}
+
+	err := query.Scan(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	response := make(map[string]*api.PolicyResult)
+	for _, r := range results {
+		category := r.Category
+		if category == "" {
+			category = "Other"
+		}
+
+		if _, ok := response[r.Policy]; ok {
+			response[r.Policy].Results[r.Result] = r.Count
+			continue
+		}
+
+		response[r.Policy] = &api.PolicyResult{
+			Source:   r.Source,
+			Category: category,
+			Policy:   r.Policy,
+			Severity: r.Severity,
+			Results: map[string]int{
+				r.Result: r.Count,
+			},
+		}
+	}
+
+	return helper.ToList(response), nil
 }
 
 func (s *Store) Get(ctx context.Context, id string) (v1alpha2.ReportInterface, error) {
@@ -1090,11 +1096,7 @@ func (s *Store) fetchFilterOptions(ctx context.Context, option string, filter ap
 		query.Where(`f.namespace = ''`)
 	}
 
-	if len(filter.ReportLabel) > 0 {
-		query.Join("JOIN policy_report AS pr ON pr.id = f.policy_report_id")
-	}
-
-	s.addFilter(query, filter)
+	s.addFilter(query, filter, "f")
 	addPolicyReportFilterFilter(query, filter)
 
 	err := query.Scan(ctx, &list)
@@ -1217,6 +1219,10 @@ func addPolicyReportFilterFilter(query *bun.SelectQuery, filter api.Filter) {
 		query.Where("f.source = ?", filter.Sources[0])
 	}
 
+	if len(filter.Namespaces) == 0 && filter.Namespaced {
+		query.Where("f.namespace != ''")
+	}
+
 	if len(filter.Kinds) == 0 && len(filter.Exclude) > 0 {
 		for source, kind := range filter.Exclude {
 			query.Where("(f.source != ? OR (f.source = ? AND f.kind NOT IN (?)))", source, source, bun.In(kind))
@@ -1233,7 +1239,7 @@ func addPolicyReportResultFilter(query *bun.SelectQuery, filter api.Filter) {
 
 	if len(filter.Rules) > 0 {
 		query.Where("r.rule IN (?)", bun.In(filter.Rules))
-	} else if len(filter.ReportLabel) == 1 {
+	} else if len(filter.Rules) == 1 {
 		query.Where("r.rule = ?", filter.Rules[0])
 	}
 
@@ -1251,6 +1257,10 @@ func addPolicyReportResultFilter(query *bun.SelectQuery, filter api.Filter) {
 
 	if filter.ResourceID != "" {
 		query.Where("r.resource_id = ?", filter.ResourceID)
+	}
+
+	if len(filter.Namespaces) == 0 && filter.Namespaced {
+		query.Where("r.resource_namespace != ''")
 	}
 
 	if len(filter.Sources) > 0 {
@@ -1311,6 +1321,10 @@ func addPolicyReportResourceFilter(query *bun.SelectQuery, filter api.Filter) {
 		}
 	}
 
+	if len(filter.Namespaces) == 0 && filter.Namespaced {
+		query.Where("res.resource_namespace != ''")
+	}
+
 	if filter.Search != "" {
 		query.Where(`(resource_namespace LIKE ?0 OR resource_name LIKE ?0 OR LOWER(resource_kind) = LOWER(?1))`, "%"+filter.Search+"%", filter.Search)
 	}
@@ -1330,7 +1344,17 @@ func addPolicyReportFilter(query *bun.SelectQuery, filter api.Filter) {
 	}
 }
 
-func (s *Store) addFilter(query *bun.SelectQuery, filter api.Filter) {
+func (s *Store) addPRFilter(query *bun.SelectQuery, filter api.Filter) {
+	if len(filter.ReportLabel) > 0 {
+		query.Join("JOIN policy_report AS pr ON pr.id = res.policy_report_id")
+
+		for key, value := range filter.ReportLabel {
+			query.Where(fmt.Sprintf(s.jsonExtractLayout, key), value)
+		}
+	}
+}
+
+func (s *Store) addFilter(query *bun.SelectQuery, filter api.Filter, table string) {
 	if len(filter.Policies) > 0 {
 		query.Where("policy IN (?)", bun.In(filter.Policies))
 	} else if len(filter.Policies) == 1 {
@@ -1356,6 +1380,8 @@ func (s *Store) addFilter(query *bun.SelectQuery, filter api.Filter) {
 	}
 
 	if len(filter.ReportLabel) > 0 {
+		query.Join("JOIN policy_report AS pr ON pr.id = " + table + ".policy_report_id")
+
 		for key, value := range filter.ReportLabel {
 			query.Where(fmt.Sprintf(s.jsonExtractLayout, key), value)
 		}

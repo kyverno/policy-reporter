@@ -17,6 +17,7 @@ type Filter struct {
 	ResourceID  string
 	ReportLabel map[string]string
 	Exclude     map[string][]string
+	Namespaced  bool
 	Search      string
 }
 
@@ -82,7 +83,7 @@ type PolicyReportFinder interface {
 	FetchNamespacedReportLabels(context.Context, Filter) (map[string][]string, error)
 
 	FetchFindingCounts(context.Context, Filter) (*Findings, error)
-	FetchSources(context.Context, string) ([]*Source, error)
+	FetchSources(context.Context, string, Filter) ([]*Source, error)
 
 	FetchNamespacedResourceResults(context.Context, Filter, Pagination) ([]*ResourceResult, error)
 	FetchClusterResourceResults(context.Context, Filter, Pagination) ([]*ResourceResult, error)
@@ -94,4 +95,6 @@ type PolicyReportFinder interface {
 
 	FetchResults(context.Context, string, Filter, Pagination) ([]*ListResult, error)
 	CountResults(context.Context, string, Filter) (int, error)
+
+	FetchPolicies(context.Context, Filter) (any, error)
 }

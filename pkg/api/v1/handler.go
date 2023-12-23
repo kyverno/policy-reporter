@@ -256,7 +256,7 @@ func (h *Handler) FetchFindingCountsHandler() http.HandlerFunc {
 // SourceListHandler REST API
 func (h *Handler) SourceListHandler() http.HandlerFunc {
 	return func(w http.ResponseWriter, req *http.Request) {
-		list, err := h.finder.FetchSources(req.Context(), req.URL.Query().Get("id"))
+		list, err := h.finder.FetchSources(req.Context(), req.URL.Query().Get("id"), buildFilter(req))
 		h.logError(err)
 		helper.SendJSONResponse(w, list, err)
 	}
@@ -322,6 +322,14 @@ func (h *Handler) ResourceHandler() http.HandlerFunc {
 	}
 }
 
+// ResourceHandler REST API
+func (h *Handler) PolicyListHandler() http.HandlerFunc {
+	return func(w http.ResponseWriter, req *http.Request) {
+		list, err := h.finder.FetchPolicies(req.Context(), buildFilter(req))
+		h.logError(err)
+		helper.SendJSONResponse(w, list, err)
+	}
+}
 func buildPagination(req *http.Request, defaultOrder []string) Pagination {
 	page, err := strconv.Atoi(req.URL.Query().Get("page"))
 	if err != nil || page < 1 {
@@ -389,6 +397,7 @@ func buildFilter(req *http.Request) Filter {
 		Search:      req.URL.Query().Get("search"),
 		ResourceID:  req.URL.Query().Get("resource_id"),
 		Exclude:     exclude,
+		Namespaced:  req.URL.Query().Get("namespaced") == "true",
 	}
 }
 
