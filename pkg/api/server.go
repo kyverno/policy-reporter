@@ -92,6 +92,7 @@ func (s *httpServer) RegisterV1Handler(finder v1.PolicyReportFinder) {
 	s.mux.HandleFunc("/v1/resource-status-counts", s.middleware(handler.ResourceStatusCountsHandler()))
 	s.mux.HandleFunc("/v1/resource", s.middleware(handler.ResourceHandler()))
 	s.mux.HandleFunc("/v1/results", s.middleware(handler.ResultHandler()))
+	s.mux.HandleFunc("/v1/policies", s.middleware(handler.PolicyListHandler()))
 }
 
 func (s *httpServer) RegisterMetricsHandler() {
