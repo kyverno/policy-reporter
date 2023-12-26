@@ -110,7 +110,7 @@ type Elasticsearch struct {
 	Rotation          string           `mapstructure:"rotation"`
 	Username          string           `mapstructure:"username"`
 	Password          string           `mapstructure:"password"`
-	ApiKey            string           `mapstructure:"apiKey"`
+	APIKey            string           `mapstructure:"apiKey"`
 	Channels          []*Elasticsearch `mapstructure:"channels"`
 	TypelessApi       bool             `mapstructure:"typelessApi"`
 }
@@ -266,6 +266,7 @@ type API struct {
 	Port      int       `mapstructure:"port"`
 	Logging   bool      `mapstructure:"logging"`
 	BasicAuth BasicAuth `mapstructure:"basicAuth"`
+	DebugMode bool      `mapstructure:"debug"`
 }
 
 // REST configuration

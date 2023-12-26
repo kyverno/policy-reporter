@@ -6,10 +6,10 @@ import (
 	"strconv"
 
 	corev1 "k8s.io/api/core/v1"
-	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	v1 "k8s.io/client-go/kubernetes/typed/core/v1"
-	"k8s.io/client-go/util/retry"
+
+	"github.com/kyverno/policy-reporter/pkg/kubernetes"
 )
 
 type Values struct {
@@ -18,7 +18,7 @@ type Values struct {
 	Channel         string `json:"channel,omitempty"`
 	Username        string `json:"username,omitempty"`
 	Password        string `json:"password,omitempty"`
-	ApiKey          string `json:"apiKey,omitempty"`
+	APIKey          string `json:"apiKey,omitempty"`
 	AccessKeyID     string `json:"accessKeyID,omitempty"`
 	SecretAccessKey string `json:"secretAccessKey,omitempty"`
 	AccountID       string `json:"accountID,omitempty"`
@@ -39,31 +39,8 @@ type k8sClient struct {
 }
 
 func (c *k8sClient) Get(ctx context.Context, name string) (Values, error) {
-	var secret *corev1.Secret
-
-	err := retry.OnError(retry.DefaultRetry, func(err error) bool {
-		if _, ok := err.(errors.APIStatus); !ok {
-			return true
-		}
-
-		if ok := errors.IsTimeout(err); ok {
-			return true
-		}
-
-		if ok := errors.IsServerTimeout(err); ok {
-			return true
-		}
-
-		if ok := errors.IsServiceUnavailable(err); ok {
-			return true
-		}
-
-		return false
-	}, func() error {
-		var err error
-		secret, err = c.client.Get(ctx, name, metav1.GetOptions{})
-
-		return err
+	secret, err := kubernetes.Retry(func() (*corev1.Secret, error) {
+		return c.client.Get(ctx, name, metav1.GetOptions{})
 	})
 
 	values := Values{}
@@ -92,7 +69,7 @@ func (c *k8sClient) Get(ctx context.Context, name string) (Values, error) {
 	}
 
 	if apiKey, ok := secret.Data["apiKey"]; ok {
-		values.ApiKey = string(apiKey)
+		values.APIKey = string(apiKey)
 	}
 
 	if database, ok := secret.Data["database"]; ok {
