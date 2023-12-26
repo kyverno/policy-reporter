@@ -7,7 +7,6 @@ import (
 	"github.com/uptrace/bun"
 	corev1 "k8s.io/api/core/v1"
 
-	api "github.com/kyverno/policy-reporter/pkg/api/v1"
 	"github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
 	"github.com/kyverno/policy-reporter/pkg/helper"
 	"github.com/kyverno/policy-reporter/pkg/report"
@@ -93,9 +92,9 @@ type PolicyReportFilter struct {
 	bun.BaseModel `bun:"table:policy_report_filter,alias:f"`
 
 	PolicyReportID string `bun:"policy_report_id"`
-	Namespace      string
+	Namespace      string `bun:"resource_namespace"`
+	Kind           string `bun:"resource_kind"`
 	Policy         string
-	Kind           string
 	Result         string
 	Severity       string
 	Category       string
@@ -212,50 +211,6 @@ func MapPolicyReportFilter(polr v1alpha2.ReportInterface) []*PolicyReportFilter 
 	return list
 }
 
-func MapListResult(results []*PolicyReportResult) []*api.ListResult {
-	list := make([]*api.ListResult, 0, len(results))
-	for _, res := range results {
-		list = append(list, &api.ListResult{
-			ID:         res.ID,
-			Namespace:  res.Resource.Namespace,
-			Kind:       res.Resource.Kind,
-			APIVersion: res.Resource.APIVersion,
-			Name:       res.Resource.Name,
-			Message:    res.Message,
-			Category:   res.Category,
-			Policy:     res.Policy,
-			Rule:       res.Rule,
-			Status:     res.Result,
-			Severity:   res.Severity,
-			Timestamp:  res.Created,
-			Properties: res.Properties,
-		})
-	}
-
-	return list
-}
-
-func MapResourceResult(results []*ResourceResult) []*api.ResourceResult {
-	list := make([]*api.ResourceResult, 0, len(results))
-	for _, res := range results {
-		list = append(list, &api.ResourceResult{
-			ID:         res.ID,
-			UID:        res.Resource.UID,
-			Namespace:  res.Resource.Namespace,
-			Kind:       res.Resource.Kind,
-			APIVersion: res.Resource.APIVersion,
-			Name:       res.Resource.Name,
-			Source:     res.Source,
-			Pass:       res.Pass,
-			Skip:       res.Skip,
-			Warn:       res.Warn,
-			Fail:       res.Fail,
-			Error:      res.Error,
-		})
-	}
-
-	return list
-}
 func MapPolicyReportResource(polr v1alpha2.ReportInterface) []*ResourceResult {
 	mapping := make(map[string]*ResourceResult)
 	for _, res := range polr.GetResults() {
@@ -306,4 +261,28 @@ func MapPolicyReportResource(polr v1alpha2.ReportInterface) []*ResourceResult {
 	}
 
 	return helper.ToList(mapping)
+}
+
+type Filter struct {
+	Kinds       []string
+	Categories  []string
+	Namespaces  []string
+	Sources     []string
+	Policies    []string
+	Rules       []string
+	Severities  []string
+	Status      []string
+	Resources   []string
+	ResourceID  string
+	ReportLabel map[string]string
+	Exclude     map[string][]string
+	Namespaced  bool
+	Search      string
+}
+
+type Pagination struct {
+	Page      int
+	Offset    int
+	SortBy    []string
+	Direction string
 }
