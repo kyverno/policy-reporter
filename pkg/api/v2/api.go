@@ -29,6 +29,7 @@ func (h *APIHandler) Register(engine *gin.RouterGroup) error {
 	engine.GET("sources", h.ListSources)
 	engine.GET("sources/categories", h.ListSourceWithCategories)
 	engine.GET("policies", h.ListPolicies)
+	engine.GET("findings", h.ListFindings)
 
 	ns := engine.Group("namespace-scoped")
 	ns.GET("resource-results", h.ListNamespaceResourceResults)
@@ -122,7 +123,7 @@ func (h *APIHandler) ListClusterResourceResults(ctx *gin.Context) {
 func (h *APIHandler) GetClusterStatusCounts(ctx *gin.Context) {
 	results, err := h.store.FetchClusterStatusCounts(ctx, api.BuildFilter(ctx))
 
-	api.SendResponse(ctx, MapStatusCounts(results), "failed to calculate cluster status counts", err)
+	api.SendResponse(ctx, MapClusterStatusCounts(results), "failed to calculate cluster status counts", err)
 }
 
 func (h *APIHandler) GetNamespaceStatusCounts(ctx *gin.Context) {
@@ -176,6 +177,12 @@ func (h *APIHandler) ListPolicyResults(namespaced bool) gin.HandlerFunc {
 
 		api.SendResponse(ctx, Paginated[PolicyResult]{Count: count, Items: MapPolicyResults(list)}, "failed to load resource result list", err)
 	}
+}
+
+func (h *APIHandler) ListFindings(ctx *gin.Context) {
+	results, err := h.store.FetchFindingCounts(ctx, api.BuildFilter(ctx))
+
+	api.SendResponse(ctx, MapFindings(results), "failed to load findings", err)
 }
 
 func NewAPIHandler(store *db.Store, client namespaces.Client) *APIHandler {

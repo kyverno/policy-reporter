@@ -107,7 +107,7 @@ func (s *Store) FetchRuleStatusCounts(ctx context.Context, policy, rule string) 
 }
 
 func (s *Store) FetchNamespaces(ctx context.Context, filter Filter) ([]string, error) {
-	return s.FetchClusterFilter(ctx, "f.resource_namespace", filter)
+	return s.FetchNamespacedFilter(ctx, "resource_namespace", filter)
 }
 
 func (s *Store) FetchNamespacedFilter(ctx context.Context, column string, filter Filter) ([]string, error) {
@@ -235,6 +235,7 @@ func (s *Store) FetchSources(ctx context.Context, filter Filter) ([]string, erro
 		FilterMap(map[string][]string{
 			"f.resource_kind": filter.Kinds,
 		}).
+		FilterValue("id", filter.ResourceID).
 		FilterReportLabels(filter.ReportLabel).
 		Scan(ctx, &list)
 
@@ -266,7 +267,7 @@ func (s *Store) FetchResource(ctx context.Context, id string) (ResourceResult, e
 	result := ResourceResult{}
 
 	err := FromQuery(s.db.NewSelect().Model(&result)).
-		Columns("res.source", "res.category").
+		Columns("res.id", "resource_uid", "resource_kind", "resource_api_version", "resource_namespace", "resource_name", "res.source", "res.category").
 		SelectStatusSummaries().
 		FilterValue("res.id", id).
 		GetQuery().
@@ -571,6 +572,35 @@ func (s *Store) FetchPolicies(ctx context.Context, filter Filter) ([]PolicyRepor
 
 	return results, err
 }
+func (s *Store) FetchFindingCounts(ctx context.Context, filter Filter) ([]StatusCount, error) {
+	results := make([]StatusCount, 0)
+
+	err := FromQuery(s.db.
+		NewSelect().
+		TableExpr("policy_report_filter as f").
+		ColumnExpr("SUM(f.count) as count, f.result as status, f.source")).
+		FilterMap(map[string][]string{
+			"source":        filter.Sources,
+			"category":      filter.Categories,
+			"resource_kind": filter.Kinds,
+			"status": {
+				v1alpha2.StatusPass,
+				v1alpha2.StatusFail,
+				v1alpha2.StatusWarn,
+				v1alpha2.StatusError,
+			},
+		}).
+		FilterReportLabels(filter.ReportLabel).
+		Exclude(filter, "f").
+		Group("f.source", "status").
+		Scan(ctx, &results)
+
+	return results, err
+}
+
+/////////////////////////
+/// Lifecycle Methods ///
+/////////////////////////
 
 func (s *Store) CreateSchemas(ctx context.Context) error {
 	if s.db.Dialect().Name() == dialect.SQLite {

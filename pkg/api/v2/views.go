@@ -143,24 +143,20 @@ type StatusCount struct {
 	Count     int    `json:"count"`
 }
 
-func MapStatusCounts(results []db.StatusCount) []StatusCount {
-	mapping := map[string]StatusCount{
-		v1alpha2.StatusPass:  {Status: v1alpha2.StatusPass},
-		v1alpha2.StatusFail:  {Status: v1alpha2.StatusFail},
-		v1alpha2.StatusWarn:  {Status: v1alpha2.StatusWarn},
-		v1alpha2.StatusError: {Status: v1alpha2.StatusError},
-		v1alpha2.StatusSkip:  {Status: v1alpha2.StatusSkip},
+func MapClusterStatusCounts(results []db.StatusCount) map[string]int {
+	mapping := map[string]int{
+		v1alpha2.StatusPass:  0,
+		v1alpha2.StatusFail:  0,
+		v1alpha2.StatusWarn:  0,
+		v1alpha2.StatusError: 0,
+		v1alpha2.StatusSkip:  0,
 	}
 
 	for _, result := range results {
-		mapping[result.Status] = StatusCount{
-			Source: result.Source,
-			Status: result.Status,
-			Count:  result.Count,
-		}
+		mapping[result.Status] = result.Count
 	}
 
-	return helper.ToList(mapping)
+	return mapping
 }
 
 func MapNamespaceStatusCounts(results []db.StatusCount) map[string]map[string]int {
@@ -253,4 +249,39 @@ func MapPolicyResults(results []db.PolicyReportResult) []PolicyResult {
 			Properties: res.Properties,
 		}
 	})
+}
+
+type FindingCounts struct {
+	Total  int            `json:"total"`
+	Source string         `json:"source"`
+	Counts map[string]int `json:"counts"`
+}
+
+type Findings struct {
+	Total  int              `json:"total"`
+	Counts []*FindingCounts `json:"counts"`
+}
+
+func MapFindings(results []db.StatusCount) Findings {
+	findings := make(map[string]*FindingCounts, 0)
+	total := 0
+
+	for _, count := range results {
+		if finding, ok := findings[count.Source]; ok {
+			finding.Counts[count.Status] = count.Count
+			finding.Total = finding.Total + count.Count
+		} else {
+			findings[count.Source] = &FindingCounts{
+				Source: count.Source,
+				Total:  count.Count,
+				Counts: map[string]int{
+					count.Status: count.Count,
+				},
+			}
+		}
+
+		total += count.Count
+	}
+
+	return Findings{Counts: helper.ToList(findings), Total: total}
 }
