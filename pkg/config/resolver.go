@@ -7,8 +7,10 @@ import (
 	"os"
 	"time"
 
+	"github.com/gin-gonic/gin"
 	goredis "github.com/go-redis/redis/v8"
 	_ "github.com/mattn/go-sqlite3"
+	gocache "github.com/patrickmn/go-cache"
 	"github.com/uptrace/bun"
 	"github.com/uptrace/bun/dialect"
 	mail "github.com/xhit/go-simple-mail/v2"
@@ -28,6 +30,7 @@ import (
 	"github.com/kyverno/policy-reporter/pkg/email/summary"
 	"github.com/kyverno/policy-reporter/pkg/email/violations"
 	"github.com/kyverno/policy-reporter/pkg/kubernetes"
+	"github.com/kyverno/policy-reporter/pkg/kubernetes/namespaces"
 	"github.com/kyverno/policy-reporter/pkg/kubernetes/secrets"
 	"github.com/kyverno/policy-reporter/pkg/leaderelection"
 	"github.com/kyverno/policy-reporter/pkg/listener"
@@ -41,6 +44,7 @@ import (
 type Resolver struct {
 	config             *Config
 	k8sConfig          *rest.Config
+	clientset          *k8s.Clientset
 	mapper             report.Mapper
 	publisher          report.EventPublisher
 	policyStore        *database.Store
@@ -55,12 +59,7 @@ type Resolver struct {
 }
 
 // APIServer resolver method
-func (r *Resolver) APIServer(ctx context.Context, synced func() bool) api.Server {
-	var logger *zap.Logger
-	if r.config.API.Logging {
-		logger, _ = r.Logger()
-	}
-
+func (r *Resolver) Server(ctx context.Context, options []api.ServerOption) (*api.Server, error) {
 	if r.config.API.BasicAuth.SecretRef != "" {
 		values, err := r.SecretClient().Get(ctx, r.config.API.BasicAuth.SecretRef)
 		if err != nil {
@@ -75,23 +74,34 @@ func (r *Resolver) APIServer(ctx context.Context, synced func() bool) api.Server
 		}
 	}
 
-	var auth *api.BasicAuth
+	defaults := []api.ServerOption{
+		api.WithGZIP(),
+	}
+
+	if r.config.API.Logging || r.config.API.DebugMode {
+		defaults = append(defaults, api.WithLogging(zap.L()))
+	} else {
+		defaults = append(defaults, api.WithRecovery())
+	}
+
 	if r.config.API.BasicAuth.Username != "" && r.config.API.BasicAuth.Password != "" {
-		auth = &api.BasicAuth{
+		defaults = append(defaults, api.WithBasicAuth(api.BasicAuth{
 			Username: r.config.API.BasicAuth.Username,
 			Password: r.config.API.BasicAuth.Password,
-		}
+		}))
 
 		zap.L().Info("API BasicAuth enabled")
 	}
 
-	return api.NewServer(
-		r.TargetClients(),
-		r.config.API.Port,
-		logger,
-		auth,
-		synced,
-	)
+	if r.config.Profiling.Enabled {
+		defaults = append(defaults, api.WithProfiling())
+	}
+
+	if !r.config.API.DebugMode {
+		gin.SetMode(gin.ReleaseMode)
+	}
+
+	return api.NewServer(gin.New(), append(defaults, options...)), nil
 }
 
 // Database resolver method
@@ -126,7 +136,7 @@ func (r *Resolver) Database() *bun.DB {
 }
 
 // PolicyReportStore resolver method
-func (r *Resolver) PolicyReportStore(db *bun.DB) (*database.Store, error) {
+func (r *Resolver) Store(db *bun.DB) (*database.Store, error) {
 	if r.policyStore != nil {
 		return r.policyStore, nil
 	}
@@ -266,13 +276,42 @@ func (r *Resolver) Mapper() report.Mapper {
 }
 
 // SecretClient resolver method
-func (r *Resolver) SecretClient() secrets.Client {
+func (r *Resolver) Clientset() (*k8s.Clientset, error) {
+	if r.clientset != nil {
+		return r.clientset, nil
+	}
+
 	clientset, err := k8s.NewForConfig(r.k8sConfig)
+	if err != nil {
+		return nil, err
+	}
+
+	r.clientset = clientset
+
+	return r.clientset, nil
+}
+
+// SecretClient resolver method
+func (r *Resolver) SecretClient() secrets.Client {
+	clientset, err := r.Clientset()
 	if err != nil {
 		return nil
 	}
 
 	return secrets.NewClient(clientset.CoreV1().Secrets(r.config.Namespace))
+}
+
+// NamespaceClient resolver method
+func (r *Resolver) NamespceClient() (namespaces.Client, error) {
+	clientset, err := r.Clientset()
+	if err != nil {
+		return nil, err
+	}
+
+	return namespaces.NewClient(
+		clientset.CoreV1().Namespaces(),
+		gocache.New(15*time.Second, 5*time.Second),
+	), nil
 }
 
 func (r *Resolver) TargetFactory() *TargetFactory {

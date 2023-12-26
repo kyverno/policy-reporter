@@ -51,7 +51,7 @@ func mountSecret() {
 		Webhook:         "http://localhost:9200/webhook",
 		Username:        "username",
 		Password:        "password",
-		ApiKey:          "apiKey",
+		APIKey:          "apiKey",
 		AccessKeyID:     "accessKeyId",
 		SecretAccessKey: "secretAccessKey",
 		KmsKeyID:        "kmsKeyId",

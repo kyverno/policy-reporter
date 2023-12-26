@@ -278,12 +278,12 @@ func Test_ResolvePolicyStore(t *testing.T) {
 	db := resolver.Database()
 	defer db.Close()
 
-	store1, err := resolver.PolicyReportStore(db)
+	store1, err := resolver.Store(db)
 	if err != nil {
 		t.Errorf("Unexpected Error: %s", err)
 	}
 
-	store2, _ := resolver.PolicyReportStore(db)
+	store2, _ := resolver.Store(db)
 	if store1 != store2 {
 		t.Error("A second call resolver.PolicyReportClient() should return the cached first client")
 	}
@@ -292,7 +292,7 @@ func Test_ResolvePolicyStore(t *testing.T) {
 func Test_ResolveAPIServer(t *testing.T) {
 	resolver := config.NewResolver(&config.Config{}, &rest.Config{})
 
-	server := resolver.APIServer(context.Background(), func() bool { return true })
+	server, _ := resolver.Server(context.Background(), nil)
 	if server == nil {
 		t.Error("Error: Should return API Server")
 	}

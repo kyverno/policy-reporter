@@ -1,6 +1,9 @@
 package helper
 
-import "strings"
+import (
+	"encoding/json"
+	"strings"
+)
 
 func Contains(source string, sources []string) bool {
 	for _, s := range sources {
@@ -28,4 +31,15 @@ func Map[T any, R any](source []T, cb func(T) R) []R {
 	}
 
 	return list
+}
+
+func ConvertJSONToMap(s string) map[string]string {
+	m := make(map[string]string)
+	if s == "" {
+		return m
+	}
+
+	_ = json.Unmarshal([]byte(s), &m)
+
+	return m
 }

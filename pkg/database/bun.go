@@ -3,11 +3,8 @@ package database
 import (
 	"context"
 	"database/sql"
-	"encoding/json"
 	"errors"
-	"fmt"
 	"os"
-	"strings"
 	"time"
 
 	_ "github.com/mattn/go-sqlite3"
@@ -19,9 +16,7 @@ import (
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 
-	api "github.com/kyverno/policy-reporter/pkg/api/v1"
 	"github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
-	"github.com/kyverno/policy-reporter/pkg/helper"
 	"github.com/kyverno/policy-reporter/pkg/report"
 )
 
@@ -37,14 +32,545 @@ const (
 type Store struct {
 	db      *bun.DB
 	version string
-
-	jsonExtractLayout string
 }
 
-var (
-	withNamespace    = true
-	withClusterscope = false
-)
+///////////////////////////////
+///		V1 API Queries		///
+///////////////////////////////
+
+func (s *Store) FetchPolicyReports(ctx context.Context, filter Filter, pagination Pagination) ([]PolicyReport, error) {
+	list := make([]PolicyReport, 0)
+
+	err := FromQuery(s.db.NewSelect().Model(&list)).
+		FilterMap(map[string][]string{
+			"pr.source":    filter.Sources,
+			"pr.namespace": filter.Namespaces,
+		}).
+		FilterLabels(filter.ReportLabel).
+		FilterValue("pr.type", report.PolicyReportType).
+		Pagination(pagination).
+		Scan(ctx)
+
+	return list, err
+}
+
+func (s *Store) CountPolicyReports(ctx context.Context, filter Filter) (int, error) {
+	return FromQuery(s.db.NewSelect().Model((*PolicyReport)(nil))).
+		FilterMap(map[string][]string{
+			"pr.source":    filter.Sources,
+			"pr.namespace": filter.Namespaces,
+		}).
+		FilterLabels(filter.ReportLabel).
+		FilterValue("pr.type", report.PolicyReportType).
+		GetQuery().
+		Count(ctx)
+}
+
+func (s *Store) FetchClusterPolicyReports(ctx context.Context, filter Filter, pagination Pagination) ([]PolicyReport, error) {
+	list := make([]PolicyReport, 0)
+
+	err := FromQuery(s.db.NewSelect().Model(&list)).
+		FilterMap(map[string][]string{
+			"pr.source": filter.Sources,
+		}).
+		FilterLabels(filter.ReportLabel).
+		FilterValue("pr.type", report.ClusterPolicyReportType).
+		Pagination(pagination).
+		Scan(ctx)
+
+	return list, err
+}
+
+func (s *Store) CountClusterPolicyReports(ctx context.Context, filter Filter) (int, error) {
+	return FromQuery(s.db.NewSelect().Model((*PolicyReport)(nil))).
+		FilterMap(map[string][]string{
+			"pr.source": filter.Sources,
+		}).
+		FilterLabels(filter.ReportLabel).
+		FilterValue("pr.type", report.ClusterPolicyReportType).
+		GetQuery().
+		Count(ctx)
+}
+
+func (s *Store) FetchRuleStatusCounts(ctx context.Context, policy, rule string) ([]StatusCount, error) {
+	counts := make([]StatusCount, 0)
+
+	err := s.db.NewSelect().
+		Table("policy_report_result").
+		ColumnExpr("COUNT(id) as count, result as status").
+		Where("rule = ?", rule).
+		Where("policy = ?", policy).
+		Group("status").
+		Scan(ctx, &counts)
+
+	return counts, err
+}
+
+func (s *Store) FetchNamespaces(ctx context.Context, filter Filter) ([]string, error) {
+	return s.FetchClusterFilter(ctx, "f.resource_namespace", filter)
+}
+
+func (s *Store) FetchNamespacedFilter(ctx context.Context, column string, filter Filter) ([]string, error) {
+	list := make([]string, 0)
+
+	err := NewFilterQuery(s.db, "f."+column).
+		FilterMap(map[string][]string{
+			"f.source":             filter.Sources,
+			"f.category":           filter.Categories,
+			"f.policy":             filter.Policies,
+			"f.resource_kind":      filter.Kinds,
+			"f.resource_namespace": filter.Namespaces,
+		}).
+		FilterReportLabels(filter.ReportLabel).
+		NamespaceScope().
+		Scan(ctx, &list)
+
+	return list, err
+}
+
+func (s *Store) FetchClusterFilter(ctx context.Context, column string, filter Filter) ([]string, error) {
+	list := make([]string, 0)
+
+	err := NewFilterQuery(s.db, "f."+column).
+		FilterMap(map[string][]string{
+			"f.source":        filter.Sources,
+			"f.category":      filter.Categories,
+			"f.policy":        filter.Policies,
+			"f.resource_kind": filter.Kinds,
+		}).
+		FilterReportLabels(filter.ReportLabel).
+		ClusterScope().
+		Scan(ctx, &list)
+
+	return list, err
+}
+
+func (s *Store) FetchNamespacedResources(ctx context.Context, filter Filter) ([]ResourceResult, error) {
+	list := make([]ResourceResult, 0)
+
+	err := FromQuery(s.db.NewSelect().Model(&list).Distinct()).
+		Columns("resource_name", "resource_kind", "resource_namespace").
+		FilterMap(map[string][]string{
+			"res.source":             filter.Sources,
+			"res.category":           filter.Categories,
+			"res.policy":             filter.Policies,
+			"res.resource_kind":      filter.Kinds,
+			"res.resource_namespace": filter.Namespaces,
+		}).
+		FilterReportLabels(filter.ReportLabel).
+		NamespaceScope().
+		Scan(ctx, &list)
+
+	return list, err
+}
+
+func (s *Store) FetchClusterResources(ctx context.Context, filter Filter) ([]ResourceResult, error) {
+	list := make([]ResourceResult, 0)
+
+	err := FromQuery(s.db.NewSelect().Model(&list).Distinct()).
+		Columns("resource_name", "resource_kind").
+		FilterMap(map[string][]string{
+			"f.source":             filter.Sources,
+			"f.category":           filter.Categories,
+			"f.policy":             filter.Policies,
+			"f.resource_kind":      filter.Kinds,
+			"f.resource_namespace": filter.Namespaces,
+		}).
+		FilterReportLabels(filter.ReportLabel).
+		ClusterScope().
+		Scan(ctx, &list)
+
+	return list, err
+}
+
+func (s *Store) FetchClusterScopedStatusCounts(ctx context.Context, filter Filter) ([]StatusCount, error) {
+	list := make([]StatusCount, 0)
+
+	err := FromQuery(s.db.NewSelect().Model(&list).ColumnExpr("SUM(f.count) as count, f.result as status")).
+		FilterMap(map[string][]string{
+			"f.source":        filter.Sources,
+			"f.category":      filter.Categories,
+			"f.policy":        filter.Policies,
+			"f.resource_kind": filter.Kinds,
+			"f.result":        filter.Status,
+			"f.severity":      filter.Severities,
+		}).
+		FilterReportLabels(filter.ReportLabel).
+		ClusterScope().
+		Group("status").
+		Scan(ctx)
+
+	return list, err
+}
+
+func (s *Store) FetchNamespaceScopedStatusCounts(ctx context.Context, filter Filter) ([]StatusCount, error) {
+	list := make([]StatusCount, 0)
+
+	err := FromQuery(s.db.NewSelect().Model(&list).ColumnExpr("SUM(f.count) as count, f.result as status, f.resource_namespace")).
+		FilterMap(map[string][]string{
+			"f.source":             filter.Sources,
+			"f.category":           filter.Categories,
+			"f.policy":             filter.Policies,
+			"f.resource_kind":      filter.Kinds,
+			"f.resource_namespace": filter.Namespaces,
+			"f.result":             filter.Status,
+			"f.severity":           filter.Severities,
+		}).
+		FilterReportLabels(filter.ReportLabel).
+		NamespaceScope().
+		Group("status", "f.resource_namespace").
+		Scan(ctx)
+
+	return list, err
+}
+
+///////////////////////////////
+///		V2 API Queries		///
+///////////////////////////////
+
+func (s *Store) FetchSources(ctx context.Context, filter Filter) ([]string, error) {
+	list := make([]string, 0)
+
+	err := NewFilterQuery(s.db, "f.source").
+		FilterMap(map[string][]string{
+			"f.resource_kind": filter.Kinds,
+		}).
+		FilterReportLabels(filter.ReportLabel).
+		Scan(ctx, &list)
+
+	return list, err
+}
+
+func (s *Store) FetchCategories(ctx context.Context, filter Filter) ([]Category, error) {
+	list := make([]Category, 0)
+
+	err := FromQuery(s.db.NewSelect().Model(&list)).
+		Columns("res.source", "res.category").
+		SelectStatusSummaries().
+		FilterMap(map[string][]string{
+			"res.source":        filter.Sources,
+			"res.category":      filter.Categories,
+			"res.resource_kind": filter.Kinds,
+		}).
+		Exclude(filter, "res").
+		FilterValue("id", filter.ResourceID).
+		FilterReportLabels(filter.ReportLabel).
+		Group("res.source", "res.category").
+		Order("res.source ASC", "res.category ASC").
+		Scan(ctx, &list)
+
+	return list, err
+}
+
+func (s *Store) FetchResource(ctx context.Context, id string) (ResourceResult, error) {
+	result := ResourceResult{}
+
+	err := FromQuery(s.db.NewSelect().Model(&result)).
+		Columns("res.source", "res.category").
+		SelectStatusSummaries().
+		FilterValue("res.id", id).
+		GetQuery().
+		Limit(1).
+		Scan(ctx)
+
+	return result, err
+}
+
+func (s *Store) FetchResourceStatusCounts(ctx context.Context, id string, filter Filter) ([]ResourceStatusCount, error) {
+	result := []ResourceStatusCount{}
+
+	err := FromQuery(s.db.NewSelect().Model(&result)).
+		Columns("res.source").
+		SelectStatusSummaries().
+		FilterMap(map[string][]string{
+			"res.category": filter.Categories,
+			"res.source":   filter.Sources,
+		}).
+		FilterValue("res.id", id).
+		FilterReportLabels(filter.ReportLabel).
+		Group("res.source").
+		Scan(ctx)
+
+	return result, err
+}
+
+func (s *Store) FetchNamespaceResourceResults(ctx context.Context, filter Filter, pagination Pagination) ([]ResourceResult, error) {
+	results := make([]ResourceResult, 0)
+
+	err := FromQuery(s.db.NewSelect().Model(&results)).
+		Columns("res.id", "resource_uid", "resource_kind", "resource_api_version", "resource_namespace", "resource_name").
+		SelectStatusSummaries().
+		Group("res.id", "resource_uid", "resource_kind", "resource_api_version", "resource_namespace", "resource_name").
+		FilterMap(map[string][]string{
+			"source":             filter.Sources,
+			"category":           filter.Categories,
+			"resource_namespace": filter.Namespaces,
+			"resource_kind":      filter.Kinds,
+		}).
+		FilterValue("res.id", filter.ResourceID).
+		ResourceSearch(filter.Search).
+		FilterReportLabels(filter.ReportLabel).
+		Exclude(filter, "res").
+		NamespaceScope().
+		Pagination(pagination).
+		Scan(ctx)
+
+	return results, err
+}
+
+func (s *Store) CountNamespaceResourceResults(ctx context.Context, filter Filter) (int, error) {
+	query := FromQuery(s.db.NewSelect().Model((*ResourceResult)(nil))).
+		FilterMap(map[string][]string{
+			"source":             filter.Sources,
+			"category":           filter.Categories,
+			"resource_namespace": filter.Namespaces,
+			"resource_kind":      filter.Kinds,
+		}).
+		FilterValue("res.id", filter.ResourceID).
+		ResourceSearch(filter.Search).
+		FilterReportLabels(filter.ReportLabel).
+		Exclude(filter, "res").
+		NamespaceScope().
+		Group("res.id").
+		GetQuery()
+
+	return query.Count(ctx)
+}
+
+func (s *Store) FetchClusterResourceResults(ctx context.Context, filter Filter, pagination Pagination) ([]ResourceResult, error) {
+	results := make([]ResourceResult, 0)
+
+	err := FromQuery(s.db.NewSelect().Model(&results)).
+		Columns("res.id", "resource_uid", "resource_kind", "resource_api_version", "resource_namespace", "resource_name").
+		SelectStatusSummaries().
+		Group("res.id", "resource_uid", "resource_kind", "resource_api_version", "resource_namespace", "resource_name").
+		FilterMap(map[string][]string{
+			"source":        filter.Sources,
+			"category":      filter.Categories,
+			"resource_kind": filter.Kinds,
+		}).
+		FilterValue("res.id", filter.ResourceID).
+		ResourceSearch(filter.Search).
+		FilterReportLabels(filter.ReportLabel).
+		Exclude(filter, "res").
+		ClusterScope().
+		Pagination(pagination).
+		Scan(ctx)
+
+	return results, err
+}
+
+func (s *Store) CountClusterResourceResults(ctx context.Context, filter Filter) (int, error) {
+	query := FromQuery(s.db.NewSelect().Model((*ResourceResult)(nil))).
+		FilterMap(map[string][]string{
+			"source":        filter.Sources,
+			"category":      filter.Categories,
+			"resource_kind": filter.Kinds,
+		}).
+		FilterValue("res.id", filter.ResourceID).
+		ResourceSearch(filter.Search).
+		FilterReportLabels(filter.ReportLabel).
+		Exclude(filter, "res").
+		ClusterScope().
+		Group("res.id").
+		GetQuery()
+
+	return query.Count(ctx)
+}
+
+func (s *Store) FetchResourceResults(ctx context.Context, id string, filter Filter) ([]ResourceResult, error) {
+	results := make([]ResourceResult, 0)
+
+	err := FromQuery(s.db.NewSelect().Model(&results)).
+		Columns("res.id", "resource_uid", "resource_kind", "resource_api_version", "resource_namespace", "resource_name", "res.source").
+		SelectStatusSummaries().
+		FilterValue(`res.id`, id).
+		FilterMap(map[string][]string{
+			"source":        filter.Sources,
+			"category":      filter.Categories,
+			"resource_kind": filter.Kinds,
+		}).
+		FilterReportLabels(filter.ReportLabel).
+		ResourceSearch(filter.Search).
+		Order("res.source ASC").
+		Group("res.id", "resource_uid", "resource_kind", "resource_api_version", "resource_namespace", "resource_name", "res.source").
+		Scan(ctx)
+
+	return results, err
+}
+
+func (s *Store) FetchResourcePolicyResults(ctx context.Context, id string, filter Filter, pagination Pagination) ([]PolicyReportResult, error) {
+	results := make([]PolicyReportResult, 0)
+
+	err := FromQuery(s.db.NewSelect().Model(&results)).
+		FilterValue(`r.resource_id`, id).
+		FilterMap(map[string][]string{
+			"source":   filter.Sources,
+			"category": filter.Categories,
+		}).
+		ResultSearch(filter.Search).
+		FilterReportLabels(filter.ReportLabel).
+		Pagination(pagination).
+		Scan(ctx)
+
+	return results, err
+}
+
+func (s *Store) CountResourcePolicyResults(ctx context.Context, id string, filter Filter) (int, error) {
+	return FromQuery(s.db.NewSelect().Model((*PolicyReportResult)(nil))).
+		FilterValue(`r.resource_id`, id).
+		FilterMap(map[string][]string{
+			"source":   filter.Sources,
+			"category": filter.Categories,
+		}).
+		ResultSearch(filter.Search).
+		FilterReportLabels(filter.ReportLabel).
+		GetQuery().
+		Count(ctx)
+}
+
+func (s *Store) FetchResults(ctx context.Context, namespaced bool, filter Filter, pagination Pagination) ([]PolicyReportResult, error) {
+	results := make([]PolicyReportResult, 0)
+
+	err := FromQuery(s.db.NewSelect().Model(&results)).
+		FilterMap(map[string][]string{
+			"source":             filter.Sources,
+			"category":           filter.Categories,
+			"policy":             filter.Policies,
+			"rule":               filter.Rules,
+			"resource_namespace": filter.Namespaces,
+			"resource_kind":      filter.Kinds,
+			"resource_name":      filter.Resources,
+			"result":             filter.Status,
+			"severity":           filter.Severities,
+		}).
+		Scoped(namespaced).
+		FilterValue(`r.resource_id`, filter.ResourceID).
+		ResultSearch(filter.Search).
+		FilterReportLabels(filter.ReportLabel).
+		Exclude(filter, "r").
+		Pagination(pagination).
+		Scan(ctx)
+
+	return results, err
+}
+
+func (s *Store) CountResults(ctx context.Context, namespaced bool, filter Filter) (int, error) {
+	return FromQuery(s.db.NewSelect().Model((*PolicyReportResult)(nil))).
+		FilterMap(map[string][]string{
+			"source":             filter.Sources,
+			"category":           filter.Categories,
+			"policy":             filter.Policies,
+			"rule":               filter.Rules,
+			"resource_namespace": filter.Namespaces,
+			"resource_kind":      filter.Kinds,
+			"resource_name":      filter.Resources,
+			"result":             filter.Status,
+			"severity":           filter.Severities,
+		}).
+		Scoped(namespaced).
+		FilterValue(`r.resource_id`, filter.ResourceID).
+		ResultSearch(filter.Search).
+		FilterReportLabels(filter.ReportLabel).
+		Exclude(filter, "r").
+		GetQuery().
+		Count(ctx)
+}
+
+func (s *Store) FetchClusterStatusCounts(ctx context.Context, filter Filter) ([]StatusCount, error) {
+	results := make([]StatusCount, 0)
+
+	err := FromQuery(s.db.
+		NewSelect().
+		TableExpr("policy_report_filter as f").
+		ColumnExpr("SUM(f.count) as count, f.result as status")).
+		FilterMap(map[string][]string{
+			"source":        filter.Sources,
+			"category":      filter.Categories,
+			"resource_kind": filter.Kinds,
+		}).
+		FilterReportLabels(filter.ReportLabel).
+		Exclude(filter, "f").
+		ClusterScope().
+		Group("status").
+		Scan(ctx, &results)
+
+	return results, err
+}
+
+func (s *Store) FetchNamespaceStatusCounts(ctx context.Context, filter Filter) ([]StatusCount, error) {
+	results := make([]StatusCount, 0)
+
+	err := FromQuery(s.db.
+		NewSelect().
+		TableExpr("policy_report_filter as f").
+		ColumnExpr("f.resource_namespace, SUM(f.count) as count, f.result as status")).
+		FilterMap(map[string][]string{
+			"f.source":             filter.Sources,
+			"f.category":           filter.Categories,
+			"f.resource_kind":      filter.Kinds,
+			"f.resource_namespace": filter.Namespaces,
+		}).
+		FilterReportLabels(filter.ReportLabel).
+		Exclude(filter, "f").
+		NamespaceScope().
+		Group("f.resource_namespace", "status").
+		Scan(ctx, &results)
+
+	return results, err
+}
+
+func (s *Store) FetchNamespaceKinds(ctx context.Context, filter Filter) ([]string, error) {
+	list := make([]string, 0)
+
+	err := NewFilterQuery(s.db, "resource_kind").
+		FilterMap(map[string][]string{
+			"f.source":             filter.Sources,
+			"f.category":           filter.Categories,
+			"f.resource_namespace": filter.Namespaces,
+		}).
+		Exclude(filter, "f").
+		FilterReportLabels(filter.ReportLabel).
+		NamespaceScope().
+		Scan(ctx, &list)
+
+	return list, err
+}
+
+func (s *Store) FetchClusterKinds(ctx context.Context, filter Filter) ([]string, error) {
+	list := make([]string, 0)
+
+	err := NewFilterQuery(s.db, "resource_kind").
+		FilterMap(map[string][]string{
+			"f.source":   filter.Sources,
+			"f.category": filter.Categories,
+		}).
+		Exclude(filter, "f").
+		FilterReportLabels(filter.ReportLabel).
+		ClusterScope().
+		Scan(ctx, &list)
+
+	return list, err
+}
+
+func (s *Store) FetchPolicies(ctx context.Context, filter Filter) ([]PolicyReportFilter, error) {
+	results := make([]PolicyReportFilter, 0)
+
+	err := FromQuery(s.db.NewSelect().Model(&results).ColumnExpr("f.severity, f.category, f.policy, f.source, f.result, SUM(f.count) as count")).
+		FilterMap(map[string][]string{
+			"f.source":        filter.Sources,
+			"f.category":      filter.Categories,
+			"f.resource_kind": filter.Kinds,
+		}).
+		PolicySearch(filter.Search).
+		Exclude(filter, "f").
+		FilterReportLabels(filter.ReportLabel).
+		Order("f.source ASC", "f.category ASC").
+		Group("f.category", "f.policy", "f.source", "f.result", "f.severity").
+		Scan(ctx)
+
+	return results, err
+}
 
 func (s *Store) CreateSchemas(ctx context.Context) error {
 	if s.db.Dialect().Name() == dialect.SQLite {
@@ -193,809 +719,6 @@ func (s *Store) CleanUp(ctx context.Context) error {
 	return err
 }
 
-func (s *Store) FetchPolicyReports(ctx context.Context, filter api.Filter, pagination api.Pagination) ([]*api.PolicyReport, error) {
-	list := []*api.PolicyReport{}
-	query := s.db.NewSelect().Model((*PolicyReport)(nil))
-
-	s.addFilter(query, filter, "r")
-	addPolicyReportFilter(query, filter)
-	query.Where(`pr.type = ?`, report.PolicyReportType)
-
-	addPagination(query, pagination)
-
-	err := query.Scan(ctx, &list)
-	if err != nil {
-		zap.L().Error("failed to select policy report results", zap.Error(err), zap.Any("filter", filter), zap.Any("pagination", pagination))
-	}
-
-	return list, err
-}
-
-func (s *Store) CountPolicyReports(ctx context.Context, filter api.Filter) (int, error) {
-	query := s.db.NewSelect().Model((*PolicyReport)(nil))
-
-	s.addFilter(query, filter, "r")
-	addPolicyReportFilter(query, filter)
-	query.Where(`pr.type = ?`, report.PolicyReportType)
-
-	count, err := query.Count(ctx)
-	if err != nil {
-		zap.L().Error("failed to select policy report results", zap.Error(err), zap.Any("filter", filter))
-	}
-
-	return count, err
-}
-
-func (s *Store) FetchNamespacedReportLabels(ctx context.Context, filter api.Filter) (map[string][]string, error) {
-	results := []string{}
-	list := make(map[string][]string)
-
-	query := s.db.NewSelect().
-		TableExpr("policy_report as pr").
-		Distinct().
-		Where(`pr.type = ?`, report.PolicyReportType)
-
-	if s.db.Dialect().Name() == dialect.PG {
-		query.ColumnExpr("labels::text")
-	} else {
-		query.Column("labels")
-	}
-
-	addPolicyReportFilter(query, filter)
-
-	err := query.Scan(ctx, &results)
-	if err != nil {
-		return list, err
-	}
-
-	for _, labels := range results {
-		for key, value := range convertJSONToMap(labels) {
-			_, ok := list[key]
-			contained := contains(value, list[key])
-
-			if ok && !contained {
-				list[key] = append(list[key], value)
-				continue
-			} else if ok && contained {
-				continue
-			}
-
-			list[key] = []string{value}
-		}
-	}
-
-	return list, nil
-}
-
-func (s *Store) FetchClusterPolicyReports(ctx context.Context, filter api.Filter, pagination api.Pagination) ([]*api.PolicyReport, error) {
-	list := []*api.PolicyReport{}
-	query := s.db.NewSelect().Model((*PolicyReport)(nil))
-
-	s.addFilter(query, filter, "r")
-	addPolicyReportFilter(query, filter)
-	query.Where(`pr.type = ?`, report.ClusterPolicyReportType)
-
-	addPagination(query, pagination)
-
-	err := query.Scan(ctx, &list)
-	if err != nil {
-		zap.L().Error("failed to select policy report results", zap.Error(err), zap.Any("filter", filter), zap.Any("pagination", pagination))
-	}
-
-	return list, err
-}
-
-func (s *Store) CountClusterPolicyReports(ctx context.Context, filter api.Filter) (int, error) {
-	query := s.db.NewSelect().Model((*PolicyReport)(nil))
-
-	s.addFilter(query, filter, "r")
-	addPolicyReportFilter(query, filter)
-	query.Where(`pr.type = ?`, report.ClusterPolicyReportType)
-
-	count, err := query.Count(ctx)
-	if err != nil {
-		zap.L().Error("failed to select policy report results", zap.Error(err), zap.Any("filter", filter))
-	}
-
-	return count, err
-}
-
-func (s *Store) FetchClusterReportLabels(ctx context.Context, filter api.Filter) (map[string][]string, error) {
-	results := []string{}
-	list := make(map[string][]string)
-
-	query := s.db.NewSelect().
-		TableExpr("policy_report as pr").
-		Distinct().
-		Where(`pr.type = ?`, report.ClusterPolicyReportType)
-
-	if s.db.Dialect().Name() == dialect.PG {
-		query.ColumnExpr("labels::text")
-	} else {
-		query.Column("labels")
-	}
-
-	addPolicyReportFilter(query, filter)
-
-	err := query.Scan(ctx, &results)
-	if err != nil {
-		return list, err
-	}
-
-	for _, labels := range results {
-		for key, value := range convertJSONToMap(labels) {
-			_, ok := list[key]
-			contained := contains(value, list[key])
-
-			if ok && !contained {
-				list[key] = append(list[key], value)
-				continue
-			} else if ok && contained {
-				continue
-			}
-
-			list[key] = []string{value}
-		}
-	}
-
-	return list, nil
-}
-
-func (s *Store) FetchClusterRules(ctx context.Context, filter api.Filter) ([]string, error) {
-	list := make([]string, 0)
-
-	query := s.db.
-		NewSelect().
-		TableExpr("policy_report_result as r").
-		Column("rule").
-		Distinct().
-		Order("rule ASC").
-		Where(`r.resource_namespace = ''`)
-
-	s.addFilter(query, filter, "r")
-	addPolicyReportResultFilter(query, filter)
-
-	query.Scan(ctx, &list)
-
-	return list, nil
-}
-
-func (s *Store) FetchClusterResources(ctx context.Context, filter api.Filter) ([]*api.Resource, error) {
-	list := make([]*api.Resource, 0)
-
-	query := s.db.
-		NewSelect().
-		TableExpr("policy_report_result as r").
-		ColumnExpr("resource_name as name, resource_kind as kind").
-		Distinct().
-		Order("kind ASC", "name ASC").
-		Where(`r.resource_namespace = ''`)
-
-	s.addFilter(query, filter, "r")
-	addPolicyReportResultFilter(query, filter)
-
-	query.Scan(ctx, &list)
-
-	return list, nil
-}
-
-func (s *Store) FetchClusterPolicies(ctx context.Context, filter api.Filter) ([]string, error) {
-	return s.fetchFilterOptions(ctx, "policy", filter, &withClusterscope)
-}
-
-func (s *Store) FetchClusterKinds(ctx context.Context, filter api.Filter) ([]string, error) {
-	return s.fetchFilterOptions(ctx, "kind", filter, &withClusterscope)
-}
-
-func (s *Store) FetchClusterCategories(ctx context.Context, filter api.Filter) ([]string, error) {
-	return s.fetchFilterOptions(ctx, "category", filter, &withClusterscope)
-}
-
-func (s *Store) FetchClusterSources(ctx context.Context) ([]string, error) {
-	return s.fetchFilterOptions(ctx, "source", api.Filter{}, &withClusterscope)
-}
-
-func (s *Store) FetchSources(ctx context.Context, resource string, filter api.Filter) ([]*api.Source, error) {
-	query := s.db.
-		NewSelect().
-		TableExpr("policy_report_resource as res").
-		Distinct().
-		ColumnExpr("res.source, res.category, SUM(res.pass) as pass, SUM(res.warn) as warn, SUM(res.fail) as fail, SUM(res.error) as error, SUM(res.skip) as skip").
-		Group("res.source", "res.category").
-		Order("res.source ASC", "res.category ASC")
-
-	if resource != "" {
-		query.Where("res.id = ?", resource)
-	}
-
-	addPolicyReportResourceFilter(query, filter)
-
-	results := make([]*ResourceResult, 0)
-
-	err := query.Scan(ctx, &results)
-	if err != nil {
-		zap.L().Error("failed to load cluster status counts", zap.Error(err))
-		return nil, err
-	}
-
-	list := make(map[string]*api.Source, 0)
-	for _, r := range results {
-		if s, ok := list[r.Source]; ok {
-			s.Categories = append(s.Categories, api.Category{
-				Name:  r.Category,
-				Pass:  r.Pass,
-				Fail:  r.Fail,
-				Warn:  r.Warn,
-				Error: r.Error,
-				Skip:  r.Skip,
-			})
-			continue
-		}
-
-		list[r.Source] = &api.Source{
-			Name: r.Source,
-			Categories: []api.Category{{
-				Name:  r.Category,
-				Pass:  r.Pass,
-				Fail:  r.Fail,
-				Warn:  r.Warn,
-				Error: r.Error,
-				Skip:  r.Skip,
-			}},
-		}
-	}
-
-	return helper.ToList(list), nil
-}
-
-func (s *Store) FetchFindingCounts(ctx context.Context, filter api.Filter) (*api.Findings, error) {
-	query := s.db.
-		NewSelect().
-		TableExpr("policy_report_filter as f").
-		ColumnExpr("SUM(f.count) as count, f.result as status, f.source").
-		Where("status IN (?)", bun.In([]string{v1alpha2.StatusPass, v1alpha2.StatusFail, v1alpha2.StatusWarn, v1alpha2.StatusError})).
-		Group("status", "f.source")
-
-	s.addFilter(query, filter, "f")
-	addPolicyReportFilterFilter(query, filter)
-
-	results := make([]api.StatusCount, 0)
-
-	err := query.Scan(ctx, &results)
-	if err != nil {
-		zap.L().Error("failed to load cluster status counts", zap.Error(err))
-		return nil, err
-	}
-
-	findings := make(map[string]*api.FindingCounts, 0)
-	total := 0
-	for _, count := range results {
-		if finding, ok := findings[count.Source]; ok {
-			finding.Counts[count.Status] = count.Count
-			finding.Total = finding.Total + count.Count
-		} else {
-			findings[count.Source] = &api.FindingCounts{
-				Source: count.Source,
-				Total:  count.Count,
-				Counts: map[string]int{
-					count.Status: count.Count,
-				},
-			}
-		}
-
-		total += count.Count
-	}
-
-	return &api.Findings{Counts: helper.ToList(findings), Total: total}, nil
-}
-
-func (s *Store) FetchClusterStatusCounts(ctx context.Context, filter api.Filter) ([]api.StatusCount, error) {
-	var list map[string]api.StatusCount
-
-	if len(filter.Status) == 0 {
-		list = map[string]api.StatusCount{
-			v1alpha2.StatusPass:  {Status: v1alpha2.StatusPass},
-			v1alpha2.StatusFail:  {Status: v1alpha2.StatusFail},
-			v1alpha2.StatusWarn:  {Status: v1alpha2.StatusWarn},
-			v1alpha2.StatusError: {Status: v1alpha2.StatusError},
-			v1alpha2.StatusSkip:  {Status: v1alpha2.StatusSkip},
-		}
-	} else {
-		list = map[string]api.StatusCount{}
-
-		for _, status := range filter.Status {
-			list[status] = api.StatusCount{Status: status}
-		}
-	}
-
-	counts := make([]api.StatusCount, 0, len(list))
-	results := make([]api.StatusCount, 0)
-
-	query := s.db.
-		NewSelect().
-		TableExpr("policy_report_filter as f").
-		ColumnExpr("SUM(f.count) as count, f.result as status").
-		Where(`f.namespace = ''`).
-		Group("status")
-
-	s.addFilter(query, filter, "f")
-	addPolicyReportFilterFilter(query, filter)
-
-	err := query.Scan(ctx, &results)
-	if err != nil {
-		zap.L().Error("failed to load cluster status counts", zap.Error(err))
-		return nil, err
-	}
-
-	for _, count := range results {
-		list[count.Status] = count
-	}
-
-	for _, count := range list {
-		counts = append(counts, count)
-	}
-
-	return counts, nil
-}
-
-func (s *Store) FetchClusterResults(ctx context.Context, filter api.Filter, pagination api.Pagination) ([]*api.ListResult, error) {
-	results := make([]*PolicyReportResult, 0)
-
-	query := s.db.
-		NewSelect().
-		Model(&results).
-		Where(`r.resource_namespace = ''`)
-
-	s.addFilter(query, filter, "r")
-	addPolicyReportResultFilter(query, filter)
-	addPagination(query, pagination)
-
-	err := query.Scan(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	return MapListResult(results), nil
-}
-
-func (s *Store) CountClusterResults(ctx context.Context, filter api.Filter) (int, error) {
-	query := s.db.
-		NewSelect().
-		Model((*PolicyReportResult)(nil)).
-		Where(`r.resource_namespace = ''`)
-
-	s.addFilter(query, filter, "r")
-	addPolicyReportResultFilter(query, filter)
-
-	return query.Count(ctx)
-}
-
-func (s *Store) FetchNamespacedRules(ctx context.Context, filter api.Filter) ([]string, error) {
-	list := make([]string, 0)
-
-	query := s.db.
-		NewSelect().
-		TableExpr("policy_report_result as r").
-		Column("rule").
-		Distinct().
-		Order("rule ASC").
-		Where(`r.resource_namespace != ''`)
-
-	s.addFilter(query, filter, "r")
-	addPolicyReportResultFilter(query, filter)
-
-	query.Scan(ctx, &list)
-
-	return list, nil
-}
-
-func (s *Store) FetchNamespacedResources(ctx context.Context, filter api.Filter) ([]*api.Resource, error) {
-	list := make([]*api.Resource, 0)
-
-	query := s.db.
-		NewSelect().
-		TableExpr("policy_report_result as r").
-		ColumnExpr("resource_name as name, resource_kind as kind").
-		Distinct().
-		Order("kind ASC", "name ASC").
-		Where(`r.resource_namespace != ''`)
-
-	s.addFilter(query, filter, "r")
-	addPolicyReportResultFilter(query, filter)
-
-	query.Scan(ctx, &list)
-
-	return list, nil
-}
-
-func (s *Store) FetchNamespacedPolicies(ctx context.Context, filter api.Filter) ([]string, error) {
-	return s.fetchFilterOptions(ctx, "policy", filter, &withNamespace)
-}
-
-func (s *Store) FetchNamespacedKinds(ctx context.Context, filter api.Filter) ([]string, error) {
-	return s.fetchFilterOptions(ctx, "kind", filter, &withNamespace)
-}
-
-func (s *Store) FetchNamespacedCategories(ctx context.Context, filter api.Filter) ([]string, error) {
-	return s.fetchFilterOptions(ctx, "category", filter, &withNamespace)
-}
-
-func (s *Store) FetchNamespacedSources(ctx context.Context) ([]string, error) {
-	return s.fetchFilterOptions(ctx, "source", api.Filter{}, &withNamespace)
-}
-
-func (s *Store) FetchNamespaces(ctx context.Context, filter api.Filter) ([]string, error) {
-	return s.fetchFilterOptions(ctx, "f.namespace", filter, &withNamespace)
-}
-
-func (s *Store) FetchNamespacedStatusCounts(ctx context.Context, filter api.Filter) ([]api.NamespacedStatusCount, error) {
-	var list map[string][]api.NamespaceCount
-
-	if len(filter.Status) == 0 {
-		list = map[string][]api.NamespaceCount{
-			v1alpha2.StatusPass:  make([]api.NamespaceCount, 0),
-			v1alpha2.StatusFail:  make([]api.NamespaceCount, 0),
-			v1alpha2.StatusWarn:  make([]api.NamespaceCount, 0),
-			v1alpha2.StatusError: make([]api.NamespaceCount, 0),
-			v1alpha2.StatusSkip:  make([]api.NamespaceCount, 0),
-		}
-	} else {
-		list = map[string][]api.NamespaceCount{}
-
-		for _, status := range filter.Status {
-			list[status] = make([]api.NamespaceCount, 0)
-		}
-	}
-
-	statusCounts := make([]api.NamespacedStatusCount, 0, 5)
-	counts := make([]api.NamespaceCount, 0)
-
-	query := s.db.
-		NewSelect().
-		TableExpr("policy_report_filter as f").
-		ColumnExpr("SUM(f.count) as count, f.namespace, f.result as status").
-		Where(`f.namespace != ''`).
-		Group("f.namespace", "status").
-		Order("f.namespace ASC")
-
-	s.addFilter(query, filter, "f")
-	addPolicyReportFilterFilter(query, filter)
-
-	err := query.Scan(ctx, &counts)
-	if err != nil {
-		zap.L().Error("failed to load namespaced status counts", zap.Error(err))
-		return nil, err
-	}
-
-	for _, count := range counts {
-		list[count.Status] = append(list[count.Status], count)
-	}
-
-	for status, items := range list {
-		statusCounts = append(statusCounts, api.NamespacedStatusCount{
-			Status: status,
-			Items:  items,
-		})
-	}
-
-	return statusCounts, nil
-}
-
-func (s *Store) FetchRuleStatusCounts(ctx context.Context, policy, rule string) ([]api.StatusCount, error) {
-	list := map[string]api.StatusCount{
-		v1alpha2.StatusPass:  {Status: v1alpha2.StatusPass},
-		v1alpha2.StatusFail:  {Status: v1alpha2.StatusFail},
-		v1alpha2.StatusWarn:  {Status: v1alpha2.StatusWarn},
-		v1alpha2.StatusError: {Status: v1alpha2.StatusError},
-		v1alpha2.StatusSkip:  {Status: v1alpha2.StatusSkip},
-	}
-
-	statusCounts := make([]api.StatusCount, 0, len(list))
-	counts := make([]api.StatusCount, 0)
-
-	err := s.db.NewSelect().
-		Table("policy_report_result").
-		ColumnExpr("COUNT(id) as count, result as status").
-		Where("rule = ?", rule).
-		Where("policy = ?", policy).
-		Group("status").
-		Scan(ctx, &counts)
-	if err != nil {
-		return statusCounts, err
-	}
-
-	for _, count := range counts {
-		list[count.Status] = count
-	}
-
-	for _, count := range list {
-		statusCounts = append(statusCounts, count)
-	}
-
-	return statusCounts, nil
-}
-
-func (s *Store) FetchNamespacedResults(ctx context.Context, filter api.Filter, pagination api.Pagination) ([]*api.ListResult, error) {
-	results := make([]*PolicyReportResult, 0)
-
-	query := s.db.
-		NewSelect().
-		Model(&results).
-		Where(`r.resource_namespace != ''`)
-
-	s.addFilter(query, filter, "r")
-	addPolicyReportResultFilter(query, filter)
-	addPagination(query, pagination)
-
-	err := query.Scan(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	return MapListResult(results), nil
-}
-
-func (s *Store) CountNamespacedResults(ctx context.Context, filter api.Filter) (int, error) {
-	query := s.db.
-		NewSelect().
-		Model((*PolicyReportResult)(nil)).
-		Where(`r.resource_namespace != ''`)
-
-	s.addFilter(query, filter, "r")
-	addPolicyReportResultFilter(query, filter)
-
-	return query.Count(ctx)
-}
-
-func (s *Store) FetchResults(ctx context.Context, id string, filter api.Filter, pagination api.Pagination) ([]*api.ListResult, error) {
-	results := make([]*PolicyReportResult, 0)
-
-	query := s.db.
-		NewSelect().
-		Model(&results).
-		Where(`r.resource_id = ?`, id)
-
-	s.addFilter(query, filter, "r")
-	addPolicyReportResultFilter(query, filter)
-	addPagination(query, pagination)
-
-	err := query.Scan(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	return MapListResult(results), nil
-}
-
-func (s *Store) CountResults(ctx context.Context, id string, filter api.Filter) (int, error) {
-	query := s.db.
-		NewSelect().
-		Model((*PolicyReportResult)(nil)).
-		Where(`r.resource_id = ?`, id)
-
-	s.addFilter(query, filter, "r")
-	addPolicyReportResultFilter(query, filter)
-
-	return query.Count(ctx)
-}
-
-func (s *Store) FetchNamespacedResourceResults(ctx context.Context, filter api.Filter, pagination api.Pagination) ([]*api.ResourceResult, error) {
-	results := make([]*ResourceResult, 0)
-
-	query := s.db.
-		NewSelect().
-		Model(&results).
-		ColumnExpr("res.id, resource_uid, resource_kind, resource_api_version, resource_namespace, resource_name, SUM(res.pass) as pass, SUM(res.warn) as warn, SUM(res.fail) as fail, SUM(res.error) as error, SUM(res.skip) as skip").
-		Group("res.id", "resource_uid", "resource_kind", "resource_api_version", "resource_namespace", "resource_name").
-		Where(`resource_namespace != ''`)
-
-	s.addPRFilter(query, filter)
-	addPolicyReportResourceFilter(query, filter)
-	addPagination(query, pagination)
-
-	err := query.Scan(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	return MapResourceResult(results), nil
-}
-
-func (s *Store) CountNamespacedResourceResults(ctx context.Context, filter api.Filter) (int, error) {
-	query := s.db.
-		NewSelect().
-		Model((*ResourceResult)(nil)).
-		Group("res.id").
-		Where(`resource_namespace != ''`)
-
-	s.addPRFilter(query, filter)
-	addPolicyReportResourceFilter(query, filter)
-
-	return query.Count(ctx)
-}
-
-func (s *Store) FetchClusterResourceResults(ctx context.Context, filter api.Filter, pagination api.Pagination) ([]*api.ResourceResult, error) {
-	results := make([]*ResourceResult, 0)
-
-	query := s.db.
-		NewSelect().
-		Model(&results).
-		ColumnExpr("res.id, resource_uid, resource_kind, resource_api_version, resource_namespace, resource_name, SUM(res.pass) as pass, SUM(res.warn) as warn, SUM(res.fail) as fail, SUM(res.error) as error, SUM(res.skip) as skip").
-		Where(`resource_namespace = ''`).
-		Group("res.id", "resource_uid", "resource_kind", "resource_api_version", "resource_namespace", "resource_name")
-
-	s.addPRFilter(query, filter)
-	addPolicyReportResourceFilter(query, filter)
-	addPagination(query, pagination)
-
-	err := query.Scan(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	return MapResourceResult(results), nil
-}
-
-func (s *Store) CountClusterResourceResults(ctx context.Context, filter api.Filter) (int, error) {
-	query := s.db.
-		NewSelect().
-		Model((*ResourceResult)(nil)).
-		Where(`resource_namespace = ''`).
-		Group("res.id")
-
-	s.addPRFilter(query, filter)
-	addPolicyReportResourceFilter(query, filter)
-
-	return query.Count(ctx)
-}
-
-func (s *Store) FetchResourceResults(ctx context.Context, id string, filter api.Filter) ([]*api.ResourceResult, error) {
-	results := make([]*ResourceResult, 0)
-
-	query := s.db.
-		NewSelect().
-		Model(&results).
-		ColumnExpr("res.id, resource_uid, resource_kind, resource_api_version, resource_namespace, resource_name, source, SUM(pass) as pass, SUM(warn) as warn, SUM(fail) as fail, SUM(error) as error, SUM(skip) as skip").
-		Where(`res.id = ?`, id).
-		Order("source ASC").
-		Group("res.id", "resource_uid", "resource_kind", "resource_api_version", "resource_namespace", "resource_name", "source")
-
-	addPolicyReportResourceFilter(query, filter)
-
-	err := query.Scan(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	return MapResourceResult(results), nil
-}
-
-func (s *Store) FetchResource(ctx context.Context, id string) (*api.Resource, error) {
-	result := ResourceResult{}
-
-	query := s.db.
-		NewSelect().
-		Model(&result).
-		ColumnExpr("res.id, resource_uid, resource_kind, resource_api_version, resource_namespace, resource_name").
-		Where(`res.id = ?`, id).
-		Limit(1)
-
-	err := query.Scan(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	return &api.Resource{
-		ID:         result.ID,
-		UID:        result.Resource.UID,
-		APIVersion: result.Resource.APIVersion,
-		Kind:       result.Resource.Kind,
-		Name:       result.Resource.Name,
-		Namespace:  result.Resource.Namespace,
-	}, nil
-}
-
-func (s *Store) FetchResourceStatusCounts(ctx context.Context, resourceID string, filter api.Filter) ([]api.ResourceStatusCount, error) {
-	var list map[string][]api.ResourceCount
-
-	if len(filter.Status) == 0 {
-		list = map[string][]api.ResourceCount{
-			v1alpha2.StatusPass:  make([]api.ResourceCount, 0),
-			v1alpha2.StatusFail:  make([]api.ResourceCount, 0),
-			v1alpha2.StatusWarn:  make([]api.ResourceCount, 0),
-			v1alpha2.StatusError: make([]api.ResourceCount, 0),
-			v1alpha2.StatusSkip:  make([]api.ResourceCount, 0),
-		}
-	} else {
-		list = map[string][]api.ResourceCount{}
-
-		for _, status := range filter.Status {
-			list[status] = make([]api.ResourceCount, 0)
-		}
-	}
-
-	statusCounts := make([]api.ResourceStatusCount, 0, 5)
-	counts := make([]api.ResourceCount, 0)
-
-	query := s.db.
-		NewSelect().
-		TableExpr("policy_report_result as r").
-		ColumnExpr("COUNT(r.resource_id) as count, r.result as status, r.source").
-		Where(`r.resource_id = ?`, resourceID).
-		Group("status", "source").
-		Order("source ASC")
-
-	s.addFilter(query, filter, "r")
-	addPolicyReportResultFilter(query, filter)
-
-	err := query.Scan(ctx, &counts)
-	if err != nil {
-		zap.L().Error("failed to load resource status counts", zap.Error(err))
-		return nil, err
-	}
-
-	for _, count := range counts {
-		list[count.Status] = append(list[count.Status], count)
-	}
-
-	for status, items := range list {
-		statusCounts = append(statusCounts, api.ResourceStatusCount{
-			Status: status,
-			Items:  items,
-		})
-	}
-
-	return statusCounts, nil
-}
-
-func (s *Store) FetchPolicies(ctx context.Context, filter api.Filter) (any, error) {
-	results := make([]*PolicyReportFilter, 0)
-
-	query := s.db.
-		NewSelect().
-		Model(&results).
-		ColumnExpr("f.severity, f.category, f.policy, f.source, f.result, SUM(f.count) as count").
-		Order("f.source ASC", "f.category").
-		Group("f.category", "f.policy", "f.source", "f.result", "f.severity")
-
-	s.addFilter(query, filter, "f")
-	addPolicyReportFilterFilter(query, filter)
-
-	if filter.Search != "" {
-		query.Where(`(f.policy LIKE ?0 OR LOWER(f.kind) = LOWER(?1))`, "%"+filter.Search+"%", filter.Search)
-	}
-
-	err := query.Scan(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	response := make(map[string]*api.PolicyResult)
-	for _, r := range results {
-		category := r.Category
-		if category == "" {
-			category = "Other"
-		}
-
-		if _, ok := response[r.Policy]; ok {
-			response[r.Policy].Results[r.Result] = r.Count
-			continue
-		}
-
-		response[r.Policy] = &api.PolicyResult{
-			Source:   r.Source,
-			Category: category,
-			Policy:   r.Policy,
-			Severity: r.Severity,
-			Results: map[string]int{
-				r.Result: r.Count,
-			},
-		}
-	}
-
-	return helper.ToList(response), nil
-}
-
 func (s *Store) Get(ctx context.Context, id string) (v1alpha2.ReportInterface, error) {
 	polr := &PolicyReport{}
 
@@ -1079,40 +802,6 @@ func (s *Store) fetchResults(ctx context.Context, id string) ([]v1alpha2.PolicyR
 	return list, nil
 }
 
-func (s *Store) fetchFilterOptions(ctx context.Context, option string, filter api.Filter, namespaced *bool) ([]string, error) {
-	list := make([]string, 0)
-
-	query := s.db.
-		NewSelect().
-		TableExpr("policy_report_filter as f").
-		Column(option).
-		Distinct().
-		Order(option+" ASC").
-		Where(`? != ''`, bun.Ident(option))
-
-	if *namespaced == true {
-		query.Where(`f.namespace != ''`)
-	} else if *namespaced == false {
-		query.Where(`f.namespace = ''`)
-	}
-
-	s.addFilter(query, filter, "f")
-	addPolicyReportFilterFilter(query, filter)
-
-	err := query.Scan(ctx, &list)
-
-	return list, err
-}
-
-func (s *Store) Configure() {
-	if s.db.Dialect().Name() == dialect.PG {
-		s.jsonExtractLayout = "(pr.labels->>'%s') = ?"
-		return
-	}
-
-	s.jsonExtractLayout = "json_extract(pr.labels, '$.\"%s\"') = ?"
-}
-
 func (s *Store) RequireSchemaUpgrade(ctx context.Context) bool {
 	config := Config{}
 
@@ -1169,8 +858,6 @@ func NewStore(db *bun.DB, version string) (*Store, error) {
 		version: version,
 	}
 
-	s.Configure()
-
 	return s, nil
 }
 
@@ -1198,230 +885,6 @@ func createSQLiteDB(dbFile string) (*sql.DB, error) {
 	db.SetMaxOpenConns(1)
 
 	return db, nil
-}
-
-func addPolicyReportFilterFilter(query *bun.SelectQuery, filter api.Filter) {
-	if len(filter.Namespaces) > 0 {
-		query.Where("f.namespace IN (?)", bun.In(filter.Namespaces))
-	} else if len(filter.Namespaces) == 1 {
-		query.Where("f.namespace = ?", filter.Namespaces[0])
-	}
-
-	if len(filter.Kinds) > 0 {
-		query.Where("f.kind IN (?)", bun.In(filter.Kinds))
-	} else if len(filter.Kinds) == 1 {
-		query.Where("f.kind = ?", filter.Kinds[0])
-	}
-
-	if len(filter.Sources) > 0 {
-		query.Where("f.source IN (?)", bun.In(filter.Sources))
-	} else if len(filter.Sources) == 1 {
-		query.Where("f.source = ?", filter.Sources[0])
-	}
-
-	if len(filter.Namespaces) == 0 && filter.Namespaced {
-		query.Where("f.namespace != ''")
-	}
-
-	if len(filter.Kinds) == 0 && len(filter.Exclude) > 0 {
-		for source, kind := range filter.Exclude {
-			query.Where("(f.source != ? OR (f.source = ? AND f.kind NOT IN (?)))", source, source, bun.In(kind))
-		}
-	}
-}
-
-func addPolicyReportResultFilter(query *bun.SelectQuery, filter api.Filter) {
-	if len(filter.Namespaces) > 1 {
-		query.Where("r.resource_namespace IN (?)", bun.In(filter.Namespaces))
-	} else if len(filter.Namespaces) == 1 {
-		query.Where("r.resource_namespace = ?", filter.Namespaces[0])
-	}
-
-	if len(filter.Rules) > 0 {
-		query.Where("r.rule IN (?)", bun.In(filter.Rules))
-	} else if len(filter.Rules) == 1 {
-		query.Where("r.rule = ?", filter.Rules[0])
-	}
-
-	if len(filter.Kinds) > 0 {
-		query.Where("r.resource_kind IN (?)", bun.In(filter.Kinds))
-	} else if len(filter.Kinds) == 1 {
-		query.Where("r.resource_kind = ?", filter.Kinds[0])
-	}
-
-	if len(filter.Resources) > 0 {
-		query.Where("r.resource_name IN (?)", bun.In(filter.Resources))
-	} else if len(filter.Resources) == 1 {
-		query.Where("r.resource_name = ?", filter.Resources[0])
-	}
-
-	if filter.ResourceID != "" {
-		query.Where("r.resource_id = ?", filter.ResourceID)
-	}
-
-	if len(filter.Namespaces) == 0 && filter.Namespaced {
-		query.Where("r.resource_namespace != ''")
-	}
-
-	if len(filter.Sources) > 0 {
-		query.Where("r.source IN (?)", bun.In(filter.Sources))
-	} else if len(filter.Sources) == 1 {
-		query.Where("r.source = ?", filter.Sources[0])
-	}
-
-	if len(filter.Kinds) == 0 && len(filter.Exclude) > 0 {
-		for source, kind := range filter.Exclude {
-			query.Where("(r.source != ? OR (r.source = ? AND r.resource_kind NOT IN (?)))", source, source, bun.In(kind))
-		}
-	}
-
-	if filter.Search != "" {
-		query.Where(`(resource_namespace LIKE ?0 OR resource_name LIKE ?0 OR policy LIKE ?0 OR rule LIKE ?0 OR severity = ?1 OR result = ?1 OR LOWER(resource_kind) = LOWER(?1))`, "%"+filter.Search+"%", filter.Search)
-	}
-}
-
-func addPolicyReportResourceFilter(query *bun.SelectQuery, filter api.Filter) {
-	if len(filter.Namespaces) > 0 {
-		query.Where("res.resource_namespace IN (?)", bun.In(filter.Namespaces))
-	} else if len(filter.Namespaces) == 1 {
-		query.Where("res.resource_namespace = ?", filter.Namespaces[0])
-	}
-
-	if len(filter.Kinds) > 0 {
-		query.Where("res.resource_kind IN (?)", bun.In(filter.Kinds))
-	} else if len(filter.Kinds) == 1 {
-		query.Where("res.resource_kind = ?", filter.Kinds[0])
-	}
-
-	if len(filter.Resources) > 0 {
-		query.Where("res.resource_name IN (?)", bun.In(filter.Resources))
-	} else if len(filter.Resources) == 1 {
-		query.Where("res.resource_name = ?", filter.Resources[0])
-	}
-
-	if len(filter.Sources) > 0 {
-		query.Where("res.source IN (?)", bun.In(filter.Sources))
-	} else if len(filter.Sources) == 1 {
-		query.Where("res.source = ?", filter.Sources[0])
-	}
-
-	if len(filter.Categories) > 0 {
-		query.Where("res.category IN (?)", bun.In(filter.Categories))
-	} else if len(filter.Categories) == 1 {
-		query.Where("res.category = ?", filter.Categories[0])
-	}
-
-	if filter.ResourceID != "" {
-		query.Where("res.id = ?", filter.ResourceID)
-	}
-
-	if len(filter.Kinds) == 0 && len(filter.Exclude) > 0 {
-		for source, kind := range filter.Exclude {
-			query.Where("(res.source != ? OR (res.source = ? AND res.resource_kind NOT IN (?)))", source, source, bun.In(kind))
-		}
-	}
-
-	if len(filter.Namespaces) == 0 && filter.Namespaced {
-		query.Where("res.resource_namespace != ''")
-	}
-
-	if filter.Search != "" {
-		query.Where(`(resource_namespace LIKE ?0 OR resource_name LIKE ?0 OR LOWER(resource_kind) = LOWER(?1))`, "%"+filter.Search+"%", filter.Search)
-	}
-}
-
-func addPolicyReportFilter(query *bun.SelectQuery, filter api.Filter) {
-	if len(filter.Namespaces) > 0 {
-		query.Where("pr.namespace IN (?)", bun.In(filter.Namespaces))
-	} else if len(filter.Namespaces) == 1 {
-		query.Where("pr.namespace = ?", filter.Namespaces[0])
-	}
-
-	if len(filter.Sources) > 0 {
-		query.Where("pr.source IN (?)", bun.In(filter.Sources))
-	} else if len(filter.Sources) == 1 {
-		query.Where("pr.source = ?", filter.Sources[0])
-	}
-}
-
-func (s *Store) addPRFilter(query *bun.SelectQuery, filter api.Filter) {
-	if len(filter.ReportLabel) > 0 {
-		query.Join("JOIN policy_report AS pr ON pr.id = res.policy_report_id")
-
-		for key, value := range filter.ReportLabel {
-			query.Where(fmt.Sprintf(s.jsonExtractLayout, key), value)
-		}
-	}
-}
-
-func (s *Store) addFilter(query *bun.SelectQuery, filter api.Filter, table string) {
-	if len(filter.Policies) > 0 {
-		query.Where("policy IN (?)", bun.In(filter.Policies))
-	} else if len(filter.Policies) == 1 {
-		query.Where("policy = ?", filter.Policies[0])
-	}
-
-	if len(filter.Categories) > 0 {
-		query.Where("category IN (?)", bun.In(filter.Categories))
-	} else if len(filter.Categories) == 1 {
-		query.Where("category = ?", filter.Categories[0])
-	}
-
-	if len(filter.Severities) > 0 {
-		query.Where("severity IN (?)", bun.In(filter.Severities))
-	} else if len(filter.Severities) == 1 {
-		query.Where("severity = ?", filter.Severities[0])
-	}
-
-	if len(filter.Status) > 0 {
-		query.Where("result IN (?)", bun.In(filter.Status))
-	} else if len(filter.Status) == 1 {
-		query.Where("result = ?", filter.Status[0])
-	}
-
-	if len(filter.ReportLabel) > 0 {
-		query.Join("JOIN policy_report AS pr ON pr.id = " + table + ".policy_report_id")
-
-		for key, value := range filter.ReportLabel {
-			query.Where(fmt.Sprintf(s.jsonExtractLayout, key), value)
-		}
-	}
-}
-
-func addPagination(query *bun.SelectQuery, pagination api.Pagination) {
-	query.OrderExpr(fmt.Sprintf(
-		"%s %s",
-		strings.Join(pagination.SortBy, ","),
-		pagination.Direction,
-	))
-
-	if pagination.Page == 0 || pagination.Offset == 0 {
-		return
-	}
-
-	query.Limit(pagination.Offset)
-	query.Offset((pagination.Page - 1) * pagination.Offset)
-}
-
-func convertJSONToMap(s string) map[string]string {
-	m := make(map[string]string)
-	if s == "" {
-		return m
-	}
-
-	_ = json.Unmarshal([]byte(s), &m)
-
-	return m
-}
-
-func contains(source string, sources []string) bool {
-	for _, s := range sources {
-		if strings.EqualFold(s, source) {
-			return true
-		}
-	}
-
-	return false
 }
 
 func chunkSlice[K interface{}](slice []K, chunkSize int) [][]K {
