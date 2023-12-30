@@ -258,12 +258,14 @@ type FindingCounts struct {
 }
 
 type Findings struct {
-	Total  int              `json:"total"`
-	Counts []*FindingCounts `json:"counts"`
+	Total     int              `json:"total"`
+	PerResult map[string]int   `json:"perResult"`
+	Counts    []*FindingCounts `json:"counts"`
 }
 
 func MapFindings(results []db.StatusCount) Findings {
 	findings := make(map[string]*FindingCounts, 0)
+	totals := make(map[string]int, 5)
 	total := 0
 
 	for _, count := range results {
@@ -280,8 +282,9 @@ func MapFindings(results []db.StatusCount) Findings {
 			}
 		}
 
+		totals[count.Status] += count.Count
 		total += count.Count
 	}
 
-	return Findings{Counts: helper.ToList(findings), Total: total}
+	return Findings{Counts: helper.ToList(findings), Total: total, PerResult: totals}
 }
