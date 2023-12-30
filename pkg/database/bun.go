@@ -286,6 +286,7 @@ func (s *Store) FetchResourceStatusCounts(ctx context.Context, id string, filter
 		FilterMap(map[string][]string{
 			"res.category": filter.Categories,
 			"res.source":   filter.Sources,
+			"policy":       filter.Policies,
 		}).
 		FilterValue("res.id", id).
 		FilterReportLabels(filter.ReportLabel).
@@ -478,7 +479,7 @@ func (s *Store) CountResults(ctx context.Context, namespaced bool, filter Filter
 		Count(ctx)
 }
 
-func (s *Store) FetchClusterStatusCounts(ctx context.Context, filter Filter) ([]StatusCount, error) {
+func (s *Store) FetchClusterStatusCounts(ctx context.Context, source string, filter Filter) ([]StatusCount, error) {
 	results := make([]StatusCount, 0)
 
 	err := FromQuery(s.db.
@@ -486,10 +487,11 @@ func (s *Store) FetchClusterStatusCounts(ctx context.Context, filter Filter) ([]
 		TableExpr("policy_report_filter as f").
 		ColumnExpr("SUM(f.count) as count, f.result as status")).
 		FilterMap(map[string][]string{
-			"source":        filter.Sources,
 			"category":      filter.Categories,
+			"policy":        filter.Policies,
 			"resource_kind": filter.Kinds,
 		}).
+		FilterValue("f.source", source).
 		FilterReportLabels(filter.ReportLabel).
 		Exclude(filter, "f").
 		ClusterScope().
@@ -499,7 +501,7 @@ func (s *Store) FetchClusterStatusCounts(ctx context.Context, filter Filter) ([]
 	return results, err
 }
 
-func (s *Store) FetchNamespaceStatusCounts(ctx context.Context, filter Filter) ([]StatusCount, error) {
+func (s *Store) FetchNamespaceStatusCounts(ctx context.Context, source string, filter Filter) ([]StatusCount, error) {
 	results := make([]StatusCount, 0)
 
 	err := FromQuery(s.db.
@@ -507,15 +509,17 @@ func (s *Store) FetchNamespaceStatusCounts(ctx context.Context, filter Filter) (
 		TableExpr("policy_report_filter as f").
 		ColumnExpr("f.resource_namespace, SUM(f.count) as count, f.result as status")).
 		FilterMap(map[string][]string{
-			"f.source":             filter.Sources,
 			"f.category":           filter.Categories,
 			"f.resource_kind":      filter.Kinds,
 			"f.resource_namespace": filter.Namespaces,
+			"f.policy":             filter.Policies,
 		}).
+		FilterValue("f.source", source).
 		FilterReportLabels(filter.ReportLabel).
 		Exclude(filter, "f").
 		NamespaceScope().
 		Group("f.resource_namespace", "status").
+		Order("f.resource_namespace ASC", "status ASC").
 		Scan(ctx, &results)
 
 	return results, err
@@ -572,6 +576,7 @@ func (s *Store) FetchPolicies(ctx context.Context, filter Filter) ([]PolicyRepor
 
 	return results, err
 }
+
 func (s *Store) FetchFindingCounts(ctx context.Context, filter Filter) ([]StatusCount, error) {
 	results := make([]StatusCount, 0)
 
@@ -580,14 +585,17 @@ func (s *Store) FetchFindingCounts(ctx context.Context, filter Filter) ([]Status
 		TableExpr("policy_report_filter as f").
 		ColumnExpr("SUM(f.count) as count, f.result as status, f.source")).
 		FilterMap(map[string][]string{
-			"source":        filter.Sources,
-			"category":      filter.Categories,
-			"resource_kind": filter.Kinds,
+			"source":             filter.Sources,
+			"category":           filter.Categories,
+			"resource_kind":      filter.Kinds,
+			"resource_namespace": filter.Namespaces,
+			"policy":             filter.Policies,
 			"status": {
 				v1alpha2.StatusPass,
 				v1alpha2.StatusFail,
 				v1alpha2.StatusWarn,
 				v1alpha2.StatusError,
+				v1alpha2.StatusSkip,
 			},
 		}).
 		FilterReportLabels(filter.ReportLabel).
