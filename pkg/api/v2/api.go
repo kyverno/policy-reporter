@@ -33,13 +33,13 @@ func (h *APIHandler) Register(engine *gin.RouterGroup) error {
 
 	ns := engine.Group("namespace-scoped")
 	ns.GET("resource-results", h.ListNamespaceResourceResults)
-	ns.GET("status-counts", h.GetNamespaceStatusCounts)
+	ns.GET(":source/status-counts", h.GetNamespaceStatusCounts)
 	ns.GET("kinds", h.ListNamespaceKinds)
 	ns.GET("results", h.ListPolicyResults(true))
 
 	cluster := engine.Group("cluster-scoped")
 	cluster.GET("resource-results", h.ListClusterResourceResults)
-	cluster.GET("status-counts", h.GetClusterStatusCounts)
+	cluster.GET(":source/status-counts", h.GetClusterStatusCounts)
 	cluster.GET("kinds", h.ListClusterKinds)
 	cluster.GET("results", h.ListPolicyResults(false))
 
@@ -121,13 +121,13 @@ func (h *APIHandler) ListClusterResourceResults(ctx *gin.Context) {
 }
 
 func (h *APIHandler) GetClusterStatusCounts(ctx *gin.Context) {
-	results, err := h.store.FetchClusterStatusCounts(ctx, api.BuildFilter(ctx))
+	results, err := h.store.FetchClusterStatusCounts(ctx, ctx.Param("source"), api.BuildFilter(ctx))
 
 	api.SendResponse(ctx, MapClusterStatusCounts(results), "failed to calculate cluster status counts", err)
 }
 
 func (h *APIHandler) GetNamespaceStatusCounts(ctx *gin.Context) {
-	results, err := h.store.FetchNamespaceStatusCounts(ctx, api.BuildFilter(ctx))
+	results, err := h.store.FetchNamespaceStatusCounts(ctx, ctx.Param("source"), api.BuildFilter(ctx))
 
 	api.SendResponse(ctx, MapNamespaceStatusCounts(results), "failed to calculate namespace status counts", err)
 }
