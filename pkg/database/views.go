@@ -3,6 +3,15 @@ package database
 import "github.com/uptrace/bun"
 
 type Category struct {
+	bun.BaseModel `bun:"table:policy_report_filter,alias:f"`
+
+	Source string
+	Name   string `bun:"category"`
+	Result string
+	Count  int
+}
+
+type ResourceCategory struct {
 	bun.BaseModel `bun:"table:policy_report_resource,alias:res"`
 
 	Source string

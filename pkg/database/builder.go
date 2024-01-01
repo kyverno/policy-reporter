@@ -39,6 +39,18 @@ func (q *QueryBuilder) FilterValue(column string, value string) *QueryBuilder {
 	return q
 }
 
+func (q *QueryBuilder) WithEmpty(column string) *QueryBuilder {
+	q.query.Where(column + " = ''")
+
+	return q
+}
+
+func (q *QueryBuilder) WithNotEmpty(column string) *QueryBuilder {
+	q.query.Where(column + " != ''")
+
+	return q
+}
+
 func (q *QueryBuilder) Exclude(filter Filter, prefix string) *QueryBuilder {
 	if filter.ResourceID == "" && len(filter.Kinds) == 0 && len(filter.Exclude) > 0 {
 		for source, kind := range filter.Exclude {
@@ -80,6 +92,16 @@ func (q *QueryBuilder) FilterMap(columns map[string][]string) *QueryBuilder {
 		} else if len(values) == 1 {
 			q.query.Where(column+" = ?", values[0])
 		}
+	}
+
+	return q
+}
+
+func (q *QueryBuilder) FilterOptionalNamespaces(values []string) *QueryBuilder {
+	if len(values) > 1 {
+		q.query.Where("(resource_namespace IN (?) OR resource_namespace = '')", bun.In(values))
+	} else if len(values) == 1 {
+		q.query.Where("(resource_namespace = ? OR resource_namespace = '')", values[0])
 	}
 
 	return q
