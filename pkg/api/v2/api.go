@@ -24,12 +24,15 @@ func (h *APIHandler) Register(engine *gin.RouterGroup) error {
 	engine.GET("resource/:id/resource-results", h.ListResourceResults)
 	engine.GET("resource/:id/results", h.ListResourcePolilcyResults)
 	engine.GET("resource/:id", h.GetResource)
+	engine.GET("resource/:id/source-categories", h.ListCategories)
 
 	engine.POST("namespaces/resolve-selector", h.ResolveNamespaceSelector)
 	engine.GET("sources", h.ListSources)
+	engine.GET("sources/:source/use-resources", h.UseResources)
 	engine.GET("sources/categories", h.ListSourceWithCategories)
 	engine.GET("policies", h.ListPolicies)
 	engine.GET("findings", h.ListFindings)
+	engine.GET("results-without-resources", h.ListResultsWithoutResource)
 
 	ns := engine.Group("namespace-scoped")
 	ns.GET("resource-results", h.ListNamespaceResourceResults)
@@ -80,6 +83,12 @@ func (h *APIHandler) ListSourceWithCategories(ctx *gin.Context) {
 	categories, err := h.store.FetchCategories(ctx, api.BuildFilter(ctx))
 
 	api.SendResponse(ctx, MapToSourceDetails(categories), "failed to load source details", err)
+}
+
+func (h *APIHandler) ListCategories(ctx *gin.Context) {
+	categories, err := h.store.FetchResourceCategories(ctx, ctx.Param("id"), api.BuildFilter(ctx))
+
+	api.SendResponse(ctx, MapResourceCategoryToSourceDetails(categories), "failed to load source details", err)
 }
 
 func (h *APIHandler) GetResource(ctx *gin.Context) {
@@ -177,6 +186,26 @@ func (h *APIHandler) ListPolicyResults(namespaced bool) gin.HandlerFunc {
 
 		api.SendResponse(ctx, Paginated[PolicyResult]{Count: count, Items: MapPolicyResults(list)}, "failed to load resource result list", err)
 	}
+}
+
+func (h *APIHandler) ListResultsWithoutResource(ctx *gin.Context) {
+	filter := api.BuildFilter(ctx)
+
+	list, err := h.store.FetchResultsWithoutResource(ctx, filter, api.BuildPagination(ctx, defaultOrder))
+	if err != nil {
+		zap.L().Error("failed to load results without resources", zap.Error(err))
+		ctx.AbortWithStatus(http.StatusInternalServerError)
+		return
+	}
+	count, err := h.store.CountResultsWithoutResource(ctx, filter)
+
+	api.SendResponse(ctx, Paginated[PolicyResult]{Count: count, Items: MapPolicyResults(list)}, "failed to load result list without resources", err)
+}
+
+func (h *APIHandler) UseResources(ctx *gin.Context) {
+	resources, err := h.store.UseResources(ctx, ctx.Param("source"), api.BuildFilter(ctx))
+
+	api.SendResponse(ctx, gin.H{"resources": resources}, "failed to check if resources are used", err)
 }
 
 func (h *APIHandler) ListFindings(ctx *gin.Context) {

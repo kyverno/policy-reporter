@@ -16,8 +16,8 @@ type Category struct {
 }
 
 type SourceDetails struct {
-	Name       string     `json:"name"`
-	Categories []Category `json:"categories"`
+	Name       string      `json:"name"`
+	Categories []*Category `json:"categories"`
 }
 
 func MapToSourceDetails(categories []db.Category) []*SourceDetails {
@@ -25,31 +25,49 @@ func MapToSourceDetails(categories []db.Category) []*SourceDetails {
 
 	for _, r := range categories {
 		if s, ok := list[r.Source]; ok {
-			s.Categories = append(s.Categories, Category{
-				Name:  r.Name,
-				Pass:  r.Pass,
-				Fail:  r.Fail,
-				Warn:  r.Warn,
-				Error: r.Error,
-				Skip:  r.Skip,
-			})
+			UpdateCategory(r, s)
 			continue
 		}
 
 		list[r.Source] = &SourceDetails{
 			Name: r.Source,
-			Categories: []Category{{
-				Name:  r.Name,
-				Pass:  r.Pass,
-				Fail:  r.Fail,
-				Warn:  r.Warn,
-				Error: r.Error,
-				Skip:  r.Skip,
-			}},
+			Categories: []*Category{MapResultToCategory(r, &Category{
+				Name: r.Name,
+			})},
 		}
 	}
 
 	return helper.ToList(list)
+}
+
+func UpdateCategory(result db.Category, source *SourceDetails) {
+	for _, c := range source.Categories {
+		if c.Name == result.Name {
+			MapResultToCategory(result, c)
+			return
+		}
+	}
+
+	source.Categories = append(source.Categories, MapResultToCategory(result, &Category{
+		Name: result.Name,
+	}))
+}
+
+func MapResultToCategory(result db.Category, category *Category) *Category {
+	switch result.Result {
+	case v1alpha2.StatusPass:
+		category.Pass = result.Count
+	case v1alpha2.StatusWarn:
+		category.Warn = result.Count
+	case v1alpha2.StatusFail:
+		category.Fail = result.Count
+	case v1alpha2.StatusError:
+		category.Error = result.Count
+	case v1alpha2.StatusSkip:
+		category.Skip = result.Count
+	}
+
+	return category
 }
 
 type Resource struct {
@@ -287,4 +305,36 @@ func MapFindings(results []db.StatusCount) Findings {
 	}
 
 	return Findings{Counts: helper.ToList(findings), Total: total, PerResult: totals}
+}
+
+func MapResourceCategoryToSourceDetails(categories []db.ResourceCategory) []*SourceDetails {
+	list := make(map[string]*SourceDetails, 0)
+
+	for _, r := range categories {
+		if s, ok := list[r.Source]; ok {
+			s.Categories = append(s.Categories, &Category{
+				Name:  r.Name,
+				Pass:  r.Pass,
+				Fail:  r.Fail,
+				Warn:  r.Warn,
+				Error: r.Error,
+				Skip:  r.Skip,
+			})
+			continue
+		}
+
+		list[r.Source] = &SourceDetails{
+			Name: r.Source,
+			Categories: []*Category{{
+				Name:  r.Name,
+				Pass:  r.Pass,
+				Fail:  r.Fail,
+				Warn:  r.Warn,
+				Error: r.Error,
+				Skip:  r.Skip,
+			}},
+		}
+	}
+
+	return helper.ToList(list)
 }
