@@ -24,6 +24,19 @@ func ToList[T any, R comparable](mapping map[R]T) []T {
 	return list
 }
 
+func Merge[T comparable, R any](first, second map[T]R) map[T]R {
+	merged := make(map[T]R, len(first)+len(second))
+
+	for k, v := range first {
+		merged[k] = v
+	}
+	for k, v := range second {
+		merged[k] = v
+	}
+
+	return merged
+}
+
 func Map[T any, R any](source []T, cb func(T) R) []R {
 	list := make([]R, 0, len(source))
 	for _, i := range source {

@@ -8,6 +8,7 @@ import (
 	"go.uber.org/zap"
 
 	"github.com/kyverno/policy-reporter/pkg/api"
+	"github.com/kyverno/policy-reporter/pkg/config"
 	db "github.com/kyverno/policy-reporter/pkg/database"
 	"github.com/kyverno/policy-reporter/pkg/kubernetes/namespaces"
 )
@@ -17,6 +18,7 @@ var defaultOrder = []string{"resource_namespace", "resource_name", "resource_uid
 type APIHandler struct {
 	store    *db.Store
 	nsClient namespaces.Client
+	targets  map[string][]*Target
 }
 
 func (h *APIHandler) Register(engine *gin.RouterGroup) error {
@@ -33,6 +35,7 @@ func (h *APIHandler) Register(engine *gin.RouterGroup) error {
 	engine.GET("policies", h.ListPolicies)
 	engine.GET("findings", h.ListFindings)
 	engine.GET("results-without-resources", h.ListResultsWithoutResource)
+	engine.GET("targets", h.ListTargets)
 
 	ns := engine.Group("namespace-scoped")
 	ns.GET("resource-results", h.ListNamespaceResourceResults)
@@ -214,15 +217,20 @@ func (h *APIHandler) ListFindings(ctx *gin.Context) {
 	api.SendResponse(ctx, MapFindings(results), "failed to load findings", err)
 }
 
-func NewAPIHandler(store *db.Store, client namespaces.Client) *APIHandler {
+func (h *APIHandler) ListTargets(ctx *gin.Context) {
+	api.SendResponse(ctx, h.targets, "failed to load findings", nil)
+}
+
+func NewAPIHandler(store *db.Store, client namespaces.Client, targets map[string][]*Target) *APIHandler {
 	return &APIHandler{
 		store:    store,
 		nsClient: client,
+		targets:  targets,
 	}
 }
 
-func WithAPI(store *db.Store, client namespaces.Client) api.ServerOption {
+func WithAPI(store *db.Store, client namespaces.Client, targets config.Targets) api.ServerOption {
 	return func(s *api.Server) error {
-		return s.Register("v2", NewAPIHandler(store, client))
+		return s.Register("v2", NewAPIHandler(store, client, MapConfigTagrgets(targets)))
 	}
 }
