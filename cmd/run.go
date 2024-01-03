@@ -93,7 +93,7 @@ func newRunCMD(version string) *cobra.Command {
 				}
 
 				logger.Info("REST api enabled")
-				servOptions = append(servOptions, v1.WithAPI(store, resolver.TargetClients()), v2.WithAPI(store, nsClient))
+				servOptions = append(servOptions, v1.WithAPI(store, resolver.TargetClients()), v2.WithAPI(store, nsClient, c.Targets))
 			}
 
 			if c.Metrics.Enabled {

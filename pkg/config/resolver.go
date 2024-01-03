@@ -329,28 +329,7 @@ func (r *Resolver) TargetClients() []target.Client {
 		return r.targetClients
 	}
 
-	factory := r.TargetFactory()
-
-	clients := make([]target.Client, 0)
-
-	clients = append(clients, factory.LokiClients(r.config.Loki)...)
-	clients = append(clients, factory.ElasticsearchClients(r.config.Elasticsearch)...)
-	clients = append(clients, factory.SlackClients(r.config.Slack)...)
-	clients = append(clients, factory.DiscordClients(r.config.Discord)...)
-	clients = append(clients, factory.TeamsClients(r.config.Teams)...)
-	clients = append(clients, factory.S3Clients(r.config.S3)...)
-	clients = append(clients, factory.KinesisClients(r.config.Kinesis)...)
-	clients = append(clients, factory.SecurityHubs(r.config.SecurityHub)...)
-	clients = append(clients, factory.WebhookClients(r.config.Webhook)...)
-	clients = append(clients, factory.GCSClients(r.config.GCS)...)
-	clients = append(clients, factory.TelegramClients(r.config.Telegram)...)
-	clients = append(clients, factory.GoogleChatClients(r.config.GoogleChat)...)
-
-	if ui := factory.UIClient(r.config.UI); ui != nil {
-		clients = append(clients, ui)
-	}
-
-	r.targetClients = clients
+	r.targetClients = r.TargetFactory().CreateClients(&r.config.Targets)
 	r.targetsCreated = true
 
 	return r.targetClients

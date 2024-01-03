@@ -26,7 +26,6 @@ import (
 	"github.com/kyverno/policy-reporter/pkg/target/slack"
 	"github.com/kyverno/policy-reporter/pkg/target/teams"
 	"github.com/kyverno/policy-reporter/pkg/target/telegram"
-	"github.com/kyverno/policy-reporter/pkg/target/ui"
 	"github.com/kyverno/policy-reporter/pkg/target/webhook"
 )
 
@@ -36,604 +35,361 @@ type TargetFactory struct {
 }
 
 // LokiClients resolver method
-func (f *TargetFactory) LokiClients(config *Loki) []target.Client {
+func createClients[T any](name string, config *Target[T], mapper func(*Target[T], *Target[T]) target.Client) []target.Client {
 	clients := make([]target.Client, 0)
 	if config == nil {
 		return clients
 	}
 
-	setFallback(&config.Name, "Loki")
-	setFallback(&config.Path, "/api/prom/push")
-
-	if loki := f.createLokiClient(config, &Loki{}); loki != nil {
-		clients = append(clients, loki)
+	if config.Config == nil {
+		config.Config = new(T)
 	}
-	for i, channel := range config.Channels {
-		setFallback(&config.Name, fmt.Sprintf("Loki Channel %d", i+1))
 
-		if loki := f.createLokiClient(channel, config); loki != nil {
-			clients = append(clients, loki)
+	setFallback(&config.Name, name)
+
+	if client := mapper(config, &Target[T]{Config: new(T)}); client != nil {
+		clients = append(clients, client)
+		config.Valid = true
+	}
+
+	for i, channel := range config.Channels {
+		setFallback(&config.Name, fmt.Sprintf("%s Channel %d", name, i+1))
+
+		if channel.Config == nil {
+			channel.Config = new(T)
+		}
+
+		if client := mapper(channel, config); client != nil {
+			clients = append(clients, client)
+			channel.Valid = true
 		}
 	}
 
 	return clients
 }
 
-// ElasticsearchClients resolver method
-func (f *TargetFactory) ElasticsearchClients(config *Elasticsearch) []target.Client {
+// LokiClients resolver method
+func (f *TargetFactory) CreateClients(config *Targets) []target.Client {
 	clients := make([]target.Client, 0)
 	if config == nil {
 		return clients
 	}
 
-	setFallback(&config.Name, "Elasticsearch")
-
-	if es := f.createElasticsearchClient(config, &Elasticsearch{}); es != nil {
-		clients = append(clients, es)
-	}
-
-	for i, channel := range config.Channels {
-		setFallback(&config.Name, fmt.Sprintf("Elasticsearch Channel %d", i+1))
-
-		if es := f.createElasticsearchClient(channel, config); es != nil {
-			clients = append(clients, es)
-		}
-	}
+	clients = append(clients, createClients("Loki", config.Loki, f.createLokiClient)...)
+	clients = append(clients, createClients("Elasticsearch", config.Elasticsearch, f.createElasticsearchClient)...)
+	clients = append(clients, createClients("Slack", config.Slack, f.createSlackClient)...)
+	clients = append(clients, createClients("Discord", config.Discord, f.createDiscordClient)...)
+	clients = append(clients, createClients("Teams", config.Teams, f.createTeamsClient)...)
+	clients = append(clients, createClients("GoogleChat", config.GoogleChat, f.createGoogleChatClient)...)
+	clients = append(clients, createClients("Telegram", config.Telegram, f.createTelegramClient)...)
+	clients = append(clients, createClients("Webhook", config.Webhook, f.createWebhookClient)...)
+	clients = append(clients, createClients("UI", config.UI, f.createWebhookClient)...)
+	clients = append(clients, createClients("S3", config.S3, f.createS3Client)...)
+	clients = append(clients, createClients("Kinesis", config.Kinesis, f.createKinesisClient)...)
+	clients = append(clients, createClients("SecurityHub", config.SecurityHub, f.createSecurityHub)...)
+	clients = append(clients, createClients("GoogleCloudStorage", config.GCS, f.createGCSClient)...)
 
 	return clients
 }
 
-// SlackClients resolver method
-func (f *TargetFactory) SlackClients(config *Slack) []target.Client {
-	clients := make([]target.Client, 0)
+func (f *TargetFactory) createSlackClient(config, parent *Target[SlackOptions]) target.Client {
 	if config == nil {
-		return clients
-	}
-
-	setFallback(&config.Name, "Slack")
-
-	if es := f.createSlackClient(config, &Slack{}); es != nil {
-		clients = append(clients, es)
-	}
-	for i, channel := range config.Channels {
-		setFallback(&config.Name, fmt.Sprintf("Slack Channel %d", i+1))
-
-		if es := f.createSlackClient(channel, config); es != nil {
-			clients = append(clients, es)
-		}
-	}
-
-	return clients
-}
-
-// DiscordClients resolver method
-func (f *TargetFactory) DiscordClients(config *Discord) []target.Client {
-	clients := make([]target.Client, 0)
-	if config == nil {
-		return clients
-	}
-
-	setFallback(&config.Name, "Discord")
-
-	if es := f.createDiscordClient(config, &Discord{}); es != nil {
-		clients = append(clients, es)
-	}
-	for i, channel := range config.Channels {
-		setFallback(&config.Name, fmt.Sprintf("Discord Channel %d", i+1))
-
-		if es := f.createDiscordClient(channel, config); es != nil {
-			clients = append(clients, es)
-		}
-	}
-
-	return clients
-}
-
-// TeamsClients resolver method
-func (f *TargetFactory) TeamsClients(config *Teams) []target.Client {
-	clients := make([]target.Client, 0)
-	if config == nil {
-		return clients
-	}
-
-	setFallback(&config.Name, "Teams")
-
-	if es := f.createTeamsClient(config, &Teams{}); es != nil {
-		clients = append(clients, es)
-	}
-	for i, channel := range config.Channels {
-		setFallback(&config.Name, fmt.Sprintf("Teams Channel %d", i+1))
-
-		if es := f.createTeamsClient(channel, config); es != nil {
-			clients = append(clients, es)
-		}
-	}
-
-	return clients
-}
-
-// WebhookClients resolver method
-func (f *TargetFactory) WebhookClients(config *Webhook) []target.Client {
-	clients := make([]target.Client, 0)
-	if config == nil {
-		return clients
-	}
-
-	setFallback(&config.Name, "Webhook")
-
-	if es := f.createWebhookClient(config, &Webhook{}); es != nil {
-		clients = append(clients, es)
-	}
-	for i, channel := range config.Channels {
-		setFallback(&config.Name, fmt.Sprintf("Webhook Channel %d", i+1))
-
-		if es := f.createWebhookClient(channel, config); es != nil {
-			clients = append(clients, es)
-		}
-	}
-
-	return clients
-}
-
-// UIClient resolver method
-func (f *TargetFactory) UIClient(config *UI) target.Client {
-	if config == nil || config.Host == "" {
 		return nil
 	}
 
-	setFallback(&config.Name, "UI")
-
-	zap.L().Info("UI configured")
-
-	return ui.NewClient(ui.Options{
-		ClientOptions: config.ClientOptions(),
-		Host:          config.Host,
-		HTTPClient:    http.NewClient(config.Certificate, config.SkipTLS),
-	})
-}
-
-// S3Clients resolver method
-func (f *TargetFactory) S3Clients(config *S3) []target.Client {
-	clients := make([]target.Client, 0)
-	if config == nil {
-		return clients
-	}
-
-	setFallback(&config.Name, "S3")
-
-	if es := f.createS3Client(config, &S3{}); es != nil {
-		clients = append(clients, es)
-	}
-	for i, channel := range config.Channels {
-		setFallback(&config.Name, fmt.Sprintf("S3 Channel %d", i+1))
-
-		if es := f.createS3Client(channel, config); es != nil {
-			clients = append(clients, es)
-		}
-	}
-
-	return clients
-}
-
-// KinesisClients resolver method
-func (f *TargetFactory) KinesisClients(config *Kinesis) []target.Client {
-	clients := make([]target.Client, 0)
-	if config == nil {
-		return clients
-	}
-
-	setFallback(&config.Name, "Kinesis")
-
-	if es := f.createKinesisClient(config, &Kinesis{}); es != nil {
-		clients = append(clients, es)
-	}
-	for i, channel := range config.Channels {
-		setFallback(&config.Name, fmt.Sprintf("Kinesis Channel %d", i+1))
-
-		if es := f.createKinesisClient(channel, config); es != nil {
-			clients = append(clients, es)
-		}
-	}
-
-	return clients
-}
-
-// SecurityHub resolver method
-func (f *TargetFactory) SecurityHubs(config *SecurityHub) []target.Client {
-	clients := make([]target.Client, 0)
-	if config == nil {
-		return clients
-	}
-
-	setFallback(&config.Name, "SecurityHub")
-
-	if es := f.createSecurityHub(config, &SecurityHub{}); es != nil {
-		clients = append(clients, es)
-	}
-	for i, channel := range config.Channels {
-		setFallback(&config.Name, fmt.Sprintf("SecurityHub Channel %d", i+1))
-
-		if es := f.createSecurityHub(channel, config); es != nil {
-			clients = append(clients, es)
-		}
-	}
-
-	return clients
-}
-
-// GCSClients resolver method
-func (f *TargetFactory) GCSClients(config *GCS) []target.Client {
-	clients := make([]target.Client, 0)
-	if config == nil {
-		return clients
-	}
-
-	setFallback(&config.Name, "GoogleCloudStorage")
-
-	if es := f.createGCSClient(config, &GCS{}); es != nil {
-		clients = append(clients, es)
-	}
-	for i, channel := range config.Channels {
-		setFallback(&config.Name, fmt.Sprintf("GCS Channel %d", i+1))
-
-		if es := f.createGCSClient(channel, config); es != nil {
-			clients = append(clients, es)
-		}
-	}
-
-	return clients
-}
-
-// TelegramClients resolver method
-func (f *TargetFactory) TelegramClients(config *Telegram) []target.Client {
-	clients := make([]target.Client, 0)
-	if config == nil {
-		return clients
-	}
-
-	setFallback(&config.Name, "Telegram")
-
-	if es := f.createTelegramClient(config, &Telegram{}); es != nil {
-		clients = append(clients, es)
-	}
-	for i, channel := range config.Channels {
-		setFallback(&config.Name, fmt.Sprintf("Telegram Channel %d", i+1))
-
-		if es := f.createTelegramClient(channel, config); es != nil {
-			clients = append(clients, es)
-		}
-	}
-
-	return clients
-}
-
-// GoogleChatClients resolver method
-func (f *TargetFactory) GoogleChatClients(config *GoogleChat) []target.Client {
-	clients := make([]target.Client, 0)
-	if config == nil {
-		return clients
-	}
-
-	setFallback(&config.Name, "GoogleChat")
-
-	if es := f.createGoogleChatClient(config, &GoogleChat{}); es != nil {
-		clients = append(clients, es)
-	}
-	for i, channel := range config.Channels {
-		setFallback(&config.Name, fmt.Sprintf("GoogleChat Channel %d", i+1))
-
-		if es := f.createGoogleChatClient(channel, config); es != nil {
-			clients = append(clients, es)
-		}
-	}
-
-	return clients
-}
-
-func (f *TargetFactory) createSlackClient(config, parent *Slack) target.Client {
 	if (config.SecretRef != "" && f.secretClient != nil) || config.MountedSecret != "" {
 		f.mapSecretValues(config, config.SecretRef, config.MountedSecret)
 	}
 
-	if config.Webhook == "" && config.Channel == "" {
+	if config.Config.Webhook == "" && config.Config.Channel == "" {
 		return nil
 	}
 
-	setFallback(&config.Webhook, parent.Webhook)
+	setFallback(&config.Config.Webhook, parent.Config.Webhook)
 
-	if config.Webhook == "" {
+	if config.Config.Webhook == "" {
 		return nil
 	}
 
-	config.MapBaseParent(parent.TargetBaseOptions)
+	config.MapBaseParent(parent)
 
 	zap.S().Infof("%s configured", config.Name)
 
 	return slack.NewClient(slack.Options{
 		ClientOptions: config.ClientOptions(),
-		Webhook:       config.Webhook,
-		Channel:       config.Channel,
+		Webhook:       config.Config.Webhook,
+		Channel:       config.Config.Channel,
 		CustomFields:  config.CustomFields,
 		HTTPClient:    http.NewClient("", false),
 	})
 }
 
-func (f *TargetFactory) createLokiClient(config, parent *Loki) target.Client {
+func (f *TargetFactory) createLokiClient(config, parent *Target[LokiOptions]) target.Client {
+	if config == nil || config.Config == nil {
+		return nil
+	}
+
 	if (config.SecretRef != "" && f.secretClient != nil) || config.MountedSecret != "" {
 		f.mapSecretValues(config, config.SecretRef, config.MountedSecret)
 	}
 
-	if config.Host == "" && parent.Host == "" {
+	if config.Config.Host == "" && parent.Config.Host == "" {
 		return nil
 	}
 
-	setFallback(&config.Host, parent.Host)
-	setFallback(&config.Certificate, parent.Certificate)
-	setFallback(&config.Path, parent.Path)
-	setBool(&config.SkipTLS, parent.SkipTLS)
+	setFallback(&config.Config.Path, "/api/prom/push")
+	setFallback(&config.Config.Host, parent.Config.Host)
+	setFallback(&config.Config.Certificate, parent.Config.Certificate)
+	setFallback(&config.Config.Path, parent.Config.Path)
+	setBool(&config.Config.SkipTLS, parent.Config.SkipTLS)
 
-	config.MapBaseParent(parent.TargetBaseOptions)
+	config.MapBaseParent(parent)
 
 	zap.S().Infof("%s configured", config.Name)
 
-	if config.CustomFields == nil {
-		config.CustomFields = make(map[string]string)
-	}
-
-	if config.CustomLabels != nil {
-		for k, v := range config.CustomLabels {
-			config.CustomFields[k] = v
-		}
-	}
-
 	return loki.NewClient(loki.Options{
 		ClientOptions: config.ClientOptions(),
-		Host:          config.Host + config.Path,
+		Host:          config.Config.Host + config.Config.Path,
 		CustomLabels:  config.CustomFields,
-		HTTPClient:    http.NewClient(config.Certificate, config.SkipTLS),
+		HTTPClient:    http.NewClient(config.Config.Certificate, config.Config.SkipTLS),
 	})
 }
 
-func (f *TargetFactory) createElasticsearchClient(config, parent *Elasticsearch) target.Client {
+func (f *TargetFactory) createElasticsearchClient(config, parent *Target[ElasticsearchOptions]) target.Client {
+	if config == nil || config.Config == nil {
+		return nil
+	}
+
 	if (config.SecretRef != "" && f.secretClient != nil) || config.MountedSecret != "" {
 		f.mapSecretValues(config, config.SecretRef, config.MountedSecret)
 	}
 
-	if config.Host == "" && parent.Host == "" {
+	if config.Config.Host == "" && parent.Config.Host == "" {
 		return nil
 	}
 
-	setFallback(&config.Host, parent.Host)
-	setFallback(&config.Certificate, parent.Certificate)
-	setBool(&config.SkipTLS, parent.SkipTLS)
-	setFallback(&config.Username, parent.Username)
-	setFallback(&config.Password, parent.Password)
-	setFallback(&config.APIKey, parent.APIKey)
-	setFallback(&config.Index, parent.Index, "policy-reporter")
-	setFallback(&config.Rotation, parent.Rotation, elasticsearch.Daily)
+	setFallback(&config.Config.Host, parent.Config.Host)
+	setFallback(&config.Config.Certificate, parent.Config.Certificate)
+	setBool(&config.Config.SkipTLS, parent.Config.SkipTLS)
+	setFallback(&config.Config.Username, parent.Config.Username)
+	setFallback(&config.Config.Password, parent.Config.Password)
+	setFallback(&config.Config.APIKey, parent.Config.APIKey)
+	setFallback(&config.Config.Index, parent.Config.Index, "policy-reporter")
+	setFallback(&config.Config.Rotation, parent.Config.Rotation, elasticsearch.Daily)
 
-	config.MapBaseParent(parent.TargetBaseOptions)
+	config.MapBaseParent(parent)
 
 	zap.S().Infof("%s configured", config.Name)
 
 	return elasticsearch.NewClient(elasticsearch.Options{
 		ClientOptions: config.ClientOptions(),
-		Host:          config.Host,
-		Username:      config.Username,
-		Password:      config.Password,
-		ApiKey:        config.APIKey,
-		Rotation:      config.Rotation,
-		Index:         config.Index,
+		Host:          config.Config.Host,
+		Username:      config.Config.Username,
+		Password:      config.Config.Password,
+		ApiKey:        config.Config.APIKey,
+		Rotation:      config.Config.Rotation,
+		Index:         config.Config.Index,
 		CustomFields:  config.CustomFields,
-		HTTPClient:    http.NewClient(config.Certificate, config.SkipTLS),
+		HTTPClient:    http.NewClient(config.Config.Certificate, config.Config.SkipTLS),
 	})
 }
 
-func (f *TargetFactory) createDiscordClient(config, parent *Discord) target.Client {
+func (f *TargetFactory) createDiscordClient(config, parent *Target[WebhookOptions]) target.Client {
+	if config == nil || config.Config == nil {
+		return nil
+	}
+
 	if (config.SecretRef != "" && f.secretClient != nil) || config.MountedSecret != "" {
 		f.mapSecretValues(config, config.SecretRef, config.MountedSecret)
 	}
 
-	if config.Webhook == "" {
+	if config.Config.Webhook == "" {
 		return nil
 	}
 
-	config.MapBaseParent(parent.TargetBaseOptions)
+	mapWebhookTarget(config, parent)
 
 	zap.S().Infof("%s configured", config.Name)
 
 	return discord.NewClient(discord.Options{
 		ClientOptions: config.ClientOptions(),
-		Webhook:       config.Webhook,
+		Webhook:       config.Config.Webhook,
 		CustomFields:  config.CustomFields,
-		HTTPClient:    http.NewClient("", false),
+		HTTPClient:    http.NewClient(config.Config.Certificate, config.Config.SkipTLS),
 	})
 }
 
-func (f *TargetFactory) createTeamsClient(config, parent *Teams) target.Client {
+func (f *TargetFactory) createTeamsClient(config, parent *Target[WebhookOptions]) target.Client {
+	if config == nil || config.Config == nil {
+		return nil
+	}
+
 	if (config.SecretRef != "" && f.secretClient != nil) || config.MountedSecret != "" {
 		f.mapSecretValues(config, config.SecretRef, config.MountedSecret)
 	}
 
-	if config.Webhook == "" {
+	if config.Config.Webhook == "" {
 		return nil
 	}
 
-	setFallback(&config.Certificate, parent.Certificate)
-	setBool(&config.SkipTLS, parent.SkipTLS)
-
-	config.MapBaseParent(parent.TargetBaseOptions)
+	mapWebhookTarget(config, parent)
 
 	zap.S().Infof("%s configured", config.Name)
 
 	return teams.NewClient(teams.Options{
 		ClientOptions: config.ClientOptions(),
-		Webhook:       config.Webhook,
+		Webhook:       config.Config.Webhook,
 		CustomFields:  config.CustomFields,
-		HTTPClient:    http.NewClient(config.Certificate, config.SkipTLS),
+		HTTPClient:    http.NewClient(config.Config.Certificate, config.Config.SkipTLS),
 	})
 }
 
-func (f *TargetFactory) createWebhookClient(config, parent *Webhook) target.Client {
+func (f *TargetFactory) createWebhookClient(config, parent *Target[WebhookOptions]) target.Client {
+	if config == nil || config.Config == nil {
+		return nil
+	}
+
 	if (config.SecretRef != "" && f.secretClient != nil) || config.MountedSecret != "" {
 		f.mapSecretValues(config, config.SecretRef, config.MountedSecret)
 	}
 
-	if config.Host == "" {
+	if config.Config.Webhook == "" {
 		return nil
 	}
 
-	setFallback(&config.Certificate, parent.Certificate)
-	setBool(&config.SkipTLS, parent.SkipTLS)
-	config.MapBaseParent(parent.TargetBaseOptions)
-
-	if len(parent.Headers) > 0 {
-		headers := map[string]string{}
-		for header, value := range parent.Headers {
-			headers[header] = value
-		}
-		for header, value := range config.Headers {
-			headers[header] = value
-		}
-
-		config.Headers = headers
-	}
+	mapWebhookTarget(config, parent)
 
 	zap.S().Infof("%s configured", config.Name)
 
 	return webhook.NewClient(webhook.Options{
 		ClientOptions: config.ClientOptions(),
-		Host:          config.Host,
-		Headers:       config.Headers,
+		Host:          config.Config.Webhook,
+		Headers:       config.Config.Headers,
 		CustomFields:  config.CustomFields,
-		HTTPClient:    http.NewClient(config.Certificate, config.SkipTLS),
+		HTTPClient:    http.NewClient(config.Config.Certificate, config.Config.SkipTLS),
 	})
 }
 
-func (f *TargetFactory) createTelegramClient(config, parent *Telegram) target.Client {
+func (f *TargetFactory) createTelegramClient(config, parent *Target[TelegramOptions]) target.Client {
+	if config == nil {
+		return nil
+	}
+
 	if (config.SecretRef != "" && f.secretClient != nil) || config.MountedSecret != "" {
 		f.mapSecretValues(config, config.SecretRef, config.MountedSecret)
 	}
 
-	setFallback(&config.Token, parent.Token)
+	setFallback(&config.Config.Token, parent.Config.Token)
 
-	if config.ChatID == "" || config.Token == "" {
+	if config.Config.ChatID == "" || config.Config.Token == "" {
 		return nil
 	}
 
-	setFallback(&config.Host, parent.Host)
-	setFallback(&config.Certificate, parent.Certificate)
-	setBool(&config.SkipTLS, parent.SkipTLS)
+	setFallback(&config.Config.Webhook, parent.Config.Webhook)
+	setFallback(&config.Config.Certificate, parent.Config.Certificate)
+	setBool(&config.Config.SkipTLS, parent.Config.SkipTLS)
 
-	config.MapBaseParent(parent.TargetBaseOptions)
+	config.MapBaseParent(parent)
 
-	if len(parent.Headers) > 0 {
+	if len(parent.Config.Headers) > 0 {
 		headers := map[string]string{}
-		for header, value := range parent.Headers {
+		for header, value := range parent.Config.Headers {
 			headers[header] = value
 		}
-		for header, value := range config.Headers {
+		for header, value := range config.Config.Headers {
 			headers[header] = value
 		}
 
-		config.Headers = headers
+		config.Config.Headers = headers
 	}
 
 	host := "https://api.telegram.org"
-	if config.Host != "" {
-		host = strings.TrimSuffix(config.Host, "/")
+	if config.Config.Webhook != "" {
+		host = strings.TrimSuffix(config.Config.Webhook, "/")
 	}
 
 	zap.S().Infof("%s configured", config.Name)
 
 	return telegram.NewClient(telegram.Options{
 		ClientOptions: config.ClientOptions(),
-		Host:          fmt.Sprintf("%s/bot%s/sendMessage", host, config.Token),
-		ChatID:        config.ChatID,
-		Headers:       config.Headers,
+		Host:          fmt.Sprintf("%s/bot%s/sendMessage", host, config.Config.Token),
+		ChatID:        config.Config.ChatID,
+		Headers:       config.Config.Headers,
 		CustomFields:  config.CustomFields,
-		HTTPClient:    http.NewClient(config.Certificate, config.SkipTLS),
+		HTTPClient:    http.NewClient(config.Config.Certificate, config.Config.SkipTLS),
 	})
 }
 
-func (f *TargetFactory) createGoogleChatClient(config, parent *GoogleChat) target.Client {
+func (f *TargetFactory) createGoogleChatClient(config, parent *Target[WebhookOptions]) target.Client {
+	if config == nil || config.Config == nil {
+		return nil
+	}
+
 	if (config.SecretRef != "" && f.secretClient != nil) || config.MountedSecret != "" {
 		f.mapSecretValues(config, config.SecretRef, config.MountedSecret)
 	}
 
-	setFallback(&config.Webhook, parent.Webhook)
-
-	if config.Webhook == "" {
+	if config.Config.Webhook == "" {
 		return nil
 	}
 
-	setFallback(&config.Certificate, parent.Certificate)
-	setBool(&config.SkipTLS, parent.SkipTLS)
-	config.MapBaseParent(parent.TargetBaseOptions)
-
-	if len(parent.Headers) > 0 {
-		headers := map[string]string{}
-		for header, value := range parent.Headers {
-			headers[header] = value
-		}
-		for header, value := range config.Headers {
-			headers[header] = value
-		}
-
-		config.Headers = headers
-	}
+	mapWebhookTarget(config, parent)
 
 	zap.S().Infof("%s configured", config.Name)
 
 	return googlechat.NewClient(googlechat.Options{
 		ClientOptions: config.ClientOptions(),
-		Webhook:       config.Webhook,
-		Headers:       config.Headers,
+		Webhook:       config.Config.Webhook,
+		Headers:       config.Config.Headers,
 		CustomFields:  config.CustomFields,
-		HTTPClient:    http.NewClient(config.Certificate, config.SkipTLS),
+		HTTPClient:    http.NewClient(config.Config.Certificate, config.Config.SkipTLS),
 	})
 }
 
-func (f *TargetFactory) createS3Client(config, parent *S3) target.Client {
+func (f *TargetFactory) createS3Client(config, parent *Target[S3Options]) target.Client {
+	if config == nil || config.Config == nil {
+		return nil
+	}
+
 	if (config.SecretRef != "" && f.secretClient != nil) || config.MountedSecret != "" {
 		f.mapSecretValues(config, config.SecretRef, config.MountedSecret)
 	}
 
-	config.MapAWSParent(parent.AWSConfig)
-	if config.Endpoint == "" && !hasAWSIdentity() {
+	config.Config.MapAWSParent(parent.Config.AWSConfig)
+	if config.Config.Endpoint == "" && !hasAWSIdentity() {
 		return nil
 	}
 
 	sugar := zap.S()
 
-	if err := checkAWSConfig(config.Name, config.AWSConfig, parent.AWSConfig); err != nil {
+	if err := checkAWSConfig(config.Name, config.Config.AWSConfig, parent.Config.AWSConfig); err != nil {
 		sugar.Error(err)
 
 		return nil
 	}
 
-	setFallback(&config.Bucket, parent.Bucket)
-	if config.Bucket == "" {
+	setFallback(&config.Config.Bucket, parent.Config.Bucket)
+	if config.Config.Bucket == "" {
 		sugar.Errorf("%s.Bucket has not been declared", config.Name)
 		return nil
 	}
 
-	setFallback(&config.Region, os.Getenv("AWS_REGION"))
-	setFallback(&config.Prefix, parent.Prefix, "policy-reporter")
-	setFallback(&config.KmsKeyID, parent.KmsKeyID)
-	setFallback(&config.ServerSideEncryption, parent.ServerSideEncryption)
-	setBool(&config.BucketKeyEnabled, parent.BucketKeyEnabled)
+	setFallback(&config.Config.Region, os.Getenv("AWS_REGION"))
+	setFallback(&config.Config.Prefix, parent.Config.Prefix, "policy-reporter")
+	setFallback(&config.Config.KmsKeyID, parent.Config.KmsKeyID)
+	setFallback(&config.Config.ServerSideEncryption, parent.Config.ServerSideEncryption)
+	setBool(&config.Config.BucketKeyEnabled, parent.Config.BucketKeyEnabled)
 
-	config.MapBaseParent(parent.TargetBaseOptions)
+	config.MapBaseParent(parent)
 
 	s3Client := helper.NewS3Client(
-		config.AccessKeyID,
-		config.SecretAccessKey,
-		config.Region,
-		config.Endpoint,
-		config.Bucket,
-		config.PathStyle,
-		helper.WithKMS(config.BucketKeyEnabled, &config.KmsKeyID, &config.ServerSideEncryption),
+		config.Config.AccessKeyID,
+		config.Config.SecretAccessKey,
+		config.Config.Region,
+		config.Config.Endpoint,
+		config.Config.Bucket,
+		config.Config.PathStyle,
+		helper.WithKMS(config.Config.BucketKeyEnabled, &config.Config.KmsKeyID, &config.Config.ServerSideEncryption),
 	)
 
 	sugar.Infof("%s configured", config.Name)
@@ -642,41 +398,45 @@ func (f *TargetFactory) createS3Client(config, parent *S3) target.Client {
 		ClientOptions: config.ClientOptions(),
 		S3:            s3Client,
 		CustomFields:  config.CustomFields,
-		Prefix:        config.Prefix,
+		Prefix:        config.Config.Prefix,
 	})
 }
 
-func (f *TargetFactory) createKinesisClient(config, parent *Kinesis) target.Client {
+func (f *TargetFactory) createKinesisClient(config, parent *Target[KinesisOptions]) target.Client {
+	if config == nil || config.Config == nil {
+		return nil
+	}
+
 	if (config.SecretRef != "" && f.secretClient != nil) || config.MountedSecret != "" {
 		f.mapSecretValues(config, config.SecretRef, config.MountedSecret)
 	}
 
-	config.MapAWSParent(parent.AWSConfig)
-	if config.Endpoint == "" {
+	config.Config.MapAWSParent(parent.Config.AWSConfig)
+	if config.Config.Endpoint == "" {
 		return nil
 	}
 
 	sugar := zap.S()
-	if err := checkAWSConfig(config.Name, config.AWSConfig, parent.AWSConfig); err != nil {
+	if err := checkAWSConfig(config.Name, config.Config.AWSConfig, parent.Config.AWSConfig); err != nil {
 		sugar.Error(err)
 
 		return nil
 	}
 
-	setFallback(&config.StreamName, parent.StreamName)
-	if config.StreamName == "" {
+	setFallback(&config.Config.StreamName, parent.Config.StreamName)
+	if config.Config.StreamName == "" {
 		sugar.Errorf("%s.StreamName has not been declared", config.Name)
 		return nil
 	}
 
-	config.MapBaseParent(parent.TargetBaseOptions)
+	config.MapBaseParent(parent)
 
 	kinesisClient := helper.NewKinesisClient(
-		config.AccessKeyID,
-		config.SecretAccessKey,
-		config.Region,
-		config.Endpoint,
-		config.StreamName,
+		config.Config.AccessKeyID,
+		config.Config.SecretAccessKey,
+		config.Config.Region,
+		config.Config.Endpoint,
+		config.Config.StreamName,
 	)
 
 	sugar.Infof("%s configured", config.Name)
@@ -688,31 +448,35 @@ func (f *TargetFactory) createKinesisClient(config, parent *Kinesis) target.Clie
 	})
 }
 
-func (f *TargetFactory) createSecurityHub(config, parent *SecurityHub) target.Client {
+func (f *TargetFactory) createSecurityHub(config, parent *Target[SecurityHubOptions]) target.Client {
+	if config == nil || config.Config == nil {
+		return nil
+	}
+
 	if (config.SecretRef != "" && f.secretClient != nil) || config.MountedSecret != "" {
 		f.mapSecretValues(config, config.SecretRef, config.MountedSecret)
 	}
 
-	setFallback(&config.AccountID, parent.AccountID)
-	if config.AccountID == "" {
+	setFallback(&config.Config.AccountID, parent.Config.AccountID)
+	if config.Config.AccountID == "" {
 		return nil
 	}
 
 	sugar := zap.S()
-	if err := checkAWSConfig(config.Name, config.AWSConfig, parent.AWSConfig); err != nil {
+	if err := checkAWSConfig(config.Name, config.Config.AWSConfig, parent.Config.AWSConfig); err != nil {
 		sugar.Error(err)
 
 		return nil
 	}
 
-	config.MapAWSParent(parent.AWSConfig)
-	config.MapBaseParent(parent.TargetBaseOptions)
+	config.Config.MapAWSParent(parent.Config.AWSConfig)
+	config.MapBaseParent(parent)
 
 	client := helper.NewHubClient(
-		config.AccessKeyID,
-		config.SecretAccessKey,
-		config.Region,
-		config.Endpoint,
+		config.Config.AccessKeyID,
+		config.Config.SecretAccessKey,
+		config.Config.Region,
+		config.Config.Endpoint,
 	)
 
 	sugar.Infof("%s configured", config.Name)
@@ -721,37 +485,41 @@ func (f *TargetFactory) createSecurityHub(config, parent *SecurityHub) target.Cl
 		ClientOptions: config.ClientOptions(),
 		CustomFields:  config.CustomFields,
 		Client:        client,
-		AccountID:     config.AccountID,
-		Region:        config.Region,
+		AccountID:     config.Config.AccountID,
+		Region:        config.Config.Region,
 	})
 }
 
-func (f *TargetFactory) createGCSClient(config, parent *GCS) target.Client {
+func (f *TargetFactory) createGCSClient(config, parent *Target[GCSOptions]) target.Client {
+	if config == nil || config.Config == nil {
+		return nil
+	}
+
 	if (config.SecretRef != "" && f.secretClient != nil) || config.MountedSecret != "" {
 		f.mapSecretValues(config, config.SecretRef, config.MountedSecret)
 	}
 
-	setFallback(&config.Bucket, parent.Bucket)
-	if config.Bucket == "" {
+	setFallback(&config.Config.Bucket, parent.Config.Bucket)
+	if config.Config.Bucket == "" {
 		return nil
 	}
 
 	sugar := zap.S()
 
-	setFallback(&config.Credentials, parent.Credentials)
-	if config.Credentials == "" {
+	setFallback(&config.Config.Credentials, parent.Config.Credentials)
+	if config.Config.Credentials == "" {
 		sugar.Errorf("%s.Credentials has not been declared", config.Name)
 		return nil
 	}
 
-	setFallback(&config.Prefix, parent.Prefix, "policy-reporter")
+	setFallback(&config.Config.Prefix, parent.Config.Prefix, "policy-reporter")
 
-	config.MapBaseParent(parent.TargetBaseOptions)
+	config.MapBaseParent(parent)
 
 	gcsClient := helper.NewGCSClient(
 		context.Background(),
-		config.Credentials,
-		config.Bucket,
+		config.Config.Credentials,
+		config.Config.Bucket,
 	)
 	if gcsClient == nil {
 		return nil
@@ -763,7 +531,7 @@ func (f *TargetFactory) createGCSClient(config, parent *GCS) target.Client {
 		ClientOptions: config.ClientOptions(),
 		Client:        gcsClient,
 		CustomFields:  config.CustomFields,
-		Prefix:        config.Prefix,
+		Prefix:        config.Config.Prefix,
 	})
 }
 
@@ -793,119 +561,110 @@ func (f *TargetFactory) mapSecretValues(config any, ref, mountedSecret string) {
 	}
 
 	switch c := config.(type) {
-	case *Loki:
+	case *Target[LokiOptions]:
 		if values.Host != "" {
-			c.Host = values.Host
+			c.Config.Host = values.Host
 		}
 
-	case *Slack:
+	case *Target[SlackOptions]:
 		if values.Webhook != "" {
-			c.Webhook = values.Webhook
-			c.Channel = values.Channel
+			c.Config.Webhook = values.Webhook
+			c.Config.Channel = values.Channel
 		}
 
-	case *Discord:
+	case *Target[WebhookOptions]:
 		if values.Webhook != "" {
-			c.Webhook = values.Webhook
-		}
-
-	case *Teams:
-		if values.Webhook != "" {
-			c.Webhook = values.Webhook
-		}
-
-	case *Elasticsearch:
-		if values.Host != "" {
-			c.Host = values.Host
-		}
-		if values.Username != "" {
-			c.Username = values.Username
-		}
-		if values.Password != "" {
-			c.Password = values.Password
-		}
-		if values.APIKey != "" {
-			c.APIKey = values.APIKey
-		}
-
-	case *S3:
-		if values.AccessKeyID != "" {
-			c.AccessKeyID = values.AccessKeyID
-		}
-		if values.SecretAccessKey != "" {
-			c.SecretAccessKey = values.SecretAccessKey
-		}
-		if values.KmsKeyID != "" {
-			c.KmsKeyID = values.KmsKeyID
-		}
-
-	case *Kinesis:
-		if values.AccessKeyID != "" {
-			c.AccessKeyID = values.AccessKeyID
-		}
-		if values.SecretAccessKey != "" {
-			c.SecretAccessKey = values.SecretAccessKey
-		}
-
-	case *SecurityHub:
-		if values.AccessKeyID != "" {
-			c.AccessKeyID = values.AccessKeyID
-		}
-		if values.SecretAccessKey != "" {
-			c.SecretAccessKey = values.SecretAccessKey
-		}
-		if values.AccountID != "" {
-			c.AccountID = values.AccessKeyID
-		}
-
-	case *GCS:
-		if values.Credentials != "" {
-			c.Credentials = values.Credentials
-		}
-
-	case *Webhook:
-		if values.Host != "" {
-			c.Host = values.Host
+			c.Config.Webhook = values.Webhook
 		}
 		if values.Token != "" {
-			if c.Headers == nil {
-				c.Headers = make(map[string]string)
+			if c.Config.Headers == nil {
+				c.Config.Headers = make(map[string]string)
 			}
 
-			c.Headers["Authorization"] = values.Token
+			c.Config.Headers["Authorization"] = values.Token
 		}
-	case *Telegram:
+
+	case *Target[ElasticsearchOptions]:
+		if values.Host != "" {
+			c.Config.Host = values.Host
+		}
+		if values.Username != "" {
+			c.Config.Username = values.Username
+		}
+		if values.Password != "" {
+			c.Config.Password = values.Password
+		}
+		if values.APIKey != "" {
+			c.Config.APIKey = values.APIKey
+		}
+
+	case *Target[S3Options]:
+		if values.AccessKeyID != "" {
+			c.Config.AccessKeyID = values.AccessKeyID
+		}
+		if values.SecretAccessKey != "" {
+			c.Config.SecretAccessKey = values.SecretAccessKey
+		}
+		if values.KmsKeyID != "" {
+			c.Config.KmsKeyID = values.KmsKeyID
+		}
+
+	case *Target[KinesisOptions]:
+		if values.AccessKeyID != "" {
+			c.Config.AccessKeyID = values.AccessKeyID
+		}
+		if values.SecretAccessKey != "" {
+			c.Config.SecretAccessKey = values.SecretAccessKey
+		}
+
+	case *Target[SecurityHubOptions]:
+		if values.AccessKeyID != "" {
+			c.Config.AccessKeyID = values.AccessKeyID
+		}
+		if values.SecretAccessKey != "" {
+			c.Config.SecretAccessKey = values.SecretAccessKey
+		}
+		if values.AccountID != "" {
+			c.Config.AccountID = values.AccessKeyID
+		}
+
+	case *Target[GCSOptions]:
+		if values.Credentials != "" {
+			c.Config.Credentials = values.Credentials
+		}
+
+	case *Target[TelegramOptions]:
 		if values.Token != "" {
-			c.Token = values.Token
+			c.Config.Token = values.Token
 		}
 		if values.Host != "" {
-			c.Host = values.Host
-		}
-	case *GoogleChat:
-		if values.Webhook != "" {
-			c.Webhook = values.Webhook
+			c.Config.Webhook = values.Host
 		}
 	}
 }
 
-func createResultFilter(filter TargetFilter, minimumPriority string, sources []string) *report.ResultFilter {
-	return target.NewResultFilter(
-		ToRuleSet(filter.Namespaces),
-		ToRuleSet(filter.Priorities),
-		ToRuleSet(filter.Policies),
-		minimumPriority,
-		sources,
-	)
-}
-
-func createReportFilter(filter TargetFilter) *report.ReportFilter {
-	return target.NewReportFilter(
-		ToRuleSet(filter.ReportLabels),
-	)
-}
-
 func NewTargetFactory(secretClient secrets.Client) *TargetFactory {
 	return &TargetFactory{secretClient: secretClient}
+}
+
+func mapWebhookTarget(config, parent *Target[WebhookOptions]) {
+	setFallback(&config.Config.Webhook, parent.Config.Webhook)
+	setFallback(&config.Config.Certificate, parent.Config.Certificate)
+	setBool(&config.Config.SkipTLS, parent.Config.SkipTLS)
+
+	config.MapBaseParent(parent)
+
+	if len(parent.Config.Headers) > 0 {
+		headers := map[string]string{}
+		for header, value := range parent.Config.Headers {
+			headers[header] = value
+		}
+		for header, value := range config.Config.Headers {
+			headers[header] = value
+		}
+
+		config.Config.Headers = headers
+	}
 }
 
 func hasAWSIdentity() bool {
@@ -948,4 +707,20 @@ func setBool(config *bool, parent bool) {
 	if *config == false {
 		*config = parent
 	}
+}
+
+func createResultFilter(filter TargetFilter, minimumPriority string, sources []string) *report.ResultFilter {
+	return target.NewResultFilter(
+		ToRuleSet(filter.Namespaces),
+		ToRuleSet(filter.Priorities),
+		ToRuleSet(filter.Policies),
+		minimumPriority,
+		sources,
+	)
+}
+
+func createReportFilter(filter TargetFilter) *report.ReportFilter {
+	return target.NewReportFilter(
+		ToRuleSet(filter.ReportLabels),
+	)
 }
