@@ -203,11 +203,11 @@ func (f *TargetFactory) createDiscordClient(config, parent *Target[WebhookOption
 		f.mapSecretValues(config, config.SecretRef, config.MountedSecret)
 	}
 
+	mapWebhookTarget(config, parent)
+
 	if config.Config.Webhook == "" {
 		return nil
 	}
-
-	mapWebhookTarget(config, parent)
 
 	zap.S().Infof("%s configured", config.Name)
 
@@ -228,11 +228,11 @@ func (f *TargetFactory) createTeamsClient(config, parent *Target[WebhookOptions]
 		f.mapSecretValues(config, config.SecretRef, config.MountedSecret)
 	}
 
+	mapWebhookTarget(config, parent)
+
 	if config.Config.Webhook == "" {
 		return nil
 	}
-
-	mapWebhookTarget(config, parent)
 
 	zap.S().Infof("%s configured", config.Name)
 
@@ -253,11 +253,11 @@ func (f *TargetFactory) createWebhookClient(config, parent *Target[WebhookOption
 		f.mapSecretValues(config, config.SecretRef, config.MountedSecret)
 	}
 
+	mapWebhookTarget(config, parent)
+
 	if config.Config.Webhook == "" {
 		return nil
 	}
-
-	mapWebhookTarget(config, parent)
 
 	zap.S().Infof("%s configured", config.Name)
 
@@ -329,11 +329,11 @@ func (f *TargetFactory) createGoogleChatClient(config, parent *Target[WebhookOpt
 		f.mapSecretValues(config, config.SecretRef, config.MountedSecret)
 	}
 
+	mapWebhookTarget(config, parent)
+
 	if config.Config.Webhook == "" {
 		return nil
 	}
-
-	mapWebhookTarget(config, parent)
 
 	zap.S().Infof("%s configured", config.Name)
 

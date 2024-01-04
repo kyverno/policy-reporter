@@ -427,6 +427,10 @@ func MapLokiToTarget(ta *config.Target[config.LokiOptions]) *Target {
 	t.UseTLS = ta.Config.Certificate != ""
 	t.Properties["api"] = ta.Config.Path
 
+	if v, ok := ta.Config.Headers["Authorization"]; ok && v != "" {
+		t.Auth = true
+	}
+
 	return t
 }
 
@@ -439,6 +443,10 @@ func MapElasticsearchToTarget(ta *config.Target[config.ElasticsearchOptions]) *T
 	t.Auth = (ta.Config.Username != "" && ta.Config.Password != "") || ta.Config.APIKey != ""
 	t.Properties["rotation"] = ta.Config.Rotation
 	t.Properties["index"] = ta.Config.Index
+
+	if v, ok := ta.Config.Headers["Authorization"]; ok && v != "" {
+		t.Auth = true
+	}
 
 	return t
 }
@@ -453,6 +461,10 @@ func MapWebhhokToTarget(typeName string) func(ta *config.Target[config.WebhookOp
 		if u, err := url.Parse(ta.Config.Webhook); err == nil {
 			t.Host = fmt.Sprintf("%s://%s", u.Scheme, u.Host)
 			t.Auth = u.User != nil
+		}
+
+		if v, ok := ta.Config.Headers["Authorization"]; ok && v != "" {
+			t.Auth = true
 		}
 
 		return t
@@ -477,6 +489,7 @@ func MapS3ToTarget(ta *config.Target[config.S3Options]) *Target {
 	t.Properties["prefix"] = ta.Config.Prefix
 	t.Properties["bucket"] = ta.Config.Bucket
 	t.Properties["region"] = ta.Config.Region
+	t.Auth = true
 
 	return t
 }
@@ -487,6 +500,7 @@ func MapKinesisToTarget(ta *config.Target[config.KinesisOptions]) *Target {
 	t.Host = ta.Config.Endpoint
 	t.Properties["stream"] = ta.Config.StreamName
 	t.Properties["region"] = ta.Config.Region
+	t.Auth = true
 
 	return t
 }
@@ -496,6 +510,7 @@ func MapSecurityHubToTarget(ta *config.Target[config.SecurityHubOptions]) *Targe
 	t.Type = "SecurityHub"
 	t.Host = ta.Config.Endpoint
 	t.Properties["region"] = ta.Config.Region
+	t.Auth = true
 
 	return t
 }
@@ -505,6 +520,7 @@ func MapGCSToTarget(ta *config.Target[config.GCSOptions]) *Target {
 	t.Type = "GoogleCloudStore"
 	t.Properties["prefix"] = ta.Config.Prefix
 	t.Properties["bucket"] = ta.Config.Bucket
+	t.Auth = true
 
 	return t
 }
