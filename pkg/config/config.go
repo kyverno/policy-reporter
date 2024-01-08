@@ -110,6 +110,7 @@ type Elasticsearch struct {
 	Password          string           `mapstructure:"password"`
 	ApiKey            string           `mapstructure:"apiKey"`
 	Channels          []*Elasticsearch `mapstructure:"channels"`
+	TypelessApi       bool             `mapstructure:"typelessApi"`
 }
 
 // Slack configuration

@@ -34,6 +34,7 @@ func newFakeClient() v1.SecretInterface {
 			"accountID":       []byte("accountID"),
 			"database":        []byte("database"),
 			"dsn":             []byte("dsn"),
+			"typelessApi":     []byte("false"),
 		},
 	}).CoreV1().Secrets("default")
 }
@@ -93,6 +94,10 @@ func Test_Client(t *testing.T) {
 
 		if values.DSN != "dsn" {
 			t.Errorf("Unexpected DSN: %s", values.DSN)
+		}
+
+		if values.TypelessApi {
+			t.Errorf("Unexpected TypelessApi: %t", values.TypelessApi)
 		}
 	})
 
