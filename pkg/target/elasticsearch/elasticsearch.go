@@ -6,7 +6,6 @@ import (
 	"github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
 	"github.com/kyverno/policy-reporter/pkg/target"
 	"github.com/kyverno/policy-reporter/pkg/target/http"
-	"go.uber.org/zap"
 )
 
 // Options to configure elasticsearch target
@@ -88,15 +87,11 @@ func (e *client) Send(result v1alpha2.PolicyReportResult) {
 		return
 	}
 
-	zap.L().Info("ElasticSearch ApiKey" + e.apiKey)
-
 	if e.username != "" {
 		req.SetBasicAuth(e.username, e.password)
 	} else if e.apiKey != "" {
 		req.Header.Add("Authorization", "ApiKey "+e.apiKey)
 	}
-
-	zap.L().Info("ElasticSearch Authorization Header" + req.Header.Get("Authorization"))
 
 	resp, err := e.client.Do(req)
 	http.ProcessHTTPResponse(e.Name(), resp, err)
