@@ -6,6 +6,7 @@ import (
 	"github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
 	"github.com/kyverno/policy-reporter/pkg/target"
 	"github.com/kyverno/policy-reporter/pkg/target/http"
+	"go.uber.org/zap"
 )
 
 // Options to configure elasticsearch target
@@ -19,6 +20,8 @@ type Options struct {
 	Rotation     string
 	CustomFields map[string]string
 	HTTPClient   http.Client
+	// https://www.elastic.co/blog/moving-from-types-to-typeless-apis-in-elasticsearch-7-0
+	TypelessApi bool
 }
 
 // Rotation Enum
@@ -42,19 +45,28 @@ type client struct {
 	rotation     Rotation
 	customFields map[string]string
 	client       http.Client
+	// https://www.elastic.co/blog/moving-from-types-to-typeless-apis-in-elasticsearch-7-0
+	typelessApi bool
 }
 
 func (e *client) Send(result v1alpha2.PolicyReportResult) {
 	var host string
+	var apiSuffix string
+	if e.typelessApi {
+		apiSuffix = "_doc"
+	} else {
+		apiSuffix = "event"
+	}
+
 	switch e.rotation {
 	case None:
-		host = e.host + "/" + e.index + "/event"
+		host = e.host + "/" + e.index + "/" + apiSuffix
 	case Annually:
-		host = e.host + "/" + e.index + "-" + time.Now().Format("2006") + "/event"
+		host = e.host + "/" + e.index + "-" + time.Now().Format("2006") + "/" + apiSuffix
 	case Monthly:
-		host = e.host + "/" + e.index + "-" + time.Now().Format("2006.01") + "/event"
+		host = e.host + "/" + e.index + "-" + time.Now().Format("2006.01") + "/" + apiSuffix
 	default:
-		host = e.host + "/" + e.index + "-" + time.Now().Format("2006.01.02") + "/event"
+		host = e.host + "/" + e.index + "-" + time.Now().Format("2006.01.02") + "/" + apiSuffix
 	}
 
 	if len(e.customFields) > 0 {
@@ -76,11 +88,15 @@ func (e *client) Send(result v1alpha2.PolicyReportResult) {
 		return
 	}
 
+	zap.L().Info("ElasticSearch ApiKey" + e.apiKey)
+
 	if e.username != "" {
 		req.SetBasicAuth(e.username, e.password)
 	} else if e.apiKey != "" {
 		req.Header.Add("Authorization", "ApiKey "+e.apiKey)
 	}
+
+	zap.L().Info("ElasticSearch Authorization Header" + req.Header.Get("Authorization"))
 
 	resp, err := e.client.Do(req)
 	http.ProcessHTTPResponse(e.Name(), resp, err)
@@ -98,5 +114,6 @@ func NewClient(options Options) target.Client {
 		options.Rotation,
 		options.CustomFields,
 		options.HTTPClient,
+		options.TypelessApi,
 	}
 }

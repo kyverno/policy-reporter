@@ -377,6 +377,8 @@ target:
     sources: []
     # Skip already existing PolicyReportResults on startup
     skipExistingOnStartup: true
+    # https://www.elastic.co/blog/moving-from-types-to-typeless-apis-in-elasticsearch-7-0 keeping as false for retrocompatibility.
+    typelessApi: false
     # Added as additional properties to each elasticsearch event
     customFields: {}
     # filter results send by namespaces, policies and priorities

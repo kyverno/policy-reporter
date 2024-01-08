@@ -411,6 +411,7 @@ func (f *TargetFactory) createElasticsearchClient(config, parent *Elasticsearch)
 	setFallback(&config.ApiKey, parent.ApiKey)
 	setFallback(&config.Index, parent.Index, "policy-reporter")
 	setFallback(&config.Rotation, parent.Rotation, elasticsearch.Daily)
+	setBool(&config.TypelessApi, parent.TypelessApi)
 
 	config.MapBaseParent(parent.TargetBaseOptions)
 
@@ -426,6 +427,7 @@ func (f *TargetFactory) createElasticsearchClient(config, parent *Elasticsearch)
 		Index:         config.Index,
 		CustomFields:  config.CustomFields,
 		HTTPClient:    http.NewClient(config.Certificate, config.SkipTLS),
+		TypelessApi:   config.TypelessApi,
 	})
 }
 
@@ -826,6 +828,9 @@ func (f *TargetFactory) mapSecretValues(config any, ref, mountedSecret string) {
 		}
 		if values.ApiKey != "" {
 			c.ApiKey = values.ApiKey
+		}
+		if values.TypelessApi != false {
+			c.TypelessApi = values.TypelessApi
 		}
 
 	case *S3:

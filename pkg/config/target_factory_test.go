@@ -40,6 +40,7 @@ func newFakeClient() v1.SecretInterface {
 			"credentials":     []byte(`{"token": "token", "type": "authorized_user"}`),
 			"database":        []byte("database"),
 			"dsn":             []byte(""),
+			"typelessApi":     []byte("false"),
 		},
 	}).CoreV1().Secrets("default")
 }
@@ -58,6 +59,7 @@ func mountSecret() {
 		Credentials:     `{"token": "token", "type": "authorized_user"}`,
 		Database:        "database",
 		DSN:             "",
+		TypelessApi:     false,
 	}
 	file, _ := json.MarshalIndent(secretValues, "", " ")
 	_ = os.WriteFile(mountedSecret, file, 0o644)
@@ -338,6 +340,11 @@ func Test_GetValuesFromSecret(t *testing.T) {
 		apiKey := client.FieldByName("apiKey").String()
 		if apiKey != "apiKey" {
 			t.Errorf("Expected apiKey from secret, got %s", apiKey)
+		}
+
+		typelessApi := client.FieldByName("typelessApi").Bool()
+		if typelessApi != false {
+			t.Errorf("Expected typelessApi false value from secret, got %t", typelessApi)
 		}
 	})
 
@@ -650,6 +657,11 @@ func Test_GetValuesFromMountedSecret(t *testing.T) {
 		apiKey := client.FieldByName("apiKey").String()
 		if apiKey != "apiKey" {
 			t.Errorf("Expected apiKey from secret, got %s", apiKey)
+		}
+
+		typelessApi := client.FieldByName("typelessApi").Bool()
+		if typelessApi != false {
+			t.Errorf("Expected typelessApi false value from secret, got %t", typelessApi)
 		}
 	})
 

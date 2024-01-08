@@ -3,6 +3,8 @@ package secrets
 import (
 	"context"
 
+	"strconv"
+
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -25,6 +27,7 @@ type Values struct {
 	Credentials     string `json:"credentials,omitempty"`
 	Database        string `json:"database,omitempty"`
 	DSN             string `json:"dsn,omitempty"`
+	TypelessApi     bool   `json:"typelessApi,omitempty"`
 }
 
 type Client interface {
@@ -122,6 +125,13 @@ func (c *k8sClient) Get(ctx context.Context, name string) (Values, error) {
 
 	if credentials, ok := secret.Data["credentials"]; ok {
 		values.Credentials = string(credentials)
+	}
+
+	if typelessApi, ok := secret.Data["typelessApi"]; ok {
+		values.TypelessApi, err = strconv.ParseBool(string(typelessApi))
+		if err != nil {
+			values.TypelessApi = false
+		}
 	}
 
 	return values, nil
