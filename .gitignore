@@ -10,3 +10,4 @@ values.yaml
 coverage.out
 heap*
 /.env*
+.tools

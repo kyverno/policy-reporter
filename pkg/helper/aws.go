@@ -54,7 +54,7 @@ func (s *s3Client) Upload(body *bytes.Buffer, key string) error {
 		Bucket:               aws.String(s.bucket),
 		Key:                  aws.String(key),
 		Body:                 body,
-		BucketKeyEnabled:     s.bucketKeyEnabled,
+		BucketKeyEnabled:     aws.Bool(s.bucketKeyEnabled),
 		SSEKMSKeyId:          s.kmsKeyID,
 		ServerSideEncryption: s.serverSideEncryption,
 	})

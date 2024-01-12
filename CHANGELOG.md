@@ -2,9 +2,15 @@
 
 # 2.21.6
 * Helm Chart
-    * Policy Reporter
+    * Policy Reporter v2.17.5
         * Compatibility with elasticSearch typeless API [[#387](https://github.com/kyverno/policy-reporter/pull/387) by [guipal](https://github.com/guipal)]
-
+        * Allow labels to be set on ingress [[#392](https://github.com/kyverno/policy-reporter/pull/392) by [jseiser](https://github.com/jseiser)]
+        * Dependency Updates
+    * Policy Reporter UI v1.9.2
+        * Dependency Updates
+        * Fix Result Message Space in PolicyReportResults Table
+    * Policy Reporter Kyverno Plugin v1.6.2
+        * Dependency Updates
 
 # 2.21.5
 * Helm Chart
