@@ -19,6 +19,11 @@ metadata:
   namespace: {{ include "policyreporter.namespace" . }}
   labels:
     {{- include "policyreporter.labels" . | nindent 4 }}
+    {{- if .Values.ingress.labels }}
+    {{- with .Values.ingress.labels }}
+      {{- toYaml . | nindent 4 }}
+    {{- end }}
+    {{- end }}
   {{- if or .Values.annotations .Values.ingress.annotations }}
   annotations:
   {{- with .Values.ingress.annotations }}
