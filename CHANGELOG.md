@@ -1,5 +1,11 @@
 # Changelog
 
+# 2.21.6
+* Helm Chart
+    * Policy Reporter
+        * Compatibility with elasticSearch typeless API [[#387](https://github.com/kyverno/policy-reporter/pull/387) by [guipal](https://github.com/guipal)]
+
+
 # 2.21.5
 * Helm Chart
     * Policy Reporter UI
