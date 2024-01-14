@@ -3,10 +3,13 @@ dependencies:
   repository: ""
   version: 2.8.1
 - name: ui
-  repository: ""
-  version: 3.0.0-alpha.2
-- name: kyvernoPlugin
-  repository: ""
-  version: 1.6.3
-digest: sha256:8e8c5fba6c59b96d21d8ddf747867de08df783ad8931c148782549b618e8e2bc
-generated: "2023-12-18T14:09:16.846904+01:00"
+  repository: oci://ghcr.io/kyverno/charts/policy-reporter
+  version: 0.0.8
+- name: kyverno-plugin
+  repository: oci://ghcr.io/kyverno/charts/policy-reporter
+  version: 0.0.1
+- name: trivy-plugin
+  repository: oci://ghcr.io/kyverno/charts/policy-reporter
+  version: 0.0.3
+digest: sha256:891e86653dfbc4f4c0a4f0b6e04acf53a4fb8a37dc806f9fb7b8d166b185c7ac
+generated: "2024-01-14T23:19:40.200683+01:00"
