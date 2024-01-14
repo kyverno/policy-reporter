@@ -6,7 +6,7 @@ build
 /test.yaml
 **/test.db
 sqlite-database*.db
-values.yaml
+values*.yaml
 coverage.out
 heap*
 /.env*

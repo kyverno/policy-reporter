@@ -5,7 +5,7 @@ image:
   registry: ghcr.io
   repository: kyverno/policy-reporter
   pullPolicy: IfNotPresent
-  tag: 6fab7d5
+  tag: 2175b1b
 
 imagePullSecrets: []
 
@@ -160,11 +160,17 @@ reportFilter:
     # Disable the processing of ClusterPolicyReports
     disabled: false
 
-# enable policy-report-ui
 ui:
   enabled: false
+  clusters:
+  - name: Default
+    secretRef: policy-report-ui-cluster-config
+    plugins: []
 
-kyvernoPlugin:
+kyverno-plugin:
+  enabled: false
+
+trivy-plugin:
   enabled: false
 
 # Settings for the monitoring subchart
