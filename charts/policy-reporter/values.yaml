@@ -164,8 +164,7 @@ ui:
   enabled: false
   clusters:
   - name: Default
-    secretRef: policy-report-ui-cluster-config
-    plugins: []
+    secretRef: policy-report-ui-default-cluster
 
 kyverno-plugin:
   enabled: false
@@ -321,7 +320,7 @@ target:
     # Skip already existing PolicyReportResults on startup
     skipExistingOnStartup: true
     # Added as additional labels to each Loki event
-    customLabels: {}
+    customFields: {}
     # Filter Results which should send to this target by report labels, namespaces, priorities or policies
     # Wildcars for namespaces and policies are supported, you can either define exclude or include values
     # Filters are available for all targets except the UI
@@ -353,7 +352,7 @@ target:
     # skip TLS verification if necessary
     skipTLS: false
     # elasticsearch index (default: policy-reporter)
-    index: ""
+    index: "policy-reporter"
     # elasticsearch username für HTTP Basic Auth
     username: ""
     # elasticsearch password für HTTP Basic Auth
@@ -364,7 +363,7 @@ target:
     mountedSecret: ""
     # elasticsearch index rotation and index suffix
     # possible values: daily, monthly, annually, none (default: daily)
-    rotation: ""
+    rotation: "daily"
     # minimum priority "" < info < warning < critical < error
     minimumPriority: ""
     # list of sources which should send to elasticsearch
@@ -456,21 +455,6 @@ target:
     filter: {}
     # add additional teams channels with different configurations and filters
     channels: []
-
-  ui:
-    # ui host address
-    host: ""
-    # path to your custom certificate
-    # can be added under extraVolumes
-    certificate: ""
-    # skip TLS verification if necessary
-    skipTLS: false
-    # minimum priority "" < info < warning < critical < error
-    minimumPriority: "warning"
-    # list of sources which should send to the UI Log
-    sources: []
-    # Skip already existing PolicyReportResults on startup
-    skipExistingOnStartup: true
 
   webhook:
     # webhook host address

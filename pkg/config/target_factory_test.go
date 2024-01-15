@@ -69,8 +69,8 @@ func Test_ResolveTarget(t *testing.T) {
 	factory := config.NewTargetFactory(nil)
 
 	clients := factory.CreateClients(&testConfig.Targets)
-	if len(clients) != 26 {
-		t.Errorf("Expected 26 Client, got %d clients", len(clients))
+	if len(clients) != 25 {
+		t.Errorf("Expected 25 Client, got %d clients", len(clients))
 	}
 }
 
@@ -85,7 +85,6 @@ func Test_ResolveTargetsWithoutRequiredConfiguration(t *testing.T) {
 		Teams:         &config.Target[config.WebhookOptions]{},
 		GoogleChat:    &config.Target[config.WebhookOptions]{},
 		Webhook:       &config.Target[config.WebhookOptions]{},
-		UI:            &config.Target[config.WebhookOptions]{},
 		Telegram:      &config.Target[config.TelegramOptions]{},
 		S3:            &config.Target[config.S3Options]{},
 		Kinesis:       &config.Target[config.KinesisOptions]{},
@@ -289,7 +288,6 @@ func Test_GetValuesFromSecret(t *testing.T) {
 		Teams:         &config.Target[config.WebhookOptions]{SecretRef: secretName},
 		GoogleChat:    &config.Target[config.WebhookOptions]{SecretRef: secretName},
 		Webhook:       &config.Target[config.WebhookOptions]{SecretRef: secretName},
-		UI:            &config.Target[config.WebhookOptions]{SecretRef: secretName},
 		Telegram: &config.Target[config.TelegramOptions]{
 			SecretRef: secretName,
 			Config: &config.TelegramOptions{
@@ -326,8 +324,8 @@ func Test_GetValuesFromSecret(t *testing.T) {
 	}
 
 	clients := factory.CreateClients(&targets)
-	if len(clients) != 13 {
-		t.Fatalf("expected 13 clients created, got %d", len(clients))
+	if len(clients) != 12 {
+		t.Fatalf("expected 12 clients created, got %d", len(clients))
 	}
 
 	t.Run("Get Loki values from Secret", func(t *testing.T) {
@@ -425,15 +423,6 @@ func Test_GetValuesFromSecret(t *testing.T) {
 		}
 	})
 
-	t.Run("Get UI host from Secret", func(t *testing.T) {
-		client := reflect.ValueOf(clients[8]).Elem()
-
-		host := client.FieldByName("host").String()
-		if host != "http://localhost:9200/webhook" {
-			t.Errorf("Expected host from secret, got %s", host)
-		}
-	})
-
 	t.Run("Get none existing secret skips target", func(t *testing.T) {
 		clients := factory.CreateClients(&config.Targets{
 			Loki: &config.Target[config.LokiOptions]{SecretRef: "not-exist"},
@@ -501,12 +490,6 @@ func Test_CustomFields(t *testing.T) {
 			},
 			CustomFields: map[string]string{"field": "value"},
 		},
-		UI: &config.Target[config.WebhookOptions]{
-			Config: &config.WebhookOptions{
-				Webhook: "http://localhost:8080",
-			},
-			CustomFields: map[string]string{"field": "value"},
-		},
 		Webhook: &config.Target[config.WebhookOptions]{
 			Config: &config.WebhookOptions{
 				Webhook: "http://localhost:8080",
@@ -561,8 +544,8 @@ func Test_CustomFields(t *testing.T) {
 
 	clients := factory.CreateClients(targets)
 
-	if len(clients) != 13 {
-		t.Fatalf("expected 13 client created, got %d", len(clients))
+	if len(clients) != 12 {
+		t.Fatalf("expected 12 client created, got %d", len(clients))
 	}
 
 	t.Run("Get CustomLabels from Loki", func(t *testing.T) {
@@ -635,7 +618,7 @@ func Test_CustomFields(t *testing.T) {
 		}
 	})
 	t.Run("Get CustomFields from S3", func(t *testing.T) {
-		client := reflect.ValueOf(clients[9]).Elem()
+		client := reflect.ValueOf(clients[8]).Elem()
 
 		customFields := client.FieldByName("customFields").MapKeys()
 		if customFields[0].String() != "field" {
@@ -643,7 +626,7 @@ func Test_CustomFields(t *testing.T) {
 		}
 	})
 	t.Run("Get CustomFields from Kinesis", func(t *testing.T) {
-		client := reflect.ValueOf(clients[10]).Elem()
+		client := reflect.ValueOf(clients[9]).Elem()
 
 		customFields := client.FieldByName("customFields").MapKeys()
 		if customFields[0].String() != "field" {
@@ -651,7 +634,7 @@ func Test_CustomFields(t *testing.T) {
 		}
 	})
 	t.Run("Get CustomFields from GCS", func(t *testing.T) {
-		client := reflect.ValueOf(clients[12]).Elem()
+		client := reflect.ValueOf(clients[11]).Elem()
 
 		customFields := client.FieldByName("customFields").MapKeys()
 		if customFields[0].String() != "field" {
@@ -674,7 +657,6 @@ func Test_GetValuesFromMountedSecret(t *testing.T) {
 		Teams:         &config.Target[config.WebhookOptions]{MountedSecret: mountedSecret},
 		GoogleChat:    &config.Target[config.WebhookOptions]{MountedSecret: mountedSecret},
 		Webhook:       &config.Target[config.WebhookOptions]{MountedSecret: mountedSecret},
-		UI:            &config.Target[config.WebhookOptions]{MountedSecret: mountedSecret},
 		Telegram: &config.Target[config.TelegramOptions]{
 			MountedSecret: mountedSecret,
 			Config: &config.TelegramOptions{
@@ -711,8 +693,8 @@ func Test_GetValuesFromMountedSecret(t *testing.T) {
 	}
 
 	clients := factory.CreateClients(&targets)
-	if len(clients) != 13 {
-		t.Fatalf("expected 13 client created, got %d", len(clients))
+	if len(clients) != 12 {
+		t.Fatalf("expected 12 client created, got %d", len(clients))
 	}
 
 	t.Run("Get Loki values from Secret", func(t *testing.T) {
@@ -807,15 +789,6 @@ func Test_GetValuesFromMountedSecret(t *testing.T) {
 		token := client.FieldByName("headers").MapIndex(reflect.ValueOf("Authorization")).String()
 		if token != "token" {
 			t.Errorf("Expected token from secret, got %s", token)
-		}
-	})
-
-	t.Run("Get UI host from Secret", func(t *testing.T) {
-		client := reflect.ValueOf(clients[8]).Elem()
-
-		host := client.FieldByName("host").String()
-		if host != "http://localhost:9200/webhook" {
-			t.Errorf("Expected host from secret, got %s", host)
 		}
 	})
 
