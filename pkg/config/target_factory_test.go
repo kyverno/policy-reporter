@@ -252,8 +252,8 @@ func Test_SecurityHubValidation(t *testing.T) {
 			t.Error("Expected Client to be nil if no region is configured")
 		}
 	})
-
 }
+
 func Test_GCSValidation(t *testing.T) {
 	factory := config.NewTargetFactory(nil)
 
