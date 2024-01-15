@@ -223,8 +223,8 @@ var testConfig = &config.Config{
 func Test_ResolveTargets(t *testing.T) {
 	resolver := config.NewResolver(testConfig, &rest.Config{})
 
-	if count := len(resolver.TargetClients()); count != 26 {
-		t.Errorf("Expected 26 Clients, got %d", count)
+	if count := len(resolver.TargetClients()); count != 25 {
+		t.Errorf("Expected 25 Clients, got %d", count)
 	}
 }
 
