@@ -555,7 +555,6 @@ func MapConfigTagrgets(c config.Targets) map[string][]*Target {
 	targets["teams"] = MapTargets(c.Teams, MapWebhhokToTarget("MS Teams"))
 	targets["googleChat"] = MapTargets(c.GoogleChat, MapWebhhokToTarget("GoogleChat"))
 	targets["webhook"] = MapTargets(c.Webhook, MapWebhhokToTarget("Webhook"))
-	targets["ui"] = MapTargets(c.UI, MapWebhhokToTarget("UI"))
 	targets["telegram"] = MapTargets(c.Telegram, MapTelegramToTarget)
 	targets["s3"] = MapTargets(c.S3, MapS3ToTarget)
 	targets["kinesis"] = MapTargets(c.Kinesis, MapKinesisToTarget)
