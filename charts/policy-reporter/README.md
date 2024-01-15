@@ -54,7 +54,7 @@ Check the [Documentation](https://kyverno.github.io/policy-reporter/guide/02-get
 | image.registry | string | `"ghcr.io"` |  |
 | image.repository | string | `"kyverno/policy-reporter"` |  |
 | image.pullPolicy | string | `"IfNotPresent"` |  |
-| image.tag | string | `"6fab7d5"` |  |
+| image.tag | string | `"99a9ed1"` |  |
 | imagePullSecrets | list | `[]` |  |
 | priorityClassName | string | `""` |  |
 | replicaCount | int | `1` |  |
@@ -109,7 +109,10 @@ Check the [Documentation](https://kyverno.github.io/policy-reporter/guide/02-get
 | reportFilter.namespaces.exclude | list | `[]` |  |
 | reportFilter.clusterReports.disabled | bool | `false` |  |
 | ui.enabled | bool | `false` |  |
-| kyvernoPlugin.enabled | bool | `false` |  |
+| ui.clusters[0].name | string | `"Default"` |  |
+| ui.clusters[0].secretRef | string | `"policy-report-ui-default-cluster"` |  |
+| kyverno-plugin.enabled | bool | `false` |  |
+| trivy-plugin.enabled | bool | `false` |  |
 | monitoring.enabled | bool | `false` |  |
 | database.type | string | `""` |  |
 | database.database | string | `""` |  |
@@ -168,18 +171,18 @@ Check the [Documentation](https://kyverno.github.io/policy-reporter/guide/02-get
 | target.loki.minimumPriority | string | `""` |  |
 | target.loki.sources | list | `[]` |  |
 | target.loki.skipExistingOnStartup | bool | `true` |  |
-| target.loki.customLabels | object | `{}` |  |
+| target.loki.customFields | object | `{}` |  |
 | target.loki.filter | object | `{}` |  |
 | target.loki.channels | list | `[]` |  |
 | target.elasticsearch.host | string | `""` |  |
 | target.elasticsearch.certificate | string | `""` |  |
 | target.elasticsearch.skipTLS | bool | `false` |  |
-| target.elasticsearch.index | string | `""` |  |
+| target.elasticsearch.index | string | `"policy-reporter"` |  |
 | target.elasticsearch.username | string | `""` |  |
 | target.elasticsearch.password | string | `""` |  |
 | target.elasticsearch.secretRef | string | `""` |  |
 | target.elasticsearch.mountedSecret | string | `""` |  |
-| target.elasticsearch.rotation | string | `""` |  |
+| target.elasticsearch.rotation | string | `"daily"` |  |
 | target.elasticsearch.minimumPriority | string | `""` |  |
 | target.elasticsearch.sources | list | `[]` |  |
 | target.elasticsearch.skipExistingOnStartup | bool | `true` |  |
@@ -214,12 +217,6 @@ Check the [Documentation](https://kyverno.github.io/policy-reporter/guide/02-get
 | target.teams.skipExistingOnStartup | bool | `true` |  |
 | target.teams.filter | object | `{}` |  |
 | target.teams.channels | list | `[]` |  |
-| target.ui.host | string | `""` |  |
-| target.ui.certificate | string | `""` |  |
-| target.ui.skipTLS | bool | `false` |  |
-| target.ui.minimumPriority | string | `"warning"` |  |
-| target.ui.sources | list | `[]` |  |
-| target.ui.skipExistingOnStartup | bool | `true` |  |
 | target.webhook.host | string | `""` |  |
 | target.webhook.certificate | string | `""` |  |
 | target.webhook.skipTLS | bool | `false` |  |
@@ -345,9 +342,10 @@ Check the [Documentation](https://kyverno.github.io/policy-reporter/guide/02-get
 
 | Repository | Name | Version |
 |------------|------|---------|
-|  | kyvernoPlugin | 1.6.3 |
 |  | monitoring | 2.8.1 |
-|  | ui | 3.0.0-alpha.2 |
+| oci://ghcr.io/kyverno/charts/policy-reporter | kyverno-plugin | 0.0.1 |
+| oci://ghcr.io/kyverno/charts/policy-reporter | trivy-plugin | 0.0.3 |
+| oci://ghcr.io/kyverno/charts/policy-reporter | ui | 0.0.9 |
 
 ## Maintainers
 
