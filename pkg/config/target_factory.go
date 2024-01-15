@@ -83,7 +83,6 @@ func (f *TargetFactory) CreateClients(config *Targets) []target.Client {
 	clients = append(clients, createClients("GoogleChat", config.GoogleChat, f.createGoogleChatClient)...)
 	clients = append(clients, createClients("Telegram", config.Telegram, f.createTelegramClient)...)
 	clients = append(clients, createClients("Webhook", config.Webhook, f.createWebhookClient)...)
-	clients = append(clients, createClients("UI", config.UI, f.createWebhookClient)...)
 	clients = append(clients, createClients("S3", config.S3, f.createS3Client)...)
 	clients = append(clients, createClients("Kinesis", config.Kinesis, f.createKinesisClient)...)
 	clients = append(clients, createClients("SecurityHub", config.SecurityHub, f.createSecurityHub)...)

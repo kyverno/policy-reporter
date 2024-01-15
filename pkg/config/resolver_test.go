@@ -120,20 +120,6 @@ var targets = config.Targets{
 			},
 		}},
 	},
-	UI: &config.Target[config.WebhookOptions]{
-		Config: &config.WebhookOptions{
-			Webhook: "http://localhost:8080",
-			SkipTLS: true,
-		},
-		SkipExisting:    true,
-		MinimumPriority: "debug",
-		CustomFields:    map[string]string{"field": "value"},
-		Channels: []*config.Target[config.WebhookOptions]{{
-			Config: &config.WebhookOptions{
-				Webhook: "http://localhost:9200",
-			},
-		}},
-	},
 	Webhook: &config.Target[config.WebhookOptions]{
 		Config: &config.WebhookOptions{
 			Webhook: "http://localhost:8080",

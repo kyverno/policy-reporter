@@ -131,7 +131,6 @@ type Targets struct {
 	Slack         *Target[SlackOptions]         `mapstructure:"slack"`
 	Discord       *Target[WebhookOptions]       `mapstructure:"discord"`
 	Teams         *Target[WebhookOptions]       `mapstructure:"teams"`
-	UI            *Target[WebhookOptions]       `mapstructure:"ui"`
 	Webhook       *Target[WebhookOptions]       `mapstructure:"webhook"`
 	GoogleChat    *Target[WebhookOptions]       `mapstructure:"googleChat"`
 	Telegram      *Target[TelegramOptions]      `mapstructure:"telegram"`

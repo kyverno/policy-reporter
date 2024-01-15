@@ -93,7 +93,7 @@ Create UI target host based on configuration
 
 {{- define "policyreporter.podDisruptionBudget" -}}
 {{- if and .Values.podDisruptionBudget.minAvailable .Values.podDisruptionBudget.maxUnavailable }}
-{{- fail "Cannot set both .Values.podDisruptionBudget.minAvailable and .Values.podDisruptionBudget.maxUnavailable" -}}
+{{- fail "Cannot set both minAvailable and maxUnavailable" -}}
 {{- end }}
 {{- if not .Values.podDisruptionBudget.maxUnavailable }}
 minAvailable: {{ default 1 .Values.podDisruptionBudget.minAvailable }}
@@ -120,3 +120,132 @@ maxUnavailable: {{ .Values.podDisruptionBudget.maxUnavailable }}
 {{- .Values.logging.logLevel -}}
 {{- end -}}
 {{- end -}}
+
+{{- define "ui.checksums" -}}
+checksum/cluster: {{ uuidv4 }}
+{{- end }}
+
+{{- define "target" -}}
+name: {{ .name | quote }}
+path: {{ .path | quote }}
+secretRef: {{ .secretRef | quote }}
+mountedSecret: {{ .mountedSecret | quote }}
+minimumPriority: {{ .minimumPriority | quote }}
+skipExistingOnStartup: {{ .skipExistingOnStartup }}
+{{- with .customFields }}
+customFields:
+{{- toYaml . | nindent 2 }}
+{{- end }}
+{{- with .sources }}
+sources:
+{{- toYaml . | nindent 2 }}
+{{- end }}
+{{- with .filter }}
+filter:
+{{- toYaml . | nindent 2 }}
+{{- end }}
+{{- end }}
+
+{{- define "target.loki" -}}
+config:
+  host: {{ .host | quote }}
+  certificate: {{ .certificate | quote }}
+  skipTLS: {{ .skipTLS }}
+  path: {{ .path | quote }}
+{{ include "target" . }}
+{{- end }}
+
+{{- define "target.elasticsearch" -}}
+config:
+  host: {{ .host | quote }}
+  certificate: {{ .certificate | quote }}
+  skipTLS: {{ .skipTLS }}
+  username: {{ .username | quote }}
+  password: {{ .password | quote }}
+  apiKey: {{ .apiKey | quote }}
+  index: {{ .index| quote }}
+  rotation: {{ .rotation | quote }}
+{{ include "target" . }}
+{{- end }}
+
+{{- define "target.slack" -}}
+config:
+  webhook: {{ .webhook | quote }}
+  channel: {{ .channel | quote }}
+  certificate: {{ .certificate | quote }}
+  skipTLS: {{ .skipTLS }}
+  {{- with .headers }}
+  headers:
+  {{- toYaml . | nindent 4 }}
+  {{- end }}
+{{ include "target" . }}
+{{- end }}
+
+{{- define "target.webhook" -}}
+config:
+  webhook: {{ .webhook | quote }}
+  certificate: {{ .certificate | quote }}
+  skipTLS: {{ .skipTLS }}
+  {{- with .headers }}
+  headers:
+  {{- toYaml . | nindent 4 }}
+  {{- end }}
+{{ include "target" . }}
+{{- end }}
+
+{{- define "target.telegram" -}}
+config:
+  chatID: {{ .chatID | quote }}
+  token: {{ .token | quote }}
+  webhook: {{ .webhook | quote }}
+  certificate: {{ .certificate | quote }}
+  skipTLS: {{ .skipTLS }}
+  {{- with .headers }}
+  headers:
+  {{- toYaml . | nindent 4 }}
+  {{- end }}
+{{ include "target" . }}
+{{- end }}
+
+{{- define "target.s3" -}}
+config:
+  accessKeyID: {{ .accessKeyID }}
+  secretAccessKey:  {{ .secretAccessKey }}
+  region: {{ .region }}
+  endpoint: {{ .endpoint }}
+  bucket: {{ .bucket }}
+  bucketKeyEnabled: {{ .bucketKeyEnabled }}
+  kmsKeyId: {{ .kmsKeyId }}
+  serverSideEncryption: {{ .serverSideEncryption }}
+  pathStyle: {{ .pathStyle }}
+  prefix: {{ .prefix }}
+{{ include "target" . }}
+{{- end }}
+
+{{- define "target.kinesis" -}}
+config:
+  accessKeyID: {{ .accessKeyID }}
+  secretAccessKey:  {{ .secretAccessKey }}
+  region: {{ .region }}
+  endpoint: {{ .endpoint }}
+  streamName: {{ .streamName }}
+{{ include "target" . }}
+{{- end }}
+
+{{- define "target.securityhub" -}}
+config:
+  accessKeyID: {{ .accessKeyID }}
+  secretAccessKey:  {{ .secretAccessKey }}
+  region: {{ .region }}
+  endpoint: {{ .endpoint }}
+  accountID: {{ .accountID }}
+{{ include "target" . }}
+{{- end }}
+
+{{- define "target.gcs" -}}
+config:
+  credentials: {{ .credentials }}
+  bucket: {{ .bucket }}
+  prefix: {{ .prefix }}
+{{ include "target" . }}
+{{- end }}
