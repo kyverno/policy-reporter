@@ -165,6 +165,31 @@ ui:
   clusters:
   - name: Default
     secretRef: policy-report-ui-default-cluster
+  # -- source specific configurations
+  sources:
+    # -- exclude Pod, Job and Replica resources from kyverno results by default if no kinds are specified
+    - name: kyverno
+      excludes:
+        namespaceKinds:
+        - Pod
+        - Job
+        - ReplicaSet
+  # -- Additional customizable dashboards
+  customBoards: []
+  # - name: Team A
+  #   namespaces:
+  #     # -- list of displayed namespaces
+  #     list: []
+  #     # -- selector for displayed namespaces
+  #     selector:
+  #       team: team-a
+  #   sources:
+  #     # -- list of displayed sources
+  #     list: []
+  #   clusterScope:
+  #     # -- disply cluster scoped resources and results
+  #     enabled: false
+
 
 kyverno-plugin:
   enabled: false
