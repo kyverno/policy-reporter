@@ -3,7 +3,7 @@
 Policy Reporter watches for PolicyReport Resources.
 It creates Prometheus Metrics and can send rule validation events to different targets like Loki, Elasticsearch, Slack or Discord
 
-![Version: 3.0.0-alpha.3](https://img.shields.io/badge/Version-3.0.0--alpha.3-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 3.0.0-alpha](https://img.shields.io/badge/AppVersion-3.0.0--alpha-informational?style=flat-square)
+![Version: 3.0.0-alpha.4](https://img.shields.io/badge/Version-3.0.0--alpha.4-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 3.0.0-alpha](https://img.shields.io/badge/AppVersion-3.0.0--alpha-informational?style=flat-square)
 
 ## Documentation
 
@@ -111,6 +111,9 @@ Check the [Documentation](https://kyverno.github.io/policy-reporter/guide/02-get
 | ui.enabled | bool | `false` |  |
 | ui.clusters[0].name | string | `"Default"` |  |
 | ui.clusters[0].secretRef | string | `"policy-report-ui-default-cluster"` |  |
+| ui.sources | list | `[{"excludes":{"namespaceKinds":["Pod","Job","ReplicaSet"]},"name":"kyverno"}]` | source specific configurations |
+| ui.sources[0] | object | `{"excludes":{"namespaceKinds":["Pod","Job","ReplicaSet"]},"name":"kyverno"}` | exclude Pod, Job and Replica resources from kyverno results by default if no kinds are specified |
+| ui.customBoards | list | `[]` | Additional customizable dashboards |
 | kyverno-plugin.enabled | bool | `false` |  |
 | trivy-plugin.enabled | bool | `false` |  |
 | monitoring.enabled | bool | `false` |  |
@@ -345,7 +348,7 @@ Check the [Documentation](https://kyverno.github.io/policy-reporter/guide/02-get
 |  | monitoring | 2.8.1 |
 | oci://ghcr.io/kyverno/charts/policy-reporter | kyverno-plugin | 0.0.1 |
 | oci://ghcr.io/kyverno/charts/policy-reporter | trivy-plugin | 0.0.3 |
-| oci://ghcr.io/kyverno/charts/policy-reporter | ui | 0.0.9 |
+| oci://ghcr.io/kyverno/charts/policy-reporter | ui | 0.0.10 |
 
 ## Maintainers
 
