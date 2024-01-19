@@ -96,6 +96,8 @@ type Loki struct {
 	Certificate       string            `mapstructure:"certificate"`
 	Path              string            `mapstructure:"path"`
 	Channels          []*Loki           `mapstructure:"channels"`
+	Username          string            `mapstructure:"username"`
+	Password          string            `mapstructure:"password"`
 }
 
 // Elasticsearch configuration
