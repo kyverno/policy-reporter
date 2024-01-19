@@ -40,6 +40,10 @@ func Test_LokiTarget(t *testing.T) {
 				t.Errorf("Unexpected Host: %s", url)
 			}
 
+			if req.Header.Get("Authorization") == "" {
+				t.Error("Expected Authentication header for BasicAuth is set")
+			}
+
 			expectedLine := fmt.Sprintf("[%s] %s", strings.ToUpper(fixtures.CompleteTargetSendResult.Priority.String()), fixtures.CompleteTargetSendResult.Message)
 			labels, line := convertAndValidateBody(req, t)
 			if line != expectedLine {
@@ -95,6 +99,8 @@ func Test_LokiTarget(t *testing.T) {
 			Host:         "http://localhost:3100/api/prom/push",
 			CustomLabels: map[string]string{"custom": "label"},
 			HTTPClient:   testClient{callback, 200},
+			Username:     "username",
+			Password:     "password",
 		})
 		client.Send(fixtures.CompleteTargetSendResult)
 	})

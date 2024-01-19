@@ -298,9 +298,20 @@ func Test_GetValuesFromSecret(t *testing.T) {
 			t.Fatal("Expected one client created")
 		}
 
-		fv := reflect.ValueOf(clients[0]).Elem().FieldByName("host")
-		if v := fv.String(); v != "http://localhost:9200/api/prom/push" {
+		client := reflect.ValueOf(clients[0]).Elem()
+
+		if v := client.FieldByName("host").String(); v != "http://localhost:9200/api/prom/push" {
 			t.Errorf("Expected host from secret, got %s", v)
+		}
+
+		username := client.FieldByName("username").String()
+		if username != "username" {
+			t.Errorf("Expected username from secret, got %s", username)
+		}
+
+		password := client.FieldByName("password").String()
+		if password != "password" {
+			t.Errorf("Expected password from secret, got %s", password)
 		}
 	})
 
@@ -625,10 +636,21 @@ func Test_GetValuesFromMountedSecret(t *testing.T) {
 			t.Error("Expected one client created")
 		}
 
-		fv := reflect.ValueOf(clients[0]).Elem().FieldByName("host")
-		if v := fv.String(); v != "http://localhost:9200/api/prom/push" {
+		client := reflect.ValueOf(clients[0]).Elem()
+		if v := client.FieldByName("host").String(); v != "http://localhost:9200/api/prom/push" {
 			t.Errorf("Expected host from mounted secret, got %s", v)
 		}
+
+		username := client.FieldByName("username").String()
+		if username != "username" {
+			t.Errorf("Expected username from mounted secret, got %s", username)
+		}
+
+		password := client.FieldByName("password").String()
+		if password != "password" {
+			t.Errorf("Expected password from mounted secret, got %s", password)
+		}
+
 	})
 
 	t.Run("Get Elasticsearch values from MountedSecret", func(t *testing.T) {
