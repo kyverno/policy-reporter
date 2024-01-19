@@ -371,6 +371,8 @@ func (f *TargetFactory) createLokiClient(config, parent *Loki) target.Client {
 	setFallback(&config.Certificate, parent.Certificate)
 	setFallback(&config.Path, parent.Path)
 	setBool(&config.SkipTLS, parent.SkipTLS)
+	setFallback(&config.Username, parent.Username)
+	setFallback(&config.Password, parent.Password)
 
 	config.MapBaseParent(parent.TargetBaseOptions)
 
@@ -391,6 +393,8 @@ func (f *TargetFactory) createLokiClient(config, parent *Loki) target.Client {
 		Host:          config.Host + config.Path,
 		CustomLabels:  config.CustomFields,
 		HTTPClient:    http.NewClient(config.Certificate, config.SkipTLS),
+		Username:      config.Username,
+		Password:      config.Password,
 	})
 }
 
@@ -798,6 +802,12 @@ func (f *TargetFactory) mapSecretValues(config any, ref, mountedSecret string) {
 	case *Loki:
 		if values.Host != "" {
 			c.Host = values.Host
+		}
+		if values.Username != "" {
+			c.Username = values.Username
+		}
+		if values.Password != "" {
+			c.Password = values.Password
 		}
 
 	case *Slack:
