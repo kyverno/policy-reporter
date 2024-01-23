@@ -11,3 +11,4 @@ coverage.out
 heap*
 /.env*
 .tools
+/.idea/
