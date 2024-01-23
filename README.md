@@ -52,17 +52,20 @@ Check the [Documentation](https://kyverno.github.io/policy-reporter/guide/gettin
 
 ## Targets
 
-Policy Reporter supports the following [Targets](https://kyverno.github.io/policy-reporter/core/06-targets) to send new (Cluster)PolicyReport Results too:
+Policy Reporter supports the following [Targets](https://kyverno.github.io/policy-reporter/core/targets) to send new (Cluster)PolicyReport Results too:
 * [Grafana Loki](https://kyverno.github.io/policy-reporter/core/targets#grafana-loki)
 * [Elasticsearch](https://kyverno.github.io/policy-reporter/core/targets#elasticsearch)
+* [Microsoft Teams](https://kyverno.github.io/policy-reporter/core/targets#microsoft-teams)
 * [Slack](https://kyverno.github.io/policy-reporter/core/targets#slack)
 * [Discord](https://kyverno.github.io/policy-reporter/core/targets#discord)
-* [MS Teams](https://kyverno.github.io/policy-reporter/core/targets#microsoft-teams)
 * [Policy Reporter UI](https://kyverno.github.io/policy-reporter/core/targets#policy-reporter-ui)
+* [Webhook](https://kyverno.github.io/policy-reporter/core/targets#webhook)
 * [S3](https://kyverno.github.io/policy-reporter/core/targets#s3-compatible-storage)
+* [AWS Kinesis compatible Services](https://kyverno.github.io/policy-reporter/core/targets#kinesis-compatible-services)
+* [AWS SecurityHub](https://kyverno.github.io/policy-reporter/core/targets#aws-securityhub)
 * [Google Cloud Storage](https://kyverno.github.io/policy-reporter/core/targets/#google-cloud-storage)
-* Google Chat
-* Telegram
+* [Telegram](https://kyverno.github.io/policy-reporter/core/targets#telegram)
+* [Google Chat](https://kyverno.github.io/policy-reporter/core/targets#google-chat)
 
 ## Monitoring
 
