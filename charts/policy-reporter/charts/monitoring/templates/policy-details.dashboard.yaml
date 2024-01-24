@@ -125,7 +125,7 @@ data:
         "pluginVersion": "7.1.5",
         "targets": [
             {
-            "expr": "sum(policy_report_result{policy=~\"$policy\", category=~\"$category\", severity=~\"$severity\", source=~\"$source\", kind=~\"$kind\", {{ $nsLabel }}=~\"$namespace\", status=\"pass\"{{ range $filters }}, {{.}}=~\"${{.}}\"{{ end }} } > 0) by ({{ $nsLabel }})",
+            "expr": "sum(policy_report_result{policy=~\"$policy\", rule=~\"$rule\", category=~\"$category\", severity=~\"$severity\", source=~\"$source\", kind=~\"$kind\", {{ $nsLabel }}=~\"$namespace\", status=\"pass\"{{ range $filters }}, {{.}}=~\"${{.}}\"{{ end }} } > 0) by ({{ $nsLabel }})",
             "instant": true,
             "interval": "",
             "legendFormat": "{{ printf `{{%s}}` $nsLabel }}",
@@ -180,7 +180,7 @@ data:
         "pluginVersion": "7.1.5",
         "targets": [
             {
-            "expr": "sum(policy_report_result{policy=~\"$policy\", category=~\"$category\", severity=~\"$severity\", source=~\"$source\", kind=~\"$kind\", {{ $nsLabel }}=~\"$namespace\", status=\"fail\"{{ range $filters }}, {{.}}=~\"${{.}}\"{{ end }} } > 0) by ({{ $nsLabel }})",
+            "expr": "sum(policy_report_result{policy=~\"$policy\", rule=~\"$rule\", category=~\"$category\", severity=~\"$severity\", source=~\"$source\", kind=~\"$kind\", {{ $nsLabel }}=~\"$namespace\", status=\"fail\"{{ range $filters }}, {{.}}=~\"${{.}}\"{{ end }} } > 0) by ({{ $nsLabel }})",
             "instant": true,
             "interval": "",
             "legendFormat": "{{ printf `{{%s}}` $nsLabel }}",
@@ -236,7 +236,7 @@ data:
         "pluginVersion": "7.1.5",
         "targets": [
             {
-            "expr": "sum(policy_report_result{policy=~\"$policy\", category=~\"$category\", severity=~\"$severity\", source=~\"$source\", kind=~\"$kind\", {{ $nsLabel }}=~\"$namespace\", status=\"warn\"{{ range $filters }}, {{.}}=~\"${{.}}\"{{ end }} } > 0) by ({{ $nsLabel }})",
+            "expr": "sum(policy_report_result{policy=~\"$policy\", rule=~\"$rule\", category=~\"$category\", severity=~\"$severity\", source=~\"$source\", kind=~\"$kind\", {{ $nsLabel }}=~\"$namespace\", status=\"warn\"{{ range $filters }}, {{.}}=~\"${{.}}\"{{ end }} } > 0) by ({{ $nsLabel }})",
             "instant": true,
             "interval": "",
             "legendFormat": "{{ printf `{{%s}}` $nsLabel }}",
@@ -291,7 +291,7 @@ data:
         "pluginVersion": "7.1.5",
         "targets": [
             {
-            "expr": "sum(policy_report_result{policy=~\"$policy\", category=~\"$category\", severity=~\"$severity\", source=~\"$source\", kind=~\"$kind\", {{ $nsLabel }}=~\"$namespace\", status=\"error\"{{ range $filters }}, {{.}}=~\"${{.}}\"{{ end }} } > 0) by ({{ $nsLabel }})",
+            "expr": "sum(policy_report_result{policy=~\"$policy\", rule=~\"$rule\", category=~\"$category\", severity=~\"$severity\", source=~\"$source\", kind=~\"$kind\", {{ $nsLabel }}=~\"$namespace\", status=\"error\"{{ range $filters }}, {{.}}=~\"${{.}}\"{{ end }} } > 0) by ({{ $nsLabel }})",
             "instant": true,
             "interval": "",
             "legendFormat": "{{ printf `{{%s}}` $nsLabel }}",
@@ -354,7 +354,7 @@ data:
         "steppedLine": false,
         "targets": [
             {
-            "expr": "sum(policy_report_result{policy=~\"$policy\", category=~\"$category\", severity=~\"$severity\", source=~\"$source\", kind=~\"$kind\", {{ $nsLabel }}=~\"$namespace\"{{ range $filters }}, {{.}}=~\"${{.}}\"{{ end }} } > 0) by (status, {{ $nsLabel }})",
+            "expr": "sum(policy_report_result{policy=~\"$policy\", rule=~\"$rule\", category=~\"$category\", severity=~\"$severity\", source=~\"$source\", kind=~\"$kind\", {{ $nsLabel }}=~\"$namespace\"{{ range $filters }}, {{.}}=~\"${{.}}\"{{ end }} } > 0) by (status, {{ $nsLabel }})",
             "interval": "",
             "legendFormat": "{{ printf `{{%s}}` $nsLabel }} {{`{{ status }}`}}",
             "refId": "A"
@@ -442,7 +442,7 @@ data:
         "pluginVersion": "7.1.5",
         "targets": [
             {
-            "expr": "sum(policy_report_result{policy=~\"$policy\", category=~\"$category\", severity=~\"$severity\", source=~\"$source\", kind=~\"$kind\", {{ $nsLabel }}=~\"$namespace\", status=\"pass\"{{ range $filters }}, {{.}}=~\"${{.}}\"{{ end }} }) by ({{ $nsLabel }},category,policy,rule,kind,name,severity,status,source{{ range $filters }},{{.}}{{ end }} )",
+            "expr": "sum(policy_report_result{policy=~\"$policy\", rule=~\"$rule\", category=~\"$category\", severity=~\"$severity\", source=~\"$source\", kind=~\"$kind\", {{ $nsLabel }}=~\"$namespace\", status=\"pass\"{{ range $filters }}, {{.}}=~\"${{.}}\"{{ end }} }) by ({{ $nsLabel }},category,policy,rule,kind,name,severity,status,source{{ range $filters }},{{.}}{{ end }} )",
             "format": "table",
             "instant": true,
             "interval": "",
@@ -522,7 +522,7 @@ data:
         "pluginVersion": "7.1.5",
         "targets": [
             {
-            "expr": "sum(policy_report_result{policy=~\"$policy\", category=~\"$category\", severity=~\"$severity\", source=~\"$source\", kind=~\"$kind\", {{ $nsLabel }}=~\"$namespace\", status=\"fail\"{{ range $filters }}, {{.}}=~\"${{.}}\"{{ end }} }) by ({{ $nsLabel }},category,policy,rule,kind,name,severity,status,source{{ range $filters }},{{.}}{{ end }})",
+            "expr": "sum(policy_report_result{policy=~\"$policy\", rule=~\"$rule\", category=~\"$category\", severity=~\"$severity\", source=~\"$source\", kind=~\"$kind\", {{ $nsLabel }}=~\"$namespace\", status=\"fail\"{{ range $filters }}, {{.}}=~\"${{.}}\"{{ end }} }) by ({{ $nsLabel }},category,policy,rule,kind,name,severity,status,source{{ range $filters }},{{.}}{{ end }})",
             "format": "table",
             "instant": true,
             "interval": "",
@@ -599,7 +599,7 @@ data:
         "pluginVersion": "7.1.5",
         "targets": [
             {
-            "expr": "sum(policy_report_result{policy=~\"$policy\", category=~\"$category\", severity=~\"$severity\", source=~\"$source\", kind=~\"$kind\", {{ $nsLabel }}=~\"$namespace\", status=\"warn\"{{ range $filters }}, {{.}}=~\"${{.}}\"{{ end }} }) by ({{ $nsLabel }},category,policy,rule,kind,name,severity,status,source{{ range $filters }},{{.}}{{ end }} )",
+            "expr": "sum(policy_report_result{policy=~\"$policy\", rule=~\"$rule\", category=~\"$category\", severity=~\"$severity\", source=~\"$source\", kind=~\"$kind\", {{ $nsLabel }}=~\"$namespace\", status=\"warn\"{{ range $filters }}, {{.}}=~\"${{.}}\"{{ end }} }) by ({{ $nsLabel }},category,policy,rule,kind,name,severity,status,source{{ range $filters }},{{.}}{{ end }} )",
             "format": "table",
             "instant": true,
             "interval": "",
@@ -676,7 +676,7 @@ data:
         "pluginVersion": "7.1.5",
         "targets": [
             {
-            "expr": "sum(policy_report_result{policy=~\"$policy\", category=~\"$category\", severity=~\"$severity\", source=~\"$source\", kind=~\"$kind\", {{ $nsLabel }}=~\"$namespace\", status=\"error\"{{ range $filters }}, {{.}}=~\"${{.}}\"{{ end }} }) by ({{ $nsLabel }},category,policy,rule,kind,name,severity,status,source{{ range $filters }},{{.}}{{ end }} )",
+            "expr": "sum(policy_report_result{policy=~\"$policy\", rule=~\"$rule\", category=~\"$category\", severity=~\"$severity\", source=~\"$source\", kind=~\"$kind\", {{ $nsLabel }}=~\"$namespace\", status=\"error\"{{ range $filters }}, {{.}}=~\"${{.}}\"{{ end }} }) by ({{ $nsLabel }},category,policy,rule,kind,name,severity,status,source{{ range $filters }},{{.}}{{ end }} )",
             "format": "table",
             "instant": true,
             "interval": "",
@@ -755,6 +755,27 @@ data:
             "tagsQuery": "",
             "type": "query",
             "useTags": false
+        },
+        {
+            "allValue": ".*",
+            "datasource": "${DS_PROMETHEUS}",
+            "definition": "label_values(policy_report_result{policy=~\"$policy\"},rule)",
+            "hide": 0,
+            "includeAll": true,
+            "label": "Rule",
+            "multi": true,
+            "name": "rule",
+            "options": [],
+            "query": {
+            "qryType": 1,
+            "query": "label_values(policy_report_result{policy=~\"$policy\"},rule)",
+            "refId": "PrometheusVariableQueryEditor-VariableQuery"
+            },
+            "refresh": 1,
+            "regex": "",
+            "skipUrlSync": false,
+            "sort": 0,
+            "type": "query"
         },
         {
             "allValue": ".*",
@@ -883,7 +904,7 @@ data:
             "type": "query",
             "useTags": false
         }
-        {{- end }} 
+        {{- end }}
         ]
     },
     "time": {
