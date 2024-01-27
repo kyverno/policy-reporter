@@ -700,7 +700,7 @@ func (f *TargetFactory) createSecurityHub(config, parent *SecurityHub) target.Cl
 	}
 
 	setFallback(&config.AccountID, parent.AccountID)
-	if config.AccountID == "" {
+	if !hasAWSIdentity() && config.AccountID == "" {
 		return nil
 	}
 
@@ -723,12 +723,15 @@ func (f *TargetFactory) createSecurityHub(config, parent *SecurityHub) target.Cl
 
 	sugar.Infof("%s configured", config.Name)
 
+	setFallback(&config.ProductName, parent.ProductName, "Policy Reporter")
+
 	return securityhub.NewClient(securityhub.Options{
 		ClientOptions: config.ClientOptions(),
 		CustomFields:  config.CustomFields,
 		Client:        client,
 		AccountID:     config.AccountID,
 		Region:        config.Region,
+		ProductName:   config.ProductName,
 	})
 }
 

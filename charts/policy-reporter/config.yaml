@@ -280,6 +280,7 @@ securityHub:
   secretAccessKey:  {{ .Values.target.securityHub.secretAccessKey }}
   secretRef: {{ .Values.target.securityHub.secretRef | quote }}
   mountedSecret: {{ .Values.target.securityHub.mountedSecret | quote }}
+  productName: {{ .Values.target.securityHub.productName | quote }}
   region: {{ .Values.target.securityHub.region }}
   endpoint: {{ .Values.target.securityHub.endpoint }}
   streamName: {{ .Values.target.securityHub.streamName }}

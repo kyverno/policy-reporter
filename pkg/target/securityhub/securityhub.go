@@ -20,6 +20,7 @@ type Options struct {
 	Client       *hub.Client
 	AccountID    string
 	Region       string
+	ProductName  string
 }
 
 type client struct {
@@ -28,6 +29,7 @@ type client struct {
 	hub          *hub.Client
 	accountID    string
 	region       string
+	productName  string
 }
 
 func (c *client) Send(result v1alpha2.PolicyReportResult) {
@@ -43,11 +45,16 @@ func (c *client) Send(result v1alpha2.PolicyReportResult) {
 
 	t := time.Unix(result.Timestamp.Seconds, int64(result.Timestamp.Nanos))
 
+	var accID *string
+	if c.accountID != "" {
+		accID = toPointer(c.accountID)
+	}
+
 	res, err := c.hub.BatchImportFindings(context.TODO(), &hub.BatchImportFindingsInput{
 		Findings: []types.AwsSecurityFinding{
 			{
 				Id:            &result.ID,
-				AwsAccountId:  &c.accountID,
+				AwsAccountId:  accID,
 				SchemaVersion: toPointer("2018-10-08"),
 				ProductArn:    toPointer("arn:aws:securityhub:" + c.region + ":" + c.accountID + ":product/" + c.accountID + "/default"),
 				GeneratorId:   toPointer(fmt.Sprintf("%s/%s", result.Source, generator)),
@@ -60,7 +67,7 @@ func (c *client) Send(result v1alpha2.PolicyReportResult) {
 				Title:       &title,
 				Description: &result.Message,
 				ProductFields: map[string]string{
-					"Product Name": "Policy Reporter",
+					"Product Name": c.productName,
 				},
 				Resources: []types.Resource{
 					{
@@ -136,6 +143,7 @@ func NewClient(options Options) target.Client {
 		options.Client,
 		options.AccountID,
 		options.Region,
+		options.ProductName,
 	}
 }
 
