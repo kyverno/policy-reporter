@@ -646,6 +646,8 @@ target:
     endpoint: ""
     # AWS accountID
     accountID: ""
+    # Used product name, defaults to "Polilcy Reporter"
+    productName: ""
     # minimum priority "" < info < warning < critical < error
     minimumPriority: ""
     # list of sources which should send to S3

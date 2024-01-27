@@ -203,6 +203,7 @@ type SecurityHub struct {
 	TargetBaseOptions `mapstructure:",squash"`
 	AWSConfig         `mapstructure:",squash"`
 	AccountID         string         `mapstructure:"accountId"`
+	ProductName       string         `mapstructure:"productName"`
 	Channels          []*SecurityHub `mapstructure:"channels"`
 }
 
