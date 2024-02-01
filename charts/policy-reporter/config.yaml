@@ -283,7 +283,6 @@ securityHub:
   productName: {{ .Values.target.securityHub.productName | quote }}
   region: {{ .Values.target.securityHub.region }}
   endpoint: {{ .Values.target.securityHub.endpoint }}
-  streamName: {{ .Values.target.securityHub.streamName }}
   minimumPriority: {{ .Values.target.securityHub.minimumPriority | quote }}
   skipExistingOnStartup: {{ .Values.target.securityHub.skipExistingOnStartup }}
   {{- with .Values.target.securityHub.sources }}
