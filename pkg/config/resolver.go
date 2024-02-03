@@ -2,6 +2,9 @@ package config
 
 import (
 	"context"
+	"crypto/tls"
+	"crypto/x509"
+	"os"
 	"time"
 
 	goredis "github.com/go-redis/redis/v8"
@@ -405,14 +408,30 @@ func (r *Resolver) ViolationsReporter() *violations.Reporter {
 }
 
 func (r *Resolver) SMTPServer() *mail.SMTPServer {
+	smtp := r.config.EmailReports.SMTP
+
 	server := mail.NewSMTPClient()
-	server.Host = r.config.EmailReports.SMTP.Host
-	server.Port = r.config.EmailReports.SMTP.Port
-	server.Username = r.config.EmailReports.SMTP.Username
-	server.Password = r.config.EmailReports.SMTP.Password
+	server.Host = smtp.Host
+	server.Port = smtp.Port
+	server.Username = smtp.Username
+	server.Password = smtp.Password
 	server.ConnectTimeout = 10 * time.Second
 	server.SendTimeout = 10 * time.Second
-	server.Encryption = email.EncryptionFromString(r.config.EmailReports.SMTP.Encryption)
+	server.Encryption = email.EncryptionFromString(smtp.Encryption)
+	server.TLSConfig = &tls.Config{InsecureSkipVerify: smtp.SkipTLS}
+
+	if smtp.Certificate != "" {
+		caCert, err := os.ReadFile(smtp.Certificate)
+		if err != nil {
+			zap.L().Error("failed to read certificate for SMTP Client", zap.String("path", smtp.Certificate))
+			return server
+		}
+
+		caCertPool := x509.NewCertPool()
+		caCertPool.AppendCertsFromPEM(caCert)
+
+		server.TLSConfig.RootCAs = caCertPool
+	}
 
 	return server
 }

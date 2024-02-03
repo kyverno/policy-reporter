@@ -233,6 +233,8 @@ emailReports:
     password: ""
     from: "" # displayed from email address
     encryption: "" # default is none, supports ssl/tls and starttls
+    skipTLS: false
+    certificate: ""
 
   # basic summary report
   summary:

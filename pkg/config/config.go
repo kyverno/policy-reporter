@@ -221,12 +221,14 @@ type GCS struct {
 
 // SMTP configuration
 type SMTP struct {
-	Host       string `mapstructure:"host"`
-	Port       int    `mapstructure:"port"`
-	Username   string `mapstructure:"username"`
-	Password   string `mapstructure:"password"`
-	From       string `mapstructure:"from"`
-	Encryption string `mapstructure:"encryption"`
+	Host        string `mapstructure:"host"`
+	Port        int    `mapstructure:"port"`
+	Username    string `mapstructure:"username"`
+	Password    string `mapstructure:"password"`
+	From        string `mapstructure:"from"`
+	Encryption  string `mapstructure:"encryption"`
+	SkipTLS     bool   `mapstructure:"skipTLS"`
+	Certificate string `mapstructure:"certificate"`
 }
 
 // EmailReport configuration
