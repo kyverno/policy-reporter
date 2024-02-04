@@ -5,7 +5,7 @@ image:
   registry: ghcr.io
   repository: kyverno/policy-reporter
   pullPolicy: IfNotPresent
-  tag: 2.17.5
+  tag: 2.18.0
 
 imagePullSecrets: []
 
@@ -328,6 +328,9 @@ target:
     skipExistingOnStartup: true
     # Added as additional labels to each Loki event
     customLabels: {}
+    # HTTP BasicAuth credentials for Loki
+    username: ""
+    password: ""
     # Filter Results which should send to this target by report labels, namespaces, priorities or policies
     # Wildcars for namespaces and policies are supported, you can either define exclude or include values
     # Filters are available for all targets except the UI

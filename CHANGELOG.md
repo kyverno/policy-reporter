@@ -1,5 +1,18 @@
 # Changelog
 
+# 2.22.0
+* Helm Chart
+    * Policy Reporter v2.18.0
+        * Support HTTP BasicAuth for Loki [[#394](https://github.com/kyverno/policy-reporter/pull/394) by [YannickTeKulve](https://github.com/YannickTeKulve)]
+        * Update README Targets and Links [[#396](https://github.com/kyverno/policy-reporter/pull/396) by [vponoikoait](https://github.com/vponoikoait)]
+        * AccoundID for SecurityHub is now optional if IRSA is used.
+        * Removed unused from config.yaml. Stream name isn't a property of SecurityHub [[#403](https://github.com/kyverno/policy-reporter/pull/403) by [vponoikoait](https://github.com/vponoikoait)]
+        * Support `certificate` and `skipTLS` configuration for SMTP Client configuration.
+    * Policy Reporter Kyverno Plugin v1.6.3
+        * Fix HTML Report Details
+    * Monitoring Chart
+        * Add Rule filter to Grafana PolicyReport Details Dashboard [[#399](https://github.com/kyverno/policy-reporter/pull/399) by [lukashankeln](https://github.com/lukashankeln)]
+
 # 2.21.6
 * Helm Chart
     * Policy Reporter v2.17.5
