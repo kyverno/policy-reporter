@@ -7,6 +7,8 @@ loki:
   mountedSecret: {{ .Values.target.loki.mountedSecret | quote }}
   minimumPriority: {{ .Values.target.loki.minimumPriority | quote }}
   skipExistingOnStartup: {{ .Values.target.loki.skipExistingOnStartup }}
+  username: {{ .Values.target.loki.username | quote }}
+  password: {{ .Values.target.loki.password | quote }}
   {{- with .Values.target.loki.customLabels }}
   customLabels:
     {{- toYaml . | nindent 4 }}
