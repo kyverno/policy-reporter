@@ -1,1 +1,0 @@
-/* empty css                    */import{s as r}from"./index.ce37d225.js";import{q as o,x as t,O as s}from"./runtime-core.esm-bundler.c752936e.js";const n={};function c(e,a){return o(),t("li",null,[s(e.$slots,"default",{},void 0,!0)])}const _=r(n,[["render",c],["__scopeId","data-v-4c2f5fb9"]]);export{_ as default};
