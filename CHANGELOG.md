@@ -1,5 +1,9 @@
 # Changelog
 
+# 2.22.1
+* Helm Chart
+    * Fix indentation in SummaryReport CronJob
+
 # 2.22.0
 * Helm Chart
     * Policy Reporter v2.18.0
