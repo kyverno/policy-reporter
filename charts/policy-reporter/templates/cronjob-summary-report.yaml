@@ -69,9 +69,9 @@ spec:
                 mountPath: /app/config.yaml
                 subPath: config.yaml
                 readOnly: true
-                {{- with .Values.extraVolumes.volumeMounts }}
-                {{ toYaml . | nindent 14 | trim }}
-                {{- end }}
+              {{- with .Values.extraVolumes.volumeMounts }}
+              {{ toYaml . | nindent 14 | trim }}
+              {{- end }}
               {{- if .Values.emailReports.smtp.secret }}
               env:
               - name: EMAIL_REPORTS_SMTP_HOST
