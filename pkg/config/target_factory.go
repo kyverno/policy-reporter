@@ -140,6 +140,8 @@ func (f *TargetFactory) createLokiClient(config, parent *Target[LokiOptions]) ta
 	setFallback(&config.Config.Host, parent.Config.Host)
 	setFallback(&config.Config.Certificate, parent.Config.Certificate)
 	setFallback(&config.Config.Path, parent.Config.Path)
+	setFallback(&config.Config.Username, parent.Config.Username)
+	setFallback(&config.Config.Password, parent.Config.Password)
 	setBool(&config.Config.SkipTLS, parent.Config.SkipTLS)
 
 	config.MapBaseParent(parent)
@@ -150,6 +152,8 @@ func (f *TargetFactory) createLokiClient(config, parent *Target[LokiOptions]) ta
 		ClientOptions: config.ClientOptions(),
 		Host:          config.Config.Host + config.Config.Path,
 		CustomLabels:  config.CustomFields,
+		Username:      config.Config.Username,
+		Password:      config.Config.Password,
 		HTTPClient:    http.NewClient(config.Config.Certificate, config.Config.SkipTLS),
 	})
 }
@@ -175,6 +179,7 @@ func (f *TargetFactory) createElasticsearchClient(config, parent *Target[Elastic
 	setFallback(&config.Config.APIKey, parent.Config.APIKey)
 	setFallback(&config.Config.Index, parent.Config.Index, "policy-reporter")
 	setFallback(&config.Config.Rotation, parent.Config.Rotation, elasticsearch.Daily)
+	setBool(&config.Config.TypelessApi, parent.Config.TypelessApi)
 
 	config.MapBaseParent(parent)
 
@@ -188,6 +193,7 @@ func (f *TargetFactory) createElasticsearchClient(config, parent *Target[Elastic
 		ApiKey:        config.Config.APIKey,
 		Rotation:      config.Config.Rotation,
 		Index:         config.Config.Index,
+		TypelessApi:   config.Config.TypelessApi,
 		CustomFields:  config.CustomFields,
 		HTTPClient:    http.NewClient(config.Config.Certificate, config.Config.SkipTLS),
 	})
