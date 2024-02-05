@@ -87,6 +87,8 @@ type SlackOptions struct {
 
 type LokiOptions struct {
 	HostOptions `mapstructure:",squash"`
+	Username    string `mapstructure:"username"`
+	Password    string `mapstructure:"password"`
 	Path        string `mapstructure:"path"`
 }
 
@@ -97,6 +99,7 @@ type ElasticsearchOptions struct {
 	Username    string `mapstructure:"username"`
 	Password    string `mapstructure:"password"`
 	APIKey      string `mapstructure:"apiKey"`
+	TypelessApi bool   `mapstructure:"typelessApi"`
 }
 
 type S3Options struct {
