@@ -3,7 +3,7 @@
 Policy Reporter watches for PolicyReport Resources.
 It creates Prometheus Metrics and can send rule validation events to different targets like Loki, Elasticsearch, Slack or Discord
 
-![Version: 3.0.0-alpha.5](https://img.shields.io/badge/Version-3.0.0--alpha.5-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 3.0.0-alpha](https://img.shields.io/badge/AppVersion-3.0.0--alpha-informational?style=flat-square)
+![Version: 3.0.0-alpha.6](https://img.shields.io/badge/Version-3.0.0--alpha.6-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 3.0.0-alpha](https://img.shields.io/badge/AppVersion-3.0.0--alpha-informational?style=flat-square)
 
 ## Documentation
 
@@ -348,7 +348,7 @@ Check the [Documentation](https://kyverno.github.io/policy-reporter/guide/02-get
 |  | monitoring | 2.8.1 |
 | oci://ghcr.io/kyverno/charts/policy-reporter | kyverno-plugin | 0.0.3 |
 | oci://ghcr.io/kyverno/charts/policy-reporter | trivy-plugin | 0.0.5 |
-| oci://ghcr.io/kyverno/charts/policy-reporter | ui | 0.0.13 |
+| oci://ghcr.io/kyverno/charts/policy-reporter | ui | 0.0.14 |
 
 ## Maintainers
 
