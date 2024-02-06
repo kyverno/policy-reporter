@@ -26,7 +26,7 @@ func (h *APIHandler) Register(engine *gin.RouterGroup) error {
 	engine.GET("resource/:id/resource-results", h.ListResourceResults)
 	engine.GET("resource/:id/results", h.ListResourcePolilcyResults)
 	engine.GET("resource/:id", h.GetResource)
-	engine.GET("resource/:id/source-categories", h.ListCategories)
+	engine.GET("resource/:id/source-categories", h.ListResourceCategories)
 
 	engine.POST("namespaces/resolve-selector", h.ResolveNamespaceSelector)
 	engine.GET("sources", h.ListSources)
@@ -88,7 +88,7 @@ func (h *APIHandler) ListSourceWithCategories(ctx *gin.Context) {
 	api.SendResponse(ctx, MapToSourceDetails(categories), "failed to load source details", err)
 }
 
-func (h *APIHandler) ListCategories(ctx *gin.Context) {
+func (h *APIHandler) ListResourceCategories(ctx *gin.Context) {
 	categories, err := h.store.FetchResourceCategories(ctx, ctx.Param("id"), api.BuildFilter(ctx))
 
 	api.SendResponse(ctx, MapResourceCategoryToSourceDetails(categories), "failed to load source details", err)
