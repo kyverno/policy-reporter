@@ -348,7 +348,7 @@ Check the [Documentation](https://kyverno.github.io/policy-reporter/guide/02-get
 |  | monitoring | 2.8.1 |
 | oci://ghcr.io/kyverno/charts/policy-reporter | kyverno-plugin | 0.0.3 |
 | oci://ghcr.io/kyverno/charts/policy-reporter | trivy-plugin | 0.0.5 |
-| oci://ghcr.io/kyverno/charts/policy-reporter | ui | 0.0.14 |
+| oci://ghcr.io/kyverno/charts/policy-reporter | ui | 0.0.22 |
 
 ## Maintainers
 

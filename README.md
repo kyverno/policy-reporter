@@ -9,6 +9,13 @@ Policy Reporter provides also a Prometheus Metrics API as well as an standalone 
 
 This project is in an early stage. Please let me know if anything did not work as expected or if you want to send your audits to unsupported targets.
 
+## Preview Feature Docs
+
+Documentation for upcoming features and changes for the new Policy Reporter UI v2 are located in [Docs](https://github.com/kyverno/policy-reporter/tree/3.x/docs)
+
+* [Basic Installation](https://github.com/kyverno/policy-reporter/blob/3.x/docs/TUTORIALS.md)
+* [OAUth2 / OpenIDConnect](https://github.com/kyverno/policy-reporter/blob/3.x/docs/UI_AUTH.md)
+
 ## Documentation
 
 You can find detailed Information and Screens about Features and Configurations in the [Documentation](https://kyverno.github.io/policy-reporter).
