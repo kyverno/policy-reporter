@@ -68,7 +68,7 @@ func (o *Generator) GenerateData(ctx context.Context) ([]Source, error) {
 						continue
 					}
 
-					s.AddClusterResults(mapResult(result))
+					s.AddClusterResults(mapResult(&report, result))
 				}
 			}(rep)
 		}
@@ -117,7 +117,7 @@ func (o *Generator) GenerateData(ctx context.Context) ([]Source, error) {
 				if result.Result == v1alpha2.StatusPass || result.Result == v1alpha2.StatusSkip {
 					continue
 				}
-				s.AddNamespacedResults(report.Namespace, mapResult(result))
+				s.AddNamespacedResults(report.Namespace, mapResult(&report, result))
 			}
 		}(rep)
 	}
