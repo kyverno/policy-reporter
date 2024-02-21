@@ -1,5 +1,10 @@
 # Changelog
 
+# 2.22.2
+* Helm Chart
+    * Policy Reporter v2.18.1
+        * Fix Resource Mapping in Violation Report E-Mails
+
 # 2.22.1
 * Helm Chart
     * Fix indentation in SummaryReport CronJob
