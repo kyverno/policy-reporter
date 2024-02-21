@@ -14,17 +14,25 @@ type Result struct {
 	Status string
 }
 
-func mapResult(res v1alpha2.PolicyReportResult) []Result {
+func mapResult(polr v1alpha2.ReportInterface, res v1alpha2.PolicyReportResult) []Result {
 	count := len(res.Resources)
 	rule := res.Rule
 	if rule == "" {
 		rule = res.Message
 	}
 
-	if count == 0 {
+	if count == 0 && polr.GetScope() == nil {
 		return []Result{{
 			Policy: res.Policy,
 			Rule:   rule,
+			Status: string(res.Result),
+		}}
+	} else if count == 0 && polr.GetScope() != nil {
+		return []Result{{
+			Policy: res.Policy,
+			Rule:   rule,
+			Name:   polr.GetScope().Name,
+			Kind:   polr.GetScope().Kind,
 			Status: string(res.Result),
 		}}
 	}
