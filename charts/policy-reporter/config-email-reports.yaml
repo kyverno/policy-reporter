@@ -15,7 +15,7 @@ emailReports:
     filter:
       {{- toYaml . | nindent 6 }}
     {{- end }}
-    {{- with .Values.emailReports.violations.channels }}
+    {{- with .Values.emailReports.summary.channels }}
     channels:
       {{- toYaml . | nindent 6 }}
     {{- end }}
