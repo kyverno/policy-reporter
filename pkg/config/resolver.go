@@ -101,7 +101,7 @@ func (r *Resolver) Server(ctx context.Context, options []api.ServerOption) (*api
 		gin.SetMode(gin.ReleaseMode)
 	}
 
-	return api.NewServer(gin.New(), append(defaults, options...)), nil
+	return api.NewServer(gin.New(), append(defaults, options...)...), nil
 }
 
 // Database resolver method
