@@ -2,6 +2,7 @@ package api
 
 import (
 	"fmt"
+	"net/http"
 	"time"
 
 	"github.com/gin-contrib/gzip"
@@ -32,11 +33,15 @@ func (s *Server) Start() error {
 	return s.engine.Run(fmt.Sprintf(":%d", s.port))
 }
 
+func (s *Server) Serve(w http.ResponseWriter, req *http.Request) {
+	s.engine.ServeHTTP(w, req)
+}
+
 func (s *Server) Register(path string, handler Handler) error {
 	return handler.Register(s.engine.Group(path, s.middleware...))
 }
 
-func NewServer(engine *gin.Engine, options []ServerOption) *Server {
+func NewServer(engine *gin.Engine, options ...ServerOption) *Server {
 	server := &Server{
 		engine: engine,
 		port:   8080,
