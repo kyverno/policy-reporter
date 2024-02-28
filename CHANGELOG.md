@@ -1,5 +1,9 @@
 # Changelog
 
+# 2.22.3
+* Helm Chart
+    * fix(helm): typo in email report config [[#413](https://github.com/kyverno/policy-reporter/pull/413) by [sudoleg](https://github.com/sudoleg)]
+
 # 2.22.2
 * Helm Chart
     * Policy Reporter v2.18.1
