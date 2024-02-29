@@ -13,7 +13,7 @@ This project is in an early stage. Please let me know if anything did not work a
 
 Documentation for upcoming features and changes for the new Policy Reporter UI v2 are located in [Docs](https://github.com/kyverno/policy-reporter/tree/3.x/docs)
 
-* [Basic Installation](https://github.com/kyverno/policy-reporter/blob/3.x/docs/TUTORIALS.md)
+* [Installation](https://github.com/kyverno/policy-reporter/blob/3.x/docs/SETUP.md)
 * [OAUth2 / OpenIDConnect](https://github.com/kyverno/policy-reporter/blob/3.x/docs/UI_AUTH.md)
 * [UI CustomBoards](https://github.com/kyverno/policy-reporter/blob/3.x/docs/CUSTOM_BOARDS.md)
 
