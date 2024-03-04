@@ -1,5 +1,9 @@
 # Changelog
 
+# 2.22.4
+* Helm Chart
+    * fix mapping of headers properties to from values.yaml to config.yaml
+
 # 2.22.3
 * Helm Chart
     * fix(helm): typo in email report config [[#413](https://github.com/kyverno/policy-reporter/pull/413) by [sudoleg](https://github.com/sudoleg)]

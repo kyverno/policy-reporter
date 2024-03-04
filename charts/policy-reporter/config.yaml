@@ -137,6 +137,10 @@ webhook:
   mountedSecret: {{ .Values.target.webhook.mountedSecret | quote }}
   minimumPriority: {{ .Values.target.webhook.minimumPriority | quote }}
   skipExistingOnStartup: {{ .Values.target.webhook.skipExistingOnStartup }}
+  {{- with .Values.target.webhook.headers }}
+  headers:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
   {{- with .Values.target.webhook.sources }}
   sources:
     {{- toYaml . | nindent 4 }}
@@ -164,6 +168,10 @@ telegram:
   mountedSecret: {{ .Values.target.telegram.mountedSecret | quote }}
   minimumPriority: {{ .Values.target.telegram.minimumPriority | quote }}
   skipExistingOnStartup: {{ .Values.target.telegram.skipExistingOnStartup }}
+  {{- with .Values.target.telegram.headers }}
+  headers:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
   {{- with .Values.target.telegram.sources }}
   sources:
     {{- toYaml . | nindent 4 }}
@@ -189,6 +197,10 @@ googleChat:
   mountedSecret: {{ .Values.target.googleChat.mountedSecret | quote }}
   minimumPriority: {{ .Values.target.googleChat.minimumPriority | quote }}
   skipExistingOnStartup: {{ .Values.target.googleChat.skipExistingOnStartup }}
+  {{- with .Values.target.googleChat.headers }}
+  headers:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
   {{- with .Values.target.googleChat.sources }}
   sources:
     {{- toYaml . | nindent 4 }}
