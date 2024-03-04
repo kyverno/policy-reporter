@@ -96,20 +96,8 @@ func ResultListeners(
 		}
 	}
 
-	prCallback := metrics.CreateDetailedResultMetricListener(filter, metrics.RegisterDetailedResultGauge(ResultGaugeName))
-	pCallback := metrics.CreatePolicyReportMetricsListener(reportFilter)
-
-	crCallback := metrics.CreateDetailedClusterResultMetricListener(filter, metrics.RegisterDetailedClusterResultGauge(ClusterResultGaugeName))
-	cCallback := metrics.CreateClusterPolicyReportMetricsListener(reportFilter)
-
 	return []report.PolicyReportListener{
-		func(event report.LifecycleEvent) {
-			pCallback(event)
-			prCallback(event)
-		},
-		func(event report.LifecycleEvent) {
-			cCallback(event)
-			crCallback(event)
-		},
+		metrics.CreateDetailedResultMetricListener(filter, metrics.RegisterDetailedResultGauge(ResultGaugeName)),
+		metrics.CreateDetailedClusterResultMetricListener(filter, metrics.RegisterDetailedClusterResultGauge(ClusterResultGaugeName)),
 	}
 }
