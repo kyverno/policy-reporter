@@ -82,7 +82,7 @@ func newRunCMD(version string) *cobra.Command {
 					return err
 				}
 
-				nsClient, err := resolver.NamespceClient()
+				nsClient, err := resolver.NamespaceClient()
 				if err != nil {
 					return err
 				}

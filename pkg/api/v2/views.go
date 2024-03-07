@@ -344,12 +344,13 @@ func MapResourceCategoryToSourceDetails(categories []db.ResourceCategory) []*Sou
 }
 
 type ValueFilter struct {
-	Include []string `json:"include,omitempty"`
-	Exclude []string `json:"exclude,omitempty"`
+	Include  []string          `json:"include,omitempty"`
+	Exclude  []string          `json:"exclude,omitempty"`
+	Selector map[string]string `json:"selector,omitempty"`
 }
 
 func (v ValueFilter) Empty() bool {
-	return len(v.Exclude)+len(v.Include) == 0
+	return len(v.Exclude)+len(v.Include)+len(v.Selector) == 0
 }
 
 type TargetFilter struct {

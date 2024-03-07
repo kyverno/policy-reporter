@@ -66,7 +66,7 @@ func mountSecret() {
 var logger = zap.NewNop()
 
 func Test_ResolveTarget(t *testing.T) {
-	factory := config.NewTargetFactory(nil)
+	factory := config.NewTargetFactory(nil, nil)
 
 	clients := factory.CreateClients(&testConfig.Targets)
 	if len(clients) != 25 {
@@ -75,7 +75,7 @@ func Test_ResolveTarget(t *testing.T) {
 }
 
 func Test_ResolveTargetsWithoutRequiredConfiguration(t *testing.T) {
-	factory := config.NewTargetFactory(nil)
+	factory := config.NewTargetFactory(nil, nil)
 
 	targets := config.Targets{
 		Loki:          &config.Target[config.LokiOptions]{},
@@ -108,7 +108,7 @@ func Test_ResolveTargetsWithoutRequiredConfiguration(t *testing.T) {
 }
 
 func Test_S3Validation(t *testing.T) {
-	factory := config.NewTargetFactory(nil)
+	factory := config.NewTargetFactory(nil, nil)
 
 	targets := config.Targets{
 		S3: &config.Target[config.S3Options]{
@@ -175,7 +175,7 @@ func Test_S3Validation(t *testing.T) {
 }
 
 func Test_KinesisValidation(t *testing.T) {
-	factory := config.NewTargetFactory(nil)
+	factory := config.NewTargetFactory(nil, nil)
 
 	targets := config.Targets{
 		Kinesis: &config.Target[config.KinesisOptions]{
@@ -216,7 +216,7 @@ func Test_KinesisValidation(t *testing.T) {
 }
 
 func Test_SecurityHubValidation(t *testing.T) {
-	factory := config.NewTargetFactory(nil)
+	factory := config.NewTargetFactory(nil, nil)
 
 	targets := config.Targets{
 		SecurityHub: &config.Target[config.SecurityHubOptions]{
@@ -255,7 +255,7 @@ func Test_SecurityHubValidation(t *testing.T) {
 }
 
 func Test_GCSValidation(t *testing.T) {
-	factory := config.NewTargetFactory(nil)
+	factory := config.NewTargetFactory(nil, nil)
 
 	targets := config.Targets{
 		GCS: &config.Target[config.GCSOptions]{
@@ -278,7 +278,7 @@ func Test_GCSValidation(t *testing.T) {
 }
 
 func Test_GetValuesFromSecret(t *testing.T) {
-	factory := config.NewTargetFactory(secrets.NewClient(newFakeClient()))
+	factory := config.NewTargetFactory(secrets.NewClient(newFakeClient()), nil)
 
 	targets := config.Targets{
 		Loki:          &config.Target[config.LokiOptions]{SecretRef: secretName},
@@ -435,7 +435,7 @@ func Test_GetValuesFromSecret(t *testing.T) {
 }
 
 func Test_CustomFields(t *testing.T) {
-	factory := config.NewTargetFactory(nil)
+	factory := config.NewTargetFactory(nil, nil)
 
 	targets := &config.Targets{
 		Loki: &config.Target[config.LokiOptions]{
@@ -644,7 +644,7 @@ func Test_CustomFields(t *testing.T) {
 }
 
 func Test_GetValuesFromMountedSecret(t *testing.T) {
-	factory := config.NewTargetFactory(secrets.NewClient(newFakeClient()))
+	factory := config.NewTargetFactory(secrets.NewClient(newFakeClient()), nil)
 
 	mountSecret()
 	defer os.Remove(mountedSecret)
