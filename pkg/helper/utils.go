@@ -56,3 +56,14 @@ func ConvertJSONToMap(s string) map[string]string {
 
 	return m
 }
+
+func ConvertMap(m map[string]any) map[string]string {
+	n := make(map[string]string, len(m))
+	for k, v := range m {
+		if l, ok := v.(string); ok {
+			n[k] = l
+		}
+	}
+
+	return n
+}

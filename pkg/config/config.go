@@ -1,8 +1,9 @@
 package config
 
 type ValueFilter struct {
-	Include []string `mapstructure:"include"`
-	Exclude []string `mapstructure:"exclude"`
+	Include  []string       `mapstructure:"include"`
+	Exclude  []string       `mapstructure:"exclude"`
+	Selector map[string]any `mapstructure:"selector"`
 }
 
 type EmailReportFilter struct {

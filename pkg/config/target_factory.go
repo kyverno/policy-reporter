@@ -27,11 +27,13 @@ import (
 	"github.com/kyverno/policy-reporter/pkg/target/teams"
 	"github.com/kyverno/policy-reporter/pkg/target/telegram"
 	"github.com/kyverno/policy-reporter/pkg/target/webhook"
+	"github.com/kyverno/policy-reporter/pkg/validate"
 )
 
 // TargetFactory manages target creation
 type TargetFactory struct {
-	secretClient secrets.Client
+	secretClient  secrets.Client
+	filterFactory *target.ResultFilterFactory
 }
 
 // LokiClients resolver method
@@ -115,11 +117,16 @@ func (f *TargetFactory) createSlackClient(config, parent *Target[SlackOptions]) 
 	zap.S().Infof("%s configured", config.Name)
 
 	return slack.NewClient(slack.Options{
-		ClientOptions: config.ClientOptions(),
-		Webhook:       config.Config.Webhook,
-		Channel:       config.Config.Channel,
-		CustomFields:  config.CustomFields,
-		HTTPClient:    http.NewClient("", false),
+		ClientOptions: target.ClientOptions{
+			Name:                  config.Name,
+			SkipExistingOnStartup: config.SkipExisting,
+			ResultFilter:          f.createResultFilter(config.Filter, config.MinimumPriority, config.Sources),
+			ReportFilter:          createReportFilter(config.Filter),
+		},
+		Webhook:      config.Config.Webhook,
+		Channel:      config.Config.Channel,
+		CustomFields: config.CustomFields,
+		HTTPClient:   http.NewClient("", false),
 	})
 }
 
@@ -149,12 +156,17 @@ func (f *TargetFactory) createLokiClient(config, parent *Target[LokiOptions]) ta
 	zap.S().Infof("%s configured", config.Name)
 
 	return loki.NewClient(loki.Options{
-		ClientOptions: config.ClientOptions(),
-		Host:          config.Config.Host + config.Config.Path,
-		CustomLabels:  config.CustomFields,
-		Username:      config.Config.Username,
-		Password:      config.Config.Password,
-		HTTPClient:    http.NewClient(config.Config.Certificate, config.Config.SkipTLS),
+		ClientOptions: target.ClientOptions{
+			Name:                  config.Name,
+			SkipExistingOnStartup: config.SkipExisting,
+			ResultFilter:          f.createResultFilter(config.Filter, config.MinimumPriority, config.Sources),
+			ReportFilter:          createReportFilter(config.Filter),
+		},
+		Host:         config.Config.Host + config.Config.Path,
+		CustomLabels: config.CustomFields,
+		Username:     config.Config.Username,
+		Password:     config.Config.Password,
+		HTTPClient:   http.NewClient(config.Config.Certificate, config.Config.SkipTLS),
 	})
 }
 
@@ -186,16 +198,21 @@ func (f *TargetFactory) createElasticsearchClient(config, parent *Target[Elastic
 	zap.S().Infof("%s configured", config.Name)
 
 	return elasticsearch.NewClient(elasticsearch.Options{
-		ClientOptions: config.ClientOptions(),
-		Host:          config.Config.Host,
-		Username:      config.Config.Username,
-		Password:      config.Config.Password,
-		ApiKey:        config.Config.APIKey,
-		Rotation:      config.Config.Rotation,
-		Index:         config.Config.Index,
-		TypelessApi:   config.Config.TypelessApi,
-		CustomFields:  config.CustomFields,
-		HTTPClient:    http.NewClient(config.Config.Certificate, config.Config.SkipTLS),
+		ClientOptions: target.ClientOptions{
+			Name:                  config.Name,
+			SkipExistingOnStartup: config.SkipExisting,
+			ResultFilter:          f.createResultFilter(config.Filter, config.MinimumPriority, config.Sources),
+			ReportFilter:          createReportFilter(config.Filter),
+		},
+		Host:         config.Config.Host,
+		Username:     config.Config.Username,
+		Password:     config.Config.Password,
+		ApiKey:       config.Config.APIKey,
+		Rotation:     config.Config.Rotation,
+		Index:        config.Config.Index,
+		TypelessApi:  config.Config.TypelessApi,
+		CustomFields: config.CustomFields,
+		HTTPClient:   http.NewClient(config.Config.Certificate, config.Config.SkipTLS),
 	})
 }
 
@@ -217,10 +234,15 @@ func (f *TargetFactory) createDiscordClient(config, parent *Target[WebhookOption
 	zap.S().Infof("%s configured", config.Name)
 
 	return discord.NewClient(discord.Options{
-		ClientOptions: config.ClientOptions(),
-		Webhook:       config.Config.Webhook,
-		CustomFields:  config.CustomFields,
-		HTTPClient:    http.NewClient(config.Config.Certificate, config.Config.SkipTLS),
+		ClientOptions: target.ClientOptions{
+			Name:                  config.Name,
+			SkipExistingOnStartup: config.SkipExisting,
+			ResultFilter:          f.createResultFilter(config.Filter, config.MinimumPriority, config.Sources),
+			ReportFilter:          createReportFilter(config.Filter),
+		},
+		Webhook:      config.Config.Webhook,
+		CustomFields: config.CustomFields,
+		HTTPClient:   http.NewClient(config.Config.Certificate, config.Config.SkipTLS),
 	})
 }
 
@@ -242,10 +264,15 @@ func (f *TargetFactory) createTeamsClient(config, parent *Target[WebhookOptions]
 	zap.S().Infof("%s configured", config.Name)
 
 	return teams.NewClient(teams.Options{
-		ClientOptions: config.ClientOptions(),
-		Webhook:       config.Config.Webhook,
-		CustomFields:  config.CustomFields,
-		HTTPClient:    http.NewClient(config.Config.Certificate, config.Config.SkipTLS),
+		ClientOptions: target.ClientOptions{
+			Name:                  config.Name,
+			SkipExistingOnStartup: config.SkipExisting,
+			ResultFilter:          f.createResultFilter(config.Filter, config.MinimumPriority, config.Sources),
+			ReportFilter:          createReportFilter(config.Filter),
+		},
+		Webhook:      config.Config.Webhook,
+		CustomFields: config.CustomFields,
+		HTTPClient:   http.NewClient(config.Config.Certificate, config.Config.SkipTLS),
 	})
 }
 
@@ -267,11 +294,16 @@ func (f *TargetFactory) createWebhookClient(config, parent *Target[WebhookOption
 	zap.S().Infof("%s configured", config.Name)
 
 	return webhook.NewClient(webhook.Options{
-		ClientOptions: config.ClientOptions(),
-		Host:          config.Config.Webhook,
-		Headers:       config.Config.Headers,
-		CustomFields:  config.CustomFields,
-		HTTPClient:    http.NewClient(config.Config.Certificate, config.Config.SkipTLS),
+		ClientOptions: target.ClientOptions{
+			Name:                  config.Name,
+			SkipExistingOnStartup: config.SkipExisting,
+			ResultFilter:          f.createResultFilter(config.Filter, config.MinimumPriority, config.Sources),
+			ReportFilter:          createReportFilter(config.Filter),
+		},
+		Host:         config.Config.Webhook,
+		Headers:      config.Config.Headers,
+		CustomFields: config.CustomFields,
+		HTTPClient:   http.NewClient(config.Config.Certificate, config.Config.SkipTLS),
 	})
 }
 
@@ -316,12 +348,17 @@ func (f *TargetFactory) createTelegramClient(config, parent *Target[TelegramOpti
 	zap.S().Infof("%s configured", config.Name)
 
 	return telegram.NewClient(telegram.Options{
-		ClientOptions: config.ClientOptions(),
-		Host:          fmt.Sprintf("%s/bot%s/sendMessage", host, config.Config.Token),
-		ChatID:        config.Config.ChatID,
-		Headers:       config.Config.Headers,
-		CustomFields:  config.CustomFields,
-		HTTPClient:    http.NewClient(config.Config.Certificate, config.Config.SkipTLS),
+		ClientOptions: target.ClientOptions{
+			Name:                  config.Name,
+			SkipExistingOnStartup: config.SkipExisting,
+			ResultFilter:          f.createResultFilter(config.Filter, config.MinimumPriority, config.Sources),
+			ReportFilter:          createReportFilter(config.Filter),
+		},
+		Host:         fmt.Sprintf("%s/bot%s/sendMessage", host, config.Config.Token),
+		ChatID:       config.Config.ChatID,
+		Headers:      config.Config.Headers,
+		CustomFields: config.CustomFields,
+		HTTPClient:   http.NewClient(config.Config.Certificate, config.Config.SkipTLS),
 	})
 }
 
@@ -343,11 +380,16 @@ func (f *TargetFactory) createGoogleChatClient(config, parent *Target[WebhookOpt
 	zap.S().Infof("%s configured", config.Name)
 
 	return googlechat.NewClient(googlechat.Options{
-		ClientOptions: config.ClientOptions(),
-		Webhook:       config.Config.Webhook,
-		Headers:       config.Config.Headers,
-		CustomFields:  config.CustomFields,
-		HTTPClient:    http.NewClient(config.Config.Certificate, config.Config.SkipTLS),
+		ClientOptions: target.ClientOptions{
+			Name:                  config.Name,
+			SkipExistingOnStartup: config.SkipExisting,
+			ResultFilter:          f.createResultFilter(config.Filter, config.MinimumPriority, config.Sources),
+			ReportFilter:          createReportFilter(config.Filter),
+		},
+		Webhook:      config.Config.Webhook,
+		Headers:      config.Config.Headers,
+		CustomFields: config.CustomFields,
+		HTTPClient:   http.NewClient(config.Config.Certificate, config.Config.SkipTLS),
 	})
 }
 
@@ -400,10 +442,15 @@ func (f *TargetFactory) createS3Client(config, parent *Target[S3Options]) target
 	sugar.Infof("%s configured", config.Name)
 
 	return s3.NewClient(s3.Options{
-		ClientOptions: config.ClientOptions(),
-		S3:            s3Client,
-		CustomFields:  config.CustomFields,
-		Prefix:        config.Config.Prefix,
+		ClientOptions: target.ClientOptions{
+			Name:                  config.Name,
+			SkipExistingOnStartup: config.SkipExisting,
+			ResultFilter:          f.createResultFilter(config.Filter, config.MinimumPriority, config.Sources),
+			ReportFilter:          createReportFilter(config.Filter),
+		},
+		S3:           s3Client,
+		CustomFields: config.CustomFields,
+		Prefix:       config.Config.Prefix,
 	})
 }
 
@@ -447,9 +494,14 @@ func (f *TargetFactory) createKinesisClient(config, parent *Target[KinesisOption
 	sugar.Infof("%s configured", config.Name)
 
 	return kinesis.NewClient(kinesis.Options{
-		ClientOptions: config.ClientOptions(),
-		CustomFields:  config.CustomFields,
-		Kinesis:       kinesisClient,
+		ClientOptions: target.ClientOptions{
+			Name:                  config.Name,
+			SkipExistingOnStartup: config.SkipExisting,
+			ResultFilter:          f.createResultFilter(config.Filter, config.MinimumPriority, config.Sources),
+			ReportFilter:          createReportFilter(config.Filter),
+		},
+		CustomFields: config.CustomFields,
+		Kinesis:      kinesisClient,
 	})
 }
 
@@ -487,11 +539,16 @@ func (f *TargetFactory) createSecurityHub(config, parent *Target[SecurityHubOpti
 	sugar.Infof("%s configured", config.Name)
 
 	return securityhub.NewClient(securityhub.Options{
-		ClientOptions: config.ClientOptions(),
-		CustomFields:  config.CustomFields,
-		Client:        client,
-		AccountID:     config.Config.AccountID,
-		Region:        config.Config.Region,
+		ClientOptions: target.ClientOptions{
+			Name:                  config.Name,
+			SkipExistingOnStartup: config.SkipExisting,
+			ResultFilter:          f.createResultFilter(config.Filter, config.MinimumPriority, config.Sources),
+			ReportFilter:          createReportFilter(config.Filter),
+		},
+		CustomFields: config.CustomFields,
+		Client:       client,
+		AccountID:    config.Config.AccountID,
+		Region:       config.Config.Region,
 	})
 }
 
@@ -533,11 +590,30 @@ func (f *TargetFactory) createGCSClient(config, parent *Target[GCSOptions]) targ
 	sugar.Infof("%s configured", config.Name)
 
 	return gcs.NewClient(gcs.Options{
-		ClientOptions: config.ClientOptions(),
-		Client:        gcsClient,
-		CustomFields:  config.CustomFields,
-		Prefix:        config.Config.Prefix,
+		ClientOptions: target.ClientOptions{
+			Name:                  config.Name,
+			SkipExistingOnStartup: config.SkipExisting,
+			ResultFilter:          f.createResultFilter(config.Filter, config.MinimumPriority, config.Sources),
+			ReportFilter:          createReportFilter(config.Filter),
+		},
+		Client:       gcsClient,
+		CustomFields: config.CustomFields,
+		Prefix:       config.Config.Prefix,
 	})
+}
+
+func (f *TargetFactory) createResultFilter(filter TargetFilter, minimumPriority string, sources []string) *report.ResultFilter {
+	return f.filterFactory.CreateFilter(
+		validate.RuleSets{
+			Include:  filter.Namespaces.Include,
+			Exclude:  filter.Namespaces.Exclude,
+			Selector: helper.ConvertMap(filter.Namespaces.Selector),
+		},
+		ToRuleSet(filter.Priorities),
+		ToRuleSet(filter.Policies),
+		minimumPriority,
+		sources,
+	)
 }
 
 func (f *TargetFactory) mapSecretValues(config any, ref, mountedSecret string) {
@@ -648,8 +724,8 @@ func (f *TargetFactory) mapSecretValues(config any, ref, mountedSecret string) {
 	}
 }
 
-func NewTargetFactory(secretClient secrets.Client) *TargetFactory {
-	return &TargetFactory{secretClient: secretClient}
+func NewTargetFactory(secretClient secrets.Client, filterFactory *target.ResultFilterFactory) *TargetFactory {
+	return &TargetFactory{secretClient: secretClient, filterFactory: filterFactory}
 }
 
 func mapWebhookTarget(config, parent *Target[WebhookOptions]) {
@@ -712,16 +788,6 @@ func setBool(config *bool, parent bool) {
 	if *config == false {
 		*config = parent
 	}
-}
-
-func createResultFilter(filter TargetFilter, minimumPriority string, sources []string) *report.ResultFilter {
-	return target.NewResultFilter(
-		ToRuleSet(filter.Namespaces),
-		ToRuleSet(filter.Priorities),
-		ToRuleSet(filter.Policies),
-		minimumPriority,
-		sources,
-	)
 }
 
 func createReportFilter(filter TargetFilter) *report.ReportFilter {

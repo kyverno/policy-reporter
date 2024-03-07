@@ -302,7 +302,7 @@ func (r *Resolver) SecretClient() secrets.Client {
 }
 
 // NamespaceClient resolver method
-func (r *Resolver) NamespceClient() (namespaces.Client, error) {
+func (r *Resolver) NamespaceClient() (namespaces.Client, error) {
 	clientset, err := r.Clientset()
 	if err != nil {
 		return nil, err
@@ -315,9 +315,12 @@ func (r *Resolver) NamespceClient() (namespaces.Client, error) {
 }
 
 func (r *Resolver) TargetFactory() *TargetFactory {
-	return &TargetFactory{
-		secretClient: r.SecretClient(),
+	ns, err := r.NamespaceClient()
+	if err != nil {
+		zap.L().Error("failed to create namespace client", zap.Error(err))
 	}
+
+	return NewTargetFactory(r.SecretClient(), target.NewResultFilterFactory(ns))
 }
 
 func (r *Resolver) DatabaseFactory() *DatabaseFactory {

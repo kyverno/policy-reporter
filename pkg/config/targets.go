@@ -1,7 +1,5 @@
 package config
 
-import "github.com/kyverno/policy-reporter/pkg/target"
-
 type Target[T any] struct {
 	Config          *T                `mapstructure:"config"`
 	Name            string            `mapstructure:"name"`
@@ -23,15 +21,6 @@ func (config *Target[T]) MapBaseParent(parent *Target[T]) {
 
 	if !config.SkipExisting {
 		config.SkipExisting = parent.SkipExisting
-	}
-}
-
-func (config *Target[T]) ClientOptions() target.ClientOptions {
-	return target.ClientOptions{
-		Name:                  config.Name,
-		SkipExistingOnStartup: config.SkipExisting,
-		ResultFilter:          createResultFilter(config.Filter, config.MinimumPriority, config.Sources),
-		ReportFilter:          createReportFilter(config.Filter),
 	}
 }
 
