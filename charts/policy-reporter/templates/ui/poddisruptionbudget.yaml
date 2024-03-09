@@ -8,6 +8,7 @@ apiVersion: policy/v1beta1
 kind: PodDisruptionBudget
 metadata:
   name: {{ include "ui.fullname" . }}
+  namespace: {{ include "policyreporter.namespace" . }}
   labels:
     {{- include "ui.labels" . | nindent 4 }}
 spec:

@@ -5,6 +5,7 @@ kind: NetworkPolicy
 metadata:
   labels: {{- include "ui.labels" . | nindent 4 }}
   name: {{ include "ui.fullname" . }}
+  namespace: {{ include "policyreporter.namespace" . }}
 spec:
   podSelector:
     matchLabels: {{- include "ui.selectorLabels" . | nindent 6 }}

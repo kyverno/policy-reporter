@@ -17,6 +17,7 @@ apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
   name: {{ $fullName }}
+  namespace: {{ include "policyreporter.namespace" . }}
   labels:
     {{- include "ui.labels" . | nindent 4 }}
     {{- with .Values.ui.ingress.labels }}
