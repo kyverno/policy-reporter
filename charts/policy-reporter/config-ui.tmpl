@@ -1,0 +1,40 @@
+namespace: {{ .Release.Namespace }}
+
+tempDir: {{ .Values.ui.tempDir }}
+
+logging:
+  encoding: {{ .Values.ui.logging.encoding }}
+  logLevel: {{ .Values.ui.logging.logLevel }}
+
+server:
+  port: {{ .Values.ui.server.port }}
+  logging: {{ .Values.ui.server.logging }}
+  overwriteHost: {{ .Values.ui.server.overwriteHost }}
+
+ui:
+  displayMode: {{ .Values.ui.displayMode }}
+
+{{- with .Values.ui.clusters }}
+clusters:
+  {{- toYaml . | nindent 4 }}
+{{- end }}
+
+{{- with .Values.ui.customBoards }}
+customBoards:
+  {{- toYaml . | nindent 4 }}
+{{- end }}
+
+{{- with .Values.ui.sources }}
+sources:
+  {{- toYaml . | nindent 4 }}
+{{- end }}
+
+{{- with .Values.ui.openIDConnect }}
+openIDConnect:
+  {{- toYaml . | nindent 4 }}
+{{- end }}
+
+{{- with .Values.ui.oauth }}
+oauth:
+  {{- toYaml . | nindent 4 }}
+{{- end }}

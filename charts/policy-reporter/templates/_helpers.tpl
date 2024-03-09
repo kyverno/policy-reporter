@@ -121,10 +121,6 @@ maxUnavailable: {{ .Values.podDisruptionBudget.maxUnavailable }}
 {{- end -}}
 {{- end -}}
 
-{{- define "ui.checksums" -}}
-checksum/cluster: {{ uuidv4 }}
-{{- end }}
-
 {{- define "target" -}}
 name: {{ .name | quote }}
 path: {{ .path | quote }}

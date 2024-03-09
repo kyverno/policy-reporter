@@ -162,18 +162,83 @@ reportFilter:
 
 ui:
   enabled: false
-  clusters:
-  - name: Default
-    secretRef: policy-report-ui-default-cluster
-  # -- source specific configurations
-  sources:
-    # -- exclude Pod, Job and Replica resources from kyverno results by default if no kinds are specified
-    - name: kyverno
-      excludes:
-        namespaceKinds:
-        - Pod
-        - Job
-        - ReplicaSet
+  image:
+      # -- (string) Image registry
+    registry: ghcr.io
+      # -- (string) Image repository
+    repository: kyverno/policy-reporter-ui
+      # -- (string) Image PullPolicy
+    pullPolicy: IfNotPresent
+      # -- (string) Image tag
+      # Defaults to `Chart.AppVersion` if omitted
+    tag: "2.0.0-alpha.18"
+
+  # -- Deployment replica count
+  replicaCount: 1
+
+  # -- Temporary Directory to persist session data for authentication
+  tempDir: "/tmp"
+
+  logging:
+    # -- log encoding
+    # possible encodings are console and json
+    encoding: console
+    # -- log level
+    # default info
+    logLevel: 0
+
+  server:
+    # -- Application port
+    port: 8080
+    # -- Enables Access logging
+    logging: false
+    basicAuth:
+      # -- HTTP BasicAuth username
+      username: ""
+      # -- HTTP BasicAuth password
+      password: ""
+      # -- Read HTTP BasicAuth credentials from secret
+      secretRef: ""
+
+  openIDConnect:
+    # -- Enable openID Connect authentication
+    enabled: false
+    # -- OpenID Connect Discovery URL
+    discoveryUrl: ""
+    # -- OpenID Connect Callback URL
+    callbackUrl: ""
+    # -- OpenID Connect ClientID
+    clientId: ""
+    # -- OpenID Connect ClientSecret
+    clientSecret: ""
+    # -- OpenID Connect allowed Scopes
+    scopes: []
+    # -- Provide OpenID Connect configuration via Secret
+    # supported keys: `discoveryUrl`, `clientId`, `clientSecret`
+    secretRef: ""
+
+  oauth:
+    # -- Enable openID Connect authentication
+    enabled: false
+    # -- OAuth2 Provider
+    # supported: amazon, gitlab, github, apple, google, yandex, azuread
+    provider: ""
+    # -- OpenID Connect Callback URL
+    callbackUrl: ""
+    # -- OpenID Connect ClientID
+    clientId: ""
+    # -- OpenID Connect ClientSecret
+    clientSecret: ""
+    # -- OpenID Connect allowed Scopes
+    scopes: []
+    # -- Provide OpenID Connect configuration via Secret
+    # supported keys: `provider`, `clientId`, `clientSecret`
+    secretRef: ""
+
+  # -- DisplayMode dark/light
+  # uses the OS configured prefered color scheme as default
+  displayMode: ""
+
   # -- Additional customizable dashboards
   customBoards: []
   # - name: Team A
@@ -190,6 +255,168 @@ ui:
   #     # -- disply cluster scoped resources and results
   #     enabled: false
 
+  # -- source specific configurations
+  sources:
+    # -- exclude Pod, Job and Replica resources from kyverno results by default if no kinds are specified
+    - name: kyverno
+      excludes:
+        namespaceKinds:
+        - Pod
+        - Job
+        - ReplicaSet
+
+  # -- Connected Policy Reporter APIs
+  clusters:
+  - name: Default
+    secretRef: policy-report-ui-default-cluster
+  # - name: default
+  #   host: http://policy-reporter:8080
+  #   secretRef: ""
+  #   skipTLS: false
+  #   certificate: ""
+  #   plugins:
+  #   - name: kyverno
+  #     host: http://policy-reporter-kyverno-plugin:8080
+
+  # -- Image pull secrets for image verification policies, this will define the `--imagePullSecrets` argument
+  imagePullSecrets: []
+    # regcred:
+    #   registry: foo.example.com
+    #   username: foobar
+    #   password: secret
+
+  # -- (string) Override the name of the chart
+  nameOverride: ""
+  # -- (string) Override the expanded name of the chart
+  fullnameOverride: ""
+
+  serviceAccount:
+    # -- Create ServiceAccount
+    create: true
+    # -- Enable ServiceAccount automaount
+    automount: true
+    # -- Annotations for the ServiceAccount
+    annotations: {}
+    # -- The ServiceAccount name
+    name: ""
+
+  # -- Additional annotations to add to each pod
+  podAnnotations: {}
+
+  # -- Additional labels to add to each pod
+  podLabels: {}
+
+  # -- Deployment update strategy.
+  # Ref: https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#strategy
+  updateStrategy: {}
+  #  rollingUpdate:
+  #    maxSurge: 1
+  #    maxUnavailable: 40%
+  #  type: RollingUpdate
+
+  # -- The number of revisions to keep
+  revisionHistoryLimit: 10
+
+  # -- Security context for the pod
+  podSecurityContext:
+    runAsUser: 1234
+    runAsGroup: 1234
+
+  # -- Allow additional env variables to be added
+  envVars: []
+
+  rbac:
+    # -- Create RBAC resources
+    enabled: true
+
+  # -- Container security context
+  securityContext:
+    runAsUser: 1234
+    runAsNonRoot: true
+    privileged: false
+    allowPrivilegeEscalation: false
+    readOnlyRootFilesystem: true
+    capabilities:
+      drop:
+        - ALL
+    seccompProfile:
+      type: RuntimeDefault
+
+  service:
+    # -- Service type.
+    type: ClusterIP
+    # -- Service port.
+    port: 8080
+    # -- Service annotations.
+    annotations: {}
+    # -- Service labels.
+    labels: {}
+
+  ingress:
+    # -- Create ingress resource.
+    enabled: false
+    # -- Ingress class name.
+    className: ""
+    # -- Ingress labels.
+    labels: {}
+    # -- Ingress annotations.
+    annotations: {}
+      # kubernetes.io/ingress.class: nginx
+      # kubernetes.io/tls-acme: "true"
+    # -- List of ingress host configurations.
+    hosts: []
+    #  - host: chart-example.local
+    #    paths:
+    #      - path: /
+    #        pathType: ImplementationSpecific
+    # -- List of ingress TLS configurations.
+    tls: []
+    #  - secretName: chart-example-tls
+    #    hosts:
+    #      - chart-example.local
+
+  networkPolicy:
+    # -- When true, use a NetworkPolicy to allow ingress to the webhook
+    # This is useful on clusters using Calico and/or native k8s network policies in a default-deny setup.
+    enabled: false
+    # -- A list of valid from selectors according to https://kubernetes.io/docs/concepts/services-networking/network-policies.
+    # Enables Kubernetes API Server by default
+    egress:
+    - ports:
+      - protocol: TCP
+        port: 6443
+    # -- A list of valid from selectors according to https://kubernetes.io/docs/concepts/services-networking/network-policies.
+    ingress: []
+
+  resources: {}
+    # We usually recommend not to specify default resources and to leave this as a conscious
+    # choice for the user. This also increases chances charts run on environments with little
+    # resources, such as Minikube. If you do want to specify resources, uncomment the following
+    # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+    # limits:
+    #   cpu: 100m
+    #   memory: 128Mi
+    # requests:
+    #   cpu: 100m
+    #   memory: 128Mi
+
+  # enabled if replicaCount > 1
+  podDisruptionBudget:
+    # -- Configures the minimum available pods for kyvernoPlugin disruptions.
+    # Cannot be used if `maxUnavailable` is set.
+    minAvailable: 1
+    # -- Configures the maximum unavailable pods for kyvernoPlugin disruptions.
+    # Cannot be used if `minAvailable` is set.
+    maxUnavailable:
+
+  # -- Node labels for pod assignment
+  nodeSelector: {}
+
+  # -- List of node taints to tolerate
+  tolerations: []
+
+    # -- Affinity constraints.
+  affinity: {}
 
 kyverno-plugin:
   enabled: false
