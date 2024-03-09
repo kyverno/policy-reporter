@@ -35,12 +35,16 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       serviceAccountName: {{ include "ui.serviceAccountName" . }}
+      {{- if .Values.ui.podSecurityContext }}
       securityContext:
         {{- toYaml .Values.ui.podSecurityContext | nindent 8 }}
+      {{- end }}
       containers:
         - name: {{ .Chart.Name }}
+          {{- if .Values.ui.securityContext }}
           securityContext:
             {{- toYaml .Values.ui.securityContext | nindent 12 }}
+          {{- end }}
           image: "{{ .Values.ui.image.registry }}/{{ .Values.ui.image.repository }}:{{ .Values.ui.image.tag }}"
           imagePullPolicy: {{ .Values.ui.image.pullPolicy }}
           args:
