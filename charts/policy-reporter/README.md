@@ -3,7 +3,7 @@
 Policy Reporter watches for PolicyReport Resources.
 It creates Prometheus Metrics and can send rule validation events to different targets like Loki, Elasticsearch, Slack or Discord
 
-![Version: 3.0.0-alpha.9](https://img.shields.io/badge/Version-3.0.0--alpha.9-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 3.0.0-alpha](https://img.shields.io/badge/AppVersion-3.0.0--alpha-informational?style=flat-square)
+![Version: 3.0.0-alpha.10](https://img.shields.io/badge/Version-3.0.0--alpha.10-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 3.0.0-alpha](https://img.shields.io/badge/AppVersion-3.0.0--alpha-informational?style=flat-square)
 
 ## Documentation
 
@@ -453,7 +453,7 @@ Check the [Documentation](https://kyverno.github.io/policy-reporter/guide/02-get
 | plugin.trivy.image.registry | string | `"ghcr.io"` | Image registry |
 | plugin.trivy.image.repository | string | `"kyverno/policy-reporter/trivy-plugin"` | Image repository |
 | plugin.trivy.image.pullPolicy | string | `"IfNotPresent"` | Image PullPolicy |
-| plugin.trivy.image.tag | string | `"0.0.5"` | Image tag Defaults to `Chart.AppVersion` if omitted |
+| plugin.trivy.image.tag | string | `"0.0.3"` | Image tag Defaults to `Chart.AppVersion` if omitted |
 | plugin.trivy.replicaCount | int | `1` | Deployment replica count |
 | plugin.trivy.logging.encoding | string | `"console"` | log encoding possible encodings are console and json |
 | plugin.trivy.logging.logLevel | int | `0` | log level default info |
