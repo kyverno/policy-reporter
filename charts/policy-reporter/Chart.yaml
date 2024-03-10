@@ -19,11 +19,3 @@ dependencies:
   - name: monitoring
     condition: monitoring.enabled
     version: "2.8.1"
-  - name: kyverno-plugin
-    version: "0.0.3"
-    repository: "oci://ghcr.io/kyverno/charts/policy-reporter"
-    condition: kyverno-plugin.enabled
-  - name: trivy-plugin
-    version: "0.0.5"
-    repository: "oci://ghcr.io/kyverno/charts/policy-reporter"
-    condition: trivy-plugin.enabled
