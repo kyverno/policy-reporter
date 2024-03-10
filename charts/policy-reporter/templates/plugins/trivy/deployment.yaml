@@ -1,0 +1,93 @@
+{{- if .Values.plugin.trivy.enabled -}}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "trivy-plugin.fullname" . }}
+  namespace: {{ include "policyreporter.namespace" . }}
+  labels:
+    {{- include "trivy-plugin.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.plugin.trivy.replicaCount }}
+  revisionHistoryLimit: {{ .Values.plugin.trivy.revisionHistoryLimit }}
+  {{- with .Values.plugin.trivy.updateStrategy }}
+  strategy:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "trivy-plugin.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      annotations:
+        checksum/secret: {{ include (print .Template.BasePath "/config-secret.yaml") . | sha256sum | quote }}
+        {{- with .Values.plugin.trivy.podAnnotations }}
+          {{- toYaml . | nindent 8 }}
+        {{- end }}
+      labels:
+        {{- include "trivy-plugin.labels" . | nindent 8 }}
+	{{- with .Values.plugin.trivy.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      {{- with .Values.plugin.trivy.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "trivy-plugin.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.plugin.trivy.podSecurityContext | nindent 8 }}
+      containers:
+        - name: {{ .Chart.Name }}
+          securityContext:
+            {{- toYaml .Values.plugin.trivy.securityContext | nindent 12 }}
+          image: "{{ .Values.plugin.trivy.image.registry }}/{{ .Values.plugin.trivy.image.repository }}:{{ .Values.plugin.trivy.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.plugin.trivy.image.pullPolicy }}
+          args:
+            - run
+            - --config=/app/config.yaml
+            - --port={{ .Values.plugin.trivy.server.port }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.plugin.trivy.server.port }}
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /api/vulnr/v1/policies
+              port: http
+          readinessProbe:
+            httpGet:
+              path: /api/vulnr/v1/policies
+              port: http
+          resources:
+            {{- toYaml .Values.plugin.trivy.resources | nindent 12 }}
+          volumeMounts:
+          - name: config-file
+            mountPath: /app/config.yaml
+            subPath: config.yaml
+            readOnly: true
+          env:
+          - name: POD_NAMESPACE
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.namespace
+          {{- with .Values.plugin.trivy.envVars }}
+          {{- . | toYaml | trim | nindent 10 }}
+          {{- end }}
+      volumes:
+      - name: config-file
+        secret:
+          secretName: {{ include "trivy-plugin.fullname" . }}-config
+          optional: true
+      {{- with .Values.plugin.trivy.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.plugin.trivy.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.plugin.trivy.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+{{- end }}

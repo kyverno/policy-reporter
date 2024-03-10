@@ -108,75 +108,6 @@ Check the [Documentation](https://kyverno.github.io/policy-reporter/guide/02-get
 | reportFilter.namespaces.include | list | `[]` |  |
 | reportFilter.namespaces.exclude | list | `[]` |  |
 | reportFilter.clusterReports.disabled | bool | `false` |  |
-| ui.enabled | bool | `false` |  |
-| ui.image.registry | string | `"ghcr.io"` | Image registry |
-| ui.image.repository | string | `"kyverno/policy-reporter-ui"` | Image repository |
-| ui.image.pullPolicy | string | `"IfNotPresent"` | Image PullPolicy |
-| ui.image.tag | string | `"2.0.0-alpha.18"` | Image tag Defaults to `Chart.AppVersion` if omitted |
-| ui.replicaCount | int | `1` | Deployment replica count |
-| ui.tempDir | string | `"/tmp"` | Temporary Directory to persist session data for authentication |
-| ui.logging.encoding | string | `"console"` | log encoding possible encodings are console and json |
-| ui.logging.logLevel | int | `0` | log level default info |
-| ui.server.port | int | `8080` | Application port |
-| ui.server.logging | bool | `false` | Enables Access logging |
-| ui.server.basicAuth.username | string | `""` | HTTP BasicAuth username |
-| ui.server.basicAuth.password | string | `""` | HTTP BasicAuth password |
-| ui.server.basicAuth.secretRef | string | `""` | Read HTTP BasicAuth credentials from secret |
-| ui.openIDConnect.enabled | bool | `false` | Enable openID Connect authentication |
-| ui.openIDConnect.discoveryUrl | string | `""` | OpenID Connect Discovery URL |
-| ui.openIDConnect.callbackUrl | string | `""` | OpenID Connect Callback URL |
-| ui.openIDConnect.clientId | string | `""` | OpenID Connect ClientID |
-| ui.openIDConnect.clientSecret | string | `""` | OpenID Connect ClientSecret |
-| ui.openIDConnect.scopes | list | `[]` | OpenID Connect allowed Scopes |
-| ui.openIDConnect.secretRef | string | `""` | Provide OpenID Connect configuration via Secret supported keys: `discoveryUrl`, `clientId`, `clientSecret` |
-| ui.oauth.enabled | bool | `false` | Enable openID Connect authentication |
-| ui.oauth.provider | string | `""` | OAuth2 Provider supported: amazon, gitlab, github, apple, google, yandex, azuread |
-| ui.oauth.callbackUrl | string | `""` | OpenID Connect Callback URL |
-| ui.oauth.clientId | string | `""` | OpenID Connect ClientID |
-| ui.oauth.clientSecret | string | `""` | OpenID Connect ClientSecret |
-| ui.oauth.scopes | list | `[]` | OpenID Connect allowed Scopes |
-| ui.oauth.secretRef | string | `""` | Provide OpenID Connect configuration via Secret supported keys: `provider`, `clientId`, `clientSecret` |
-| ui.displayMode | string | `""` | DisplayMode dark/light uses the OS configured prefered color scheme as default |
-| ui.customBoards | list | `[]` | Additional customizable dashboards |
-| ui.sources | list | `[{"excludes":{"namespaceKinds":["Pod","Job","ReplicaSet"]},"name":"kyverno"}]` | source specific configurations |
-| ui.sources[0] | object | `{"excludes":{"namespaceKinds":["Pod","Job","ReplicaSet"]},"name":"kyverno"}` | exclude Pod, Job and Replica resources from kyverno results by default if no kinds are specified |
-| ui.clusters | list | `[{"name":"Default","secretRef":"policy-report-ui-default-cluster"}]` | Connected Policy Reporter APIs |
-| ui.imagePullSecrets | list | `[]` | Image pull secrets for image verification policies, this will define the `--imagePullSecrets` argument |
-| ui.nameOverride | string | `""` | Override the name of the chart |
-| ui.fullnameOverride | string | `""` | Override the expanded name of the chart |
-| ui.serviceAccount.create | bool | `true` | Create ServiceAccount |
-| ui.serviceAccount.automount | bool | `true` | Enable ServiceAccount automaount |
-| ui.serviceAccount.annotations | object | `{}` | Annotations for the ServiceAccount |
-| ui.serviceAccount.name | string | `""` | The ServiceAccount name |
-| ui.podAnnotations | object | `{}` | Additional annotations to add to each pod |
-| ui.podLabels | object | `{}` | Additional labels to add to each pod |
-| ui.updateStrategy | object | `{}` | Deployment update strategy. Ref: https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#strategy |
-| ui.revisionHistoryLimit | int | `10` | The number of revisions to keep |
-| ui.podSecurityContext | object | `{"runAsGroup":1234,"runAsUser":1234}` | Security context for the pod |
-| ui.envVars | list | `[]` | Allow additional env variables to be added |
-| ui.rbac.enabled | bool | `true` | Create RBAC resources |
-| ui.securityContext | object | `{"allowPrivilegeEscalation":false,"capabilities":{"drop":["ALL"]},"privileged":false,"readOnlyRootFilesystem":true,"runAsNonRoot":true,"runAsUser":1234,"seccompProfile":{"type":"RuntimeDefault"}}` | Container security context |
-| ui.service.type | string | `"ClusterIP"` | Service type. |
-| ui.service.port | int | `8080` | Service port. |
-| ui.service.annotations | object | `{}` | Service annotations. |
-| ui.service.labels | object | `{}` | Service labels. |
-| ui.ingress.enabled | bool | `false` | Create ingress resource. |
-| ui.ingress.className | string | `""` | Ingress class name. |
-| ui.ingress.labels | object | `{}` | Ingress labels. |
-| ui.ingress.annotations | object | `{}` | Ingress annotations. |
-| ui.ingress.hosts | list | `[]` | List of ingress host configurations. |
-| ui.ingress.tls | list | `[]` | List of ingress TLS configurations. |
-| ui.networkPolicy.enabled | bool | `false` | When true, use a NetworkPolicy to allow ingress to the webhook This is useful on clusters using Calico and/or native k8s network policies in a default-deny setup. |
-| ui.networkPolicy.egress | list | `[{"ports":[{"port":6443,"protocol":"TCP"}]}]` | A list of valid from selectors according to https://kubernetes.io/docs/concepts/services-networking/network-policies. Enables Kubernetes API Server by default |
-| ui.networkPolicy.ingress | list | `[]` | A list of valid from selectors according to https://kubernetes.io/docs/concepts/services-networking/network-policies. |
-| ui.resources | object | `{}` |  |
-| ui.podDisruptionBudget.minAvailable | int | `1` | Configures the minimum available pods for kyvernoPlugin disruptions. Cannot be used if `maxUnavailable` is set. |
-| ui.podDisruptionBudget.maxUnavailable | string | `nil` | Configures the maximum unavailable pods for kyvernoPlugin disruptions. Cannot be used if `minAvailable` is set. |
-| ui.nodeSelector | object | `{}` | Node labels for pod assignment |
-| ui.tolerations | list | `[]` | List of node taints to tolerate |
-| ui.affinity | object | `{}` | Affinity constraints. |
-| kyverno-plugin.enabled | bool | `false` |  |
-| trivy-plugin.enabled | bool | `false` |  |
 | monitoring.enabled | bool | `false` |  |
 | database.type | string | `""` |  |
 | database.database | string | `""` |  |
@@ -187,8 +118,6 @@ Check the [Documentation](https://kyverno.github.io/policy-reporter/guide/02-get
 | database.dsn | string | `""` |  |
 | database.secretRef | string | `""` |  |
 | database.mountedSecret | string | `""` |  |
-| global.plugins.kyverno | bool | `false` |  |
-| global.backend | string | `""` |  |
 | global.fullnameOverride | string | `"policy-reporter"` |  |
 | global.namespace | string | `""` |  |
 | global.labels | object | `{}` |  |
@@ -198,6 +127,7 @@ Check the [Documentation](https://kyverno.github.io/policy-reporter/guide/02-get
 | policyPriorities | object | `{}` |  |
 | emailReports.clusterName | string | `""` |  |
 | emailReports.titlePrefix | string | `"Report"` |  |
+| emailReports.resources | object | `{}` |  |
 | emailReports.smtp.secret | string | `""` |  |
 | emailReports.smtp.host | string | `""` |  |
 | emailReports.smtp.port | int | `465` |  |
@@ -397,6 +327,178 @@ Check the [Documentation](https://kyverno.github.io/policy-reporter/guide/02-get
 | extraVolumes.volumeMounts | list | `[]` |  |
 | extraVolumes.volumes | list | `[]` |  |
 | sqliteVolume | object | `{}` |  |
+| envVars | list | `[]` | Allow additional env variables to be added |
+| tmpVolume | object | `{}` | Allow custom configuration of the /tmp volume |
+| ui.enabled | bool | `false` |  |
+| ui.image.registry | string | `"ghcr.io"` | Image registry |
+| ui.image.repository | string | `"kyverno/policy-reporter-ui"` | Image repository |
+| ui.image.pullPolicy | string | `"IfNotPresent"` | Image PullPolicy |
+| ui.image.tag | string | `"2.0.0-alpha.18"` | Image tag Defaults to `Chart.AppVersion` if omitted |
+| ui.replicaCount | int | `1` | Deployment replica count |
+| ui.tempDir | string | `"/tmp"` | Temporary Directory to persist session data for authentication |
+| ui.logging.encoding | string | `"console"` | log encoding possible encodings are console and json |
+| ui.logging.logLevel | int | `0` | log level default info |
+| ui.server.port | int | `8080` | Application port |
+| ui.server.logging | bool | `false` | Enables Access logging |
+| ui.server.basicAuth.username | string | `""` | HTTP BasicAuth username |
+| ui.server.basicAuth.password | string | `""` | HTTP BasicAuth password |
+| ui.server.basicAuth.secretRef | string | `""` | Read HTTP BasicAuth credentials from secret |
+| ui.openIDConnect.enabled | bool | `false` | Enable openID Connect authentication |
+| ui.openIDConnect.discoveryUrl | string | `""` | OpenID Connect Discovery URL |
+| ui.openIDConnect.callbackUrl | string | `""` | OpenID Connect Callback URL |
+| ui.openIDConnect.clientId | string | `""` | OpenID Connect ClientID |
+| ui.openIDConnect.clientSecret | string | `""` | OpenID Connect ClientSecret |
+| ui.openIDConnect.scopes | list | `[]` | OpenID Connect allowed Scopes |
+| ui.openIDConnect.secretRef | string | `""` | Provide OpenID Connect configuration via Secret supported keys: `discoveryUrl`, `clientId`, `clientSecret` |
+| ui.oauth.enabled | bool | `false` | Enable openID Connect authentication |
+| ui.oauth.provider | string | `""` | OAuth2 Provider supported: amazon, gitlab, github, apple, google, yandex, azuread |
+| ui.oauth.callbackUrl | string | `""` | OpenID Connect Callback URL |
+| ui.oauth.clientId | string | `""` | OpenID Connect ClientID |
+| ui.oauth.clientSecret | string | `""` | OpenID Connect ClientSecret |
+| ui.oauth.scopes | list | `[]` | OpenID Connect allowed Scopes |
+| ui.oauth.secretRef | string | `""` | Provide OpenID Connect configuration via Secret supported keys: `provider`, `clientId`, `clientSecret` |
+| ui.displayMode | string | `""` | DisplayMode dark/light uses the OS configured prefered color scheme as default |
+| ui.customBoards | list | `[]` | Additional customizable dashboards |
+| ui.sources | list | `[{"excludes":{"namespaceKinds":["Pod","Job","ReplicaSet"]},"name":"kyverno"}]` | source specific configurations |
+| ui.sources[0] | object | `{"excludes":{"namespaceKinds":["Pod","Job","ReplicaSet"]},"name":"kyverno"}` | exclude Pod, Job and Replica resources from kyverno results by default if no kinds are specified |
+| ui.clusters | list | `[{"name":"Default","secretRef":"policy-report-ui-default-cluster"}]` | Connected Policy Reporter APIs |
+| ui.imagePullSecrets | list | `[]` | Image pull secrets for image verification policies, this will define the `--imagePullSecrets` argument |
+| ui.serviceAccount.create | bool | `true` | Create ServiceAccount |
+| ui.serviceAccount.automount | bool | `true` | Enable ServiceAccount automaount |
+| ui.serviceAccount.annotations | object | `{}` | Annotations for the ServiceAccount |
+| ui.serviceAccount.name | string | `""` | The ServiceAccount name |
+| ui.podAnnotations | object | `{}` | Additional annotations to add to each pod |
+| ui.podLabels | object | `{}` | Additional labels to add to each pod |
+| ui.updateStrategy | object | `{}` | Deployment update strategy. Ref: https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#strategy |
+| ui.revisionHistoryLimit | int | `10` | The number of revisions to keep |
+| ui.podSecurityContext | object | `{"runAsGroup":1234,"runAsUser":1234}` | Security context for the pod |
+| ui.envVars | list | `[]` | Allow additional env variables to be added |
+| ui.rbac.enabled | bool | `true` | Create RBAC resources |
+| ui.securityContext | object | `{"allowPrivilegeEscalation":false,"capabilities":{"drop":["ALL"]},"privileged":false,"readOnlyRootFilesystem":true,"runAsNonRoot":true,"runAsUser":1234,"seccompProfile":{"type":"RuntimeDefault"}}` | Container security context |
+| ui.service.type | string | `"ClusterIP"` | Service type. |
+| ui.service.port | int | `8080` | Service port. |
+| ui.service.annotations | object | `{}` | Service annotations. |
+| ui.service.labels | object | `{}` | Service labels. |
+| ui.ingress.enabled | bool | `false` | Create ingress resource. |
+| ui.ingress.className | string | `""` | Ingress class name. |
+| ui.ingress.labels | object | `{}` | Ingress labels. |
+| ui.ingress.annotations | object | `{}` | Ingress annotations. |
+| ui.ingress.hosts | list | `[]` | List of ingress host configurations. |
+| ui.ingress.tls | list | `[]` | List of ingress TLS configurations. |
+| ui.networkPolicy.enabled | bool | `false` | When true, use a NetworkPolicy to allow ingress to the webhook This is useful on clusters using Calico and/or native k8s network policies in a default-deny setup. |
+| ui.networkPolicy.egress | list | `[{"ports":[{"port":6443,"protocol":"TCP"}]}]` | A list of valid from selectors according to https://kubernetes.io/docs/concepts/services-networking/network-policies. Enables Kubernetes API Server by default |
+| ui.networkPolicy.ingress | list | `[]` | A list of valid from selectors according to https://kubernetes.io/docs/concepts/services-networking/network-policies. |
+| ui.resources | object | `{}` |  |
+| ui.podDisruptionBudget.minAvailable | int | `1` | Configures the minimum available pods for kyvernoPlugin disruptions. Cannot be used if `maxUnavailable` is set. |
+| ui.podDisruptionBudget.maxUnavailable | string | `nil` | Configures the maximum unavailable pods for kyvernoPlugin disruptions. Cannot be used if `minAvailable` is set. |
+| ui.nodeSelector | object | `{}` | Node labels for pod assignment |
+| ui.tolerations | list | `[]` | List of node taints to tolerate |
+| ui.affinity | object | `{}` | Affinity constraints. |
+| plugin.kyverno.enabled | bool | `false` | Enable Kyverno Plugin |
+| plugin.kyverno.image.registry | string | `"ghcr.io"` | Image registry |
+| plugin.kyverno.image.repository | string | `"kyverno/policy-reporter/kyverno-plugin"` | Image repository |
+| plugin.kyverno.image.pullPolicy | string | `"IfNotPresent"` | Image PullPolicy |
+| plugin.kyverno.image.tag | string | `"0.0.3"` | Image tag Defaults to `Chart.AppVersion` if omitted |
+| plugin.kyverno.replicaCount | int | `1` | Deployment replica count |
+| plugin.kyverno.logging.encoding | string | `"console"` | log encoding possible encodings are console and json |
+| plugin.kyverno.logging.logLevel | int | `0` | log level default info |
+| plugin.kyverno.server.port | int | `8080` | Application port |
+| plugin.kyverno.server.logging | bool | `false` | Enables Access logging |
+| plugin.kyverno.server.basicAuth.username | string | `""` | HTTP BasicAuth username |
+| plugin.kyverno.server.basicAuth.password | string | `""` | HTTP BasicAuth password |
+| plugin.kyverno.server.basicAuth.secretRef | string | `""` | Read HTTP BasicAuth credentials from secret |
+| plugin.kyverno.blockReports.enabled | bool | `false` | Enables he BlockReport feature |
+| plugin.kyverno.blockReports.eventNamespace | string | `"default"` | Watches for Kyverno Events in the configured namespace leave blank to watch in all namespaces |
+| plugin.kyverno.blockReports.results.maxPerReport | int | `200` | Max items per PolicyReport resource |
+| plugin.kyverno.blockReports.results.keepOnlyLatest | bool | `false` | Keep only the latest of duplicated events |
+| plugin.kyverno.imagePullSecrets | list | `[]` | Image pull secrets for image verification policies, this will define the `--imagePullSecrets` argument |
+| plugin.kyverno.serviceAccount.create | bool | `true` | Create ServiceAccount |
+| plugin.kyverno.serviceAccount.automount | bool | `true` | Enable ServiceAccount automaount |
+| plugin.kyverno.serviceAccount.annotations | object | `{}` | Annotations for the ServiceAccount |
+| plugin.kyverno.serviceAccount.name | string | `""` | The ServiceAccount name |
+| plugin.kyverno.podAnnotations | object | `{}` | Additional annotations to add to each pod |
+| plugin.kyverno.podLabels | object | `{}` | Additional labels to add to each pod |
+| plugin.kyverno.updateStrategy | object | `{}` | Deployment update strategy. Ref: https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#strategy |
+| plugin.kyverno.revisionHistoryLimit | int | `10` | The number of revisions to keep |
+| plugin.kyverno.podSecurityContext | object | `{"runAsGroup":1234,"runAsUser":1234}` | Security context for the pod |
+| plugin.kyverno.envVars | list | `[]` | Allow additional env variables to be added |
+| plugin.kyverno.rbac.enabled | bool | `true` | Create RBAC resources |
+| plugin.kyverno.securityContext | object | `{"allowPrivilegeEscalation":false,"capabilities":{"drop":["ALL"]},"privileged":false,"readOnlyRootFilesystem":true,"runAsNonRoot":true,"runAsUser":1234,"seccompProfile":{"type":"RuntimeDefault"}}` | Container security context |
+| plugin.kyverno.service.type | string | `"ClusterIP"` | Service type. |
+| plugin.kyverno.service.port | int | `8080` | Service port. |
+| plugin.kyverno.service.annotations | object | `{}` | Service annotations. |
+| plugin.kyverno.service.labels | object | `{}` | Service labels. |
+| plugin.kyverno.ingress.enabled | bool | `false` | Create ingress resource. |
+| plugin.kyverno.ingress.className | string | `""` | Ingress class name. |
+| plugin.kyverno.ingress.labels | object | `{}` | Ingress labels. |
+| plugin.kyverno.ingress.annotations | object | `{}` | Ingress annotations. |
+| plugin.kyverno.ingress.hosts | list | `[]` | List of ingress host configurations. |
+| plugin.kyverno.ingress.tls | list | `[]` | List of ingress TLS configurations. |
+| plugin.kyverno.networkPolicy.enabled | bool | `false` | When true, use a NetworkPolicy to allow ingress to the webhook This is useful on clusters using Calico and/or native k8s network policies in a default-deny setup. |
+| plugin.kyverno.networkPolicy.egress | list | `[{"ports":[{"port":6443,"protocol":"TCP"}]}]` | A list of valid from selectors according to https://kubernetes.io/docs/concepts/services-networking/network-policies. Enables Kubernetes API Server by default |
+| plugin.kyverno.networkPolicy.ingress | list | `[]` | A list of valid from selectors according to https://kubernetes.io/docs/concepts/services-networking/network-policies. |
+| plugin.kyverno.resources | object | `{}` |  |
+| plugin.kyverno.leaderElection.enabled | bool | `false` | Enables LeaderElection. |
+| plugin.kyverno.leaderElection.lockName | string | `"kyverno-plugin"` | Lock Name |
+| plugin.kyverno.leaderElection.releaseOnCancel | bool | `true` | Released lock when the run context is cancelled. |
+| plugin.kyverno.leaderElection.leaseDuration | int | `15` | LeaseDuration is the duration that non-leader candidates will wait to force acquire leadership. |
+| plugin.kyverno.leaderElection.renewDeadline | int | `10` | RenewDeadline is the duration that the acting master will retry refreshing leadership before giving up. |
+| plugin.kyverno.leaderElection.retryPeriod | int | `2` | RetryPeriod is the duration the LeaderElector clients should wait between tries of actions. |
+| plugin.kyverno.podDisruptionBudget.minAvailable | int | `1` | Configures the minimum available pods for kyvernoPlugin disruptions. Cannot be used if `maxUnavailable` is set. |
+| plugin.kyverno.podDisruptionBudget.maxUnavailable | string | `nil` | Configures the maximum unavailable pods for kyvernoPlugin disruptions. Cannot be used if `minAvailable` is set. |
+| plugin.kyverno.nodeSelector | object | `{}` | Node labels for pod assignment |
+| plugin.kyverno.tolerations | list | `[]` | List of node taints to tolerate |
+| plugin.kyverno.affinity | object | `{}` | Affinity constraints. |
+| plugin.trivy.enabled | bool | `false` | Enable Trivy Operator Plugin |
+| plugin.trivy.image.registry | string | `"ghcr.io"` | Image registry |
+| plugin.trivy.image.repository | string | `"kyverno/policy-reporter/trivy-plugin"` | Image repository |
+| plugin.trivy.image.pullPolicy | string | `"IfNotPresent"` | Image PullPolicy |
+| plugin.trivy.image.tag | string | `"0.0.5"` | Image tag Defaults to `Chart.AppVersion` if omitted |
+| plugin.trivy.replicaCount | int | `1` | Deployment replica count |
+| plugin.trivy.logging.encoding | string | `"console"` | log encoding possible encodings are console and json |
+| plugin.trivy.logging.logLevel | int | `0` | log level default info |
+| plugin.trivy.server.port | int | `8080` | Application port |
+| plugin.trivy.server.logging | bool | `false` | Enables Access logging |
+| plugin.trivy.server.basicAuth.username | string | `""` | HTTP BasicAuth username |
+| plugin.trivy.server.basicAuth.password | string | `""` | HTTP BasicAuth password |
+| plugin.trivy.server.basicAuth.secretRef | string | `""` | Read HTTP BasicAuth credentials from secret |
+| plugin.trivy.policyReporter.skipTLS | bool | `false` | Skip TLS Verification |
+| plugin.trivy.policyReporter.certificate | string | `""` | TLS Certificate |
+| plugin.trivy.policyReporter.basicAuth.username | string | `""` | HTTP BasicAuth Username |
+| plugin.trivy.policyReporter.basicAuth.password | string | `""` | HTTP BasicAuth Password |
+| plugin.trivy.policyReporter.secretRef | string | `""` | Secret to read the API configuration from supports `host`, `certificate`, `skipTLS`, `username`, `password` key |
+| plugin.trivy.imagePullSecrets | list | `[]` | Image pull secrets for image verification policies, this will define the `--imagePullSecrets` argument |
+| plugin.trivy.serviceAccount.create | bool | `true` | Create ServiceAccount |
+| plugin.trivy.serviceAccount.automount | bool | `true` | Enable ServiceAccount automaount |
+| plugin.trivy.serviceAccount.annotations | object | `{}` | Annotations for the ServiceAccount |
+| plugin.trivy.serviceAccount.name | string | `""` | The ServiceAccount name |
+| plugin.trivy.podAnnotations | object | `{}` | Additional annotations to add to each pod |
+| plugin.trivy.podLabels | object | `{}` | Additional labels to add to each pod |
+| plugin.trivy.updateStrategy | object | `{}` | Deployment update strategy. Ref: https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#strategy |
+| plugin.trivy.revisionHistoryLimit | int | `10` | The number of revisions to keep |
+| plugin.trivy.podSecurityContext | object | `{"runAsGroup":1234,"runAsUser":1234}` | Security context for the pod |
+| plugin.trivy.envVars | list | `[]` | Allow additional env variables to be added |
+| plugin.trivy.rbac.enabled | bool | `true` | Create RBAC resources |
+| plugin.trivy.securityContext | object | `{"allowPrivilegeEscalation":false,"capabilities":{"drop":["ALL"]},"privileged":false,"readOnlyRootFilesystem":true,"runAsNonRoot":true,"runAsUser":1234,"seccompProfile":{"type":"RuntimeDefault"}}` | Container security context |
+| plugin.trivy.service.type | string | `"ClusterIP"` | Service type. |
+| plugin.trivy.service.port | int | `8080` | Service port. |
+| plugin.trivy.service.annotations | object | `{}` | Service annotations. |
+| plugin.trivy.service.labels | object | `{}` | Service labels. |
+| plugin.trivy.ingress.enabled | bool | `false` | Create ingress resource. |
+| plugin.trivy.ingress.className | string | `""` | Ingress class name. |
+| plugin.trivy.ingress.labels | object | `{}` | Ingress labels. |
+| plugin.trivy.ingress.annotations | object | `{}` | Ingress annotations. |
+| plugin.trivy.ingress.hosts | list | `[]` | List of ingress host configurations. |
+| plugin.trivy.ingress.tls | list | `[]` | List of ingress TLS configurations. |
+| plugin.trivy.networkPolicy.enabled | bool | `false` | When true, use a NetworkPolicy to allow ingress to the webhook This is useful on clusters using Calico and/or native k8s network policies in a default-deny setup. |
+| plugin.trivy.networkPolicy.egress | list | `[{"ports":[{"port":6443,"protocol":"TCP"}]}]` | A list of valid from selectors according to https://kubernetes.io/docs/concepts/services-networking/network-policies. Enables Kubernetes API Server by default |
+| plugin.trivy.networkPolicy.ingress | list | `[]` | A list of valid from selectors according to https://kubernetes.io/docs/concepts/services-networking/network-policies. |
+| plugin.trivy.resources | object | `{}` |  |
+| plugin.trivy.podDisruptionBudget.minAvailable | int | `1` | Configures the minimum available pods for kyvernoPlugin disruptions. Cannot be used if `maxUnavailable` is set. |
+| plugin.trivy.podDisruptionBudget.maxUnavailable | string | `nil` | Configures the maximum unavailable pods for kyvernoPlugin disruptions. Cannot be used if `minAvailable` is set. |
+| plugin.trivy.nodeSelector | object | `{}` | Node labels for pod assignment |
+| plugin.trivy.tolerations | list | `[]` | List of node taints to tolerate |
+| plugin.trivy.affinity | object | `{}` | Affinity constraints. |
 
 ## Source Code
 
@@ -407,8 +509,6 @@ Check the [Documentation](https://kyverno.github.io/policy-reporter/guide/02-get
 | Repository | Name | Version |
 |------------|------|---------|
 |  | monitoring | 2.8.1 |
-| oci://ghcr.io/kyverno/charts/policy-reporter | kyverno-plugin | 0.0.3 |
-| oci://ghcr.io/kyverno/charts/policy-reporter | trivy-plugin | 0.0.5 |
 
 ## Maintainers
 

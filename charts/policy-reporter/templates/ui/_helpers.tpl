@@ -18,7 +18,7 @@ If release name contains chart name it will be used as a full name.
 Create chart name and version as used by the chart label.
 */}}
 {{- define "ui.chart" -}}
-{{ template "policyreporter.chart" . }}-ui
+{{ template "policyreporter.chart" . }}
 {{- end }}
 
 {{/*
@@ -45,21 +45,21 @@ app.kubernetes.io/instance: {{ .Release.Name }}
 Create the name of the service account to use
 */}}
 {{- define "ui.serviceAccountName" -}}
-{{- if .Values.serviceAccount.create }}
-{{- default (include "ui.fullname" .) .Values.serviceAccount.name }}
+{{- if .Values.plugin.kyverno.serviceAccount.create }}
+{{- default (include "ui.fullname" .) .Values.plugin.kyverno.serviceAccount.name }}
 {{- else }}
-{{- default "default" .Values.serviceAccount.name }}
+{{- default "default" .Values.plugin.kyverno.serviceAccount.name }}
 {{- end }}
 {{- end }}
 
 {{- define "ui.podDisruptionBudget" -}}
-{{- if and .Values.podDisruptionBudget.minAvailable .Values.podDisruptionBudget.maxUnavailable }}
-{{- fail "Cannot set both .Values.podDisruptionBudget.minAvailable and .Values.podDisruptionBudget.maxUnavailable" -}}
+{{- if and .Values.plugin.kyverno.ui.podDisruptionBudget.minAvailable .Values.plugin.kyverno.ui.podDisruptionBudget.maxUnavailable }}
+{{- fail "Cannot set both" -}}
 {{- end }}
-{{- if not .Values.podDisruptionBudget.maxUnavailable }}
-minAvailable: {{ default 1 .Values.podDisruptionBudget.minAvailable }}
+{{- if not .Values.plugin.kyverno.ui.podDisruptionBudget.maxUnavailable }}
+minAvailable: {{ default 1 .Values.plugin.kyverno.ui.podDisruptionBudget.minAvailable }}
 {{- end }}
-{{- if .Values.podDisruptionBudget.maxUnavailable }}
-maxUnavailable: {{ .Values.podDisruptionBudget.maxUnavailable }}
+{{- if .Values.plugin.kyverno.ui.podDisruptionBudget.maxUnavailable }}
+maxUnavailable: {{ .Values.plugin.kyverno.ui.podDisruptionBudget.maxUnavailable }}
 {{- end }}
 {{- end }}

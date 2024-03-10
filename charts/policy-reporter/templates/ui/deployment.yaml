@@ -40,7 +40,7 @@ spec:
         {{- toYaml .Values.ui.podSecurityContext | nindent 8 }}
       {{- end }}
       containers:
-        - name: {{ .Chart.Name }}
+        - name: policy-reporter-ui
           {{- if .Values.ui.securityContext }}
           securityContext:
             {{- toYaml .Values.ui.securityContext | nindent 12 }}
