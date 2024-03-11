@@ -25,7 +25,7 @@ spec:
         {{- end }}
       labels:
         {{- include "trivy-plugin.labels" . | nindent 8 }}
-	{{- with .Values.plugin.trivy.podLabels }}
+        {{- with .Values.plugin.trivy.podLabels }}
         {{- toYaml . | nindent 8 }}
         {{- end }}
     spec:
@@ -34,13 +34,13 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       serviceAccountName: {{ include "trivy-plugin.serviceAccountName" . }}
-      {{- if .Values.plugin.trivy.podSecurityContext -}}
+      {{- if .Values.plugin.trivy.podSecurityContext }}
       securityContext:
         {{- toYaml .Values.plugin.trivy.podSecurityContext | nindent 8 }}
       {{- end }}
       containers:
-        - name: {{ .Chart.Name }}
-          {{- if .Values.plugin.trivy.securityContext -}}
+        - name: policy-reporter-trivy-plugin
+          {{- if .Values.plugin.trivy.securityContext }}
           securityContext:
             {{- toYaml .Values.plugin.trivy.securityContext | nindent 12 }}
           {{- end }}

@@ -13,9 +13,9 @@ logging:
 server:
   logging: {{ .Values.plugin.kyverno.server.logging }}
   basicAuth:
-    username: {{ .Values.plugin.kyverno.server.basicAuth.username }}
-    password: {{ .Values.plugin.kyverno.server.basicAuth.password }}
-    secretRef: {{ .Values.plugin.kyverno.server.basicAuth.secretRef }}
+    username: {{ .Values.basicAuth.username }}
+    password: {{ .Values.basicAuth.password }}
+    secretRef: {{ .Values.basicAuth.secretRef }}
 
 {{- with .Values.plugin.kyverno.blockReports }}
 blockReports:
