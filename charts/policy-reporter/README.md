@@ -332,7 +332,7 @@ Check the [Documentation](https://kyverno.github.io/policy-reporter/guide/02-get
 | ui.image.registry | string | `"ghcr.io"` | Image registry |
 | ui.image.repository | string | `"kyverno/policy-reporter-ui"` | Image repository |
 | ui.image.pullPolicy | string | `"IfNotPresent"` | Image PullPolicy |
-| ui.image.tag | string | `"2.0.0-alpha.18"` | Image tag Defaults to `Chart.AppVersion` if omitted |
+| ui.image.tag | string | `"2.0.0-alpha.19"` | Image tag Defaults to `Chart.AppVersion` if omitted |
 | ui.replicaCount | int | `1` | Deployment replica count |
 | ui.tempDir | string | `"/tmp"` | Temporary Directory to persist session data for authentication |
 | ui.logging.encoding | string | `"console"` | log encoding possible encodings are console and json |
