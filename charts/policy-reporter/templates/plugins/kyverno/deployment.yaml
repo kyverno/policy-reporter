@@ -25,7 +25,7 @@ spec:
         {{- end }}
       labels:
         {{- include "kyverno-plugin.labels" . | nindent 8 }}
-	{{- with .Values.plugin.kyverno.podLabels }}
+        {{- with .Values.plugin.kyverno.podLabels }}
         {{- toYaml . | nindent 8 }}
         {{- end }}
     spec:

@@ -9,8 +9,8 @@ If release name contains chart name it will be used as a full name.
 */}}
 {{- define "policyreporter.fullname" -}}
 {{- $name := default .Chart.Name .Values.nameOverride }}
-{{- if .Values.global.fullnameOverride }}
-{{- .Values.global.fullnameOverride }}
+{{- if .Values.fullnameOverride }}
+{{- .Values.fullnameOverride }}
 {{- else if contains $name .Release.Name }}
 {{- .Release.Name | trunc 63 | trimSuffix "-" }}
 {{- else }}
@@ -105,8 +105,8 @@ maxUnavailable: {{ .Values.podDisruptionBudget.maxUnavailable }}
 
 {{/* Get the namespace name. */}}
 {{- define "policyreporter.namespace" -}}
-{{- if .Values.global.namespace -}}
-    {{- .Values.global.namespace -}}
+{{- if .Values.namespaceOverride -}}
+    {{- .Values.namespaceOverride -}}
 {{- else -}}
     {{- .Release.Namespace -}}
 {{- end -}}

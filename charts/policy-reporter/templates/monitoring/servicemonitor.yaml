@@ -1,28 +1,29 @@
+{{- if and .Values.monitoring.enabled }}
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
   name: {{ include "monitoring.fullname" . }}
   namespace: {{ include "monitoring.smNamespace" . }}
-  {{- if .Values.annotations }}
+  {{- if .Values.monitoring.annotations }}
   annotations:
-    {{- toYaml .Values.annotations | nindent 4 }}
+    {{- toYaml .Values.monitoring.annotations | nindent 4 }}
   {{- end }}
   labels:
     {{- include "monitoring.labels" . | nindent 4 }}
-    {{- with .Values.serviceMonitor.labels }}
+    {{- with .Values.monitoring.serviceMonitor.labels }}
         {{- toYaml . | nindent 4 }}
     {{- end }}
 spec:
   selector:
     matchLabels:
         {{- include "policyreporter.selectorLabels" . | nindent 8 }}
-  {{- with .Values.serviceMonitor.namespaceSelector }}
+  {{- with .Values.monitoring.serviceMonitor.namespaceSelector }}
   namespaceSelector:
     {{- toYaml . | nindent 4 }}
   {{- end }}
   endpoints:
   - port: http
-    {{- if and .Values.global.basicAuth.username .Values.global.basicAuth.password }}
+    {{- if and .Values.basicAuth.username .Values.basicAuth.password }}
     basicAuth:
       password:
         name: {{ include "monitoring.fullname" . }}-auth
@@ -30,21 +31,21 @@ spec:
       username:
         name: {{ include "monitoring.fullname" . }}-auth
         key: username
-    {{- else if .Values.global.basicAuth.secretRef }}
+    {{- else if .Values.basicAuth.secretRef }}
     basicAuth:
       password:
-        name: {{ .Values.global.basicAuth.secretRef }}
+        name: {{ .Values.basicAuth.secretRef }}
         key: password
       username:
-        name: {{ .Values.global.basicAuth.secretRef }}
+        name: {{ .Values.basicAuth.secretRef }}
         key: username
     {{- end }}
-    honorLabels: {{ .Values.serviceMonitor.honorLabels }}
-    {{- if .Values.serviceMonitor.scrapeTimeout }}
-    scrapeTimeout: {{ .Values.serviceMonitor.scrapeTimeout }}
+    honorLabels: {{ .Values.monitoring.serviceMonitor.honorLabels }}
+    {{- if .Values.monitoring.serviceMonitor.scrapeTimeout }}
+    scrapeTimeout: {{ .Values.monitoring.serviceMonitor.scrapeTimeout }}
     {{- end }}
-    {{- if .Values.serviceMonitor.interval }}
-    interval: {{ .Values.serviceMonitor.interval }}
+    {{- if .Values.monitoring.serviceMonitor.interval }}
+    interval: {{ .Values.monitoring.serviceMonitor.interval }}
     {{- end }}
     relabelings:
     - action: labeldrop
@@ -52,10 +53,11 @@ spec:
     - targetLabel: instance
       replacement: policy-reporter
       action: replace
-    {{- with .Values.serviceMonitor.relabelings }}
+    {{- with .Values.monitoring.serviceMonitor.relabelings }}
       {{- toYaml . | nindent 4 }}
     {{- end }}
-    {{- with .Values.serviceMonitor.metricRelabelings }}
+    {{- with .Values.monitoring.serviceMonitor.metricRelabelings }}
     metricRelabelings:
       {{- toYaml . | nindent 4 }}
     {{- end }}
+{{- end }}

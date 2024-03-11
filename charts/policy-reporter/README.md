@@ -3,7 +3,7 @@
 Policy Reporter watches for PolicyReport Resources.
 It creates Prometheus Metrics and can send rule validation events to different targets like Loki, Elasticsearch, Slack or Discord
 
-![Version: 3.0.0-alpha.11](https://img.shields.io/badge/Version-3.0.0--alpha.11-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 3.0.0-alpha](https://img.shields.io/badge/AppVersion-3.0.0--alpha-informational?style=flat-square)
+![Version: 3.0.0-alpha.12](https://img.shields.io/badge/Version-3.0.0--alpha.12-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 3.0.0-alpha](https://img.shields.io/badge/AppVersion-3.0.0--alpha-informational?style=flat-square)
 
 ## Documentation
 
@@ -51,6 +51,8 @@ Check the [Documentation](https://kyverno.github.io/policy-reporter/guide/02-get
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
 | nameOverride | string | `""` |  |
+| fullnameOverride | string | `"policy-reporter"` |  |
+| namespaceOverride | string | `""` |  |
 | image.registry | string | `"ghcr.io"` |  |
 | image.repository | string | `"kyverno/policy-reporter"` |  |
 | image.pullPolicy | string | `"IfNotPresent"` |  |
@@ -108,7 +110,6 @@ Check the [Documentation](https://kyverno.github.io/policy-reporter/guide/02-get
 | reportFilter.namespaces.include | list | `[]` |  |
 | reportFilter.namespaces.exclude | list | `[]` |  |
 | reportFilter.clusterReports.disabled | bool | `false` |  |
-| monitoring.enabled | bool | `false` |  |
 | database.type | string | `""` |  |
 | database.database | string | `""` |  |
 | database.username | string | `""` |  |
@@ -118,13 +119,11 @@ Check the [Documentation](https://kyverno.github.io/policy-reporter/guide/02-get
 | database.dsn | string | `""` |  |
 | database.secretRef | string | `""` |  |
 | database.mountedSecret | string | `""` |  |
-| global.fullnameOverride | string | `"policy-reporter"` |  |
-| global.namespace | string | `""` |  |
 | global.labels | object | `{}` |  |
-| global.basicAuth.username | string | `""` |  |
-| global.basicAuth.password | string | `""` |  |
-| global.basicAuth.secretRef | string | `""` |  |
 | policyPriorities | object | `{}` |  |
+| basicAuth.username | string | `""` |  |
+| basicAuth.password | string | `""` |  |
+| basicAuth.secretRef | string | `""` |  |
 | emailReports.clusterName | string | `""` |  |
 | emailReports.titlePrefix | string | `"Report"` |  |
 | emailReports.resources | object | `{}` |  |
@@ -340,9 +339,6 @@ Check the [Documentation](https://kyverno.github.io/policy-reporter/guide/02-get
 | ui.logging.logLevel | int | `0` | log level default info |
 | ui.server.port | int | `8080` | Application port |
 | ui.server.logging | bool | `false` | Enables Access logging |
-| ui.server.basicAuth.username | string | `""` | HTTP BasicAuth username |
-| ui.server.basicAuth.password | string | `""` | HTTP BasicAuth password |
-| ui.server.basicAuth.secretRef | string | `""` | Read HTTP BasicAuth credentials from secret |
 | ui.openIDConnect.enabled | bool | `false` | Enable openID Connect authentication |
 | ui.openIDConnect.discoveryUrl | string | `""` | OpenID Connect Discovery URL |
 | ui.openIDConnect.callbackUrl | string | `""` | OpenID Connect Callback URL |
@@ -404,9 +400,6 @@ Check the [Documentation](https://kyverno.github.io/policy-reporter/guide/02-get
 | plugin.kyverno.logging.logLevel | int | `0` | log level default info |
 | plugin.kyverno.server.port | int | `8080` | Application port |
 | plugin.kyverno.server.logging | bool | `false` | Enables Access logging |
-| plugin.kyverno.server.basicAuth.username | string | `""` | HTTP BasicAuth username |
-| plugin.kyverno.server.basicAuth.password | string | `""` | HTTP BasicAuth password |
-| plugin.kyverno.server.basicAuth.secretRef | string | `""` | Read HTTP BasicAuth credentials from secret |
 | plugin.kyverno.blockReports.enabled | bool | `false` | Enables he BlockReport feature |
 | plugin.kyverno.blockReports.eventNamespace | string | `"default"` | Watches for Kyverno Events in the configured namespace leave blank to watch in all namespaces |
 | plugin.kyverno.blockReports.results.maxPerReport | int | `200` | Max items per PolicyReport resource |
@@ -459,13 +452,8 @@ Check the [Documentation](https://kyverno.github.io/policy-reporter/guide/02-get
 | plugin.trivy.logging.logLevel | int | `0` | log level default info |
 | plugin.trivy.server.port | int | `8080` | Application port |
 | plugin.trivy.server.logging | bool | `false` | Enables Access logging |
-| plugin.trivy.server.basicAuth.username | string | `""` | HTTP BasicAuth username |
-| plugin.trivy.server.basicAuth.password | string | `""` | HTTP BasicAuth password |
-| plugin.trivy.server.basicAuth.secretRef | string | `""` | Read HTTP BasicAuth credentials from secret |
 | plugin.trivy.policyReporter.skipTLS | bool | `false` | Skip TLS Verification |
 | plugin.trivy.policyReporter.certificate | string | `""` | TLS Certificate |
-| plugin.trivy.policyReporter.basicAuth.username | string | `""` | HTTP BasicAuth Username |
-| plugin.trivy.policyReporter.basicAuth.password | string | `""` | HTTP BasicAuth Password |
 | plugin.trivy.policyReporter.secretRef | string | `""` | Secret to read the API configuration from supports `host`, `certificate`, `skipTLS`, `username`, `password` key |
 | plugin.trivy.imagePullSecrets | list | `[]` | Image pull secrets for image verification policies, this will define the `--imagePullSecrets` argument |
 | plugin.trivy.serviceAccount.create | bool | `true` | Create ServiceAccount |
@@ -499,16 +487,63 @@ Check the [Documentation](https://kyverno.github.io/policy-reporter/guide/02-get
 | plugin.trivy.nodeSelector | object | `{}` | Node labels for pod assignment |
 | plugin.trivy.tolerations | list | `[]` | List of node taints to tolerate |
 | plugin.trivy.affinity | object | `{}` | Affinity constraints. |
+| monitoring.enabled | bool | `false` |  |
+| monitoring.annotations | object | `{}` |  |
+| monitoring.serviceMonitor.honorLabels | bool | `false` |  |
+| monitoring.serviceMonitor.namespace | string | `nil` |  |
+| monitoring.serviceMonitor.labels | object | `{}` |  |
+| monitoring.serviceMonitor.relabelings | list | `[]` |  |
+| monitoring.serviceMonitor.metricRelabelings | list | `[]` |  |
+| monitoring.serviceMonitor.namespaceSelector | object | `{}` |  |
+| monitoring.serviceMonitor.scrapeTimeout | string | `nil` |  |
+| monitoring.serviceMonitor.interval | string | `nil` |  |
+| monitoring.grafana.namespace | string | `nil` |  |
+| monitoring.grafana.dashboards.enabled | bool | `true` |  |
+| monitoring.grafana.dashboards.label | string | `"grafana_dashboard"` |  |
+| monitoring.grafana.dashboards.value | string | `"1"` |  |
+| monitoring.grafana.dashboards.labelFilter | list | `[]` |  |
+| monitoring.grafana.dashboards.multicluster.enabled | bool | `false` |  |
+| monitoring.grafana.dashboards.multicluster.label | string | `"cluster"` |  |
+| monitoring.grafana.dashboards.enable.overview | bool | `true` |  |
+| monitoring.grafana.dashboards.enable.policyReportDetails | bool | `true` |  |
+| monitoring.grafana.dashboards.enable.clusterPolicyReportDetails | bool | `true` |  |
+| monitoring.grafana.folder.annotation | string | `"grafana_folder"` |  |
+| monitoring.grafana.folder.name | string | `"Policy Reporter"` |  |
+| monitoring.grafana.datasource.label | string | `"Prometheus"` |  |
+| monitoring.grafana.datasource.pluginId | string | `"prometheus"` |  |
+| monitoring.grafana.datasource.pluginName | string | `"Prometheus"` |  |
+| monitoring.policyReportDetails.firstStatusRow.height | int | `8` |  |
+| monitoring.policyReportDetails.secondStatusRow.enabled | bool | `true` |  |
+| monitoring.policyReportDetails.secondStatusRow.height | int | `2` |  |
+| monitoring.policyReportDetails.statusTimeline.enabled | bool | `true` |  |
+| monitoring.policyReportDetails.statusTimeline.height | int | `8` |  |
+| monitoring.policyReportDetails.passTable.enabled | bool | `true` |  |
+| monitoring.policyReportDetails.passTable.height | int | `8` |  |
+| monitoring.policyReportDetails.failTable.enabled | bool | `true` |  |
+| monitoring.policyReportDetails.failTable.height | int | `8` |  |
+| monitoring.policyReportDetails.warningTable.enabled | bool | `true` |  |
+| monitoring.policyReportDetails.warningTable.height | int | `4` |  |
+| monitoring.policyReportDetails.errorTable.enabled | bool | `true` |  |
+| monitoring.policyReportDetails.errorTable.height | int | `4` |  |
+| monitoring.clusterPolicyReportDetails.statusRow.height | int | `6` |  |
+| monitoring.clusterPolicyReportDetails.statusTimeline.enabled | bool | `true` |  |
+| monitoring.clusterPolicyReportDetails.statusTimeline.height | int | `8` |  |
+| monitoring.clusterPolicyReportDetails.passTable.enabled | bool | `true` |  |
+| monitoring.clusterPolicyReportDetails.passTable.height | int | `8` |  |
+| monitoring.clusterPolicyReportDetails.failTable.enabled | bool | `true` |  |
+| monitoring.clusterPolicyReportDetails.failTable.height | int | `8` |  |
+| monitoring.clusterPolicyReportDetails.warningTable.enabled | bool | `true` |  |
+| monitoring.clusterPolicyReportDetails.warningTable.height | int | `4` |  |
+| monitoring.clusterPolicyReportDetails.errorTable.enabled | bool | `true` |  |
+| monitoring.clusterPolicyReportDetails.errorTable.height | int | `4` |  |
+| monitoring.policyReportOverview.failingSummaryRow.height | int | `8` |  |
+| monitoring.policyReportOverview.failingTimeline.height | int | `10` |  |
+| monitoring.policyReportOverview.failingPolicyRuleTable.height | int | `10` |  |
+| monitoring.policyReportOverview.failingClusterPolicyRuleTable.height | int | `10` |  |
 
 ## Source Code
 
 * <https://github.com/kyverno/policy-reporter>
-
-## Requirements
-
-| Repository | Name | Version |
-|------------|------|---------|
-|  | monitoring | 2.8.1 |
 
 ## Maintainers
 

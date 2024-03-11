@@ -1,6 +1,12 @@
 # Override the chart name used for all resources
 nameOverride: ""
 
+# overwrite the fullname of all resources including subcharts
+fullnameOverride: "policy-reporter"
+
+# configure the namespace of all resources including subcharts
+namespaceOverride: ""
+
 image:
   registry: ghcr.io
   repository: kyverno/policy-reporter
@@ -160,10 +166,6 @@ reportFilter:
     # Disable the processing of ClusterPolicyReports
     disabled: false
 
-# Settings for the monitoring subchart
-monitoring:
-  enabled: false
-
 database:
   # Database Type, supported: mysql, postgres, mariadb
   type: ""
@@ -184,20 +186,8 @@ database:
   mountedSecret: ""
 
 global:
-  # overwrite the fullname of all resources including subcharts
-  fullnameOverride: "policy-reporter"
-  # configure the namespace of all resources including subcharts
-  namespace: ""
   # additional labels added on each resource
   labels: {}
-  # basicAuth for APIs and metrics
-  basicAuth:
-    # HTTP BasicAuth username
-    username: ""
-    # HTTP BasicAuth password
-    password: ""
-    # read credentials from secret
-    secretRef: ""
 
 # configure mappings from policy to priority
 # you can use default to configure a default priority for fail results
@@ -205,6 +195,15 @@ global:
 #   default: warning
 #   require-ns-labels: error
 policyPriorities: {}
+
+# basicAuth for APIs and metrics
+basicAuth:
+  # HTTP BasicAuth username
+  username: ""
+  # HTTP BasicAuth password
+  password: ""
+  # read credentials from secret
+  secretRef: ""
 
 emailReports:
   clusterName: "" # (optional) - displayed in the email report if configured
@@ -721,7 +720,7 @@ ui:
     pullPolicy: IfNotPresent
       # -- (string) Image tag
       # Defaults to `Chart.AppVersion` if omitted
-    tag: "2.0.0-alpha.18"
+    tag: "2.0.0-alpha.19"
 
   # -- Deployment replica count
   replicaCount: 1
@@ -742,13 +741,6 @@ ui:
     port: 8080
     # -- Enables Access logging
     logging: false
-    basicAuth:
-      # -- HTTP BasicAuth username
-      username: ""
-      # -- HTTP BasicAuth password
-      password: ""
-      # -- Read HTTP BasicAuth credentials from secret
-      secretRef: ""
 
   openIDConnect:
     # -- Enable openID Connect authentication
@@ -994,13 +986,6 @@ plugin:
       port: 8080
       # -- Enables Access logging
       logging: false
-      basicAuth:
-        # -- HTTP BasicAuth username
-        username: ""
-        # -- HTTP BasicAuth password
-        password: ""
-        # -- Read HTTP BasicAuth credentials from secret
-        secretRef: ""
 
     blockReports:
       # -- Enables he BlockReport feature
@@ -1196,24 +1181,12 @@ plugin:
       port: 8080
       # -- Enables Access logging
       logging: false
-      basicAuth:
-        # -- HTTP BasicAuth username
-        username: ""
-        # -- HTTP BasicAuth password
-        password: ""
-        # -- Read HTTP BasicAuth credentials from secret
-        secretRef: ""
 
     policyReporter:
       # -- Skip TLS Verification
       skipTLS: false
       # -- TLS Certificate
       certificate: ""
-      basicAuth:
-        # -- HTTP BasicAuth Username
-        username: ""
-        # -- HTTP BasicAuth Password
-        password: ""
       # -- Secret to read the API configuration from
       # supports `host`, `certificate`, `skipTLS`, `username`, `password` key
       secretRef: ""
@@ -1352,3 +1325,105 @@ plugin:
 
       # -- Affinity constraints.
     affinity: {}
+
+monitoring:
+  enabled: false
+
+  # Key/value pairs that are attached to all resources.
+  annotations: {}
+
+  serviceMonitor:
+    # HonorLabels chooses the metrics labels on collisions with target labels
+    honorLabels: false
+    # allow to override the namespace for serviceMonitor
+    namespace:
+    # labels to match the serviceMonitorSelector of the Prometheus Resource
+    labels: {}
+    # https://github.com/prometheus-operator/prometheus-operator/blob/main/Documentation/api.md#relabelconfig
+    relabelings: []
+    # see serviceMonitor.relabelings
+    metricRelabelings: []
+    # optional namespaceSelector
+    namespaceSelector: {}
+    # optional scrapeTimeout
+    scrapeTimeout:
+    # optional scrape interval
+    interval:
+
+  grafana:
+    # namespace for configMap of grafana dashboards
+    namespace:
+    dashboards:
+      # Enable the deployment of grafana dashboards
+      enabled: true
+      # Label to find dashboards using the k8s sidecar
+      label: grafana_dashboard
+      value: "1"
+      labelFilter: []
+      multicluster:
+        enabled: false
+        label: cluster
+      enable:
+        overview: true
+        policyReportDetails: true
+        clusterPolicyReportDetails: true
+    folder:
+      # Annotation to enable folder storage using the k8s sidecar
+      annotation: grafana_folder
+      # Grafana folder in which to store the dashboards
+      name: Policy Reporter
+    datasource:
+      label: Prometheus
+      pluginId: prometheus
+      pluginName: Prometheus
+
+  policyReportDetails:
+    firstStatusRow:
+      height: 8
+    secondStatusRow:
+      enabled: true
+      height: 2
+    statusTimeline:
+      enabled: true
+      height: 8
+    passTable:
+      enabled: true
+      height: 8
+    failTable:
+      enabled: true
+      height: 8
+    warningTable:
+      enabled: true
+      height: 4
+    errorTable:
+      enabled: true
+      height: 4
+
+  clusterPolicyReportDetails:
+    statusRow:
+      height: 6
+    statusTimeline:
+      enabled: true
+      height: 8
+    passTable:
+      enabled: true
+      height: 8
+    failTable:
+      enabled: true
+      height: 8
+    warningTable:
+      enabled: true
+      height: 4
+    errorTable:
+      enabled: true
+      height: 4
+
+  policyReportOverview:
+    failingSummaryRow:
+      height: 8
+    failingTimeline:
+      height: 10
+    failingPolicyRuleTable:
+      height: 10
+    failingClusterPolicyRuleTable:
+      height: 10

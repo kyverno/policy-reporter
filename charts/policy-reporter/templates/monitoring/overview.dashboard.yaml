@@ -1,11 +1,12 @@
-{{- if and $.Values.grafana.dashboards.enabled $.Values.grafana.dashboards.enable.overview }}
-{{- $filters := .Values.grafana.dashboards.labelFilter }}
-{{- if and .Values.grafana.dashboards.multicluster.enabled .Values.grafana.dashboards.multicluster.label }}
-{{- $filters = append $filters .Values.grafana.dashboards.multicluster.label }}
+{{- if and .Values.monitoring.enabled }}
+{{- if and .Values.monitoring.grafana.dashboards.enabled .Values.monitoring.grafana.dashboards.enable.overview }}
+{{- $filters := .Values.monitoring.grafana.dashboards.labelFilter }}
+{{- if and .Values.monitoring.grafana.dashboards.multicluster.enabled .Values.monitoring.grafana.dashboards.multicluster.label }}
+{{- $filters = append $filters .Values.monitoring.grafana.dashboards.multicluster.label }}
 {{- end }}
 
 {{- $nsLabel := "exported_namespace" }}
-{{- if .Values.serviceMonitor.honorLabels }}
+{{- if .Values.monitoring.serviceMonitor.honorLabels }}
 {{- $nsLabel = "namespace" }}
 {{- end }}
 
@@ -13,15 +14,15 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: {{ include "monitoring.fullname" . }}-overview-dashboard
-  namespace: {{ include "monitoring.namespace" . }}
+  namespace: {{ include "policyreporter.namespace" . }}
   annotations:
-    {{ .Values.grafana.folder.annotation }}: {{ .Values.grafana.folder.name }}
-    {{- with .Values.annotations }}
+    {{ .Values.monitoring.grafana.folder.annotation }}: {{ .Values.monitoring.grafana.folder.name }}
+    {{- with .Values.monitoring.annotations }}
         {{- toYaml . | nindent 4 }}
     {{- end }}
   labels:
-    {{ .Values.grafana.dashboards.label }}: {{ .Values.grafana.dashboards.value | quote }}
-    {{- with .Values.serviceMonitor.labels }}
+    {{ .Values.monitoring.grafana.dashboards.label }}: {{ .Values.monitoring.grafana.dashboards.value | quote }}
+    {{- with .Values.monitoring.serviceMonitor.labels }}
         {{- toYaml . | nindent 4 }}
     {{- end }}
     {{- include "monitoring.labels" . | nindent 4 }}
@@ -31,11 +32,11 @@ data:
     "__inputs": [	
         {	
             "name": "DS_PROMETHEUS",
-            "label": "{{ .Values.grafana.datasource.label }}",
+            "label": "{{ .Values.monitoring.grafana.datasource.label }}",
             "description": "",
             "type": "datasource",
-            "pluginId": "{{ .Values.grafana.datasource.pluginId }}",
-            "pluginName": "{{ .Values.grafana.datasource.pluginName }}"
+            "pluginId": "{{ .Values.monitoring.grafana.datasource.pluginId }}",
+            "pluginName": "{{ .Values.monitoring.grafana.datasource.pluginName }}"
         }	
     ],	
     "__requires": [	
@@ -94,7 +95,7 @@ data:
             "overrides": []
         },
         "gridPos": {
-            "h": {{ .Values.policyReportOverview.failingSummaryRow.height }},
+            "h": {{ .Values.monitoring.policyReportOverview.failingSummaryRow.height }},
             "w": 15,
             "x": 0,
             "y": 0
@@ -153,7 +154,7 @@ data:
             "overrides": []
         },
         "gridPos": {
-            "h": {{ .Values.policyReportOverview.failingSummaryRow.height }},
+            "h": {{ .Values.monitoring.policyReportOverview.failingSummaryRow.height }},
             "w": 9,
             "x": 15,
             "y": 0
@@ -204,7 +205,7 @@ data:
         "fill": 1,
         "fillGradient": 0,
         "gridPos": {
-            "h": {{ .Values.policyReportOverview.failingTimeline.height }},
+            "h": {{ .Values.monitoring.policyReportOverview.failingTimeline.height }},
             "w": 24,
             "x": 0,
             "y": 10
@@ -317,7 +318,7 @@ data:
             "overrides": []
         },
         "gridPos": {
-            "h": {{ .Values.policyReportOverview.failingPolicyRuleTable.height }},
+            "h": {{ .Values.monitoring.policyReportOverview.failingPolicyRuleTable.height }},
             "w": 24,
             "x": 0,
             "y": 18
@@ -392,7 +393,7 @@ data:
             "overrides": []
         },
         "gridPos": {
-            "h": {{ .Values.policyReportOverview.failingClusterPolicyRuleTable.height }},
+            "h": {{ .Values.monitoring.policyReportOverview.failingClusterPolicyRuleTable.height }},
             "w": 24,
             "x": 0,
             "y": 28
@@ -639,4 +640,5 @@ data:
     "title": "PolicyReports",
     "version": 1
     }
+{{- end }}
 {{- end }}
