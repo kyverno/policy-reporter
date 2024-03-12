@@ -588,6 +588,7 @@ func (s *Store) FetchNamespaceStatusCounts(ctx context.Context, source string, f
 			"f.resource_kind":      filter.Kinds,
 			"f.resource_namespace": filter.Namespaces,
 			"f.policy":             filter.Policies,
+			"status":               filter.Status,
 		}).
 		FilterValue("f.source", source).
 		FilterReportLabels(filter.ReportLabel).
@@ -674,13 +675,7 @@ func (s *Store) FetchFindingCounts(ctx context.Context, filter Filter) ([]Status
 			"category":      filter.Categories,
 			"resource_kind": filter.Kinds,
 			"policy":        filter.Policies,
-			"status": {
-				v1alpha2.StatusPass,
-				v1alpha2.StatusFail,
-				v1alpha2.StatusWarn,
-				v1alpha2.StatusError,
-				v1alpha2.StatusSkip,
-			},
+			"status":        filter.Status,
 		}).
 		FilterReportLabels(filter.ReportLabel).
 		Exclude(filter, "f").
