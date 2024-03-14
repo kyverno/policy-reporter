@@ -19,7 +19,7 @@ spec:
   template:
     metadata:
       annotations:
-        checksum/secret: {{ include (print .Template.BasePath "/config-secret.yaml") . | sha256sum | quote }}
+        checksum/secret: {{ include (print .Template.BasePath "/plugins/kyverno/config-secret.yaml") . | sha256sum | quote }}
         {{- with .Values.plugin.kyverno.podAnnotations }}
           {{- toYaml . | nindent 8 }}
         {{- end }}
