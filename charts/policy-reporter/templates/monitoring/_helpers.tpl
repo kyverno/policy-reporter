@@ -46,8 +46,8 @@ app.kubernetes.io/instance: {{ .Release.Name }}
 
 {{/* Get the namespace name. */}}
 {{- define "monitoring.smNamespace" -}}
-{{-  if .Values.serviceMonitor.namespace -}}
-{{- .Values.serviceMonitor.namespace -}}
+{{-  if .Values.monitoring.serviceMonitor.namespace -}}
+{{- .Values.monitoring.serviceMonitor.namespace -}}
 {{- else if .Values.namespaceOverride -}}
     {{- .Values.namespaceOverride -}}
 {{- else -}}

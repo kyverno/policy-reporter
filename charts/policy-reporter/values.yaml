@@ -720,7 +720,7 @@ ui:
     pullPolicy: IfNotPresent
       # -- (string) Image tag
       # Defaults to `Chart.AppVersion` if omitted
-    tag: "2.0.0-alpha.25"
+    tag: "2.0.0-alpha.27"
 
   # -- Deployment replica count
   replicaCount: 1
@@ -806,6 +806,9 @@ ui:
         - Pod
         - Job
         - ReplicaSet
+        results:
+        - warn
+        - error
 
   # -- Connected Policy Reporter APIs
   clusters:
