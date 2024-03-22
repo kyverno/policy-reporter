@@ -243,6 +243,7 @@ type PolicyResult struct {
 	Kind       string            `json:"kind"`
 	APIVersion string            `json:"apiVersion"`
 	Name       string            `json:"name"`
+	ResourceID string            `json:"resourceId"`
 	Message    string            `json:"message"`
 	Category   string            `json:"category,omitempty"`
 	Policy     string            `json:"policy"`
@@ -261,6 +262,7 @@ func MapPolicyResults(results []db.PolicyReportResult) []PolicyResult {
 			Kind:       res.Resource.Kind,
 			APIVersion: res.Resource.APIVersion,
 			Name:       res.Resource.Name,
+			ResourceID: res.Resource.GetID(),
 			Message:    res.Message,
 			Category:   res.Category,
 			Policy:     res.Policy,
