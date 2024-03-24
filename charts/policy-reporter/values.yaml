@@ -1,17 +1,17 @@
 # Override the chart name used for all resources
 nameOverride: ""
 
-# overwrite the fullname of all resources including subcharts
+# overwrite the fullname of all resources
 fullnameOverride: "policy-reporter"
 
-# configure the namespace of all resources including subcharts
+# configure the namespace of all resources
 namespaceOverride: ""
 
 image:
   registry: ghcr.io
   repository: kyverno/policy-reporter
   pullPolicy: IfNotPresent
-  tag: 4e1a18c
+  tag: 446cc09
 
 imagePullSecrets: []
 
@@ -720,7 +720,7 @@ ui:
     pullPolicy: IfNotPresent
       # -- (string) Image tag
       # Defaults to `Chart.AppVersion` if omitted
-    tag: "2.0.0-alpha.27"
+    tag: "2.0.0-alpha.28"
 
   # -- Deployment replica count
   replicaCount: 1
@@ -799,8 +799,11 @@ ui:
 
   # -- source specific configurations
   sources:
-    # -- exclude Pod, Job and Replica resources from kyverno results by default if no kinds are specified
+      # -- kyverno specific UI confiurations
     - name: kyverno
+      # -- enabled action button to generate PolicyExceptions from the UI
+      exceptions: false
+      # -- exclude Pod, Job and Replica resources from kyverno results by default if no kinds are specified
       excludes:
         namespaceKinds:
         - Pod
@@ -971,7 +974,7 @@ plugin:
       pullPolicy: IfNotPresent
         # -- (string) Image tag
         # Defaults to `Chart.AppVersion` if omitted
-      tag: "0.0.3"
+      tag: "0.0.5"
 
     # -- Deployment replica count
     replicaCount: 1
