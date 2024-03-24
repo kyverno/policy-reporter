@@ -3,7 +3,7 @@
 Policy Reporter watches for PolicyReport Resources.
 It creates Prometheus Metrics and can send rule validation events to different targets like Loki, Elasticsearch, Slack or Discord
 
-![Version: 3.0.0-alpha.18](https://img.shields.io/badge/Version-3.0.0--alpha.18-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 3.0.0-alpha](https://img.shields.io/badge/AppVersion-3.0.0--alpha-informational?style=flat-square)
+![Version: 3.0.0-alpha.19](https://img.shields.io/badge/Version-3.0.0--alpha.19-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 3.0.0-alpha](https://img.shields.io/badge/AppVersion-3.0.0--alpha-informational?style=flat-square)
 
 ## Documentation
 
@@ -56,7 +56,7 @@ Check the [Documentation](https://kyverno.github.io/policy-reporter/guide/02-get
 | image.registry | string | `"ghcr.io"` |  |
 | image.repository | string | `"kyverno/policy-reporter"` |  |
 | image.pullPolicy | string | `"IfNotPresent"` |  |
-| image.tag | string | `"4e1a18c"` |  |
+| image.tag | string | `"446cc09"` |  |
 | imagePullSecrets | list | `[]` |  |
 | priorityClassName | string | `""` |  |
 | replicaCount | int | `1` |  |
@@ -332,7 +332,7 @@ Check the [Documentation](https://kyverno.github.io/policy-reporter/guide/02-get
 | ui.image.registry | string | `"ghcr.io"` | Image registry |
 | ui.image.repository | string | `"kyverno/policy-reporter-ui"` | Image repository |
 | ui.image.pullPolicy | string | `"IfNotPresent"` | Image PullPolicy |
-| ui.image.tag | string | `"2.0.0-alpha.27"` | Image tag Defaults to `Chart.AppVersion` if omitted |
+| ui.image.tag | string | `"2.0.0-alpha.28"` | Image tag Defaults to `Chart.AppVersion` if omitted |
 | ui.replicaCount | int | `1` | Deployment replica count |
 | ui.tempDir | string | `"/tmp"` | Temporary Directory to persist session data for authentication |
 | ui.logging.encoding | string | `"console"` | log encoding possible encodings are console and json |
@@ -355,8 +355,10 @@ Check the [Documentation](https://kyverno.github.io/policy-reporter/guide/02-get
 | ui.oauth.secretRef | string | `""` | Provide OpenID Connect configuration via Secret supported keys: `provider`, `clientId`, `clientSecret` |
 | ui.displayMode | string | `""` | DisplayMode dark/light uses the OS configured prefered color scheme as default |
 | ui.customBoards | list | `[]` | Additional customizable dashboards |
-| ui.sources | list | `[{"excludes":{"namespaceKinds":["Pod","Job","ReplicaSet"],"results":["warn","error"]},"name":"kyverno"}]` | source specific configurations |
-| ui.sources[0] | object | `{"excludes":{"namespaceKinds":["Pod","Job","ReplicaSet"],"results":["warn","error"]},"name":"kyverno"}` | exclude Pod, Job and Replica resources from kyverno results by default if no kinds are specified |
+| ui.sources | list | `[{"exceptions":false,"excludes":{"namespaceKinds":["Pod","Job","ReplicaSet"],"results":["warn","error"]},"name":"kyverno"}]` | source specific configurations |
+| ui.sources[0] | object | `{"exceptions":false,"excludes":{"namespaceKinds":["Pod","Job","ReplicaSet"],"results":["warn","error"]},"name":"kyverno"}` | kyverno specific UI confiurations |
+| ui.sources[0].exceptions | bool | `false` | enabled action button to generate PolicyExceptions from the UI |
+| ui.sources[0].excludes | object | `{"namespaceKinds":["Pod","Job","ReplicaSet"],"results":["warn","error"]}` | exclude Pod, Job and Replica resources from kyverno results by default if no kinds are specified |
 | ui.clusters | list | `[{"name":"Default","secretRef":"policy-report-ui-default-cluster"}]` | Connected Policy Reporter APIs |
 | ui.imagePullSecrets | list | `[]` | Image pull secrets for image verification policies, this will define the `--imagePullSecrets` argument |
 | ui.serviceAccount.create | bool | `true` | Create ServiceAccount |
@@ -394,7 +396,7 @@ Check the [Documentation](https://kyverno.github.io/policy-reporter/guide/02-get
 | plugin.kyverno.image.registry | string | `"ghcr.io"` | Image registry |
 | plugin.kyverno.image.repository | string | `"kyverno/policy-reporter/kyverno-plugin"` | Image repository |
 | plugin.kyverno.image.pullPolicy | string | `"IfNotPresent"` | Image PullPolicy |
-| plugin.kyverno.image.tag | string | `"0.0.3"` | Image tag Defaults to `Chart.AppVersion` if omitted |
+| plugin.kyverno.image.tag | string | `"0.0.5"` | Image tag Defaults to `Chart.AppVersion` if omitted |
 | plugin.kyverno.replicaCount | int | `1` | Deployment replica count |
 | plugin.kyverno.logging.encoding | string | `"console"` | log encoding possible encodings are console and json |
 | plugin.kyverno.logging.logLevel | int | `0` | log level default info |
