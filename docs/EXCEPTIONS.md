@@ -32,7 +32,7 @@ ui:
         - error
 ```
 
-### UI Configuration
+### Alternative manual UI Configuration
 
 ```yaml
 # Configure the Kyverno Plugin the Cluster config
