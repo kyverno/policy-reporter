@@ -44,7 +44,7 @@ spec:
           securityContext:
             {{- toYaml .Values.plugin.trivy.securityContext | nindent 12 }}
           {{- end }}
-          image: "{{ .Values.plugin.trivy.image.registry }}/{{ .Values.plugin.trivy.image.repository }}:{{ .Values.plugin.trivy.image.tag | default .Chart.AppVersion }}"
+          image: "{{ .Values.plugin.trivy.image.registry }}/{{ .Values.plugin.trivy.image.repository }}:{{ .Values.plugin.trivy.image.tag }}"
           imagePullPolicy: {{ .Values.plugin.trivy.image.pullPolicy }}
           args:
             - run
