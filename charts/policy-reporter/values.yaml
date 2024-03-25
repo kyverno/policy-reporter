@@ -720,7 +720,7 @@ ui:
     pullPolicy: IfNotPresent
       # -- (string) Image tag
       # Defaults to `Chart.AppVersion` if omitted
-    tag: "2.0.0-alpha.29"
+    tag: "2.0.0-alpha.30"
 
   # -- Deployment replica count
   replicaCount: 1
@@ -974,7 +974,7 @@ plugin:
       pullPolicy: IfNotPresent
         # -- (string) Image tag
         # Defaults to `Chart.AppVersion` if omitted
-      tag: "0.0.5"
+      tag: "0.0.6"
 
     # -- Deployment replica count
     replicaCount: 1
