@@ -46,10 +46,10 @@ func BuildFilter(ctx *gin.Context) db.Filter {
 			continue
 		}
 
-		if l, ok := exclude[strings.TrimSpace(parts[length-2])]; ok {
-			exclude[strings.TrimSpace(parts[length-2])] = append(l, strings.TrimSpace(parts[length-1]))
+		if l, ok := exclude[strings.TrimSpace(parts[0])]; ok {
+			exclude[strings.TrimSpace(parts[0])] = append(l, strings.TrimSpace(parts[1]))
 		} else {
-			exclude[strings.TrimSpace(parts[length-2])] = []string{strings.TrimSpace(parts[length-1])}
+			exclude[strings.TrimSpace(parts[0])] = []string{strings.TrimSpace(parts[1])}
 		}
 	}
 
