@@ -3727,6 +3727,24 @@ entries:
   policy-reporter-preview:
   - apiVersion: v2
     appVersion: 3.0.0-alpha
+    created: "2024-04-02T06:52:12.339666615Z"
+    description: 'Policy Reporter watches for PolicyReport Resources. It creates Prometheus
+      Metrics and can send rule validation events to different targets like Loki,
+      Elasticsearch, Slack or Discord '
+    digest: 415b6908cb53cc8779d54d2186300d161198cc665e28b1eaf16a94c4bace6e1e
+    home: https://kyverno.github.io/policy-reporter
+    icon: https://github.com/kyverno/kyverno/raw/main/img/logo.png
+    maintainers:
+    - name: Frank Jogeleit
+    name: policy-reporter-preview
+    sources:
+    - https://github.com/kyverno/policy-reporter
+    type: application
+    urls:
+    - https://github.com/kyverno/policy-reporter/releases/download/policy-reporter-preview-3.0.0-alpha.23/policy-reporter-preview-3.0.0-alpha.23.tgz
+    version: 3.0.0-alpha.23
+  - apiVersion: v2
+    appVersion: 3.0.0-alpha
     created: "2024-03-25T12:59:30.028035822Z"
     description: 'Policy Reporter watches for PolicyReport Resources. It creates Prometheus
       Metrics and can send rule validation events to different targets like Loki,
@@ -4272,4 +4290,4 @@ entries:
     urls:
     - https://github.com/kyverno/policy-reporter/releases/download/policy-reporter-preview-3.0.0-alpha/policy-reporter-preview-3.0.0-alpha.tgz
     version: 3.0.0-alpha
-generated: "2024-03-25T12:59:30.028856457Z"
+generated: "2024-04-02T06:52:12.340133447Z"
