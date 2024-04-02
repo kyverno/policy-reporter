@@ -29,6 +29,7 @@ func (h *APIHandler) Register(engine *gin.RouterGroup) error {
 	engine.GET("resource/:id/source-categories", h.ListResourceCategories)
 
 	engine.POST("namespaces/resolve-selector", h.ResolveNamespaceSelector)
+	engine.GET("namespaces", h.ListNamespaces)
 	engine.GET("sources", h.ListSources)
 	engine.GET("sources/:source/use-resources", h.UseResources)
 	engine.GET("sources/categories", h.ListSourceWithCategories)
@@ -65,9 +66,9 @@ func (h *APIHandler) ResolveNamespaceSelector(ctx *gin.Context) {
 }
 
 func (h *APIHandler) ListNamespaces(ctx *gin.Context) {
-	categories, err := h.store.FetchNamespaces(ctx, api.BuildFilter(ctx))
+	list, err := h.store.FetchNamespaces(ctx, api.BuildFilter(ctx))
 
-	api.SendResponse(ctx, categories, "failed to load namespaces", err)
+	api.SendResponse(ctx, list, "failed to load namespaces", err)
 }
 
 func (h *APIHandler) ListSources(ctx *gin.Context) {

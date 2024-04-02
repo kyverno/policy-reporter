@@ -36,7 +36,7 @@ func MapToSourceDetails(categories []db.Category) []*SourceDetails {
 		list[r.Source] = &SourceDetails{
 			Name: r.Source,
 			Categories: []*Category{MapResultToCategory(r, &Category{
-				Name: r.Name,
+				Name: helper.Defaults(r.Name, "Other"),
 			})},
 		}
 	}
@@ -53,7 +53,7 @@ func UpdateCategory(result db.Category, source *SourceDetails) {
 	}
 
 	source.Categories = append(source.Categories, MapResultToCategory(result, &Category{
-		Name: result.Name,
+		Name: helper.Defaults(result.Name, "Other"),
 	}))
 }
 

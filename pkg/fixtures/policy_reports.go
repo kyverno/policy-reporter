@@ -58,6 +58,7 @@ var DefaultPolicyReport = &v1alpha2.PolicyReport{
 			Scored:    true,
 			Policy:    "priority-test",
 			Timestamp: v1.Timestamp{Seconds: 1614093000},
+			Source:    "test",
 		},
 		{
 			Message:   "message 3",
