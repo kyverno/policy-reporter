@@ -4,3 +4,4 @@ config.yaml
 values.yaml
 .vscode
 .tools
+*.db
