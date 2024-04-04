@@ -3,6 +3,7 @@ namespace: {{ .Release.Namespace }}
 tempDir: {{ .Values.ui.tempDir }}
 
 logging:
+  enabled: {{ .Values.ui.logging.enabled }}
   encoding: {{ .Values.ui.logging.encoding }}
   logLevel: {{ .Values.ui.logging.logLevel }}
 

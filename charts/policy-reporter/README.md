@@ -3,7 +3,7 @@
 Policy Reporter watches for PolicyReport Resources.
 It creates Prometheus Metrics and can send rule validation events to different targets like Loki, Elasticsearch, Slack or Discord
 
-![Version: 3.0.0-alpha.23](https://img.shields.io/badge/Version-3.0.0--alpha.23-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 3.0.0-alpha](https://img.shields.io/badge/AppVersion-3.0.0--alpha-informational?style=flat-square)
+![Version: 3.0.0-alpha.24](https://img.shields.io/badge/Version-3.0.0--alpha.24-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 3.0.0-alpha](https://img.shields.io/badge/AppVersion-3.0.0--alpha-informational?style=flat-square)
 
 ## Documentation
 
@@ -56,7 +56,7 @@ Check the [Documentation](https://kyverno.github.io/policy-reporter/guide/02-get
 | image.registry | string | `"ghcr.io"` |  |
 | image.repository | string | `"kyverno/policy-reporter"` |  |
 | image.pullPolicy | string | `"IfNotPresent"` |  |
-| image.tag | string | `"446cc09"` |  |
+| image.tag | string | `"77b076f"` |  |
 | imagePullSecrets | list | `[]` |  |
 | priorityClassName | string | `""` |  |
 | replicaCount | int | `1` |  |
@@ -332,13 +332,14 @@ Check the [Documentation](https://kyverno.github.io/policy-reporter/guide/02-get
 | ui.image.registry | string | `"ghcr.io"` | Image registry |
 | ui.image.repository | string | `"kyverno/policy-reporter-ui"` | Image repository |
 | ui.image.pullPolicy | string | `"IfNotPresent"` | Image PullPolicy |
-| ui.image.tag | string | `"2.0.0-alpha.32"` | Image tag Defaults to `Chart.AppVersion` if omitted |
+| ui.image.tag | string | `"2.0.0-alpha.34"` | Image tag Defaults to `Chart.AppVersion` if omitted |
 | ui.replicaCount | int | `1` | Deployment replica count |
 | ui.tempDir | string | `"/tmp"` | Temporary Directory to persist session data for authentication |
 | ui.logging.encoding | string | `"console"` | log encoding possible encodings are console and json |
 | ui.logging.logLevel | int | `0` | log level default info |
 | ui.server.port | int | `8080` | Application port |
 | ui.server.logging | bool | `false` | Enables Access logging |
+| ui.server.overwriteHost | bool | `true` | Overwrites Request Host with Proxy Host and adds `X-Forwarded-Host` and `X-Origin-Host` headers |
 | ui.openIDConnect.enabled | bool | `false` | Enable openID Connect authentication |
 | ui.openIDConnect.discoveryUrl | string | `""` | OpenID Connect Discovery URL |
 | ui.openIDConnect.callbackUrl | string | `""` | OpenID Connect Callback URL |
@@ -396,7 +397,7 @@ Check the [Documentation](https://kyverno.github.io/policy-reporter/guide/02-get
 | plugin.kyverno.image.registry | string | `"ghcr.io"` | Image registry |
 | plugin.kyverno.image.repository | string | `"kyverno/policy-reporter/kyverno-plugin"` | Image repository |
 | plugin.kyverno.image.pullPolicy | string | `"IfNotPresent"` | Image PullPolicy |
-| plugin.kyverno.image.tag | string | `"0.0.7"` | Image tag Defaults to `Chart.AppVersion` if omitted |
+| plugin.kyverno.image.tag | string | `"0.0.8"` | Image tag Defaults to `Chart.AppVersion` if omitted |
 | plugin.kyverno.replicaCount | int | `1` | Deployment replica count |
 | plugin.kyverno.logging.encoding | string | `"console"` | log encoding possible encodings are console and json |
 | plugin.kyverno.logging.logLevel | int | `0` | log level default info |

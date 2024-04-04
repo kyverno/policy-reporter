@@ -6,9 +6,10 @@ import (
 	"testing"
 
 	"github.com/gin-gonic/gin"
-	"github.com/kyverno/policy-reporter/pkg/api"
 	"github.com/stretchr/testify/assert"
 	"go.uber.org/zap"
+
+	"github.com/kyverno/policy-reporter/pkg/api"
 )
 
 var check = func() error {

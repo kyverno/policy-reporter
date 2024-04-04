@@ -7,8 +7,9 @@ import (
 	"testing"
 
 	"github.com/gin-gonic/gin"
-	"github.com/kyverno/policy-reporter/pkg/api"
 	"github.com/stretchr/testify/assert"
+
+	"github.com/kyverno/policy-reporter/pkg/api"
 )
 
 func TestHealthCheckSuccess(t *testing.T) {

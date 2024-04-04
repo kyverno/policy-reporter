@@ -8,9 +8,9 @@ import (
 	"testing"
 
 	"github.com/gin-gonic/gin"
-	"github.com/kyverno/policy-reporter/pkg/api"
 	"github.com/stretchr/testify/assert"
 
+	"github.com/kyverno/policy-reporter/pkg/api"
 	db "github.com/kyverno/policy-reporter/pkg/database"
 )
 

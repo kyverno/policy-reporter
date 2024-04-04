@@ -11,7 +11,7 @@ image:
   registry: ghcr.io
   repository: kyverno/policy-reporter
   pullPolicy: IfNotPresent
-  tag: 446cc09
+  tag: 77b076f
 
 imagePullSecrets: []
 
@@ -720,7 +720,7 @@ ui:
     pullPolicy: IfNotPresent
       # -- (string) Image tag
       # Defaults to `Chart.AppVersion` if omitted
-    tag: "2.0.0-alpha.32"
+    tag: "2.0.0-alpha.34"
 
   # -- Deployment replica count
   replicaCount: 1
@@ -741,6 +741,8 @@ ui:
     port: 8080
     # -- Enables Access logging
     logging: false
+    # -- Overwrites Request Host with Proxy Host and adds `X-Forwarded-Host` and `X-Origin-Host` headers
+    overwriteHost: true
 
   openIDConnect:
     # -- Enable openID Connect authentication
@@ -974,7 +976,7 @@ plugin:
       pullPolicy: IfNotPresent
         # -- (string) Image tag
         # Defaults to `Chart.AppVersion` if omitted
-      tag: "0.0.7"
+      tag: "0.0.8"
 
     # -- Deployment replica count
     replicaCount: 1

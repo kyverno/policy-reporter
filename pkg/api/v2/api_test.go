@@ -9,20 +9,20 @@ import (
 	"testing"
 	"time"
 
+	"github.com/gin-gonic/gin"
+	"github.com/patrickmn/go-cache"
+	"github.com/stretchr/testify/assert"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes/fake"
 	v1 "k8s.io/client-go/kubernetes/typed/core/v1"
 
-	"github.com/gin-gonic/gin"
 	"github.com/kyverno/policy-reporter/pkg/api"
 	v2 "github.com/kyverno/policy-reporter/pkg/api/v2"
 	"github.com/kyverno/policy-reporter/pkg/config"
 	"github.com/kyverno/policy-reporter/pkg/database"
 	"github.com/kyverno/policy-reporter/pkg/fixtures"
 	"github.com/kyverno/policy-reporter/pkg/kubernetes/namespaces"
-	"github.com/patrickmn/go-cache"
-	"github.com/stretchr/testify/assert"
 )
 
 const (
