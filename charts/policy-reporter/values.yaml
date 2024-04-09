@@ -720,7 +720,7 @@ ui:
     pullPolicy: IfNotPresent
       # -- (string) Image tag
       # Defaults to `Chart.AppVersion` if omitted
-    tag: "2.0.0-alpha.34"
+    tag: "2.0.0-alpha.37"
 
   # -- Deployment replica count
   replicaCount: 1
