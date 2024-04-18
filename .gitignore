@@ -1,7 +1,7 @@
 .deploy
 .dist
 config.yaml
-values.yaml
+values*.yaml
 .vscode
 .tools
 *.db
