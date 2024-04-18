@@ -56,7 +56,7 @@ jobs:
             ghcr.io/kyverno/policy-reporter:latest
             ghcr.io/kyverno/policy-reporter:${{ steps.params.outputs.version }}
 
-      - uses: CycloneDX/gh-gomod-generate-sbom@d4aee0cf5133055dbd98899978246c10c18c440f # v1.1.0
+      - uses: CycloneDX/gh-gomod-generate-sbom@efc74245d6802c8cefd925620515442756c70d8f # v2.0.0
         with:
           version: v1
           args: app -licenses -json -output policy-reporter-bom.cdx.json -main .
