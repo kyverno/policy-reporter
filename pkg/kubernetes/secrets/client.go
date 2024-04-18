@@ -18,7 +18,7 @@ type Values struct {
 	Channel         string `json:"channel,omitempty"`
 	Username        string `json:"username,omitempty"`
 	Password        string `json:"password,omitempty"`
-	ApiKey          string `json:"apiKey,omitempty"`
+	APIKey          string `json:"apiKey,omitempty"`
 	AccessKeyID     string `json:"accessKeyID,omitempty"`
 	SecretAccessKey string `json:"secretAccessKey,omitempty"`
 	AccountID       string `json:"accountID,omitempty"`
@@ -27,7 +27,7 @@ type Values struct {
 	Credentials     string `json:"credentials,omitempty"`
 	Database        string `json:"database,omitempty"`
 	DSN             string `json:"dsn,omitempty"`
-	TypelessApi     bool   `json:"typelessApi,omitempty"`
+	TypelessAPI     bool   `json:"typelessApi,omitempty"`
 }
 
 type Client interface {
@@ -92,7 +92,7 @@ func (c *k8sClient) Get(ctx context.Context, name string) (Values, error) {
 	}
 
 	if apiKey, ok := secret.Data["apiKey"]; ok {
-		values.ApiKey = string(apiKey)
+		values.APIKey = string(apiKey)
 	}
 
 	if database, ok := secret.Data["database"]; ok {
@@ -127,10 +127,10 @@ func (c *k8sClient) Get(ctx context.Context, name string) (Values, error) {
 		values.Credentials = string(credentials)
 	}
 
-	if typelessApi, ok := secret.Data["typelessApi"]; ok {
-		values.TypelessApi, err = strconv.ParseBool(string(typelessApi))
+	if typelessAPI, ok := secret.Data["typelessApi"]; ok {
+		values.TypelessAPI, err = strconv.ParseBool(string(typelessAPI))
 		if err != nil {
-			values.TypelessApi = false
+			values.TypelessAPI = false
 		}
 	}
 

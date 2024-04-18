@@ -1,8 +1,14 @@
 # Changelog
 
+# 2.22.5
+* Helm Chart
+    * fix(helm): correct typo when using global.annotations [[#420](https://github.com/kyverno/policy-reporter/pull/420) by [ThomasLachaux](https://github.com/ThomasLachaux)]
+    * Policy Reporter v2.18.2
+        * Add support for custom headers for the Loki target
+
 # 2.22.4
 * Helm Chart
-    * fix mapping of headers properties to from values.yaml to config.yaml
+    * fix(helm): mapping of headers properties to from values.yaml to config.yaml
 
 # 2.22.3
 * Helm Chart

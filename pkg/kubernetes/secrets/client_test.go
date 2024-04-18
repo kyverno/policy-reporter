@@ -64,8 +64,8 @@ func Test_Client(t *testing.T) {
 			t.Errorf("Unexpected Password: %s", values.Password)
 		}
 
-		if values.ApiKey != "apiKey" {
-			t.Errorf("Unexpected ApiKey: %s", values.ApiKey)
+		if values.APIKey != "apiKey" {
+			t.Errorf("Unexpected ApiKey: %s", values.APIKey)
 		}
 
 		if values.AccessKeyID != "accessKeyID" {
@@ -96,8 +96,8 @@ func Test_Client(t *testing.T) {
 			t.Errorf("Unexpected DSN: %s", values.DSN)
 		}
 
-		if values.TypelessApi {
-			t.Errorf("Unexpected TypelessApi: %t", values.TypelessApi)
+		if values.TypelessAPI {
+			t.Errorf("Unexpected TypelessApi: %t", values.TypelessAPI)
 		}
 	})
 

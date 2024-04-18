@@ -31,6 +31,9 @@ func Test_LokiTarget(t *testing.T) {
 			if contentType := req.Header.Get("Content-Type"); contentType != "application/json" {
 				t.Errorf("Unexpected Content-Type: %s", contentType)
 			}
+			if header := req.Header.Get("X-Forward"); header != "http://loki" {
+				t.Errorf("Unexpected Header Value: %s", header)
+			}
 
 			if agend := req.Header.Get("User-Agent"); agend != "Policy-Reporter" {
 				t.Errorf("Unexpected Host: %s", agend)
@@ -101,6 +104,7 @@ func Test_LokiTarget(t *testing.T) {
 			HTTPClient:   testClient{callback, 200},
 			Username:     "username",
 			Password:     "password",
+			Headers:      map[string]string{"X-Forward": "http://loki"},
 		})
 		client.Send(fixtures.CompleteTargetSendResult)
 	})

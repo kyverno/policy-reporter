@@ -51,7 +51,7 @@ func mountSecret() {
 		Webhook:         "http://localhost:9200/webhook",
 		Username:        "username",
 		Password:        "password",
-		ApiKey:          "apiKey",
+		APIKey:          "apiKey",
 		AccessKeyID:     "accessKeyId",
 		SecretAccessKey: "secretAccessKey",
 		KmsKeyID:        "kmsKeyId",
@@ -59,7 +59,7 @@ func mountSecret() {
 		Credentials:     `{"token": "token", "type": "authorized_user"}`,
 		Database:        "database",
 		DSN:             "",
-		TypelessApi:     false,
+		TypelessAPI:     false,
 	}
 	file, _ := json.MarshalIndent(secretValues, "", " ")
 	_ = os.WriteFile(mountedSecret, file, 0o644)

@@ -27,6 +27,7 @@ var testConfig = &config.Config{
 				},
 			},
 		},
+		Headers: map[string]string{"X-Forward": "http://loki"},
 	},
 	Elasticsearch: &config.Elasticsearch{
 		Host:     "http://localhost:9200",
