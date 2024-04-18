@@ -5,6 +5,8 @@
     * fix(helm): correct typo when using global.annotations [[#420](https://github.com/kyverno/policy-reporter/pull/420) by [ThomasLachaux](https://github.com/ThomasLachaux)]
     * Policy Reporter v2.18.2
         * Add support for custom headers for the Loki target
+        * Depdency Updates
+        * Upgrade to Go v1.22
 
 # 2.22.4
 * Helm Chart
