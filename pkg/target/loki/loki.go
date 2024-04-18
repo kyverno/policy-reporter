@@ -14,6 +14,7 @@ type Options struct {
 	target.ClientOptions
 	Host         string
 	CustomLabels map[string]string
+	Headers      map[string]string
 	HTTPClient   http.Client
 	Username     string
 	Password     string
@@ -94,6 +95,7 @@ type client struct {
 	host         string
 	client       http.Client
 	customLabels map[string]string
+	headers      map[string]string
 	username     string
 	password     string
 }
@@ -105,6 +107,10 @@ func (l *client) Send(result v1alpha2.PolicyReportResult) {
 	}
 
 	req.Header.Set("Content-Type", "application/json")
+	for k, v := range l.headers {
+		req.Header.Set(k, v)
+	}
+
 	if l.username != "" {
 		req.SetBasicAuth(l.username, l.password)
 	}
@@ -120,6 +126,7 @@ func NewClient(options Options) target.Client {
 		options.Host,
 		options.HTTPClient,
 		options.CustomLabels,
+		options.Headers,
 		options.Username,
 		options.Password,
 	}

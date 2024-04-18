@@ -395,6 +395,7 @@ func (f *TargetFactory) createLokiClient(config, parent *Loki) target.Client {
 		HTTPClient:    http.NewClient(config.Certificate, config.SkipTLS),
 		Username:      config.Username,
 		Password:      config.Password,
+		Headers:       config.Headers,
 	})
 }
 
@@ -412,10 +413,10 @@ func (f *TargetFactory) createElasticsearchClient(config, parent *Elasticsearch)
 	setBool(&config.SkipTLS, parent.SkipTLS)
 	setFallback(&config.Username, parent.Username)
 	setFallback(&config.Password, parent.Password)
-	setFallback(&config.ApiKey, parent.ApiKey)
+	setFallback(&config.APIKey, parent.APIKey)
 	setFallback(&config.Index, parent.Index, "policy-reporter")
 	setFallback(&config.Rotation, parent.Rotation, elasticsearch.Daily)
-	setBool(&config.TypelessApi, parent.TypelessApi)
+	setBool(&config.TypelessAPI, parent.TypelessAPI)
 
 	config.MapBaseParent(parent.TargetBaseOptions)
 
@@ -426,12 +427,12 @@ func (f *TargetFactory) createElasticsearchClient(config, parent *Elasticsearch)
 		Host:          config.Host,
 		Username:      config.Username,
 		Password:      config.Password,
-		ApiKey:        config.ApiKey,
+		ApiKey:        config.APIKey,
 		Rotation:      config.Rotation,
 		Index:         config.Index,
 		CustomFields:  config.CustomFields,
 		HTTPClient:    http.NewClient(config.Certificate, config.SkipTLS),
-		TypelessApi:   config.TypelessApi,
+		TypelessApi:   config.TypelessAPI,
 	})
 }
 
@@ -839,11 +840,11 @@ func (f *TargetFactory) mapSecretValues(config any, ref, mountedSecret string) {
 		if values.Password != "" {
 			c.Password = values.Password
 		}
-		if values.ApiKey != "" {
-			c.ApiKey = values.ApiKey
+		if values.APIKey != "" {
+			c.APIKey = values.APIKey
 		}
-		if values.TypelessApi != false {
-			c.TypelessApi = values.TypelessApi
+		if values.TypelessAPI != false {
+			c.TypelessAPI = values.TypelessAPI
 		}
 
 	case *S3:
