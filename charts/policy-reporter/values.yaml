@@ -328,6 +328,8 @@ target:
     skipExistingOnStartup: true
     # Added as additional labels to each Loki event
     customLabels: {}
+    # Additional custom HTTP Headers
+    headers: {}
     # HTTP BasicAuth credentials for Loki
     username: ""
     password: ""

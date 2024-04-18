@@ -21,6 +21,10 @@ loki:
   filter:
     {{- toYaml . | nindent 4 }}
   {{- end }}
+  {{- with .Values.target.loki.headers }}
+  headers:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
   {{- with .Values.target.loki.channels }}
   channels:
     {{- toYaml . | nindent 4 }}
