@@ -2,6 +2,7 @@ package googlechat
 
 import (
 	"bytes"
+	"context"
 	"text/template"
 	"time"
 
@@ -218,6 +219,8 @@ func (e *client) Send(result v1alpha2.PolicyReportResult) {
 	resp, err := e.client.Do(req)
 	http.ProcessHTTPResponse(e.Name(), resp, err)
 }
+
+func (e *client) CleanUp(_ context.Context, _ v1alpha2.ReportInterface) {}
 
 // NewClient creates a new loki.client to send Results to Elasticsearch
 func NewClient(options Options) target.Client {

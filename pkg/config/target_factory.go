@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"os"
 	"strings"
+	"time"
 
 	_ "github.com/mattn/go-sqlite3"
 	"go.uber.org/zap"
@@ -725,6 +726,7 @@ func (f *TargetFactory) createSecurityHub(config, parent *SecurityHub) target.Cl
 	sugar.Infof("%s configured", config.Name)
 
 	setFallback(&config.ProductName, parent.ProductName, "Policy Reporter")
+	setInt(&config.DelayInSeconds, parent.DelayInSeconds)
 
 	return securityhub.NewClient(securityhub.Options{
 		ClientOptions: config.ClientOptions(),
@@ -733,6 +735,7 @@ func (f *TargetFactory) createSecurityHub(config, parent *SecurityHub) target.Cl
 		AccountID:     config.AccountID,
 		Region:        config.Region,
 		ProductName:   config.ProductName,
+		Delay:         time.Duration(config.DelayInSeconds) * time.Second,
 	})
 }
 
@@ -956,6 +959,17 @@ func setFallback(config *string, parents ...string) {
 	if *config == "" {
 		for _, p := range parents {
 			if p != "" {
+				*config = p
+				return
+			}
+		}
+	}
+}
+
+func setInt(config *int, parents ...int) {
+	if *config == 0 {
+		for _, p := range parents {
+			if p != 0 {
 				*config = p
 				return
 			}

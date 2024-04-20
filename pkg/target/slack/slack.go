@@ -1,6 +1,7 @@
 package slack
 
 import (
+	"context"
 	"strings"
 
 	"github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
@@ -198,6 +199,8 @@ func (s *client) Send(result v1alpha2.PolicyReportResult) {
 	resp, err := s.client.Do(req)
 	http.ProcessHTTPResponse(s.Name(), resp, err)
 }
+
+func (s *client) CleanUp(_ context.Context, _ v1alpha2.ReportInterface) {}
 
 // NewClient creates a new slack.client to send Results to Slack
 func NewClient(options Options) target.Client {

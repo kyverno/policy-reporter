@@ -1,6 +1,7 @@
 package teams
 
 import (
+	"context"
 	"strings"
 	"time"
 
@@ -124,6 +125,8 @@ func (s *client) Send(result v1alpha2.PolicyReportResult) {
 	resp, err := s.client.Do(req)
 	http.ProcessHTTPResponse(s.Name(), resp, err)
 }
+
+func (s *client) CleanUp(_ context.Context, _ v1alpha2.ReportInterface) {}
 
 // NewClient creates a new teams.client to send Results to MS Teams
 func NewClient(options Options) target.Client {

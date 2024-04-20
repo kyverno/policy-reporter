@@ -96,7 +96,7 @@ func (q *Queue) processNextItem() bool {
 			defer q.lock.Unlock()
 			q.cache.Delete(key)
 		}()
-		q.debouncer.Add(report.LifecycleEvent{Type: report.Deleted, PolicyReport: mapResource(polr)})
+		q.debouncer.Add(report.LifecycleEvent{Type: report.Deleted, PolicyReport: updateResults(polr)})
 
 		return true
 	}
@@ -115,13 +115,13 @@ func (q *Queue) processNextItem() bool {
 
 	q.handleErr(err, key)
 
-	q.debouncer.Add(report.LifecycleEvent{Type: event, PolicyReport: mapResource(polr)})
+	q.debouncer.Add(report.LifecycleEvent{Type: event, PolicyReport: updateResults(polr)})
 
 	return true
 }
 
 // each result needs to know its resource it belongs to, to generate internal unique IDs
-func mapResource(polr pr.ReportInterface) pr.ReportInterface {
+func updateResults(polr pr.ReportInterface) pr.ReportInterface {
 	results := polr.GetResults()
 	for i, r := range results {
 		scope := polr.GetScope()
@@ -130,10 +130,36 @@ func mapResource(polr pr.ReportInterface) pr.ReportInterface {
 			r.Resources = append(r.Resources, *scope)
 		}
 
+		r.Priority = ResolvePriority(r)
+
 		results[i] = r
 	}
 
 	return polr
+}
+
+func ResolvePriority(result pr.PolicyReportResult) pr.Priority {
+	if result.Result == pr.StatusSkip {
+		return pr.DebugPriority
+	}
+
+	if result.Result == pr.StatusPass {
+		return pr.InfoPriority
+	}
+
+	if result.Result == pr.StatusError {
+		return pr.ErrorPriority
+	}
+
+	if result.Result == pr.StatusWarn {
+		return pr.WarningPriority
+	}
+
+	if result.Severity != "" {
+		return pr.PriorityFromSeverity(result.Severity)
+	}
+
+	return pr.WarningPriority
 }
 
 func (q *Queue) handleErr(err error, key interface{}) {

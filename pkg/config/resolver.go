@@ -47,8 +47,8 @@ type Resolver struct {
 	database           *bun.DB
 	policyReportClient report.PolicyReportClient
 	leaderElector      *leaderelection.Client
-	targetClients      []target.Client
 	resultCache        cache.Cache
+	targetClients      []target.Client
 	targetsCreated     bool
 	logger             *zap.Logger
 	resultListener     *listener.ResultListener
@@ -198,6 +198,8 @@ func (r *Resolver) RegisterNewResultsListener() {
 	newResultListener := listener.NewResultListener(r.SkipExistingOnStartup(), r.ResultCache(), time.Now())
 	r.resultListener = newResultListener
 	r.EventPublisher().RegisterListener(listener.NewResults, newResultListener.Listen)
+
+	r.EventPublisher().RegisterPostListener(listener.CleanUpListener, listener.NewCleanupListener(context.Background(), targets))
 }
 
 // RegisterSendResultListener resolver method

@@ -1,6 +1,7 @@
 package target
 
 import (
+	"context"
 	"strings"
 
 	"github.com/kyverno/go-wildcard"
@@ -25,6 +26,8 @@ type Client interface {
 	MinimumPriority() string
 	// Sources of the Results which should send to this target, empty means all sources
 	Sources() []string
+	// Cleanup old results if supported by the target
+	CleanUp(context.Context, v1alpha2.ReportInterface)
 }
 
 func NewResultFilter(namespace, priority, policy validate.RuleSets, minimumPriority string, sources []string) *report.ResultFilter {

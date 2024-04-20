@@ -285,7 +285,10 @@ func (r *PolicyReportResult) ResourceString() string {
 		return ""
 	}
 
-	res := r.GetResource()
+	return ToResourceString(r.GetResource())
+}
+
+func ToResourceString(res *corev1.ObjectReference) string {
 	var resource string
 
 	if res.Namespace != "" {

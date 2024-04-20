@@ -207,6 +207,7 @@ type SecurityHub struct {
 	AWSConfig         `mapstructure:",squash"`
 	AccountID         string         `mapstructure:"accountId"`
 	ProductName       string         `mapstructure:"productName"`
+	DelayInSeconds    int            `mapstructure:"delayInSeconds"`
 	Channels          []*SecurityHub `mapstructure:"channels"`
 }
 

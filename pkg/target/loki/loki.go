@@ -1,6 +1,7 @@
 package loki
 
 import (
+	"context"
 	"strings"
 	"time"
 
@@ -118,6 +119,8 @@ func (l *client) Send(result v1alpha2.PolicyReportResult) {
 	resp, err := l.client.Do(req)
 	http.ProcessHTTPResponse(l.Name(), resp, err)
 }
+
+func (l *client) CleanUp(_ context.Context, _ v1alpha2.ReportInterface) {}
 
 // NewClient creates a new loki.client to send Results to Loki
 func NewClient(options Options) target.Client {

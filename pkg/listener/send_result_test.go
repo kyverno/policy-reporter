@@ -1,6 +1,7 @@
 package listener_test
 
 import (
+	"context"
 	"testing"
 
 	"github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
@@ -39,6 +40,8 @@ func (c *client) SkipExistingOnStartup() bool {
 func (c client) Validate(rep v1alpha2.ReportInterface, result v1alpha2.PolicyReportResult) bool {
 	return c.validated
 }
+
+func (c *client) CleanUp(_ context.Context, _ v1alpha2.ReportInterface) {}
 
 func Test_SendResultListener(t *testing.T) {
 	t.Run("Send Result", func(t *testing.T) {
