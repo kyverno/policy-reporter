@@ -15,6 +15,7 @@ type client struct {
 	Called                bool
 	skipExistingOnStartup bool
 	validated             bool
+	cleanupCalled         bool
 }
 
 func (c *client) Send(result v1alpha2.PolicyReportResult) {
@@ -41,7 +42,9 @@ func (c client) Validate(rep v1alpha2.ReportInterface, result v1alpha2.PolicyRep
 	return c.validated
 }
 
-func (c *client) CleanUp(_ context.Context, _ v1alpha2.ReportInterface) {}
+func (c *client) CleanUp(_ context.Context, _ v1alpha2.ReportInterface) {
+	c.cleanupCalled = true
+}
 
 func Test_SendResultListener(t *testing.T) {
 	t.Run("Send Result", func(t *testing.T) {

@@ -969,7 +969,7 @@ func setFallback(config *string, parents ...string) {
 func setInt(config *int, parents ...int) {
 	if *config == 0 {
 		for _, p := range parents {
-			if p != 0 {
+			if p > 0 {
 				*config = p
 				return
 			}

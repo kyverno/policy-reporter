@@ -130,36 +130,12 @@ func updateResults(polr pr.ReportInterface) pr.ReportInterface {
 			r.Resources = append(r.Resources, *scope)
 		}
 
-		r.Priority = ResolvePriority(r)
+		r.Priority = report.ResolvePriority(r)
 
 		results[i] = r
 	}
 
 	return polr
-}
-
-func ResolvePriority(result pr.PolicyReportResult) pr.Priority {
-	if result.Result == pr.StatusSkip {
-		return pr.DebugPriority
-	}
-
-	if result.Result == pr.StatusPass {
-		return pr.InfoPriority
-	}
-
-	if result.Result == pr.StatusError {
-		return pr.ErrorPriority
-	}
-
-	if result.Result == pr.StatusWarn {
-		return pr.WarningPriority
-	}
-
-	if result.Severity != "" {
-		return pr.PriorityFromSeverity(result.Severity)
-	}
-
-	return pr.WarningPriority
 }
 
 func (q *Queue) handleErr(err error, key interface{}) {

@@ -149,8 +149,9 @@ var testConfig = &config.Config{
 			Endpoint:        "https://yds.serverless.yandexcloud.net",
 			Region:          "ru-central1",
 		},
-		AccountID: "AccountID",
-		Channels:  []*config.SecurityHub{{}},
+		AccountID:      "AccountID",
+		Channels:       []*config.SecurityHub{{}},
+		DelayInSeconds: 2,
 	},
 	GCS: &config.GCS{
 		TargetBaseOptions: config.TargetBaseOptions{
