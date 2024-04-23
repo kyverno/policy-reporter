@@ -208,6 +208,7 @@ type SecurityHub struct {
 	AccountID         string         `mapstructure:"accountId"`
 	ProductName       string         `mapstructure:"productName"`
 	DelayInSeconds    int            `mapstructure:"delayInSeconds"`
+	Cleanup           bool           `mapstructure:"cleanup"`
 	Channels          []*SecurityHub `mapstructure:"channels"`
 }
 

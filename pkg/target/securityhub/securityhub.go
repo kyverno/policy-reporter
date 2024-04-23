@@ -22,6 +22,7 @@ type Options struct {
 	Region       string
 	ProductName  string
 	Delay        time.Duration
+	Cleanup      bool
 }
 
 type client struct {
@@ -32,6 +33,7 @@ type client struct {
 	region       string
 	productName  string
 	delay        time.Duration
+	cleanup      bool
 }
 
 func (c *client) Send(result v1alpha2.PolicyReportResult) {
@@ -98,6 +100,10 @@ func (c *client) Send(result v1alpha2.PolicyReportResult) {
 }
 
 func (c *client) CleanUp(ctx context.Context, report v1alpha2.ReportInterface) {
+	if !c.cleanup {
+		return
+	}
+
 	resourceIds := toResourceIDFilter(report)
 	if len(resourceIds) == 0 {
 		return
@@ -228,6 +234,7 @@ func NewClient(options Options) target.Client {
 		options.Region,
 		options.ProductName,
 		options.Delay,
+		options.Cleanup,
 	}
 }
 

@@ -297,6 +297,7 @@ securityHub:
   accessKeyID: {{ .Values.target.securityHub.accessKeyID }}
   secretAccessKey:  {{ .Values.target.securityHub.secretAccessKey }}
   delayInSeconds: {{ .Values.target.securityHub.delayInSeconds }}
+  cleanup: {{ .Values.target.securityHub.cleanup }}
   secretRef: {{ .Values.target.securityHub.secretRef | quote }}
   mountedSecret: {{ .Values.target.securityHub.mountedSecret | quote }}
   productName: {{ .Values.target.securityHub.productName | quote }}
