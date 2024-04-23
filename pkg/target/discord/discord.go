@@ -1,6 +1,7 @@
 package discord
 
 import (
+	"context"
 	"strings"
 
 	"github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
@@ -113,6 +114,8 @@ func (d *client) Send(result v1alpha2.PolicyReportResult) {
 	resp, err := d.client.Do(req)
 	http.ProcessHTTPResponse(d.Name(), resp, err)
 }
+
+func (d *client) CleanUp(_ context.Context, _ v1alpha2.ReportInterface) {}
 
 // NewClient creates a new loki.client to send Results to Discord
 func NewClient(options Options) target.Client {

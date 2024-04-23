@@ -2,6 +2,7 @@ package s3
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"time"
@@ -61,6 +62,8 @@ func (c *client) Send(result v1alpha2.PolicyReportResult) {
 
 	zap.L().Info(c.Name() + ": PUSH OK")
 }
+
+func (c *client) CleanUp(_ context.Context, _ v1alpha2.ReportInterface) {}
 
 // NewClient creates a new S3.client to send Results to S3.
 func NewClient(options Options) target.Client {

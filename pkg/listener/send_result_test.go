@@ -1,6 +1,7 @@
 package listener_test
 
 import (
+	"context"
 	"testing"
 
 	"github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
@@ -14,6 +15,7 @@ type client struct {
 	Called                bool
 	skipExistingOnStartup bool
 	validated             bool
+	cleanupCalled         bool
 }
 
 func (c *client) Send(result v1alpha2.PolicyReportResult) {
@@ -38,6 +40,10 @@ func (c *client) SkipExistingOnStartup() bool {
 
 func (c client) Validate(rep v1alpha2.ReportInterface, result v1alpha2.PolicyReportResult) bool {
 	return c.validated
+}
+
+func (c *client) CleanUp(_ context.Context, _ v1alpha2.ReportInterface) {
+	c.cleanupCalled = true
 }
 
 func Test_SendResultListener(t *testing.T) {

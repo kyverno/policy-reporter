@@ -661,6 +661,10 @@ target:
     sources: []
     # Skip already existing PolicyReportResults on startup
     skipExistingOnStartup: true
+    # Enable cleanup listener for SecurityHub
+    cleanup: false
+    # Delay between AWS GetFindings API calls, to avoid hitting the API RequestLimit
+    delayInSeconds: 2
     # Added as additional properties to each securityHub event
     customFields: {}
     # filter results send by namespaces, policies and priorities

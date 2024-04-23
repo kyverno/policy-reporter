@@ -32,3 +32,27 @@ func (m *mapper) ResolvePriority(policy string, severity v1alpha2.PolicySeverity
 func NewMapper(priorities map[string]string) Mapper {
 	return &mapper{priorityMap: priorities}
 }
+
+func ResolvePriority(result v1alpha2.PolicyReportResult) v1alpha2.Priority {
+	if result.Result == v1alpha2.StatusSkip {
+		return v1alpha2.DebugPriority
+	}
+
+	if result.Result == v1alpha2.StatusPass {
+		return v1alpha2.InfoPriority
+	}
+
+	if result.Result == v1alpha2.StatusError {
+		return v1alpha2.ErrorPriority
+	}
+
+	if result.Result == v1alpha2.StatusWarn {
+		return v1alpha2.WarningPriority
+	}
+
+	if result.Severity != "" {
+		return v1alpha2.PriorityFromSeverity(result.Severity)
+	}
+
+	return v1alpha2.WarningPriority
+}

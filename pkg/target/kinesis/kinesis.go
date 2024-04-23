@@ -2,6 +2,7 @@ package kinesis
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"time"
@@ -59,6 +60,8 @@ func (c *client) Send(result v1alpha2.PolicyReportResult) {
 
 	zap.L().Info("PUSH OK", zap.String("name", c.Name()))
 }
+
+func (c *client) CleanUp(_ context.Context, _ v1alpha2.ReportInterface) {}
 
 // NewClient creates a new Kinesis.client to send Results to AWS Kinesis compatible source
 func NewClient(options Options) target.Client {
