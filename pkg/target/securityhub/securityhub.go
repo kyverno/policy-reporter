@@ -13,11 +13,16 @@ import (
 	"github.com/kyverno/policy-reporter/pkg/target"
 )
 
+type HubClient interface {
+	BatchImportFindings(ctx context.Context, params *hub.BatchImportFindingsInput, optFns ...func(*hub.Options)) (*hub.BatchImportFindingsOutput, error)
+	GetFindings(ctx context.Context, params *hub.GetFindingsInput, optFns ...func(*hub.Options)) (*hub.GetFindingsOutput, error)
+}
+
 // Options to configure the S3 target
 type Options struct {
 	target.ClientOptions
 	CustomFields map[string]string
-	Client       *hub.Client
+	Client       HubClient
 	AccountID    string
 	Region       string
 	ProductName  string
@@ -28,7 +33,7 @@ type Options struct {
 type client struct {
 	target.BaseClient
 	customFields map[string]string
-	hub          *hub.Client
+	hub          HubClient
 	accountID    string
 	region       string
 	productName  string
@@ -66,7 +71,7 @@ func (c *client) Send(result v1alpha2.PolicyReportResult) {
 				CreatedAt:     toPointer(t.Format("2006-01-02T15:04:05.999999999Z07:00")),
 				UpdatedAt:     toPointer(t.Format("2006-01-02T15:04:05.999999999Z07:00")),
 				Severity: &types.Severity{
-					Label: mapSeverity(result.Severity),
+					Label: MapSeverity(result.Severity),
 				},
 				Title:       &title,
 				Description: &result.Message,
@@ -242,7 +247,7 @@ func toPointer[T any](value T) *T {
 	return &value
 }
 
-func mapSeverity(s v1alpha2.PolicySeverity) types.SeverityLabel {
+func MapSeverity(s v1alpha2.PolicySeverity) types.SeverityLabel {
 	switch s {
 	case v1alpha2.SeverityInfo:
 		return types.SeverityLabelInformational
