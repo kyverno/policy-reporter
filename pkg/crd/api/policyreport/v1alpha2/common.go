@@ -15,7 +15,6 @@ package v1alpha2
 
 import (
 	"bytes"
-	"encoding/json"
 	"fmt"
 	"strconv"
 	"strings"
@@ -150,13 +149,6 @@ type PolicyReportSummary struct {
 	// Skip indicates the count of policies that were not selected for evaluation
 	// +optional
 	Skip int `json:"skip"`
-}
-
-func (prs PolicyReportSummary) ToMap() map[string]interface{} {
-	b, _ := json.Marshal(&prs)
-	var m map[string]interface{}
-	_ = json.Unmarshal(b, &m)
-	return m
 }
 
 // +kubebuilder:validation:Enum=pass;fail;warn;error;skip

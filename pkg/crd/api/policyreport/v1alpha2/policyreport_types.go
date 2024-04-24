@@ -81,6 +81,10 @@ func (r *PolicyReport) GetSource() string {
 }
 
 func (r *PolicyReport) GetKinds() []string {
+	if r.GetScope() != nil {
+		return []string{r.Scope.Kind}
+	}
+
 	list := make([]string, 0)
 	for _, k := range r.Results {
 		if !k.HasResource() {
