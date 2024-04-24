@@ -7,7 +7,6 @@ import (
 	"github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
 	"github.com/kyverno/policy-reporter/pkg/fixtures"
 	"github.com/kyverno/policy-reporter/pkg/listener"
-	"github.com/kyverno/policy-reporter/pkg/report"
 	"github.com/kyverno/policy-reporter/pkg/target"
 )
 
@@ -49,7 +48,7 @@ func (c *client) CleanUp(_ context.Context, _ v1alpha2.ReportInterface) {
 func Test_SendResultListener(t *testing.T) {
 	t.Run("Send Result", func(t *testing.T) {
 		c := &client{validated: true}
-		slistener := listener.NewSendResultListener([]target.Client{c}, report.NewMapper(make(map[string]string)))
+		slistener := listener.NewSendResultListener([]target.Client{c})
 		slistener(preport1, fixtures.FailResult, false)
 
 		if !c.Called {
@@ -58,7 +57,7 @@ func Test_SendResultListener(t *testing.T) {
 	})
 	t.Run("Don't Send Result when validation fails", func(t *testing.T) {
 		c := &client{validated: false}
-		slistener := listener.NewSendResultListener([]target.Client{c}, report.NewMapper(make(map[string]string)))
+		slistener := listener.NewSendResultListener([]target.Client{c})
 		slistener(preport1, fixtures.FailResult, false)
 
 		if c.Called {
@@ -67,7 +66,7 @@ func Test_SendResultListener(t *testing.T) {
 	})
 	t.Run("Don't Send pre existing Result when skipExistingOnStartup is true", func(t *testing.T) {
 		c := &client{skipExistingOnStartup: true}
-		slistener := listener.NewSendResultListener([]target.Client{c}, report.NewMapper(make(map[string]string)))
+		slistener := listener.NewSendResultListener([]target.Client{c})
 		slistener(preport1, fixtures.FailResult, true)
 
 		if c.Called {
