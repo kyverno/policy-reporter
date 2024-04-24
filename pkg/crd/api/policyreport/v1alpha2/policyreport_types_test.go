@@ -65,4 +65,26 @@ func TestPolicyReport(t *testing.T) {
 			t.Errorf("expected critical severity, got: %s", cpolr.GetSeverities()[1])
 		}
 	})
+	t.Run("Results", func(t *testing.T) {
+		polr := &v1alpha2.PolicyReport{}
+
+		if s := len(polr.GetResults()); s != 0 {
+			t.Errorf("expected empty results, got: %d", s)
+		}
+
+		polr.SetResults([]v1alpha2.PolicyReportResult{
+			{Policy: "require-label", Result: v1alpha2.StatusPass},
+		})
+
+		if s := len(polr.GetResults()); s != 1 {
+			t.Errorf("expected 1 result, got: %d", s)
+		}
+	})
+	t.Run("Summary", func(t *testing.T) {
+		polr := &v1alpha2.PolicyReport{Summary: v1alpha2.PolicyReportSummary{Pass: 1}}
+
+		if s := polr.GetSummary().Pass; s != 1 {
+			t.Errorf("expected 1 pass result, got: %d", s)
+		}
+	})
 }
