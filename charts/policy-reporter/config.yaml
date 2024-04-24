@@ -347,11 +347,6 @@ gcs:
     {{- toYaml . | nindent 4 }}
   {{- end }}
 
-{{- with .Values.policyPriorities }}
-priorityMap:
-  {{- toYaml . | nindent 2 }}
-{{- end }}
-
 worker: {{ .Values.worker }}
 
 metrics:
