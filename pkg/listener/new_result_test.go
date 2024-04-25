@@ -17,7 +17,7 @@ func Test_ResultListener(t *testing.T) {
 	t.Run("Publish Result", func(t *testing.T) {
 		var called v1alpha2.PolicyReportResult
 
-		slistener := listener.NewResultListener(true, cache.NewInMermoryCache(), time.Now())
+		slistener := listener.NewResultListener(true, cache.NewInMermoryCache(time.Minute, time.Minute), time.Now())
 		slistener.RegisterListener(func(_ v1alpha2.ReportInterface, r v1alpha2.PolicyReportResult, b bool) {
 			called = r
 		})
@@ -33,7 +33,7 @@ func Test_ResultListener(t *testing.T) {
 	t.Run("Ignore Delete Event", func(t *testing.T) {
 		var called bool
 
-		slistener := listener.NewResultListener(true, cache.NewInMermoryCache(), time.Now())
+		slistener := listener.NewResultListener(true, cache.NewInMermoryCache(time.Minute, time.Minute), time.Now())
 		slistener.RegisterListener(func(_ v1alpha2.ReportInterface, r v1alpha2.PolicyReportResult, b bool) {
 			called = true
 		})
@@ -48,7 +48,7 @@ func Test_ResultListener(t *testing.T) {
 	t.Run("Ignore Added Results created before startup", func(t *testing.T) {
 		var called bool
 
-		slistener := listener.NewResultListener(true, cache.NewInMermoryCache(), time.Now())
+		slistener := listener.NewResultListener(true, cache.NewInMermoryCache(time.Minute, time.Minute), time.Now())
 		slistener.RegisterListener(func(_ v1alpha2.ReportInterface, r v1alpha2.PolicyReportResult, b bool) {
 			called = true
 		})
@@ -63,7 +63,7 @@ func Test_ResultListener(t *testing.T) {
 	t.Run("Ignore CacheResults", func(t *testing.T) {
 		var called bool
 
-		slistener := listener.NewResultListener(true, cache.NewInMermoryCache(), time.Now())
+		slistener := listener.NewResultListener(true, cache.NewInMermoryCache(time.Minute, time.Minute), time.Now())
 		slistener.RegisterListener(func(_ v1alpha2.ReportInterface, r v1alpha2.PolicyReportResult, b bool) {
 			called = true
 		})
@@ -79,7 +79,7 @@ func Test_ResultListener(t *testing.T) {
 	t.Run("Early Return if Results are empty", func(t *testing.T) {
 		var called bool
 
-		slistener := listener.NewResultListener(true, cache.NewInMermoryCache(), time.Now())
+		slistener := listener.NewResultListener(true, cache.NewInMermoryCache(time.Minute, time.Minute), time.Now())
 		slistener.RegisterListener(func(_ v1alpha2.ReportInterface, r v1alpha2.PolicyReportResult, b bool) {
 			called = true
 		})
@@ -92,7 +92,7 @@ func Test_ResultListener(t *testing.T) {
 	})
 
 	t.Run("Skip process events when no listeners registered", func(t *testing.T) {
-		c := cache.NewInMermoryCache()
+		c := cache.NewInMermoryCache(time.Minute, time.Minute)
 
 		slistener := listener.NewResultListener(true, c, time.Now())
 		slistener.Listen(report.LifecycleEvent{Type: report.Added, PolicyReport: preport2})
@@ -105,7 +105,7 @@ func Test_ResultListener(t *testing.T) {
 	t.Run("UnregisterListener removes all listeners", func(t *testing.T) {
 		var called bool
 
-		slistener := listener.NewResultListener(true, cache.NewInMermoryCache(), time.Now())
+		slistener := listener.NewResultListener(true, cache.NewInMermoryCache(time.Minute, time.Minute), time.Now())
 		slistener.RegisterListener(func(_ v1alpha2.ReportInterface, r v1alpha2.PolicyReportResult, b bool) {
 			called = true
 		})
@@ -121,7 +121,7 @@ func Test_ResultListener(t *testing.T) {
 	t.Run("ignore results with past timestamps", func(t *testing.T) {
 		var called bool
 
-		slistener := listener.NewResultListener(true, cache.NewInMermoryCache(), time.Now())
+		slistener := listener.NewResultListener(true, cache.NewInMermoryCache(time.Minute, time.Minute), time.Now())
 		slistener.RegisterListener(func(_ v1alpha2.ReportInterface, r v1alpha2.PolicyReportResult, b bool) {
 			called = true
 		})

@@ -470,10 +470,10 @@ func (r *Resolver) ResultCache() cache.Cache {
 				Password: r.config.Redis.Password,
 				DB:       r.config.Redis.Database,
 			}),
-			2*time.Hour,
+			6*time.Hour,
 		)
 	} else {
-		r.resultCache = cache.NewInMermoryCache()
+		r.resultCache = cache.NewInMermoryCache(6*time.Hour, 10*time.Minute)
 	}
 
 	return r.resultCache

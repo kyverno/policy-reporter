@@ -12,8 +12,15 @@ import (
 	"github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
 )
 
+type rdb interface {
+	Set(ctx context.Context, key string, value interface{}, expiration time.Duration) *goredis.StatusCmd
+	Keys(ctx context.Context, pattern string) *goredis.StringSliceCmd
+	Expire(ctx context.Context, key string, expiration time.Duration) *goredis.BoolCmd
+	Del(ctx context.Context, keys ...string) *goredis.IntCmd
+}
+
 type redisCache struct {
-	rdb    *goredis.Client
+	rdb    rdb
 	prefix string
 	ttl    time.Duration
 }
@@ -28,7 +35,7 @@ func (r *redisCache) AddReport(report v1alpha2.ReportInterface) {
 
 	for _, id := range r.GetResults(report.GetID()) {
 		if !next[id] {
-			r.rdb.Set(context.Background(), r.generateKey(report.GetID(), id), nil, 6*time.Hour)
+			r.rdb.Set(context.Background(), r.generateKey(report.GetID(), id), nil, r.ttl)
 		}
 	}
 }
@@ -88,6 +95,6 @@ func (r *redisCache) generateKeyPattern(report string) string {
 	return fmt.Sprintf("%s:%s:*", r.prefix, report)
 }
 
-func NewRedisCache(prefix string, rdb *goredis.Client, ttl time.Duration) Cache {
+func NewRedisCache(prefix string, rdb rdb, ttl time.Duration) Cache {
 	return &redisCache{rdb: rdb, prefix: prefix, ttl: ttl}
 }
