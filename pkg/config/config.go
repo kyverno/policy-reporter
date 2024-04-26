@@ -95,9 +95,6 @@ type Profiling struct {
 	Enabled bool `mapstructure:"enabled"`
 }
 
-// PriorityMap configuration
-type PriorityMap = map[string]string
-
 // ClusterReportFilter configuration
 type ClusterReportFilter struct {
 	Disabled bool `mapstructure:"disabled"`
@@ -167,7 +164,6 @@ type Config struct {
 	DBFile         string         `mapstructure:"dbfile"`
 	Metrics        Metrics        `mapstructure:"metrics"`
 	REST           REST           `mapstructure:"rest"`
-	PriorityMap    PriorityMap    `mapstructure:"priorityMap"`
 	ReportFilter   ReportFilter   `mapstructure:"reportFilter"`
 	Redis          Redis          `mapstructure:"redis"`
 	Profiling      Profiling      `mapstructure:"profiling"`
