@@ -1,7 +1,0 @@
-apiVersion: v2
-name: kyvernoPlugin
-description: Policy Reporter Kyverno Plugin
-
-type: application
-version: 1.6.5
-appVersion: 1.6.3

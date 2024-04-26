@@ -5,10 +5,10 @@
 build
 /test.yaml
 **/test.db
-sqlite-database*.db
 values*.yaml
 coverage.out*
 heap*
 /.env*
 .tools
 /.idea/
+*.db

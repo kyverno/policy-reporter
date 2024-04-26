@@ -1,10 +1,9 @@
 package config
 
-import "github.com/kyverno/policy-reporter/pkg/target"
-
 type ValueFilter struct {
-	Include []string `mapstructure:"include"`
-	Exclude []string `mapstructure:"exclude"`
+	Include  []string       `mapstructure:"include"`
+	Exclude  []string       `mapstructure:"exclude"`
+	Selector map[string]any `mapstructure:"selector"`
 }
 
 type EmailReportFilter struct {
@@ -26,200 +25,6 @@ type MetricsFilter struct {
 	Severities ValueFilter `mapstructure:"severities"`
 	Status     ValueFilter `mapstructure:"status"`
 	Sources    ValueFilter `mapstructure:"sources"`
-}
-
-type TargetBaseOptions struct {
-	Name            string            `mapstructure:"name"`
-	MinimumPriority string            `mapstructure:"minimumPriority"`
-	Filter          TargetFilter      `mapstructure:"filter"`
-	SecretRef       string            `mapstructure:"secretRef"`
-	MountedSecret   string            `mapstructure:"mountedSecret"`
-	Sources         []string          `mapstructure:"sources"`
-	CustomFields    map[string]string `mapstructure:"customFields"`
-	SkipExisting    bool              `mapstructure:"skipExistingOnStartup"`
-}
-
-func (config *TargetBaseOptions) MapBaseParent(parent TargetBaseOptions) {
-	if config.MinimumPriority == "" {
-		config.MinimumPriority = parent.MinimumPriority
-	}
-
-	if !config.SkipExisting {
-		config.SkipExisting = parent.SkipExisting
-	}
-}
-
-func (config *TargetBaseOptions) ClientOptions() target.ClientOptions {
-	return target.ClientOptions{
-		Name:                  config.Name,
-		SkipExistingOnStartup: config.SkipExisting,
-		ResultFilter:          createResultFilter(config.Filter, config.MinimumPriority, config.Sources),
-		ReportFilter:          createReportFilter(config.Filter),
-	}
-}
-
-type AWSConfig struct {
-	AccessKeyID     string `mapstructure:"accessKeyID"`
-	SecretAccessKey string `mapstructure:"secretAccessKey"`
-	Region          string `mapstructure:"region"`
-	Endpoint        string `mapstructure:"endpoint"`
-}
-
-func (config *AWSConfig) MapAWSParent(parent AWSConfig) {
-	if config.Endpoint == "" {
-		config.Endpoint = parent.Endpoint
-	}
-
-	if config.AccessKeyID == "" {
-		config.AccessKeyID = parent.AccessKeyID
-	}
-
-	if config.SecretAccessKey == "" {
-		config.SecretAccessKey = parent.SecretAccessKey
-	}
-
-	if config.Region == "" {
-		config.Region = parent.Region
-	}
-}
-
-type TargetOption interface {
-	BaseOptions() *TargetBaseOptions
-}
-
-// Loki configuration
-type Loki struct {
-	TargetBaseOptions `mapstructure:",squash"`
-	CustomLabels      map[string]string `mapstructure:"customLabels"`
-	Headers           map[string]string `mapstructure:"headers"`
-	Host              string            `mapstructure:"host"`
-	SkipTLS           bool              `mapstructure:"skipTLS"`
-	Certificate       string            `mapstructure:"certificate"`
-	Path              string            `mapstructure:"path"`
-	Channels          []*Loki           `mapstructure:"channels"`
-	Username          string            `mapstructure:"username"`
-	Password          string            `mapstructure:"password"`
-}
-
-// Elasticsearch configuration
-type Elasticsearch struct {
-	TargetBaseOptions `mapstructure:",squash"`
-	Host              string           `mapstructure:"host"`
-	SkipTLS           bool             `mapstructure:"skipTLS"`
-	Certificate       string           `mapstructure:"certificate"`
-	Index             string           `mapstructure:"index"`
-	Rotation          string           `mapstructure:"rotation"`
-	Username          string           `mapstructure:"username"`
-	Password          string           `mapstructure:"password"`
-	APIKey            string           `mapstructure:"apiKey"`
-	Channels          []*Elasticsearch `mapstructure:"channels"`
-	TypelessAPI       bool             `mapstructure:"typelessApi"`
-}
-
-// Slack configuration
-type Slack struct {
-	TargetBaseOptions `mapstructure:",squash"`
-	Webhook           string   `mapstructure:"webhook"`
-	Channel           string   `mapstructure:"channel"`
-	Channels          []*Slack `mapstructure:"channels"`
-}
-
-// Discord configuration
-type Discord struct {
-	TargetBaseOptions `mapstructure:",squash"`
-	Webhook           string     `mapstructure:"webhook"`
-	Channels          []*Discord `mapstructure:"channels"`
-}
-
-// Teams configuration
-type Teams struct {
-	TargetBaseOptions `mapstructure:",squash"`
-	Webhook           string   `mapstructure:"webhook"`
-	SkipTLS           bool     `mapstructure:"skipTLS"`
-	Certificate       string   `mapstructure:"certificate"`
-	Channels          []*Teams `mapstructure:"channels"`
-}
-
-// UI configuration
-type UI struct {
-	TargetBaseOptions `mapstructure:",squash"`
-	Host              string `mapstructure:"host"`
-	SkipTLS           bool   `mapstructure:"skipTLS"`
-	Certificate       string `mapstructure:"certificate"`
-}
-
-// Webhook configuration
-type Webhook struct {
-	TargetBaseOptions `mapstructure:",squash"`
-	Host              string            `mapstructure:"host"`
-	SkipTLS           bool              `mapstructure:"skipTLS"`
-	Certificate       string            `mapstructure:"certificate"`
-	Headers           map[string]string `mapstructure:"headers"`
-	Channels          []*Webhook        `mapstructure:"channels"`
-}
-
-// Telegram configuration
-type Telegram struct {
-	TargetBaseOptions `mapstructure:",squash"`
-	Host              string            `mapstructure:"host"`
-	Token             string            `mapstructure:"token"`
-	ChatID            string            `mapstructure:"chatID"`
-	SkipTLS           bool              `mapstructure:"skipTLS"`
-	Certificate       string            `mapstructure:"certificate"`
-	Headers           map[string]string `mapstructure:"headers"`
-	Channels          []*Telegram       `mapstructure:"channels"`
-}
-
-// GoogleChat configuration
-type GoogleChat struct {
-	TargetBaseOptions `mapstructure:",squash"`
-	Webhook           string            `mapstructure:"webhook"`
-	SkipTLS           bool              `mapstructure:"skipTLS"`
-	Certificate       string            `mapstructure:"certificate"`
-	Headers           map[string]string `mapstructure:"headers"`
-	Channels          []*GoogleChat     `mapstructure:"channels"`
-}
-
-// S3 configuration
-type S3 struct {
-	TargetBaseOptions    `mapstructure:",squash"`
-	AWSConfig            `mapstructure:",squash"`
-	Prefix               string `mapstructure:"prefix"`
-	Bucket               string `mapstructure:"bucket"`
-	BucketKeyEnabled     bool   `mapstructure:"bucketKeyEnabled"`
-	KmsKeyID             string `mapstructure:"kmsKeyId"`
-	ServerSideEncryption string `mapstructure:"serverSideEncryption"`
-	PathStyle            bool   `mapstructure:"pathStyle"`
-	Channels             []*S3  `mapstructure:"channels"`
-}
-
-// Kinesis configuration
-type Kinesis struct {
-	TargetBaseOptions `mapstructure:",squash"`
-	AWSConfig         `mapstructure:",squash"`
-	StreamName        string     `mapstructure:"streamName"`
-	Channels          []*Kinesis `mapstructure:"channels"`
-}
-
-// SecurityHub configuration
-type SecurityHub struct {
-	TargetBaseOptions `mapstructure:",squash"`
-	AWSConfig         `mapstructure:",squash"`
-	AccountID         string         `mapstructure:"accountId"`
-	ProductName       string         `mapstructure:"productName"`
-	DelayInSeconds    int            `mapstructure:"delayInSeconds"`
-	Cleanup           bool           `mapstructure:"cleanup"`
-	Channels          []*SecurityHub `mapstructure:"channels"`
-}
-
-// GCS configuration
-type GCS struct {
-	TargetBaseOptions `mapstructure:",squash"`
-	Credentials       string   `mapstructure:"credentials"`
-	Prefix            string   `mapstructure:"prefix"`
-	Bucket            string   `mapstructure:"bucket"`
-	Sources           []string `mapstructure:"sources"`
-	Channels          []*GCS   `mapstructure:"channels"`
 }
 
 // SMTP configuration
@@ -269,6 +74,7 @@ type API struct {
 	Port      int       `mapstructure:"port"`
 	Logging   bool      `mapstructure:"logging"`
 	BasicAuth BasicAuth `mapstructure:"basicAuth"`
+	DebugMode bool      `mapstructure:"debug"`
 }
 
 // REST configuration
@@ -289,6 +95,9 @@ type Profiling struct {
 	Enabled bool `mapstructure:"enabled"`
 }
 
+// PriorityMap configuration
+type PriorityMap = map[string]string
+
 // ClusterReportFilter configuration
 type ClusterReportFilter struct {
 	Disabled bool `mapstructure:"disabled"`
@@ -297,6 +106,8 @@ type ClusterReportFilter struct {
 // ReportFilter configuration
 type ReportFilter struct {
 	Namespaces     ValueFilter         `mapstructure:"namespaces"`
+	Sources        ValueFilter         `mapstructure:"sources"`
+	Kinds          ValueFilter         `mapstructure:"kinds"`
 	ClusterReports ClusterReportFilter `mapstructure:"clusterReports"`
 }
 
@@ -351,24 +162,12 @@ type Database struct {
 type Config struct {
 	Version        string
 	Namespace      string         `mapstructure:"namespace"`
-	Loki           *Loki          `mapstructure:"loki"`
-	Elasticsearch  *Elasticsearch `mapstructure:"elasticsearch"`
-	Slack          *Slack         `mapstructure:"slack"`
-	Discord        *Discord       `mapstructure:"discord"`
-	Teams          *Teams         `mapstructure:"teams"`
-	S3             *S3            `mapstructure:"s3"`
-	Kinesis        *Kinesis       `mapstructure:"kinesis"`
-	SecurityHub    *SecurityHub   `mapstructure:"securityHub"`
-	GCS            *GCS           `mapstructure:"gcs"`
-	UI             *UI            `mapstructure:"ui"`
-	Webhook        *Webhook       `mapstructure:"webhook"`
-	Telegram       *Telegram      `mapstructure:"telegram"`
-	GoogleChat     *GoogleChat    `mapstructure:"googleChat"`
 	API            API            `mapstructure:"api"`
 	WorkerCount    int            `mapstructure:"worker"`
 	DBFile         string         `mapstructure:"dbfile"`
 	Metrics        Metrics        `mapstructure:"metrics"`
 	REST           REST           `mapstructure:"rest"`
+	PriorityMap    PriorityMap    `mapstructure:"priorityMap"`
 	ReportFilter   ReportFilter   `mapstructure:"reportFilter"`
 	Redis          Redis          `mapstructure:"redis"`
 	Profiling      Profiling      `mapstructure:"profiling"`
@@ -377,4 +176,5 @@ type Config struct {
 	K8sClient      K8sClient      `mapstructure:"k8sClient"`
 	Logging        Logging        `mapstructure:"logging"`
 	Database       Database       `mapstructure:"database"`
+	Targets        Targets        `mapstructure:"targets"`
 }

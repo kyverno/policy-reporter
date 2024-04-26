@@ -97,7 +97,7 @@ func Test_Client(t *testing.T) {
 		}
 
 		if values.TypelessAPI {
-			t.Errorf("Unexpected TypelessApi: %t", values.TypelessAPI)
+			t.Errorf("Unexpected TypelessAPI: %t", values.TypelessAPI)
 		}
 	})
 

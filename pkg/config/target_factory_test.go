@@ -33,15 +33,15 @@ func newFakeClient() v1.SecretInterface {
 			"password":        []byte("password"),
 			"apiKey":          []byte("apiKey"),
 			"webhook":         []byte("http://localhost:9200/webhook"),
+			"accountId":       []byte("accountID"),
+			"typelessApi":     []byte("true"),
 			"accessKeyID":     []byte("accessKeyID"),
 			"secretAccessKey": []byte("secretAccessKey"),
-			"accountID":       []byte("accountID"),
 			"kmsKeyId":        []byte("kmsKeyId"),
 			"token":           []byte("token"),
 			"credentials":     []byte(`{"token": "token", "type": "authorized_user"}`),
 			"database":        []byte("database"),
 			"dsn":             []byte(""),
-			"typelessApi":     []byte("true"),
 		},
 	}).CoreV1().Secrets("default")
 }
@@ -53,14 +53,15 @@ func mountSecret() {
 		Username:        "username",
 		Password:        "password",
 		APIKey:          "apiKey",
+		AccountID:       "accountID",
 		AccessKeyID:     "accessKeyId",
 		SecretAccessKey: "secretAccessKey",
 		KmsKeyID:        "kmsKeyId",
 		Token:           "token",
 		Credentials:     `{"token": "token", "type": "authorized_user"}`,
 		Database:        "database",
+		TypelessAPI:     true,
 		DSN:             "",
-		TypelessAPI:     false,
 	}
 	file, _ := json.MarshalIndent(secretValues, "", " ")
 	_ = os.WriteFile(mountedSecret, file, 0o644)
@@ -69,260 +70,277 @@ func mountSecret() {
 var logger = zap.NewNop()
 
 func Test_ResolveTarget(t *testing.T) {
-	factory := config.NewTargetFactory(nil)
+	factory := config.NewTargetFactory(nil, nil)
 
-	t.Run("Loki", func(t *testing.T) {
-		clients := factory.LokiClients(testConfig.Loki)
-		if len(clients) != 2 {
-			t.Errorf("Expected 2 Client, got %d clients", len(clients))
+	clients := factory.CreateClients(&testConfig.Targets)
+	if len(clients) != 25 {
+		t.Errorf("Expected 25 Client, got %d clients", len(clients))
+	}
+}
+
+func Test_ResolveTargetsWithoutRequiredConfiguration(t *testing.T) {
+	factory := config.NewTargetFactory(nil, nil)
+
+	targets := config.Targets{
+		Loki:          &config.Target[config.LokiOptions]{},
+		Elasticsearch: &config.Target[config.ElasticsearchOptions]{},
+		Slack:         &config.Target[config.SlackOptions]{},
+		Discord:       &config.Target[config.WebhookOptions]{},
+		Teams:         &config.Target[config.WebhookOptions]{},
+		GoogleChat:    &config.Target[config.WebhookOptions]{},
+		Webhook:       &config.Target[config.WebhookOptions]{},
+		Telegram:      &config.Target[config.TelegramOptions]{},
+		S3:            &config.Target[config.S3Options]{},
+		Kinesis:       &config.Target[config.KinesisOptions]{},
+		SecurityHub:   &config.Target[config.SecurityHubOptions]{},
+	}
+
+	if len(factory.CreateClients(&targets)) != 0 {
+		t.Error("Expected Client to be nil if no required fields are configured")
+	}
+
+	targets = config.Targets{}
+	if len(factory.CreateClients(&targets)) != 0 {
+		t.Error("Expected Client to be nil if no target is configured")
+	}
+
+	targets.S3 = &config.Target[config.S3Options]{
+		Config: &config.S3Options{
+			AWSConfig: config.AWSConfig{Endpoint: "https://storage.yandexcloud.net"},
+		},
+	}
+}
+
+func Test_S3Validation(t *testing.T) {
+	factory := config.NewTargetFactory(nil, nil)
+
+	targets := config.Targets{
+		S3: &config.Target[config.S3Options]{
+			Config: &config.S3Options{
+				AWSConfig: config.AWSConfig{Endpoint: "https://storage.yandexcloud.net"},
+			},
+		},
+	}
+
+	t.Run("S3.AccessKey", func(t *testing.T) {
+		if len(factory.CreateClients(&targets)) != 0 {
+			t.Error("Expected Client to be nil if no accessKey is configured")
 		}
 	})
-	t.Run("Elasticsearch", func(t *testing.T) {
-		clients := factory.ElasticsearchClients(testConfig.Elasticsearch)
-		if len(clients) != 2 {
-			t.Errorf("Expected 2 Client, got %d clients", len(clients))
+
+	targets.S3.Config.AWSConfig.AccessKeyID = "access"
+	t.Run("S3.SecretAccessKey", func(t *testing.T) {
+		if len(factory.CreateClients(&targets)) != 0 {
+			t.Error("Expected Client to be nil if no secretAccessKey is configured")
 		}
 	})
-	t.Run("Slack", func(t *testing.T) {
-		clients := factory.SlackClients(testConfig.Slack)
-		if len(clients) != 3 {
-			t.Error("Expected Client, got nil")
+
+	targets.S3.Config.AWSConfig.SecretAccessKey = "secret"
+	t.Run("S3.Region", func(t *testing.T) {
+		if len(factory.CreateClients(&targets)) != 0 {
+			t.Error("Expected Client to be nil if no region is configured")
 		}
 	})
-	t.Run("Discord", func(t *testing.T) {
-		clients := factory.DiscordClients(testConfig.Discord)
-		if len(clients) != 2 {
-			t.Error("Expected Client, got nil")
+
+	targets.S3.Config.AWSConfig.Region = "ru-central1"
+	t.Run("S3.Bucket", func(t *testing.T) {
+		if len(factory.CreateClients(&targets)) != 0 {
+			t.Error("Expected Client to be nil if no bucket is configured")
 		}
 	})
-	t.Run("Teams", func(t *testing.T) {
-		clients := factory.TeamsClients(testConfig.Teams)
-		if len(clients) != 2 {
-			t.Errorf("Expected 2 Client, got %d clients", len(clients))
+
+	targets.S3.Config.ServerSideEncryption = "AES256"
+	t.Run("S3.SSE-S3", func(t *testing.T) {
+		if len(factory.CreateClients(&targets)) != 0 {
+			t.Error("Expected Client to be nil if server side encryption is not configured")
 		}
 	})
-	t.Run("Webhook", func(t *testing.T) {
-		clients := factory.WebhookClients(testConfig.Webhook)
-		if len(clients) != 2 {
-			t.Errorf("Expected 2 Client, got %d clients", len(clients))
+
+	targets.S3.Config.ServerSideEncryption = "aws:kms"
+	t.Run("S3.SSE-KMS", func(t *testing.T) {
+		if len(factory.CreateClients(&targets)) != 0 {
+			t.Error("Expected Client to be nil if server side encryption is not configured")
 		}
 	})
-	t.Run("Telegram", func(t *testing.T) {
-		clients := factory.TelegramClients(testConfig.Telegram)
-		if len(clients) != 2 {
-			t.Errorf("Expected 2 Client, got %d clients", len(clients))
+
+	targets.S3.Config.BucketKeyEnabled = true
+	t.Run("S3.SSE-KMS-S3-KEY", func(t *testing.T) {
+		if len(factory.CreateClients(&targets)) != 0 {
+			t.Error("Expected Client to be nil if server side encryption is not configured")
 		}
 	})
-	t.Run("GoogleChat", func(t *testing.T) {
-		clients := factory.GoogleChatClients(testConfig.GoogleChat)
-		if len(clients) != 2 {
-			t.Errorf("Expected 2 Client, got %d clients", len(clients))
-		}
-	})
-	t.Run("S3", func(t *testing.T) {
-		clients := factory.S3Clients(testConfig.S3)
-		if len(clients) != 2 {
-			t.Errorf("Expected 2 Client, got %d clients", len(clients))
-		}
-	})
-	t.Run("GCS", func(t *testing.T) {
-		clients := factory.GCSClients(testConfig.GCS)
-		if len(clients) != 2 {
-			t.Errorf("Expected 2 Client, got %d clients", len(clients))
-		}
-	})
-	t.Run("Kinesis", func(t *testing.T) {
-		clients := factory.KinesisClients(testConfig.Kinesis)
-		if len(clients) != 2 {
-			t.Errorf("Expected 2 Client, got %d clients", len(clients))
-		}
-	})
-	t.Run("SecurityHub", func(t *testing.T) {
-		clients := factory.SecurityHubs(testConfig.SecurityHub)
-		if len(clients) != 2 {
-			t.Errorf("Expected 2 Client, got %d clients", len(clients))
+
+	targets.S3.Config.KmsKeyID = "kmsKeyId"
+	t.Run("S3.SSE-KMS-KEY-ID", func(t *testing.T) {
+		if len(factory.CreateClients(&targets)) != 0 {
+			t.Error("Expected Client to be nil if server side encryption is not configured")
 		}
 	})
 }
 
-func Test_ResolveTargetWithoutHost(t *testing.T) {
-	factory := config.NewTargetFactory(nil)
+func Test_KinesisValidation(t *testing.T) {
+	factory := config.NewTargetFactory(nil, nil)
 
-	t.Run("Loki", func(t *testing.T) {
-		if len(factory.LokiClients(&config.Loki{})) != 0 {
-			t.Error("Expected Client to be nil if no host is configured")
-		}
-	})
-	t.Run("Elasticsearch", func(t *testing.T) {
-		if len(factory.ElasticsearchClients(&config.Elasticsearch{})) != 0 {
-			t.Error("Expected Client to be nil if no host is configured")
-		}
-	})
-	t.Run("Slack", func(t *testing.T) {
-		if len(factory.SlackClients(&config.Slack{})) != 0 {
-			t.Error("Expected Client to be nil if no host is configured")
-		}
-	})
-	t.Run("Discord", func(t *testing.T) {
-		if len(factory.DiscordClients(&config.Discord{})) != 0 {
-			t.Error("Expected Client to be nil if no host is configured")
-		}
-	})
-	t.Run("Teams", func(t *testing.T) {
-		if len(factory.TeamsClients(&config.Teams{})) != 0 {
-			t.Error("Expected Client to be nil if no host is configured")
-		}
-	})
-	t.Run("Webhook", func(t *testing.T) {
-		if len(factory.WebhookClients(&config.Webhook{})) != 0 {
-			t.Error("Expected Client to be nil if no host is configured")
-		}
-	})
-	t.Run("Telegram", func(t *testing.T) {
-		if len(factory.TelegramClients(&config.Telegram{})) != 0 {
-			t.Error("Expected Client to be nil if no chatID is configured")
-		}
-	})
-	t.Run("GoogleChat", func(t *testing.T) {
-		if len(factory.GoogleChatClients(&config.GoogleChat{})) != 0 {
-			t.Error("Expected Client to be nil if no webhook is configured")
-		}
-	})
-	t.Run("S3.Endoint", func(t *testing.T) {
-		if len(factory.S3Clients(&config.S3{})) != 0 {
-			t.Error("Expected Client to be nil if no endpoint is configured")
-		}
-	})
-	t.Run("S3.AccessKey", func(t *testing.T) {
-		if len(factory.S3Clients(&config.S3{AWSConfig: config.AWSConfig{Endpoint: "https://storage.yandexcloud.net"}})) != 0 {
-			t.Error("Expected Client to be nil if no accessKey is configured")
-		}
-	})
-	t.Run("S3.SecretAccessKey", func(t *testing.T) {
-		if len(factory.S3Clients(&config.S3{AWSConfig: config.AWSConfig{Endpoint: "https://storage.yandexcloud.net", AccessKeyID: "access"}})) != 0 {
-			t.Error("Expected Client to be nil if no secretAccessKey is configured")
-		}
-	})
-	t.Run("S3.Region", func(t *testing.T) {
-		if len(factory.S3Clients(&config.S3{AWSConfig: config.AWSConfig{Endpoint: "https://storage.yandexcloud.net", AccessKeyID: "access", SecretAccessKey: "secret"}})) != 0 {
-			t.Error("Expected Client to be nil if no region is configured")
-		}
-	})
-	t.Run("S3.Bucket", func(t *testing.T) {
-		if len(factory.S3Clients(&config.S3{AWSConfig: config.AWSConfig{Endpoint: "https://storage.yandexcloud.net", AccessKeyID: "access", SecretAccessKey: "secret", Region: "ru-central1"}})) != 0 {
-			t.Error("Expected Client to be nil if no bucket is configured")
-		}
-	})
-	t.Run("S3.SSE-S3", func(t *testing.T) {
-		if len(factory.S3Clients(&config.S3{AWSConfig: config.AWSConfig{Endpoint: "https://storage.yandexcloud.net", AccessKeyID: "access", SecretAccessKey: "secret", Region: "ru-central1"}, ServerSideEncryption: "AES256"})) != 0 {
-			t.Error("Expected Client to be nil if server side encryption is not configured")
-		}
-	})
-	t.Run("S3.SSE-KMS", func(t *testing.T) {
-		if len(factory.S3Clients(&config.S3{AWSConfig: config.AWSConfig{Endpoint: "https://storage.yandexcloud.net", AccessKeyID: "access", SecretAccessKey: "secret", Region: "ru-central1"}, ServerSideEncryption: "aws:kms"})) != 0 {
-			t.Error("Expected Client to be nil if server side encryption is not configured")
-		}
-	})
-	t.Run("S3.SSE-KMS-S3-KEY", func(t *testing.T) {
-		if len(factory.S3Clients(&config.S3{AWSConfig: config.AWSConfig{Endpoint: "https://storage.yandexcloud.net", AccessKeyID: "access", SecretAccessKey: "secret", Region: "ru-central1"}, BucketKeyEnabled: true, ServerSideEncryption: "aws:kms"})) != 0 {
-			t.Error("Expected Client to be nil if server side encryption is not configured")
-		}
-	})
-	t.Run("S3.SSE-KMS-KEY-ID", func(t *testing.T) {
-		if len(factory.S3Clients(&config.S3{AWSConfig: config.AWSConfig{Endpoint: "https://storage.yandexcloud.net", AccessKeyID: "access", SecretAccessKey: "secret", Region: "ru-central1"}, ServerSideEncryption: "aws:kms", KmsKeyID: "kmsKeyId"})) != 0 {
-			t.Error("Expected Client to be nil if server side encryption is not configured")
-		}
-	})
-	t.Run("Kinesis.Endpoint", func(t *testing.T) {
-		if len(factory.KinesisClients(&config.Kinesis{})) != 0 {
-			t.Error("Expected Client to be nil if no endpoint is configured")
-		}
-	})
+	targets := config.Targets{
+		Kinesis: &config.Target[config.KinesisOptions]{
+			Config: &config.KinesisOptions{
+				AWSConfig: config.AWSConfig{Endpoint: "https://storage.yandexcloud.net"},
+			},
+		},
+	}
+
 	t.Run("Kinesis.AccessKey", func(t *testing.T) {
-		if len(factory.KinesisClients(&config.Kinesis{AWSConfig: config.AWSConfig{Endpoint: "https://yds.serverless.yandexcloud.net"}})) != 0 {
+		if len(factory.CreateClients(&targets)) != 0 {
 			t.Error("Expected Client to be nil if no accessKey is configured")
 		}
 	})
+
+	targets.Kinesis.Config.AWSConfig.AccessKeyID = "access"
 	t.Run("Kinesis.SecretAccessKey", func(t *testing.T) {
-		if len(factory.KinesisClients(&config.Kinesis{AWSConfig: config.AWSConfig{Endpoint: "https://yds.serverless.yandexcloud.net", AccessKeyID: "access"}})) != 0 {
+		if len(factory.CreateClients(&targets)) != 0 {
 			t.Error("Expected Client to be nil if no secretAccessKey is configured")
 		}
 	})
+
+	targets.Kinesis.Config.AWSConfig.SecretAccessKey = "secret"
+
 	t.Run("Kinesis.Region", func(t *testing.T) {
-		if len(factory.KinesisClients(&config.Kinesis{AWSConfig: config.AWSConfig{Endpoint: "https://yds.serverless.yandexcloud.net", AccessKeyID: "access", SecretAccessKey: "secret"}})) != 0 {
+		if len(factory.CreateClients(&targets)) != 0 {
 			t.Error("Expected Client to be nil if no region is configured")
 		}
 	})
+
+	targets.Kinesis.Config.AWSConfig.Region = "ru-central1"
+
 	t.Run("Kinesis.StreamName", func(t *testing.T) {
-		if len(factory.KinesisClients(&config.Kinesis{AWSConfig: config.AWSConfig{Endpoint: "https://yds.serverless.yandexcloud.net", AccessKeyID: "access", SecretAccessKey: "secret", Region: "ru-central1"}})) != 0 {
+		if len(factory.CreateClients(&targets)) != 0 {
 			t.Error("Expected Client to be nil if no stream name is configured")
 		}
 	})
+}
+
+func Test_SecurityHubValidation(t *testing.T) {
+	factory := config.NewTargetFactory(nil, nil)
+
+	targets := config.Targets{
+		SecurityHub: &config.Target[config.SecurityHubOptions]{
+			Config: &config.SecurityHubOptions{
+				AWSConfig: config.AWSConfig{Endpoint: "https://storage.yandexcloud.net"},
+			},
+		},
+	}
+
 	t.Run("SecurityHub.AccountID", func(t *testing.T) {
-		if len(factory.SecurityHubs(&config.SecurityHub{})) != 0 {
+		if len(factory.CreateClients(&targets)) != 0 {
 			t.Error("Expected Client to be nil if no accountID is configured")
 		}
 	})
+
+	targets.SecurityHub.Config.AccountID = "accountID"
 	t.Run("SecurityHub.AccessKey", func(t *testing.T) {
-		if len(factory.SecurityHubs(&config.SecurityHub{AccountID: "accountID"})) != 0 {
+		if len(factory.CreateClients(&targets)) != 0 {
 			t.Error("Expected Client to be nil if no accessKey is configured")
 		}
 	})
+
+	targets.SecurityHub.Config.AWSConfig.AccessKeyID = "access"
 	t.Run("SecurityHub.SecretAccessKey", func(t *testing.T) {
-		if len(factory.SecurityHubs(&config.SecurityHub{AccountID: "accountID", AWSConfig: config.AWSConfig{AccessKeyID: "access"}})) != 0 {
+		if len(factory.CreateClients(&targets)) != 0 {
 			t.Error("Expected Client to be nil if no secretAccessKey is configured")
 		}
 	})
+
+	targets.SecurityHub.Config.AWSConfig.SecretAccessKey = "secret"
 	t.Run("SecurityHub.Region", func(t *testing.T) {
-		if len(factory.SecurityHubs(&config.SecurityHub{AccountID: "accountID", AWSConfig: config.AWSConfig{AccessKeyID: "access", SecretAccessKey: "secret"}})) != 0 {
+		if len(factory.CreateClients(&targets)) != 0 {
 			t.Error("Expected Client to be nil if no region is configured")
 		}
 	})
+}
+
+func Test_GCSValidation(t *testing.T) {
+	factory := config.NewTargetFactory(nil, nil)
+
+	targets := config.Targets{
+		GCS: &config.Target[config.GCSOptions]{
+			Config: &config.GCSOptions{},
+		},
+	}
+
 	t.Run("GCS.Bucket", func(t *testing.T) {
-		if len(factory.GCSClients(&config.GCS{})) != 0 {
+		if len(factory.CreateClients(&targets)) != 0 {
 			t.Error("Expected Client to be nil if no bucket is configured")
 		}
 	})
+
+	targets.GCS.Config.Bucket = "policy-reporter"
 	t.Run("GCS.Credentials", func(t *testing.T) {
-		if len(factory.GCSClients(&config.GCS{Bucket: "policy-reporter"})) != 0 {
+		if len(factory.CreateClients(&targets)) != 0 {
 			t.Error("Expected Client to be nil if no accessKey is configured")
 		}
 	})
 }
 
 func Test_GetValuesFromSecret(t *testing.T) {
-	factory := config.NewTargetFactory(secrets.NewClient(newFakeClient()))
+	factory := config.NewTargetFactory(secrets.NewClient(newFakeClient()), nil)
+
+	targets := config.Targets{
+		Loki:          &config.Target[config.LokiOptions]{SecretRef: secretName},
+		Elasticsearch: &config.Target[config.ElasticsearchOptions]{SecretRef: secretName},
+		Slack:         &config.Target[config.SlackOptions]{SecretRef: secretName},
+		Discord:       &config.Target[config.WebhookOptions]{SecretRef: secretName},
+		Teams:         &config.Target[config.WebhookOptions]{SecretRef: secretName},
+		GoogleChat:    &config.Target[config.WebhookOptions]{SecretRef: secretName},
+		Webhook:       &config.Target[config.WebhookOptions]{SecretRef: secretName},
+		Telegram: &config.Target[config.TelegramOptions]{
+			SecretRef: secretName,
+			Config: &config.TelegramOptions{
+				ChatID: "1234",
+			},
+		},
+		S3: &config.Target[config.S3Options]{
+			SecretRef: secretName,
+			Config: &config.S3Options{
+				AWSConfig: config.AWSConfig{Endpoint: "endoint", Region: "region"},
+				Bucket:    "bucket",
+			},
+		},
+		Kinesis: &config.Target[config.KinesisOptions]{
+			SecretRef: secretName,
+			Config: &config.KinesisOptions{
+				AWSConfig:  config.AWSConfig{Endpoint: "endoint", Region: "region"},
+				StreamName: "stream",
+			},
+		},
+		SecurityHub: &config.Target[config.SecurityHubOptions]{
+			SecretRef: secretName,
+			Config: &config.SecurityHubOptions{
+				AWSConfig: config.AWSConfig{Endpoint: "endoint", Region: "region"},
+				AccountID: "accountID",
+			},
+		},
+		GCS: &config.Target[config.GCSOptions]{
+			SecretRef: secretName,
+			Config: &config.GCSOptions{
+				Bucket: "policy-reporter",
+			},
+		},
+	}
+
+	clients := factory.CreateClients(&targets)
+	if len(clients) != 12 {
+		t.Fatalf("expected 12 clients created, got %d", len(clients))
+	}
 
 	t.Run("Get Loki values from Secret", func(t *testing.T) {
-		clients := factory.LokiClients(&config.Loki{TargetBaseOptions: config.TargetBaseOptions{SecretRef: secretName}})
-		if len(clients) != 1 {
-			t.Fatal("Expected one client created")
-		}
-
-		client := reflect.ValueOf(clients[0]).Elem()
-
-		if v := client.FieldByName("host").String(); v != "http://localhost:9200/api/prom/push" {
+		fv := reflect.ValueOf(clients[0]).Elem().FieldByName("host")
+		if v := fv.String(); v != "http://localhost:9200/api/prom/push" {
 			t.Errorf("Expected host from secret, got %s", v)
-		}
-
-		username := client.FieldByName("username").String()
-		if username != "username" {
-			t.Errorf("Expected username from secret, got %s", username)
-		}
-
-		password := client.FieldByName("password").String()
-		if password != "password" {
-			t.Errorf("Expected password from secret, got %s", password)
 		}
 	})
 
 	t.Run("Get Elasticsearch values from Secret", func(t *testing.T) {
-		clients := factory.ElasticsearchClients(&config.Elasticsearch{TargetBaseOptions: config.TargetBaseOptions{SecretRef: secretName}})
-		if len(clients) != 1 {
-			t.Fatal("Expected one client created")
-		}
-
-		client := reflect.ValueOf(clients[0]).Elem()
+		client := reflect.ValueOf(clients[1]).Elem()
 
 		host := client.FieldByName("host").String()
 		if host != "http://localhost:9200" {
@@ -353,20 +371,19 @@ func Test_GetValuesFromSecret(t *testing.T) {
 		if apiKey != "apiKey" {
 			t.Errorf("Expected apiKey from secret, got %s", apiKey)
 		}
+	})
 
-		typelessApi := client.FieldByName("typelessApi").Bool()
-		if typelessApi == false {
-			t.Errorf("Expected typelessApi true value from secret, got %t", typelessApi)
+	t.Run("Get Slack values from Secret", func(t *testing.T) {
+		client := reflect.ValueOf(clients[2]).Elem()
+
+		webhook := client.FieldByName("webhook").String()
+		if webhook != "http://localhost:9200/webhook" {
+			t.Errorf("Expected webhook from secret, got %s", webhook)
 		}
 	})
 
 	t.Run("Get Discord values from Secret", func(t *testing.T) {
-		clients := factory.DiscordClients(&config.Discord{TargetBaseOptions: config.TargetBaseOptions{SecretRef: secretName}})
-		if len(clients) != 1 {
-			t.Error("Expected one client created")
-		}
-
-		client := reflect.ValueOf(clients[0]).Elem()
+		client := reflect.ValueOf(clients[3]).Elem()
 
 		webhook := client.FieldByName("webhook").String()
 		if webhook != "http://localhost:9200/webhook" {
@@ -375,12 +392,7 @@ func Test_GetValuesFromSecret(t *testing.T) {
 	})
 
 	t.Run("Get MS Teams values from Secret", func(t *testing.T) {
-		clients := factory.TeamsClients(&config.Teams{TargetBaseOptions: config.TargetBaseOptions{SecretRef: secretName}})
-		if len(clients) != 1 {
-			t.Error("Expected one client created")
-		}
-
-		client := reflect.ValueOf(clients[0]).Elem()
+		client := reflect.ValueOf(clients[4]).Elem()
 
 		webhook := client.FieldByName("webhook").String()
 		if webhook != "http://localhost:9200/webhook" {
@@ -388,54 +400,8 @@ func Test_GetValuesFromSecret(t *testing.T) {
 		}
 	})
 
-	t.Run("Get Slack values from Secret", func(t *testing.T) {
-		clients := factory.SlackClients(&config.Slack{TargetBaseOptions: config.TargetBaseOptions{SecretRef: secretName}})
-		if len(clients) != 1 {
-			t.Error("Expected one client created")
-		}
-
-		client := reflect.ValueOf(clients[0]).Elem()
-
-		webhook := client.FieldByName("webhook").String()
-		if webhook != "http://localhost:9200/webhook" {
-			t.Errorf("Expected webhook from secret, got %s", webhook)
-		}
-	})
-
-	t.Run("Get Webhook Authentication Token from Secret", func(t *testing.T) {
-		clients := factory.WebhookClients(&config.Webhook{TargetBaseOptions: config.TargetBaseOptions{SecretRef: secretName}})
-		if len(clients) != 1 {
-			t.Error("Expected one client created")
-		}
-
-		client := reflect.ValueOf(clients[0]).Elem()
-
-		token := client.FieldByName("headers").MapIndex(reflect.ValueOf("Authorization")).String()
-		if token != "token" {
-			t.Errorf("Expected token from secret, got %s", token)
-		}
-	})
-
-	t.Run("Get Telegram Token from Secret", func(t *testing.T) {
-		clients := factory.TelegramClients(&config.Telegram{TargetBaseOptions: config.TargetBaseOptions{SecretRef: secretName}, ChatID: "1234"})
-		if len(clients) != 1 {
-			t.Error("Expected one client created")
-		}
-
-		client := reflect.ValueOf(clients[0]).Elem()
-
-		host := client.FieldByName("host").String()
-		if host != "http://localhost:9200/bottoken/sendMessage" {
-			t.Errorf("Expected host with token from secret, got %s", host)
-		}
-	})
 	t.Run("Get GoogleChat Webhook from Secret", func(t *testing.T) {
-		clients := factory.GoogleChatClients(&config.GoogleChat{TargetBaseOptions: config.TargetBaseOptions{SecretRef: secretName}})
-		if len(clients) != 1 {
-			t.Error("Expected one client created")
-		}
-
-		client := reflect.ValueOf(clients[0]).Elem()
+		client := reflect.ValueOf(clients[5]).Elem()
 
 		host := client.FieldByName("webhook").String()
 		if host != "http://localhost:9200/webhook" {
@@ -443,55 +409,169 @@ func Test_GetValuesFromSecret(t *testing.T) {
 		}
 	})
 
-	t.Run("Get S3 values from Secret", func(t *testing.T) {
-		clients := factory.S3Clients(&config.S3{TargetBaseOptions: config.TargetBaseOptions{SecretRef: secretName}, AWSConfig: config.AWSConfig{Endpoint: "endoint", Region: "region"}, Bucket: "bucket"})
-		if len(clients) != 1 {
-			t.Error("Expected one client created")
+	t.Run("Get Telegram Token from Secret", func(t *testing.T) {
+		client := reflect.ValueOf(clients[6]).Elem()
+
+		host := client.FieldByName("host").String()
+		if host != "http://localhost:9200/bottoken/sendMessage" {
+			t.Errorf("Expected host with token from secret, got %s", host)
 		}
 	})
 
-	t.Run("Get S3 values from Secret with KMS", func(t *testing.T) {
-		clients := factory.S3Clients(&config.S3{TargetBaseOptions: config.TargetBaseOptions{SecretRef: secretName}, AWSConfig: config.AWSConfig{Endpoint: "endoint", Region: "region"}, Bucket: "bucket", BucketKeyEnabled: true, ServerSideEncryption: "aws:kms"})
-		if len(clients) != 1 {
-			t.Error("Expected one client created")
-		}
-	})
+	t.Run("Get Webhook Authentication Token from Secret", func(t *testing.T) {
+		client := reflect.ValueOf(clients[7]).Elem()
 
-	t.Run("Get Kinesis values from Secret", func(t *testing.T) {
-		clients := factory.KinesisClients(&config.Kinesis{TargetBaseOptions: config.TargetBaseOptions{SecretRef: secretName}, AWSConfig: config.AWSConfig{Endpoint: "endpoint", Region: "region"}, StreamName: "stream"})
-		if len(clients) != 1 {
-			t.Error("Expected one client created")
-		}
-	})
-
-	t.Run("Get SecurityHub values from Secret", func(t *testing.T) {
-		clients := factory.SecurityHubs(&config.SecurityHub{TargetBaseOptions: config.TargetBaseOptions{SecretRef: secretName}, AWSConfig: config.AWSConfig{Endpoint: "endpoint", Region: "region"}})
-		if len(clients) != 1 {
-			t.Error("Expected one client created")
-		}
-	})
-
-	t.Run("Get GCS values from Secret", func(t *testing.T) {
-		clients := factory.GCSClients(&config.GCS{TargetBaseOptions: config.TargetBaseOptions{SecretRef: secretName}, Bucket: "bucket"})
-		if len(clients) != 1 {
-			t.Error("Expected one client created")
+		token := client.FieldByName("headers").MapIndex(reflect.ValueOf("Authorization")).String()
+		if token != "token" {
+			t.Errorf("Expected token from secret, got %s", token)
 		}
 	})
 
 	t.Run("Get none existing secret skips target", func(t *testing.T) {
-		clients := factory.LokiClients(&config.Loki{TargetBaseOptions: config.TargetBaseOptions{SecretRef: "no-exist"}})
+		clients := factory.CreateClients(&config.Targets{
+			Loki: &config.Target[config.LokiOptions]{SecretRef: "not-exist"},
+		})
+
 		if len(clients) != 0 {
 			t.Error("Expected client are skipped")
 		}
 	})
+}
+
+func Test_CustomFields(t *testing.T) {
+	factory := config.NewTargetFactory(nil, nil)
+
+	targets := &config.Targets{
+		Loki: &config.Target[config.LokiOptions]{
+			Config: &config.LokiOptions{
+				HostOptions: config.HostOptions{
+					Host: "http://localhost:3100",
+				},
+			},
+			CustomFields: map[string]string{"field": "value"},
+		},
+		Elasticsearch: &config.Target[config.ElasticsearchOptions]{
+			Config: &config.ElasticsearchOptions{
+				HostOptions: config.HostOptions{
+					Host: "http://localhost:9200",
+				},
+			},
+			CustomFields: map[string]string{"field": "value"},
+		},
+		Slack: &config.Target[config.SlackOptions]{
+			Config: &config.SlackOptions{
+				WebhookOptions: config.WebhookOptions{
+					Webhook: "http://localhost:80",
+				},
+			},
+			CustomFields: map[string]string{"field": "value"},
+		},
+		Discord: &config.Target[config.WebhookOptions]{
+			Config: &config.WebhookOptions{
+				Webhook: "http://discord:80",
+			},
+			CustomFields: map[string]string{"field": "value"},
+		},
+		Teams: &config.Target[config.WebhookOptions]{
+			Config: &config.WebhookOptions{
+				Webhook: "http://hook.teams:80",
+			},
+			CustomFields: map[string]string{"field": "value"},
+		},
+		GoogleChat: &config.Target[config.WebhookOptions]{
+			Config: &config.WebhookOptions{
+				Webhook: "http://localhost:900/webhook",
+			},
+			CustomFields: map[string]string{"field": "value"},
+		},
+		Telegram: &config.Target[config.TelegramOptions]{
+			Config: &config.TelegramOptions{
+				WebhookOptions: config.WebhookOptions{
+					Webhook: "http://localhost:80",
+				},
+				Token:  "XXX",
+				ChatID: "123456",
+			},
+			CustomFields: map[string]string{"field": "value"},
+		},
+		Webhook: &config.Target[config.WebhookOptions]{
+			Config: &config.WebhookOptions{
+				Webhook: "http://localhost:8080",
+			},
+			CustomFields: map[string]string{"field": "value"},
+		},
+		S3: &config.Target[config.S3Options]{
+			Config: &config.S3Options{
+				AWSConfig: config.AWSConfig{
+					AccessKeyID:     "AccessKey",
+					SecretAccessKey: "SecretAccessKey",
+					Endpoint:        "https://storage.yandexcloud.net",
+					Region:          "ru-central1",
+				},
+				Bucket: "test",
+			},
+			CustomFields: map[string]string{"field": "value"},
+		},
+		Kinesis: &config.Target[config.KinesisOptions]{
+			Config: &config.KinesisOptions{
+				AWSConfig: config.AWSConfig{
+					AccessKeyID:     "AccessKey",
+					SecretAccessKey: "SecretAccessKey",
+					Endpoint:        "https://storage.yandexcloud.net",
+					Region:          "ru-central1",
+				},
+				StreamName: "policy-reporter",
+			},
+			CustomFields: map[string]string{"field": "value"},
+		},
+		SecurityHub: &config.Target[config.SecurityHubOptions]{
+			Config: &config.SecurityHubOptions{
+				AWSConfig: config.AWSConfig{
+					AccessKeyID:     "AccessKey",
+					SecretAccessKey: "SecretAccessKey",
+					Endpoint:        "https://storage.yandexcloud.net",
+					Region:          "ru-central1",
+				},
+				AccountID: "AccountID",
+			},
+			CustomFields: map[string]string{"field": "value"},
+		},
+		GCS: &config.Target[config.GCSOptions]{
+			Config: &config.GCSOptions{
+				Credentials: `{"token": "token", "type": "authorized_user"}`,
+				Bucket:      "test",
+				Prefix:      "prefix",
+			},
+			CustomFields: map[string]string{"field": "value"},
+		},
+	}
+
+	clients := factory.CreateClients(targets)
+
+	if len(clients) != 12 {
+		t.Fatalf("expected 12 client created, got %d", len(clients))
+	}
+
+	t.Run("Get CustomLabels from Loki", func(t *testing.T) {
+		client := reflect.ValueOf(clients[0]).Elem()
+
+		customFields := client.FieldByName("customLabels").MapKeys()
+		if customFields[0].String() != "field" {
+			t.Errorf("Expected customLabels are added")
+		}
+	})
+
+	t.Run("Get CustomFields from Elasticsearch", func(t *testing.T) {
+		client := reflect.ValueOf(clients[1]).Elem()
+
+		customFields := client.FieldByName("customFields").MapKeys()
+		if customFields[0].String() != "field" {
+			t.Errorf("Expected customFields are added")
+		}
+	})
 
 	t.Run("Get CustomFields from Slack", func(t *testing.T) {
-		clients := factory.SlackClients(&config.Slack{TargetBaseOptions: config.TargetBaseOptions{CustomFields: map[string]string{"field": "value"}}, Webhook: "http://localhost"})
-		if len(clients) != 1 {
-			t.Error("Expected one client created")
-		}
-
-		client := reflect.ValueOf(clients[0]).Elem()
+		client := reflect.ValueOf(clients[2]).Elem()
 
 		customFields := client.FieldByName("customFields").MapKeys()
 		if customFields[0].String() != "field" {
@@ -499,12 +579,7 @@ func Test_GetValuesFromSecret(t *testing.T) {
 		}
 	})
 	t.Run("Get CustomFields from Discord", func(t *testing.T) {
-		clients := factory.DiscordClients(&config.Discord{TargetBaseOptions: config.TargetBaseOptions{CustomFields: map[string]string{"field": "value"}}, Webhook: "http://localhost"})
-		if len(clients) != 1 {
-			t.Error("Expected one client created")
-		}
-
-		client := reflect.ValueOf(clients[0]).Elem()
+		client := reflect.ValueOf(clients[3]).Elem()
 
 		customFields := client.FieldByName("customFields").MapKeys()
 		if customFields[0].String() != "field" {
@@ -512,77 +587,34 @@ func Test_GetValuesFromSecret(t *testing.T) {
 		}
 	})
 	t.Run("Get CustomFields from MS Teams", func(t *testing.T) {
-		clients := factory.TeamsClients(&config.Teams{TargetBaseOptions: config.TargetBaseOptions{CustomFields: map[string]string{"field": "value"}}, Webhook: "http://localhost"})
-		if len(clients) != 1 {
-			t.Error("Expected one client created")
-		}
-
-		client := reflect.ValueOf(clients[0]).Elem()
+		client := reflect.ValueOf(clients[4]).Elem()
 
 		customFields := client.FieldByName("customFields").MapKeys()
 		if customFields[0].String() != "field" {
 			t.Errorf("Expected customFields are added")
 		}
 	})
-	t.Run("Get CustomFields from Elasticsearch", func(t *testing.T) {
-		clients := factory.ElasticsearchClients(&config.Elasticsearch{TargetBaseOptions: config.TargetBaseOptions{CustomFields: map[string]string{"field": "value"}}, Host: "http://localhost"})
-		if len(clients) != 1 {
-			t.Error("Expected one client created")
-		}
 
-		client := reflect.ValueOf(clients[0]).Elem()
-
-		customFields := client.FieldByName("customFields").MapKeys()
-		if customFields[0].String() != "field" {
-			t.Errorf("Expected customFields are added")
-		}
-	})
-	t.Run("Get CustomFields from Webhook", func(t *testing.T) {
-		clients := factory.WebhookClients(&config.Webhook{TargetBaseOptions: config.TargetBaseOptions{CustomFields: map[string]string{"field": "value"}}, Host: "http://localhost"})
-		if len(clients) != 1 {
-			t.Error("Expected one client created")
-		}
-
-		client := reflect.ValueOf(clients[0]).Elem()
-
-		customFields := client.FieldByName("customFields").MapKeys()
-		if customFields[0].String() != "field" {
-			t.Errorf("Expected customFields are added")
-		}
-	})
-	t.Run("Get CustomFields from Telegram", func(t *testing.T) {
-		clients := factory.TelegramClients(&config.Telegram{TargetBaseOptions: config.TargetBaseOptions{CustomFields: map[string]string{"field": "value"}}, Token: "XXX", ChatID: "1234"})
-		if len(clients) != 1 {
-			t.Error("Expected one client created")
-		}
-
-		client := reflect.ValueOf(clients[0]).Elem()
-
-		customFields := client.FieldByName("customFields").MapKeys()
-		if customFields[0].String() != "field" {
-			t.Errorf("Expected customFields are added")
-		}
-	})
 	t.Run("Get CustomFields from GoogleChat", func(t *testing.T) {
-		clients := factory.GoogleChatClients(&config.GoogleChat{TargetBaseOptions: config.TargetBaseOptions{CustomFields: map[string]string{"field": "value"}}, Webhook: "http;//googlechat.webhook"})
-		if len(clients) != 1 {
-			t.Error("Expected one client created")
-		}
-
-		client := reflect.ValueOf(clients[0]).Elem()
+		client := reflect.ValueOf(clients[5]).Elem()
 
 		customFields := client.FieldByName("customFields").MapKeys()
 		if customFields[0].String() != "field" {
 			t.Errorf("Expected customFields are added")
 		}
 	})
-	t.Run("Get CustomFields from Kinesis", func(t *testing.T) {
-		clients := factory.KinesisClients(testConfig.Kinesis)
-		if len(clients) < 1 {
-			t.Error("Expected one client created")
-		}
 
-		client := reflect.ValueOf(clients[0]).Elem()
+	t.Run("Get CustomFields from Telegram", func(t *testing.T) {
+		client := reflect.ValueOf(clients[6]).Elem()
+
+		customFields := client.FieldByName("customFields").MapKeys()
+		if customFields[0].String() != "field" {
+			t.Errorf("Expected customFields are added")
+		}
+	})
+
+	t.Run("Get CustomFields from Webhook", func(t *testing.T) {
+		client := reflect.ValueOf(clients[7]).Elem()
 
 		customFields := client.FieldByName("customFields").MapKeys()
 		if customFields[0].String() != "field" {
@@ -590,41 +622,23 @@ func Test_GetValuesFromSecret(t *testing.T) {
 		}
 	})
 	t.Run("Get CustomFields from S3", func(t *testing.T) {
-		clients := factory.S3Clients(testConfig.S3)
-		if len(clients) < 1 {
-			t.Error("Expected one client created")
-		}
-
-		client := reflect.ValueOf(clients[0]).Elem()
+		client := reflect.ValueOf(clients[8]).Elem()
 
 		customFields := client.FieldByName("customFields").MapKeys()
 		if customFields[0].String() != "field" {
 			t.Errorf("Expected customFields are added")
 		}
 	})
-	t.Run("Get CustomLabels from Loki", func(t *testing.T) {
-		clients := factory.LokiClients(&config.Loki{
-			CustomLabels: map[string]string{"label": "value"},
-			Host:         "http://localhost",
-		})
-		if len(clients) < 1 {
-			t.Error("Expected one client created")
-		}
+	t.Run("Get CustomFields from Kinesis", func(t *testing.T) {
+		client := reflect.ValueOf(clients[9]).Elem()
 
-		client := reflect.ValueOf(clients[0]).Elem()
-
-		customFields := client.FieldByName("customLabels").MapKeys()
-		if customFields[0].String() != "label" {
-			t.Errorf("Expected customLabels are added")
+		customFields := client.FieldByName("customFields").MapKeys()
+		if customFields[0].String() != "field" {
+			t.Errorf("Expected customFields are added")
 		}
 	})
 	t.Run("Get CustomFields from GCS", func(t *testing.T) {
-		clients := factory.GCSClients(testConfig.GCS)
-		if len(clients) < 1 {
-			t.Error("Expected one client created")
-		}
-
-		client := reflect.ValueOf(clients[0]).Elem()
+		client := reflect.ValueOf(clients[11]).Elem()
 
 		customFields := client.FieldByName("customFields").MapKeys()
 		if customFields[0].String() != "field" {
@@ -634,181 +648,159 @@ func Test_GetValuesFromSecret(t *testing.T) {
 }
 
 func Test_GetValuesFromMountedSecret(t *testing.T) {
-	factory := config.NewTargetFactory(nil)
+	factory := config.NewTargetFactory(secrets.NewClient(newFakeClient()), nil)
+
 	mountSecret()
 	defer os.Remove(mountedSecret)
 
-	t.Run("Get Loki values from MountedSecret", func(t *testing.T) {
-		clients := factory.LokiClients(&config.Loki{TargetBaseOptions: config.TargetBaseOptions{MountedSecret: mountedSecret}})
-		if len(clients) != 1 {
-			t.Error("Expected one client created")
-		}
+	targets := config.Targets{
+		Loki:          &config.Target[config.LokiOptions]{MountedSecret: mountedSecret},
+		Elasticsearch: &config.Target[config.ElasticsearchOptions]{MountedSecret: mountedSecret},
+		Slack:         &config.Target[config.SlackOptions]{MountedSecret: mountedSecret},
+		Discord:       &config.Target[config.WebhookOptions]{MountedSecret: mountedSecret},
+		Teams:         &config.Target[config.WebhookOptions]{MountedSecret: mountedSecret},
+		GoogleChat:    &config.Target[config.WebhookOptions]{MountedSecret: mountedSecret},
+		Webhook:       &config.Target[config.WebhookOptions]{MountedSecret: mountedSecret},
+		Telegram: &config.Target[config.TelegramOptions]{
+			MountedSecret: mountedSecret,
+			Config: &config.TelegramOptions{
+				ChatID: "1234",
+			},
+		},
+		S3: &config.Target[config.S3Options]{
+			MountedSecret: mountedSecret,
+			Config: &config.S3Options{
+				AWSConfig: config.AWSConfig{Endpoint: "endoint", Region: "region"},
+				Bucket:    "bucket",
+			},
+		},
+		Kinesis: &config.Target[config.KinesisOptions]{
+			MountedSecret: mountedSecret,
+			Config: &config.KinesisOptions{
+				AWSConfig:  config.AWSConfig{Endpoint: "endoint", Region: "region"},
+				StreamName: "stream",
+			},
+		},
+		SecurityHub: &config.Target[config.SecurityHubOptions]{
+			MountedSecret: mountedSecret,
+			Config: &config.SecurityHubOptions{
+				AWSConfig: config.AWSConfig{Endpoint: "endoint", Region: "region"},
+				AccountID: "accountID",
+			},
+		},
+		GCS: &config.Target[config.GCSOptions]{
+			MountedSecret: mountedSecret,
+			Config: &config.GCSOptions{
+				Bucket: "policy-reporter",
+			},
+		},
+	}
 
-		client := reflect.ValueOf(clients[0]).Elem()
-		if v := client.FieldByName("host").String(); v != "http://localhost:9200/api/prom/push" {
-			t.Errorf("Expected host from mounted secret, got %s", v)
-		}
+	clients := factory.CreateClients(&targets)
+	if len(clients) != 12 {
+		t.Fatalf("expected 12 client created, got %d", len(clients))
+	}
 
-		username := client.FieldByName("username").String()
-		if username != "username" {
-			t.Errorf("Expected username from mounted secret, got %s", username)
+	t.Run("Get Loki values from Secret", func(t *testing.T) {
+		fv := reflect.ValueOf(clients[0]).Elem().FieldByName("host")
+		if v := fv.String(); v != "http://localhost:9200/api/prom/push" {
+			t.Errorf("Expected host from secret, got %s", v)
 		}
-
-		password := client.FieldByName("password").String()
-		if password != "password" {
-			t.Errorf("Expected password from mounted secret, got %s", password)
-		}
-
 	})
 
-	t.Run("Get Elasticsearch values from MountedSecret", func(t *testing.T) {
-		clients := factory.ElasticsearchClients(&config.Elasticsearch{TargetBaseOptions: config.TargetBaseOptions{MountedSecret: mountedSecret}})
-		if len(clients) != 1 {
-			t.Error("Expected one client created")
-		}
-
-		client := reflect.ValueOf(clients[0]).Elem()
+	t.Run("Get Elasticsearch values from Secret", func(t *testing.T) {
+		client := reflect.ValueOf(clients[1]).Elem()
 
 		host := client.FieldByName("host").String()
 		if host != "http://localhost:9200" {
-			t.Errorf("Expected host from mounted secret, got %s", host)
+			t.Errorf("Expected host from secret, got %s", host)
 		}
 
 		username := client.FieldByName("username").String()
 		if username != "username" {
-			t.Errorf("Expected username from mounted secret, got %s", username)
+			t.Errorf("Expected username from secret, got %s", username)
+		}
+
+		rotation := client.FieldByName("rotation").String()
+		if rotation != "daily" {
+			t.Errorf("Expected rotation from secret, got %s", rotation)
+		}
+
+		index := client.FieldByName("index").String()
+		if index != "policy-reporter" {
+			t.Errorf("Expected rotation from secret, got %s", index)
 		}
 
 		password := client.FieldByName("password").String()
 		if password != "password" {
-			t.Errorf("Expected password from mounted secret, got %s", password)
+			t.Errorf("Expected password from secret, got %s", password)
 		}
 
 		apiKey := client.FieldByName("apiKey").String()
 		if apiKey != "apiKey" {
 			t.Errorf("Expected apiKey from secret, got %s", apiKey)
 		}
-
-		typelessApi := client.FieldByName("typelessApi").Bool()
-		if typelessApi != false {
-			t.Errorf("Expected typelessApi false value from secret, got %t", typelessApi)
-		}
 	})
 
-	t.Run("Get Discord values from MountedSecret", func(t *testing.T) {
-		clients := factory.DiscordClients(&config.Discord{TargetBaseOptions: config.TargetBaseOptions{MountedSecret: mountedSecret}})
-		if len(clients) != 1 {
-			t.Error("Expected one client created")
-		}
-
-		client := reflect.ValueOf(clients[0]).Elem()
+	t.Run("Get Slack values from Secret", func(t *testing.T) {
+		client := reflect.ValueOf(clients[2]).Elem()
 
 		webhook := client.FieldByName("webhook").String()
 		if webhook != "http://localhost:9200/webhook" {
-			t.Errorf("Expected webhook from mounted secret, got %s", webhook)
+			t.Errorf("Expected webhook from secret, got %s", webhook)
 		}
 	})
 
-	t.Run("Get MS Teams values from MountedSecret", func(t *testing.T) {
-		clients := factory.TeamsClients(&config.Teams{TargetBaseOptions: config.TargetBaseOptions{MountedSecret: mountedSecret}})
-		if len(clients) != 1 {
-			t.Error("Expected one client created")
-		}
-
-		client := reflect.ValueOf(clients[0]).Elem()
+	t.Run("Get Discord values from Secret", func(t *testing.T) {
+		client := reflect.ValueOf(clients[3]).Elem()
 
 		webhook := client.FieldByName("webhook").String()
 		if webhook != "http://localhost:9200/webhook" {
-			t.Errorf("Expected webhook from mounted secret, got %s", webhook)
+			t.Errorf("Expected webhook from secret, got %s", webhook)
 		}
 	})
 
-	t.Run("Get Slack values from MountedSecret", func(t *testing.T) {
-		clients := factory.SlackClients(&config.Slack{TargetBaseOptions: config.TargetBaseOptions{MountedSecret: mountedSecret}})
-		if len(clients) != 1 {
-			t.Error("Expected one client created")
-		}
-
-		client := reflect.ValueOf(clients[0]).Elem()
+	t.Run("Get MS Teams values from Secret", func(t *testing.T) {
+		client := reflect.ValueOf(clients[4]).Elem()
 
 		webhook := client.FieldByName("webhook").String()
 		if webhook != "http://localhost:9200/webhook" {
-			t.Errorf("Expected webhook from mounted secret, got %s", webhook)
+			t.Errorf("Expected webhook from secret, got %s", webhook)
 		}
 	})
 
-	t.Run("Get Webhook Authentication Token from MountedSecret", func(t *testing.T) {
-		clients := factory.WebhookClients(&config.Webhook{TargetBaseOptions: config.TargetBaseOptions{MountedSecret: mountedSecret}})
-		if len(clients) != 1 {
-			t.Error("Expected one client created")
-		}
+	t.Run("Get GoogleChat Webhook from Secret", func(t *testing.T) {
+		client := reflect.ValueOf(clients[5]).Elem()
 
-		client := reflect.ValueOf(clients[0]).Elem()
+		host := client.FieldByName("webhook").String()
+		if host != "http://localhost:9200/webhook" {
+			t.Errorf("Expected host with token from secret, got %s", host)
+		}
+	})
+
+	t.Run("Get Telegram Token from Secret", func(t *testing.T) {
+		client := reflect.ValueOf(clients[6]).Elem()
+
+		host := client.FieldByName("host").String()
+		if host != "http://localhost:9200/bottoken/sendMessage" {
+			t.Errorf("Expected host with token from secret, got %s", host)
+		}
+	})
+
+	t.Run("Get Webhook Authentication Token from Secret", func(t *testing.T) {
+		client := reflect.ValueOf(clients[7]).Elem()
 
 		token := client.FieldByName("headers").MapIndex(reflect.ValueOf("Authorization")).String()
 		if token != "token" {
-			t.Errorf("Expected token from mounted secret, got %s", token)
+			t.Errorf("Expected token from secret, got %s", token)
 		}
 	})
 
-	t.Run("Get Telegram Token from MountedSecret", func(t *testing.T) {
-		clients := factory.TelegramClients(&config.Telegram{TargetBaseOptions: config.TargetBaseOptions{MountedSecret: mountedSecret}, ChatID: "123"})
-		if len(clients) != 1 {
-			t.Error("Expected one client created")
-		}
+	t.Run("Get none existing secret skips target", func(t *testing.T) {
+		clients := factory.CreateClients(&config.Targets{
+			Loki: &config.Target[config.LokiOptions]{SecretRef: "not-exist"},
+		})
 
-		client := reflect.ValueOf(clients[0]).Elem()
-
-		token := client.FieldByName("host").String()
-		if token != "http://localhost:9200/bottoken/sendMessage" {
-			t.Errorf("Expected token from mounted secret, got %s", token)
-		}
-	})
-
-	t.Run("Get GoogleChat Webhook from MountedSecret", func(t *testing.T) {
-		clients := factory.GoogleChatClients(&config.GoogleChat{TargetBaseOptions: config.TargetBaseOptions{MountedSecret: mountedSecret}})
-		if len(clients) != 1 {
-			t.Error("Expected one client created")
-		}
-
-		client := reflect.ValueOf(clients[0]).Elem()
-
-		token := client.FieldByName("webhook").String()
-		if token != "http://localhost:9200/webhook" {
-			t.Errorf("Expected token from mounted secret, got %s", token)
-		}
-	})
-
-	t.Run("Get S3 values from MountedSecret", func(t *testing.T) {
-		clients := factory.S3Clients(&config.S3{TargetBaseOptions: config.TargetBaseOptions{MountedSecret: mountedSecret}, AWSConfig: config.AWSConfig{Endpoint: "endpoint", Region: "region"}, Bucket: "bucket"})
-		if len(clients) != 1 {
-			t.Error("Expected one client created")
-		}
-	})
-
-	t.Run("Get S3 values from MountedSecret with KMS", func(t *testing.T) {
-		clients := factory.S3Clients(&config.S3{TargetBaseOptions: config.TargetBaseOptions{MountedSecret: mountedSecret}, AWSConfig: config.AWSConfig{Endpoint: "endpoint", Region: "region"}, Bucket: "bucket", BucketKeyEnabled: true, ServerSideEncryption: "aws:kms"})
-		if len(clients) != 1 {
-			t.Error("Expected one client created")
-		}
-	})
-
-	t.Run("Get Kinesis values from MountedSecret", func(t *testing.T) {
-		clients := factory.KinesisClients(&config.Kinesis{TargetBaseOptions: config.TargetBaseOptions{MountedSecret: mountedSecret}, AWSConfig: config.AWSConfig{Endpoint: "endpoint", Region: "region"}, StreamName: "stream"})
-		if len(clients) != 1 {
-			t.Error("Expected one client created")
-		}
-	})
-
-	t.Run("Get GCS values from MountedSecret", func(t *testing.T) {
-		clients := factory.GCSClients(&config.GCS{TargetBaseOptions: config.TargetBaseOptions{MountedSecret: mountedSecret}, Bucket: "bucket"})
-		if len(clients) != 1 {
-			t.Error("Expected one client created")
-		}
-	})
-
-	t.Run("Get none existing mounted secret skips target", func(t *testing.T) {
-		clients := factory.LokiClients(&config.Loki{TargetBaseOptions: config.TargetBaseOptions{MountedSecret: "no-exists"}})
 		if len(clients) != 0 {
 			t.Error("Expected client are skipped")
 		}

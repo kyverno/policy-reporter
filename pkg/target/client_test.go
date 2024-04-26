@@ -18,9 +18,11 @@ var preport = &v1alpha2.PolicyReport{
 	},
 }
 
+var factory = target.NewResultFilterFactory(nil)
+
 func Test_BaseClient(t *testing.T) {
 	t.Run("Validate MinimumPriority", func(t *testing.T) {
-		filter := target.NewResultFilter(
+		filter := factory.CreateFilter(
 			validate.RuleSets{},
 			validate.RuleSets{},
 			validate.RuleSets{},
@@ -33,7 +35,7 @@ func Test_BaseClient(t *testing.T) {
 		}
 	})
 	t.Run("Validate Source", func(t *testing.T) {
-		filter := target.NewResultFilter(
+		filter := factory.CreateFilter(
 			validate.RuleSets{},
 			validate.RuleSets{},
 			validate.RuleSets{},
@@ -47,7 +49,7 @@ func Test_BaseClient(t *testing.T) {
 	})
 
 	t.Run("Validate ClusterResult", func(t *testing.T) {
-		filter := target.NewResultFilter(
+		filter := factory.CreateFilter(
 			validate.RuleSets{Include: []string{"default"}},
 			validate.RuleSets{},
 			validate.RuleSets{},
@@ -61,7 +63,7 @@ func Test_BaseClient(t *testing.T) {
 	})
 
 	t.Run("Validate Exclude Namespace match", func(t *testing.T) {
-		filter := target.NewResultFilter(
+		filter := factory.CreateFilter(
 			validate.RuleSets{Exclude: []string{"test"}},
 			validate.RuleSets{},
 			validate.RuleSets{},
@@ -74,7 +76,7 @@ func Test_BaseClient(t *testing.T) {
 		}
 	})
 	t.Run("Validate Exclude Namespace mismatch", func(t *testing.T) {
-		filter := target.NewResultFilter(
+		filter := factory.CreateFilter(
 			validate.RuleSets{Exclude: []string{"team-a"}},
 			validate.RuleSets{},
 			validate.RuleSets{},
@@ -87,7 +89,7 @@ func Test_BaseClient(t *testing.T) {
 		}
 	})
 	t.Run("Validate Include Namespace match", func(t *testing.T) {
-		filter := target.NewResultFilter(
+		filter := factory.CreateFilter(
 			validate.RuleSets{Include: []string{"test"}},
 			validate.RuleSets{},
 			validate.RuleSets{},
@@ -100,7 +102,7 @@ func Test_BaseClient(t *testing.T) {
 		}
 	})
 	t.Run("Validate Exclude Namespace mismatch", func(t *testing.T) {
-		filter := target.NewResultFilter(
+		filter := factory.CreateFilter(
 			validate.RuleSets{Include: []string{"team-a"}},
 			validate.RuleSets{},
 			validate.RuleSets{},
@@ -114,7 +116,7 @@ func Test_BaseClient(t *testing.T) {
 	})
 
 	t.Run("Validate Exclude Priority match", func(t *testing.T) {
-		filter := target.NewResultFilter(
+		filter := factory.CreateFilter(
 			validate.RuleSets{},
 			validate.RuleSets{Exclude: []string{v1alpha2.WarningPriority.String()}},
 			validate.RuleSets{},
@@ -127,7 +129,7 @@ func Test_BaseClient(t *testing.T) {
 		}
 	})
 	t.Run("Validate Exclude Priority mismatch", func(t *testing.T) {
-		filter := target.NewResultFilter(
+		filter := factory.CreateFilter(
 			validate.RuleSets{},
 			validate.RuleSets{Exclude: []string{v1alpha2.ErrorPriority.String()}},
 			validate.RuleSets{},
@@ -140,7 +142,7 @@ func Test_BaseClient(t *testing.T) {
 		}
 	})
 	t.Run("Validate Include Priority match", func(t *testing.T) {
-		filter := target.NewResultFilter(
+		filter := factory.CreateFilter(
 			validate.RuleSets{},
 			validate.RuleSets{Include: []string{v1alpha2.WarningPriority.String()}},
 			validate.RuleSets{},
@@ -153,7 +155,7 @@ func Test_BaseClient(t *testing.T) {
 		}
 	})
 	t.Run("Validate Exclude Priority mismatch", func(t *testing.T) {
-		filter := target.NewResultFilter(
+		filter := factory.CreateFilter(
 			validate.RuleSets{},
 			validate.RuleSets{Include: []string{v1alpha2.ErrorPriority.String()}},
 			validate.RuleSets{},
@@ -167,7 +169,7 @@ func Test_BaseClient(t *testing.T) {
 	})
 
 	t.Run("Validate Exclude Policy match", func(t *testing.T) {
-		filter := target.NewResultFilter(
+		filter := factory.CreateFilter(
 			validate.RuleSets{},
 			validate.RuleSets{},
 			validate.RuleSets{Exclude: []string{"require-requests-and-limits-required"}},
@@ -180,7 +182,7 @@ func Test_BaseClient(t *testing.T) {
 		}
 	})
 	t.Run("Validate Exclude Policy mismatch", func(t *testing.T) {
-		filter := target.NewResultFilter(
+		filter := factory.CreateFilter(
 			validate.RuleSets{},
 			validate.RuleSets{},
 			validate.RuleSets{Exclude: []string{"policy-test"}},
@@ -193,7 +195,7 @@ func Test_BaseClient(t *testing.T) {
 		}
 	})
 	t.Run("Validate Include Policy match", func(t *testing.T) {
-		filter := target.NewResultFilter(
+		filter := factory.CreateFilter(
 			validate.RuleSets{},
 			validate.RuleSets{},
 			validate.RuleSets{Include: []string{"require-requests-and-limits-required"}},
@@ -206,7 +208,7 @@ func Test_BaseClient(t *testing.T) {
 		}
 	})
 	t.Run("Validate Exclude Policy mismatch", func(t *testing.T) {
-		filter := target.NewResultFilter(
+		filter := factory.CreateFilter(
 			validate.RuleSets{},
 			validate.RuleSets{},
 			validate.RuleSets{Include: []string{"policy-test"}},
@@ -294,7 +296,7 @@ func Test_BaseClient(t *testing.T) {
 	t.Run("Client Result Validation", func(t *testing.T) {
 		client := target.NewBaseClient(target.ClientOptions{
 			Name: "Client",
-			ResultFilter: target.NewResultFilter(
+			ResultFilter: factory.CreateFilter(
 				validate.RuleSets{},
 				validate.RuleSets{},
 				validate.RuleSets{Include: []string{"policy-test"}},
