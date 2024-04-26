@@ -1,7 +1,0 @@
-apiVersion: v2
-name: ui
-description: Policy Reporter UI
-
-type: application
-version: 2.10.5
-appVersion: 1.9.2
