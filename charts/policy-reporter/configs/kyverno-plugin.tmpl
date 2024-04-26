@@ -1,0 +1,23 @@
+leaderElection:
+  enabled: {{ or .Values.plugin.kyverno.leaderElection.enabled (gt (int .Values.plugin.kyverno.replicaCount) 1) }}
+  releaseOnCancel: {{ .Values.plugin.kyverno.leaderElection.releaseOnCancel }}
+  leaseDuration: {{ .Values.plugin.kyverno.leaderElection.leaseDuration }}
+  renewDeadline: {{ .Values.plugin.kyverno.leaderElection.renewDeadline }}
+  retryPeriod: {{ .Values.plugin.kyverno.leaderElection.retryPeriod }}
+  lockName: {{ .Values.plugin.kyverno.leaderElection.lockName }}
+
+logging:
+  encoding: {{ .Values.plugin.kyverno.logging.encoding }}
+  logLevel: {{ .Values.plugin.kyverno.logging.logLevel }}
+
+server:
+  logging: {{ .Values.plugin.kyverno.server.logging }}
+  basicAuth:
+    username: {{ .Values.basicAuth.username }}
+    password: {{ .Values.basicAuth.password }}
+    secretRef: {{ .Values.basicAuth.secretRef }}
+
+{{- with .Values.plugin.kyverno.blockReports }}
+blockReports:
+  {{- toYaml . | nindent 4 }}
+{{- end }}

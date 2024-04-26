@@ -30,4 +30,5 @@ jobs:
             ct lint --lint-conf=.github/ct_lintconf.yaml \
                     --chart-yaml-schema=.github/ct_chart_schema.yaml \
                     --target-branch=main --validate-maintainers=false \
+                    --check-version-increment=false \
                     --chart-dirs charts

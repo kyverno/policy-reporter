@@ -5,9 +5,11 @@ import (
 	"strings"
 
 	"github.com/kyverno/go-wildcard"
+	"go.uber.org/zap"
 
 	"github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
 	"github.com/kyverno/policy-reporter/pkg/helper"
+	"github.com/kyverno/policy-reporter/pkg/kubernetes/namespaces"
 	"github.com/kyverno/policy-reporter/pkg/report"
 	"github.com/kyverno/policy-reporter/pkg/validate"
 )
@@ -30,7 +32,11 @@ type Client interface {
 	CleanUp(context.Context, v1alpha2.ReportInterface)
 }
 
-func NewResultFilter(namespace, priority, policy validate.RuleSets, minimumPriority string, sources []string) *report.ResultFilter {
+type ResultFilterFactory struct {
+	client namespaces.Client
+}
+
+func (rf *ResultFilterFactory) CreateFilter(namespace, priority, policy validate.RuleSets, minimumPriority string, sources []string) *report.ResultFilter {
 	f := report.NewResultFilter()
 	f.Sources = sources
 	f.MinimumPriority = minimumPriority
@@ -48,6 +54,22 @@ func NewResultFilter(namespace, priority, policy validate.RuleSets, minimumPrior
 			}
 
 			return validate.Namespace(r.GetResource().Namespace, namespace)
+		})
+	}
+
+	if len(namespace.Selector) > 0 {
+		f.AddValidation(func(r v1alpha2.PolicyReportResult) bool {
+			if r.GetResource() == nil || r.GetResource().Namespace == "" {
+				return true
+			}
+
+			namespaces, err := rf.client.List(context.Background(), namespace.Selector)
+			if err != nil {
+				zap.L().Error("failed to resolve namespace selector", zap.Error(err))
+				return false
+			}
+
+			return validate.Namespace(r.GetResource().Namespace, validate.RuleSets{Include: namespaces})
 		})
 	}
 
@@ -117,6 +139,10 @@ func NewReportFilter(labels validate.RuleSets) *report.ReportFilter {
 	}
 
 	return f
+}
+
+func NewResultFilterFactory(client namespaces.Client) *ResultFilterFactory {
+	return &ResultFilterFactory{client: client}
 }
 
 type BaseClient struct {
