@@ -4,7 +4,7 @@ on:
   push:
     branches:
       - main
-      - development
+      - 3.x
 
     paths-ignore:
       - README.md
@@ -19,18 +19,24 @@ jobs:
   coverage:
     runs-on: ubuntu-latest
     steps:
-      - name: Set up Go 1.22
+      - name: Set up Go 1.21
         uses: actions/setup-go@v2
         with:
-          go-version: 1.22
+          go-version-file: go.mod
+          cache-dependency-path: go.sum
+
       - name: Checkout code
         uses: actions/checkout@v2
+
       - name: Get dependencies
         run: go get -v -t -d ./...
+
       - name: Calc coverage
         run: make coverage
+
       - name: Convert coverage to lcov
         uses: jandelgado/gcov2lcov-action@v1.0.9
+
       - name: Coveralls
         uses: coverallsapp/github-action@v2.0.0
         with:

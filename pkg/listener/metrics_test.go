@@ -110,10 +110,6 @@ func Test_MetricsListener(t *testing.T) {
 			t.Errorf("unexpected Error: %s", err)
 		}
 
-		summary := findMetric(metricFam, "cluster_policy_report_summary")
-		if summary == nil {
-			t.Fatalf("Metric not found: cluster_policy_report_summary")
-		}
 		result := findMetric(metricFam, "cluster_policy_report_result")
 		if result == nil {
 			t.Fatalf("Metric not found: cluster_policy_report_result")
@@ -127,10 +123,6 @@ func Test_MetricsListener(t *testing.T) {
 			t.Errorf("unexpected Error: %s", err)
 		}
 
-		summary := findMetric(metricFam, "policy_report_summary")
-		if summary == nil {
-			t.Fatalf("Metric not found: policy_report_summary")
-		}
 		result := findMetric(metricFam, "policy_report_result")
 		if result == nil {
 			t.Fatalf("Metric not found: policy_report_result")

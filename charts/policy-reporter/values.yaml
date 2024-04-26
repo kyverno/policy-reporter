@@ -1,11 +1,17 @@
 # Override the chart name used for all resources
 nameOverride: ""
 
+# overwrite the fullname of all resources
+fullnameOverride: "policy-reporter"
+
+# configure the namespace of all resources
+namespaceOverride: ""
+
 image:
   registry: ghcr.io
   repository: kyverno/policy-reporter
   pullPolicy: IfNotPresent
-  tag: 2.20.1
+  tag: 77b076f
 
 imagePullSecrets: []
 
@@ -75,9 +81,6 @@ podAnnotations: {}
 
 # Key/value pairs that are attached to pods.
 podLabels: {}
-
-# Allow additional env variables to be added
-envVars: []
 
 resources: {}
   # We usually recommend not to specify default resources and to leave this as a conscious
@@ -163,68 +166,29 @@ reportFilter:
     # Disable the processing of ClusterPolicyReports
     disabled: false
 
-# customize source specific logic like result ID generation
-sourceConfig: {}
-# sourcename:
-#   customID:
-#     enabled: true
-#     fields: ["resource", "policy", "rule", "category", "result", "message"]
-
-# Settings for the Policy Reporter UI subchart (see subchart's values.yaml)
-ui:
+kyverno-plugin:
   enabled: false
 
-kyvernoPlugin:
+trivy-plugin:
   enabled: false
-
-# Settings for the monitoring subchart
-monitoring:
-  enabled: false
-
-database:
-  # Database Type, supported: mysql, postgres, mariadb
-  type: ""
-  database: "" # Database Name
-  username: ""
-  password: ""
-  host: ""
-  enableSSL: false
-  # instead of configure the individual values you can also provide an DSN string
-  # example postgres: postgres://postgres:password@localhost:5432/postgres?sslmode=disable
-  # example mysql: root:password@tcp(localhost:3306)/test?tls=false
-  dsn: ""
-  # configure an existing secret as source for your values
-  # supported fields: username, password, host, dsn, database
-  secretRef: ""
-  # use an mounted secret as source for your values, required the information in JSON format
-  # supported fields: username, password, host, dsn, database
-  mountedSecret: ""
 
 global:
-  # available plugins
-  plugins:
-    # enable kyverno for Policy Reporter UI and monitoring
-    kyverno: false
-  # The name of service policy-report. Defaults to ReleaseName.
-  backend: ""
-  # overwrite the fullname of all resources including subcharts
-  fullnameOverride: ""
-  # configure the namespace of all resources including subcharts
-  namespace: ""
   # additional labels added on each resource
   labels: {}
-  # basicAuth for APIs and metrics
-  basicAuth:
-    # HTTP BasicAuth username
-    username: ""
-    # HTTP BasicAuth password
-    password: ""
-    # read credentials from secret
-    secretRef: ""
+
+# basicAuth for APIs and metrics
+basicAuth:
+  # HTTP BasicAuth username
+  username: ""
+  # HTTP BasicAuth password
+  password: ""
+  # read credentials from secret
+  secretRef: ""
 
 emailReports:
   clusterName: "" # (optional) - displayed in the email report if configured
   titlePrefix: "Report" # title prefix in the email subject
+  resources: {}
   smtp:
     secret: "" # (optional) secret name to provide the complete or partial SMTP configuration
     host: ""
@@ -288,13 +252,6 @@ emailReports:
     #        include: ['team-a-*']
     #      sources:
     #        include: ['Kyverno']
-  resources: {}
-  # limits:
-  #   memory: 100Mi
-  #   cpu: 10m
-  # requests:
-  #   memory: 75Mi
-  #   cpu: 5m
 
 # Reference a configuration which already exists instead of creating one
 existingTargetConfig:
@@ -327,7 +284,7 @@ target:
     # Skip already existing PolicyReportResults on startup
     skipExistingOnStartup: true
     # Added as additional labels to each Loki event
-    customLabels: {}
+    customFields: {}
     # Additional custom HTTP Headers
     headers: {}
     # HTTP BasicAuth credentials for Loki
@@ -364,7 +321,7 @@ target:
     # skip TLS verification if necessary
     skipTLS: false
     # elasticsearch index (default: policy-reporter)
-    index: ""
+    index: "policy-reporter"
     # elasticsearch username für HTTP Basic Auth
     username: ""
     # elasticsearch password für HTTP Basic Auth
@@ -377,7 +334,7 @@ target:
     mountedSecret: ""
     # elasticsearch index rotation and index suffix
     # possible values: daily, monthly, annually, none (default: daily)
-    rotation: ""
+    rotation: "daily"
     # minimum priority "" < info < warning < critical < error
     minimumPriority: ""
     # list of sources which should send to elasticsearch
@@ -471,21 +428,6 @@ target:
     filter: {}
     # add additional teams channels with different configurations and filters
     channels: []
-
-  ui:
-    # ui host address
-    host: ""
-    # path to your custom certificate
-    # can be added under extraVolumes
-    certificate: ""
-    # skip TLS verification if necessary
-    skipTLS: false
-    # minimum priority "" < info < warning < critical < error
-    minimumPriority: "warning"
-    # list of sources which should send to the UI Log
-    sources: []
-    # Skip already existing PolicyReportResults on startup
-    skipExistingOnStartup: true
 
   webhook:
     # webhook host address
@@ -739,13 +681,13 @@ topologySpreadConstraints: []
 # livenessProbe for policy-reporter
 livenessProbe:
   httpGet:
-    path: /healthz
+    path: /ready
     port: http
 
 # readinessProbe for policy-reporter
 readinessProbe:
   httpGet:
-    path: /ready
+    path: /healthz
     port: http
 
 extraVolumes:
@@ -758,7 +700,735 @@ sqliteVolume: {}
   # emptyDir:
   #   sizeLimit: 10Mi
 
-# If set the volume for /tmp is freely configurable below "- name: tmp". If no value is set an emptyDir is used.
+# -- Allow additional env variables to be added
+envVars: []
+
+# -- Allow custom configuration of the /tmp volume
 tmpVolume: {}
-  # emptyDir:
-  #   sizeLimit: 10Mi
+
+ui:
+  enabled: false
+  image:
+      # -- (string) Image registry
+    registry: ghcr.io
+      # -- (string) Image repository
+    repository: kyverno/policy-reporter-ui
+      # -- (string) Image PullPolicy
+    pullPolicy: IfNotPresent
+      # -- (string) Image tag
+      # Defaults to `Chart.AppVersion` if omitted
+    tag: "2.0.0-alpha.47"
+
+  # -- Deployment replica count
+  replicaCount: 1
+
+  # -- Temporary Directory to persist session data for authentication
+  tempDir: "/tmp"
+
+  logging:
+    # -- log encoding
+    # possible encodings are console and json
+    encoding: console
+    # -- log level
+    # default info
+    logLevel: 0
+
+  server:
+    # -- Application port
+    port: 8080
+    # -- Enables Access logging
+    logging: false
+    # -- Overwrites Request Host with Proxy Host and adds `X-Forwarded-Host` and `X-Origin-Host` headers
+    overwriteHost: true
+
+  openIDConnect:
+    # -- Enable openID Connect authentication
+    enabled: false
+    # -- OpenID Connect Discovery URL
+    discoveryUrl: ""
+    # -- OpenID Connect Callback URL
+    callbackUrl: ""
+    # -- OpenID Connect ClientID
+    clientId: ""
+    # -- OpenID Connect ClientSecret
+    clientSecret: ""
+    # -- OpenID Connect allowed Scopes
+    scopes: []
+    # -- Provide OpenID Connect configuration via Secret
+    # supported keys: `discoveryUrl`, `clientId`, `clientSecret`
+    secretRef: ""
+
+  oauth:
+    # -- Enable openID Connect authentication
+    enabled: false
+    # -- OAuth2 Provider
+    # supported: amazon, gitlab, github, apple, google, yandex, azuread
+    provider: ""
+    # -- OpenID Connect Callback URL
+    callbackUrl: ""
+    # -- OpenID Connect ClientID
+    clientId: ""
+    # -- OpenID Connect ClientSecret
+    clientSecret: ""
+    # -- OpenID Connect allowed Scopes
+    scopes: []
+    # -- Provide OpenID Connect configuration via Secret
+    # supported keys: `provider`, `clientId`, `clientSecret`
+    secretRef: ""
+
+  # -- DisplayMode dark/light
+  # uses the OS configured prefered color scheme as default
+  displayMode: ""
+
+  # -- Additional customizable dashboards
+  customBoards: []
+  # - name: Team A
+  #   namespaces:
+  #     # -- list of displayed namespaces
+  #     list: []
+  #     # -- selector for displayed namespaces
+  #     selector:
+  #       team: team-a
+  #   sources:
+  #     # -- list of displayed sources
+  #     list: []
+  #   clusterScope:
+  #     # -- disply cluster scoped resources and results
+  #     enabled: false
+
+  # -- source specific configurations
+  sources:
+      # -- kyverno specific UI confiurations
+    - name: kyverno
+      # -- enabled action button to generate PolicyExceptions from the UI
+      exceptions: false
+      # -- exclude Pod, Job and Replica resources from kyverno results by default if no kinds are specified
+      excludes:
+        namespaceKinds:
+        - Pod
+        - Job
+        - ReplicaSet
+        results:
+        - warn
+        - error
+
+  # -- Connected Policy Reporter APIs
+  clusters:
+  - name: Default
+    secretRef: policy-report-ui-default-cluster
+  # - name: default
+  #   host: http://policy-reporter:8080
+  #   secretRef: ""
+  #   skipTLS: false
+  #   certificate: ""
+  #   plugins:
+  #   - name: kyverno
+  #     host: http://policy-reporter-kyverno-plugin:8080
+
+  # -- Image pull secrets for image verification policies, this will define the `--imagePullSecrets` argument
+  imagePullSecrets: []
+    # regcred:
+    #   registry: foo.example.com
+    #   username: foobar
+    #   password: secret
+
+  serviceAccount:
+    # -- Create ServiceAccount
+    create: true
+    # -- Enable ServiceAccount automaount
+    automount: true
+    # -- Annotations for the ServiceAccount
+    annotations: {}
+    # -- The ServiceAccount name
+    name: ""
+
+  # -- Additional annotations to add to each pod
+  podAnnotations: {}
+
+  # -- Additional labels to add to each pod
+  podLabels: {}
+
+  # -- Deployment update strategy.
+  # Ref: https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#strategy
+  updateStrategy: {}
+  #  rollingUpdate:
+  #    maxSurge: 1
+  #    maxUnavailable: 40%
+  #  type: RollingUpdate
+
+  # -- The number of revisions to keep
+  revisionHistoryLimit: 10
+
+  # -- Security context for the pod
+  podSecurityContext:
+    runAsUser: 1234
+    runAsGroup: 1234
+
+  # -- Allow additional env variables to be added
+  envVars: []
+
+  rbac:
+    # -- Create RBAC resources
+    enabled: true
+
+  # -- Container security context
+  securityContext:
+    runAsUser: 1234
+    runAsNonRoot: true
+    privileged: false
+    allowPrivilegeEscalation: false
+    readOnlyRootFilesystem: true
+    capabilities:
+      drop:
+        - ALL
+    seccompProfile:
+      type: RuntimeDefault
+
+  service:
+    # -- Service type.
+    type: ClusterIP
+    # -- Service port.
+    port: 8080
+    # -- Service annotations.
+    annotations: {}
+    # -- Service labels.
+    labels: {}
+
+  ingress:
+    # -- Create ingress resource.
+    enabled: false
+    # -- Ingress class name.
+    className: ""
+    # -- Ingress labels.
+    labels: {}
+    # -- Ingress annotations.
+    annotations: {}
+      # kubernetes.io/ingress.class: nginx
+      # kubernetes.io/tls-acme: "true"
+    # -- List of ingress host configurations.
+    hosts: []
+    #  - host: chart-example.local
+    #    paths:
+    #      - path: /
+    #        pathType: ImplementationSpecific
+    # -- List of ingress TLS configurations.
+    tls: []
+    #  - secretName: chart-example-tls
+    #    hosts:
+    #      - chart-example.local
+
+  networkPolicy:
+    # -- When true, use a NetworkPolicy to allow ingress to the webhook
+    # This is useful on clusters using Calico and/or native k8s network policies in a default-deny setup.
+    enabled: false
+    # -- A list of valid from selectors according to https://kubernetes.io/docs/concepts/services-networking/network-policies.
+    # Enables Kubernetes API Server by default
+    egress:
+    - ports:
+      - protocol: TCP
+        port: 6443
+    # -- A list of valid from selectors according to https://kubernetes.io/docs/concepts/services-networking/network-policies.
+    ingress: []
+
+  resources: {}
+    # We usually recommend not to specify default resources and to leave this as a conscious
+    # choice for the user. This also increases chances charts run on environments with little
+    # resources, such as Minikube. If you do want to specify resources, uncomment the following
+    # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+    # limits:
+    #   cpu: 100m
+    #   memory: 128Mi
+    # requests:
+    #   cpu: 100m
+    #   memory: 128Mi
+
+  # enabled if replicaCount > 1
+  podDisruptionBudget:
+    # -- Configures the minimum available pods for kyvernoPlugin disruptions.
+    # Cannot be used if `maxUnavailable` is set.
+    minAvailable: 1
+    # -- Configures the maximum unavailable pods for kyvernoPlugin disruptions.
+    # Cannot be used if `minAvailable` is set.
+    maxUnavailable:
+
+  # -- Node labels for pod assignment
+  nodeSelector: {}
+
+  # -- List of node taints to tolerate
+  tolerations: []
+
+    # -- Affinity constraints.
+  affinity: {}
+
+plugin:
+  kyverno:
+      # -- (bool) Enable Kyverno Plugin
+    enabled: false
+    image:
+      # -- (string) Image registry
+      registry: ghcr.io
+        # -- (string) Image repository
+      repository: kyverno/policy-reporter/kyverno-plugin
+        # -- (string) Image PullPolicy
+      pullPolicy: IfNotPresent
+        # -- (string) Image tag
+        # Defaults to `Chart.AppVersion` if omitted
+      tag: "0.0.8"
+
+    # -- Deployment replica count
+    replicaCount: 1
+
+    logging:
+      # -- log encoding
+      # possible encodings are console and json
+      encoding: console
+      # -- log level
+      # default info
+      logLevel: 0
+
+    server:
+      # -- Application port
+      port: 8080
+      # -- Enables Access logging
+      logging: false
+
+    blockReports:
+      # -- Enables he BlockReport feature
+      enabled: false
+      # -- Watches for Kyverno Events in the configured namespace
+      # leave blank to watch in all namespaces
+      eventNamespace: default
+      results:
+        # -- Max items per PolicyReport resource
+        maxPerReport: 200
+        # -- Keep only the latest of duplicated events
+        keepOnlyLatest: false
+
+    # -- Image pull secrets for image verification policies, this will define the `--imagePullSecrets` argument
+    imagePullSecrets: []
+      # regcred:
+      #   registry: foo.example.com
+      #   username: foobar
+      #   password: secret
+
+    serviceAccount:
+      # -- Create ServiceAccount
+      create: true
+      # -- Enable ServiceAccount automaount
+      automount: true
+      # -- Annotations for the ServiceAccount
+      annotations: {}
+      # -- The ServiceAccount name
+      name: ""
+
+    # -- Additional annotations to add to each pod
+    podAnnotations: {}
+
+    # -- Additional labels to add to each pod
+    podLabels: {}
+
+    # -- Deployment update strategy.
+    # Ref: https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#strategy
+    updateStrategy: {}
+    #  rollingUpdate:
+    #    maxSurge: 1
+    #    maxUnavailable: 40%
+    #  type: RollingUpdate
+
+    # -- The number of revisions to keep
+    revisionHistoryLimit: 10
+
+    # -- Security context for the pod
+    podSecurityContext:
+      runAsUser: 1234
+      runAsGroup: 1234
+
+    # -- Allow additional env variables to be added
+    envVars: []
+
+    rbac:
+      # -- Create RBAC resources
+      enabled: true
+
+    # -- Container security context
+    securityContext:
+      runAsUser: 1234
+      runAsNonRoot: true
+      privileged: false
+      allowPrivilegeEscalation: false
+      readOnlyRootFilesystem: true
+      capabilities:
+        drop:
+          - ALL
+      seccompProfile:
+        type: RuntimeDefault
+
+    service:
+      # -- Service type.
+      type: ClusterIP
+      # -- Service port.
+      port: 8080
+      # -- Service annotations.
+      annotations: {}
+      # -- Service labels.
+      labels: {}
+
+    ingress:
+      # -- Create ingress resource.
+      enabled: false
+      # -- Ingress class name.
+      className: ""
+      # -- Ingress labels.
+      labels: {}
+      # -- Ingress annotations.
+      annotations: {}
+        # kubernetes.io/ingress.class: nginx
+        # kubernetes.io/tls-acme: "true"
+      # -- List of ingress host configurations.
+      hosts: []
+      #  - host: chart-example.local
+      #    paths:
+      #      - path: /
+      #        pathType: ImplementationSpecific
+      # -- List of ingress TLS configurations.
+      tls: []
+      #  - secretName: chart-example-tls
+      #    hosts:
+      #      - chart-example.local
+
+    networkPolicy:
+      # -- When true, use a NetworkPolicy to allow ingress to the webhook
+      # This is useful on clusters using Calico and/or native k8s network policies in a default-deny setup.
+      enabled: false
+      # -- A list of valid from selectors according to https://kubernetes.io/docs/concepts/services-networking/network-policies.
+      # Enables Kubernetes API Server by default
+      egress:
+      - ports:
+        - protocol: TCP
+          port: 6443
+      # -- A list of valid from selectors according to https://kubernetes.io/docs/concepts/services-networking/network-policies.
+      ingress: []
+
+    resources: {}
+      # We usually recommend not to specify default resources and to leave this as a conscious
+      # choice for the user. This also increases chances charts run on environments with little
+      # resources, such as Minikube. If you do want to specify resources, uncomment the following
+      # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+      # limits:
+      #   cpu: 100m
+      #   memory: 128Mi
+      # requests:
+      #   cpu: 100m
+      #   memory: 128Mi
+
+    # required for HA mode
+    # if "blockReports" is disabled, leaderElection is also disabled automatically
+    # will be enabled when replicaCount > 1
+    leaderElection:
+      # -- Enables LeaderElection.
+      enabled: false
+      # -- Lock Name
+      lockName: kyverno-plugin
+      # -- Released lock when the run context is cancelled.
+      releaseOnCancel: true
+      # -- LeaseDuration is the duration that non-leader candidates will wait to force acquire leadership.
+      leaseDuration: 15
+      # -- RenewDeadline is the duration that the acting master will retry refreshing leadership before giving up.
+      renewDeadline: 10
+      # -- RetryPeriod is the duration the LeaderElector clients should wait between tries of actions.
+      retryPeriod: 2
+
+    # enabled if replicaCount > 1
+    podDisruptionBudget:
+      # -- Configures the minimum available pods for kyvernoPlugin disruptions.
+      # Cannot be used if `maxUnavailable` is set.
+      minAvailable: 1
+      # -- Configures the maximum unavailable pods for kyvernoPlugin disruptions.
+      # Cannot be used if `minAvailable` is set.
+      maxUnavailable:
+
+    # -- Node labels for pod assignment
+    nodeSelector: {}
+
+    # -- List of node taints to tolerate
+    tolerations: []
+
+      # -- Affinity constraints.
+    affinity: {}
+
+  trivy:
+      # -- (bool) Enable Trivy Operator Plugin
+    enabled: false
+    image:
+      # -- (string) Image registry
+      registry: ghcr.io
+        # -- (string) Image repository
+      repository: kyverno/policy-reporter/trivy-plugin
+        # -- (string) Image PullPolicy
+      pullPolicy: IfNotPresent
+        # -- (string) Image tag
+        # Defaults to `Chart.AppVersion` if omitted
+      tag: "0.0.3"
+
+    # -- Deployment replica count
+    replicaCount: 1
+
+    logging:
+      # -- log encoding
+      # possible encodings are console and json
+      encoding: console
+      # -- log level
+      # default info
+      logLevel: 0
+
+    server:
+      # -- Application port
+      port: 8080
+      # -- Enables Access logging
+      logging: false
+
+    policyReporter:
+      # -- Skip TLS Verification
+      skipTLS: false
+      # -- TLS Certificate
+      certificate: ""
+      # -- Secret to read the API configuration from
+      # supports `host`, `certificate`, `skipTLS`, `username`, `password` key
+      secretRef: ""
+
+    # -- Image pull secrets for image verification policies, this will define the `--imagePullSecrets` argument
+    imagePullSecrets: []
+      # regcred:
+      #   registry: foo.example.com
+      #   username: foobar
+      #   password: secret
+
+    serviceAccount:
+      # -- Create ServiceAccount
+      create: true
+      # -- Enable ServiceAccount automaount
+      automount: true
+      # -- Annotations for the ServiceAccount
+      annotations: {}
+      # -- The ServiceAccount name
+      name: ""
+
+    # -- Additional annotations to add to each pod
+    podAnnotations: {}
+
+    # -- Additional labels to add to each pod
+    podLabels: {}
+
+    # -- Deployment update strategy.
+    # Ref: https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#strategy
+    updateStrategy: {}
+    #  rollingUpdate:
+    #    maxSurge: 1
+    #    maxUnavailable: 40%
+    #  type: RollingUpdate
+
+    # -- The number of revisions to keep
+    revisionHistoryLimit: 10
+
+    # -- Security context for the pod
+    podSecurityContext:
+      runAsUser: 1234
+      runAsGroup: 1234
+
+    # -- Allow additional env variables to be added
+    envVars: []
+
+    rbac:
+      # -- Create RBAC resources
+      enabled: true
+
+    # -- Container security context
+    securityContext:
+      runAsUser: 1234
+      runAsNonRoot: true
+      privileged: false
+      allowPrivilegeEscalation: false
+      readOnlyRootFilesystem: true
+      capabilities:
+        drop:
+          - ALL
+      seccompProfile:
+        type: RuntimeDefault
+
+    service:
+      # -- Service type.
+      type: ClusterIP
+      # -- Service port.
+      port: 8080
+      # -- Service annotations.
+      annotations: {}
+      # -- Service labels.
+      labels: {}
+
+    ingress:
+      # -- Create ingress resource.
+      enabled: false
+      # -- Ingress class name.
+      className: ""
+      # -- Ingress labels.
+      labels: {}
+      # -- Ingress annotations.
+      annotations: {}
+        # kubernetes.io/ingress.class: nginx
+        # kubernetes.io/tls-acme: "true"
+      # -- List of ingress host configurations.
+      hosts: []
+      #  - host: chart-example.local
+      #    paths:
+      #      - path: /
+      #        pathType: ImplementationSpecific
+      # -- List of ingress TLS configurations.
+      tls: []
+      #  - secretName: chart-example-tls
+      #    hosts:
+      #      - chart-example.local
+
+    networkPolicy:
+      # -- When true, use a NetworkPolicy to allow ingress to the webhook
+      # This is useful on clusters using Calico and/or native k8s network policies in a default-deny setup.
+      enabled: false
+      # -- A list of valid from selectors according to https://kubernetes.io/docs/concepts/services-networking/network-policies.
+      # Enables Kubernetes API Server by default
+      egress:
+      - ports:
+        - protocol: TCP
+          port: 6443
+      # -- A list of valid from selectors according to https://kubernetes.io/docs/concepts/services-networking/network-policies.
+      ingress: []
+
+    resources: {}
+      # We usually recommend not to specify default resources and to leave this as a conscious
+      # choice for the user. This also increases chances charts run on environments with little
+      # resources, such as Minikube. If you do want to specify resources, uncomment the following
+      # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+      # limits:
+      #   cpu: 100m
+      #   memory: 128Mi
+      # requests:
+      #   cpu: 100m
+      #   memory: 128Mi
+
+    # enabled if replicaCount > 1
+    podDisruptionBudget:
+      # -- Configures the minimum available pods for kyvernoPlugin disruptions.
+      # Cannot be used if `maxUnavailable` is set.
+      minAvailable: 1
+      # -- Configures the maximum unavailable pods for kyvernoPlugin disruptions.
+      # Cannot be used if `minAvailable` is set.
+      maxUnavailable:
+
+    # -- Node labels for pod assignment
+    nodeSelector: {}
+
+    # -- List of node taints to tolerate
+    tolerations: []
+
+      # -- Affinity constraints.
+    affinity: {}
+
+monitoring:
+  enabled: false
+
+  # Key/value pairs that are attached to all resources.
+  annotations: {}
+
+  serviceMonitor:
+    # HonorLabels chooses the metrics labels on collisions with target labels
+    honorLabels: false
+    # allow to override the namespace for serviceMonitor
+    namespace:
+    # labels to match the serviceMonitorSelector of the Prometheus Resource
+    labels: {}
+    # https://github.com/prometheus-operator/prometheus-operator/blob/main/Documentation/api.md#relabelconfig
+    relabelings: []
+    # see serviceMonitor.relabelings
+    metricRelabelings: []
+    # optional namespaceSelector
+    namespaceSelector: {}
+    # optional scrapeTimeout
+    scrapeTimeout:
+    # optional scrape interval
+    interval:
+
+  grafana:
+    # namespace for configMap of grafana dashboards
+    namespace:
+    dashboards:
+      # Enable the deployment of grafana dashboards
+      enabled: true
+      # Label to find dashboards using the k8s sidecar
+      label: grafana_dashboard
+      value: "1"
+      labelFilter: []
+      multicluster:
+        enabled: false
+        label: cluster
+      enable:
+        overview: true
+        policyReportDetails: true
+        clusterPolicyReportDetails: true
+    folder:
+      # Annotation to enable folder storage using the k8s sidecar
+      annotation: grafana_folder
+      # Grafana folder in which to store the dashboards
+      name: Policy Reporter
+    datasource:
+      label: Prometheus
+      pluginId: prometheus
+      pluginName: Prometheus
+
+  policyReportDetails:
+    firstStatusRow:
+      height: 8
+    secondStatusRow:
+      enabled: true
+      height: 2
+    statusTimeline:
+      enabled: true
+      height: 8
+    passTable:
+      enabled: true
+      height: 8
+    failTable:
+      enabled: true
+      height: 8
+    warningTable:
+      enabled: true
+      height: 4
+    errorTable:
+      enabled: true
+      height: 4
+
+  clusterPolicyReportDetails:
+    statusRow:
+      height: 6
+    statusTimeline:
+      enabled: true
+      height: 8
+    passTable:
+      enabled: true
+      height: 8
+    failTable:
+      enabled: true
+      height: 8
+    warningTable:
+      enabled: true
+      height: 4
+    errorTable:
+      enabled: true
+      height: 4
+
+  policyReportOverview:
+    failingSummaryRow:
+      height: 8
+    failingTimeline:
+      height: 10
+    failingPolicyRuleTable:
+      height: 10
+    failingClusterPolicyRuleTable:
+      height: 10
