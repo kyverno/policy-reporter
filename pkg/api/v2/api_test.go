@@ -271,7 +271,7 @@ func TestV2(t *testing.T) {
 			json.NewDecoder(w.Body).Decode(&resp)
 
 			assert.Equal(t, resp.Count, 1)
-			assert.Equal(t, resp.Items[0], v2.ResourceResult{ID: "6274512523942114905", UID: "dfd57c50-f30c-4729-b63f-b1954d8988d1", Name: "kyverno", Kind: "Namespace", APIVersion: "v1", Source: "", Fail: 1})
+			assert.Equal(t, resp.Items[0], v2.ResourceResult{ID: "11786270724827677857", UID: "dfd57c50-f30c-4729-b63f-b1954d8988d1", Name: "kyverno", Kind: "Namespace", APIVersion: "v1", Source: "", Fail: 1})
 		}
 	})
 
