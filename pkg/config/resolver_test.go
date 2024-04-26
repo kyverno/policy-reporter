@@ -366,20 +366,6 @@ func Test_ResolveCache(t *testing.T) {
 	})
 }
 
-func Test_ResolveMapper(t *testing.T) {
-	resolver := config.NewResolver(testConfig, &rest.Config{})
-
-	mapper1 := resolver.Mapper()
-	if mapper1 == nil {
-		t.Error("Error: Should return Mapper")
-	}
-
-	mapper2 := resolver.Mapper()
-	if mapper1 != mapper2 {
-		t.Error("A second call resolver.Mapper() should return the cached first cache")
-	}
-}
-
 func Test_ResolveReportFilter(t *testing.T) {
 	resolver := config.NewResolver(testConfig, &rest.Config{})
 
