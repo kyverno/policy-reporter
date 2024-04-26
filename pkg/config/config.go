@@ -173,7 +173,6 @@ type Config struct {
 	DBFile         string         `mapstructure:"dbfile"`
 	Metrics        Metrics        `mapstructure:"metrics"`
 	REST           REST           `mapstructure:"rest"`
-	PriorityMap    PriorityMap    `mapstructure:"priorityMap"`
 	ReportFilter   ReportFilter   `mapstructure:"reportFilter"`
 	Redis          Redis          `mapstructure:"redis"`
 	Profiling      Profiling      `mapstructure:"profiling"`
