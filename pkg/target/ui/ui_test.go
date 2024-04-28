@@ -60,4 +60,18 @@ func Test_UITarget(t *testing.T) {
 			t.Errorf("Unexpected Name %s", client.Name())
 		}
 	})
+	t.Run("Request Error", func(t *testing.T) {
+		callback := func(req *http.Request) {
+			t.Fail()
+		}
+
+		client := ui.NewClient(ui.Options{
+			ClientOptions: target.ClientOptions{
+				Name: "UI",
+			},
+			Host:       "\\localhost:8080",
+			HTTPClient: testClient{callback, 200},
+		})
+		client.Send(fixtures.CompleteTargetSendResult)
+	})
 }
