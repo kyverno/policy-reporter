@@ -10,23 +10,23 @@ import (
 	"go.uber.org/zap"
 
 	"github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
-	"github.com/kyverno/policy-reporter/pkg/helper"
 	"github.com/kyverno/policy-reporter/pkg/target"
 	"github.com/kyverno/policy-reporter/pkg/target/http"
+	"github.com/kyverno/policy-reporter/pkg/target/provider/aws"
 )
 
 // Options to configure the S3 target
 type Options struct {
 	target.ClientOptions
 	CustomFields map[string]string
-	S3           helper.AWSClient
+	S3           aws.Client
 	Prefix       string
 }
 
 type client struct {
 	target.BaseClient
 	customFields map[string]string
-	s3           helper.AWSClient
+	s3           aws.Client
 	prefix       string
 }
 

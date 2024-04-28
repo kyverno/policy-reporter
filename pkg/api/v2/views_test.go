@@ -3,10 +3,11 @@ package v2_test
 import (
 	"testing"
 
+	"github.com/stretchr/testify/assert"
+
 	v2 "github.com/kyverno/policy-reporter/pkg/api/v2"
 	"github.com/kyverno/policy-reporter/pkg/config"
 	"github.com/kyverno/policy-reporter/pkg/database"
-	"github.com/stretchr/testify/assert"
 )
 
 func TestV2Views(t *testing.T) {
@@ -330,7 +331,6 @@ func TestV2Views(t *testing.T) {
 			Valid: true,
 			Channels: []*config.Target[config.GCSOptions]{
 				{
-
 					Name:            "Target 2",
 					MinimumPriority: "warning",
 					Config: &config.GCSOptions{
@@ -340,7 +340,6 @@ func TestV2Views(t *testing.T) {
 					Valid: true,
 				},
 				{
-
 					Name:            "Target 2",
 					MinimumPriority: "warning",
 					Config: &config.GCSOptions{
@@ -354,5 +353,4 @@ func TestV2Views(t *testing.T) {
 
 		assert.Equal(t, 2, len(targets))
 	})
-
 }
