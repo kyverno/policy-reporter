@@ -346,13 +346,9 @@ func MapResourceCategoryToSourceDetails(categories []db.ResourceCategory) []*Sou
 }
 
 type ValueFilter struct {
-	Include  []string          `json:"include,omitempty"`
-	Exclude  []string          `json:"exclude,omitempty"`
-	Selector map[string]string `json:"selector,omitempty"`
-}
-
-func (v ValueFilter) Empty() bool {
-	return len(v.Exclude)+len(v.Include)+len(v.Selector) == 0
+	Include  []string       `json:"include,omitempty"`
+	Exclude  []string       `json:"exclude,omitempty"`
+	Selector map[string]any `json:"selector,omitempty"`
 }
 
 type TargetFilter struct {
@@ -379,13 +375,14 @@ type Target struct {
 }
 
 func MapValueFilter(f config.ValueFilter) *ValueFilter {
-	if len(f.Exclude)+len(f.Include) == 0 {
+	if len(f.Exclude)+len(f.Include) == 0+len(f.Selector) {
 		return nil
 	}
 
 	return &ValueFilter{
-		Include: f.Include,
-		Exclude: f.Exclude,
+		Include:  f.Include,
+		Exclude:  f.Exclude,
+		Selector: f.Selector,
 	}
 }
 
@@ -431,6 +428,8 @@ func MapLokiToTarget(ta *config.Target[config.LokiOptions]) *Target {
 	t.Properties["api"] = ta.Config.Path
 
 	if v, ok := ta.Config.Headers["Authorization"]; ok && v != "" {
+		t.Auth = true
+	} else if ta.Config.Username != "" && ta.Config.Password != "" {
 		t.Auth = true
 	}
 
@@ -513,6 +512,7 @@ func MapSecurityHubToTarget(ta *config.Target[config.SecurityHubOptions]) *Targe
 	t.Type = "SecurityHub"
 	t.Host = ta.Config.Endpoint
 	t.Properties["region"] = ta.Config.Region
+	t.Properties["cleanup"] = ta.Config.Cleanup
 	t.Auth = true
 
 	return t

@@ -440,4 +440,39 @@ func TestV2(t *testing.T) {
 			assert.True(t, resp["resources"])
 		}
 	})
+
+	t.Run("ListFindings", func(t *testing.T) {
+		req, _ := http.NewRequest("GET", "/v2/findings", nil)
+		w := httptest.NewRecorder()
+
+		server.Serve(w, req)
+
+		if ok := assert.Equal(t, http.StatusOK, w.Code); ok {
+			resp := v2.Findings{}
+
+			json.NewDecoder(w.Body).Decode(&resp)
+
+			assert.Equal(t, 6, resp.Total)
+			assert.Equal(t, 4, resp.PerResult["fail"])
+			assert.Equal(t, 1, resp.PerResult["pass"])
+			assert.Equal(t, 1, resp.PerResult["warn"])
+			assert.Equal(t, 2, len(resp.Counts))
+			assert.Contains(t, resp.Counts, &v2.FindingCounts{
+				Total:  3,
+				Source: "Kyverno",
+				Counts: map[string]int{
+					"fail": 1,
+					"pass": 1,
+					"warn": 1,
+				},
+			})
+			assert.Contains(t, resp.Counts, &v2.FindingCounts{
+				Total:  3,
+				Source: "test",
+				Counts: map[string]int{
+					"fail": 3,
+				},
+			})
+		}
+	})
 }
