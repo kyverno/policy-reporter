@@ -7,6 +7,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/aws"
 	hub "github.com/aws/aws-sdk-go-v2/service/securityhub"
 	"github.com/aws/aws-sdk-go-v2/service/securityhub/types"
+
 	"github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
 	"github.com/kyverno/policy-reporter/pkg/fixtures"
 	"github.com/kyverno/policy-reporter/pkg/target/securityhub"

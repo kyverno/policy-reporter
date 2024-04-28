@@ -1,4 +1,4 @@
-package helper
+package aws
 
 import (
 	"bytes"
@@ -21,7 +21,7 @@ import (
 
 var enable = true
 
-type AWSClient interface {
+type Client interface {
 	// Upload given Data the configured AWS storage
 	Upload(body *bytes.Buffer, key string) error
 }
@@ -62,7 +62,7 @@ func (s *s3Client) Upload(body *bytes.Buffer, key string) error {
 }
 
 // NewS3Client creates a new S3.client to send Results to S3
-func NewS3Client(accessKeyID, secretAccessKey, region, endpoint, bucket string, pathStyle bool, opts ...Options) AWSClient {
+func NewS3Client(accessKeyID, secretAccessKey, region, endpoint, bucket string, pathStyle bool, opts ...Options) Client {
 	config, err := createConfig(accessKeyID, secretAccessKey, region)
 	if err != nil {
 		zap.L().Error("error while creating config", zap.Error(err))
@@ -111,7 +111,7 @@ func (k *kinesisClient) Upload(body *bytes.Buffer, key string) error {
 }
 
 // NewKinesisClient creates a new S3.client to send Results to S3
-func NewKinesisClient(accessKeyID, secretAccessKey, region, endpoint, streamName string) AWSClient {
+func NewKinesisClient(accessKeyID, secretAccessKey, region, endpoint, streamName string) Client {
 	config, err := createConfig(accessKeyID, secretAccessKey, region)
 	if err != nil {
 		zap.L().Error("error while creating config", zap.Error(err))

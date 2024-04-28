@@ -1,4 +1,4 @@
-package helper
+package gcs
 
 import (
 	"bytes"
@@ -10,17 +10,17 @@ import (
 	"google.golang.org/api/option"
 )
 
-type GCPClient interface {
+type Client interface {
 	// Upload given Data the configured AWS storage
 	Upload(body *bytes.Buffer, key string) error
 }
 
-type gcsClient struct {
+type client struct {
 	bucket string
 	client *storage.Client
 }
 
-func (c *gcsClient) Upload(body *bytes.Buffer, key string) error {
+func (c *client) Upload(body *bytes.Buffer, key string) error {
 	object := c.client.Bucket(c.bucket).Object(key)
 
 	writer := object.NewWriter(context.Background())
@@ -34,22 +34,22 @@ func (c *gcsClient) Upload(body *bytes.Buffer, key string) error {
 	return writer.Close()
 }
 
-// NewGCSClient creates a new GCS.client to send Results to GCS Bucket
-func NewGCSClient(ctx context.Context, credentials, bucket string) GCPClient {
+// NewClient creates a new GCS.client to send Results to GCS Bucket
+func NewClient(ctx context.Context, credentials, bucket string) Client {
 	cred, err := google.CredentialsFromJSON(ctx, []byte(credentials), storage.ScopeReadWrite)
 	if err != nil {
 		zap.L().Error("error while creating GCS credentials", zap.Error(err))
 		return nil
 	}
 
-	client, err := storage.NewClient(ctx, option.WithCredentials(cred))
+	baseClient, err := storage.NewClient(ctx, option.WithCredentials(cred))
 	if err != nil {
 		zap.L().Error("error while creating GCS client", zap.Error(err))
 		return nil
 	}
 
-	return &gcsClient{
+	return &client{
 		bucket,
-		client,
+		baseClient,
 	}
 }

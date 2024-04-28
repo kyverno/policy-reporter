@@ -4,8 +4,9 @@ import (
 	"encoding/json"
 	"testing"
 
-	"github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
 	corev1 "k8s.io/api/core/v1"
+
+	"github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
 )
 
 func TestCommon(t *testing.T) {
