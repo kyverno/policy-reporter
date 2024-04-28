@@ -3,9 +3,10 @@ package v1_test
 import (
 	"testing"
 
+	"github.com/stretchr/testify/assert"
+
 	v1 "github.com/kyverno/policy-reporter/pkg/api/v1"
 	"github.com/kyverno/policy-reporter/pkg/database"
-	"github.com/stretchr/testify/assert"
 )
 
 func TestMapping(t *testing.T) {
