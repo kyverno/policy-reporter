@@ -54,8 +54,7 @@ func (c *client) Send(result v1alpha2.PolicyReportResult) {
 	t := time.Unix(result.Timestamp.Seconds, int64(result.Timestamp.Nanos))
 	key := fmt.Sprintf("%s/%s/%s-%s-%s.json", c.prefix, t.Format("2006-01-02"), result.Policy, result.ID, t.Format(time.RFC3339Nano))
 
-	err := c.s3.Upload(body, key)
-	if err != nil {
+	if err := c.s3.Upload(body, key); err != nil {
 		zap.L().Error(c.Name()+": S3 Upload error", zap.Error(err))
 		return
 	}
