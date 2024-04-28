@@ -680,6 +680,7 @@ func (s *Store) FetchFindingCounts(ctx context.Context, filter Filter) ([]Status
 		FilterReportLabels(filter.ReportLabel).
 		Exclude(filter, "f").
 		Group("f.source", "status").
+		Order("f.source").
 		Scan(ctx, &results)
 
 	return results, err
