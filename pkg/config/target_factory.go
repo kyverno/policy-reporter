@@ -22,6 +22,8 @@ import (
 	"github.com/kyverno/policy-reporter/pkg/target/http"
 	"github.com/kyverno/policy-reporter/pkg/target/kinesis"
 	"github.com/kyverno/policy-reporter/pkg/target/loki"
+	"github.com/kyverno/policy-reporter/pkg/target/provider/aws"
+	gs "github.com/kyverno/policy-reporter/pkg/target/provider/gcs"
 	"github.com/kyverno/policy-reporter/pkg/target/s3"
 	"github.com/kyverno/policy-reporter/pkg/target/securityhub"
 	"github.com/kyverno/policy-reporter/pkg/target/slack"
@@ -431,14 +433,14 @@ func (f *TargetFactory) createS3Client(config, parent *Target[S3Options]) target
 
 	config.MapBaseParent(parent)
 
-	s3Client := helper.NewS3Client(
+	s3Client := aws.NewS3Client(
 		config.Config.AccessKeyID,
 		config.Config.SecretAccessKey,
 		config.Config.Region,
 		config.Config.Endpoint,
 		config.Config.Bucket,
 		config.Config.PathStyle,
-		helper.WithKMS(config.Config.BucketKeyEnabled, &config.Config.KmsKeyID, &config.Config.ServerSideEncryption),
+		aws.WithKMS(config.Config.BucketKeyEnabled, &config.Config.KmsKeyID, &config.Config.ServerSideEncryption),
 	)
 
 	sugar.Infof("%s configured", config.Name)
@@ -485,7 +487,7 @@ func (f *TargetFactory) createKinesisClient(config, parent *Target[KinesisOption
 
 	config.MapBaseParent(parent)
 
-	kinesisClient := helper.NewKinesisClient(
+	kinesisClient := aws.NewKinesisClient(
 		config.Config.AccessKeyID,
 		config.Config.SecretAccessKey,
 		config.Config.Region,
@@ -533,7 +535,7 @@ func (f *TargetFactory) createSecurityHub(config, parent *Target[SecurityHubOpti
 
 	setInt(&config.Config.DelayInSeconds, parent.Config.DelayInSeconds)
 
-	client := helper.NewHubClient(
+	client := aws.NewHubClient(
 		config.Config.AccessKeyID,
 		config.Config.SecretAccessKey,
 		config.Config.Region,
@@ -584,7 +586,7 @@ func (f *TargetFactory) createGCSClient(config, parent *Target[GCSOptions]) targ
 
 	config.MapBaseParent(parent)
 
-	gcsClient := helper.NewGCSClient(
+	gcsClient := gs.NewClient(
 		context.Background(),
 		config.Config.Credentials,
 		config.Config.Bucket,

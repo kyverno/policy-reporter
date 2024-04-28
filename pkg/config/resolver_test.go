@@ -4,6 +4,7 @@ import (
 	"context"
 	"testing"
 
+	"github.com/stretchr/testify/assert"
 	"k8s.io/client-go/rest"
 
 	"github.com/kyverno/policy-reporter/pkg/config"
@@ -218,6 +219,9 @@ var testConfig = &config.Config{
 		},
 	},
 	Targets: targets,
+	Logging: config.Logging{
+		Development: true,
+	},
 }
 
 func Test_ResolveTargets(t *testing.T) {
@@ -326,7 +330,11 @@ func Test_ResolvePolicyStore(t *testing.T) {
 }
 
 func Test_ResolveAPIServer(t *testing.T) {
-	resolver := config.NewResolver(&config.Config{}, &rest.Config{})
+	resolver := config.NewResolver(&config.Config{
+		API: config.API{
+			BasicAuth: config.BasicAuth{Username: "user", Password: "password"},
+		},
+	}, &rest.Config{})
 
 	server, _ := resolver.Server(context.Background(), nil)
 	if server == nil {
@@ -574,6 +582,14 @@ func Test_ResolveLogger(t *testing.T) {
 	if logger1 != logger2 {
 		t.Error("A second call resolver.Mapper() should return the cached first cache")
 	}
+}
+
+func Test_Logger(t *testing.T) {
+	resolver := config.NewResolver(&config.Config{}, &rest.Config{})
+
+	logger, _ := resolver.Logger()
+
+	assert.NotNil(t, logger)
 }
 
 func Test_ResolveEnableLeaderElection(t *testing.T) {
