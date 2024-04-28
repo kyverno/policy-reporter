@@ -52,8 +52,7 @@ func (c *client) Send(result v1alpha2.PolicyReportResult) {
 	t := time.Unix(result.Timestamp.Seconds, int64(result.Timestamp.Nanos))
 	key := fmt.Sprintf("%s-%s-%s", result.Policy, result.ID, t.Format(time.RFC3339Nano))
 
-	err := c.kinesis.Upload(body, key)
-	if err != nil {
+	if err := c.kinesis.Upload(body, key); err != nil {
 		zap.L().Error("kinesis upload error", zap.String("name", c.Name()), zap.Error(err))
 		return
 	}
