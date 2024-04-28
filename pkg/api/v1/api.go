@@ -24,6 +24,7 @@ func (h *APIHandler) Register(engine *gin.RouterGroup) error {
 	engine.GET("namespaces", h.ListNamespaces)
 	engine.GET("policy-reports", h.ListPolicyReports)
 	engine.GET("cluster-policy-reports", h.ListClusterPolicyReports)
+	engine.GET("rule-status-count", h.RuleStatusCounts)
 
 	ns := engine.Group("namespaced-resources")
 	ns.GET("sources", h.ListNamespacedFilter("source"))
