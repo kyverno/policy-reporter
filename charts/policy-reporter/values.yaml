@@ -11,7 +11,7 @@ image:
   registry: ghcr.io
   repository: kyverno/policy-reporter
   pullPolicy: IfNotPresent
-  tag: 77b076f
+  tag: 03562cc
 
 imagePullSecrets: []
 
@@ -172,7 +172,7 @@ sourceFilters:
 - selector:
     # -- select PolicyReport by source
     source: kyverno
-  # -- Filter out PolicyReports of controlled Pods and Jobs
+  # -- Filter out PolicyReports of controlled Pods and Jobs, only works for PolicyReport with scope resource
   uncontrolledOnly: true
   # -- Filter out ClusterPolicyReports
   disableClusterReports: false
@@ -750,7 +750,7 @@ ui:
     pullPolicy: IfNotPresent
       # -- (string) Image tag
       # Defaults to `Chart.AppVersion` if omitted
-    tag: "2.0.0-alpha.47"
+    tag: "2.0.0-alpha.49"
 
   # -- Deployment replica count
   replicaCount: 1
