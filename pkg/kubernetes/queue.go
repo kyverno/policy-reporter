@@ -16,6 +16,7 @@ import (
 
 	pr "github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
 	"github.com/kyverno/policy-reporter/pkg/crd/client/clientset/versioned/typed/policyreport/v1alpha2"
+	"github.com/kyverno/policy-reporter/pkg/helper"
 	"github.com/kyverno/policy-reporter/pkg/report"
 )
 
@@ -136,6 +137,7 @@ func updateResults(polr pr.ReportInterface) pr.ReportInterface {
 		}
 
 		r.Priority = report.ResolvePriority(r)
+		r.Category = helper.Defaults(r.Category, "Other")
 
 		results[i] = r
 	}
