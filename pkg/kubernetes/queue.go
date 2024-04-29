@@ -21,12 +21,13 @@ import (
 )
 
 type Queue struct {
-	queue         workqueue.RateLimitingInterface
-	client        v1alpha2.Wgpolicyk8sV1alpha2Interface
+	queue     workqueue.RateLimitingInterface
+	client    v1alpha2.Wgpolicyk8sV1alpha2Interface
 	reconditioner *result.Reconditioner
-	debouncer     Debouncer
-	lock          *sync.Mutex
-	cache         sets.Set[string]
+	debouncer Debouncer
+	lock      *sync.Mutex
+	cache     sets.Set[string]
+	filter    *report.SourceFilter
 }
 
 func (q *Queue) Add(obj *v1.PartialObjectMetadata) error {
@@ -103,6 +104,10 @@ func (q *Queue) processNextItem() bool {
 		return true
 	}
 
+	if ok := q.filter.Validate(polr); !ok {
+		return true
+	}
+
 	event := func() report.Event {
 		q.lock.Lock()
 		defer q.lock.Unlock()
@@ -145,6 +150,7 @@ func NewQueue(
 	debouncer Debouncer,
 	queue workqueue.RateLimitingInterface,
 	client v1alpha2.Wgpolicyk8sV1alpha2Interface,
+	filter *report.SourceFilter,
 	reconditioner *result.Reconditioner,
 ) *Queue {
 	return &Queue{
@@ -153,6 +159,7 @@ func NewQueue(
 		client:        client,
 		cache:         sets.New[string](),
 		lock:          &sync.Mutex{},
+		filter:    filter,
 		reconditioner: reconditioner,
 	}
 }
