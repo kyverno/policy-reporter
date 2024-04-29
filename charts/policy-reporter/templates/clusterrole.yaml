@@ -28,4 +28,16 @@ rules:
   - namespaces
   verbs:
   - list
+- apiGroups:
+  - ''
+  resources:
+  - pods
+  verbs:
+  - get
+- apiGroups:
+  - 'batch'
+  resources:
+  - jobs
+  verbs:
+  - get
 {{- end -}}

@@ -5,10 +5,11 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/kyverno/policy-reporter/pkg/target/http"
 	"github.com/stretchr/testify/assert"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zaptest/observer"
+
+	"github.com/kyverno/policy-reporter/pkg/target/http"
 )
 
 type mock struct{}

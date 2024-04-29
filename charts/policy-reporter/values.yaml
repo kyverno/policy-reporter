@@ -166,6 +166,20 @@ reportFilter:
     # Disable the processing of ClusterPolicyReports
     disabled: false
 
+# -- Source based PolicyReport filter
+sourceFilters:
+  # -- PolicyReport selector.
+- selector:
+    # -- select PolicyReport by source
+    source: kyverno
+  # -- Filter out PolicyReports of controlled Pods and Jobs
+  uncontrolledOnly: true
+  # -- Filter out ClusterPolicyReports
+  disableClusterReports: false
+  # -- Filter out PolicyReports based on the scope resource kind
+  kinds:
+    exclude: [ReplicaSet]
+
 kyverno-plugin:
   enabled: false
 
@@ -655,6 +669,25 @@ redis:
   username: ""
   password: ""
 
+database:
+  # Database Type, supported: mysql, postgres, mariadb
+  type: ""
+  database: "" # Database Name
+  username: ""
+  password: ""
+  host: ""
+  enableSSL: false
+  # instead of configure the individual values you can also provide an DSN string
+  # example postgres: postgres://postgres:password@localhost:5432/postgres?sslmode=disable
+  # example mysql: root:password@tcp(localhost:3306)/test?tls=false
+  dsn: ""
+  # configure an existing secret as source for your values
+  # supported fields: username, password, host, dsn, database
+  secretRef: ""
+  # use an mounted secret as source for your values, required the information in JSON format
+  # supported fields: username, password, host, dsn, database
+  mountedSecret: ""
+
 # enabled if replicaCount > 1
 podDisruptionBudget:
   # -- Configures the minimum available pods for policy-reporter disruptions.
@@ -804,10 +837,6 @@ ui:
       exceptions: false
       # -- exclude Pod, Job and Replica resources from kyverno results by default if no kinds are specified
       excludes:
-        namespaceKinds:
-        - Pod
-        - Job
-        - ReplicaSet
         results:
         - warn
         - error
