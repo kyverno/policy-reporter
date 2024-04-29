@@ -28,6 +28,19 @@ type MetricsFilter struct {
 	Kinds      ValueFilter `mapstructure:"kinds"`
 }
 
+type ReportSelector struct {
+	Source string `mapstructure:"source"`
+}
+
+type SourceFilter struct {
+	Selector              ReportSelector `mapstructure:"selector"`
+	Kinds                 ValueFilter    `mapstructure:"kinds"`
+	Sources               ValueFilter    `mapstructure:"sources"`
+	Namespaces            ValueFilter    `mapstructure:"namespaces"`
+	UncontrolledOnly      bool           `mapstructure:"uncontrolledOnly"`
+	DisableClusterReports bool           `mapstructure:"disableClusterReports"`
+}
+
 // SMTP configuration
 type SMTP struct {
 	Host        string `mapstructure:"host"`
@@ -174,6 +187,7 @@ type Config struct {
 	Metrics        Metrics        `mapstructure:"metrics"`
 	REST           REST           `mapstructure:"rest"`
 	ReportFilter   ReportFilter   `mapstructure:"reportFilter"`
+	SourceFilters  []SourceFilter `mapstructure:"sourceFilters"`
 	Redis          Redis          `mapstructure:"redis"`
 	Profiling      Profiling      `mapstructure:"profiling"`
 	EmailReports   EmailReports   `mapstructure:"emailReports"`

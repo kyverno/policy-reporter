@@ -110,17 +110,15 @@ Check the [Documentation](https://kyverno.github.io/policy-reporter/guide/02-get
 | reportFilter.namespaces.include | list | `[]` |  |
 | reportFilter.namespaces.exclude | list | `[]` |  |
 | reportFilter.clusterReports.disabled | bool | `false` |  |
-| database.type | string | `""` |  |
-| database.database | string | `""` |  |
-| database.username | string | `""` |  |
-| database.password | string | `""` |  |
-| database.host | string | `""` |  |
-| database.enableSSL | bool | `false` |  |
-| database.dsn | string | `""` |  |
-| database.secretRef | string | `""` |  |
-| database.mountedSecret | string | `""` |  |
+| sourceFilters | list | `[{"disableClusterReports":false,"kinds":{"exclude":["ReplicaSet"]},"removeControlled":true,"selector":{"source":"kyverno"}}]` | Source based PolicyReport filter |
+| sourceFilters[0] | object | `{"disableClusterReports":false,"kinds":{"exclude":["ReplicaSet"]},"removeControlled":true,"selector":{"source":"kyverno"}}` | PolicyReport selector. |
+| sourceFilters[0].selector.source | string | `"kyverno"` | select PolicyReport by source |
+| sourceFilters[0].removeControlled | bool | `true` | Filter out PolicyReports of controlled Pods and Jobs |
+| sourceFilters[0].disableClusterReports | bool | `false` | Filter out ClusterPolicyReports |
+| sourceFilters[0].kinds | object | `{"exclude":["ReplicaSet"]}` | Filter out PolicyReports based on the scope resource kind |
+| kyverno-plugin.enabled | bool | `false` |  |
+| trivy-plugin.enabled | bool | `false` |  |
 | global.labels | object | `{}` |  |
-| policyPriorities | object | `{}` |  |
 | basicAuth.username | string | `""` |  |
 | basicAuth.password | string | `""` |  |
 | basicAuth.secretRef | string | `""` |  |
@@ -134,6 +132,8 @@ Check the [Documentation](https://kyverno.github.io/policy-reporter/guide/02-get
 | emailReports.smtp.password | string | `""` |  |
 | emailReports.smtp.from | string | `""` |  |
 | emailReports.smtp.encryption | string | `""` |  |
+| emailReports.smtp.skipTLS | bool | `false` |  |
+| emailReports.smtp.certificate | string | `""` |  |
 | emailReports.summary.enabled | bool | `false` |  |
 | emailReports.summary.schedule | string | `"0 8 * * *"` |  |
 | emailReports.summary.activeDeadlineSeconds | int | `300` |  |
@@ -165,6 +165,9 @@ Check the [Documentation](https://kyverno.github.io/policy-reporter/guide/02-get
 | target.loki.sources | list | `[]` |  |
 | target.loki.skipExistingOnStartup | bool | `true` |  |
 | target.loki.customFields | object | `{}` |  |
+| target.loki.headers | object | `{}` |  |
+| target.loki.username | string | `""` |  |
+| target.loki.password | string | `""` |  |
 | target.loki.filter | object | `{}` |  |
 | target.loki.channels | list | `[]` |  |
 | target.elasticsearch.host | string | `""` |  |
@@ -173,12 +176,14 @@ Check the [Documentation](https://kyverno.github.io/policy-reporter/guide/02-get
 | target.elasticsearch.index | string | `"policy-reporter"` |  |
 | target.elasticsearch.username | string | `""` |  |
 | target.elasticsearch.password | string | `""` |  |
+| target.elasticsearch.apiKey | string | `""` |  |
 | target.elasticsearch.secretRef | string | `""` |  |
 | target.elasticsearch.mountedSecret | string | `""` |  |
 | target.elasticsearch.rotation | string | `"daily"` |  |
 | target.elasticsearch.minimumPriority | string | `""` |  |
 | target.elasticsearch.sources | list | `[]` |  |
 | target.elasticsearch.skipExistingOnStartup | bool | `true` |  |
+| target.elasticsearch.typelessApi | bool | `false` |  |
 | target.elasticsearch.customFields | object | `{}` |  |
 | target.elasticsearch.filter | object | `{}` |  |
 | target.elasticsearch.channels | list | `[]` |  |
@@ -286,9 +291,12 @@ Check the [Documentation](https://kyverno.github.io/policy-reporter/guide/02-get
 | target.securityHub.region | string | `""` |  |
 | target.securityHub.endpoint | string | `""` |  |
 | target.securityHub.accountID | string | `""` |  |
+| target.securityHub.productName | string | `""` |  |
 | target.securityHub.minimumPriority | string | `""` |  |
 | target.securityHub.sources | list | `[]` |  |
 | target.securityHub.skipExistingOnStartup | bool | `true` |  |
+| target.securityHub.cleanup | bool | `false` |  |
+| target.securityHub.delayInSeconds | int | `2` |  |
 | target.securityHub.customFields | object | `{}` |  |
 | target.securityHub.filter | object | `{}` |  |
 | target.securityHub.channels | list | `[]` |  |
@@ -313,6 +321,15 @@ Check the [Documentation](https://kyverno.github.io/policy-reporter/guide/02-get
 | redis.prefix | string | `"policy-reporter"` |  |
 | redis.username | string | `""` |  |
 | redis.password | string | `""` |  |
+| database.type | string | `""` |  |
+| database.database | string | `""` |  |
+| database.username | string | `""` |  |
+| database.password | string | `""` |  |
+| database.host | string | `""` |  |
+| database.enableSSL | bool | `false` |  |
+| database.dsn | string | `""` |  |
+| database.secretRef | string | `""` |  |
+| database.mountedSecret | string | `""` |  |
 | podDisruptionBudget.minAvailable | int | `1` | Configures the minimum available pods for policy-reporter disruptions. Cannot be used if `maxUnavailable` is set. |
 | podDisruptionBudget.maxUnavailable | string | `nil` | Configures the maximum unavailable pods for policy-reporter disruptions. Cannot be used if `minAvailable` is set. |
 | nodeSelector | object | `{}` |  |
@@ -332,7 +349,7 @@ Check the [Documentation](https://kyverno.github.io/policy-reporter/guide/02-get
 | ui.image.registry | string | `"ghcr.io"` | Image registry |
 | ui.image.repository | string | `"kyverno/policy-reporter-ui"` | Image repository |
 | ui.image.pullPolicy | string | `"IfNotPresent"` | Image PullPolicy |
-| ui.image.tag | string | `"2.0.0-alpha.37"` | Image tag Defaults to `Chart.AppVersion` if omitted |
+| ui.image.tag | string | `"2.0.0-alpha.47"` | Image tag Defaults to `Chart.AppVersion` if omitted |
 | ui.replicaCount | int | `1` | Deployment replica count |
 | ui.tempDir | string | `"/tmp"` | Temporary Directory to persist session data for authentication |
 | ui.logging.encoding | string | `"console"` | log encoding possible encodings are console and json |
@@ -356,10 +373,10 @@ Check the [Documentation](https://kyverno.github.io/policy-reporter/guide/02-get
 | ui.oauth.secretRef | string | `""` | Provide OpenID Connect configuration via Secret supported keys: `provider`, `clientId`, `clientSecret` |
 | ui.displayMode | string | `""` | DisplayMode dark/light uses the OS configured prefered color scheme as default |
 | ui.customBoards | list | `[]` | Additional customizable dashboards |
-| ui.sources | list | `[{"exceptions":false,"excludes":{"namespaceKinds":["Pod","Job","ReplicaSet"],"results":["warn","error"]},"name":"kyverno"}]` | source specific configurations |
-| ui.sources[0] | object | `{"exceptions":false,"excludes":{"namespaceKinds":["Pod","Job","ReplicaSet"],"results":["warn","error"]},"name":"kyverno"}` | kyverno specific UI confiurations |
+| ui.sources | list | `[{"exceptions":false,"excludes":{"results":["warn","error"]},"name":"kyverno"}]` | source specific configurations |
+| ui.sources[0] | object | `{"exceptions":false,"excludes":{"results":["warn","error"]},"name":"kyverno"}` | kyverno specific UI confiurations |
 | ui.sources[0].exceptions | bool | `false` | enabled action button to generate PolicyExceptions from the UI |
-| ui.sources[0].excludes | object | `{"namespaceKinds":["Pod","Job","ReplicaSet"],"results":["warn","error"]}` | exclude Pod, Job and Replica resources from kyverno results by default if no kinds are specified |
+| ui.sources[0].excludes | object | `{"results":["warn","error"]}` | exclude Pod, Job and Replica resources from kyverno results by default if no kinds are specified |
 | ui.clusters | list | `[{"name":"Default","secretRef":"policy-report-ui-default-cluster"}]` | Connected Policy Reporter APIs |
 | ui.imagePullSecrets | list | `[]` | Image pull secrets for image verification policies, this will define the `--imagePullSecrets` argument |
 | ui.serviceAccount.create | bool | `true` | Create ServiceAccount |
