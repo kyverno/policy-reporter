@@ -25,6 +25,7 @@ type Queue struct {
 	debouncer Debouncer
 	lock      *sync.Mutex
 	cache     sets.Set[string]
+	filter    *report.SourceFilter
 }
 
 func (q *Queue) Add(obj *v1.PartialObjectMetadata) error {
@@ -101,6 +102,10 @@ func (q *Queue) processNextItem() bool {
 		return true
 	}
 
+	if ok := q.filter.Validate(polr); !ok {
+		return true
+	}
+
 	event := func() report.Event {
 		q.lock.Lock()
 		defer q.lock.Unlock()
@@ -157,12 +162,13 @@ func (q *Queue) handleErr(err error, key interface{}) {
 	zap.L().Warn("dropping report out of queue", zap.Any("key", key), zap.Error(err))
 }
 
-func NewQueue(debouncer Debouncer, queue workqueue.RateLimitingInterface, client v1alpha2.Wgpolicyk8sV1alpha2Interface) *Queue {
+func NewQueue(debouncer Debouncer, queue workqueue.RateLimitingInterface, client v1alpha2.Wgpolicyk8sV1alpha2Interface, filter *report.SourceFilter) *Queue {
 	return &Queue{
 		debouncer: debouncer,
 		queue:     queue,
 		client:    client,
 		cache:     sets.New[string](),
 		lock:      &sync.Mutex{},
+		filter:    filter,
 	}
 }
