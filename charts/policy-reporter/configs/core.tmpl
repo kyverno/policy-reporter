@@ -150,6 +150,11 @@ reportFilter:
   clusterReports:
     disabled: {{ .Values.reportFilter.clusterReports.disabled }}
 
+{{- with .Values.sourceFilters }}
+sourceFilters:
+  {{- toYaml . | nindent 2 }}
+{{- end }}
+
 leaderElection:
   enabled: {{ or .Values.leaderElection.enabled (gt (int .Values.replicaCount) 1) }}
   releaseOnCancel: {{ .Values.leaderElection.releaseOnCancel }}

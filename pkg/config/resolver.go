@@ -32,7 +32,9 @@ import (
 	"github.com/kyverno/policy-reporter/pkg/email/violations"
 	"github.com/kyverno/policy-reporter/pkg/helper"
 	"github.com/kyverno/policy-reporter/pkg/kubernetes"
+	"github.com/kyverno/policy-reporter/pkg/kubernetes/jobs"
 	"github.com/kyverno/policy-reporter/pkg/kubernetes/namespaces"
+	"github.com/kyverno/policy-reporter/pkg/kubernetes/pods"
 	"github.com/kyverno/policy-reporter/pkg/kubernetes/secrets"
 	"github.com/kyverno/policy-reporter/pkg/leaderelection"
 	"github.com/kyverno/policy-reporter/pkg/listener"
@@ -206,10 +208,30 @@ func (r *Resolver) Queue() (*kubernetes.Queue, error) {
 		return nil, err
 	}
 
+	pods, err := r.PodClient()
+	if err != nil {
+		return nil, err
+	}
+
+	jobs, err := r.JobClient()
+	if err != nil {
+		return nil, err
+	}
+
 	return kubernetes.NewQueue(
 		kubernetes.NewDebouncer(1*time.Minute, r.EventPublisher()),
 		workqueue.NewNamedRateLimitingQueue(workqueue.DefaultControllerRateLimiter(), "report-queue"),
 		client,
+		report.NewSourceFilter(pods, jobs, helper.Map(r.config.SourceFilters, func(f SourceFilter) report.SourceValidation {
+			return report.SourceValidation{
+				Selector:              report.ReportSelector{Source: f.Selector.Source},
+				Kinds:                 ToRuleSet(f.Kinds),
+				Sources:               ToRuleSet(f.Sources),
+				Namespaces:            ToRuleSet(f.Namespaces),
+				UncontrolledOnly:      f.UncontrolledOnly,
+				DisableClusterReports: f.DisableClusterReports,
+			}
+		})),
 		result.NewReconditioner(r.CustomIDGenerators()),
 	), nil
 }
@@ -316,6 +338,32 @@ func (r *Resolver) NamespaceClient() (namespaces.Client, error) {
 
 	return namespaces.NewClient(
 		clientset.CoreV1().Namespaces(),
+		gocache.New(15*time.Second, 5*time.Second),
+	), nil
+}
+
+// PodClient resolver method
+func (r *Resolver) PodClient() (pods.Client, error) {
+	clientset, err := r.Clientset()
+	if err != nil {
+		return nil, err
+	}
+
+	return pods.NewClient(
+		clientset.CoreV1(),
+		gocache.New(15*time.Second, 5*time.Second),
+	), nil
+}
+
+// JobClient resolver method
+func (r *Resolver) JobClient() (jobs.Client, error) {
+	clientset, err := r.Clientset()
+	if err != nil {
+		return nil, err
+	}
+
+	return jobs.NewClient(
+		clientset.BatchV1(),
 		gocache.New(15*time.Second, 5*time.Second),
 	), nil
 }
@@ -487,8 +535,8 @@ func (r *Resolver) PolicyReportClient() (report.PolicyReportClient, error) {
 	return r.policyReportClient, nil
 }
 
-func (r *Resolver) ReportFilter() *report.Filter {
-	return report.NewFilter(
+func (r *Resolver) ReportFilter() *report.MetaFilter {
+	return report.NewMetaFilter(
 		r.config.ReportFilter.ClusterReports.Disabled,
 		ToRuleSet(r.config.ReportFilter.Namespaces),
 	)
