@@ -3,7 +3,7 @@
 Policy Reporter watches for PolicyReport Resources.
 It creates Prometheus Metrics and can send rule validation events to different targets like Loki, Elasticsearch, Slack or Discord
 
-![Version: 3.0.0-alpha.25](https://img.shields.io/badge/Version-3.0.0--alpha.25-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 3.0.0-alpha](https://img.shields.io/badge/AppVersion-3.0.0--alpha-informational?style=flat-square)
+![Version: 3.0.0-alpha.26](https://img.shields.io/badge/Version-3.0.0--alpha.26-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 3.0.0-alpha](https://img.shields.io/badge/AppVersion-3.0.0--alpha-informational?style=flat-square)
 
 ## Documentation
 
@@ -56,7 +56,7 @@ Check the [Documentation](https://kyverno.github.io/policy-reporter/guide/02-get
 | image.registry | string | `"ghcr.io"` |  |
 | image.repository | string | `"kyverno/policy-reporter"` |  |
 | image.pullPolicy | string | `"IfNotPresent"` |  |
-| image.tag | string | `"77b076f"` |  |
+| image.tag | string | `"03562cc"` |  |
 | imagePullSecrets | list | `[]` |  |
 | priorityClassName | string | `""` |  |
 | replicaCount | int | `1` |  |
@@ -110,10 +110,10 @@ Check the [Documentation](https://kyverno.github.io/policy-reporter/guide/02-get
 | reportFilter.namespaces.include | list | `[]` |  |
 | reportFilter.namespaces.exclude | list | `[]` |  |
 | reportFilter.clusterReports.disabled | bool | `false` |  |
-| sourceFilters | list | `[{"disableClusterReports":false,"kinds":{"exclude":["ReplicaSet"]},"removeControlled":true,"selector":{"source":"kyverno"}}]` | Source based PolicyReport filter |
-| sourceFilters[0] | object | `{"disableClusterReports":false,"kinds":{"exclude":["ReplicaSet"]},"removeControlled":true,"selector":{"source":"kyverno"}}` | PolicyReport selector. |
+| sourceFilters | list | `[{"disableClusterReports":false,"kinds":{"exclude":["ReplicaSet"]},"selector":{"source":"kyverno"},"uncontrolledOnly":true}]` | Source based PolicyReport filter |
+| sourceFilters[0] | object | `{"disableClusterReports":false,"kinds":{"exclude":["ReplicaSet"]},"selector":{"source":"kyverno"},"uncontrolledOnly":true}` | PolicyReport selector. |
 | sourceFilters[0].selector.source | string | `"kyverno"` | select PolicyReport by source |
-| sourceFilters[0].removeControlled | bool | `true` | Filter out PolicyReports of controlled Pods and Jobs |
+| sourceFilters[0].uncontrolledOnly | bool | `true` | Filter out PolicyReports of controlled Pods and Jobs, only works for PolicyReport with scope resource |
 | sourceFilters[0].disableClusterReports | bool | `false` | Filter out ClusterPolicyReports |
 | sourceFilters[0].kinds | object | `{"exclude":["ReplicaSet"]}` | Filter out PolicyReports based on the scope resource kind |
 | kyverno-plugin.enabled | bool | `false` |  |
@@ -349,7 +349,7 @@ Check the [Documentation](https://kyverno.github.io/policy-reporter/guide/02-get
 | ui.image.registry | string | `"ghcr.io"` | Image registry |
 | ui.image.repository | string | `"kyverno/policy-reporter-ui"` | Image repository |
 | ui.image.pullPolicy | string | `"IfNotPresent"` | Image PullPolicy |
-| ui.image.tag | string | `"2.0.0-alpha.47"` | Image tag Defaults to `Chart.AppVersion` if omitted |
+| ui.image.tag | string | `"2.0.0-alpha.49"` | Image tag Defaults to `Chart.AppVersion` if omitted |
 | ui.replicaCount | int | `1` | Deployment replica count |
 | ui.tempDir | string | `"/tmp"` | Temporary Directory to persist session data for authentication |
 | ui.logging.encoding | string | `"console"` | log encoding possible encodings are console and json |
