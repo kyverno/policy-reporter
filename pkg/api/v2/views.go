@@ -46,7 +46,7 @@ func MapToSourceDetails(categories []db.Category) []*SourceDetails {
 
 func UpdateCategory(result db.Category, source *SourceDetails) {
 	for _, c := range source.Categories {
-		if c.Name == result.Name {
+		if c.Name == helper.Defaults(result.Name, "Other") {
 			MapResultToCategory(result, c)
 			return
 		}
