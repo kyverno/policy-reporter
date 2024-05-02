@@ -16,19 +16,18 @@ import (
 
 	pr "github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
 	"github.com/kyverno/policy-reporter/pkg/crd/client/clientset/versioned/typed/policyreport/v1alpha2"
-	"github.com/kyverno/policy-reporter/pkg/helper"
 	"github.com/kyverno/policy-reporter/pkg/report"
 	"github.com/kyverno/policy-reporter/pkg/report/result"
 )
 
 type Queue struct {
-	queue     workqueue.RateLimitingInterface
-	client    v1alpha2.Wgpolicyk8sV1alpha2Interface
+	queue         workqueue.RateLimitingInterface
+	client        v1alpha2.Wgpolicyk8sV1alpha2Interface
 	reconditioner *result.Reconditioner
-	debouncer Debouncer
-	lock      *sync.Mutex
-	cache     sets.Set[string]
-	filter    *report.SourceFilter
+	debouncer     Debouncer
+	lock          *sync.Mutex
+	cache         sets.Set[string]
+	filter        *report.SourceFilter
 }
 
 func (q *Queue) Add(obj *v1.PartialObjectMetadata) error {
@@ -160,7 +159,7 @@ func NewQueue(
 		client:        client,
 		cache:         sets.New[string](),
 		lock:          &sync.Mutex{},
-		filter:    filter,
+		filter:        filter,
 		reconditioner: reconditioner,
 	}
 }

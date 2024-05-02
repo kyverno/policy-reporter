@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"github.com/kyverno/policy-reporter/pkg/report/result"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -53,6 +54,8 @@ func newFakeClient() v1.NamespaceInterface {
 	).CoreV1().Namespaces()
 }
 
+var reconditioner = result.NewReconditioner(nil)
+
 func TestV2(t *testing.T) {
 	db, err := database.NewSQLiteDB("db_v2.db")
 	if err != nil {
@@ -68,9 +71,9 @@ func TestV2(t *testing.T) {
 		assert.Fail(t, "failed to prepare Store")
 	}
 
-	store.Add(context.Background(), fixtures.DefaultPolicyReport)
-	store.Add(context.Background(), fixtures.KyvernoPolicyReport)
-	store.Add(context.Background(), fixtures.KyvernoClusterPolicyReport)
+	store.Add(context.Background(), reconditioner.Prepare(fixtures.DefaultPolicyReport))
+	store.Add(context.Background(), reconditioner.Prepare(fixtures.KyvernoPolicyReport))
+	store.Add(context.Background(), reconditioner.Prepare(fixtures.KyvernoClusterPolicyReport))
 
 	client := namespaces.NewClient(newFakeClient(), cache.New(time.Second, time.Second))
 
@@ -421,7 +424,7 @@ func TestV2(t *testing.T) {
 			json.NewDecoder(w.Body).Decode(&resp)
 
 			assert.Equal(t, 1, resp.Count)
-			assert.Equal(t, resp.Items[0], v2.PolicyResult{ID: "8115731892871392633", ResourceID: "18007334074686647077", Severity: "", Name: "", Kind: "", APIVersion: "", Namespace: "test", Message: "message 2", Category: "", Policy: "priority-test", Rule: "", Status: "fail", Timestamp: 1614093000})
+			assert.Equal(t, resp.Items[0], v2.PolicyResult{ID: "8115731892871392633", ResourceID: "18007334074686647077", Severity: "", Name: "", Kind: "", APIVersion: "", Namespace: "test", Message: "message 2", Category: "Other", Policy: "priority-test", Rule: "", Status: "fail", Timestamp: 1614093000})
 		}
 	})
 

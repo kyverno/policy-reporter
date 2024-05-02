@@ -4,9 +4,10 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
 	"github.com/segmentio/fasthash/fnv1a"
 	corev1 "k8s.io/api/core/v1"
+
+	"github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
 )
 
 type FieldMapperFunc = func(h1 uint64, polr v1alpha2.ReportInterface, res v1alpha2.PolicyReportResult) uint64
