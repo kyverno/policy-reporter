@@ -385,6 +385,12 @@ redis:
   {{- toYaml . | nindent 2 }}
 {{- end }}
 
+{{- with .Values.sourceConfig }}
+sourceConfig:
+  {{- toYaml . | nindent 2 }}
+{{- end }}
+
+
 logging:
   encoding: {{ .Values.logging.encoding }}
   logLevel: {{ include "policyreporter.logLevel" . }}

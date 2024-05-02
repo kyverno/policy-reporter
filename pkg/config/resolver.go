@@ -5,6 +5,7 @@ import (
 	"crypto/tls"
 	"crypto/x509"
 	"os"
+	"strings"
 	"time"
 
 	goredis "github.com/go-redis/redis/v8"
@@ -174,6 +175,19 @@ func (r *Resolver) EventPublisher() report.EventPublisher {
 	return r.publisher
 }
 
+func (r *Resolver) CustomIDGenerators() map[string]result.IDGenerator {
+	generators := make(map[string]result.IDGenerator)
+	for s, c := range r.config.SourceConfig {
+		if !c.Enabled || len(c.Fields) == 0 {
+			continue
+		}
+
+		generators[strings.ToLower(s)] = result.NewIDGenerator(c.Fields)
+	}
+
+	return generators
+}
+
 // EventPublisher resolver method
 func (r *Resolver) Queue() (*kubernetes.Queue, error) {
 	client, err := r.CRDClient()
@@ -185,7 +199,7 @@ func (r *Resolver) Queue() (*kubernetes.Queue, error) {
 		kubernetes.NewDebouncer(1*time.Minute, r.EventPublisher()),
 		workqueue.NewNamedRateLimitingQueue(workqueue.DefaultControllerRateLimiter(), "report-queue"),
 		client,
-		result.NewReconditioner(nil),
+		result.NewReconditioner(r.CustomIDGenerators()),
 	), nil
 }
 
