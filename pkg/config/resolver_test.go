@@ -222,6 +222,15 @@ var testConfig = &config.Config{
 	Logging: config.Logging{
 		Development: true,
 	},
+	SourceConfig: map[string]config.SourceConfig{
+		"test": {
+			CustomID: config.CustomID{
+				Enabled: true,
+				Fields:  []string{"resource"},
+			},
+		},
+		"default": {},
+	},
 }
 
 func Test_ResolveTargets(t *testing.T) {
@@ -645,4 +654,11 @@ func Test_ResolveEnableLeaderElection(t *testing.T) {
 			t.Error("leaderelection should be enabled if general enabled and targets configured")
 		}
 	})
+}
+
+func Test_ResolveCustomIDGenerators(t *testing.T) {
+	resolver := config.NewResolver(testConfig, nil)
+
+	generators := resolver.CustomIDGenerators()
+	assert.Equal(t, 1, len(generators), "only enabled custom id config should be mapped")
 }

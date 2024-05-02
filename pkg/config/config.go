@@ -180,22 +180,22 @@ type SourceConfig struct {
 // Config of the PolicyReporter
 type Config struct {
 	Version        string
-	Namespace      string         `mapstructure:"namespace"`
-	API            API            `mapstructure:"api"`
-	WorkerCount    int            `mapstructure:"worker"`
-	DBFile         string         `mapstructure:"dbfile"`
-	Metrics        Metrics        `mapstructure:"metrics"`
-	REST           REST           `mapstructure:"rest"`
-	ReportFilter   ReportFilter   `mapstructure:"reportFilter"`
-	SourceFilters  []SourceFilter `mapstructure:"sourceFilters"`
-	Redis          Redis          `mapstructure:"redis"`
-	Profiling      Profiling      `mapstructure:"profiling"`
-	EmailReports   EmailReports   `mapstructure:"emailReports"`
-	LeaderElection LeaderElection `mapstructure:"leaderElection"`
-	K8sClient      K8sClient      `mapstructure:"k8sClient"`
-	Logging        Logging        `mapstructure:"logging"`
-	Database       Database       `mapstructure:"database"`
-	Targets        Targets        `mapstructure:"targets"`
+	Namespace      string                  `mapstructure:"namespace"`
+	API            API                     `mapstructure:"api"`
+	WorkerCount    int                     `mapstructure:"worker"`
+	DBFile         string                  `mapstructure:"dbfile"`
+	Metrics        Metrics                 `mapstructure:"metrics"`
+	REST           REST                    `mapstructure:"rest"`
+	ReportFilter   ReportFilter            `mapstructure:"reportFilter"`
+	SourceFilters  []SourceFilter          `mapstructure:"sourceFilters"`
+	Redis          Redis                   `mapstructure:"redis"`
+	Profiling      Profiling               `mapstructure:"profiling"`
+	EmailReports   EmailReports            `mapstructure:"emailReports"`
+	LeaderElection LeaderElection          `mapstructure:"leaderElection"`
+	K8sClient      K8sClient               `mapstructure:"k8sClient"`
+	Logging        Logging                 `mapstructure:"logging"`
+	Database       Database                `mapstructure:"database"`
+	Targets        Targets                 `mapstructure:"targets"`
 	SourceConfig   map[string]SourceConfig `mapstructure:"sourceConfig"`
 	Templates      Templates               `mapstructure:"templates"`
 }

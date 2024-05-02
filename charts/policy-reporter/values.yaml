@@ -166,6 +166,13 @@ reportFilter:
     # Disable the processing of ClusterPolicyReports
     disabled: false
 
+# -- Customize source specific logic like result ID generation
+sourceConfig: {}
+# sourcename:
+#   customID:
+#     enabled: true
+#     fields: ["resource", "policy", "rule", "category", "result", "message"]
+
 # -- Source based PolicyReport filter
 sourceFilters:
   # -- PolicyReport selector.

@@ -208,21 +208,23 @@ func (r *Resolver) Queue() (*kubernetes.Queue, error) {
 		return nil, err
 	}
 
-	pods, err := r.PodClient()
+	podsClient, err := r.PodClient()
 	if err != nil {
 		return nil, err
 	}
 
-	jobs, err := r.JobClient()
+	jobsClient, err := r.JobClient()
 	if err != nil {
 		return nil, err
 	}
 
 	return kubernetes.NewQueue(
 		kubernetes.NewDebouncer(1*time.Minute, r.EventPublisher()),
-		workqueue.NewNamedRateLimitingQueue(workqueue.DefaultControllerRateLimiter(), "report-queue"),
+		workqueue.NewRateLimitingQueueWithConfig(workqueue.DefaultControllerRateLimiter(), workqueue.RateLimitingQueueConfig{
+			Name: "report-queue",
+		}),
 		client,
-		report.NewSourceFilter(pods, jobs, helper.Map(r.config.SourceFilters, func(f SourceFilter) report.SourceValidation {
+		report.NewSourceFilter(podsClient, jobsClient, helper.Map(r.config.SourceFilters, func(f SourceFilter) report.SourceValidation {
 			return report.SourceValidation{
 				Selector:              report.ReportSelector{Source: f.Selector.Source},
 				Kinds:                 ToRuleSet(f.Kinds),
