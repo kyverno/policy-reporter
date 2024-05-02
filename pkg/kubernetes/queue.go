@@ -17,14 +17,16 @@ import (
 	pr "github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
 	"github.com/kyverno/policy-reporter/pkg/crd/client/clientset/versioned/typed/policyreport/v1alpha2"
 	"github.com/kyverno/policy-reporter/pkg/report"
+	"github.com/kyverno/policy-reporter/pkg/report/result"
 )
 
 type Queue struct {
-	queue     workqueue.RateLimitingInterface
-	client    v1alpha2.Wgpolicyk8sV1alpha2Interface
-	debouncer Debouncer
-	lock      *sync.Mutex
-	cache     sets.Set[string]
+	queue         workqueue.RateLimitingInterface
+	client        v1alpha2.Wgpolicyk8sV1alpha2Interface
+	reconditioner *result.Reconditioner
+	debouncer     Debouncer
+	lock          *sync.Mutex
+	cache         sets.Set[string]
 }
 
 func (q *Queue) Add(obj *v1.PartialObjectMetadata) error {
@@ -96,7 +98,7 @@ func (q *Queue) processNextItem() bool {
 			defer q.lock.Unlock()
 			q.cache.Delete(key)
 		}()
-		q.debouncer.Add(report.LifecycleEvent{Type: report.Deleted, PolicyReport: updateResults(polr)})
+		q.debouncer.Add(report.LifecycleEvent{Type: report.Deleted, PolicyReport: q.reconditioner.Prepare(polr)})
 
 		return true
 	}
@@ -115,27 +117,9 @@ func (q *Queue) processNextItem() bool {
 
 	q.handleErr(err, key)
 
-	q.debouncer.Add(report.LifecycleEvent{Type: event, PolicyReport: updateResults(polr)})
+	q.debouncer.Add(report.LifecycleEvent{Type: event, PolicyReport: q.reconditioner.Prepare(polr)})
 
 	return true
-}
-
-// each result needs to know its resource it belongs to, to generate internal unique IDs
-func updateResults(polr pr.ReportInterface) pr.ReportInterface {
-	results := polr.GetResults()
-	for i, r := range results {
-		scope := polr.GetScope()
-
-		if len(r.Resources) == 0 && scope != nil {
-			r.Resources = append(r.Resources, *scope)
-		}
-
-		r.Priority = report.ResolvePriority(r)
-
-		results[i] = r
-	}
-
-	return polr
 }
 
 func (q *Queue) handleErr(err error, key interface{}) {
@@ -157,12 +141,18 @@ func (q *Queue) handleErr(err error, key interface{}) {
 	zap.L().Warn("dropping report out of queue", zap.Any("key", key), zap.Error(err))
 }
 
-func NewQueue(debouncer Debouncer, queue workqueue.RateLimitingInterface, client v1alpha2.Wgpolicyk8sV1alpha2Interface) *Queue {
+func NewQueue(
+	debouncer Debouncer,
+	queue workqueue.RateLimitingInterface,
+	client v1alpha2.Wgpolicyk8sV1alpha2Interface,
+	reconditioner *result.Reconditioner,
+) *Queue {
 	return &Queue{
-		debouncer: debouncer,
-		queue:     queue,
-		client:    client,
-		cache:     sets.New[string](),
-		lock:      &sync.Mutex{},
+		debouncer:     debouncer,
+		queue:         queue,
+		client:        client,
+		cache:         sets.New[string](),
+		lock:          &sync.Mutex{},
+		reconditioner: reconditioner,
 	}
 }

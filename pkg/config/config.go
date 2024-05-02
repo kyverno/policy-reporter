@@ -347,34 +347,44 @@ type Database struct {
 	MountedSecret string `mapstructure:"mountedSecret"`
 }
 
+type CustomID struct {
+	Enabled bool     `mapstructure:"enabled"`
+	Fields  []string `mapstructure:"fields"`
+}
+
+type SourceConfig struct {
+	CustomID `mapstructure:"customID"`
+}
+
 // Config of the PolicyReporter
 type Config struct {
 	Version        string
-	Namespace      string         `mapstructure:"namespace"`
-	Loki           *Loki          `mapstructure:"loki"`
-	Elasticsearch  *Elasticsearch `mapstructure:"elasticsearch"`
-	Slack          *Slack         `mapstructure:"slack"`
-	Discord        *Discord       `mapstructure:"discord"`
-	Teams          *Teams         `mapstructure:"teams"`
-	S3             *S3            `mapstructure:"s3"`
-	Kinesis        *Kinesis       `mapstructure:"kinesis"`
-	SecurityHub    *SecurityHub   `mapstructure:"securityHub"`
-	GCS            *GCS           `mapstructure:"gcs"`
-	UI             *UI            `mapstructure:"ui"`
-	Webhook        *Webhook       `mapstructure:"webhook"`
-	Telegram       *Telegram      `mapstructure:"telegram"`
-	GoogleChat     *GoogleChat    `mapstructure:"googleChat"`
-	API            API            `mapstructure:"api"`
-	WorkerCount    int            `mapstructure:"worker"`
-	DBFile         string         `mapstructure:"dbfile"`
-	Metrics        Metrics        `mapstructure:"metrics"`
-	REST           REST           `mapstructure:"rest"`
-	ReportFilter   ReportFilter   `mapstructure:"reportFilter"`
-	Redis          Redis          `mapstructure:"redis"`
-	Profiling      Profiling      `mapstructure:"profiling"`
-	EmailReports   EmailReports   `mapstructure:"emailReports"`
-	LeaderElection LeaderElection `mapstructure:"leaderElection"`
-	K8sClient      K8sClient      `mapstructure:"k8sClient"`
-	Logging        Logging        `mapstructure:"logging"`
-	Database       Database       `mapstructure:"database"`
+	Namespace      string                  `mapstructure:"namespace"`
+	Loki           *Loki                   `mapstructure:"loki"`
+	Elasticsearch  *Elasticsearch          `mapstructure:"elasticsearch"`
+	Slack          *Slack                  `mapstructure:"slack"`
+	Discord        *Discord                `mapstructure:"discord"`
+	Teams          *Teams                  `mapstructure:"teams"`
+	S3             *S3                     `mapstructure:"s3"`
+	Kinesis        *Kinesis                `mapstructure:"kinesis"`
+	SecurityHub    *SecurityHub            `mapstructure:"securityHub"`
+	GCS            *GCS                    `mapstructure:"gcs"`
+	UI             *UI                     `mapstructure:"ui"`
+	Webhook        *Webhook                `mapstructure:"webhook"`
+	Telegram       *Telegram               `mapstructure:"telegram"`
+	GoogleChat     *GoogleChat             `mapstructure:"googleChat"`
+	API            API                     `mapstructure:"api"`
+	WorkerCount    int                     `mapstructure:"worker"`
+	DBFile         string                  `mapstructure:"dbfile"`
+	Metrics        Metrics                 `mapstructure:"metrics"`
+	REST           REST                    `mapstructure:"rest"`
+	ReportFilter   ReportFilter            `mapstructure:"reportFilter"`
+	Redis          Redis                   `mapstructure:"redis"`
+	Profiling      Profiling               `mapstructure:"profiling"`
+	EmailReports   EmailReports            `mapstructure:"emailReports"`
+	LeaderElection LeaderElection          `mapstructure:"leaderElection"`
+	K8sClient      K8sClient               `mapstructure:"k8sClient"`
+	Logging        Logging                 `mapstructure:"logging"`
+	Database       Database                `mapstructure:"database"`
+	SourceConfig   map[string]SourceConfig `mapstructure:"sourceConfig"`
 }

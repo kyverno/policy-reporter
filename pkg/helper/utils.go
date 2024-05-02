@@ -11,3 +11,11 @@ func Contains(source string, sources []string) bool {
 
 	return false
 }
+
+func Defaults(s, f string) string {
+	if s != "" {
+		return s
+	}
+
+	return f
+}

@@ -5,11 +5,11 @@ import (
 
 	"github.com/segmentio/fasthash/fnv1a"
 	"github.com/uptrace/bun"
-	corev1 "k8s.io/api/core/v1"
 
 	api "github.com/kyverno/policy-reporter/pkg/api/v1"
 	"github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
 	"github.com/kyverno/policy-reporter/pkg/report"
+	"github.com/kyverno/policy-reporter/pkg/report/result"
 )
 
 type Config struct {
@@ -109,13 +109,8 @@ func MapPolicyReport(r v1alpha2.ReportInterface) *PolicyReport {
 
 func MapPolicyReportResults(polr v1alpha2.ReportInterface) []*PolicyReportResult {
 	list := make([]*PolicyReportResult, 0, len(polr.GetResults()))
-	for _, result := range polr.GetResults() {
-		res := result.GetResource()
-		if res == nil && polr.GetScope() != nil {
-			res = polr.GetScope()
-		} else if res == nil {
-			res = &corev1.ObjectReference{}
-		}
+	for _, r := range polr.GetResults() {
+		res := result.Resource(polr, r)
 
 		ns := res.Namespace
 		if ns == "" {
@@ -123,7 +118,7 @@ func MapPolicyReportResults(polr v1alpha2.ReportInterface) []*PolicyReportResult
 		}
 
 		list = append(list, &PolicyReportResult{
-			ID:             result.GetID(),
+			ID:             r.GetID(),
 			PolicyReportID: polr.GetID(),
 			Resource: Resource{
 				APIVersion: res.APIVersion,
@@ -132,16 +127,16 @@ func MapPolicyReportResults(polr v1alpha2.ReportInterface) []*PolicyReportResult
 				Namespace:  ns,
 				UID:        string(res.UID),
 			},
-			Policy:     result.Policy,
-			Rule:       result.Rule,
-			Source:     result.Source,
-			Scored:     result.Scored,
-			Message:    result.Message,
-			Result:     string(result.Result),
-			Severity:   string(result.Severity),
-			Category:   result.Category,
-			Properties: result.Properties,
-			Created:    result.Timestamp.Seconds,
+			Policy:     r.Policy,
+			Rule:       r.Rule,
+			Source:     r.Source,
+			Scored:     r.Scored,
+			Message:    r.Message,
+			Result:     string(r.Result),
+			Severity:   string(r.Severity),
+			Category:   r.Category,
+			Properties: r.Properties,
+			Created:    r.Timestamp.Seconds,
 		})
 	}
 

@@ -12,6 +12,7 @@ import (
 	"github.com/kyverno/policy-reporter/pkg/fixtures"
 	"github.com/kyverno/policy-reporter/pkg/kubernetes"
 	"github.com/kyverno/policy-reporter/pkg/report"
+	"github.com/kyverno/policy-reporter/pkg/report/result"
 	"github.com/kyverno/policy-reporter/pkg/validate"
 )
 
@@ -38,6 +39,7 @@ func Test_PolicyReportWatcher(t *testing.T) {
 		kubernetes.NewDebouncer(0, publisher),
 		workqueue.NewNamedRateLimitingQueue(workqueue.DefaultControllerRateLimiter(), "test-queue"),
 		restClient.Wgpolicyk8sV1alpha2(),
+		result.NewReconditioner(nil),
 	)
 
 	kclient, rclient, _ := NewFakeMetaClient()
@@ -88,6 +90,7 @@ func Test_ClusterPolicyReportWatcher(t *testing.T) {
 		kubernetes.NewDebouncer(0, publisher),
 		workqueue.NewNamedRateLimitingQueue(workqueue.DefaultControllerRateLimiter(), "test-queue"),
 		restClient.Wgpolicyk8sV1alpha2(),
+		result.NewReconditioner(nil),
 	)
 
 	kclient, _, rclient := NewFakeMetaClient()
@@ -128,6 +131,7 @@ func Test_HasSynced(t *testing.T) {
 		kubernetes.NewDebouncer(0, report.NewEventPublisher()),
 		workqueue.NewNamedRateLimitingQueue(workqueue.DefaultControllerRateLimiter(), "test-queue"),
 		restClient.Wgpolicyk8sV1alpha2(),
+		result.NewReconditioner(nil),
 	)
 
 	kclient, _, _ := NewFakeMetaClient()

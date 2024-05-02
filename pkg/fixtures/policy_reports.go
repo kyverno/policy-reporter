@@ -32,6 +32,7 @@ var DefaultPolicyReport = &v1alpha2.PolicyReport{
 	},
 	Results: []v1alpha2.PolicyReportResult{
 		{
+			ID:        "12348",
 			Message:   "message",
 			Result:    v1alpha2.StatusFail,
 			Scored:    true,
@@ -53,6 +54,7 @@ var DefaultPolicyReport = &v1alpha2.PolicyReport{
 			Properties: map[string]string{"version": "1.2.0"},
 		},
 		{
+			ID:        "12346",
 			Message:   "message 2",
 			Result:    v1alpha2.StatusFail,
 			Scored:    true,
@@ -60,6 +62,7 @@ var DefaultPolicyReport = &v1alpha2.PolicyReport{
 			Timestamp: v1.Timestamp{Seconds: 1614093000},
 		},
 		{
+			ID:        "12347",
 			Message:   "message 3",
 			Result:    v1alpha2.StatusFail,
 			Scored:    true,
