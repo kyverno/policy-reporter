@@ -16,10 +16,8 @@ package v1alpha2
 import (
 	"bytes"
 	"fmt"
-	"strconv"
 	"strings"
 
-	"github.com/segmentio/fasthash/fnv1a"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -243,32 +241,6 @@ func (r *PolicyReportResult) GetKind() string {
 }
 
 func (r *PolicyReportResult) GetID() string {
-	if r.ID != "" {
-		return r.ID
-	}
-
-	if id, ok := r.Properties[ResultIDKey]; ok {
-		r.ID = id
-
-		return r.ID
-	}
-
-	h1 := fnv1a.Init64
-
-	res := r.GetResource()
-	if res != nil {
-		h1 = fnv1a.AddString64(h1, res.Name)
-		h1 = fnv1a.AddString64(h1, string(res.UID))
-	}
-
-	h1 = fnv1a.AddString64(h1, r.Policy)
-	h1 = fnv1a.AddString64(h1, r.Rule)
-	h1 = fnv1a.AddString64(h1, string(r.Result))
-	h1 = fnv1a.AddString64(h1, r.Category)
-	h1 = fnv1a.AddString64(h1, r.Message)
-
-	r.ID = strconv.FormatUint(h1, 10)
-
 	return r.ID
 }
 

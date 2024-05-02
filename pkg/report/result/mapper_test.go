@@ -1,15 +1,15 @@
-package report_test
+package result_test
 
 import (
 	"testing"
 
 	"github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
-	"github.com/kyverno/policy-reporter/pkg/report"
+	"github.com/kyverno/policy-reporter/pkg/report/result"
 )
 
 func Test_ResolvePriority(t *testing.T) {
 	t.Run("Status Skip", func(t *testing.T) {
-		priority := report.ResolvePriority(v1alpha2.PolicyReportResult{
+		priority := result.ResolvePriority(v1alpha2.PolicyReportResult{
 			Result:   v1alpha2.StatusSkip,
 			Severity: v1alpha2.SeverityHigh,
 		})
@@ -20,7 +20,7 @@ func Test_ResolvePriority(t *testing.T) {
 	})
 
 	t.Run("Status Pass", func(t *testing.T) {
-		priority := report.ResolvePriority(v1alpha2.PolicyReportResult{
+		priority := result.ResolvePriority(v1alpha2.PolicyReportResult{
 			Result:   v1alpha2.StatusPass,
 			Severity: v1alpha2.SeverityHigh,
 		})
@@ -31,7 +31,7 @@ func Test_ResolvePriority(t *testing.T) {
 	})
 
 	t.Run("Status Warning", func(t *testing.T) {
-		priority := report.ResolvePriority(v1alpha2.PolicyReportResult{
+		priority := result.ResolvePriority(v1alpha2.PolicyReportResult{
 			Result:   v1alpha2.StatusWarn,
 			Severity: v1alpha2.SeverityHigh,
 		})
@@ -42,7 +42,7 @@ func Test_ResolvePriority(t *testing.T) {
 	})
 
 	t.Run("Status Error", func(t *testing.T) {
-		priority := report.ResolvePriority(v1alpha2.PolicyReportResult{
+		priority := result.ResolvePriority(v1alpha2.PolicyReportResult{
 			Result:   v1alpha2.StatusError,
 			Severity: v1alpha2.SeverityHigh,
 		})
@@ -53,7 +53,7 @@ func Test_ResolvePriority(t *testing.T) {
 	})
 
 	t.Run("Status Fail Fallback", func(t *testing.T) {
-		priority := report.ResolvePriority(v1alpha2.PolicyReportResult{
+		priority := result.ResolvePriority(v1alpha2.PolicyReportResult{
 			Result: v1alpha2.StatusFail,
 		})
 
@@ -63,7 +63,7 @@ func Test_ResolvePriority(t *testing.T) {
 	})
 
 	t.Run("Status Severity", func(t *testing.T) {
-		priority := report.ResolvePriority(v1alpha2.PolicyReportResult{
+		priority := result.ResolvePriority(v1alpha2.PolicyReportResult{
 			Result:   v1alpha2.StatusFail,
 			Severity: v1alpha2.SeverityCritical,
 		})

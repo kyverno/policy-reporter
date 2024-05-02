@@ -1,4 +1,4 @@
-package report
+package result
 
 import (
 	"github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
