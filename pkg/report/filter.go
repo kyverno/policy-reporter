@@ -26,7 +26,7 @@ func NewFilter(disableClusterReports bool, namespace validate.RuleSets) *Filter 
 	return &Filter{disableClusterReports, namespace}
 }
 
-type ResultValidation = func(v1alpha2.ReportInterface, v1alpha2.PolicyReportResult) bool
+type ResultValidation = func(v1alpha2.PolicyReportResult) bool
 
 type ResultFilter struct {
 	validations     []ResultValidation
@@ -38,9 +38,9 @@ func (rf *ResultFilter) AddValidation(v ResultValidation) {
 	rf.validations = append(rf.validations, v)
 }
 
-func (rf *ResultFilter) Validate(report v1alpha2.ReportInterface, result v1alpha2.PolicyReportResult) bool {
+func (rf *ResultFilter) Validate(result v1alpha2.PolicyReportResult) bool {
 	for _, validation := range rf.validations {
-		if !validation(report, result) {
+		if !validation(result) {
 			return false
 		}
 	}

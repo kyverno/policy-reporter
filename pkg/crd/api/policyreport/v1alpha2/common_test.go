@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
+	"github.com/kyverno/policy-reporter/pkg/report/result"
 	corev1 "k8s.io/api/core/v1"
 )
 
@@ -98,7 +99,7 @@ func TestCommon(t *testing.T) {
 	})
 }
 
-func TestPolicyReportResul(t *testing.T) {
+func TestPolicyReportResult(t *testing.T) {
 	t.Run("GetResource Without Resources", func(t *testing.T) {
 		r := &v1alpha2.PolicyReportResult{}
 
@@ -128,30 +129,19 @@ func TestPolicyReportResul(t *testing.T) {
 		}
 	})
 	t.Run("GetID from Result With Resource", func(t *testing.T) {
-		r := &v1alpha2.PolicyReportResult{Resources: []corev1.ObjectReference{{Name: "test", Kind: "Pod"}}}
+		r := v1alpha2.PolicyReportResult{Resources: []corev1.ObjectReference{{Name: "test", Kind: "Pod"}}}
+		r.ID = result.NewIDGenerator(nil).Generate(&v1alpha2.PolicyReport{}, r)
 
 		if r.GetID() != "18007334074686647077" {
 			t.Errorf("expected result kind to be '18007334074686647077', got :%s", r.GetID())
 		}
 	})
 	t.Run("GetID from Result With ID Property", func(t *testing.T) {
-		r := &v1alpha2.PolicyReportResult{Resources: []corev1.ObjectReference{{Name: "test", Kind: "Pod"}}, Properties: map[string]string{"resultID": "result-id"}}
+		r := v1alpha2.PolicyReportResult{Resources: []corev1.ObjectReference{{Name: "test", Kind: "Pod"}}, Properties: map[string]string{"resultID": "result-id"}}
+		r.ID = result.NewIDGenerator(nil).Generate(&v1alpha2.PolicyReport{}, r)
 
 		if r.GetID() != "result-id" {
 			t.Errorf("expected result kind to be 'result-id', got :%s", r.GetID())
-		}
-	})
-	t.Run("GetID cached", func(t *testing.T) {
-		r := &v1alpha2.PolicyReportResult{Resources: []corev1.ObjectReference{{Name: "test", Kind: "Pod"}}, Properties: map[string]string{"resultID": "result-id"}}
-
-		if r.GetID() != "result-id" {
-			t.Errorf("expected result kind to be 'result-id', got :%s", r.GetID())
-		}
-
-		r.Properties["resultID"] = "test"
-
-		if r.GetID() != "result-id" {
-			t.Errorf("expected result ID doesn't change, got :%s", r.GetID())
 		}
 	})
 	t.Run("ToResourceString with Namespace and Kind", func(t *testing.T) {
