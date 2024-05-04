@@ -58,8 +58,8 @@ func Test_Load(t *testing.T) {
 	if c.Profiling.Enabled != true {
 		t.Errorf("Unexpected Profiling Config: %v", c.Profiling.Enabled)
 	}
-	if c.EmailReports.Templates.Dir != "/app/templates" {
-		t.Errorf("Unexpected TemplateDir Config: %s", c.EmailReports.Templates.Dir)
+	if c.Templates.Dir != "/app/templates" {
+		t.Errorf("Unexpected TemplateDir Config: %s", c.Templates.Dir)
 	}
 	if c.DBFile != "sqlite-database.db" {
 		t.Errorf("Unexpected DBFile Config: %s", c.DBFile)

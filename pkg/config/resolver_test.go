@@ -164,10 +164,10 @@ var testConfig = &config.Config{
 		Prefix:      "prefix",
 		Channels:    []*config.GCS{{}},
 	},
+	Templates: config.Templates{
+		Dir: "../../templates",
+	},
 	EmailReports: config.EmailReports{
-		Templates: config.EmailTemplates{
-			Dir: "../../templates",
-		},
 		SMTP: config.SMTP{
 			Host:       "localhost",
 			Port:       465,

@@ -243,18 +243,17 @@ type EmailReport struct {
 }
 
 // EmailReport configuration
-type EmailTemplates struct {
+type Templates struct {
 	Dir string `mapstructure:"dir"`
 }
 
 // EmailReports configuration
 type EmailReports struct {
-	SMTP        SMTP           `mapstructure:"smtp"`
-	Templates   EmailTemplates `mapstructure:"templates"`
-	Summary     EmailReport    `mapstructure:"summary"`
-	Violations  EmailReport    `mapstructure:"violations"`
-	ClusterName string         `mapstructure:"clusterName"`
-	TitlePrefix string         `mapstructure:"titlePrefix"`
+	SMTP        SMTP        `mapstructure:"smtp"`
+	Summary     EmailReport `mapstructure:"summary"`
+	Violations  EmailReport `mapstructure:"violations"`
+	ClusterName string      `mapstructure:"clusterName"`
+	TitlePrefix string      `mapstructure:"titlePrefix"`
 }
 
 // BasicAuth configuration
@@ -387,4 +386,5 @@ type Config struct {
 	Logging        Logging                 `mapstructure:"logging"`
 	Database       Database                `mapstructure:"database"`
 	SourceConfig   map[string]SourceConfig `mapstructure:"sourceConfig"`
+	Templates      Templates               `mapstructure:"templates"`
 }
