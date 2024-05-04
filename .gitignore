@@ -4,8 +4,7 @@
 /config.yaml
 build
 /test.yaml
-**/test.db
-sqlite-database*.db
+*.db
 values*.yaml
 coverage.out*
 heap*

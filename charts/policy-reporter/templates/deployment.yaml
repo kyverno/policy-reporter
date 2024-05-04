@@ -67,6 +67,7 @@ spec:
             - --rest-enabled={{ or .Values.rest.enabled .Values.ui.enabled }}
             - --profile={{ .Values.profiling.enabled }}
             - --lease-name={{ include "policyreporter.fullname" . }}
+            - --template-dir=/app/templates
           ports:
             - name: {{ .Values.port.name }}
               containerPort: {{ .Values.port.number }}

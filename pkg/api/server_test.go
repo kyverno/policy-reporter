@@ -33,7 +33,7 @@ func Test_NewServer(t *testing.T) {
 	)
 
 	server.RegisterMetricsHandler()
-	server.RegisterV1Handler(nil)
+	server.RegisterV1Handler(nil, nil)
 	server.RegisterProfilingHandler()
 
 	serviceRunning := make(chan struct{})
@@ -81,6 +81,6 @@ func Test_SetupServerWithAuth(t *testing.T) {
 	)
 
 	server.RegisterMetricsHandler()
-	server.RegisterV1Handler(nil)
+	server.RegisterV1Handler(nil, nil)
 	server.RegisterProfilingHandler()
 }

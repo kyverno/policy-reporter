@@ -11,6 +11,7 @@ import (
 	"go.uber.org/zap/zapcore"
 
 	v1 "github.com/kyverno/policy-reporter/pkg/api/v1"
+	"github.com/kyverno/policy-reporter/pkg/email/violations"
 	"github.com/kyverno/policy-reporter/pkg/target"
 )
 
@@ -25,7 +26,7 @@ type Server interface {
 	// RegisterMetricsHandler adds the optional metrics endpoint
 	RegisterMetricsHandler()
 	// RegisterV1Handler adds the optional v1 REST APIs
-	RegisterV1Handler(v1.PolicyReportFinder)
+	RegisterV1Handler(v1.PolicyReportFinder, *violations.Reporter)
 	// RegisterProfilingHandler adds the optional pprof profiling APIs
 	RegisterProfilingHandler()
 }
@@ -54,7 +55,7 @@ func (s *httpServer) RegisterLifecycleHandler() {
 	s.mux.HandleFunc("/ready", ReadyHandler(s.synced))
 }
 
-func (s *httpServer) RegisterV1Handler(finder v1.PolicyReportFinder) {
+func (s *httpServer) RegisterV1Handler(finder v1.PolicyReportFinder, reporter *violations.Reporter) {
 	handler := v1.NewHandler(finder)
 
 	s.mux.HandleFunc("/v1/targets", s.middleware(handler.TargetsHandler(s.targets)))
@@ -83,6 +84,10 @@ func (s *httpServer) RegisterV1Handler(finder v1.PolicyReportFinder) {
 	s.mux.HandleFunc("/v1/cluster-resources/status-counts", s.middleware(handler.ClusterResourcesStatusCountHandler()))
 	s.mux.HandleFunc("/v1/cluster-resources/results", s.middleware(handler.ClusterResourcesResultHandler()))
 	s.mux.HandleFunc("/v1/cluster-resources/categories", s.middleware(handler.ClusterCategoryListHandler()))
+
+	htmlHandler := v1.NewHTMLHandler(finder, reporter)
+
+	s.mux.HandleFunc("/v1/html-report/violations", s.middleware(htmlHandler.HTMLReport()))
 }
 
 func (s *httpServer) RegisterMetricsHandler() {

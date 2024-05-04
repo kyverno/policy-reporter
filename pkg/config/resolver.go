@@ -384,7 +384,7 @@ func (r *Resolver) SummaryGenerator() (*summary.Generator, error) {
 
 func (r *Resolver) SummaryReporter() *summary.Reporter {
 	return summary.NewReporter(
-		r.config.EmailReports.Templates.Dir,
+		r.config.Templates.Dir,
 		r.config.EmailReports.ClusterName,
 		r.config.EmailReports.TitlePrefix,
 	)
@@ -405,7 +405,7 @@ func (r *Resolver) ViolationsGenerator() (*violations.Generator, error) {
 
 func (r *Resolver) ViolationsReporter() *violations.Reporter {
 	return violations.NewReporter(
-		r.config.EmailReports.Templates.Dir,
+		r.config.Templates.Dir,
 		r.config.EmailReports.ClusterName,
 		r.config.EmailReports.TitlePrefix,
 	)

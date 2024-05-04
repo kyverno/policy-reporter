@@ -74,7 +74,7 @@ func Load(cmd *cobra.Command) (*Config, error) {
 	}
 
 	if flag := cmd.Flags().Lookup("template-dir"); flag != nil {
-		v.BindPFlag("emailReports.templates.dir", flag)
+		v.BindPFlag("templates.dir", flag)
 	}
 
 	if flag := cmd.Flags().Lookup("lease-name"); flag != nil {
