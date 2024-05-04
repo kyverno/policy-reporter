@@ -89,28 +89,31 @@ func (h *HTMLHandler) HTMLReport() http.HandlerFunc {
 
 			nsResults := make(map[string]map[string][]violations.Result)
 			for _, ns := range namespaces {
-				nsResults[ns] = make(map[string][]violations.Result)
-				nsResults[ns]["warn"] = make([]violations.Result, 0)
-				nsResults[ns]["fail"] = make([]violations.Result, 0)
-				nsResults[ns]["error"] = make([]violations.Result, 0)
-			}
+				results, err := h.finder.FetchNamespacedResults(req.Context(), Filter{
+					Sources:    []string{source},
+					Status:     []string{"warn", "fail", "error"},
+					Namespaces: []string{ns},
+				}, Pagination{SortBy: defaultOrder})
+				if err != nil {
+					continue
+				}
 
-			results, err := h.finder.FetchNamespacedResults(req.Context(), Filter{
-				Sources: []string{source},
-				Status:  []string{"warn", "fail", "error"},
-			}, Pagination{SortBy: defaultOrder})
-			if err != nil {
-				continue
-			}
+				mapping := make(map[string][]violations.Result)
+				mapping["warn"] = make([]violations.Result, 0)
+				mapping["fail"] = make([]violations.Result, 0)
+				mapping["error"] = make([]violations.Result, 0)
 
-			for _, r := range results {
-				nsResults[r.Namespace][r.Status] = append(nsResults[r.Namespace][r.Status], violations.Result{
-					Kind:   r.Kind,
-					Name:   r.Name,
-					Policy: r.Policy,
-					Rule:   r.Rule,
-					Status: r.Status,
-				})
+				for _, r := range results {
+					mapping[r.Status] = append(mapping[r.Status], violations.Result{
+						Kind:   r.Kind,
+						Name:   r.Name,
+						Policy: r.Policy,
+						Rule:   r.Rule,
+						Status: r.Status,
+					})
+				}
+
+				nsResults[ns] = mapping
 			}
 
 			sources = append(sources, violations.Source{
