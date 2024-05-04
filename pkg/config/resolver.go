@@ -28,6 +28,7 @@ import (
 	"github.com/kyverno/policy-reporter/pkg/email"
 	"github.com/kyverno/policy-reporter/pkg/email/summary"
 	"github.com/kyverno/policy-reporter/pkg/email/violations"
+	"github.com/kyverno/policy-reporter/pkg/helper"
 	"github.com/kyverno/policy-reporter/pkg/kubernetes"
 	"github.com/kyverno/policy-reporter/pkg/kubernetes/secrets"
 	"github.com/kyverno/policy-reporter/pkg/leaderelection"
@@ -386,7 +387,7 @@ func (r *Resolver) SummaryReporter() *summary.Reporter {
 	return summary.NewReporter(
 		r.config.Templates.Dir,
 		r.config.EmailReports.ClusterName,
-		r.config.EmailReports.TitlePrefix,
+		helper.Defaults(r.config.EmailReports.TitlePrefix, "Report"),
 	)
 }
 

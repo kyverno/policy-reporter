@@ -14,6 +14,7 @@ import (
 	v1 "github.com/kyverno/policy-reporter/pkg/api/v1"
 	"github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
 	"github.com/kyverno/policy-reporter/pkg/database"
+	"github.com/kyverno/policy-reporter/pkg/email/violations"
 	"github.com/kyverno/policy-reporter/pkg/target"
 	"github.com/kyverno/policy-reporter/pkg/target/loki"
 )
@@ -143,6 +144,7 @@ func Test_V1_API(t *testing.T) {
 	store.Add(ctx, creport)
 
 	handl := v1.NewHandler(store)
+	htmlHandl := v1.NewHTMLHandler(store, violations.NewReporter("../../../templates", "Cluster", "Report"))
 
 	t.Run("ClusterPolicyListHandler", func(t *testing.T) {
 		req, err := http.NewRequest("GET", "/v1/cluster-policies", nil)
@@ -591,6 +593,21 @@ func Test_V1_API(t *testing.T) {
 		expected := `{"items":[{"id":"7174304213499286261","name":"cpolr","source":"Kyverno","labels":{"app":"policy-reporter","scope":"cluster"},"pass":0,"skip":0,"warn":0,"error":0,"fail":0}],"count":1}`
 		if !strings.Contains(rr.Body.String(), expected) {
 			t.Errorf("handler returned unexpected body: got %v want %v", rr.Body.String(), expected)
+		}
+	})
+
+	t.Run("HTMLReport", func(t *testing.T) {
+		req, err := http.NewRequest("GET", "/v1/html-report/violations", nil)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		rr := httptest.NewRecorder()
+		handler := htmlHandl.HTMLReport()
+		handler.ServeHTTP(rr, req)
+
+		if status := rr.Code; status != http.StatusOK {
+			t.Errorf("handler returned wrong status code: got %v want %v", status, http.StatusOK)
 		}
 	})
 }
