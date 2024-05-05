@@ -93,7 +93,7 @@ func newRunCMD(version string) *cobra.Command {
 				}
 
 				logger.Info("REST api enabled")
-				servOptions = append(servOptions, v1.WithAPI(store, resolver.TargetClients()), v2.WithAPI(store, nsClient, c.Targets))
+				servOptions = append(servOptions, v1.WithAPI(store, resolver.TargetClients(), resolver.ViolationsReporter()), v2.WithAPI(store, nsClient, c.Targets))
 			}
 
 			if c.Metrics.Enabled {
@@ -197,6 +197,7 @@ func newRunCMD(version string) *cobra.Command {
 	cmd.PersistentFlags().Bool("profile", false, "Enable application profiling with pprof")
 	cmd.PersistentFlags().String("lease-name", "policy-reporter", "name of the LeaseLock")
 	cmd.PersistentFlags().String("pod-name", "policy-reporter", "name of the pod, used for leaderelection")
+	cmd.PersistentFlags().StringP("template-dir", "t", "./templates", "template directory")
 	cmd.PersistentFlags().Int("worker", 5, "amount of queue worker")
 	cmd.PersistentFlags().Float32("qps", 20, "K8s RESTClient QPS")
 	cmd.PersistentFlags().Int("burst", 50, "K8s RESTClient burst")

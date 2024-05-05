@@ -205,10 +205,10 @@ var targets = config.Targets{
 }
 
 var testConfig = &config.Config{
+	Templates: config.Templates{
+		Dir: "../../templates",
+	},
 	EmailReports: config.EmailReports{
-		Templates: config.EmailTemplates{
-			Dir: "../../templates",
-		},
 		SMTP: config.SMTP{
 			Host:       "localhost",
 			Port:       465,
