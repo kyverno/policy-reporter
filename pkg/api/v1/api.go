@@ -5,9 +5,11 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"go.uber.org/zap"
 
 	"github.com/kyverno/policy-reporter/pkg/api"
 	db "github.com/kyverno/policy-reporter/pkg/database"
+	"github.com/kyverno/policy-reporter/pkg/email/violations"
 	"github.com/kyverno/policy-reporter/pkg/helper"
 	"github.com/kyverno/policy-reporter/pkg/target"
 )
@@ -15,8 +17,9 @@ import (
 var defaultOrder = []string{"resource_namespace", "resource_name", "resource_uid", "policy", "rule", "message"}
 
 type APIHandler struct {
-	store   *db.Store
-	targets []Target
+	store    *db.Store
+	targets  []Target
+	reporter *violations.Reporter
 }
 
 func (h *APIHandler) Register(engine *gin.RouterGroup) error {
@@ -25,6 +28,7 @@ func (h *APIHandler) Register(engine *gin.RouterGroup) error {
 	engine.GET("policy-reports", h.ListPolicyReports)
 	engine.GET("cluster-policy-reports", h.ListClusterPolicyReports)
 	engine.GET("rule-status-count", h.RuleStatusCounts)
+	engine.GET("html-report/violations", h.HTMLViolationsReport)
 
 	ns := engine.Group("namespaced-resources")
 	ns.GET("sources", h.ListNamespacedFilter("source"))
@@ -141,12 +145,123 @@ func (h *APIHandler) ListNamespacedResults(ctx *gin.Context) {
 	api.SendResponse(ctx, api.Paginated[Result]{Count: count, Items: MapResults(list)}, "failed to load results", err)
 }
 
-func NewAPIHandler(store *db.Store, targets []target.Client) *APIHandler {
-	return &APIHandler{store, helper.Map(targets, mapTarget)}
+func (h *APIHandler) HTMLViolationsReport(ctx *gin.Context) {
+	sources := make([]violations.Source, 0)
+
+	list, err := h.store.FetchSources(ctx, db.Filter{})
+	if err != nil {
+		zap.L().Error("failed to load data", zap.Error(err))
+		ctx.AbortWithStatus(http.StatusInternalServerError)
+		return
+	}
+
+	for _, source := range list {
+		cPass, err := h.store.CountResults(ctx, true, db.Filter{
+			Sources: []string{source},
+			Status:  []string{"pass"},
+		})
+		if err != nil {
+			continue
+		}
+
+		statusCounts, err := h.store.FetchNamespaceStatusCounts(ctx, source, db.Filter{
+			Sources: []string{source},
+			Status:  []string{"pass"},
+		})
+		if err != nil {
+			continue
+		}
+
+		nsPass := make(map[string]int, len(statusCounts))
+		for _, s := range statusCounts {
+			nsPass[s.Namespace] = s.Count
+		}
+
+		clusterResults, err := h.store.FetchResults(ctx, true, db.Filter{
+			Sources: []string{source},
+			Status:  []string{"warn", "fail", "error"},
+		}, db.Pagination{SortBy: defaultOrder})
+		if err != nil {
+			continue
+		}
+
+		cResults := make(map[string][]violations.Result)
+		for _, r := range clusterResults {
+			if _, ok := cResults[r.Result]; !ok {
+				cResults[r.Result] = make([]violations.Result, 0)
+			}
+
+			cResults[r.Result] = append(cResults[r.Result], violations.Result{
+				Kind:   r.Resource.Kind,
+				Name:   r.Resource.Name,
+				Policy: r.Policy,
+				Rule:   r.Rule,
+				Status: r.Result,
+			})
+		}
+
+		namespaces, err := h.store.FetchNamespaces(ctx, db.Filter{
+			Sources: []string{source},
+		})
+		if err != nil {
+			continue
+		}
+
+		nsResults := make(map[string]map[string][]violations.Result)
+		for _, ns := range namespaces {
+			results, err := h.store.FetchResults(ctx, true, db.Filter{
+				Sources:    []string{source},
+				Status:     []string{"warn", "fail", "error"},
+				Namespaces: []string{ns},
+			}, db.Pagination{SortBy: defaultOrder})
+			if err != nil {
+				continue
+			}
+
+			mapping := make(map[string][]violations.Result)
+			mapping["warn"] = make([]violations.Result, 0)
+			mapping["fail"] = make([]violations.Result, 0)
+			mapping["error"] = make([]violations.Result, 0)
+
+			for _, r := range results {
+				mapping[r.Result] = append(mapping[r.Result], violations.Result{
+					Kind:   r.Resource.Kind,
+					Name:   r.Resource.Name,
+					Policy: r.Policy,
+					Rule:   r.Rule,
+					Status: r.Result,
+				})
+			}
+
+			nsResults[ns] = mapping
+		}
+
+		sources = append(sources, violations.Source{
+			Name:             source,
+			ClusterReports:   (cPass + len(cResults)) > 0,
+			ClusterPassed:    cPass,
+			ClusterResults:   cResults,
+			NamespacePassed:  nsPass,
+			NamespaceResults: nsResults,
+		})
+	}
+
+	data, err := h.reporter.Report(sources, "HTML")
+	if err != nil {
+		zap.L().Error("failed to load data", zap.Error(err))
+		ctx.AbortWithStatus(http.StatusInternalServerError)
+		return
+	}
+
+	ctx.Data(http.StatusOK, "text/html; charset=utf-8", []byte(data.Message))
 }
 
-func WithAPI(store *db.Store, targets []target.Client) api.ServerOption {
+func NewAPIHandler(store *db.Store, targets []target.Client, reporter *violations.Reporter) *APIHandler {
+	return &APIHandler{store, helper.Map(targets, mapTarget), reporter}
+}
+
+func WithAPI(store *db.Store, targets []target.Client, reporter *violations.Reporter) api.ServerOption {
 	return func(s *api.Server) error {
-		return s.Register("v1", NewAPIHandler(store, targets))
+		return s.Register("v1", NewAPIHandler(store, targets, reporter))
 	}
 }
