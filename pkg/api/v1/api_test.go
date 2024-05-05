@@ -13,6 +13,7 @@ import (
 	"github.com/kyverno/policy-reporter/pkg/api"
 	v1 "github.com/kyverno/policy-reporter/pkg/api/v1"
 	"github.com/kyverno/policy-reporter/pkg/database"
+	"github.com/kyverno/policy-reporter/pkg/email/violations"
 	"github.com/kyverno/policy-reporter/pkg/fixtures"
 	"github.com/kyverno/policy-reporter/pkg/report"
 	"github.com/kyverno/policy-reporter/pkg/report/result"
@@ -55,7 +56,7 @@ func TestV1(t *testing.T) {
 			},
 			Host: "http://localhost:8080",
 		}),
-	}))
+	}, violations.NewReporter("../../../templates", "Cluster", "Report")))
 
 	t.Run("TargetResponse", func(t *testing.T) {
 		req, _ := http.NewRequest("GET", "/v1/targets", nil)
@@ -286,5 +287,14 @@ func TestV1(t *testing.T) {
 
 			assert.Equal(t, 5, resp.Count)
 		}
+	})
+
+	t.Run("HTMLViolationsReport", func(t *testing.T) {
+		req, _ := http.NewRequest("GET", "/v1/html-report/violations", nil)
+		w := httptest.NewRecorder()
+
+		server.Serve(w, req)
+
+		assert.Equal(t, http.StatusOK, w.Code)
 	})
 }
