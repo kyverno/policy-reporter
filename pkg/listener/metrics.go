@@ -36,7 +36,7 @@ func NewMetricsListener(
 
 func ResultListeners(
 	filter *report.ResultFilter,
-	reportFilter *report.ReportFilter,
+	_ *report.ReportFilter,
 	mode metrics.Mode,
 	labels []string,
 ) []report.PolicyReportListener {

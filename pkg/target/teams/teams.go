@@ -128,6 +128,12 @@ func (s *client) Send(result v1alpha2.PolicyReportResult) {
 
 func (s *client) CleanUp(_ context.Context, _ v1alpha2.ReportInterface) {}
 
+func (s *client) BatchSend(_ v1alpha2.ReportInterface, _ []v1alpha2.PolicyReportResult) {}
+
+func (s *client) SupportsBatchSend() bool {
+	return false
+}
+
 // NewClient creates a new teams.client to send Results to MS Teams
 func NewClient(options Options) target.Client {
 	return &client{

@@ -18,6 +18,8 @@ import (
 type Client interface {
 	// Send the given Result to the configured Target
 	Send(result v1alpha2.PolicyReportResult)
+	// BatchSend the given Results of a single PolicyReport to the configured Target
+	BatchSend(report v1alpha2.ReportInterface, results []v1alpha2.PolicyReportResult)
 	// SkipExistingOnStartup skips already existing PolicyReportResults on startup
 	SkipExistingOnStartup() bool
 	// Name is a unique identifier for each Target
@@ -28,7 +30,9 @@ type Client interface {
 	MinimumPriority() string
 	// Sources of the Results which should send to this target, empty means all sources
 	Sources() []string
-	// Cleanup old results if supported by the target
+	// SupportsBatchSend for the given target
+	SupportsBatchSend() bool
+	// CleanUp old results if supported by the target
 	CleanUp(context.Context, v1alpha2.ReportInterface)
 }
 
