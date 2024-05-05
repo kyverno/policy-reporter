@@ -6,11 +6,12 @@ import (
 	"time"
 
 	"github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
+	"github.com/kyverno/policy-reporter/pkg/helper"
 	"github.com/kyverno/policy-reporter/pkg/target"
 	"github.com/kyverno/policy-reporter/pkg/target/http"
 )
 
-// Options to configure the Loko target
+// Options to configure the Loki target
 type Options struct {
 	target.ClientOptions
 	Host         string
@@ -35,7 +36,7 @@ type entry struct {
 	Line string `json:"line"`
 }
 
-func newLokiPayload(result v1alpha2.PolicyReportResult, customLabels map[string]string) payload {
+func newLokiStream(result v1alpha2.PolicyReportResult, customLabels map[string]string) stream {
 	timestamp := time.Now()
 	if result.Timestamp.Seconds != 0 {
 		timestamp = time.Unix(result.Timestamp.Seconds, int64(result.Timestamp.Nanos))
@@ -88,7 +89,7 @@ func newLokiPayload(result v1alpha2.PolicyReportResult, customLabels map[string]
 
 	ls.Labels = "{" + strings.Join(labels, ",") + "}"
 
-	return payload{Streams: []stream{ls}}
+	return ls
 }
 
 type client struct {
@@ -102,7 +103,21 @@ type client struct {
 }
 
 func (l *client) Send(result v1alpha2.PolicyReportResult) {
-	req, err := http.CreateJSONRequest(l.Name(), "POST", l.host, newLokiPayload(result, l.customLabels))
+	l.send(payload{
+		Streams: []stream{
+			newLokiStream(result, l.customLabels),
+		},
+	})
+}
+
+func (l *client) BatchSend(_ v1alpha2.ReportInterface, results []v1alpha2.PolicyReportResult) {
+	l.send(payload{Streams: helper.Map(results, func(result v1alpha2.PolicyReportResult) stream {
+		return newLokiStream(result, l.customLabels)
+	})})
+}
+
+func (l *client) send(payload payload) {
+	req, err := http.CreateJSONRequest(l.Name(), "POST", l.host, payload)
 	if err != nil {
 		return
 	}
@@ -118,6 +133,10 @@ func (l *client) Send(result v1alpha2.PolicyReportResult) {
 
 	resp, err := l.client.Do(req)
 	http.ProcessHTTPResponse(l.Name(), resp, err)
+}
+
+func (l *client) SupportsBatchSend() bool {
+	return true
 }
 
 func (l *client) CleanUp(_ context.Context, _ v1alpha2.ReportInterface) {}

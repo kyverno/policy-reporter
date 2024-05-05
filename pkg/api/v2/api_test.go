@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
-	"github.com/kyverno/policy-reporter/pkg/report/result"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -24,6 +23,7 @@ import (
 	"github.com/kyverno/policy-reporter/pkg/database"
 	"github.com/kyverno/policy-reporter/pkg/fixtures"
 	"github.com/kyverno/policy-reporter/pkg/kubernetes/namespaces"
+	"github.com/kyverno/policy-reporter/pkg/report/result"
 )
 
 const (
