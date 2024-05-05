@@ -264,10 +264,27 @@ func (r *Resolver) RegisterSendResultListener() {
 		r.RegisterNewResultsListener()
 	}
 
-	r.resultListener.RegisterListener(listener.NewSendResultListener(targets))
+	singleSend := make([]target.Client, 0)
+	batchSend := make([]target.Client, 0)
+
+	for _, client := range targets {
+		if client.SupportsBatchSend() {
+			batchSend = append(batchSend, client)
+		} else {
+			singleSend = append(singleSend, client)
+		}
+	}
+
+	if len(singleSend) > 0 {
+		r.resultListener.RegisterListener(listener.NewSendResultListener(singleSend))
+	}
+
+	if len(batchSend) > 0 {
+		r.resultListener.RegisterScopeListener(listener.NewSendScopeResultsListener(batchSend))
+	}
 }
 
-// RegisterSendResultListener resolver method
+// UnregisterSendResultListener resolver method
 func (r *Resolver) UnregisterSendResultListener() {
 	if r.ResultCache().Shared() {
 		r.EventPublisher().UnregisterListener(listener.NewResults)
@@ -278,9 +295,10 @@ func (r *Resolver) UnregisterSendResultListener() {
 	}
 
 	r.resultListener.UnregisterListener()
+	r.resultListener.UnregisterScopeListener()
 }
 
-// RegisterSendResultListener resolver method
+// RegisterStoreListener resolver method
 func (r *Resolver) RegisterStoreListener(ctx context.Context, store report.PolicyReportStore) {
 	r.EventPublisher().RegisterListener(listener.Store, listener.NewStoreListener(ctx, store))
 }

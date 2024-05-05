@@ -230,6 +230,12 @@ func (c *client) mapOtherDetails(result v1alpha2.PolicyReportResult) map[string]
 	return details
 }
 
+func (c *client) BatchSend(_ v1alpha2.ReportInterface, _ []v1alpha2.PolicyReportResult) {}
+
+func (c *client) SupportsBatchSend() bool {
+	return false
+}
+
 // NewClient creates a new SecurityHub.client to send Results to SecurityHub.
 func NewClient(options Options) target.Client {
 	return &client{
