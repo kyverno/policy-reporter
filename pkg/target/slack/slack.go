@@ -2,9 +2,12 @@ package slack
 
 import (
 	"context"
-	"strings"
+
+	"github.com/slack-go/slack"
+	"go.uber.org/zap"
 
 	"github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
+	"github.com/kyverno/policy-reporter/pkg/helper"
 	"github.com/kyverno/policy-reporter/pkg/target"
 	"github.com/kyverno/policy-reporter/pkg/target/http"
 )
@@ -61,128 +64,127 @@ var colors = map[v1alpha2.Priority]string{
 	v1alpha2.ErrorPriority:    "#e20b0b",
 }
 
-func (s *client) newPayload(result v1alpha2.PolicyReportResult) payload {
-	p := payload{
-		Attachments: make([]attachment, 0, 1),
+func (s *client) message(result v1alpha2.PolicyReportResult) *slack.WebhookMessage {
+	p := &slack.WebhookMessage{
+		Attachments: make([]slack.Attachment, 0, 1),
+		Channel:     s.channel,
 	}
 
-	att := attachment{
-		Color:  colors[result.Priority],
-		Blocks: make([]block, 0),
+	att := slack.Attachment{
+		Color: colors[result.Priority],
+		Blocks: slack.Blocks{
+			BlockSet: make([]slack.Block, 0),
+		},
 	}
 
-	policyBlock := block{
-		Type:   "section",
-		Fields: []field{{Type: "mrkdwn", Text: "*Policy*\n" + result.Policy}},
-	}
+	policyBlock := slack.NewSectionBlock(nil, []*slack.TextBlockObject{slack.NewTextBlockObject(slack.MarkdownType, "*Policy*\n"+result.Policy, false, false)}, nil)
 
 	if result.Rule != "" {
-		policyBlock.Fields = append(policyBlock.Fields, field{Type: "mrkdwn", Text: "*Rule*\n" + result.Rule})
+		policyBlock.Fields = append(policyBlock.Fields, slack.NewTextBlockObject(slack.MarkdownType, "*Rule*\n"+result.Rule, false, false))
 	}
 
-	att.Blocks = append(
-		att.Blocks,
-		block{Type: "header", Text: &text{Type: "plain_text", Text: "New Policy Report Result"}},
+	att.Blocks.BlockSet = append(
+		att.Blocks.BlockSet,
+		slack.NewHeaderBlock(slack.NewTextBlockObject(slack.PlainTextType, "New Policy Report Result", false, false)),
 		policyBlock,
 	)
 
-	att.Blocks = append(
-		att.Blocks,
-		block{Type: "section", Text: &text{Type: "mrkdwn", Text: "*Message*\n" + result.Message}},
-		block{
-			Type: "section",
-			Fields: []field{
-				{Type: "mrkdwn", Text: "*Priority*\n" + result.Priority.String()},
-				{Type: "mrkdwn", Text: "*Status*\n" + string(result.Result)},
-			},
-		},
+	att.Blocks.BlockSet = append(
+		att.Blocks.BlockSet,
+		slack.NewSectionBlock(slack.NewTextBlockObject(slack.MarkdownType, "*Message*\n"+result.Message, false, false), nil, nil),
+		slack.NewSectionBlock(nil, []*slack.TextBlockObject{
+			slack.NewTextBlockObject(slack.MarkdownType, "*Priority*\n"+result.Priority.String(), false, false),
+			slack.NewTextBlockObject(slack.MarkdownType, "*Status*\n"+string(result.Result), false, false),
+		}, nil),
 	)
 
-	b := block{
-		Type:   "section",
-		Fields: make([]field, 0, 2),
-	}
+	b := slack.NewSectionBlock(nil, make([]*slack.TextBlockObject, 0, 2), nil)
 
 	if result.Category != "" {
-		b.Fields = append(b.Fields, field{Type: "mrkdwn", Text: "*Category*\n" + result.Category})
+		b.Fields = append(b.Fields, slack.NewTextBlockObject(slack.MarkdownType, "*Category*\n"+result.Category, false, false))
 	}
 	if result.Severity != "" {
-		b.Fields = append(b.Fields, field{Type: "mrkdwn", Text: "*Severity*\n" + string(result.Severity)})
+		b.Fields = append(b.Fields, slack.NewTextBlockObject(slack.MarkdownType, "*Severity*\n"+string(result.Severity), false, false))
 	}
 
 	if len(b.Fields) > 0 {
-		att.Blocks = append(att.Blocks, b)
+		att.Blocks.BlockSet = append(att.Blocks.BlockSet, b)
 	}
 
 	if result.HasResource() {
 		res := result.GetResource()
 
-		att.Blocks = append(att.Blocks, block{Type: "section", Text: &text{Type: "mrkdwn", Text: "*Resource*"}})
+		att.Blocks.BlockSet = append(
+			att.Blocks.BlockSet,
+			slack.NewSectionBlock(slack.NewTextBlockObject(slack.MarkdownType, "*Resource*", false, false), nil, nil),
+		)
 
 		if res.APIVersion != "" {
-			att.Blocks = append(att.Blocks, block{
-				Type: "section",
-				Fields: []field{
-					{Type: "mrkdwn", Text: "*Kind*\n" + res.Kind},
-					{Type: "mrkdwn", Text: "*API Version*\n" + res.APIVersion},
-				},
-			})
+			att.Blocks.BlockSet = append(
+				att.Blocks.BlockSet,
+				slack.NewSectionBlock(nil, []*slack.TextBlockObject{
+					slack.NewTextBlockObject(slack.MarkdownType, "*Kind*\n"+res.Kind, false, false),
+					slack.NewTextBlockObject(slack.MarkdownType, "*API Version*\n"+res.APIVersion, false, false),
+				}, nil),
+			)
 		} else if res.APIVersion == "" && res.UID != "" {
-			att.Blocks = append(att.Blocks, block{
-				Type: "section",
-				Text: &text{Type: "mrkdwn", Text: "*Kind*\n" + res.Kind},
-			})
+			att.Blocks.BlockSet = append(
+				att.Blocks.BlockSet,
+				slack.NewSectionBlock(nil, []*slack.TextBlockObject{
+					slack.NewTextBlockObject(slack.MarkdownType, "*Kind*\n"+res.Kind, false, false),
+				}, nil),
+			)
 		}
 
 		if res.UID != "" {
-			att.Blocks = append(att.Blocks, block{
-				Type: "section",
-				Fields: []field{
-					{Type: "mrkdwn", Text: "*Name*\n" + res.Name},
-					{Type: "mrkdwn", Text: "*UID*\n" + string(res.UID)},
-				},
-			})
+			att.Blocks.BlockSet = append(
+				att.Blocks.BlockSet,
+				slack.NewSectionBlock(nil, []*slack.TextBlockObject{
+					slack.NewTextBlockObject(slack.MarkdownType, "*Name*\n"+res.Name, false, false),
+					slack.NewTextBlockObject(slack.MarkdownType, "*UID*\n"+string(res.UID), false, false),
+				}, nil),
+			)
 		} else if res.UID == "" && res.APIVersion != "" {
-			att.Blocks = append(att.Blocks, block{
-				Type: "section",
-				Text: &text{Type: "mrkdwn", Text: "*Name*\n" + res.Name},
-			})
+			att.Blocks.BlockSet = append(
+				att.Blocks.BlockSet,
+				slack.NewSectionBlock(nil, []*slack.TextBlockObject{slack.NewTextBlockObject(slack.MarkdownType, "*Name*\n"+res.Name, false, false)}, nil),
+			)
 		}
 
 		if res.APIVersion == "" && res.UID == "" {
-			att.Blocks = append(att.Blocks, block{
-				Type: "section",
-				Fields: []field{
-					{Type: "mrkdwn", Text: "*Kind*\n" + res.Kind},
-					{Type: "mrkdwn", Text: "*Name*\n" + res.Name},
-				},
-			})
+			att.Blocks.BlockSet = append(
+				att.Blocks.BlockSet,
+				slack.NewSectionBlock(nil, []*slack.TextBlockObject{
+					slack.NewTextBlockObject(slack.MarkdownType, "*Kind*\n"+res.Kind, false, false),
+					slack.NewTextBlockObject(slack.MarkdownType, "*Name*\n"+res.Name, false, false),
+				}, nil),
+			)
 		}
 
 		if res.Namespace != "" {
-			att.Blocks = append(att.Blocks, block{Type: "section", Fields: []field{{Type: "mrkdwn", Text: "*Namespace*\n" + res.Namespace}}})
+			att.Blocks.BlockSet = append(
+				att.Blocks.BlockSet,
+				slack.NewSectionBlock(nil, []*slack.TextBlockObject{slack.NewTextBlockObject(slack.MarkdownType, "*Namespace*\n"+res.Namespace, false, false)}, nil),
+			)
 		}
 	}
 
 	if len(result.Properties) > 0 || len(s.customFields) > 0 {
-		att.Blocks = append(
-			att.Blocks,
-			block{Type: "section", Text: &text{Type: "mrkdwn", Text: "*Properties*"}},
+		att.Blocks.BlockSet = append(
+			att.Blocks.BlockSet,
+			slack.NewSectionBlock(slack.NewTextBlockObject(slack.MarkdownType, "*Properties*", false, false), nil, nil),
 		)
 
-		propBlock := block{
-			Type:   "section",
-			Fields: []field{},
-		}
+		propBlock := slack.NewSectionBlock(nil, make([]*slack.TextBlockObject, 0), nil)
 
 		for property, value := range result.Properties {
-			propBlock.Fields = append(propBlock.Fields, field{Type: "mrkdwn", Text: "*" + strings.Title(property) + "*\n" + value})
+			propBlock.Fields = append(propBlock.Fields, slack.NewTextBlockObject(slack.MarkdownType, "*"+helper.Title(property)+"*\n"+value, false, false))
 		}
 		for property, value := range s.customFields {
-			propBlock.Fields = append(propBlock.Fields, field{Type: "mrkdwn", Text: "*" + strings.Title(property) + "*\n" + value})
+			propBlock.Fields = append(propBlock.Fields, slack.NewTextBlockObject(slack.MarkdownType, "*"+helper.Title(property)+"*\n"+value, false, false))
 		}
 
-		att.Blocks = append(att.Blocks, propBlock)
+		att.Blocks.BlockSet = append(att.Blocks.BlockSet, propBlock)
 	}
 
 	p.Attachments = append(p.Attachments, att)
@@ -191,16 +193,18 @@ func (s *client) newPayload(result v1alpha2.PolicyReportResult) payload {
 }
 
 func (s *client) Send(result v1alpha2.PolicyReportResult) {
-	req, err := http.CreateJSONRequest(s.Name(), "POST", s.webhook, s.newPayload(result))
-	if err != nil {
-		return
+	if err := slack.PostWebhook(s.webhook, s.message(result)); err != nil {
+		zap.L().Error(s.Name()+": PUSH FAILED", zap.Error(err))
 	}
-
-	resp, err := s.client.Do(req)
-	http.ProcessHTTPResponse(s.Name(), resp, err)
 }
 
 func (s *client) CleanUp(_ context.Context, _ v1alpha2.ReportInterface) {}
+
+func (s *client) BatchSend(_ v1alpha2.ReportInterface, _ []v1alpha2.PolicyReportResult) {}
+
+func (s *client) SupportsBatchSend() bool {
+	return false
+}
 
 // NewClient creates a new slack.client to send Results to Slack
 func NewClient(options Options) target.Client {

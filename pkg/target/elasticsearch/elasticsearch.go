@@ -100,6 +100,12 @@ func (e *client) Send(result v1alpha2.PolicyReportResult) {
 
 func (e *client) CleanUp(_ context.Context, _ v1alpha2.ReportInterface) {}
 
+func (e *client) BatchSend(_ v1alpha2.ReportInterface, _ []v1alpha2.PolicyReportResult) {}
+
+func (e *client) SupportsBatchSend() bool {
+	return false
+}
+
 // NewClient creates a new elasticsearch.client to send Results to Elasticsearch
 func NewClient(options Options) target.Client {
 	return &client{

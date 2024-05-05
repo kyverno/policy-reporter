@@ -54,3 +54,13 @@ func Defaults(s, f string) string {
 func ToPointer[T any](s T) *T {
 	return &s
 }
+
+func Filter[T any](s []T, keep func(T) bool) []T {
+	d := make([]T, 0, len(s))
+	for _, n := range s {
+		if keep(n) {
+			d = append(d, n)
+		}
+	}
+	return d
+}

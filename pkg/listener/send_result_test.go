@@ -15,6 +15,7 @@ type client struct {
 	skipExistingOnStartup bool
 	validated             bool
 	cleanupCalled         bool
+	batchSendCalled       bool
 }
 
 func (c *client) Send(result v1alpha2.PolicyReportResult) {
@@ -43,6 +44,14 @@ func (c client) Validate(rep v1alpha2.ReportInterface, result v1alpha2.PolicyRep
 
 func (c *client) CleanUp(_ context.Context, _ v1alpha2.ReportInterface) {
 	c.cleanupCalled = true
+}
+
+func (c *client) BatchSend(_ v1alpha2.ReportInterface, _ []v1alpha2.PolicyReportResult) {
+	c.batchSendCalled = true
+}
+
+func (c *client) SupportsBatchSend() bool {
+	return false
 }
 
 func Test_SendResultListener(t *testing.T) {
