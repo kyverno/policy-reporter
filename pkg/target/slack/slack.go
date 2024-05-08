@@ -2,14 +2,18 @@ package slack
 
 import (
 	"context"
+	"fmt"
+	"net/http"
+	"strings"
 
 	"github.com/slack-go/slack"
 	"go.uber.org/zap"
+	corev1 "k8s.io/api/core/v1"
 
 	"github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
 	"github.com/kyverno/policy-reporter/pkg/helper"
 	"github.com/kyverno/policy-reporter/pkg/target"
-	"github.com/kyverno/policy-reporter/pkg/target/http"
+	rest "github.com/kyverno/policy-reporter/pkg/target/http"
 )
 
 // Options to configure the Slack target
@@ -18,41 +22,14 @@ type Options struct {
 	Webhook      string
 	Channel      string
 	CustomFields map[string]string
-	HTTPClient   http.Client
-}
-
-type text struct {
-	Type string `json:"type"`
-	Text string `json:"text"`
-}
-
-type block struct {
-	Type   string  `json:"type"`
-	Text   *text   `json:"text,omitempty"`
-	Fields []field `json:"fields,omitempty"`
-}
-
-type field struct {
-	Type string `json:"type"`
-	Text string `json:"text"`
-}
-
-type attachment struct {
-	Color  string  `json:"color"`
-	Blocks []block `json:"blocks"`
-}
-
-type payload struct {
-	Channel     string       `json:"channel,omitempty"`
-	Username    string       `json:"username,omitempty"`
-	Attachments []attachment `json:"attachments,omitempty"`
+	HTTPClient   rest.Client
 }
 
 type client struct {
 	target.BaseClient
 	webhook      string
 	channel      string
-	client       http.Client
+	client       rest.Client
 	customFields map[string]string
 }
 
@@ -192,19 +169,128 @@ func (s *client) message(result v1alpha2.PolicyReportResult) *slack.WebhookMessa
 	return p
 }
 
+func (s *client) batchMessage(polr v1alpha2.ReportInterface, results []v1alpha2.PolicyReportResult) *slack.WebhookMessage {
+	scope := polr.GetScope()
+	resource := ResourceString(scope)
+
+	p := &slack.WebhookMessage{
+		Attachments: make([]slack.Attachment, 0, 1),
+		Channel:     s.channel,
+	}
+
+	att := slack.Attachment{
+		Color: colors[v1alpha2.InfoPriority],
+		Blocks: slack.Blocks{
+			BlockSet: make([]slack.Block, 0),
+		},
+	}
+
+	att.Blocks.BlockSet = append(
+		att.Blocks.BlockSet,
+		slack.NewHeaderBlock(slack.NewTextBlockObject(slack.PlainTextType, resource+" Policy Report Result", false, false)),
+		slack.NewSectionBlock(slack.NewTextBlockObject(slack.MarkdownType, fmt.Sprintf("Received %d new Policy Report Results", len(results)), false, false), nil, nil),
+	)
+
+	cfl := len(s.customFields)
+	if cfl > 0 {
+		att.Blocks.BlockSet = append(att.Blocks.BlockSet, slack.NewDividerBlock(), slack.NewSectionBlock(slack.NewTextBlockObject(slack.MarkdownType, "*Custom Fields*", false, false), nil, nil))
+
+		i := 0
+
+		var propBlock *slack.SectionBlock
+		for property, value := range s.customFields {
+			if i%2 == 0 {
+				propBlock = slack.NewSectionBlock(nil, make([]*slack.TextBlockObject, 2), nil)
+				att.Blocks.BlockSet = append(att.Blocks.BlockSet, propBlock)
+			}
+
+			propBlock.Fields = append(propBlock.Fields, slack.NewTextBlockObject(slack.MarkdownType, "*"+helper.Title(property)+"*\n"+value, false, false))
+			i++
+		}
+	}
+
+	p.Attachments = append(p.Attachments, att)
+
+	for _, result := range results {
+		resultAttachment := slack.Attachment{
+			Color: colors[result.Priority],
+			Blocks: slack.Blocks{
+				BlockSet: make([]slack.Block, 0),
+			},
+		}
+
+		policy := fmt.Sprintf("Policy: %s", result.Policy)
+
+		if result.Rule != "" {
+			policy = fmt.Sprintf("%s/%s", policy, result.Rule)
+		}
+
+		resultAttachment.Blocks.BlockSet = append(
+			resultAttachment.Blocks.BlockSet,
+			slack.NewHeaderBlock(slack.NewTextBlockObject(slack.PlainTextType, policy, false, false)),
+		)
+
+		if result.Category != "" {
+			resultAttachment.Blocks.BlockSet = append(
+				resultAttachment.Blocks.BlockSet,
+				slack.NewContextBlock("", slack.NewTextBlockObject(slack.MarkdownType, "*"+result.Category+"*", false, false)),
+			)
+		}
+
+		b := slack.NewSectionBlock(nil, []*slack.TextBlockObject{
+			slack.NewTextBlockObject(slack.MarkdownType, "*Status*\n"+string(result.Result), false, false),
+		}, nil)
+
+		if result.Severity != "" {
+			b.Fields = append(b.Fields, slack.NewTextBlockObject(slack.MarkdownType, "*Severity*\n"+string(result.Severity), false, false))
+		}
+
+		resultAttachment.Blocks.BlockSet = append(resultAttachment.Blocks.BlockSet, b)
+
+		resultAttachment.Blocks.BlockSet = append(
+			resultAttachment.Blocks.BlockSet,
+			slack.NewSectionBlock(slack.NewTextBlockObject(slack.MarkdownType, "*Message*\n"+result.Message, false, false), nil, nil),
+		)
+
+		if len(result.Properties) > 0 {
+			resultAttachment.Blocks.BlockSet = append(resultAttachment.Blocks.BlockSet, slack.NewSectionBlock(slack.NewTextBlockObject(slack.MarkdownType, "*Properties*", false, false), nil, nil))
+
+			propBlock := slack.NewSectionBlock(nil, make([]*slack.TextBlockObject, 0), nil)
+
+			for property, value := range result.Properties {
+				propBlock.Fields = append(propBlock.Fields, slack.NewTextBlockObject(slack.MarkdownType, "*"+helper.Title(property)+"*\n"+value, false, false))
+			}
+
+			resultAttachment.Blocks.BlockSet = append(resultAttachment.Blocks.BlockSet, propBlock)
+		}
+
+		p.Attachments = append(p.Attachments, resultAttachment)
+	}
+
+	return p
+}
+
 func (s *client) Send(result v1alpha2.PolicyReportResult) {
-	if err := slack.PostWebhook(s.webhook, s.message(result)); err != nil {
+	client := s.client.(*http.Client)
+
+	if err := slack.PostWebhookCustomHTTP(s.webhook, client, s.message(result)); err != nil {
 		zap.L().Error(s.Name()+": PUSH FAILED", zap.Error(err))
 	}
 }
 
-func (s *client) CleanUp(_ context.Context, _ v1alpha2.ReportInterface) {}
+func (s *client) BatchSend(report v1alpha2.ReportInterface, results []v1alpha2.PolicyReportResult) {
+	client := s.client.(*http.Client)
 
-func (s *client) BatchSend(_ v1alpha2.ReportInterface, _ []v1alpha2.PolicyReportResult) {}
+	if err := slack.PostWebhookCustomHTTP(s.webhook, client, s.batchMessage(report, results)); err != nil {
+		zap.L().Error(s.Name()+": BATCH PUSH FAILED", zap.Error(err))
+	}
+}
 
 func (s *client) SupportsBatchSend() bool {
-	return false
+	return true
 }
+
+func (s *client) CleanUp(_ context.Context, _ v1alpha2.ReportInterface) {}
 
 // NewClient creates a new slack.client to send Results to Slack
 func NewClient(options Options) target.Client {
@@ -215,4 +301,15 @@ func NewClient(options Options) target.Client {
 		options.HTTPClient,
 		options.CustomFields,
 	}
+}
+
+func ResourceString(res *corev1.ObjectReference) string {
+	var resource string
+	if res.Namespace == "" {
+		resource = fmt.Sprintf("%s/%s: %s", res.APIVersion, res.Kind, res.Name)
+	} else {
+		resource = fmt.Sprintf("%s/%s: %s/%s", res.APIVersion, res.Kind, res.Namespace, res.Name)
+	}
+
+	return strings.Trim(resource, "/")
 }
