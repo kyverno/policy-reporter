@@ -75,7 +75,11 @@ func (s *SourceFilter) run(polr v1alpha2.ReportInterface, options SourceValidati
 		return true
 	}
 
-	logger = logger.With(zap.Any("scope", scope))
+	logger = logger.With(
+		zap.String("kind", scope.Kind),
+		zap.String("name", scope.Name),
+		zap.String("namespace", scope.Namespace),
+	)
 
 	if options.Kinds.Enabled() && !validate.MatchRuleSet(scope.Kind, options.Kinds) {
 		logger.Debug("filter scope resource kind")
@@ -90,7 +94,7 @@ func (s *SourceFilter) run(polr v1alpha2.ReportInterface, options SourceValidati
 	if options.UncontrolledOnly && s.pods != nil && scope.Kind == "Pod" {
 		pod, err := s.pods.Get(scope)
 		if err != nil {
-			zap.L().Error("failed to get pod", zap.Error(err), zap.Any("resource", scope))
+			logger.Error("failed to get pod", zap.Error(err), zap.String("name", scope.Name), zap.String("namespace", scope.Namespace))
 			return true
 		}
 
@@ -105,7 +109,7 @@ func (s *SourceFilter) run(polr v1alpha2.ReportInterface, options SourceValidati
 	if options.UncontrolledOnly && s.jobs != nil && scope.Kind == "Job" {
 		job, err := s.jobs.Get(scope)
 		if err != nil {
-			zap.L().Error("failed to get job", zap.Error(err), zap.Any("resource", scope))
+			logger.Error("failed to get job", zap.Error(err))
 			return true
 		}
 

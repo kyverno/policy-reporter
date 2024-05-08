@@ -369,10 +369,7 @@ func (r *Resolver) PodClient() (pods.Client, error) {
 		return nil, err
 	}
 
-	return pods.NewClient(
-		clientset.CoreV1(),
-		gocache.New(15*time.Second, 5*time.Second),
-	), nil
+	return pods.NewClient(clientset.CoreV1()), nil
 }
 
 // JobClient resolver method
@@ -382,10 +379,7 @@ func (r *Resolver) JobClient() (jobs.Client, error) {
 		return nil, err
 	}
 
-	return jobs.NewClient(
-		clientset.BatchV1(),
-		gocache.New(15*time.Second, 5*time.Second),
-	), nil
+	return jobs.NewClient(clientset.BatchV1()), nil
 }
 
 func (r *Resolver) TargetFactory() *TargetFactory {
