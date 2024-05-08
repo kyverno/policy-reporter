@@ -752,11 +752,6 @@ func (f *TargetFactory) createGCSClient(config, parent *GCS) target.Client {
 	sugar := zap.S()
 
 	setFallback(&config.Credentials, parent.Credentials)
-	if config.Credentials == "" {
-		sugar.Errorf("%s.Credentials has not been declared", config.Name)
-		return nil
-	}
-
 	setFallback(&config.Prefix, parent.Prefix, "policy-reporter")
 
 	config.MapBaseParent(parent.TargetBaseOptions)
