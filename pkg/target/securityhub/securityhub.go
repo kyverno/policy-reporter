@@ -10,7 +10,12 @@ import (
 	"go.uber.org/zap"
 
 	"github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
+	"github.com/kyverno/policy-reporter/pkg/helper"
 	"github.com/kyverno/policy-reporter/pkg/target"
+)
+
+var (
+	schema = toPointer("2018-10-08")
 )
 
 type HubClient interface {
@@ -41,61 +46,70 @@ type client struct {
 	companyName  string
 	delay        time.Duration
 	cleanup      bool
+	arn          *string
 }
 
-func (c *client) Send(result v1alpha2.PolicyReportResult) {
-	generator := result.Policy
-	if generator == "" {
-		generator = result.Rule
-	}
-
-	title := generator
-	if result.HasResource() {
-		title = fmt.Sprintf("%s: %s", title, result.ResourceString())
-	}
-
-	t := time.Unix(result.Timestamp.Seconds, int64(result.Timestamp.Nanos))
-
+func (c *client) mapFindings(results []v1alpha2.PolicyReportResult) []types.AwsSecurityFinding {
 	var accID *string
 	if c.accountID != "" {
 		accID = toPointer(c.accountID)
 	}
 
-	res, err := c.hub.BatchImportFindings(context.TODO(), &hub.BatchImportFindingsInput{
-		Findings: []types.AwsSecurityFinding{
-			{
-				Id:            toPointer(result.GetID()),
-				AwsAccountId:  accID,
-				SchemaVersion: toPointer("2018-10-08"),
-				ProductArn:    toPointer("arn:aws:securityhub:" + c.region + ":" + c.accountID + ":product/" + c.accountID + "/default"),
-				GeneratorId:   toPointer(fmt.Sprintf("%s/%s", result.Source, generator)),
-				Types:         []string{mapType(result.Source)},
-				CreatedAt:     toPointer(t.Format("2006-01-02T15:04:05.999999999Z07:00")),
-				UpdatedAt:     toPointer(t.Format("2006-01-02T15:04:05.999999999Z07:00")),
-				Severity: &types.Severity{
-					Label: MapSeverity(result.Severity),
-				},
-				Title:       &title,
-				Description: &result.Message,
-				ProductName: &c.productName,
-				CompanyName: &c.companyName,
-				Compliance: &types.Compliance{
-					Status: types.ComplianceStatusFailed,
-				},
-				Resources: []types.Resource{
-					{
-						Type:      toPointer("Other"),
-						Region:    &c.region,
-						Partition: types.PartitionAws,
-						Id:        mapResourceID(result),
-						Details: &types.ResourceDetails{
-							Other: c.mapOtherDetails(result),
-						},
+	return helper.Map(results, func(result v1alpha2.PolicyReportResult) types.AwsSecurityFinding {
+		generator := result.Policy
+		if generator == "" {
+			generator = result.Rule
+		}
+
+		title := generator
+		if result.HasResource() {
+			title = fmt.Sprintf("%s: %s", title, result.ResourceString())
+		}
+
+		t := time.Unix(result.Timestamp.Seconds, int64(result.Timestamp.Nanos))
+
+		return types.AwsSecurityFinding{
+			Id:            toPointer(result.GetID()),
+			AwsAccountId:  accID,
+			SchemaVersion: schema,
+			ProductArn:    c.arn,
+			GeneratorId:   toPointer(fmt.Sprintf("%s/%s", result.Source, generator)),
+			Types:         []string{mapType(result.Source)},
+			CreatedAt:     toPointer(t.Format("2006-01-02T15:04:05.999999999Z07:00")),
+			UpdatedAt:     toPointer(t.Format("2006-01-02T15:04:05.999999999Z07:00")),
+			Severity: &types.Severity{
+				Label: MapSeverity(result.Severity),
+			},
+			Title:       &title,
+			Description: &result.Message,
+			ProductName: &c.productName,
+			CompanyName: &c.companyName,
+			Compliance: &types.Compliance{
+				Status: types.ComplianceStatusFailed,
+			},
+			Resources: []types.Resource{
+				{
+					Type:      toPointer("Other"),
+					Region:    &c.region,
+					Partition: types.PartitionAws,
+					Id:        mapResourceID(result),
+					Details: &types.ResourceDetails{
+						Other: c.mapOtherDetails(result),
 					},
 				},
-				RecordState: types.RecordStateActive,
 			},
-		},
+			RecordState: types.RecordStateActive,
+		}
+	})
+}
+
+func (c *client) Send(result v1alpha2.PolicyReportResult) {
+	c.BatchSend(nil, []v1alpha2.PolicyReportResult{result})
+}
+
+func (c *client) BatchSend(_ v1alpha2.ReportInterface, results []v1alpha2.PolicyReportResult) {
+	res, err := c.hub.BatchImportFindings(context.TODO(), &hub.BatchImportFindingsInput{
+		Findings: c.mapFindings(results),
 	})
 	if err != nil {
 		zap.L().Error(c.Name()+": PUSH FAILED", zap.Error(err), zap.Any("response", res))
@@ -230,10 +244,8 @@ func (c *client) mapOtherDetails(result v1alpha2.PolicyReportResult) map[string]
 	return details
 }
 
-func (c *client) BatchSend(_ v1alpha2.ReportInterface, _ []v1alpha2.PolicyReportResult) {}
-
 func (c *client) SupportsBatchSend() bool {
-	return false
+	return true
 }
 
 // NewClient creates a new SecurityHub.client to send Results to SecurityHub.
@@ -248,6 +260,7 @@ func NewClient(options Options) target.Client {
 		options.CompanyName,
 		options.Delay,
 		options.Cleanup,
+		toPointer("arn:aws:securityhub:" + options.Region + ":" + options.AccountID + ":product/" + options.AccountID + "/default"),
 	}
 }
 
