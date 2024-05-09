@@ -31,6 +31,7 @@ func newFakeClient() v1.SecretInterface {
 			"host":            []byte("http://localhost:9200"),
 			"username":        []byte("username"),
 			"password":        []byte("password"),
+			"channel":         []byte("general"),
 			"apiKey":          []byte("apiKey"),
 			"webhook":         []byte("http://localhost:9200/webhook"),
 			"accountId":       []byte("accountID"),
@@ -50,6 +51,7 @@ func mountSecret() {
 	secretValues := secrets.Values{
 		Host:            "http://localhost:9200",
 		Webhook:         "http://localhost:9200/webhook",
+		Channel:         "general",
 		Username:        "username",
 		Password:        "password",
 		APIKey:          "apiKey",
@@ -376,9 +378,9 @@ func Test_GetValuesFromSecret(t *testing.T) {
 	t.Run("Get Slack values from Secret", func(t *testing.T) {
 		client := reflect.ValueOf(clients[2]).Elem()
 
-		webhook := client.FieldByName("webhook").String()
-		if webhook != "http://localhost:9200/webhook" {
-			t.Errorf("Expected webhook from secret, got %s", webhook)
+		webhook := client.FieldByName("channel").String()
+		if webhook != "general" {
+			t.Errorf("Expected channel from secret, got %s", webhook)
 		}
 	})
 
@@ -745,9 +747,9 @@ func Test_GetValuesFromMountedSecret(t *testing.T) {
 	t.Run("Get Slack values from Secret", func(t *testing.T) {
 		client := reflect.ValueOf(clients[2]).Elem()
 
-		webhook := client.FieldByName("webhook").String()
-		if webhook != "http://localhost:9200/webhook" {
-			t.Errorf("Expected webhook from secret, got %s", webhook)
+		webhook := client.FieldByName("channel").String()
+		if webhook != "general" {
+			t.Errorf("Expected channel from secret, got %s", webhook)
 		}
 	})
 
