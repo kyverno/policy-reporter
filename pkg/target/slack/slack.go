@@ -3,7 +3,6 @@ package slack
 import (
 	"context"
 	"fmt"
-	"net/http"
 	"strings"
 
 	"github.com/slack-go/slack"
@@ -13,23 +12,20 @@ import (
 	"github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
 	"github.com/kyverno/policy-reporter/pkg/helper"
 	"github.com/kyverno/policy-reporter/pkg/target"
-	rest "github.com/kyverno/policy-reporter/pkg/target/http"
 )
 
 // Options to configure the Slack target
 type Options struct {
 	target.ClientOptions
-	Webhook      string
 	Channel      string
 	CustomFields map[string]string
-	HTTPClient   rest.Client
+	HTTPClient   APIClient
 }
 
 type client struct {
 	target.BaseClient
-	webhook      string
 	channel      string
-	client       rest.Client
+	client       APIClient
 	customFields map[string]string
 }
 
@@ -271,17 +267,21 @@ func (s *client) batchMessage(polr v1alpha2.ReportInterface, results []v1alpha2.
 }
 
 func (s *client) Send(result v1alpha2.PolicyReportResult) {
-	client := s.client.(*http.Client)
-
-	if err := slack.PostWebhookCustomHTTP(s.webhook, client, s.message(result)); err != nil {
+	if err := s.client.PostMessage(s.message(result)); err != nil {
 		zap.L().Error(s.Name()+": PUSH FAILED", zap.Error(err))
 	}
 }
 
 func (s *client) BatchSend(report v1alpha2.ReportInterface, results []v1alpha2.PolicyReportResult) {
-	client := s.client.(*http.Client)
+	if report.GetScope() == nil {
+		for _, result := range results {
+			s.Send(result)
+		}
 
-	if err := slack.PostWebhookCustomHTTP(s.webhook, client, s.batchMessage(report, results)); err != nil {
+		return
+	}
+
+	if err := s.client.PostMessage(s.batchMessage(report, results)); err != nil {
 		zap.L().Error(s.Name()+": BATCH PUSH FAILED", zap.Error(err))
 	}
 }
@@ -296,7 +296,6 @@ func (s *client) CleanUp(_ context.Context, _ v1alpha2.ReportInterface) {}
 func NewClient(options Options) target.Client {
 	return &client{
 		target.NewBaseClient(options.ClientOptions),
-		options.Webhook,
 		options.Channel,
 		options.HTTPClient,
 		options.CustomFields,
