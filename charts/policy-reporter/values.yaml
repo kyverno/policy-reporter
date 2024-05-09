@@ -739,13 +739,13 @@ topologySpreadConstraints: []
 # livenessProbe for policy-reporter
 livenessProbe:
   httpGet:
-    path: /ready
+    path: /healthz
     port: http
 
 # readinessProbe for policy-reporter
 readinessProbe:
   httpGet:
-    path: /healthz
+    path: /ready
     port: http
 
 extraVolumes:
