@@ -87,6 +87,42 @@ var DefaultPolicyReport = &v1alpha2.PolicyReport{
 	},
 }
 
+var ScopePolicyReport = &v1alpha2.PolicyReport{
+	ObjectMeta: v1.ObjectMeta{
+		Name:      "policy-report",
+		Namespace: "test",
+	},
+	Summary: v1alpha2.PolicyReportSummary{
+		Pass:  0,
+		Skip:  0,
+		Warn:  0,
+		Fail:  3,
+		Error: 0,
+	},
+	Scope: &corev1.ObjectReference{
+		APIVersion: "v1",
+		Kind:       "Deployment",
+		Name:       "nginx",
+		Namespace:  "test",
+		UID:        "dfd57c50-f30c-4729-b63f-b1954d8988d1",
+	},
+	Results: []v1alpha2.PolicyReportResult{
+		{
+			ID:         "12348",
+			Message:    "message",
+			Result:     v1alpha2.StatusFail,
+			Scored:     true,
+			Policy:     "required-label",
+			Rule:       "app-label-required",
+			Timestamp:  v1.Timestamp{Seconds: 1614093000},
+			Source:     "test",
+			Category:   "test",
+			Severity:   v1alpha2.SeverityHigh,
+			Properties: map[string]string{"version": "1.2.0"},
+		},
+	},
+}
+
 var MultiResourcePolicyReport = &v1alpha2.PolicyReport{
 	ObjectMeta: v1.ObjectMeta{
 		Name:      "policy-report",
