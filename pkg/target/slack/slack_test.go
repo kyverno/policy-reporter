@@ -1,124 +1,119 @@
 package slack_test
 
 import (
-	"net/http"
 	"testing"
 
+	goslack "github.com/slack-go/slack"
+	"github.com/stretchr/testify/assert"
+
+	"github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
 	"github.com/kyverno/policy-reporter/pkg/fixtures"
 	"github.com/kyverno/policy-reporter/pkg/target"
 	"github.com/kyverno/policy-reporter/pkg/target/slack"
 )
 
 type testClient struct {
-	callback   func(req *http.Request)
+	callback   func(req *goslack.WebhookMessage)
 	statusCode int
 }
 
-func (c testClient) Do(req *http.Request) (*http.Response, error) {
+func (c testClient) PostMessage(req *goslack.WebhookMessage) error {
 	c.callback(req)
 
-	return &http.Response{
-		StatusCode: c.statusCode,
-	}, nil
+	return nil
 }
 
 func Test_SlackTarget(t *testing.T) {
 	t.Run("Send Complete Result", func(t *testing.T) {
-		callback := func(req *http.Request) {
-			if contentType := req.Header.Get("Content-Type"); contentType != "application/json; charset=utf-8" {
-				t.Errorf("Unexpected Content-Type: %s", contentType)
-			}
-
-			if agend := req.Header.Get("User-Agent"); agend != "Policy-Reporter" {
-				t.Errorf("Unexpected Host: %s", agend)
-			}
-
-			if url := req.URL.String(); url != "http://hook.slack:80" {
-				t.Errorf("Unexpected Host: %s", url)
-			}
+		callback := func(req *goslack.WebhookMessage) {
+			assert.Equal(t, 1, len(req.Attachments))
 		}
 
 		client := slack.NewClient(slack.Options{
 			ClientOptions: target.ClientOptions{
 				Name: "Slack",
 			},
-			Webhook:      "http://hook.slack:80",
 			CustomFields: map[string]string{"Cluster": "Name"},
 			HTTPClient:   testClient{callback, 200},
 		})
 		client.Send(fixtures.CompleteTargetSendResult)
 	})
 
-	t.Run("Send Minimal Result", func(t *testing.T) {
-		callback := func(req *http.Request) {
-			if contentType := req.Header.Get("Content-Type"); contentType != "application/json; charset=utf-8" {
-				t.Errorf("Unexpected Content-Type: %s", contentType)
-			}
-
-			if agend := req.Header.Get("User-Agent"); agend != "Policy-Reporter" {
-				t.Errorf("Unexpected Host: %s", agend)
-			}
-
-			if url := req.URL.String(); url != "http://hook.slack:80" {
-				t.Errorf("Unexpected Host: %s", url)
-			}
+	t.Run("Send Batch Results", func(t *testing.T) {
+		callback := func(req *goslack.WebhookMessage) {
+			assert.Equal(t, 3, len(req.Attachments))
 		}
 
 		client := slack.NewClient(slack.Options{
 			ClientOptions: target.ClientOptions{
 				Name: "Slack",
 			},
-			Webhook:    "http://hook.slack:80",
+			CustomFields: map[string]string{"Cluster": "Name"},
+			HTTPClient:   testClient{callback, 200},
+		})
+
+		client.BatchSend(fixtures.ScopePolicyReport, []v1alpha2.PolicyReportResult{
+			fixtures.CompleteTargetSendResult,
+			fixtures.CritcalSendResult,
+		})
+	})
+
+	t.Run("Send Batch Results without scope", func(t *testing.T) {
+		callback := func(req *goslack.WebhookMessage) {
+			assert.Equal(t, 1, len(req.Attachments))
+		}
+
+		client := slack.NewClient(slack.Options{
+			ClientOptions: target.ClientOptions{
+				Name: "Slack",
+			},
+			CustomFields: map[string]string{"Cluster": "Name"},
+			HTTPClient:   testClient{callback, 200},
+		})
+
+		client.BatchSend(fixtures.EmptyPolicyReport, []v1alpha2.PolicyReportResult{
+			fixtures.CompleteTargetSendResult,
+			fixtures.CritcalSendResult,
+		})
+	})
+
+	t.Run("Send Minimal Result", func(t *testing.T) {
+		callback := func(req *goslack.WebhookMessage) {
+			assert.Equal(t, 1, len(req.Attachments))
+		}
+
+		client := slack.NewClient(slack.Options{
+			ClientOptions: target.ClientOptions{
+				Name: "Slack",
+			},
 			HTTPClient: testClient{callback, 200},
 		})
 		client.Send(fixtures.MinimalTargetSendResult)
 	})
 
 	t.Run("Send enforce Result", func(t *testing.T) {
-		callback := func(req *http.Request) {
-			if contentType := req.Header.Get("Content-Type"); contentType != "application/json; charset=utf-8" {
-				t.Errorf("Unexpected Content-Type: %s", contentType)
-			}
-
-			if agend := req.Header.Get("User-Agent"); agend != "Policy-Reporter" {
-				t.Errorf("Unexpected Host: %s", agend)
-			}
-
-			if url := req.URL.String(); url != "http://hook.slack:80" {
-				t.Errorf("Unexpected Host: %s", url)
-			}
+		callback := func(req *goslack.WebhookMessage) {
+			assert.Equal(t, 1, len(req.Attachments))
 		}
 
 		client := slack.NewClient(slack.Options{
 			ClientOptions: target.ClientOptions{
 				Name: "Slack",
 			},
-			Webhook:    "http://hook.slack:80",
 			HTTPClient: testClient{callback, 200},
 		})
 		client.Send(fixtures.EnforceTargetSendResult)
 	})
 
 	t.Run("Send incomplete Result", func(t *testing.T) {
-		callback := func(req *http.Request) {
-			if contentType := req.Header.Get("Content-Type"); contentType != "application/json; charset=utf-8" {
-				t.Errorf("Unexpected Content-Type: %s", contentType)
-			}
-
-			if agend := req.Header.Get("User-Agent"); agend != "Policy-Reporter" {
-				t.Errorf("Unexpected Host: %s", agend)
-			}
-
-			if url := req.URL.String(); url != "http://hook.slack:80" {
-				t.Errorf("Unexpected Host: %s", url)
-			}
+		callback := func(req *goslack.WebhookMessage) {
+			assert.Equal(t, 1, len(req.Attachments))
 		}
 
 		client := slack.NewClient(slack.Options{
 			ClientOptions: target.ClientOptions{
 				Name: "Slack",
 			},
-			Webhook:      "http://hook.slack:80",
 			CustomFields: map[string]string{"Cluster": "Name"},
 			HTTPClient:   testClient{callback, 200},
 		})
@@ -126,25 +121,14 @@ func Test_SlackTarget(t *testing.T) {
 	})
 
 	t.Run("Send incomplete Result2", func(t *testing.T) {
-		callback := func(req *http.Request) {
-			if contentType := req.Header.Get("Content-Type"); contentType != "application/json; charset=utf-8" {
-				t.Errorf("Unexpected Content-Type: %s", contentType)
-			}
-
-			if agend := req.Header.Get("User-Agent"); agend != "Policy-Reporter" {
-				t.Errorf("Unexpected Host: %s", agend)
-			}
-
-			if url := req.URL.String(); url != "http://hook.slack:80" {
-				t.Errorf("Unexpected Host: %s", url)
-			}
+		callback := func(req *goslack.WebhookMessage) {
+			assert.Equal(t, 1, len(req.Attachments))
 		}
 
 		client := slack.NewClient(slack.Options{
 			ClientOptions: target.ClientOptions{
 				Name: "Slack",
 			},
-			Webhook:      "http://hook.slack:80",
 			CustomFields: map[string]string{"Cluster": "Name"},
 			HTTPClient:   testClient{callback, 200},
 		})
@@ -156,7 +140,6 @@ func Test_SlackTarget(t *testing.T) {
 			ClientOptions: target.ClientOptions{
 				Name: "Slack",
 			},
-			Webhook:      "http://hook.slack:80",
 			CustomFields: map[string]string{"Cluster": "Name"},
 			HTTPClient:   testClient{},
 		})

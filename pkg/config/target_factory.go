@@ -126,10 +126,9 @@ func (f *TargetFactory) createSlackClient(config, parent *Target[SlackOptions]) 
 			ResultFilter:          f.createResultFilter(config.Filter, config.MinimumPriority, config.Sources),
 			ReportFilter:          createReportFilter(config.Filter),
 		},
-		Webhook:      config.Config.Webhook,
 		Channel:      config.Config.Channel,
 		CustomFields: config.CustomFields,
-		HTTPClient:   http.NewClient("", false),
+		HTTPClient:   slack.NewAPIClient(config.Config.Webhook, http.NewClient("", false)),
 	})
 }
 
