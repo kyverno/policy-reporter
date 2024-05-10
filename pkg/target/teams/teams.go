@@ -2,143 +2,118 @@ package teams
 
 import (
 	"context"
-	"strings"
-	"time"
+	"fmt"
+
+	"github.com/atc0005/go-teams-notify/v2/adaptivecard"
+	"go.uber.org/zap"
+	corev1 "k8s.io/api/core/v1"
 
 	"github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
 	"github.com/kyverno/policy-reporter/pkg/target"
-	"github.com/kyverno/policy-reporter/pkg/target/http"
+	"github.com/kyverno/policy-reporter/pkg/target/formatting"
 )
 
 // Options to configure the Slack target
 type Options struct {
 	target.ClientOptions
-	Webhook      string
 	CustomFields map[string]string
-	HTTPClient   http.Client
-}
-
-type fact struct {
-	Name  string `json:"name"`
-	Value string `json:"value"`
-}
-
-type section struct {
-	Title    string `json:"activityTitle"`
-	SubTitle string `json:"activitySubtitle"`
-	Text     string `json:"text"`
-	Facts    []fact `json:"facts,omitempty"`
-}
-
-type payload struct {
-	Type       string    `json:"@type"`
-	Context    string    `json:"@context"`
-	Summary    string    `json:"summary,omitempty"`
-	ThemeColor string    `json:"themeColor,omitempty"`
-	Sections   []section `json:"sections"`
-}
-
-var colors = map[v1alpha2.Priority]string{
-	v1alpha2.DebugPriority:    "68c2ff",
-	v1alpha2.InfoPriority:     "36a64f",
-	v1alpha2.WarningPriority:  "f2c744",
-	v1alpha2.CriticalPriority: "b80707",
-	v1alpha2.ErrorPriority:    "e20b0b",
-}
-
-func newPayload(result v1alpha2.PolicyReportResult, customFields map[string]string) payload {
-	facts := make([]fact, 0)
-
-	facts = append(facts, fact{"Policy", result.Policy})
-
-	if result.Rule != "" {
-		facts = append(facts, fact{"Rule", result.Rule})
-	}
-
-	facts = append(facts, fact{"Priority", result.Priority.String()})
-
-	if result.Category != "" {
-		facts = append(facts, fact{"Category", result.Category})
-	}
-	if result.Severity != "" {
-		facts = append(facts, fact{"Severity", string(result.Severity)})
-	}
-
-	if result.HasResource() {
-		res := result.GetResource()
-
-		facts = append(facts, fact{"Kind", res.Kind})
-		facts = append(facts, fact{"Name", res.Name})
-		if res.UID != "" {
-			facts = append(facts, fact{"UID", string(res.UID)})
-		}
-		if res.Namespace != "" {
-			facts = append(facts, fact{"Namespace", res.Namespace})
-		}
-		if res.APIVersion != "" {
-			facts = append(facts, fact{"API Version", res.APIVersion})
-		}
-	}
-
-	for property, value := range result.Properties {
-		facts = append(facts, fact{strings.Title(property), value})
-	}
-	for property, value := range customFields {
-		facts = append(facts, fact{strings.Title(property), value})
-	}
-
-	timestamp := time.Now()
-	if result.Timestamp.Seconds == 0 {
-		timestamp = time.Unix(result.Timestamp.Seconds, int64(result.Timestamp.Nanos))
-	}
-
-	sections := make([]section, 0, 1)
-	sections = append(sections, section{
-		Title:    "New Policy Report Result",
-		SubTitle: timestamp.Format(time.RFC3339),
-		Text:     result.Message,
-		Facts:    facts,
-	})
-
-	return payload{
-		Type:       "MessageCard",
-		Context:    "http://schema.org/extensions",
-		Summary:    result.Message,
-		ThemeColor: colors[result.Priority],
-		Sections:   sections,
-	}
+	HTTPClient   APIClient
 }
 
 type client struct {
 	target.BaseClient
-	webhook      string
 	customFields map[string]string
-	client       http.Client
+	teams        APIClient
 }
 
 func (s *client) Send(result v1alpha2.PolicyReportResult) {
-	req, err := http.CreateJSONRequest(s.Name(), "POST", s.webhook, newPayload(result, s.customFields))
-	if err != nil {
+	if err := s.teams.PostMessage(s.newMessage(result.GetResource(), []v1alpha2.PolicyReportResult{result})); err != nil {
+		zap.L().Error(s.Name()+": PUSH FAILED", zap.Error(err))
 		return
 	}
 
-	resp, err := s.client.Do(req)
-	http.ProcessHTTPResponse(s.Name(), resp, err)
+	zap.L().Info(s.Name() + ": PUSHED")
 }
 
 func (s *client) CleanUp(_ context.Context, _ v1alpha2.ReportInterface) {}
 
-func (s *client) BatchSend(_ v1alpha2.ReportInterface, _ []v1alpha2.PolicyReportResult) {}
+func (s *client) BatchSend(report v1alpha2.ReportInterface, results []v1alpha2.PolicyReportResult) {
+	if report.GetScope() == nil {
+		for _, r := range results {
+			s.Send(r)
+		}
+	}
+
+	if err := s.teams.PostMessage(s.newMessage(report.GetScope(), results)); err != nil {
+		zap.L().Error(s.Name()+": BATCH PUSH FAILED", zap.Error(err))
+		return
+	}
+
+	zap.L().Info(s.Name() + ": PUSHED")
+}
 
 func (s *client) SupportsBatchSend() bool {
-	return false
+	return true
+}
+
+func (s *client) newMessage(resource *corev1.ObjectReference, results []v1alpha2.PolicyReportResult) *adaptivecard.Message {
+	header := adaptivecard.NewContainer()
+
+	if resource != nil {
+		header.AddElement(false, adaptivecard.NewTitleTextBlock(formatting.ResourceString(resource), true))
+	} else {
+		header.AddElement(false, adaptivecard.NewTitleTextBlock("New PolicyReport Results", true))
+	}
+
+	header.AddElement(false, adaptivecard.NewTextBlock(fmt.Sprintf("Received %d new Policy Report Results", len(results)), true))
+
+	if len(s.customFields) > 0 {
+		header.AddElement(false, MapToColumnSet(s.customFields))
+	}
+
+	card := adaptivecard.NewCard()
+	card.SetFullWidth()
+	card.AddContainer(true, header)
+
+	for _, result := range results {
+		stats := newFactSet()
+		stats.Facts = append(stats.Facts, adaptivecard.Fact{Title: "Status", Value: string(result.Result)})
+
+		if result.Severity != "" {
+			stats.Facts = append(stats.Facts, adaptivecard.Fact{Title: "Severity", Value: string(result.Severity)})
+		}
+
+		policy := fmt.Sprintf("Policy: %s", result.Policy)
+
+		if result.Rule != "" {
+			policy = fmt.Sprintf("%s/%s", policy, result.Rule)
+		}
+
+		r := adaptivecard.NewContainer()
+		r.Separator = true
+		r.Spacing = adaptivecard.SpacingLarge
+		r.AddElement(false, newSubTitle(policy))
+		r.AddElement(false, adaptivecard.NewTextBlock(result.Category, true))
+		r.AddElement(false, stats)
+		r.AddElement(false, adaptivecard.NewTextBlock(result.Message, true))
+
+		if len(result.Properties) > 0 {
+			r.AddElement(false, MapToColumnSet(result.Properties))
+		}
+
+		card.AddContainer(false, r)
+	}
+
+	msg := adaptivecard.NewMessage()
+	msg.Attach(card)
+
+	return msg
 }
 
 // NewClient creates a new teams.client to send Results to MS Teams
 func NewClient(options Options) target.Client {
 	return &client{
 		target.NewBaseClient(options.ClientOptions),
-		options.Webhook,
 		options.CustomFields,
 		options.HTTPClient,
 	}

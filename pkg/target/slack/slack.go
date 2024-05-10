@@ -3,15 +3,14 @@ package slack
 import (
 	"context"
 	"fmt"
-	"strings"
 
 	"github.com/slack-go/slack"
 	"go.uber.org/zap"
-	corev1 "k8s.io/api/core/v1"
 
 	"github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
 	"github.com/kyverno/policy-reporter/pkg/helper"
 	"github.com/kyverno/policy-reporter/pkg/target"
+	"github.com/kyverno/policy-reporter/pkg/target/formatting"
 )
 
 // Options to configure the Slack target
@@ -167,7 +166,7 @@ func (s *client) message(result v1alpha2.PolicyReportResult) *slack.WebhookMessa
 
 func (s *client) batchMessage(polr v1alpha2.ReportInterface, results []v1alpha2.PolicyReportResult) *slack.WebhookMessage {
 	scope := polr.GetScope()
-	resource := ResourceString(scope)
+	resource := formatting.ResourceString(scope)
 
 	p := &slack.WebhookMessage{
 		Attachments: make([]slack.Attachment, 0, 1),
@@ -196,7 +195,7 @@ func (s *client) batchMessage(polr v1alpha2.ReportInterface, results []v1alpha2.
 		var propBlock *slack.SectionBlock
 		for property, value := range s.customFields {
 			if i%2 == 0 {
-				propBlock = slack.NewSectionBlock(nil, make([]*slack.TextBlockObject, 2), nil)
+				propBlock = slack.NewSectionBlock(nil, make([]*slack.TextBlockObject, 0, 2), nil)
 				att.Blocks.BlockSet = append(att.Blocks.BlockSet, propBlock)
 			}
 
@@ -300,15 +299,4 @@ func NewClient(options Options) target.Client {
 		options.HTTPClient,
 		options.CustomFields,
 	}
-}
-
-func ResourceString(res *corev1.ObjectReference) string {
-	var resource string
-	if res.Namespace == "" {
-		resource = fmt.Sprintf("%s/%s: %s", res.APIVersion, res.Kind, res.Name)
-	} else {
-		resource = fmt.Sprintf("%s/%s: %s/%s", res.APIVersion, res.Kind, res.Namespace, res.Name)
-	}
-
-	return strings.Trim(resource, "/")
 }

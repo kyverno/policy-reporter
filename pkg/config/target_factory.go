@@ -273,9 +273,8 @@ func (f *TargetFactory) createTeamsClient(config, parent *Target[WebhookOptions]
 			ResultFilter:          f.createResultFilter(config.Filter, config.MinimumPriority, config.Sources),
 			ReportFilter:          createReportFilter(config.Filter),
 		},
-		Webhook:      config.Config.Webhook,
 		CustomFields: config.CustomFields,
-		HTTPClient:   http.NewClient(config.Config.Certificate, config.Config.SkipTLS),
+		HTTPClient:   teams.NewAPIClient(config.Config.Webhook, http.NewClient(config.Config.Certificate, config.Config.SkipTLS)),
 	})
 }
 
