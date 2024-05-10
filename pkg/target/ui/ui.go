@@ -22,7 +22,7 @@ type client struct {
 }
 
 func (e *client) Send(result v1alpha2.PolicyReportResult) {
-	req, err := http.CreateJSONRequest(e.Name(), "POST", e.host, http.NewJSONResult(result))
+	req, err := http.CreateJSONRequest("POST", e.host, http.NewJSONResult(result))
 	if err != nil {
 		return
 	}

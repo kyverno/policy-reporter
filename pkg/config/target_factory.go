@@ -127,8 +127,10 @@ func (f *TargetFactory) createSlackClient(config, parent *Target[SlackOptions]) 
 			ReportFilter:          createReportFilter(config.Filter),
 		},
 		Channel:      config.Config.Channel,
+		Webhook:      config.Config.Webhook,
 		CustomFields: config.CustomFields,
-		HTTPClient:   slack.NewAPIClient(config.Config.Webhook, http.NewClient("", false)),
+		Headers:      config.Config.Headers,
+		HTTPClient:   http.NewClient("", false),
 	})
 }
 
@@ -273,8 +275,10 @@ func (f *TargetFactory) createTeamsClient(config, parent *Target[WebhookOptions]
 			ResultFilter:          f.createResultFilter(config.Filter, config.MinimumPriority, config.Sources),
 			ReportFilter:          createReportFilter(config.Filter),
 		},
+		Webhook:      config.Config.Webhook,
 		CustomFields: config.CustomFields,
-		HTTPClient:   teams.NewAPIClient(config.Config.Webhook, http.NewClient(config.Config.Certificate, config.Config.SkipTLS)),
+		Headers:      config.Config.Headers,
+		HTTPClient:   http.NewClient(config.Config.Certificate, config.Config.SkipTLS),
 	})
 }
 

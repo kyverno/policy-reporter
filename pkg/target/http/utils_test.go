@@ -25,7 +25,7 @@ func TestResultMapping(t *testing.T) {
 
 func TestCreateJSONRequest(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
-		req, err := http.CreateJSONRequest("Test", "GET", "http://localhost:8080", []string{"test"})
+		req, err := http.CreateJSONRequest("GET", "http://localhost:8080", []string{"test"})
 
 		assert.Nil(t, err)
 
@@ -40,7 +40,7 @@ func TestCreateJSONRequest(t *testing.T) {
 	})
 
 	t.Run("error", func(t *testing.T) {
-		_, err := http.CreateJSONRequest("Test", "GET", "\test", []string{"test"})
+		_, err := http.CreateJSONRequest("GET", "\test", []string{"test"})
 
 		assert.NotNil(t, err)
 	})
