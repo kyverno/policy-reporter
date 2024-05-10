@@ -14,9 +14,7 @@ import (
 	"github.com/kyverno/policy-reporter/pkg/target"
 )
 
-var (
-	schema = toPointer("2018-10-08")
-)
+var schema = toPointer("2018-10-08")
 
 type HubClient interface {
 	BatchImportFindings(ctx context.Context, params *hub.BatchImportFindingsInput, optFns ...func(*hub.Options)) (*hub.BatchImportFindingsOutput, error)
