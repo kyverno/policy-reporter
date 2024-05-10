@@ -6,6 +6,7 @@ toolchain go1.22.1
 
 require (
 	cloud.google.com/go/storage v1.40.0
+	github.com/atc0005/go-teams-notify/v2 v2.10.0
 	github.com/aws/aws-sdk-go-v2 v1.26.1
 	github.com/aws/aws-sdk-go-v2/config v1.27.11
 	github.com/aws/aws-sdk-go-v2/credentials v1.17.11
