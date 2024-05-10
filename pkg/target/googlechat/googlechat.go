@@ -207,7 +207,7 @@ func (e *client) Send(result v1alpha2.PolicyReportResult) {
 		return
 	}
 
-	req, err := http.CreateJSONRequest(e.Name(), "POST", e.webhook, payload)
+	req, err := http.CreateJSONRequest("POST", e.webhook, payload)
 	if err != nil {
 		return
 	}

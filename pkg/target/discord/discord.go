@@ -106,7 +106,7 @@ type client struct {
 }
 
 func (d *client) Send(result v1alpha2.PolicyReportResult) {
-	req, err := http.CreateJSONRequest(d.Name(), "POST", d.webhook, newPayload(result, d.customFields))
+	req, err := http.CreateJSONRequest("POST", d.webhook, newPayload(result, d.customFields))
 	if err != nil {
 		return
 	}

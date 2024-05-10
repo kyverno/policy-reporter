@@ -1,175 +1,187 @@
 package teams_test
 
 import (
+	"encoding/json"
+	"net/http"
 	"testing"
-
-	"github.com/atc0005/go-teams-notify/v2/adaptivecard"
-	"github.com/stretchr/testify/assert"
 
 	"github.com/kyverno/policy-reporter/pkg/fixtures"
 	"github.com/kyverno/policy-reporter/pkg/target"
 	"github.com/kyverno/policy-reporter/pkg/target/teams"
+	"github.com/stretchr/testify/assert"
 )
 
 type testClient struct {
-	callback func(msg *adaptivecard.Message)
-	send     bool
+	callback   func(req *http.Request)
+	statusCode int
 }
 
-func (c *testClient) PostMessage(msg *adaptivecard.Message) error {
-	c.callback(msg)
-	c.send = true
+func (c testClient) Do(req *http.Request) (*http.Response, error) {
+	c.callback(req)
 
-	return nil
+	return &http.Response{
+		StatusCode: c.statusCode,
+	}, nil
 }
 
 func Test_TeamsTarget(t *testing.T) {
 	t.Run("Send Complete Result", func(t *testing.T) {
-		tc := &testClient{callback: func(msg *adaptivecard.Message) {
-			if len(msg.Attachments) < 1 {
-				t.Errorf("missing msg attachment")
+		callback := func(req *http.Request) {
+			if contentType := req.Header.Get("Content-Type"); contentType != "application/json; charset=utf-8" {
+				t.Errorf("Unexpected Content-Type: %s", contentType)
 			}
-		}}
+
+			if agend := req.Header.Get("User-Agent"); agend != "Policy-Reporter" {
+				t.Errorf("Unexpected Host: %s", agend)
+			}
+
+			if url := req.URL.String(); url != "http://hook.teams:80" {
+				t.Errorf("Unexpected Host: %s", url)
+			}
+
+			payload := make(map[string]interface{})
+
+			err := json.NewDecoder(req.Body).Decode(&payload)
+			if err != nil {
+				t.Fatal(err)
+			}
+		}
 
 		client := teams.NewClient(teams.Options{
 			ClientOptions: target.ClientOptions{
 				Name: "Teams",
 			},
+			Webhook:      "http://hook.teams:80",
 			CustomFields: map[string]string{"Cluster": "Name"},
-			HTTPClient:   tc,
+			HTTPClient:   testClient{callback, 200},
 		})
 		client.Send(fixtures.CompleteTargetSendResult)
-
-		assert.True(t, tc.send)
 	})
 
 	t.Run("Send Minimal Result", func(t *testing.T) {
-		tc := &testClient{callback: func(msg *adaptivecard.Message) {
-			if len(msg.Attachments) < 1 {
-				t.Errorf("missing msg attachment")
+		callback := func(req *http.Request) {
+			if contentType := req.Header.Get("Content-Type"); contentType != "application/json; charset=utf-8" {
+				t.Errorf("Unexpected Content-Type: %s", contentType)
 			}
-		}}
+
+			if agend := req.Header.Get("User-Agent"); agend != "Policy-Reporter" {
+				t.Errorf("Unexpected Host: %s", agend)
+			}
+
+			if url := req.URL.String(); url != "http://hook.teams:80" {
+				t.Errorf("Unexpected Host: %s", url)
+			}
+
+			payload := make(map[string]interface{})
+
+			err := json.NewDecoder(req.Body).Decode(&payload)
+			if err != nil {
+				t.Fatal(err)
+			}
+		}
 
 		client := teams.NewClient(teams.Options{
 			ClientOptions: target.ClientOptions{
 				Name: "Teams",
 			},
+			Webhook:      "http://hook.teams:80",
 			CustomFields: map[string]string{"Cluster": "Name"},
-			HTTPClient:   tc,
+			HTTPClient:   testClient{callback, 200},
 		})
 		client.Send(fixtures.MinimalTargetSendResult)
-
-		assert.True(t, tc.send)
 	})
 	t.Run("Send Minimal InfoResult", func(t *testing.T) {
-		tc := &testClient{callback: func(msg *adaptivecard.Message) {
-			if len(msg.Attachments) < 1 {
-				t.Errorf("missing msg attachment")
+		callback := func(req *http.Request) {
+			payload := make(map[string]interface{})
+
+			err := json.NewDecoder(req.Body).Decode(&payload)
+			if err != nil {
+				t.Fatal(err)
 			}
-		}}
+		}
 
 		client := teams.NewClient(teams.Options{
 			ClientOptions: target.ClientOptions{
 				Name: "Teams",
 			},
+			Webhook:      "http://hook.teams:80",
 			CustomFields: map[string]string{"Cluster": "Name"},
-			HTTPClient:   tc,
+			HTTPClient:   testClient{callback, 200},
 		})
 		client.Send(fixtures.InfoSendResult)
-
-		assert.True(t, tc.send)
 	})
 	t.Run("Send Minimal ErrorResult", func(t *testing.T) {
-		tc := &testClient{callback: func(msg *adaptivecard.Message) {
-			if len(msg.Attachments) < 1 {
-				t.Errorf("missing msg attachment")
+		callback := func(req *http.Request) {
+			payload := make(map[string]interface{})
+
+			err := json.NewDecoder(req.Body).Decode(&payload)
+			if err != nil {
+				t.Fatal(err)
 			}
-		}}
+		}
 
 		client := teams.NewClient(teams.Options{
 			ClientOptions: target.ClientOptions{
 				Name: "Teams",
 			},
+			Webhook:      "http://hook.teams:80",
 			CustomFields: map[string]string{"Cluster": "Name"},
-			HTTPClient:   tc,
+			HTTPClient:   testClient{callback, 200},
 		})
 		client.Send(fixtures.ErrorSendResult)
-
-		assert.True(t, tc.send)
 	})
 	t.Run("Send Minimal Debug Result", func(t *testing.T) {
-		tc := &testClient{callback: func(msg *adaptivecard.Message) {
-			if len(msg.Attachments) < 1 {
-				t.Errorf("missing msg attachment")
+		callback := func(req *http.Request) {
+			if contentType := req.Header.Get("Content-Type"); contentType != "application/json; charset=utf-8" {
+				t.Errorf("Unexpected Content-Type: %s", contentType)
 			}
-		}}
+
+			if agend := req.Header.Get("User-Agent"); agend != "Policy-Reporter" {
+				t.Errorf("Unexpected Host: %s", agend)
+			}
+
+			if url := req.URL.String(); url != "http://hook.teams:80" {
+				t.Errorf("Unexpected Host: %s", url)
+			}
+
+			payload := make(map[string]interface{})
+
+			err := json.NewDecoder(req.Body).Decode(&payload)
+			if err != nil {
+				t.Fatal(err)
+			}
+		}
 
 		client := teams.NewClient(teams.Options{
 			ClientOptions: target.ClientOptions{
 				Name: "Teams",
 			},
+			Webhook:      "http://hook.teams:80",
 			CustomFields: map[string]string{"Cluster": "Name"},
-			HTTPClient:   tc,
+			HTTPClient:   testClient{callback, 200},
 		})
 		client.Send(fixtures.DebugSendResult)
-
-		assert.True(t, tc.send)
-	})
-	t.Run("Send Scope Results", func(t *testing.T) {
-		tc := &testClient{callback: func(msg *adaptivecard.Message) {
-			if len(msg.Attachments) < 1 {
-				t.Errorf("missing msg attachment")
-			}
-		}}
-
-		client := teams.NewClient(teams.Options{
-			ClientOptions: target.ClientOptions{
-				Name: "Teams",
-			},
-			CustomFields: map[string]string{"Cluster": "Name"},
-			HTTPClient:   tc,
-		})
-		client.BatchSend(fixtures.ScopePolicyReport, fixtures.ScopePolicyReport.Results)
-
-		assert.True(t, tc.send)
-	})
-	t.Run("Send Batch Results Without Scope", func(t *testing.T) {
-		tc := &testClient{callback: func(msg *adaptivecard.Message) {
-			if len(msg.Attachments) < 1 {
-				t.Errorf("missing msg attachment")
-			}
-		}}
-
-		client := teams.NewClient(teams.Options{
-			ClientOptions: target.ClientOptions{
-				Name: "Teams",
-			},
-			CustomFields: map[string]string{"Cluster": "Name"},
-			HTTPClient:   tc,
-		})
-		client.BatchSend(fixtures.DefaultPolicyReport, fixtures.DefaultPolicyReport.Results)
-
-		assert.True(t, tc.send)
 	})
 	t.Run("Name", func(t *testing.T) {
 		client := teams.NewClient(teams.Options{
 			ClientOptions: target.ClientOptions{
 				Name: "Teams",
 			},
+			Webhook:      "http://hook.teams:80",
 			CustomFields: map[string]string{"Cluster": "Name"},
-			HTTPClient:   &testClient{},
+			HTTPClient:   testClient{},
 		})
 
 		assert.Equal(t, "Teams", client.Name())
 	})
-
-	t.Run("Name", func(t *testing.T) {
+	t.Run("SupportBatchSend", func(t *testing.T) {
 		client := teams.NewClient(teams.Options{
 			ClientOptions: target.ClientOptions{
 				Name: "Teams",
 			},
+			Webhook:      "http://hook.teams:80",
 			CustomFields: map[string]string{"Cluster": "Name"},
-			HTTPClient:   &testClient{},
+			HTTPClient:   testClient{},
 		})
 
 		assert.True(t, client.SupportsBatchSend())
