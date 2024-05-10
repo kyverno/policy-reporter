@@ -11,28 +11,28 @@ import (
 	"github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
 	"github.com/kyverno/policy-reporter/pkg/target"
 	"github.com/kyverno/policy-reporter/pkg/target/formatting"
+	"github.com/kyverno/policy-reporter/pkg/target/http"
 )
 
 // Options to configure the Slack target
 type Options struct {
 	target.ClientOptions
+	Webhook      string
 	CustomFields map[string]string
-	HTTPClient   APIClient
+	Headers      map[string]string
+	HTTPClient   http.Client
 }
 
 type client struct {
 	target.BaseClient
+	webhook      string
 	customFields map[string]string
-	teams        APIClient
+	headers      map[string]string
+	client       http.Client
 }
 
 func (s *client) Send(result v1alpha2.PolicyReportResult) {
-	if err := s.teams.PostMessage(s.newMessage(result.GetResource(), []v1alpha2.PolicyReportResult{result})); err != nil {
-		zap.L().Error(s.Name()+": PUSH FAILED", zap.Error(err))
-		return
-	}
-
-	zap.L().Info(s.Name() + ": PUSHED")
+	s.PostMessage(s.newMessage(result.GetResource(), []v1alpha2.PolicyReportResult{result}))
 }
 
 func (s *client) CleanUp(_ context.Context, _ v1alpha2.ReportInterface) {}
@@ -44,12 +44,28 @@ func (s *client) BatchSend(report v1alpha2.ReportInterface, results []v1alpha2.P
 		}
 	}
 
-	if err := s.teams.PostMessage(s.newMessage(report.GetScope(), results)); err != nil {
-		zap.L().Error(s.Name()+": BATCH PUSH FAILED", zap.Error(err))
+	s.PostMessage(s.newMessage(report.GetScope(), results))
+}
+
+func (s *client) PostMessage(message *adaptivecard.Message) {
+	if err := message.Validate(); err != nil {
+		zap.L().Error(s.Name()+": PUSH FAILED", zap.Error(err))
 		return
 	}
 
-	zap.L().Info(s.Name() + ": PUSHED")
+	req, err := http.CreateJSONRequest("POST", s.webhook, message)
+	if err != nil {
+		zap.L().Error(s.Name()+": PUSH FAILED", zap.Error(err))
+		return
+	}
+
+	for k, v := range s.headers {
+		req.Header.Set(k, v)
+	}
+
+	resp, err := s.client.Do(req)
+
+	http.ProcessHTTPResponse(s.Name(), resp, err)
 }
 
 func (s *client) SupportsBatchSend() bool {
@@ -114,7 +130,9 @@ func (s *client) newMessage(resource *corev1.ObjectReference, results []v1alpha2
 func NewClient(options Options) target.Client {
 	return &client{
 		target.NewBaseClient(options.ClientOptions),
+		options.Webhook,
 		options.CustomFields,
+		options.Headers,
 		options.HTTPClient,
 	}
 }

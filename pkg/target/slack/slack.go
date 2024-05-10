@@ -11,21 +11,26 @@ import (
 	"github.com/kyverno/policy-reporter/pkg/helper"
 	"github.com/kyverno/policy-reporter/pkg/target"
 	"github.com/kyverno/policy-reporter/pkg/target/formatting"
+	"github.com/kyverno/policy-reporter/pkg/target/http"
 )
 
 // Options to configure the Slack target
 type Options struct {
 	target.ClientOptions
 	Channel      string
+	Webhook      string
 	CustomFields map[string]string
-	HTTPClient   APIClient
+	Headers      map[string]string
+	HTTPClient   http.Client
 }
 
 type client struct {
 	target.BaseClient
 	channel      string
-	client       APIClient
+	webhook      string
+	client       http.Client
 	customFields map[string]string
+	headers      map[string]string
 }
 
 var colors = map[v1alpha2.Priority]string{
@@ -266,9 +271,7 @@ func (s *client) batchMessage(polr v1alpha2.ReportInterface, results []v1alpha2.
 }
 
 func (s *client) Send(result v1alpha2.PolicyReportResult) {
-	if err := s.client.PostMessage(s.message(result)); err != nil {
-		zap.L().Error(s.Name()+": PUSH FAILED", zap.Error(err))
-	}
+	s.PostMessage(s.message(result))
 }
 
 func (s *client) BatchSend(report v1alpha2.ReportInterface, results []v1alpha2.PolicyReportResult) {
@@ -280,9 +283,23 @@ func (s *client) BatchSend(report v1alpha2.ReportInterface, results []v1alpha2.P
 		return
 	}
 
-	if err := s.client.PostMessage(s.batchMessage(report, results)); err != nil {
-		zap.L().Error(s.Name()+": BATCH PUSH FAILED", zap.Error(err))
+	s.PostMessage(s.batchMessage(report, results))
+}
+
+func (s *client) PostMessage(message *slack.WebhookMessage) {
+	req, err := http.CreateJSONRequest("POST", s.webhook, message)
+	if err != nil {
+		zap.L().Error(s.Name()+": PUSH FAILED", zap.Error(err))
+		return
 	}
+
+	for k, v := range s.headers {
+		req.Header.Set(k, v)
+	}
+
+	resp, err := s.client.Do(req)
+
+	http.ProcessHTTPResponse(s.Name(), resp, err)
 }
 
 func (s *client) SupportsBatchSend() bool {
@@ -296,7 +313,9 @@ func NewClient(options Options) target.Client {
 	return &client{
 		target.NewBaseClient(options.ClientOptions),
 		options.Channel,
+		options.Webhook,
 		options.HTTPClient,
 		options.CustomFields,
+		options.Headers,
 	}
 }
