@@ -83,7 +83,7 @@ func (e *client) Send(result v1alpha2.PolicyReportResult) {
 		result.Properties = props
 	}
 
-	req, err := http.CreateJSONRequest(e.Name(), "POST", host, http.NewJSONResult(result))
+	req, err := http.CreateJSONRequest("POST", host, http.NewJSONResult(result))
 	if err != nil {
 		return
 	}

@@ -117,7 +117,7 @@ func (l *client) BatchSend(_ v1alpha2.ReportInterface, results []v1alpha2.Policy
 }
 
 func (l *client) send(payload payload) {
-	req, err := http.CreateJSONRequest(l.Name(), "POST", l.host, payload)
+	req, err := http.CreateJSONRequest("POST", l.host, payload)
 	if err != nil {
 		return
 	}

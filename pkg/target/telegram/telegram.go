@@ -136,7 +136,7 @@ func (e *client) Send(result v1alpha2.PolicyReportResult) {
 
 	payload.Text = textBuffer.String()
 
-	req, err := http.CreateJSONRequest(e.Name(), "POST", e.host, payload)
+	req, err := http.CreateJSONRequest("POST", e.host, payload)
 	if err != nil {
 		zap.L().Error(e.Name()+": PUSH FAILED", zap.Error(err))
 		fmt.Println(err)

@@ -15,14 +15,14 @@ import (
 )
 
 // CreateJSONRequest for the given configuration
-func CreateJSONRequest(target, method, host string, payload interface{}) (*http.Request, error) {
+func CreateJSONRequest(method, host string, payload interface{}) (*http.Request, error) {
 	body := new(bytes.Buffer)
 
 	json.NewEncoder(body).Encode(payload)
 
 	req, err := http.NewRequest(method, host, body)
 	if err != nil {
-		zap.L().Error(target+": PUSH FAILED", zap.Error(err))
+		zap.L().Error("failed to create request", zap.Error(err))
 		return nil, err
 	}
 
