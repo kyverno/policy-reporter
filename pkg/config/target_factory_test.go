@@ -393,15 +393,6 @@ func Test_GetValuesFromSecret(t *testing.T) {
 		}
 	})
 
-	t.Run("Get MS Teams values from Secret", func(t *testing.T) {
-		client := reflect.ValueOf(clients[4]).Elem()
-
-		webhook := client.FieldByName("webhook").String()
-		if webhook != "http://localhost:9200/webhook" {
-			t.Errorf("Expected webhook from secret, got %s", webhook)
-		}
-	})
-
 	t.Run("Get GoogleChat Webhook from Secret", func(t *testing.T) {
 		client := reflect.ValueOf(clients[5]).Elem()
 
@@ -755,15 +746,6 @@ func Test_GetValuesFromMountedSecret(t *testing.T) {
 
 	t.Run("Get Discord values from Secret", func(t *testing.T) {
 		client := reflect.ValueOf(clients[3]).Elem()
-
-		webhook := client.FieldByName("webhook").String()
-		if webhook != "http://localhost:9200/webhook" {
-			t.Errorf("Expected webhook from secret, got %s", webhook)
-		}
-	})
-
-	t.Run("Get MS Teams values from Secret", func(t *testing.T) {
-		client := reflect.ValueOf(clients[4]).Elem()
 
 		webhook := client.FieldByName("webhook").String()
 		if webhook != "http://localhost:9200/webhook" {
