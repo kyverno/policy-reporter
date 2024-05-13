@@ -113,7 +113,7 @@ spec:
       automountServiceAccountToken: true
       containers:
         - name: policy-reporter
-          image: "ghcr.io/kyverno/policy-reporter:2.18.2"
+          image: "ghcr.io/kyverno/policy-reporter:2.19.0"
           imagePullPolicy: IfNotPresent
           securityContext:
             allowPrivilegeEscalation: false
@@ -127,6 +127,7 @@ spec:
           args:
             - --config=/app/config.yaml
             - --metrics-enabled=true
+            - --template-dir=/app/templates
           ports:
             - name: http
               containerPort: 8080

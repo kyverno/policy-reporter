@@ -1,5 +1,15 @@
 # Changelog
 
+# 2.23.0
+* Helm Chart
+    * fix: use /healthz for liveness and /ready for readiness [[#435](https://github.com/kyverno/policy-reporter/pull/435) by [rsicart](https://github.com/rsicart)]
+    * Policy Reporter v2.19.0
+        * New HTML Report API `/v1/html-report/violations`
+        * CleanUp Listener for AWS SecurityHub
+        * SourcConfig enables a custom ID generation logic per source
+        * Deprecated PriorityMapping is removed, its recommanded to configure it via Severity
+        * Support Workload Identity for GoogleCloudStorage target
+
 # 2.22.5
 * Helm Chart
     * fix(helm): correct typo when using global.annotations [[#420](https://github.com/kyverno/policy-reporter/pull/420) by [ThomasLachaux](https://github.com/ThomasLachaux)]

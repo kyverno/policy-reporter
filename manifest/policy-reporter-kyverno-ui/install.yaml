@@ -272,6 +272,7 @@ spec:
             runAsUser: 1234
           args:
             - --rest-enabled
+            - --template-dir=/app/templates
           ports:
             - name: http
               containerPort: 8080
@@ -367,7 +368,7 @@ spec:
         fsGroup: 1234
       containers:
         - name: policy-reporter
-          image: "ghcr.io/kyverno/policy-reporter:2.18.2"
+          image: "ghcr.io/kyverno/policy-reporter:2.19.0"
           imagePullPolicy: IfNotPresent
           securityContext:
             allowPrivilegeEscalation: false
