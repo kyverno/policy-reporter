@@ -1,5 +1,9 @@
 # Changelog
 
+# 2.23.1
+* Helm Chart
+    * Update AppVersion in `values.yaml`
+
 # 2.23.0
 * Helm Chart
     * fix: use /healthz for liveness and /ready for readiness [[#435](https://github.com/kyverno/policy-reporter/pull/435) by [rsicart](https://github.com/rsicart)]
