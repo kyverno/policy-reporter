@@ -11,6 +11,24 @@ image:
   pullPolicy: IfNotPresent
   tag: 1.9.2
 
+# sidecarContainers - add more containers to Kyverno ui
+# Key/Value where Key is the sidecar `- name: <Key>`
+# Example:
+# for adding OAuth authentication to Kyverno ui
+#   sidecarContainers:
+#     oauth-proxy:
+#       image: quay.io/oauth2-proxy/oauth2-proxy:v7.6.0
+#       args:
+#       - --upstream=http://127.0.0.1:8080
+#       - --http-address=0.0.0.0:8081
+#       - ...
+#       ports:
+#       - containerPort: 8081
+#         name: oauth-proxy
+#         protocol: TCP
+#       resources: {}
+sidecarContainers: {}
+
 # possible default displayModes: light/dark
 displayMode: ""
 
@@ -172,6 +190,11 @@ service:
   type: ClusterIP
   # integer nubmer. This is port for service
   port: 8080
+  # additionalPorts:
+  # - name: authenticated
+  #   port: 8081
+  #   targetPort: 8081
+  additionalPorts: []
 
 # enabled if replicaCount > 1
 podDisruptionBudget:
@@ -193,13 +216,15 @@ ingress:
   annotations: {}
     # kubernetes.io/ingress.class: nginx
     # kubernetes.io/tls-acme: "true"
+  ## Redirect ingress to an additional defined port on the service
+  # port: 8081
   hosts:
     - host: chart-example.local
       paths: []
   tls: []
   #  - secretName: chart-example-tls
   #    hosts:
-  #      - chart-example.local
+  #      - chart-example.local 
 
 # Node labels for pod assignment
 # ref: https://kubernetes.io/docs/user-guide/node-selection/
@@ -241,3 +266,14 @@ global:
     password: ""
     # read credentials from secret
     secretRef: ""
+
+# Extra manifests to deploy as an array
+extraManifests: []
+  # - |
+  #   apiVersion: v1
+  #   kind: ConfigMap
+  #   metadata:
+  #   labels:
+  #     name: kyverno-extra
+  #   data:
+  #     extra-data: "value"
