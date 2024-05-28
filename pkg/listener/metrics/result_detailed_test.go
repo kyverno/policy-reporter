@@ -39,7 +39,7 @@ func Test_DetailedResultMetricGeneration(t *testing.T) {
 		Results: []v1alpha2.PolicyReportResult{fixtures.PassResult, fixtures.FailDisallowRuleResult},
 	}
 
-	filter := metrics.NewResultFilter(validate.RuleSets{}, validate.RuleSets{}, validate.RuleSets{Exclude: []string{"disallow-policy"}}, validate.RuleSets{}, validate.RuleSets{})
+	filter := metrics.NewResultFilter(validate.RuleSets{}, validate.RuleSets{}, validate.RuleSets{Exclude: []string{"disallow-policy"}}, validate.RuleSets{}, validate.RuleSets{}, validate.RuleSets{})
 	handler := metrics.CreateDetailedResultMetricListener(filter, gauge)
 
 	t.Run("Added Metric", func(t *testing.T) {

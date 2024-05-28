@@ -6,7 +6,7 @@ import (
 	"github.com/kyverno/policy-reporter/pkg/validate"
 )
 
-func NewResultFilter(namespace, status, policy, source, severity validate.RuleSets) *report.ResultFilter {
+func NewResultFilter(namespace, status, policy, source, severity, kind validate.RuleSets) *report.ResultFilter {
 	f := &report.ResultFilter{}
 	if namespace.Count() > 0 {
 		f.AddValidation(func(r v1alpha2.PolicyReportResult) bool {
@@ -39,6 +39,16 @@ func NewResultFilter(namespace, status, policy, source, severity validate.RuleSe
 	if severity.Count() > 0 {
 		f.AddValidation(func(r v1alpha2.PolicyReportResult) bool {
 			return validate.MatchRuleSet(string(r.Severity), severity)
+		})
+	}
+
+	if kind.Count() > 0 {
+		f.AddValidation(func(r v1alpha2.PolicyReportResult) bool {
+			if !r.HasResource() {
+				return true
+			}
+
+			return validate.Kind(r.GetResource().Kind, kind)
 		})
 	}
 

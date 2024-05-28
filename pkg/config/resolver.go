@@ -260,6 +260,7 @@ func (r *Resolver) RegisterMetricsListener() {
 			ToRuleSet(r.config.Metrics.Filter.Policies),
 			ToRuleSet(r.config.Metrics.Filter.Sources),
 			ToRuleSet(r.config.Metrics.Filter.Severities),
+			ToRuleSet(r.config.Metrics.Filter.Kinds),
 		),
 		metrics.NewReportFilter(
 			ToRuleSet(r.config.Metrics.Filter.Namespaces),
