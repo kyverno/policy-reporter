@@ -26,6 +26,7 @@ type MetricsFilter struct {
 	Severities ValueFilter `mapstructure:"severities"`
 	Status     ValueFilter `mapstructure:"status"`
 	Sources    ValueFilter `mapstructure:"sources"`
+	Kinds      ValueFilter `mapstructure:"kinds"`
 }
 
 type TargetBaseOptions struct {

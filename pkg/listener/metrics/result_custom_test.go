@@ -41,7 +41,7 @@ func Test_CustomResultMetricGeneration(t *testing.T) {
 		Results: []v1alpha2.PolicyReportResult{fixtures.FailResult, fixtures.FailPodResult, fixtures.FailDisallowRuleResult},
 	}
 
-	filter := metrics.NewResultFilter(validate.RuleSets{}, validate.RuleSets{}, validate.RuleSets{Exclude: []string{"disallow-policy"}}, validate.RuleSets{}, validate.RuleSets{})
+	filter := metrics.NewResultFilter(validate.RuleSets{}, validate.RuleSets{}, validate.RuleSets{Exclude: []string{"disallow-policy"}}, validate.RuleSets{}, validate.RuleSets{}, validate.RuleSets{})
 
 	t.Run("Added Metric", func(t *testing.T) {
 		handler := metrics.CreateCustomResultMetricsListener(filter, gauge, metrics.CreateLabelGenerator([]string{"namespace", "policy", "status", "source", "label:app", "property:xyz"}, []string{"namespace", "policy", "status", "source", "app", "xyz"}))

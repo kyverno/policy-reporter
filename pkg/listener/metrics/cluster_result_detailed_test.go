@@ -37,7 +37,7 @@ func Test_DetailedClusterResultMetricGeneration(t *testing.T) {
 		Results: []v1alpha2.PolicyReportResult{fixtures.FailResult, fixtures.FailDisallowRuleResult},
 	}
 
-	filter := metrics.NewResultFilter(validate.RuleSets{}, validate.RuleSets{}, validate.RuleSets{Exclude: []string{"disallow-policy"}}, validate.RuleSets{}, validate.RuleSets{})
+	filter := metrics.NewResultFilter(validate.RuleSets{}, validate.RuleSets{}, validate.RuleSets{Exclude: []string{"disallow-policy"}}, validate.RuleSets{}, validate.RuleSets{}, (validate.RuleSets{}))
 	handler := metrics.CreateDetailedClusterResultMetricListener(filter, gauge)
 
 	t.Run("Added Metric", func(t *testing.T) {

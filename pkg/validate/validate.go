@@ -14,6 +14,14 @@ func Namespace(namespace string, namespaces RuleSets) bool {
 	return MatchRuleSet(namespace, namespaces)
 }
 
+func Kind(kind string, kinds RuleSets) bool {
+	if kind == "" {
+		return true
+	}
+
+	return MatchRuleSet(kind, kinds)
+}
+
 func MatchRuleSet(value string, rules RuleSets) bool {
 	if len(rules.Include) > 0 {
 		for _, ns := range rules.Include {
