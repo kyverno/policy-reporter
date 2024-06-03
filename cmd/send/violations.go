@@ -75,7 +75,7 @@ func NewViolationsCMD() *cobra.Command {
 					return
 				}
 
-				logger.Sugar().Infof("email sent to %s\n", strings.Join(c.EmailReports.Summary.To, ", "))
+				logger.Sugar().Infof("email sent to %s\n", strings.Join(c.EmailReports.Violations.To, ", "))
 			}()
 
 			for _, ch := range c.EmailReports.Violations.Channels {
