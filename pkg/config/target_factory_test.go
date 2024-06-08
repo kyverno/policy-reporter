@@ -284,7 +284,7 @@ func Test_ResolveTargetWithoutHost(t *testing.T) {
 		}
 	})
 	t.Run("GCS.Credentials", func(t *testing.T) {
-		if len(factory.GCSClients(&config.GCS{Bucket: "policy-reporter"})) != 0 {
+		if len(factory.GCSClients(&config.GCS{Bucket: "policy-reporter", Credentials: "{}"})) != 0 {
 			t.Error("Expected Client to be nil if no accessKey is configured")
 		}
 	})
