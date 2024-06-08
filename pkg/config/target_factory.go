@@ -612,6 +612,11 @@ func (f *TargetFactory) createS3Client(config, parent *S3) target.Client {
 		return nil
 	}
 
+	setFallback(&config.Bucket, parent.Bucket)
+	if config.Bucket == "" {
+		return nil
+	}
+
 	sugar := zap.S()
 
 	if err := checkAWSConfig(config.Name, config.AWSConfig, parent.AWSConfig); err != nil {
@@ -619,13 +624,6 @@ func (f *TargetFactory) createS3Client(config, parent *S3) target.Client {
 
 		return nil
 	}
-
-	setFallback(&config.Bucket, parent.Bucket)
-	if config.Bucket == "" {
-		sugar.Errorf("%s.Bucket has not been declared", config.Name)
-		return nil
-	}
-
 	setFallback(&config.Region, os.Getenv("AWS_REGION"))
 	setFallback(&config.Prefix, parent.Prefix, "policy-reporter")
 	setFallback(&config.KmsKeyID, parent.KmsKeyID)
