@@ -20,6 +20,9 @@ spec:
       targetPort: http
       protocol: TCP
       name: http
+  {{- if .Values.ui.service.additionalPorts }}
+    {{ toYaml .Values.ui.service.additionalPorts | indent 4 }}
+  {{- end }}
   selector:
     {{- include "ui.selectorLabels" . | nindent 4 }}
 {{- end }}
