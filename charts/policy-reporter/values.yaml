@@ -878,6 +878,24 @@ ui:
     # -- The ServiceAccount name
     name: ""
 
+  # -- list of extra manifests
+  extraManifests: []
+
+  # -- Add sidecar containers to the UI deployment
+  #  sidecarContainers:
+  #    oauth-proxy:
+  #      image: quay.io/oauth2-proxy/oauth2-proxy:v7.6.0
+  #      args:
+  #      - --upstream=http://127.0.0.1:8080
+  #      - --http-address=0.0.0.0:8081
+  #      - ...
+  #      ports:
+  #      - containerPort: 8081
+  #        name: oauth-proxy
+  #        protocol: TCP
+  #      resources: {}
+  sidecarContainers: {}
+
   # -- Additional annotations to add to each pod
   podAnnotations: {}
 
@@ -929,10 +947,18 @@ ui:
     annotations: {}
     # -- Service labels.
     labels: {}
+    # -- Additional service ports for e.g. Sidecars  # - name: authenticated
+    # additionalPorts:
+    # - name: authenticated
+    #   port: 8081
+    #   targetPort: 8081
+    additionalPorts: []
 
   ingress:
     # -- Create ingress resource.
     enabled: false
+    # -- Redirect ingress to an additional defined port on the service
+    port: null
     # -- Ingress class name.
     className: ""
     # -- Ingress labels.
@@ -1417,6 +1443,15 @@ monitoring:
       label: Prometheus
       pluginId: prometheus
       pluginName: Prometheus
+
+    # -- create GrafanaDashboard custom resource referencing to the configMap.
+    # according to https://grafana-operator.github.io/grafana-operator/docs/examples/dashboard_from_configmap/readme/
+    grafanaDashboard:
+      create: false
+      folder: kyverno
+      allowCrossNamespaceImport: true
+      matchLabels:
+        dashboards: "grafana"
 
   policyReportDetails:
     firstStatusRow:

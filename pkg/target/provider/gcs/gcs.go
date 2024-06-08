@@ -36,13 +36,19 @@ func (c *client) Upload(body *bytes.Buffer, key string) error {
 
 // NewClient creates a new GCS.client to send Results to GCS Bucket
 func NewClient(ctx context.Context, credentials, bucket string) Client {
-	cred, err := google.CredentialsFromJSON(ctx, []byte(credentials), storage.ScopeReadWrite)
-	if err != nil {
-		zap.L().Error("error while creating GCS credentials", zap.Error(err))
-		return nil
+	options := make([]option.ClientOption, 0, 1)
+
+	if credentials != "" {
+		cred, err := google.CredentialsFromJSON(ctx, []byte(credentials), storage.ScopeReadWrite)
+		if err != nil {
+			zap.L().Error("error while creating GCS credentials", zap.Error(err))
+			return nil
+		}
+
+		options = append(options, option.WithCredentials(cred))
 	}
 
-	baseClient, err := storage.NewClient(ctx, option.WithCredentials(cred))
+	baseClient, err := storage.NewClient(ctx, options...)
 	if err != nil {
 		zap.L().Error("error while creating GCS client", zap.Error(err))
 		return nil

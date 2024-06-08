@@ -323,7 +323,7 @@ func (r *Resolver) RegisterMetricsListener() {
 	))
 }
 
-// SecretClient resolver method
+// Clientset resolver method
 func (r *Resolver) Clientset() (*k8s.Clientset, error) {
 	if r.clientset != nil {
 		return r.clientset, nil
