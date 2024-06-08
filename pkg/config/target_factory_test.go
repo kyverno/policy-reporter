@@ -265,7 +265,9 @@ func Test_GCSValidation(t *testing.T) {
 
 	targets := config.Targets{
 		GCS: &config.Target[config.GCSOptions]{
-			Config: &config.GCSOptions{},
+			Config: &config.GCSOptions{
+				Credentials: "{}",
+			},
 		},
 	}
 

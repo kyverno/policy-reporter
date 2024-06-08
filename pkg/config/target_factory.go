@@ -408,6 +408,11 @@ func (f *TargetFactory) createS3Client(config, parent *Target[S3Options]) target
 		f.mapSecretValues(config, config.SecretRef, config.MountedSecret)
 	}
 
+	setFallback(&config.Config.Bucket, parent.Config.Bucket)
+	if config.Config.Bucket == "" {
+		return nil
+	}
+
 	config.Config.MapAWSParent(parent.Config.AWSConfig)
 	if config.Config.Endpoint == "" && !hasAWSIdentity() {
 		return nil
@@ -418,12 +423,6 @@ func (f *TargetFactory) createS3Client(config, parent *Target[S3Options]) target
 	if err := checkAWSConfig(config.Name, config.Config.AWSConfig, parent.Config.AWSConfig); err != nil {
 		sugar.Error(err)
 
-		return nil
-	}
-
-	setFallback(&config.Config.Bucket, parent.Config.Bucket)
-	if config.Config.Bucket == "" {
-		sugar.Errorf("%s.Bucket has not been declared", config.Name)
 		return nil
 	}
 
