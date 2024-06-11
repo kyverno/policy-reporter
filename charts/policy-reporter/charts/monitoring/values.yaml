@@ -70,7 +70,7 @@ grafana:
   # -- create GrafanaDashboard custom resource referencing to the configMap.
   # according to https://grafana-operator.github.io/grafana-operator/docs/examples/dashboard_from_configmap/readme/
   grafanaDashboard:
-    create: false
+    enabled: false
     folder: kyverno
     allowCrossNamespaceImport: true
     matchLabels:
