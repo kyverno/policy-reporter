@@ -301,6 +301,7 @@ securityHub:
   secretRef: {{ .Values.target.securityHub.secretRef | quote }}
   mountedSecret: {{ .Values.target.securityHub.mountedSecret | quote }}
   productName: {{ .Values.target.securityHub.productName | quote }}
+  companyName:  {{ .Values.target.securityHub.companyName | quote }}
   region: {{ .Values.target.securityHub.region }}
   endpoint: {{ .Values.target.securityHub.endpoint }}
   minimumPriority: {{ .Values.target.securityHub.minimumPriority | quote }}

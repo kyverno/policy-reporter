@@ -18,7 +18,7 @@ type HubClient interface {
 	GetFindings(ctx context.Context, params *hub.GetFindingsInput, optFns ...func(*hub.Options)) (*hub.GetFindingsOutput, error)
 }
 
-// Options to configure the S3 target
+// Options to configure the SecurityHub target
 type Options struct {
 	target.ClientOptions
 	CustomFields map[string]string
@@ -26,6 +26,7 @@ type Options struct {
 	AccountID    string
 	Region       string
 	ProductName  string
+	CompanyName  string
 	Delay        time.Duration
 	Cleanup      bool
 }
@@ -37,6 +38,7 @@ type client struct {
 	accountID    string
 	region       string
 	productName  string
+	companyName  string
 	delay        time.Duration
 	cleanup      bool
 }
@@ -75,9 +77,8 @@ func (c *client) Send(result v1alpha2.PolicyReportResult) {
 				},
 				Title:       &title,
 				Description: &result.Message,
-				ProductFields: map[string]string{
-					"Product Name": c.productName,
-				},
+				ProductName: &c.productName,
+				CompanyName: &c.companyName,
 				Compliance: &types.Compliance{
 					Status: types.ComplianceStatusFailed,
 				},
@@ -229,7 +230,7 @@ func (c *client) mapOtherDetails(result v1alpha2.PolicyReportResult) map[string]
 	return details
 }
 
-// NewClient creates a new S3.client to send Results to S3.
+// NewClient creates a new SecurityHub.client to send Results to SecurityHub.
 func NewClient(options Options) target.Client {
 	return &client{
 		target.NewBaseClient(options.ClientOptions),
@@ -238,6 +239,7 @@ func NewClient(options Options) target.Client {
 		options.AccountID,
 		options.Region,
 		options.ProductName,
+		options.CompanyName,
 		options.Delay,
 		options.Cleanup,
 	}

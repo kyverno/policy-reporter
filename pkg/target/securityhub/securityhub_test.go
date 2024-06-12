@@ -46,6 +46,7 @@ func TestSecurityHub(t *testing.T) {
 			AccountID:   "accountID",
 			Region:      "eu-central-1",
 			ProductName: "Policy Reporter",
+			CompanyName: "Kyverno",
 			Client: &client{
 				send: func(findings []types.AwsSecurityFinding) {
 					if len(findings) != 1 {
@@ -64,8 +65,11 @@ func TestSecurityHub(t *testing.T) {
 					if *finding.ProductArn != "arn:aws:securityhub:eu-central-1:accountID:product/accountID/default" {
 						t.Errorf("unexpected product arn: %s", *finding.ProductArn)
 					}
-					if finding.ProductFields["Product Name"] != "Policy Reporter" {
-						t.Errorf("unexpected product name arn: %s", finding.ProductFields["Product Name"])
+					if *finding.ProductName != "Policy Reporter" {
+						t.Errorf("unexpected product name: %s", *finding.ProductName)
+					}
+					if *finding.CompanyName != "Kyverno" {
+						t.Errorf("unexpected company name: %s", *finding.CompanyName)
 					}
 				},
 			},
@@ -80,6 +84,7 @@ func TestSecurityHub(t *testing.T) {
 			AccountID:   "accountID",
 			Region:      "eu-central-1",
 			ProductName: "Policy Reporter",
+			CompanyName: "Kyverno",
 			Client:      h,
 			Cleanup:     false,
 		})
@@ -100,6 +105,7 @@ func TestSecurityHub(t *testing.T) {
 			AccountID:   "accountID",
 			Region:      "eu-central-1",
 			ProductName: "Policy Reporter",
+			CompanyName: "Kyverno",
 			Client:      h,
 			Cleanup:     true,
 		})
@@ -126,6 +132,7 @@ func TestSecurityHub(t *testing.T) {
 			AccountID:   "accountID",
 			Region:      "eu-central-1",
 			ProductName: "Policy Reporter",
+			CompanyName: "Kyverno",
 			Client:      h,
 			Cleanup:     true,
 		})
@@ -152,6 +159,7 @@ func TestSecurityHub(t *testing.T) {
 			AccountID:   "accountID",
 			Region:      "eu-central-1",
 			ProductName: "Policy Reporter",
+			CompanyName: "Kyverno",
 			Client:      h,
 			Cleanup:     true,
 		})
