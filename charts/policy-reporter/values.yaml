@@ -170,7 +170,7 @@ sourceConfig: {}
 #     enabled: true
 #     fields: ["resource", "policy", "rule", "category", "result", "message"]
 
-# enable policy-report-ui
+# Settings for the Policy Reporter UI subchart (see subchart's values.yaml)
 ui:
   enabled: false
 
