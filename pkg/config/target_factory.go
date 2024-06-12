@@ -726,6 +726,7 @@ func (f *TargetFactory) createSecurityHub(config, parent *SecurityHub) target.Cl
 	sugar.Infof("%s configured", config.Name)
 
 	setFallback(&config.ProductName, parent.ProductName, "Policy Reporter")
+	setFallback(&config.CompanyName, parent.CompanyName, "Kyverno")
 	setInt(&config.DelayInSeconds, parent.DelayInSeconds)
 
 	return securityhub.NewClient(securityhub.Options{
@@ -735,6 +736,7 @@ func (f *TargetFactory) createSecurityHub(config, parent *SecurityHub) target.Cl
 		AccountID:     config.AccountID,
 		Region:        config.Region,
 		ProductName:   config.ProductName,
+		CompanyName:   config.CompanyName,
 		Delay:         time.Duration(config.DelayInSeconds) * time.Second,
 	})
 }
