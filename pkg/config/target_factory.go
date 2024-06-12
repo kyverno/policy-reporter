@@ -926,10 +926,13 @@ func NewTargetFactory(secretClient secrets.Client) *TargetFactory {
 }
 
 func hasAWSIdentity() bool {
-	arn := os.Getenv("AWS_ROLE_ARN")
-	file := os.Getenv("AWS_WEB_IDENTITY_TOKEN_FILE")
+	irsa_arn := os.Getenv("AWS_ROLE_ARN")
+	irsa_file := os.Getenv("AWS_WEB_IDENTITY_TOKEN_FILE")
 
-	return arn != "" && file != ""
+	pod_identity_file := os.Getenv("AWS_CONTAINER_AUTHORIZATION_TOKEN_FILE")
+	pod_identity_uri := os.Getenv("AWS_CONTAINER_CREDENTIALS_FULL_URI")
+
+	return (irsa_arn != "" && irsa_file != "") || (pod_identity_file != "" && pod_identity_uri != "")
 }
 
 func checkAWSConfig(name string, config AWSConfig, parent AWSConfig) error {
