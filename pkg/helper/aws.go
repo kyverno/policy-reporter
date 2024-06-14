@@ -3,13 +3,13 @@ package helper
 import (
 	"bytes"
 	"context"
+	"fmt"
 	"io"
 	"os"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/credentials"
-	"github.com/aws/aws-sdk-go-v2/credentials/ec2rolecreds"
 	"github.com/aws/aws-sdk-go-v2/credentials/stscreds"
 	"github.com/aws/aws-sdk-go-v2/service/kinesis"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
@@ -164,11 +164,8 @@ func createConfig(accessKeyID, secretAccessKey, region string) (aws.Config, erro
 	} else if webIdentity != "" && roleARN != "" {
 		zap.L().Debug("configure AWS credentals provider", zap.String("provider", "WebIdentityRoleProvider"), zap.String("WebIdentidyFile", webIdentity))
 		cfg.Credentials = stscreds.NewWebIdentityRoleProvider(sts.NewFromConfig(cfg), roleARN, stscreds.IdentityTokenFile(webIdentity))
-	} else if roleARN != "" {
-		zap.L().Debug("configure AWS credentals provider", zap.String("provider", "AssumeRoleProvider"))
-		cfg.Credentials = stscreds.NewAssumeRoleProvider(sts.NewFromConfig(cfg), roleARN)
 	} else {
-		cfg.Credentials = ec2rolecreds.New()
+		zap.L().Debug("used AWS credentials provider", zap.String("provider", fmt.Sprintf("%T", cfg.Credentials)))
 	}
 
 	return cfg, nil
