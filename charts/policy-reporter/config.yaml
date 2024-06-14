@@ -1,5 +1,4 @@
 loki:
-  host: {{ .Values.target.loki.host | quote }}
   certificate: {{ .Values.target.loki.certificate | quote }}
   skipTLS: {{ .Values.target.loki.skipTLS }}
   path: {{ .Values.target.loki.path | quote }}
@@ -7,8 +6,6 @@ loki:
   mountedSecret: {{ .Values.target.loki.mountedSecret | quote }}
   minimumPriority: {{ .Values.target.loki.minimumPriority | quote }}
   skipExistingOnStartup: {{ .Values.target.loki.skipExistingOnStartup }}
-  username: {{ .Values.target.loki.username | quote }}
-  password: {{ .Values.target.loki.password | quote }}
   {{- with .Values.target.loki.customLabels }}
   customLabels:
     {{- toYaml . | nindent 4 }}
@@ -31,19 +28,14 @@ loki:
   {{- end }}
 
 elasticsearch:
-  host: {{ .Values.target.elasticsearch.host | quote }}
   certificate: {{ .Values.target.elasticsearch.certificate | quote }}
   skipTLS: {{ .Values.target.elasticsearch.skipTLS }}
-  username: {{ .Values.target.elasticsearch.username | quote }}
-  password: {{ .Values.target.elasticsearch.password | quote }}
-  apiKey: {{ .Values.target.elasticsearch.apiKey | quote }}
   secretRef: {{ .Values.target.elasticsearch.secretRef | quote }}
   mountedSecret: {{ .Values.target.elasticsearch.mountedSecret | quote }}
   index: {{ .Values.target.elasticsearch.index | default "policy-reporter" | quote }}
   rotation: {{ .Values.target.elasticsearch.rotation | default "daily" | quote }}
   minimumPriority: {{ .Values.target.elasticsearch.minimumPriority | quote }}
   skipExistingOnStartup: {{ .Values.target.elasticsearch.skipExistingOnStartup }}
-  typelessApi: {{ .Values.target.elasticsearch.typelessApi }}
   {{- with .Values.target.elasticsearch.sources }}
   sources:
     {{- toYaml . | nindent 4 }}
@@ -62,8 +54,6 @@ elasticsearch:
   {{- end }}
 
 slack:
-  webhook: {{ .Values.target.slack.webhook | quote }}
-  channel: {{ .Values.target.slack.channel | quote }}
   secretRef: {{ .Values.target.slack.secretRef | quote }}
   mountedSecret: {{ .Values.target.slack.mountedSecret | quote }}
   minimumPriority: {{ .Values.target.slack.minimumPriority | quote }}
@@ -86,7 +76,6 @@ slack:
   {{- end }}
 
 discord:
-  webhook: {{ .Values.target.discord.webhook | quote }}
   secretRef: {{ .Values.target.discord.secretRef | quote }}
   mountedSecret: {{ .Values.target.discord.mountedSecret | quote }}
   minimumPriority: {{ .Values.target.discord.minimumPriority | quote }}
@@ -109,7 +98,6 @@ discord:
   {{- end }}
 
 teams:
-  webhook: {{ .Values.target.teams.webhook | quote }}
   certificate: {{ .Values.target.teams.certificate | quote }}
   skipTLS: {{ .Values.target.teams.skipTLS }}
   secretRef: {{ .Values.target.teams.secretRef | quote }}
@@ -134,7 +122,6 @@ teams:
   {{- end }}
 
 webhook:
-  host: {{ .Values.target.webhook.host | quote }}
   certificate: {{ .Values.target.webhook.certificate | quote }}
   skipTLS: {{ .Values.target.webhook.skipTLS }}
   secretRef: {{ .Values.target.webhook.secretRef | quote }}
@@ -163,9 +150,7 @@ webhook:
   {{- end }}
 
 telegram:
-  token: {{ .Values.target.telegram.token | quote }}
   chatID: {{ .Values.target.telegram.chatID | quote }}
-  host: {{ .Values.target.telegram.host | quote }}
   certificate: {{ .Values.target.telegram.certificate | quote }}
   skipTLS: {{ .Values.target.telegram.skipTLS }}
   secretRef: {{ .Values.target.telegram.secretRef | quote }}
@@ -234,15 +219,12 @@ ui:
   {{- end }}
 
 s3:
-  accessKeyID: {{ .Values.target.s3.accessKeyID }}
-  secretAccessKey:  {{ .Values.target.s3.secretAccessKey }}
   secretRef: {{ .Values.target.s3.secretRef | quote }}
   mountedSecret: {{ .Values.target.s3.mountedSecret }}
   region: {{ .Values.target.s3.region }}
   endpoint: {{ .Values.target.s3.endpoint }}
   bucket: {{ .Values.target.s3.bucket }}
   bucketKeyEnabled: {{ .Values.target.s3.bucketKeyEnabled }}
-  kmsKeyId: {{ .Values.target.s3.kmsKeyId }}
   serverSideEncryption: {{ .Values.target.s3.serverSideEncryption }}
   pathStyle: {{ .Values.target.s3.pathStyle }}
   prefix: {{ .Values.target.s3.prefix }}
@@ -266,8 +248,6 @@ s3:
   {{- end }}
 
 kinesis:
-  accessKeyID: {{ .Values.target.kinesis.accessKeyID }}
-  secretAccessKey:  {{ .Values.target.kinesis.secretAccessKey }}
   secretRef: {{ .Values.target.kinesis.secretRef | quote }}
   mountedSecret: {{ .Values.target.kinesis.mountedSecret | quote }}
   region: {{ .Values.target.kinesis.region }}
@@ -293,9 +273,6 @@ kinesis:
   {{- end }}
 
 securityHub:
-  accountID: {{ .Values.target.securityHub.accountID }}
-  accessKeyID: {{ .Values.target.securityHub.accessKeyID }}
-  secretAccessKey:  {{ .Values.target.securityHub.secretAccessKey }}
   delayInSeconds: {{ .Values.target.securityHub.delayInSeconds }}
   cleanup: {{ .Values.target.securityHub.cleanup }}
   secretRef: {{ .Values.target.securityHub.secretRef | quote }}
@@ -381,10 +358,11 @@ leaderElection:
   renewDeadline: {{ .Values.leaderElection.renewDeadline }}
   retryPeriod: {{ .Values.leaderElection.retryPeriod }}
 
-{{- with .Values.redis }}
 redis:
-  {{- toYaml . | nindent 2 }}
-{{- end }}
+  enabled: {{ .enabled }}
+  address: {{ .address }}
+  database: {{ .database }}
+  prefix: {{ .prefix }}
 
 {{- with .Values.sourceConfig }}
 sourceConfig:
@@ -400,15 +378,11 @@ logging:
 api:
   logging: {{ .Values.api.logging }}
   basicAuth:
-    username: {{ .Values.global.basicAuth.username }}
-    password: {{ .Values.global.basicAuth.password }}
     secretRef: {{ .Values.global.basicAuth.secretRef }}
 
 database:
   type: {{ .Values.database.type }}
   database: {{ .Values.database.database }}
-  username: {{ .Values.database.username }}
-  password: {{ .Values.database.password }}
   host: {{ .Values.database.host }}
   enableSSL: {{ .Values.database.enableSSL }}
   dsn: {{ .Values.database.dsn }}

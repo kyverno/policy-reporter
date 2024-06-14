@@ -37,6 +37,28 @@ func Load(cmd *cobra.Command) (*Config, error) {
 		log.Printf("[INFO] No configuration file found: %v\n", err)
 	}
 
+	// Load secrets from a dedicated secrets.yaml file
+	//
+	secretsFile := ""
+	secretsFlag := cmd.Flags().Lookup("secrets")
+	if secretsFlag != nil {
+		secretsFile = secretsFlag.Value.String()
+	}
+	if cfgFile != "" {
+		v.SetConfigFile(secretsFile)
+	} else {
+		v.AddConfigPath(".")
+		v.SetConfigName("secrets")
+	}
+
+	if err := v.MergeInConfig(); err != nil {
+		log.Printf("[INFO] No configuration file found: %v\n", err)
+	}
+
+	if err := v.MergeInConfig(); err != nil {
+		log.Printf("[INFO] No configuration file found: %v\n", err)
+	}
+
 	if flag := cmd.Flags().Lookup("worker"); flag != nil {
 		v.BindPFlag("worker", flag)
 	}
