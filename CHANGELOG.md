@@ -1,5 +1,17 @@
 # Changelog
 
+# 2.24.0
+* Helm Chart
+    * GrafanaDashboard configuration [[#441](https://github.com/kyverno/policy-reporter/pull/441) by [nlamirault](https://github.com/nlamirault)]
+    * Added support of sidecars and extraManifests [[#439](https://github.com/kyverno/policy-reporter/pull/439) by [wbmillogo](https://github.com/wbmillogo)]
+    * Policy Reporter v2.20.0
+        * fix(S3): Make `bucket` for S3 targets mendatory and don't show error logs if WebIdentity is used.
+        * fix(email): Fix violations "email sent to" log [[#444](https://github.com/kyverno/policy-reporter/pull/444) by [cosimomeli](https://github.com/cosimomeli)]
+        * feature(SecurityHub): fix product name field and allow to set company name [[#446](https://github.com/kyverno/policy-reporter/pull/446) by [balonik](https://github.com/balonik)]
+        * feature(AWS): recognize if AWS Pod Identity is present [[#452](https://github.com/kyverno/policy-reporter/pull/452) by [balonik](https://github.com/balonik)]
+        * feature(metrics); Add kind attribute in the Metrics filter [[#442](https://github.com/kyverno/policy-reporter/pull/442) by [abdul-jabbar01](https://github.com/abdul-jabbar01)]
+        * docs: point to ui subchart's values.yaml [[#450](https://github.com/kyverno/policy-reporter/pull/450) by [ustuehler](https://github.com/ustuehler)]
+
 # 2.23.1
 * Helm Chart
     * Update AppVersion in `values.yaml`
