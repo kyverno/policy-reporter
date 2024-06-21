@@ -28,22 +28,22 @@ metadata:
 data:
   policy-reporter-dashboard.json: |
     {
-    "__inputs": [	
-        {	
+    "__inputs": [
+        {
             "name": "DS_PROMETHEUS",
             "label": "{{ .Values.grafana.datasource.label }}",
             "description": "",
             "type": "datasource",
             "pluginId": "{{ .Values.grafana.datasource.pluginId }}",
             "pluginName": "{{ .Values.grafana.datasource.pluginName }}"
-        }	
-    ],	
-    "__requires": [	
-        {	
-            "type": "grafana",	
-            "id": "grafana",	
-            "name": "Grafana",	
-            "version": "7.1.5"	
+        }
+    ],
+    "__requires": [
+        {
+            "type": "grafana",
+            "id": "grafana",
+            "name": "Grafana",
+            "version": "7.1.5"
         }
     ],
     "annotations": {
@@ -190,107 +190,153 @@ data:
         "type": "stat"
         },
         {
-        "aliasColors": {},
-        "bars": false,
-        "dashLength": 10,
-        "dashes": false,
-        "datasource": "${DS_PROMETHEUS}",
-        "fieldConfig": {
+          "datasource": {
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "fieldConfig": {
             "defaults": {
-            "custom": {}
+              "custom": {
+                "drawStyle": "line",
+                "lineInterpolation": "linear",
+                "barAlignment": 0,
+                "lineWidth": 1,
+                "fillOpacity": 10,
+                "gradientMode": "none",
+                "spanNulls": false,
+                "insertNulls": false,
+                "showPoints": "never",
+                "pointSize": 5,
+                "stacking": {
+                  "mode": "none",
+                  "group": "A"
+                },
+                "axisPlacement": "auto",
+                "axisLabel": "",
+                "axisColorMode": "text",
+                "axisBorderShow": false,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "axisCenteredZero": false,
+                "hideFrom": {
+                  "tooltip": false,
+                  "viz": false,
+                  "legend": false
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "color": {
+                "mode": "palette-classic"
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "value": null,
+                    "color": "green"
+                  },
+                  {
+                    "value": 80,
+                    "color": "red"
+                  }
+                ]
+              },
+              "unit": "short",
+              "decimals": 0,
+              "min": 0
             },
-            "overrides": []
-        },
-        "fill": 1,
-        "fillGradient": 0,
-        "gridPos": {
+            "overrides": [
+              {
+                "matcher": {
+                  "id": "byValue",
+                  "options": {
+                    "reducer": "allIsZero",
+                    "op": "gte",
+                    "value": 0
+                  }
+                },
+                "properties": [
+                  {
+                    "id": "custom.hideFrom",
+                    "value": {
+                      "tooltip": true,
+                      "viz": false,
+                      "legend": true
+                    }
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byValue",
+                  "options": {
+                    "reducer": "allIsNull",
+                    "op": "gte",
+                    "value": 0
+                  }
+                },
+                "properties": [
+                  {
+                    "id": "custom.hideFrom",
+                    "value": {
+                      "tooltip": true,
+                      "viz": false,
+                      "legend": true
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          "gridPos": {
             "h": {{ .Values.policyReportOverview.failingTimeline.height }},
             "w": 24,
             "x": 0,
-            "y": 10
-        },
-        "hiddenSeries": false,
-        "id": 11,
-        "legend": {
-            "alignAsTable": true,
-            "avg": false,
-            "current": true,
-            "hideEmpty": true,
-            "hideZero": true,
-            "max": false,
-            "min": false,
-            "rightSide": true,
-            "show": true,
-            "total": false,
-            "values": true
-        },
-        "lines": true,
-        "linewidth": 1,
-        "nullPointMode": "null as zero",
-        "percentage": false,
-        "pluginVersion": "7.1.5",
-        "pointradius": 2,
-        "points": false,
-        "renderer": "flot",
-        "seriesOverrides": [],
-        "spaceLength": 10,
-        "stack": false,
-        "steppedLine": false,
-        "targets": [
+            "y": 8
+          },
+          "id": 11,
+          "pluginVersion": "10.4.1",
+          "targets": [
             {
-            "expr": "sum(cluster_policy_report_result{policy=~\"$policy\", category=~\"$category\", severity=~\"$severity\", source=~\"$source\", kind=~\"$kind\", status=~\"fail|error\"{{ range $filters }}, {{.}}=~\"${{.}}\"{{ end }} } > 0) by (policy)",
-            "interval": "",
-            "legendFormat": "{{`{{ policy }}`}}",
-            "refId": "A"
+              "expr": "sum(cluster_policy_report_result{policy=~\"$policy\", category=~\"$category\", severity=~\"$severity\", source=~\"$source\", kind=~\"$kind\", status=~\"fail|error\"{{ range $filters }}, {{.}}=~\"${{.}}\"{{ end }} } > 0) by (policy)",
+              "interval": "",
+              "legendFormat": "{{`{{ policy }}`}}",
+              "refId": "A",
+              "datasource": {
+                "uid": "${DS_PROMETHEUS}"
+              }
             },
             {
-            "expr": "sum(policy_report_result{policy=~\"$policy\", category=~\"$category\", severity=~\"$severity\", source=~\"$source\", kind=~\"$kind\", {{ $nsLabel }}=~\"$namespace\", status=~\"fail|error\"{{ range $filters }}, {{.}}=~\"${{.}}\"{{ end }} } > 0) by (policy)",
-            "interval": "",
-            "legendFormat": "{{`{{ policy }}`}}",
-            "refId": "B"
+              "expr": "sum(policy_report_result{policy=~\"$policy\", category=~\"$category\", severity=~\"$severity\", source=~\"$source\", kind=~\"$kind\", {{ $nsLabel }}=~\"$namespace\", status=~\"fail|error\"{{ range $filters }}, {{.}}=~\"${{.}}\"{{ end }} } > 0) by (policy)",
+              "interval": "",
+              "legendFormat": "{{`{{ policy }}`}}",
+              "refId": "B",
+              "datasource": {
+                "uid": "${DS_PROMETHEUS}"
+              }
             }
-        ],
-        "thresholds": [],
-        "timeFrom": null,
-        "timeRegions": [],
-        "timeShift": null,
-        "title": "Failing Policies Graph",
-        "tooltip": {
-            "shared": true,
-            "sort": 0,
-            "value_type": "individual"
-        },
-        "type": "graph",
-        "xaxis": {
-            "buckets": null,
-            "mode": "time",
-            "name": null,
-            "show": true,
-            "values": []
-        },
-        "yaxes": [
-            {
-            "decimals": 0,
-            "format": "short",
-            "label": null,
-            "logBase": 1,
-            "max": null,
-            "min": "0",
-            "show": true
+          ],
+          "title": "Failing Policies Graph",
+          "type": "timeseries",
+          "options": {
+            "tooltip": {
+              "mode": "multi",
+              "sort": "none"
             },
-            {
-            "format": "short",
-            "label": null,
-            "logBase": 1,
-            "max": null,
-            "min": null,
-            "show": true
+            "legend": {
+              "showLegend": true,
+              "displayMode": "table",
+              "placement": "right",
+              "calcs": [
+                "lastNotNull"
+              ]
             }
-        ],
-        "yaxis": {
-            "align": false,
-            "alignLevel": null
-        }
+          },
+          "timeFrom": null,
+          "timeShift": null
         },
         {
         "datasource": "${DS_PROMETHEUS}",
@@ -614,7 +660,7 @@ data:
             "type": "query",
             "useTags": false
         }
-        {{- end }} 
+        {{- end }}
         ]
     },
     "time": {
