@@ -2,6 +2,7 @@ package teams
 
 import (
 	"github.com/atc0005/go-teams-notify/v2/adaptivecard"
+
 	"github.com/kyverno/policy-reporter/pkg/helper"
 )
 

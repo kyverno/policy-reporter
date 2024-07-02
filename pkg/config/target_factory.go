@@ -534,6 +534,8 @@ func (f *TargetFactory) createSecurityHub(config, parent *Target[SecurityHubOpti
 	config.Config.MapAWSParent(parent.Config.AWSConfig)
 	config.MapBaseParent(parent)
 
+	setFallback(&config.Config.ProductName, parent.Config.ProductName, "Policy Reporter")
+	setFallback(&config.Config.CompanyName, parent.Config.CompanyName, "Kyverno")
 	setInt(&config.Config.DelayInSeconds, parent.Config.DelayInSeconds)
 
 	client := aws.NewHubClient(
@@ -555,6 +557,8 @@ func (f *TargetFactory) createSecurityHub(config, parent *Target[SecurityHubOpti
 		CustomFields: config.CustomFields,
 		Client:       client,
 		AccountID:    config.Config.AccountID,
+		ProductName:  config.Config.ProductName,
+		CompanyName:  config.Config.CompanyName,
 		Region:       config.Config.Region,
 		Delay:        time.Duration(config.Config.DelayInSeconds) * time.Second,
 		Cleanup:      config.Config.Cleanup,
@@ -758,10 +762,13 @@ func mapWebhookTarget(config, parent *Target[WebhookOptions]) {
 }
 
 func hasAWSIdentity() bool {
-	arn := os.Getenv("AWS_ROLE_ARN")
-	file := os.Getenv("AWS_WEB_IDENTITY_TOKEN_FILE")
+	irsaARN := os.Getenv("AWS_ROLE_ARN")
+	irsaFile := os.Getenv("AWS_WEB_IDENTITY_TOKEN_FILE")
 
-	return arn != "" && file != ""
+	podIdentityFile := os.Getenv("AWS_CONTAINER_AUTHORIZATION_TOKEN_FILE")
+	podIdentityURI := os.Getenv("AWS_CONTAINER_CREDENTIALS_FULL_URI")
+
+	return (irsaARN != "" && irsaFile != "") || (podIdentityFile != "" && podIdentityURI != "")
 }
 
 func checkAWSConfig(name string, config AWSConfig, parent AWSConfig) error {

@@ -235,6 +235,8 @@ config:
   region: {{ .region }}
   endpoint: {{ .endpoint }}
   accountID: {{ .accountID }}
+  productName: {{ .productName }}
+  companyName: {{ .companyName }}
 {{ include "target" . }}
 {{- end }}
 
