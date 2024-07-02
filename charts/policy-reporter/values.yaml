@@ -11,7 +11,7 @@ image:
   registry: ghcr.io
   repository: kyverno/policy-reporter
   pullPolicy: IfNotPresent
-  tag: db97ffe
+  tag: caa7e3e
 
 imagePullSecrets: []
 
@@ -1447,7 +1447,7 @@ monitoring:
     # -- create GrafanaDashboard custom resource referencing to the configMap.
     # according to https://grafana-operator.github.io/grafana-operator/docs/examples/dashboard_from_configmap/readme/
     grafanaDashboard:
-      create: false
+      enabled: false
       folder: kyverno
       allowCrossNamespaceImport: true
       matchLabels:
