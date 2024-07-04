@@ -601,6 +601,27 @@ func (s *Store) FetchNamespaceStatusCounts(ctx context.Context, source string, f
 	return results, err
 }
 
+func (s *Store) FetchTotalStatusCounts(ctx context.Context, source string, filter Filter) ([]StatusCount, error) {
+	results := make([]StatusCount, 0)
+
+	err := FromQuery(s.db.
+		NewSelect().
+		TableExpr("policy_report_filter as f").
+		ColumnExpr("SUM(f.count) as count, f.result as status")).
+		FilterMap(map[string][]string{
+			"category":      filter.Categories,
+			"policy":        filter.Policies,
+			"resource_kind": filter.Kinds,
+		}).
+		FilterValue("f.source", source).
+		FilterReportLabels(filter.ReportLabel).
+		Exclude(filter, "f").
+		Group("status").
+		Scan(ctx, &results)
+
+	return results, err
+}
+
 func (s *Store) FetchNamespaceKinds(ctx context.Context, filter Filter) ([]string, error) {
 	list := make([]string, 0)
 
