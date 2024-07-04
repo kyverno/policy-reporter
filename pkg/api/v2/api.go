@@ -32,6 +32,7 @@ func (h *APIHandler) Register(engine *gin.RouterGroup) error {
 	engine.GET("namespaces", h.ListNamespaces)
 	engine.GET("sources", h.ListSources)
 	engine.GET("sources/:source/use-resources", h.UseResources)
+	engine.GET("sources/:source/status-counts", h.GetTotalStatusCounts)
 	engine.GET("sources/categories", h.ListSourceWithCategories)
 	engine.GET("policies", h.ListPolicies)
 	engine.GET("findings", h.ListFindings)
@@ -143,6 +144,12 @@ func (h *APIHandler) GetNamespaceStatusCounts(ctx *gin.Context) {
 	results, err := h.store.FetchNamespaceStatusCounts(ctx, ctx.Param("source"), api.BuildFilter(ctx))
 
 	api.SendResponse(ctx, MapNamespaceStatusCounts(results), "failed to calculate namespace status counts", err)
+}
+
+func (h *APIHandler) GetTotalStatusCounts(ctx *gin.Context) {
+	results, err := h.store.FetchTotalStatusCounts(ctx, ctx.Param("source"), api.BuildFilter(ctx))
+
+	api.SendResponse(ctx, MapClusterStatusCounts(results), "failed to calculate total status counts", err)
 }
 
 func (h *APIHandler) ListClusterKinds(ctx *gin.Context) {
