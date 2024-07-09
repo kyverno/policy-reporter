@@ -66,6 +66,10 @@ func (s *client) newPayload(result v1alpha2.PolicyReportResult) payload {
 		Attachments: make([]attachment, 0, 1),
 	}
 
+	if s.channel != "" {
+		p.Channel = s.channel
+	}
+
 	att := attachment{
 		Color:  colors[result.Priority],
 		Blocks: make([]block, 0),
