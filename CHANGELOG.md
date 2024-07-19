@@ -1,5 +1,9 @@
 # Changelog
 
+# 2.24.1
+* Policy Reporter v2.20.1
+    * Propagate Slack channel Override [[#459](https://github.com/kyverno/policy-reporter/pull/459)] [[#460](https://github.com/kyverno/policy-reporter/pull/460)] by [jescarri](https://github.com/jescarri)
+
 # 2.24.0
 * Helm Chart
     * GrafanaDashboard configuration [[#441](https://github.com/kyverno/policy-reporter/pull/441) by [nlamirault](https://github.com/nlamirault)]
@@ -123,7 +127,7 @@
     * feat: add debug http logging [[#346](https://github.com/kyverno/policy-reporter/pull/346) by [blakepettersson](https://github.com/blakepettersson)]
     * build: cache go mod [[#345](https://github.com/kyverno/policy-reporter/pull/345) by [blakepettersson](https://github.com/blakepettersson)]
 
-# 2.20.0
+# 2.20.1
 * Policy Reporter
     * Support GoogleChat as new notification target
     * Support Telegram as new notification target
