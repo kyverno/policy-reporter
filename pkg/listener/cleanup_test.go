@@ -12,7 +12,7 @@ func Test_CleanupListener(t *testing.T) {
 	t.Run("Execute Cleanup Handler", func(t *testing.T) {
 		c := &client{}
 
-		slistener := listener.NewCleanupListener(ctx, []target.Client{c})
+		slistener := listener.NewCleanupListener(ctx, target.NewCollection(&target.Target{Client: c}))
 		slistener(report.LifecycleEvent{Type: report.Added, PolicyReport: preport1})
 
 		if !c.cleanupCalled {

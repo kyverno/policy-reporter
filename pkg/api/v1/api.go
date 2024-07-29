@@ -18,7 +18,7 @@ var defaultOrder = []string{"resource_namespace", "resource_name", "resource_uid
 
 type APIHandler struct {
 	store    *db.Store
-	targets  []Target
+	targets  *target.Collection
 	reporter *violations.Reporter
 }
 
@@ -52,7 +52,7 @@ func (h *APIHandler) Register(engine *gin.RouterGroup) error {
 }
 
 func (h *APIHandler) ListTargets(ctx *gin.Context) {
-	ctx.JSON(http.StatusOK, h.targets)
+	ctx.JSON(http.StatusOK, helper.Map(h.targets.Clients(), mapTarget))
 }
 
 func (h *APIHandler) ListPolicyReports(ctx *gin.Context) {
@@ -256,11 +256,11 @@ func (h *APIHandler) HTMLViolationsReport(ctx *gin.Context) {
 	ctx.Data(http.StatusOK, "text/html; charset=utf-8", []byte(data.Message))
 }
 
-func NewAPIHandler(store *db.Store, targets []target.Client, reporter *violations.Reporter) *APIHandler {
-	return &APIHandler{store, helper.Map(targets, mapTarget), reporter}
+func NewAPIHandler(store *db.Store, targets *target.Collection, reporter *violations.Reporter) *APIHandler {
+	return &APIHandler{store, targets, reporter}
 }
 
-func WithAPI(store *db.Store, targets []target.Client, reporter *violations.Reporter) api.ServerOption {
+func WithAPI(store *db.Store, targets *target.Collection, reporter *violations.Reporter) api.ServerOption {
 	return func(s *api.Server) error {
 		return s.Register("v1", NewAPIHandler(store, targets, reporter))
 	}

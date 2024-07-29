@@ -57,7 +57,7 @@ func (c *client) SupportsBatchSend() bool {
 func Test_SendResultListener(t *testing.T) {
 	t.Run("Send Result", func(t *testing.T) {
 		c := &client{validated: true}
-		slistener := listener.NewSendResultListener([]target.Client{c})
+		slistener := listener.NewSendResultListener(target.NewCollection(&target.Target{Client: c}))
 		slistener(preport1, fixtures.FailResult, false)
 
 		if !c.Called {
@@ -66,7 +66,7 @@ func Test_SendResultListener(t *testing.T) {
 	})
 	t.Run("Don't Send Result when validation fails", func(t *testing.T) {
 		c := &client{validated: false}
-		slistener := listener.NewSendResultListener([]target.Client{c})
+		slistener := listener.NewSendResultListener(target.NewCollection(&target.Target{Client: c}))
 		slistener(preport1, fixtures.FailResult, false)
 
 		if c.Called {
@@ -75,7 +75,7 @@ func Test_SendResultListener(t *testing.T) {
 	})
 	t.Run("Don't Send pre existing Result when skipExistingOnStartup is true", func(t *testing.T) {
 		c := &client{skipExistingOnStartup: true}
-		slistener := listener.NewSendResultListener([]target.Client{c})
+		slistener := listener.NewSendResultListener(target.NewCollection(&target.Target{Client: c}))
 		slistener(preport1, fixtures.FailResult, true)
 
 		if c.Called {

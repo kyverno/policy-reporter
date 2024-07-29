@@ -1,20 +1,33 @@
-package config
+package target
 
-type Target[T any] struct {
+type ValueFilter struct {
+	Include  []string       `mapstructure:"include"`
+	Exclude  []string       `mapstructure:"exclude"`
+	Selector map[string]any `mapstructure:"selector"`
+}
+
+type Filter struct {
+	Namespaces   ValueFilter `mapstructure:"namespaces"`
+	Priorities   ValueFilter `mapstructure:"priorities"`
+	Policies     ValueFilter `mapstructure:"policies"`
+	ReportLabels ValueFilter `mapstructure:"reportLabels"`
+}
+
+type Config[T any] struct {
 	Config          *T                `mapstructure:"config"`
 	Name            string            `mapstructure:"name"`
 	MinimumPriority string            `mapstructure:"minimumPriority"`
-	Filter          TargetFilter      `mapstructure:"filter"`
+	Filter          Filter            `mapstructure:"filter"`
 	SecretRef       string            `mapstructure:"secretRef"`
 	MountedSecret   string            `mapstructure:"mountedSecret"`
 	Sources         []string          `mapstructure:"sources"`
 	CustomFields    map[string]string `mapstructure:"customFields"`
 	SkipExisting    bool              `mapstructure:"skipExistingOnStartup"`
-	Channels        []*Target[T]      `mapstructure:"channels"`
+	Channels        []*Config[T]      `mapstructure:"channels"`
 	Valid           bool              `mapstructure:"-"`
 }
 
-func (config *Target[T]) MapBaseParent(parent *Target[T]) {
+func (config *Config[T]) MapBaseParent(parent *Config[T]) {
 	if config.MinimumPriority == "" {
 		config.MinimumPriority = parent.MinimumPriority
 	}
@@ -24,7 +37,7 @@ func (config *Target[T]) MapBaseParent(parent *Target[T]) {
 	}
 }
 
-func (config *Target[T]) Secret() string {
+func (config *Config[T]) Secret() string {
 	if config.SecretRef != "" {
 		return config.SecretRef
 	}
@@ -130,16 +143,32 @@ type GCSOptions struct {
 }
 
 type Targets struct {
-	Loki          *Target[LokiOptions]          `mapstructure:"loki"`
-	Elasticsearch *Target[ElasticsearchOptions] `mapstructure:"elasticsearch"`
-	Slack         *Target[SlackOptions]         `mapstructure:"slack"`
-	Discord       *Target[WebhookOptions]       `mapstructure:"discord"`
-	Teams         *Target[WebhookOptions]       `mapstructure:"teams"`
-	Webhook       *Target[WebhookOptions]       `mapstructure:"webhook"`
-	GoogleChat    *Target[WebhookOptions]       `mapstructure:"googleChat"`
-	Telegram      *Target[TelegramOptions]      `mapstructure:"telegram"`
-	S3            *Target[S3Options]            `mapstructure:"s3"`
-	Kinesis       *Target[KinesisOptions]       `mapstructure:"kinesis"`
-	SecurityHub   *Target[SecurityHubOptions]   `mapstructure:"securityHub"`
-	GCS           *Target[GCSOptions]           `mapstructure:"gcs"`
+	Loki          *Config[LokiOptions]          `mapstructure:"loki"`
+	Elasticsearch *Config[ElasticsearchOptions] `mapstructure:"elasticsearch"`
+	Slack         *Config[SlackOptions]         `mapstructure:"slack"`
+	Discord       *Config[WebhookOptions]       `mapstructure:"discord"`
+	Teams         *Config[WebhookOptions]       `mapstructure:"teams"`
+	Webhook       *Config[WebhookOptions]       `mapstructure:"webhook"`
+	GoogleChat    *Config[WebhookOptions]       `mapstructure:"googleChat"`
+	Telegram      *Config[TelegramOptions]      `mapstructure:"telegram"`
+	S3            *Config[S3Options]            `mapstructure:"s3"`
+	Kinesis       *Config[KinesisOptions]       `mapstructure:"kinesis"`
+	SecurityHub   *Config[SecurityHubOptions]   `mapstructure:"securityHub"`
+	GCS           *Config[GCSOptions]           `mapstructure:"gcs"`
+}
+
+type Factory interface {
+	CreateClients(config *Targets) *Collection
+	CreateLokiTarget(config, parent *Config[LokiOptions]) *Target
+	CreateElasticsearchTarget(config, parent *Config[ElasticsearchOptions]) *Target
+	CreateSlackTarget(config, parent *Config[SlackOptions]) *Target
+	CreateDiscordTarget(config, parent *Config[WebhookOptions]) *Target
+	CreateTeamsTarget(config, parent *Config[WebhookOptions]) *Target
+	CreateWebhookTarget(config, parent *Config[WebhookOptions]) *Target
+	CreateTelegramTarget(config, parent *Config[TelegramOptions]) *Target
+	CreateGoogleChatTarget(config, parent *Config[WebhookOptions]) *Target
+	CreateS3Target(config, parent *Config[S3Options]) *Target
+	CreateKinesisTarget(config, parent *Config[KinesisOptions]) *Target
+	CreateSecurityHubTarget(config, parent *Config[SecurityHubOptions]) *Target
+	CreateGCSTarget(config, parent *Config[GCSOptions]) *Target
 }
