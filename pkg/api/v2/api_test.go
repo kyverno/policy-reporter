@@ -19,11 +19,11 @@ import (
 
 	"github.com/kyverno/policy-reporter/pkg/api"
 	v2 "github.com/kyverno/policy-reporter/pkg/api/v2"
-	"github.com/kyverno/policy-reporter/pkg/config"
 	"github.com/kyverno/policy-reporter/pkg/database"
 	"github.com/kyverno/policy-reporter/pkg/fixtures"
 	"github.com/kyverno/policy-reporter/pkg/kubernetes/namespaces"
 	"github.com/kyverno/policy-reporter/pkg/report/result"
+	"github.com/kyverno/policy-reporter/pkg/target"
 )
 
 const (
@@ -79,11 +79,11 @@ func TestV2(t *testing.T) {
 
 	gin.SetMode(gin.ReleaseMode)
 
-	server := api.NewServer(gin.New(), v2.WithAPI(store, client, config.Targets{
-		Webhook: &config.Target[config.WebhookOptions]{
+	server := api.NewServer(gin.New(), v2.WithAPI(store, client, target.Targets{
+		Webhook: &target.Config[target.WebhookOptions]{
 			Name:            "Webhook",
 			MinimumPriority: "warn",
-			Config: &config.WebhookOptions{
+			Config: &target.WebhookOptions{
 				Webhook: "http://localhost:8080",
 			},
 		},

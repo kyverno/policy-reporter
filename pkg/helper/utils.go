@@ -32,6 +32,15 @@ func Map[T any, R any](source []T, cb func(T) R) []R {
 	return list
 }
 
+func MapSlice[T any, R any, Z comparable](source map[Z]T, cb func(T) R) []R {
+	list := make([]R, 0, len(source))
+	for _, i := range source {
+		list = append(list, cb(i))
+	}
+
+	return list
+}
+
 func ConvertMap(m map[string]any) map[string]string {
 	n := make(map[string]string, len(m))
 	for k, v := range m {
@@ -63,4 +72,13 @@ func Filter[T any](s []T, keep func(T) bool) []T {
 		}
 	}
 	return d
+}
+
+func Find[T any](s []T, keep func(T) bool, fallback T) T {
+	for _, n := range s {
+		if keep(n) {
+			return n
+		}
+	}
+	return fallback
 }

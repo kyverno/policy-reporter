@@ -10,12 +10,13 @@ import (
 	"github.com/kyverno/policy-reporter/pkg/config"
 	"github.com/kyverno/policy-reporter/pkg/database"
 	"github.com/kyverno/policy-reporter/pkg/report"
+	"github.com/kyverno/policy-reporter/pkg/target"
 )
 
-var targets = config.Targets{
-	Loki: &config.Target[config.LokiOptions]{
-		Config: &config.LokiOptions{
-			HostOptions: config.HostOptions{
+var targets = target.Targets{
+	Loki: &target.Config[target.LokiOptions]{
+		Config: &target.LokiOptions{
+			HostOptions: target.HostOptions{
 				Host:    "http://localhost:3100",
 				SkipTLS: true,
 			},
@@ -23,15 +24,15 @@ var targets = config.Targets{
 		SkipExisting:    true,
 		MinimumPriority: "debug",
 		CustomFields:    map[string]string{"field": "value"},
-		Channels: []*config.Target[config.LokiOptions]{
+		Channels: []*target.Config[target.LokiOptions]{
 			{
 				CustomFields: map[string]string{"label2": "value2"},
 			},
 		},
 	},
-	Elasticsearch: &config.Target[config.ElasticsearchOptions]{
-		Config: &config.ElasticsearchOptions{
-			HostOptions: config.HostOptions{
+	Elasticsearch: &target.Config[target.ElasticsearchOptions]{
+		Config: &target.ElasticsearchOptions{
+			HostOptions: target.HostOptions{
 				Host:    "http://localhost:9200",
 				SkipTLS: true,
 			},
@@ -41,11 +42,11 @@ var targets = config.Targets{
 		SkipExisting:    true,
 		MinimumPriority: "debug",
 		CustomFields:    map[string]string{"field": "value"},
-		Channels:        []*config.Target[config.ElasticsearchOptions]{{}},
+		Channels:        []*target.Config[target.ElasticsearchOptions]{{}},
 	},
-	Slack: &config.Target[config.SlackOptions]{
-		Config: &config.SlackOptions{
-			WebhookOptions: config.WebhookOptions{
+	Slack: &target.Config[target.SlackOptions]{
+		Config: &target.SlackOptions{
+			WebhookOptions: target.WebhookOptions{
 				Webhook: "http://localhost:80",
 				SkipTLS: true,
 			},
@@ -53,59 +54,59 @@ var targets = config.Targets{
 		SkipExisting:    true,
 		MinimumPriority: "debug",
 		CustomFields:    map[string]string{"field": "value"},
-		Channels: []*config.Target[config.SlackOptions]{{
-			Config: &config.SlackOptions{
-				WebhookOptions: config.WebhookOptions{
+		Channels: []*target.Config[target.SlackOptions]{{
+			Config: &target.SlackOptions{
+				WebhookOptions: target.WebhookOptions{
 					Webhook: "http://localhost:9200",
 				},
 			},
 		}, {
-			Config: &config.SlackOptions{
+			Config: &target.SlackOptions{
 				Channel: "general",
 			},
 		}},
 	},
-	Discord: &config.Target[config.WebhookOptions]{
-		Config: &config.WebhookOptions{
+	Discord: &target.Config[target.WebhookOptions]{
+		Config: &target.WebhookOptions{
 			Webhook: "http://discord:80",
 			SkipTLS: true,
 		},
 		SkipExisting:    true,
 		MinimumPriority: "debug",
 		CustomFields:    map[string]string{"field": "value"},
-		Channels: []*config.Target[config.WebhookOptions]{{
-			Config: &config.WebhookOptions{
+		Channels: []*target.Config[target.WebhookOptions]{{
+			Config: &target.WebhookOptions{
 				Webhook: "http://localhost:9200",
 			},
 		}},
 	},
-	Teams: &config.Target[config.WebhookOptions]{
-		Config: &config.WebhookOptions{
+	Teams: &target.Config[target.WebhookOptions]{
+		Config: &target.WebhookOptions{
 			Webhook: "http://hook.teams:80",
 			SkipTLS: true,
 		},
 		SkipExisting:    true,
 		MinimumPriority: "debug",
 		CustomFields:    map[string]string{"field": "value"},
-		Channels: []*config.Target[config.WebhookOptions]{{
-			Config: &config.WebhookOptions{
+		Channels: []*target.Config[target.WebhookOptions]{{
+			Config: &target.WebhookOptions{
 				Webhook: "http://localhost:9200",
 			},
 		}},
 	},
-	GoogleChat: &config.Target[config.WebhookOptions]{
-		Config: &config.WebhookOptions{
+	GoogleChat: &target.Config[target.WebhookOptions]{
+		Config: &target.WebhookOptions{
 			Webhook: "http://localhost:900/webhook",
 			SkipTLS: true,
 		},
 		SkipExisting:    true,
 		MinimumPriority: "debug",
 		CustomFields:    map[string]string{"field": "value"},
-		Channels:        []*config.Target[config.WebhookOptions]{{}},
+		Channels:        []*target.Config[target.WebhookOptions]{{}},
 	},
-	Telegram: &config.Target[config.TelegramOptions]{
-		Config: &config.TelegramOptions{
-			WebhookOptions: config.WebhookOptions{
+	Telegram: &target.Config[target.TelegramOptions]{
+		Config: &target.TelegramOptions{
+			WebhookOptions: target.WebhookOptions{
 				Webhook: "http://localhost:80",
 				SkipTLS: true,
 			},
@@ -115,14 +116,14 @@ var targets = config.Targets{
 		SkipExisting:    true,
 		MinimumPriority: "debug",
 		CustomFields:    map[string]string{"field": "value"},
-		Channels: []*config.Target[config.TelegramOptions]{{
-			Config: &config.TelegramOptions{
+		Channels: []*target.Config[target.TelegramOptions]{{
+			Config: &target.TelegramOptions{
 				ChatID: "1234567",
 			},
 		}},
 	},
-	Webhook: &config.Target[config.WebhookOptions]{
-		Config: &config.WebhookOptions{
+	Webhook: &target.Config[target.WebhookOptions]{
+		Config: &target.WebhookOptions{
 			Webhook: "http://localhost:8080",
 			SkipTLS: true,
 			Headers: map[string]string{
@@ -132,8 +133,8 @@ var targets = config.Targets{
 		SkipExisting:    true,
 		MinimumPriority: "debug",
 		CustomFields:    map[string]string{"field": "value"},
-		Channels: []*config.Target[config.WebhookOptions]{{
-			Config: &config.WebhookOptions{
+		Channels: []*target.Config[target.WebhookOptions]{{
+			Config: &target.WebhookOptions{
 				Webhook: "http://localhost:8081",
 				Headers: map[string]string{
 					"X-Custom-2": "Header",
@@ -141,9 +142,9 @@ var targets = config.Targets{
 			},
 		}},
 	},
-	S3: &config.Target[config.S3Options]{
-		Config: &config.S3Options{
-			AWSConfig: config.AWSConfig{
+	S3: &target.Config[target.S3Options]{
+		Config: &target.S3Options{
+			AWSConfig: target.AWSConfig{
 				AccessKeyID:     "AccessKey",
 				SecretAccessKey: "SecretAccessKey",
 				Endpoint:        "https://storage.yandexcloud.net",
@@ -159,11 +160,11 @@ var targets = config.Targets{
 		SkipExisting:    true,
 		MinimumPriority: "debug",
 		CustomFields:    map[string]string{"field": "value"},
-		Channels:        []*config.Target[config.S3Options]{{}},
+		Channels:        []*target.Config[target.S3Options]{{}},
 	},
-	Kinesis: &config.Target[config.KinesisOptions]{
-		Config: &config.KinesisOptions{
-			AWSConfig: config.AWSConfig{
+	Kinesis: &target.Config[target.KinesisOptions]{
+		Config: &target.KinesisOptions{
+			AWSConfig: target.AWSConfig{
 				AccessKeyID:     "AccessKey",
 				SecretAccessKey: "SecretAccessKey",
 				Endpoint:        "https://storage.yandexcloud.net",
@@ -174,11 +175,11 @@ var targets = config.Targets{
 		SkipExisting:    true,
 		MinimumPriority: "debug",
 		CustomFields:    map[string]string{"field": "value"},
-		Channels:        []*config.Target[config.KinesisOptions]{{}},
+		Channels:        []*target.Config[target.KinesisOptions]{{}},
 	},
-	SecurityHub: &config.Target[config.SecurityHubOptions]{
-		Config: &config.SecurityHubOptions{
-			AWSConfig: config.AWSConfig{
+	SecurityHub: &target.Config[target.SecurityHubOptions]{
+		Config: &target.SecurityHubOptions{
+			AWSConfig: target.AWSConfig{
 				AccessKeyID:     "AccessKey",
 				SecretAccessKey: "SecretAccessKey",
 				Endpoint:        "https://storage.yandexcloud.net",
@@ -189,10 +190,10 @@ var targets = config.Targets{
 		SkipExisting:    true,
 		MinimumPriority: "debug",
 		CustomFields:    map[string]string{"field": "value"},
-		Channels:        []*config.Target[config.SecurityHubOptions]{{}},
+		Channels:        []*target.Config[target.SecurityHubOptions]{{}},
 	},
-	GCS: &config.Target[config.GCSOptions]{
-		Config: &config.GCSOptions{
+	GCS: &target.Config[target.GCSOptions]{
+		Config: &target.GCSOptions{
 			Credentials: `{"token": "token", "type": "authorized_user"}`,
 			Bucket:      "test",
 			Prefix:      "prefix",
@@ -200,7 +201,7 @@ var targets = config.Targets{
 		SkipExisting:    true,
 		MinimumPriority: "debug",
 		CustomFields:    map[string]string{"field": "value"},
-		Channels:        []*config.Target[config.GCSOptions]{{}},
+		Channels:        []*target.Config[target.GCSOptions]{{}},
 	},
 }
 
@@ -236,34 +237,30 @@ var testConfig = &config.Config{
 func Test_ResolveTargets(t *testing.T) {
 	resolver := config.NewResolver(testConfig, &rest.Config{})
 
-	if count := len(resolver.TargetClients()); count != 25 {
-		t.Errorf("Expected 25 Clients, got %d", count)
-	}
+	assert.Equal(t, resolver.TargetClients().Length(), 25)
 }
 
 func Test_ResolveHasTargets(t *testing.T) {
 	resolver := config.NewResolver(testConfig, &rest.Config{})
 
-	if !resolver.HasTargets() {
-		t.Errorf("Expected 'true'")
-	}
+	assert.True(t, resolver.HasTargets())
 }
 
 func Test_ResolveSkipExistingOnStartup(t *testing.T) {
 	testConfig := &config.Config{
-		Targets: config.Targets{
-			Loki: &config.Target[config.LokiOptions]{
-				Config: &config.LokiOptions{
-					HostOptions: config.HostOptions{
+		Targets: target.Targets{
+			Loki: &target.Config[target.LokiOptions]{
+				Config: &target.LokiOptions{
+					HostOptions: target.HostOptions{
 						Host: "http://localhost:3100",
 					},
 				},
 				SkipExisting:    true,
 				MinimumPriority: "debug",
 			},
-			Elasticsearch: &config.Target[config.ElasticsearchOptions]{
-				Config: &config.ElasticsearchOptions{
-					HostOptions: config.HostOptions{
+			Elasticsearch: &target.Config[target.ElasticsearchOptions]{
+				Config: &target.ElasticsearchOptions{
+					HostOptions: target.HostOptions{
 						Host: "http://localhost:9200",
 					},
 				},
@@ -278,9 +275,7 @@ func Test_ResolveSkipExistingOnStartup(t *testing.T) {
 
 		resolver := config.NewResolver(testConfig, &rest.Config{})
 
-		if resolver.SkipExistingOnStartup() == true {
-			t.Error("Expected SkipExistingOnStartup to be false if one Client has SkipExistingOnStartup false configured")
-		}
+		assert.False(t, resolver.SkipExistingOnStartup(), "Expected SkipExistingOnStartup to be false if one Client has SkipExistingOnStartup false configured")
 	})
 
 	t.Run("Resolve true", func(t *testing.T) {
@@ -288,9 +283,7 @@ func Test_ResolveSkipExistingOnStartup(t *testing.T) {
 
 		resolver := config.NewResolver(testConfig, &rest.Config{})
 
-		if resolver.SkipExistingOnStartup() == false {
-			t.Error("Expected SkipExistingOnStartup to be true if all Client has SkipExistingOnStartup true configured")
-		}
+		assert.True(t, resolver.SkipExistingOnStartup(), "Expected SkipExistingOnStartup to be true if all Client has SkipExistingOnStartup true configured")
 	})
 }
 
@@ -298,28 +291,40 @@ func Test_ResolvePolicyClient(t *testing.T) {
 	resolver := config.NewResolver(&config.Config{DBFile: "test.db"}, &rest.Config{})
 
 	client1, err := resolver.PolicyReportClient()
-	if err != nil {
-		t.Errorf("Unexpected Error: %s", err)
-	}
+	assert.Nil(t, err)
 
 	client2, _ := resolver.PolicyReportClient()
-	if client1 != client2 {
-		t.Error("A second call resolver.PolicyReportClient() should return the cached first client")
-	}
+
+	assert.Equal(t, client1, client2, "A second call resolver.PolicyReportClient() should return the cached first client")
+}
+
+func Test_ResolveSecretInformer(t *testing.T) {
+	resolver := config.NewResolver(&config.Config{DBFile: "test.db"}, &rest.Config{})
+
+	informer, err := resolver.SecretInformer()
+	assert.Nil(t, err)
+	assert.NotNil(t, informer)
+}
+
+func Test_ResolveSecretInformerWithInvalidK8sConfig(t *testing.T) {
+	k8sConfig := &rest.Config{}
+	k8sConfig.Host = "invalid/url"
+
+	resolver := config.NewResolver(testConfig, k8sConfig)
+
+	_, err := resolver.SecretInformer()
+	assert.NotNil(t, err, "Error: 'host must be a URL or a host:port pair' was expected")
 }
 
 func Test_ResolveLeaderElectionClient(t *testing.T) {
 	resolver := config.NewResolver(&config.Config{DBFile: "test.db"}, &rest.Config{})
 
 	client1, err := resolver.LeaderElectionClient()
-	if err != nil {
-		t.Errorf("Unexpected Error: %s", err)
-	}
+	assert.Nil(t, err)
 
 	client2, _ := resolver.LeaderElectionClient()
-	if client1 != client2 {
-		t.Error("A second call resolver.LeaderElectionClient() should return the cached first client")
-	}
+
+	assert.Equal(t, client1, client2, "A second call resolver.LeaderElectionClient() should return the cached first client")
 }
 
 func Test_ResolvePolicyStore(t *testing.T) {
@@ -328,14 +333,10 @@ func Test_ResolvePolicyStore(t *testing.T) {
 	defer db.Close()
 
 	store1, err := resolver.Store(db)
-	if err != nil {
-		t.Errorf("Unexpected Error: %s", err)
-	}
+	assert.Nil(t, err)
 
 	store2, _ := resolver.Store(db)
-	if store1 != store2 {
-		t.Error("A second call resolver.PolicyReportClient() should return the cached first client")
-	}
+	assert.Equal(t, store1, store2, "A second call resolver.Store() should return the cached first client")
 }
 
 func Test_ResolveAPIServer(t *testing.T) {
@@ -346,9 +347,7 @@ func Test_ResolveAPIServer(t *testing.T) {
 	}, &rest.Config{})
 
 	server, _ := resolver.Server(context.Background(), nil)
-	if server == nil {
-		t.Error("Error: Should return API Server")
-	}
+	assert.NotNil(t, server)
 }
 
 func Test_ResolveCache(t *testing.T) {
@@ -356,14 +355,9 @@ func Test_ResolveCache(t *testing.T) {
 		resolver := config.NewResolver(testConfig, &rest.Config{})
 
 		cache1 := resolver.ResultCache()
-		if cache1 == nil {
-			t.Error("Error: Should return ResultCache")
-		}
+		assert.NotNil(t, cache1)
 
-		cache2 := resolver.ResultCache()
-		if cache1 != cache2 {
-			t.Error("A second call resolver.ResultCache() should return the cached first cache")
-		}
+		assert.Equal(t, cache1, resolver.ResultCache(), "A second call resolver.ResultCache() should return the cached first client")
 	})
 
 	t.Run("Redis", func(t *testing.T) {
@@ -376,20 +370,14 @@ func Test_ResolveCache(t *testing.T) {
 
 		resolver := config.NewResolver(redisConfig, &rest.Config{})
 
-		cache1 := resolver.ResultCache()
-		if cache1 == nil {
-			t.Error("Error: Should return ResultCache")
-		}
+		assert.NotNil(t, resolver.ResultCache())
 	})
 }
 
 func Test_ResolveReportFilter(t *testing.T) {
 	resolver := config.NewResolver(testConfig, &rest.Config{})
 
-	filter := resolver.ReportFilter()
-	if filter == nil {
-		t.Error("Error: Should return Filter")
-	}
+	assert.NotNil(t, resolver.ReportFilter())
 }
 
 func Test_ResolveClientWithInvalidK8sConfig(t *testing.T) {
@@ -399,9 +387,7 @@ func Test_ResolveClientWithInvalidK8sConfig(t *testing.T) {
 	resolver := config.NewResolver(testConfig, k8sConfig)
 
 	_, err := resolver.PolicyReportClient()
-	if err == nil {
-		t.Error("Error: 'host must be a URL or a host:port pair' was expected")
-	}
+	assert.NotNil(t, err, "Error: 'host must be a URL or a host:port pair' was expected")
 }
 
 func Test_ResolveLeaderElectionWithInvalidK8sConfig(t *testing.T) {
@@ -411,18 +397,14 @@ func Test_ResolveLeaderElectionWithInvalidK8sConfig(t *testing.T) {
 	resolver := config.NewResolver(testConfig, k8sConfig)
 
 	_, err := resolver.LeaderElectionClient()
-	if err == nil {
-		t.Error("Error: 'host must be a URL or a host:port pair' was expected")
-	}
+	assert.NotNil(t, err, "Error: 'host must be a URL or a host:port pair' was expected")
 }
 
 func Test_ResolveCRDClient(t *testing.T) {
 	resolver := config.NewResolver(testConfig, &rest.Config{})
 
 	_, err := resolver.CRDClient()
-	if err != nil {
-		t.Error("unexpected error")
-	}
+	assert.Nil(t, err)
 }
 
 func Test_ResolveCRDClientWithInvalidK8sConfig(t *testing.T) {
@@ -432,18 +414,13 @@ func Test_ResolveCRDClientWithInvalidK8sConfig(t *testing.T) {
 	resolver := config.NewResolver(testConfig, k8sConfig)
 
 	_, err := resolver.CRDClient()
-	if err == nil {
-		t.Error("Error: 'host must be a URL or a host:port pair' was expected")
-	}
+	assert.NotNil(t, err, "Error: 'host must be a URL or a host:port pair' was expected")
 }
 
 func Test_ResolveSecretClient(t *testing.T) {
 	resolver := config.NewResolver(testConfig, &rest.Config{})
 
-	client := resolver.SecretClient()
-	if client == nil {
-		t.Error("unexpected error")
-	}
+	assert.NotNil(t, resolver.SecretClient())
 }
 
 func Test_ResolveSecretCClientWithInvalidK8sConfig(t *testing.T) {
@@ -453,9 +430,7 @@ func Test_ResolveSecretCClientWithInvalidK8sConfig(t *testing.T) {
 	resolver := config.NewResolver(testConfig, k8sConfig)
 
 	client := resolver.SecretClient()
-	if client != nil {
-		t.Error("Error: 'host must be a URL or a host:port pair' was expected")
-	}
+	assert.Nil(t, client, "Error: 'host must be a URL or a host:port pair' was expected")
 }
 
 func Test_RegisterStoreListener(t *testing.T) {
@@ -463,9 +438,7 @@ func Test_RegisterStoreListener(t *testing.T) {
 		resolver := config.NewResolver(testConfig, &rest.Config{})
 		resolver.RegisterStoreListener(context.Background(), report.NewPolicyReportStore())
 
-		if len(resolver.EventPublisher().GetListener()) != 1 {
-			t.Error("Expected one Listener to be registered")
-		}
+		assert.Len(t, resolver.EventPublisher().GetListener(), 1, "Expected one Listener to be registered")
 	})
 }
 
@@ -474,9 +447,7 @@ func Test_RegisterMetricsListener(t *testing.T) {
 		resolver := config.NewResolver(testConfig, &rest.Config{})
 		resolver.RegisterMetricsListener()
 
-		if len(resolver.EventPublisher().GetListener()) != 1 {
-			t.Error("Expected one Listener to be registered")
-		}
+		assert.Len(t, resolver.EventPublisher().GetListener(), 1, "Expected one Listener to be registered")
 	})
 }
 
@@ -485,18 +456,14 @@ func Test_RegisterSendResultListener(t *testing.T) {
 		resolver := config.NewResolver(testConfig, &rest.Config{})
 		resolver.RegisterSendResultListener()
 
-		if len(resolver.EventPublisher().GetListener()) != 1 {
-			t.Error("Expected one Listener to be registered")
-		}
+		assert.Len(t, resolver.EventPublisher().GetListener(), 1, "Expected one Listener to be registered")
 	})
 	t.Run("Register SendResultListener without Targets", func(t *testing.T) {
 		resolver := config.NewResolver(&config.Config{}, &rest.Config{})
 
 		resolver.RegisterSendResultListener()
 
-		if len(resolver.EventPublisher().GetListener()) != 0 {
-			t.Error("Expected no Listener to be registered because no target exists")
-		}
+		assert.Len(t, resolver.EventPublisher().GetListener(), 0, "Expected no Listener to be registered because no target exists")
 	})
 }
 
@@ -504,12 +471,9 @@ func Test_SummaryReportServices(t *testing.T) {
 	t.Run("Generator", func(t *testing.T) {
 		resolver := config.NewResolver(testConfig, &rest.Config{})
 		generator, err := resolver.SummaryGenerator()
-		if err != nil {
-			t.Errorf("Unexpected error: %s", err)
-		}
-		if generator == nil {
-			t.Error("Should return Generator Pointer")
-		}
+
+		assert.Nil(t, err)
+		assert.NotNil(t, generator)
 	})
 	t.Run("Generator.Error", func(t *testing.T) {
 		k8sConfig := &rest.Config{}
@@ -518,16 +482,12 @@ func Test_SummaryReportServices(t *testing.T) {
 		resolver := config.NewResolver(testConfig, k8sConfig)
 
 		_, err := resolver.SummaryGenerator()
-		if err == nil {
-			t.Error("Error: 'host must be a URL or a host:port pair' was expected")
-		}
+		assert.NotNil(t, err, "Error: 'host must be a URL or a host:port pair' was expected")
 	})
 	t.Run("Reporter", func(t *testing.T) {
 		resolver := config.NewResolver(testConfig, &rest.Config{})
-		reporter := resolver.SummaryReporter()
-		if reporter == nil {
-			t.Error("Should return Reporter Pointer")
-		}
+
+		assert.NotNil(t, resolver.SummaryReporter())
 	})
 }
 
@@ -535,12 +495,9 @@ func Test_ViolationReportServices(t *testing.T) {
 	t.Run("Generator", func(t *testing.T) {
 		resolver := config.NewResolver(testConfig, &rest.Config{})
 		generator, err := resolver.ViolationsGenerator()
-		if err != nil {
-			t.Errorf("Unexpected error: %s", err)
-		}
-		if generator == nil {
-			t.Error("Should return Generator Pointer")
-		}
+
+		assert.Nil(t, err)
+		assert.NotNil(t, generator)
 	})
 	t.Run("Generator.Error", func(t *testing.T) {
 		k8sConfig := &rest.Config{}
@@ -549,33 +506,25 @@ func Test_ViolationReportServices(t *testing.T) {
 		resolver := config.NewResolver(testConfig, k8sConfig)
 
 		_, err := resolver.ViolationsGenerator()
-		if err == nil {
-			t.Error("Error: 'host must be a URL or a host:port pair' was expected")
-		}
+		assert.NotNil(t, err, "Error: 'host must be a URL or a host:port pair' was expected")
 	})
 	t.Run("Reporter", func(t *testing.T) {
 		resolver := config.NewResolver(testConfig, &rest.Config{})
-		reporter := resolver.ViolationsReporter()
-		if reporter == nil {
-			t.Error("Should return Reporter Pointer")
-		}
+
+		assert.NotNil(t, resolver.ViolationsReporter())
 	})
 }
 
 func Test_SMTP(t *testing.T) {
 	t.Run("SMTP", func(t *testing.T) {
 		resolver := config.NewResolver(testConfig, &rest.Config{})
-		smtp := resolver.SMTPServer()
-		if smtp == nil {
-			t.Error("Should return SMTP Pointer")
-		}
+
+		assert.NotNil(t, resolver.SMTPServer())
 	})
 	t.Run("EmailClient", func(t *testing.T) {
 		resolver := config.NewResolver(testConfig, &rest.Config{})
-		client := resolver.EmailClient()
-		if client == nil {
-			t.Error("Should return EmailClient Pointer")
-		}
+
+		assert.NotNil(t, resolver.EmailClient())
 	})
 }
 
@@ -583,32 +532,22 @@ func Test_ResolveLogger(t *testing.T) {
 	resolver := config.NewResolver(testConfig, &rest.Config{})
 
 	logger1, _ := resolver.Logger()
-	if logger1 == nil {
-		t.Error("Error: Should return Logger")
-	}
+	assert.NotNil(t, logger1)
 
 	logger2, _ := resolver.Logger()
-	if logger1 != logger2 {
-		t.Error("A second call resolver.Mapper() should return the cached first cache")
-	}
-}
+	assert.NotNil(t, logger2)
 
-func Test_Logger(t *testing.T) {
-	resolver := config.NewResolver(&config.Config{}, &rest.Config{})
-
-	logger, _ := resolver.Logger()
-
-	assert.NotNil(t, logger)
+	assert.Equal(t, logger1, logger2, "A second call resolver.Logger() should return the cached first cache")
 }
 
 func Test_ResolveEnableLeaderElection(t *testing.T) {
 	t.Run("general disabled", func(t *testing.T) {
 		resolver := config.NewResolver(&config.Config{
 			LeaderElection: config.LeaderElection{Enabled: false},
-			Targets: config.Targets{
-				Loki: &config.Target[config.LokiOptions]{
-					Config: &config.LokiOptions{
-						HostOptions: config.HostOptions{
+			Targets: target.Targets{
+				Loki: &target.Config[target.LokiOptions]{
+					Config: &target.LokiOptions{
+						HostOptions: target.HostOptions{
 							Host: "http://localhost:3100",
 						},
 					},
@@ -617,9 +556,7 @@ func Test_ResolveEnableLeaderElection(t *testing.T) {
 			Database: config.Database{Type: database.MySQL},
 		}, &rest.Config{})
 
-		if resolver.EnableLeaderElection() {
-			t.Error("leaderelection should be not enabled if its general disabled")
-		}
+		assert.False(t, resolver.EnableLeaderElection(), "leaderelection should be not enabled if its general disabled")
 	})
 
 	t.Run("no pushes and SQLite Database", func(t *testing.T) {
@@ -629,19 +566,17 @@ func Test_ResolveEnableLeaderElection(t *testing.T) {
 			DBFile:         "test.db",
 		}, &rest.Config{})
 
-		if resolver.EnableLeaderElection() {
-			t.Error("leaderelection should be not enabled if no pushes configured and SQLite is used")
-		}
+		assert.False(t, resolver.EnableLeaderElection(), "leaderelection should be not enabled if no pushes configured and SQLite is used")
 	})
 
 	t.Run("enabled if pushes defined", func(t *testing.T) {
 		resolver := config.NewResolver(&config.Config{
 			LeaderElection: config.LeaderElection{Enabled: true},
 			Database:       config.Database{Type: database.SQLite},
-			Targets: config.Targets{
-				Loki: &config.Target[config.LokiOptions]{
-					Config: &config.LokiOptions{
-						HostOptions: config.HostOptions{
+			Targets: target.Targets{
+				Loki: &target.Config[target.LokiOptions]{
+					Config: &target.LokiOptions{
+						HostOptions: target.HostOptions{
 							Host: "http://localhost:3100",
 						},
 					},
@@ -650,9 +585,7 @@ func Test_ResolveEnableLeaderElection(t *testing.T) {
 			DBFile: "test.db",
 		}, &rest.Config{})
 
-		if !resolver.EnableLeaderElection() {
-			t.Error("leaderelection should be enabled if general enabled and targets configured")
-		}
+		assert.True(t, resolver.EnableLeaderElection(), "leaderelection should be enabled if general enabled and targets configured")
 	})
 }
 
@@ -660,5 +593,14 @@ func Test_ResolveCustomIDGenerators(t *testing.T) {
 	resolver := config.NewResolver(testConfig, nil)
 
 	generators := resolver.CustomIDGenerators()
-	assert.Equal(t, 1, len(generators), "only enabled custom id config should be mapped")
+	assert.Len(t, generators, 1, "only enabled custom id config should be mapped")
+}
+
+func Test_ResolveTargetCollection(t *testing.T) {
+	resolver := config.NewResolver(testConfig, &rest.Config{})
+
+	collection := resolver.TargetClients()
+	assert.NotNil(t, collection)
+
+	assert.Equal(t, collection, resolver.TargetClients(), "A second call resolver.TargetClients() should return the cached first cache")
 }
