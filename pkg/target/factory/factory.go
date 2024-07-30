@@ -1,4 +1,4 @@
-package config
+package factory
 
 import (
 	"context"
@@ -8,9 +8,7 @@ import (
 	"strings"
 	"time"
 
-	_ "github.com/mattn/go-sqlite3"
-	"go.uber.org/zap"
-
+	"github.com/google/uuid"
 	"github.com/kyverno/policy-reporter/pkg/helper"
 	"github.com/kyverno/policy-reporter/pkg/kubernetes/secrets"
 	"github.com/kyverno/policy-reporter/pkg/report"
@@ -31,6 +29,8 @@ import (
 	"github.com/kyverno/policy-reporter/pkg/target/telegram"
 	"github.com/kyverno/policy-reporter/pkg/target/webhook"
 	"github.com/kyverno/policy-reporter/pkg/validate"
+	_ "github.com/mattn/go-sqlite3"
+	"go.uber.org/zap"
 )
 
 // TargetFactory manages target creation
@@ -40,8 +40,8 @@ type TargetFactory struct {
 }
 
 // LokiClients resolver method
-func createClients[T any](name string, config *Target[T], mapper func(*Target[T], *Target[T]) target.Client) []target.Client {
-	clients := make([]target.Client, 0)
+func createClients[T any](name string, config *target.Config[T], mapper func(*target.Config[T], *target.Config[T]) *target.Target) []*target.Target {
+	clients := make([]*target.Target, 0)
 	if config == nil {
 		return clients
 	}
@@ -52,7 +52,7 @@ func createClients[T any](name string, config *Target[T], mapper func(*Target[T]
 
 	setFallback(&config.Name, name)
 
-	if client := mapper(config, &Target[T]{Config: new(T)}); client != nil {
+	if client := mapper(config, &target.Config[T]{Config: new(T)}); client != nil {
 		clients = append(clients, client)
 		config.Valid = true
 	}
@@ -74,31 +74,35 @@ func createClients[T any](name string, config *Target[T], mapper func(*Target[T]
 }
 
 // LokiClients resolver method
-func (f *TargetFactory) CreateClients(config *Targets) []target.Client {
-	clients := make([]target.Client, 0)
+func (f *TargetFactory) CreateClients(config *target.Targets) *target.Collection {
+	targets := make([]*target.Target, 0)
 	if config == nil {
-		return clients
+		return target.NewCollection()
 	}
 
-	clients = append(clients, createClients("Loki", config.Loki, f.createLokiClient)...)
-	clients = append(clients, createClients("Elasticsearch", config.Elasticsearch, f.createElasticsearchClient)...)
-	clients = append(clients, createClients("Slack", config.Slack, f.createSlackClient)...)
-	clients = append(clients, createClients("Discord", config.Discord, f.createDiscordClient)...)
-	clients = append(clients, createClients("Teams", config.Teams, f.createTeamsClient)...)
-	clients = append(clients, createClients("GoogleChat", config.GoogleChat, f.createGoogleChatClient)...)
-	clients = append(clients, createClients("Telegram", config.Telegram, f.createTelegramClient)...)
-	clients = append(clients, createClients("Webhook", config.Webhook, f.createWebhookClient)...)
-	clients = append(clients, createClients("S3", config.S3, f.createS3Client)...)
-	clients = append(clients, createClients("Kinesis", config.Kinesis, f.createKinesisClient)...)
-	clients = append(clients, createClients("SecurityHub", config.SecurityHub, f.createSecurityHub)...)
-	clients = append(clients, createClients("GoogleCloudStorage", config.GCS, f.createGCSClient)...)
+	targets = append(targets, createClients("Loki", config.Loki, f.CreateLokiTarget)...)
+	targets = append(targets, createClients("Elasticsearch", config.Elasticsearch, f.CreateElasticsearchTarget)...)
+	targets = append(targets, createClients("Slack", config.Slack, f.CreateSlackTarget)...)
+	targets = append(targets, createClients("Discord", config.Discord, f.CreateDiscordTarget)...)
+	targets = append(targets, createClients("Teams", config.Teams, f.CreateTeamsTarget)...)
+	targets = append(targets, createClients("GoogleChat", config.GoogleChat, f.CreateGoogleChatTarget)...)
+	targets = append(targets, createClients("Telegram", config.Telegram, f.CreateTelegramTarget)...)
+	targets = append(targets, createClients("Webhook", config.Webhook, f.CreateWebhookTarget)...)
+	targets = append(targets, createClients("S3", config.S3, f.CreateS3Target)...)
+	targets = append(targets, createClients("Kinesis", config.Kinesis, f.CreateKinesisTarget)...)
+	targets = append(targets, createClients("SecurityHub", config.SecurityHub, f.CreateSecurityHubTarget)...)
+	targets = append(targets, createClients("GoogleCloudStorage", config.GCS, f.CreateGCSTarget)...)
 
-	return clients
+	return target.NewCollection(targets...)
 }
 
-func (f *TargetFactory) createSlackClient(config, parent *Target[SlackOptions]) target.Client {
+func (f *TargetFactory) CreateSlackTarget(config, parent *target.Config[target.SlackOptions]) *target.Target {
 	if config == nil {
 		return nil
+	}
+
+	if (parent.SecretRef != "" && f.secretClient != nil) || parent.MountedSecret != "" {
+		f.mapSecretValues(parent, parent.SecretRef, parent.MountedSecret)
 	}
 
 	if (config.SecretRef != "" && f.secretClient != nil) || config.MountedSecret != "" {
@@ -119,24 +123,34 @@ func (f *TargetFactory) createSlackClient(config, parent *Target[SlackOptions]) 
 
 	zap.S().Infof("%s configured", config.Name)
 
-	return slack.NewClient(slack.Options{
-		ClientOptions: target.ClientOptions{
-			Name:                  config.Name,
-			SkipExistingOnStartup: config.SkipExisting,
-			ResultFilter:          f.createResultFilter(config.Filter, config.MinimumPriority, config.Sources),
-			ReportFilter:          createReportFilter(config.Filter),
-		},
-		Channel:      config.Config.Channel,
-		Webhook:      config.Config.Webhook,
-		CustomFields: config.CustomFields,
-		Headers:      config.Config.Headers,
-		HTTPClient:   http.NewClient("", false),
-	})
+	return &target.Target{
+		ID:           uuid.NewString(),
+		Type:         target.Slack,
+		Config:       config,
+		ParentConfig: parent,
+		Client: slack.NewClient(slack.Options{
+			ClientOptions: target.ClientOptions{
+				Name:                  config.Name,
+				SkipExistingOnStartup: config.SkipExisting,
+				ResultFilter:          f.createResultFilter(config.Filter, config.MinimumPriority, config.Sources),
+				ReportFilter:          createReportFilter(config.Filter),
+			},
+			Channel:      config.Config.Channel,
+			Webhook:      config.Config.Webhook,
+			CustomFields: config.CustomFields,
+			Headers:      config.Config.Headers,
+			HTTPClient:   http.NewClient("", false),
+		}),
+	}
 }
 
-func (f *TargetFactory) createLokiClient(config, parent *Target[LokiOptions]) target.Client {
+func (f *TargetFactory) CreateLokiTarget(config, parent *target.Config[target.LokiOptions]) *target.Target {
 	if config == nil || config.Config == nil {
 		return nil
+	}
+
+	if (parent.SecretRef != "" && f.secretClient != nil) || parent.MountedSecret != "" {
+		f.mapSecretValues(parent, parent.SecretRef, parent.MountedSecret)
 	}
 
 	if (config.SecretRef != "" && f.secretClient != nil) || config.MountedSecret != "" {
@@ -159,25 +173,35 @@ func (f *TargetFactory) createLokiClient(config, parent *Target[LokiOptions]) ta
 
 	zap.S().Infof("%s configured", config.Name)
 
-	return loki.NewClient(loki.Options{
-		ClientOptions: target.ClientOptions{
-			Name:                  config.Name,
-			SkipExistingOnStartup: config.SkipExisting,
-			ResultFilter:          f.createResultFilter(config.Filter, config.MinimumPriority, config.Sources),
-			ReportFilter:          createReportFilter(config.Filter),
-		},
-		Host:         config.Config.Host + config.Config.Path,
-		CustomLabels: config.CustomFields,
-		Username:     config.Config.Username,
-		Password:     config.Config.Password,
-		HTTPClient:   http.NewClient(config.Config.Certificate, config.Config.SkipTLS),
-		Headers:      config.Config.Headers,
-	})
+	return &target.Target{
+		ID:           uuid.NewString(),
+		Type:         target.Loki,
+		Config:       config,
+		ParentConfig: parent,
+		Client: loki.NewClient(loki.Options{
+			ClientOptions: target.ClientOptions{
+				Name:                  config.Name,
+				SkipExistingOnStartup: config.SkipExisting,
+				ResultFilter:          f.createResultFilter(config.Filter, config.MinimumPriority, config.Sources),
+				ReportFilter:          createReportFilter(config.Filter),
+			},
+			Host:         config.Config.Host + config.Config.Path,
+			CustomLabels: config.CustomFields,
+			Username:     config.Config.Username,
+			Password:     config.Config.Password,
+			HTTPClient:   http.NewClient(config.Config.Certificate, config.Config.SkipTLS),
+			Headers:      config.Config.Headers,
+		}),
+	}
 }
 
-func (f *TargetFactory) createElasticsearchClient(config, parent *Target[ElasticsearchOptions]) target.Client {
+func (f *TargetFactory) CreateElasticsearchTarget(config, parent *target.Config[target.ElasticsearchOptions]) *target.Target {
 	if config == nil || config.Config == nil {
 		return nil
+	}
+
+	if (parent.SecretRef != "" && f.secretClient != nil) || parent.MountedSecret != "" {
+		f.mapSecretValues(parent, parent.SecretRef, parent.MountedSecret)
 	}
 
 	if (config.SecretRef != "" && f.secretClient != nil) || config.MountedSecret != "" {
@@ -202,28 +226,38 @@ func (f *TargetFactory) createElasticsearchClient(config, parent *Target[Elastic
 
 	zap.S().Infof("%s configured", config.Name)
 
-	return elasticsearch.NewClient(elasticsearch.Options{
-		ClientOptions: target.ClientOptions{
-			Name:                  config.Name,
-			SkipExistingOnStartup: config.SkipExisting,
-			ResultFilter:          f.createResultFilter(config.Filter, config.MinimumPriority, config.Sources),
-			ReportFilter:          createReportFilter(config.Filter),
-		},
-		Host:         config.Config.Host,
-		Username:     config.Config.Username,
-		Password:     config.Config.Password,
-		ApiKey:       config.Config.APIKey,
-		Rotation:     config.Config.Rotation,
-		Index:        config.Config.Index,
-		TypelessApi:  config.Config.TypelessAPI,
-		CustomFields: config.CustomFields,
-		HTTPClient:   http.NewClient(config.Config.Certificate, config.Config.SkipTLS),
-	})
+	return &target.Target{
+		ID:           uuid.NewString(),
+		Type:         target.Elasticsearch,
+		Config:       config,
+		ParentConfig: parent,
+		Client: elasticsearch.NewClient(elasticsearch.Options{
+			ClientOptions: target.ClientOptions{
+				Name:                  config.Name,
+				SkipExistingOnStartup: config.SkipExisting,
+				ResultFilter:          f.createResultFilter(config.Filter, config.MinimumPriority, config.Sources),
+				ReportFilter:          createReportFilter(config.Filter),
+			},
+			Host:         config.Config.Host,
+			Username:     config.Config.Username,
+			Password:     config.Config.Password,
+			ApiKey:       config.Config.APIKey,
+			Rotation:     config.Config.Rotation,
+			Index:        config.Config.Index,
+			TypelessApi:  config.Config.TypelessAPI,
+			CustomFields: config.CustomFields,
+			HTTPClient:   http.NewClient(config.Config.Certificate, config.Config.SkipTLS),
+		}),
+	}
 }
 
-func (f *TargetFactory) createDiscordClient(config, parent *Target[WebhookOptions]) target.Client {
+func (f *TargetFactory) CreateDiscordTarget(config, parent *target.Config[target.WebhookOptions]) *target.Target {
 	if config == nil || config.Config == nil {
 		return nil
+	}
+
+	if (parent.SecretRef != "" && f.secretClient != nil) || parent.MountedSecret != "" {
+		f.mapSecretValues(parent, parent.SecretRef, parent.MountedSecret)
 	}
 
 	if (config.SecretRef != "" && f.secretClient != nil) || config.MountedSecret != "" {
@@ -238,22 +272,32 @@ func (f *TargetFactory) createDiscordClient(config, parent *Target[WebhookOption
 
 	zap.S().Infof("%s configured", config.Name)
 
-	return discord.NewClient(discord.Options{
-		ClientOptions: target.ClientOptions{
-			Name:                  config.Name,
-			SkipExistingOnStartup: config.SkipExisting,
-			ResultFilter:          f.createResultFilter(config.Filter, config.MinimumPriority, config.Sources),
-			ReportFilter:          createReportFilter(config.Filter),
-		},
-		Webhook:      config.Config.Webhook,
-		CustomFields: config.CustomFields,
-		HTTPClient:   http.NewClient(config.Config.Certificate, config.Config.SkipTLS),
-	})
+	return &target.Target{
+		ID:           uuid.NewString(),
+		Type:         target.Discord,
+		Config:       config,
+		ParentConfig: parent,
+		Client: discord.NewClient(discord.Options{
+			ClientOptions: target.ClientOptions{
+				Name:                  config.Name,
+				SkipExistingOnStartup: config.SkipExisting,
+				ResultFilter:          f.createResultFilter(config.Filter, config.MinimumPriority, config.Sources),
+				ReportFilter:          createReportFilter(config.Filter),
+			},
+			Webhook:      config.Config.Webhook,
+			CustomFields: config.CustomFields,
+			HTTPClient:   http.NewClient(config.Config.Certificate, config.Config.SkipTLS),
+		}),
+	}
 }
 
-func (f *TargetFactory) createTeamsClient(config, parent *Target[WebhookOptions]) target.Client {
+func (f *TargetFactory) CreateTeamsTarget(config, parent *target.Config[target.WebhookOptions]) *target.Target {
 	if config == nil || config.Config == nil {
 		return nil
+	}
+
+	if (parent.SecretRef != "" && f.secretClient != nil) || parent.MountedSecret != "" {
+		f.mapSecretValues(parent, parent.SecretRef, parent.MountedSecret)
 	}
 
 	if (config.SecretRef != "" && f.secretClient != nil) || config.MountedSecret != "" {
@@ -268,23 +312,33 @@ func (f *TargetFactory) createTeamsClient(config, parent *Target[WebhookOptions]
 
 	zap.S().Infof("%s configured", config.Name)
 
-	return teams.NewClient(teams.Options{
-		ClientOptions: target.ClientOptions{
-			Name:                  config.Name,
-			SkipExistingOnStartup: config.SkipExisting,
-			ResultFilter:          f.createResultFilter(config.Filter, config.MinimumPriority, config.Sources),
-			ReportFilter:          createReportFilter(config.Filter),
-		},
-		Webhook:      config.Config.Webhook,
-		CustomFields: config.CustomFields,
-		Headers:      config.Config.Headers,
-		HTTPClient:   http.NewClient(config.Config.Certificate, config.Config.SkipTLS),
-	})
+	return &target.Target{
+		ID:           uuid.NewString(),
+		Type:         target.Teams,
+		Config:       config,
+		ParentConfig: parent,
+		Client: teams.NewClient(teams.Options{
+			ClientOptions: target.ClientOptions{
+				Name:                  config.Name,
+				SkipExistingOnStartup: config.SkipExisting,
+				ResultFilter:          f.createResultFilter(config.Filter, config.MinimumPriority, config.Sources),
+				ReportFilter:          createReportFilter(config.Filter),
+			},
+			Webhook:      config.Config.Webhook,
+			CustomFields: config.CustomFields,
+			Headers:      config.Config.Headers,
+			HTTPClient:   http.NewClient(config.Config.Certificate, config.Config.SkipTLS),
+		}),
+	}
 }
 
-func (f *TargetFactory) createWebhookClient(config, parent *Target[WebhookOptions]) target.Client {
+func (f *TargetFactory) CreateWebhookTarget(config, parent *target.Config[target.WebhookOptions]) *target.Target {
 	if config == nil || config.Config == nil {
 		return nil
+	}
+
+	if (parent.SecretRef != "" && f.secretClient != nil) || parent.MountedSecret != "" {
+		f.mapSecretValues(parent, parent.SecretRef, parent.MountedSecret)
 	}
 
 	if (config.SecretRef != "" && f.secretClient != nil) || config.MountedSecret != "" {
@@ -299,23 +353,33 @@ func (f *TargetFactory) createWebhookClient(config, parent *Target[WebhookOption
 
 	zap.S().Infof("%s configured", config.Name)
 
-	return webhook.NewClient(webhook.Options{
-		ClientOptions: target.ClientOptions{
-			Name:                  config.Name,
-			SkipExistingOnStartup: config.SkipExisting,
-			ResultFilter:          f.createResultFilter(config.Filter, config.MinimumPriority, config.Sources),
-			ReportFilter:          createReportFilter(config.Filter),
-		},
-		Host:         config.Config.Webhook,
-		Headers:      config.Config.Headers,
-		CustomFields: config.CustomFields,
-		HTTPClient:   http.NewClient(config.Config.Certificate, config.Config.SkipTLS),
-	})
+	return &target.Target{
+		ID:           uuid.NewString(),
+		Type:         target.Webhook,
+		Config:       config,
+		ParentConfig: parent,
+		Client: webhook.NewClient(webhook.Options{
+			ClientOptions: target.ClientOptions{
+				Name:                  config.Name,
+				SkipExistingOnStartup: config.SkipExisting,
+				ResultFilter:          f.createResultFilter(config.Filter, config.MinimumPriority, config.Sources),
+				ReportFilter:          createReportFilter(config.Filter),
+			},
+			Host:         config.Config.Webhook,
+			Headers:      config.Config.Headers,
+			CustomFields: config.CustomFields,
+			HTTPClient:   http.NewClient(config.Config.Certificate, config.Config.SkipTLS),
+		}),
+	}
 }
 
-func (f *TargetFactory) createTelegramClient(config, parent *Target[TelegramOptions]) target.Client {
+func (f *TargetFactory) CreateTelegramTarget(config, parent *target.Config[target.TelegramOptions]) *target.Target {
 	if config == nil {
 		return nil
+	}
+
+	if (parent.SecretRef != "" && f.secretClient != nil) || parent.MountedSecret != "" {
+		f.mapSecretValues(parent, parent.SecretRef, parent.MountedSecret)
 	}
 
 	if (config.SecretRef != "" && f.secretClient != nil) || config.MountedSecret != "" {
@@ -353,24 +417,34 @@ func (f *TargetFactory) createTelegramClient(config, parent *Target[TelegramOpti
 
 	zap.S().Infof("%s configured", config.Name)
 
-	return telegram.NewClient(telegram.Options{
-		ClientOptions: target.ClientOptions{
-			Name:                  config.Name,
-			SkipExistingOnStartup: config.SkipExisting,
-			ResultFilter:          f.createResultFilter(config.Filter, config.MinimumPriority, config.Sources),
-			ReportFilter:          createReportFilter(config.Filter),
-		},
-		Host:         fmt.Sprintf("%s/bot%s/sendMessage", host, config.Config.Token),
-		ChatID:       config.Config.ChatID,
-		Headers:      config.Config.Headers,
-		CustomFields: config.CustomFields,
-		HTTPClient:   http.NewClient(config.Config.Certificate, config.Config.SkipTLS),
-	})
+	return &target.Target{
+		ID:           uuid.NewString(),
+		Type:         target.Telegram,
+		Config:       config,
+		ParentConfig: parent,
+		Client: telegram.NewClient(telegram.Options{
+			ClientOptions: target.ClientOptions{
+				Name:                  config.Name,
+				SkipExistingOnStartup: config.SkipExisting,
+				ResultFilter:          f.createResultFilter(config.Filter, config.MinimumPriority, config.Sources),
+				ReportFilter:          createReportFilter(config.Filter),
+			},
+			Host:         fmt.Sprintf("%s/bot%s/sendMessage", host, config.Config.Token),
+			ChatID:       config.Config.ChatID,
+			Headers:      config.Config.Headers,
+			CustomFields: config.CustomFields,
+			HTTPClient:   http.NewClient(config.Config.Certificate, config.Config.SkipTLS),
+		}),
+	}
 }
 
-func (f *TargetFactory) createGoogleChatClient(config, parent *Target[WebhookOptions]) target.Client {
+func (f *TargetFactory) CreateGoogleChatTarget(config, parent *target.Config[target.WebhookOptions]) *target.Target {
 	if config == nil || config.Config == nil {
 		return nil
+	}
+
+	if (parent.SecretRef != "" && f.secretClient != nil) || parent.MountedSecret != "" {
+		f.mapSecretValues(parent, parent.SecretRef, parent.MountedSecret)
 	}
 
 	if (config.SecretRef != "" && f.secretClient != nil) || config.MountedSecret != "" {
@@ -385,23 +459,33 @@ func (f *TargetFactory) createGoogleChatClient(config, parent *Target[WebhookOpt
 
 	zap.S().Infof("%s configured", config.Name)
 
-	return googlechat.NewClient(googlechat.Options{
-		ClientOptions: target.ClientOptions{
-			Name:                  config.Name,
-			SkipExistingOnStartup: config.SkipExisting,
-			ResultFilter:          f.createResultFilter(config.Filter, config.MinimumPriority, config.Sources),
-			ReportFilter:          createReportFilter(config.Filter),
-		},
-		Webhook:      config.Config.Webhook,
-		Headers:      config.Config.Headers,
-		CustomFields: config.CustomFields,
-		HTTPClient:   http.NewClient(config.Config.Certificate, config.Config.SkipTLS),
-	})
+	return &target.Target{
+		ID:           uuid.NewString(),
+		Type:         target.GoogleChat,
+		Config:       config,
+		ParentConfig: parent,
+		Client: googlechat.NewClient(googlechat.Options{
+			ClientOptions: target.ClientOptions{
+				Name:                  config.Name,
+				SkipExistingOnStartup: config.SkipExisting,
+				ResultFilter:          f.createResultFilter(config.Filter, config.MinimumPriority, config.Sources),
+				ReportFilter:          createReportFilter(config.Filter),
+			},
+			Webhook:      config.Config.Webhook,
+			Headers:      config.Config.Headers,
+			CustomFields: config.CustomFields,
+			HTTPClient:   http.NewClient(config.Config.Certificate, config.Config.SkipTLS),
+		}),
+	}
 }
 
-func (f *TargetFactory) createS3Client(config, parent *Target[S3Options]) target.Client {
+func (f *TargetFactory) CreateS3Target(config, parent *target.Config[target.S3Options]) *target.Target {
 	if config == nil || config.Config == nil {
 		return nil
+	}
+
+	if (parent.SecretRef != "" && f.secretClient != nil) || parent.MountedSecret != "" {
+		f.mapSecretValues(parent, parent.SecretRef, parent.MountedSecret)
 	}
 
 	if (config.SecretRef != "" && f.secretClient != nil) || config.MountedSecret != "" {
@@ -446,22 +530,32 @@ func (f *TargetFactory) createS3Client(config, parent *Target[S3Options]) target
 
 	sugar.Infof("%s configured", config.Name)
 
-	return s3.NewClient(s3.Options{
-		ClientOptions: target.ClientOptions{
-			Name:                  config.Name,
-			SkipExistingOnStartup: config.SkipExisting,
-			ResultFilter:          f.createResultFilter(config.Filter, config.MinimumPriority, config.Sources),
-			ReportFilter:          createReportFilter(config.Filter),
-		},
-		S3:           s3Client,
-		CustomFields: config.CustomFields,
-		Prefix:       config.Config.Prefix,
-	})
+	return &target.Target{
+		ID:           uuid.NewString(),
+		Type:         target.S3,
+		Config:       config,
+		ParentConfig: parent,
+		Client: s3.NewClient(s3.Options{
+			ClientOptions: target.ClientOptions{
+				Name:                  config.Name,
+				SkipExistingOnStartup: config.SkipExisting,
+				ResultFilter:          f.createResultFilter(config.Filter, config.MinimumPriority, config.Sources),
+				ReportFilter:          createReportFilter(config.Filter),
+			},
+			S3:           s3Client,
+			CustomFields: config.CustomFields,
+			Prefix:       config.Config.Prefix,
+		}),
+	}
 }
 
-func (f *TargetFactory) createKinesisClient(config, parent *Target[KinesisOptions]) target.Client {
+func (f *TargetFactory) CreateKinesisTarget(config, parent *target.Config[target.KinesisOptions]) *target.Target {
 	if config == nil || config.Config == nil {
 		return nil
+	}
+
+	if (parent.SecretRef != "" && f.secretClient != nil) || parent.MountedSecret != "" {
+		f.mapSecretValues(parent, parent.SecretRef, parent.MountedSecret)
 	}
 
 	if (config.SecretRef != "" && f.secretClient != nil) || config.MountedSecret != "" {
@@ -498,21 +592,31 @@ func (f *TargetFactory) createKinesisClient(config, parent *Target[KinesisOption
 
 	sugar.Infof("%s configured", config.Name)
 
-	return kinesis.NewClient(kinesis.Options{
-		ClientOptions: target.ClientOptions{
-			Name:                  config.Name,
-			SkipExistingOnStartup: config.SkipExisting,
-			ResultFilter:          f.createResultFilter(config.Filter, config.MinimumPriority, config.Sources),
-			ReportFilter:          createReportFilter(config.Filter),
-		},
-		CustomFields: config.CustomFields,
-		Kinesis:      kinesisClient,
-	})
+	return &target.Target{
+		ID:           uuid.NewString(),
+		Type:         target.Kinesis,
+		Config:       config,
+		ParentConfig: parent,
+		Client: kinesis.NewClient(kinesis.Options{
+			ClientOptions: target.ClientOptions{
+				Name:                  config.Name,
+				SkipExistingOnStartup: config.SkipExisting,
+				ResultFilter:          f.createResultFilter(config.Filter, config.MinimumPriority, config.Sources),
+				ReportFilter:          createReportFilter(config.Filter),
+			},
+			CustomFields: config.CustomFields,
+			Kinesis:      kinesisClient,
+		}),
+	}
 }
 
-func (f *TargetFactory) createSecurityHub(config, parent *Target[SecurityHubOptions]) target.Client {
+func (f *TargetFactory) CreateSecurityHubTarget(config, parent *target.Config[target.SecurityHubOptions]) *target.Target {
 	if config == nil || config.Config == nil {
 		return nil
+	}
+
+	if (parent.SecretRef != "" && f.secretClient != nil) || parent.MountedSecret != "" {
+		f.mapSecretValues(parent, parent.SecretRef, parent.MountedSecret)
 	}
 
 	if (config.SecretRef != "" && f.secretClient != nil) || config.MountedSecret != "" {
@@ -547,27 +651,37 @@ func (f *TargetFactory) createSecurityHub(config, parent *Target[SecurityHubOpti
 
 	sugar.Infof("%s configured", config.Name)
 
-	return securityhub.NewClient(securityhub.Options{
-		ClientOptions: target.ClientOptions{
-			Name:                  config.Name,
-			SkipExistingOnStartup: config.SkipExisting,
-			ResultFilter:          f.createResultFilter(config.Filter, config.MinimumPriority, config.Sources),
-			ReportFilter:          createReportFilter(config.Filter),
-		},
-		CustomFields: config.CustomFields,
-		Client:       client,
-		AccountID:    config.Config.AccountID,
-		ProductName:  config.Config.ProductName,
-		CompanyName:  config.Config.CompanyName,
-		Region:       config.Config.Region,
-		Delay:        time.Duration(config.Config.DelayInSeconds) * time.Second,
-		Cleanup:      config.Config.Cleanup,
-	})
+	return &target.Target{
+		ID:           uuid.NewString(),
+		Type:         target.SecurityHub,
+		Config:       config,
+		ParentConfig: parent,
+		Client: securityhub.NewClient(securityhub.Options{
+			ClientOptions: target.ClientOptions{
+				Name:                  config.Name,
+				SkipExistingOnStartup: config.SkipExisting,
+				ResultFilter:          f.createResultFilter(config.Filter, config.MinimumPriority, config.Sources),
+				ReportFilter:          createReportFilter(config.Filter),
+			},
+			CustomFields: config.CustomFields,
+			Client:       client,
+			AccountID:    config.Config.AccountID,
+			ProductName:  config.Config.ProductName,
+			CompanyName:  config.Config.CompanyName,
+			Region:       config.Config.Region,
+			Delay:        time.Duration(config.Config.DelayInSeconds) * time.Second,
+			Cleanup:      config.Config.Cleanup,
+		}),
+	}
 }
 
-func (f *TargetFactory) createGCSClient(config, parent *Target[GCSOptions]) target.Client {
+func (f *TargetFactory) CreateGCSTarget(config, parent *target.Config[target.GCSOptions]) *target.Target {
 	if config == nil || config.Config == nil {
 		return nil
+	}
+
+	if (parent.SecretRef != "" && f.secretClient != nil) || parent.MountedSecret != "" {
+		f.mapSecretValues(parent, parent.SecretRef, parent.MountedSecret)
 	}
 
 	if (config.SecretRef != "" && f.secretClient != nil) || config.MountedSecret != "" {
@@ -601,21 +715,26 @@ func (f *TargetFactory) createGCSClient(config, parent *Target[GCSOptions]) targ
 	}
 
 	sugar.Infof("%s configured", config.Name)
-
-	return gcs.NewClient(gcs.Options{
-		ClientOptions: target.ClientOptions{
-			Name:                  config.Name,
-			SkipExistingOnStartup: config.SkipExisting,
-			ResultFilter:          f.createResultFilter(config.Filter, config.MinimumPriority, config.Sources),
-			ReportFilter:          createReportFilter(config.Filter),
-		},
-		Client:       gcsClient,
-		CustomFields: config.CustomFields,
-		Prefix:       config.Config.Prefix,
-	})
+	return &target.Target{
+		ID:           uuid.NewString(),
+		Type:         target.GCS,
+		Config:       config,
+		ParentConfig: parent,
+		Client: gcs.NewClient(gcs.Options{
+			ClientOptions: target.ClientOptions{
+				Name:                  config.Name,
+				SkipExistingOnStartup: config.SkipExisting,
+				ResultFilter:          f.createResultFilter(config.Filter, config.MinimumPriority, config.Sources),
+				ReportFilter:          createReportFilter(config.Filter),
+			},
+			Client:       gcsClient,
+			CustomFields: config.CustomFields,
+			Prefix:       config.Config.Prefix,
+		}),
+	}
 }
 
-func (f *TargetFactory) createResultFilter(filter TargetFilter, minimumPriority string, sources []string) *report.ResultFilter {
+func (f *TargetFactory) createResultFilter(filter target.Filter, minimumPriority string, sources []string) *report.ResultFilter {
 	return f.filterFactory.CreateFilter(
 		validate.RuleSets{
 			Include:  filter.Namespaces.Include,
@@ -655,18 +774,18 @@ func (f *TargetFactory) mapSecretValues(config any, ref, mountedSecret string) {
 	}
 
 	switch c := config.(type) {
-	case *Target[LokiOptions]:
+	case *target.Config[target.LokiOptions]:
 		if values.Host != "" {
 			c.Config.Host = values.Host
 		}
 
-	case *Target[SlackOptions]:
+	case *target.Config[target.SlackOptions]:
 		if values.Webhook != "" {
 			c.Config.Webhook = values.Webhook
 			c.Config.Channel = values.Channel
 		}
 
-	case *Target[WebhookOptions]:
+	case *target.Config[target.WebhookOptions]:
 		if values.Webhook != "" {
 			c.Config.Webhook = values.Webhook
 		}
@@ -678,7 +797,7 @@ func (f *TargetFactory) mapSecretValues(config any, ref, mountedSecret string) {
 			c.Config.Headers["Authorization"] = values.Token
 		}
 
-	case *Target[ElasticsearchOptions]:
+	case *target.Config[target.ElasticsearchOptions]:
 		if values.Host != "" {
 			c.Config.Host = values.Host
 		}
@@ -692,7 +811,7 @@ func (f *TargetFactory) mapSecretValues(config any, ref, mountedSecret string) {
 			c.Config.APIKey = values.APIKey
 		}
 
-	case *Target[S3Options]:
+	case *target.Config[target.S3Options]:
 		if values.AccessKeyID != "" {
 			c.Config.AccessKeyID = values.AccessKeyID
 		}
@@ -703,7 +822,7 @@ func (f *TargetFactory) mapSecretValues(config any, ref, mountedSecret string) {
 			c.Config.KmsKeyID = values.KmsKeyID
 		}
 
-	case *Target[KinesisOptions]:
+	case *target.Config[target.KinesisOptions]:
 		if values.AccessKeyID != "" {
 			c.Config.AccessKeyID = values.AccessKeyID
 		}
@@ -711,7 +830,7 @@ func (f *TargetFactory) mapSecretValues(config any, ref, mountedSecret string) {
 			c.Config.SecretAccessKey = values.SecretAccessKey
 		}
 
-	case *Target[SecurityHubOptions]:
+	case *target.Config[target.SecurityHubOptions]:
 		if values.AccessKeyID != "" {
 			c.Config.AccessKeyID = values.AccessKeyID
 		}
@@ -722,12 +841,12 @@ func (f *TargetFactory) mapSecretValues(config any, ref, mountedSecret string) {
 			c.Config.AccountID = values.AccessKeyID
 		}
 
-	case *Target[GCSOptions]:
+	case *target.Config[target.GCSOptions]:
 		if values.Credentials != "" {
 			c.Config.Credentials = values.Credentials
 		}
 
-	case *Target[TelegramOptions]:
+	case *target.Config[target.TelegramOptions]:
 		if values.Token != "" {
 			c.Config.Token = values.Token
 		}
@@ -737,11 +856,11 @@ func (f *TargetFactory) mapSecretValues(config any, ref, mountedSecret string) {
 	}
 }
 
-func NewTargetFactory(secretClient secrets.Client, filterFactory *target.ResultFilterFactory) *TargetFactory {
+func NewFactory(secretClient secrets.Client, filterFactory *target.ResultFilterFactory) target.Factory {
 	return &TargetFactory{secretClient: secretClient, filterFactory: filterFactory}
 }
 
-func mapWebhookTarget(config, parent *Target[WebhookOptions]) {
+func mapWebhookTarget(config, parent *target.Config[target.WebhookOptions]) {
 	setFallback(&config.Config.Webhook, parent.Config.Webhook)
 	setFallback(&config.Config.Certificate, parent.Config.Certificate)
 	setBool(&config.Config.SkipTLS, parent.Config.SkipTLS)
@@ -771,7 +890,7 @@ func hasAWSIdentity() bool {
 	return (irsaARN != "" && irsaFile != "") || (podIdentityFile != "" && podIdentityURI != "")
 }
 
-func checkAWSConfig(name string, config AWSConfig, parent AWSConfig) error {
+func checkAWSConfig(name string, config target.AWSConfig, parent target.AWSConfig) error {
 	noEnvConfig := !hasAWSIdentity()
 
 	if noEnvConfig && (config.AccessKeyID == "" && parent.AccessKeyID == "") {
@@ -812,8 +931,15 @@ func setInt(config *int, parent int) {
 	}
 }
 
-func createReportFilter(filter TargetFilter) *report.ReportFilter {
+func createReportFilter(filter target.Filter) *report.ReportFilter {
 	return target.NewReportFilter(
 		ToRuleSet(filter.ReportLabels),
 	)
+}
+
+func ToRuleSet(filter target.ValueFilter) validate.RuleSets {
+	return validate.RuleSets{
+		Include: filter.Include,
+		Exclude: filter.Exclude,
+	}
 }

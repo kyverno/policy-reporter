@@ -12,8 +12,10 @@ import (
 
 const SendResults = "send_results_listener"
 
-func NewSendResultListener(clients []target.Client) report.PolicyReportResultListener {
+func NewSendResultListener(targets *target.Collection) report.PolicyReportResultListener {
 	return func(rep v1alpha2.ReportInterface, r v1alpha2.PolicyReportResult, e bool) {
+		clients := targets.SingleSendClients()
+
 		wg := &sync.WaitGroup{}
 		wg.Add(len(clients))
 

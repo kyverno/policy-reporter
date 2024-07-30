@@ -14,12 +14,13 @@ on:
   pull_request:
     branches:
       - main
+      - 3.x
 
 jobs:
   coverage:
     runs-on: ubuntu-latest
     steps:
-      - name: Set up Go 1.21
+      - name: Set up Go
         uses: actions/setup-go@v2
         with:
           go-version-file: go.mod

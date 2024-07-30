@@ -55,6 +55,11 @@ func newRunCMD(version string) *cobra.Command {
 				return err
 			}
 
+			secretInformer, err := resolver.SecretInformer()
+			if err != nil {
+				return err
+			}
+
 			g := &errgroup.Group{}
 
 			var store *database.Store
@@ -169,6 +174,7 @@ func newRunCMD(version string) *cobra.Command {
 			g.Go(server.Start)
 
 			g.Go(func() error {
+				logger.Info("wait policy informer")
 				readinessProbe.Wait()
 
 				logger.Info("start client", zap.Int("worker", c.WorkerCount))
@@ -181,6 +187,26 @@ func newRunCMD(version string) *cobra.Command {
 
 					zap.L().Debug("informer restarts")
 				}
+			})
+
+			g.Go(func() error {
+				collection := resolver.TargetClients()
+				if !collection.UsesSecrets() {
+					return nil
+				}
+
+				readinessProbe.Wait()
+
+				stop := make(chan struct{})
+				if err := secretInformer.Sync(collection, stop); err != nil {
+					zap.L().Error("secret informer error", zap.Error(err))
+
+					return err
+				}
+
+				<-stop
+
+				return nil
 			})
 
 			return g.Wait()

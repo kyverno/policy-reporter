@@ -1,4 +1,4 @@
-package config_test
+package factory_test
 
 import (
 	"encoding/json"
@@ -12,8 +12,9 @@ import (
 	"k8s.io/client-go/kubernetes/fake"
 	v1 "k8s.io/client-go/kubernetes/typed/core/v1"
 
-	"github.com/kyverno/policy-reporter/pkg/config"
 	"github.com/kyverno/policy-reporter/pkg/kubernetes/secrets"
+	"github.com/kyverno/policy-reporter/pkg/target"
+	"github.com/kyverno/policy-reporter/pkg/target/factory"
 )
 
 const (
@@ -71,135 +72,327 @@ func mountSecret() {
 
 var logger = zap.NewNop()
 
-func Test_ResolveTarget(t *testing.T) {
-	factory := config.NewTargetFactory(nil, nil)
+var targets = target.Targets{
+	Loki: &target.Config[target.LokiOptions]{
+		Config: &target.LokiOptions{
+			HostOptions: target.HostOptions{
+				Host:    "http://localhost:3100",
+				SkipTLS: true,
+			},
+		},
+		SkipExisting:    true,
+		MinimumPriority: "debug",
+		CustomFields:    map[string]string{"field": "value"},
+		Channels: []*target.Config[target.LokiOptions]{
+			{
+				CustomFields: map[string]string{"label2": "value2"},
+			},
+		},
+	},
+	Elasticsearch: &target.Config[target.ElasticsearchOptions]{
+		Config: &target.ElasticsearchOptions{
+			HostOptions: target.HostOptions{
+				Host:    "http://localhost:9200",
+				SkipTLS: true,
+			},
+			Index:    "policy-reporter",
+			Rotation: "daily",
+		},
+		SkipExisting:    true,
+		MinimumPriority: "debug",
+		CustomFields:    map[string]string{"field": "value"},
+		Channels:        []*target.Config[target.ElasticsearchOptions]{{}},
+	},
+	Slack: &target.Config[target.SlackOptions]{
+		Config: &target.SlackOptions{
+			WebhookOptions: target.WebhookOptions{
+				Webhook: "http://localhost:80",
+				SkipTLS: true,
+			},
+		},
+		SkipExisting:    true,
+		MinimumPriority: "debug",
+		CustomFields:    map[string]string{"field": "value"},
+		Channels: []*target.Config[target.SlackOptions]{{
+			Config: &target.SlackOptions{
+				WebhookOptions: target.WebhookOptions{
+					Webhook: "http://localhost:9200",
+				},
+			},
+		}, {
+			Config: &target.SlackOptions{
+				Channel: "general",
+			},
+		}},
+	},
+	Discord: &target.Config[target.WebhookOptions]{
+		Config: &target.WebhookOptions{
+			Webhook: "http://discord:80",
+			SkipTLS: true,
+		},
+		SkipExisting:    true,
+		MinimumPriority: "debug",
+		CustomFields:    map[string]string{"field": "value"},
+		Channels: []*target.Config[target.WebhookOptions]{{
+			Config: &target.WebhookOptions{
+				Webhook: "http://localhost:9200",
+			},
+		}},
+	},
+	Teams: &target.Config[target.WebhookOptions]{
+		Config: &target.WebhookOptions{
+			Webhook: "http://hook.teams:80",
+			SkipTLS: true,
+		},
+		SkipExisting:    true,
+		MinimumPriority: "debug",
+		CustomFields:    map[string]string{"field": "value"},
+		Channels: []*target.Config[target.WebhookOptions]{{
+			Config: &target.WebhookOptions{
+				Webhook: "http://localhost:9200",
+			},
+		}},
+	},
+	GoogleChat: &target.Config[target.WebhookOptions]{
+		Config: &target.WebhookOptions{
+			Webhook: "http://localhost:900/webhook",
+			SkipTLS: true,
+		},
+		SkipExisting:    true,
+		MinimumPriority: "debug",
+		CustomFields:    map[string]string{"field": "value"},
+		Channels:        []*target.Config[target.WebhookOptions]{{}},
+	},
+	Telegram: &target.Config[target.TelegramOptions]{
+		Config: &target.TelegramOptions{
+			WebhookOptions: target.WebhookOptions{
+				Webhook: "http://localhost:80",
+				SkipTLS: true,
+			},
+			Token:  "XXX",
+			ChatID: "123456",
+		},
+		SkipExisting:    true,
+		MinimumPriority: "debug",
+		CustomFields:    map[string]string{"field": "value"},
+		Channels: []*target.Config[target.TelegramOptions]{{
+			Config: &target.TelegramOptions{
+				ChatID: "1234567",
+			},
+		}},
+	},
+	Webhook: &target.Config[target.WebhookOptions]{
+		Config: &target.WebhookOptions{
+			Webhook: "http://localhost:8080",
+			SkipTLS: true,
+			Headers: map[string]string{
+				"X-Custom": "Header",
+			},
+		},
+		SkipExisting:    true,
+		MinimumPriority: "debug",
+		CustomFields:    map[string]string{"field": "value"},
+		Channels: []*target.Config[target.WebhookOptions]{{
+			Config: &target.WebhookOptions{
+				Webhook: "http://localhost:8081",
+				Headers: map[string]string{
+					"X-Custom-2": "Header",
+				},
+			},
+		}},
+	},
+	S3: &target.Config[target.S3Options]{
+		Config: &target.S3Options{
+			AWSConfig: target.AWSConfig{
+				AccessKeyID:     "AccessKey",
+				SecretAccessKey: "SecretAccessKey",
+				Endpoint:        "https://storage.yandexcloud.net",
+				Region:          "ru-central1",
+			},
+			Bucket:               "test",
+			BucketKeyEnabled:     false,
+			KmsKeyID:             "",
+			ServerSideEncryption: "",
+			PathStyle:            true,
+			Prefix:               "prefix",
+		},
+		SkipExisting:    true,
+		MinimumPriority: "debug",
+		CustomFields:    map[string]string{"field": "value"},
+		Channels:        []*target.Config[target.S3Options]{{}},
+	},
+	Kinesis: &target.Config[target.KinesisOptions]{
+		Config: &target.KinesisOptions{
+			AWSConfig: target.AWSConfig{
+				AccessKeyID:     "AccessKey",
+				SecretAccessKey: "SecretAccessKey",
+				Endpoint:        "https://storage.yandexcloud.net",
+				Region:          "ru-central1",
+			},
+			StreamName: "policy-reporter",
+		},
+		SkipExisting:    true,
+		MinimumPriority: "debug",
+		CustomFields:    map[string]string{"field": "value"},
+		Channels:        []*target.Config[target.KinesisOptions]{{}},
+	},
+	SecurityHub: &target.Config[target.SecurityHubOptions]{
+		Config: &target.SecurityHubOptions{
+			AWSConfig: target.AWSConfig{
+				AccessKeyID:     "AccessKey",
+				SecretAccessKey: "SecretAccessKey",
+				Endpoint:        "https://storage.yandexcloud.net",
+				Region:          "ru-central1",
+			},
+			AccountID: "AccountID",
+		},
+		SkipExisting:    true,
+		MinimumPriority: "debug",
+		CustomFields:    map[string]string{"field": "value"},
+		Channels:        []*target.Config[target.SecurityHubOptions]{{}},
+	},
+	GCS: &target.Config[target.GCSOptions]{
+		Config: &target.GCSOptions{
+			Credentials: `{"token": "token", "type": "authorized_user"}`,
+			Bucket:      "test",
+			Prefix:      "prefix",
+		},
+		SkipExisting:    true,
+		MinimumPriority: "debug",
+		CustomFields:    map[string]string{"field": "value"},
+		Channels:        []*target.Config[target.GCSOptions]{{}},
+	},
+}
 
-	clients := factory.CreateClients(&testConfig.Targets)
-	if len(clients) != 25 {
-		t.Errorf("Expected 25 Client, got %d clients", len(clients))
+func Test_ResolveTarget(t *testing.T) {
+	factory := factory.NewFactory(nil, nil)
+
+	clients := factory.CreateClients(&targets)
+	if len(clients.Clients()) != 25 {
+		t.Errorf("Expected 25 Client, got %d clients", len(clients.Clients()))
 	}
 }
 
 func Test_ResolveTargetsWithoutRequiredConfiguration(t *testing.T) {
-	factory := config.NewTargetFactory(nil, nil)
+	factory := factory.NewFactory(nil, nil)
 
-	targets := config.Targets{
-		Loki:          &config.Target[config.LokiOptions]{},
-		Elasticsearch: &config.Target[config.ElasticsearchOptions]{},
-		Slack:         &config.Target[config.SlackOptions]{},
-		Discord:       &config.Target[config.WebhookOptions]{},
-		Teams:         &config.Target[config.WebhookOptions]{},
-		GoogleChat:    &config.Target[config.WebhookOptions]{},
-		Webhook:       &config.Target[config.WebhookOptions]{},
-		Telegram:      &config.Target[config.TelegramOptions]{},
-		S3:            &config.Target[config.S3Options]{},
-		Kinesis:       &config.Target[config.KinesisOptions]{},
-		SecurityHub:   &config.Target[config.SecurityHubOptions]{},
+	targets := target.Targets{
+		Loki:          &target.Config[target.LokiOptions]{},
+		Elasticsearch: &target.Config[target.ElasticsearchOptions]{},
+		Slack:         &target.Config[target.SlackOptions]{},
+		Discord:       &target.Config[target.WebhookOptions]{},
+		Teams:         &target.Config[target.WebhookOptions]{},
+		GoogleChat:    &target.Config[target.WebhookOptions]{},
+		Webhook:       &target.Config[target.WebhookOptions]{},
+		Telegram:      &target.Config[target.TelegramOptions]{},
+		S3:            &target.Config[target.S3Options]{},
+		Kinesis:       &target.Config[target.KinesisOptions]{},
+		SecurityHub:   &target.Config[target.SecurityHubOptions]{},
 	}
 
-	if len(factory.CreateClients(&targets)) != 0 {
+	if len(factory.CreateClients(&targets).Clients()) != 0 {
 		t.Error("Expected Client to be nil if no required fields are configured")
 	}
 
-	targets = config.Targets{}
-	if len(factory.CreateClients(&targets)) != 0 {
+	targets = target.Targets{}
+	if len(factory.CreateClients(&targets).Clients()) != 0 {
 		t.Error("Expected Client to be nil if no target is configured")
 	}
 
-	targets.S3 = &config.Target[config.S3Options]{
-		Config: &config.S3Options{
-			AWSConfig: config.AWSConfig{Endpoint: "https://storage.yandexcloud.net"},
+	targets.S3 = &target.Config[target.S3Options]{
+		Config: &target.S3Options{
+			AWSConfig: target.AWSConfig{Endpoint: "https://storage.yandexcloud.net"},
 		},
 	}
 }
 
 func Test_S3Validation(t *testing.T) {
-	factory := config.NewTargetFactory(nil, nil)
+	factory := factory.NewFactory(nil, nil)
 
-	targets := config.Targets{
-		S3: &config.Target[config.S3Options]{
-			Config: &config.S3Options{
-				AWSConfig: config.AWSConfig{Endpoint: "https://storage.yandexcloud.net"},
+	targets := target.Targets{
+		S3: &target.Config[target.S3Options]{
+			Config: &target.S3Options{
+				AWSConfig: target.AWSConfig{Endpoint: "https://storage.yandexcloud.net"},
 			},
 		},
 	}
 
 	t.Run("S3.AccessKey", func(t *testing.T) {
-		if len(factory.CreateClients(&targets)) != 0 {
+		if len(factory.CreateClients(&targets).Clients()) != 0 {
 			t.Error("Expected Client to be nil if no accessKey is configured")
 		}
 	})
 
 	targets.S3.Config.AWSConfig.AccessKeyID = "access"
 	t.Run("S3.SecretAccessKey", func(t *testing.T) {
-		if len(factory.CreateClients(&targets)) != 0 {
+		if len(factory.CreateClients(&targets).Clients()) != 0 {
 			t.Error("Expected Client to be nil if no secretAccessKey is configured")
 		}
 	})
 
 	targets.S3.Config.AWSConfig.SecretAccessKey = "secret"
 	t.Run("S3.Region", func(t *testing.T) {
-		if len(factory.CreateClients(&targets)) != 0 {
+		if len(factory.CreateClients(&targets).Clients()) != 0 {
 			t.Error("Expected Client to be nil if no region is configured")
 		}
 	})
 
 	targets.S3.Config.AWSConfig.Region = "ru-central1"
 	t.Run("S3.Bucket", func(t *testing.T) {
-		if len(factory.CreateClients(&targets)) != 0 {
+		if len(factory.CreateClients(&targets).Clients()) != 0 {
 			t.Error("Expected Client to be nil if no bucket is configured")
 		}
 	})
 
 	targets.S3.Config.ServerSideEncryption = "AES256"
 	t.Run("S3.SSE-S3", func(t *testing.T) {
-		if len(factory.CreateClients(&targets)) != 0 {
+		if len(factory.CreateClients(&targets).Clients()) != 0 {
 			t.Error("Expected Client to be nil if server side encryption is not configured")
 		}
 	})
 
 	targets.S3.Config.ServerSideEncryption = "aws:kms"
 	t.Run("S3.SSE-KMS", func(t *testing.T) {
-		if len(factory.CreateClients(&targets)) != 0 {
+		if len(factory.CreateClients(&targets).Clients()) != 0 {
 			t.Error("Expected Client to be nil if server side encryption is not configured")
 		}
 	})
 
 	targets.S3.Config.BucketKeyEnabled = true
 	t.Run("S3.SSE-KMS-S3-KEY", func(t *testing.T) {
-		if len(factory.CreateClients(&targets)) != 0 {
+		if len(factory.CreateClients(&targets).Clients()) != 0 {
 			t.Error("Expected Client to be nil if server side encryption is not configured")
 		}
 	})
 
 	targets.S3.Config.KmsKeyID = "kmsKeyId"
 	t.Run("S3.SSE-KMS-KEY-ID", func(t *testing.T) {
-		if len(factory.CreateClients(&targets)) != 0 {
+		if len(factory.CreateClients(&targets).Clients()) != 0 {
 			t.Error("Expected Client to be nil if server side encryption is not configured")
 		}
 	})
 }
 
 func Test_KinesisValidation(t *testing.T) {
-	factory := config.NewTargetFactory(nil, nil)
+	factory := factory.NewFactory(nil, nil)
 
-	targets := config.Targets{
-		Kinesis: &config.Target[config.KinesisOptions]{
-			Config: &config.KinesisOptions{
-				AWSConfig: config.AWSConfig{Endpoint: "https://storage.yandexcloud.net"},
+	targets := target.Targets{
+		Kinesis: &target.Config[target.KinesisOptions]{
+			Config: &target.KinesisOptions{
+				AWSConfig: target.AWSConfig{Endpoint: "https://storage.yandexcloud.net"},
 			},
 		},
 	}
 
 	t.Run("Kinesis.AccessKey", func(t *testing.T) {
-		if len(factory.CreateClients(&targets)) != 0 {
+		if len(factory.CreateClients(&targets).Clients()) != 0 {
 			t.Error("Expected Client to be nil if no accessKey is configured")
 		}
 	})
 
 	targets.Kinesis.Config.AWSConfig.AccessKeyID = "access"
 	t.Run("Kinesis.SecretAccessKey", func(t *testing.T) {
-		if len(factory.CreateClients(&targets)) != 0 {
+		if len(factory.CreateClients(&targets).Clients()) != 0 {
 			t.Error("Expected Client to be nil if no secretAccessKey is configured")
 		}
 	})
@@ -207,7 +400,7 @@ func Test_KinesisValidation(t *testing.T) {
 	targets.Kinesis.Config.AWSConfig.SecretAccessKey = "secret"
 
 	t.Run("Kinesis.Region", func(t *testing.T) {
-		if len(factory.CreateClients(&targets)) != 0 {
+		if len(factory.CreateClients(&targets).Clients()) != 0 {
 			t.Error("Expected Client to be nil if no region is configured")
 		}
 	})
@@ -215,136 +408,136 @@ func Test_KinesisValidation(t *testing.T) {
 	targets.Kinesis.Config.AWSConfig.Region = "ru-central1"
 
 	t.Run("Kinesis.StreamName", func(t *testing.T) {
-		if len(factory.CreateClients(&targets)) != 0 {
+		if len(factory.CreateClients(&targets).Clients()) != 0 {
 			t.Error("Expected Client to be nil if no stream name is configured")
 		}
 	})
 }
 
 func Test_SecurityHubValidation(t *testing.T) {
-	factory := config.NewTargetFactory(nil, nil)
+	factory := factory.NewFactory(nil, nil)
 
-	targets := config.Targets{
-		SecurityHub: &config.Target[config.SecurityHubOptions]{
-			Config: &config.SecurityHubOptions{
-				AWSConfig: config.AWSConfig{Endpoint: "https://storage.yandexcloud.net"},
+	targets := target.Targets{
+		SecurityHub: &target.Config[target.SecurityHubOptions]{
+			Config: &target.SecurityHubOptions{
+				AWSConfig: target.AWSConfig{Endpoint: "https://storage.yandexcloud.net"},
 			},
 		},
 	}
 
 	t.Run("SecurityHub.AccountID", func(t *testing.T) {
-		if len(factory.CreateClients(&targets)) != 0 {
+		if len(factory.CreateClients(&targets).Clients()) != 0 {
 			t.Error("Expected Client to be nil if no accountID is configured")
 		}
 	})
 
 	targets.SecurityHub.Config.AccountID = "accountID"
 	t.Run("SecurityHub.AccessKey", func(t *testing.T) {
-		if len(factory.CreateClients(&targets)) != 0 {
+		if len(factory.CreateClients(&targets).Clients()) != 0 {
 			t.Error("Expected Client to be nil if no accessKey is configured")
 		}
 	})
 
 	targets.SecurityHub.Config.AWSConfig.AccessKeyID = "access"
 	t.Run("SecurityHub.SecretAccessKey", func(t *testing.T) {
-		if len(factory.CreateClients(&targets)) != 0 {
+		if len(factory.CreateClients(&targets).Clients()) != 0 {
 			t.Error("Expected Client to be nil if no secretAccessKey is configured")
 		}
 	})
 
 	targets.SecurityHub.Config.AWSConfig.SecretAccessKey = "secret"
 	t.Run("SecurityHub.Region", func(t *testing.T) {
-		if len(factory.CreateClients(&targets)) != 0 {
+		if len(factory.CreateClients(&targets).Clients()) != 0 {
 			t.Error("Expected Client to be nil if no region is configured")
 		}
 	})
 }
 
 func Test_GCSValidation(t *testing.T) {
-	factory := config.NewTargetFactory(nil, nil)
+	factory := factory.NewFactory(nil, nil)
 
-	targets := config.Targets{
-		GCS: &config.Target[config.GCSOptions]{
-			Config: &config.GCSOptions{
+	targets := target.Targets{
+		GCS: &target.Config[target.GCSOptions]{
+			Config: &target.GCSOptions{
 				Credentials: "{}",
 			},
 		},
 	}
 
 	t.Run("GCS.Bucket", func(t *testing.T) {
-		if len(factory.CreateClients(&targets)) != 0 {
+		if len(factory.CreateClients(&targets).Clients()) != 0 {
 			t.Error("Expected Client to be nil if no bucket is configured")
 		}
 	})
 
 	targets.GCS.Config.Bucket = "policy-reporter"
 	t.Run("GCS.Credentials", func(t *testing.T) {
-		if len(factory.CreateClients(&targets)) != 0 {
+		if len(factory.CreateClients(&targets).Clients()) != 0 {
 			t.Error("Expected Client to be nil if no accessKey is configured")
 		}
 	})
 }
 
 func Test_GetValuesFromSecret(t *testing.T) {
-	factory := config.NewTargetFactory(secrets.NewClient(newFakeClient()), nil)
+	factory := factory.NewFactory(secrets.NewClient(newFakeClient()), nil)
 
-	targets := config.Targets{
-		Loki:          &config.Target[config.LokiOptions]{SecretRef: secretName},
-		Elasticsearch: &config.Target[config.ElasticsearchOptions]{SecretRef: secretName},
-		Slack:         &config.Target[config.SlackOptions]{SecretRef: secretName},
-		Discord:       &config.Target[config.WebhookOptions]{SecretRef: secretName},
-		Teams:         &config.Target[config.WebhookOptions]{SecretRef: secretName},
-		GoogleChat:    &config.Target[config.WebhookOptions]{SecretRef: secretName},
-		Webhook:       &config.Target[config.WebhookOptions]{SecretRef: secretName},
-		Telegram: &config.Target[config.TelegramOptions]{
+	targets := target.Targets{
+		Loki:          &target.Config[target.LokiOptions]{SecretRef: secretName},
+		Elasticsearch: &target.Config[target.ElasticsearchOptions]{SecretRef: secretName},
+		Slack:         &target.Config[target.SlackOptions]{SecretRef: secretName},
+		Discord:       &target.Config[target.WebhookOptions]{SecretRef: secretName},
+		Teams:         &target.Config[target.WebhookOptions]{SecretRef: secretName},
+		GoogleChat:    &target.Config[target.WebhookOptions]{SecretRef: secretName},
+		Webhook:       &target.Config[target.WebhookOptions]{SecretRef: secretName},
+		Telegram: &target.Config[target.TelegramOptions]{
 			SecretRef: secretName,
-			Config: &config.TelegramOptions{
+			Config: &target.TelegramOptions{
 				ChatID: "1234",
 			},
 		},
-		S3: &config.Target[config.S3Options]{
+		S3: &target.Config[target.S3Options]{
 			SecretRef: secretName,
-			Config: &config.S3Options{
-				AWSConfig: config.AWSConfig{Endpoint: "endoint", Region: "region"},
+			Config: &target.S3Options{
+				AWSConfig: target.AWSConfig{Endpoint: "endoint", Region: "region"},
 				Bucket:    "bucket",
 			},
 		},
-		Kinesis: &config.Target[config.KinesisOptions]{
+		Kinesis: &target.Config[target.KinesisOptions]{
 			SecretRef: secretName,
-			Config: &config.KinesisOptions{
-				AWSConfig:  config.AWSConfig{Endpoint: "endoint", Region: "region"},
+			Config: &target.KinesisOptions{
+				AWSConfig:  target.AWSConfig{Endpoint: "endoint", Region: "region"},
 				StreamName: "stream",
 			},
 		},
-		SecurityHub: &config.Target[config.SecurityHubOptions]{
+		SecurityHub: &target.Config[target.SecurityHubOptions]{
 			SecretRef: secretName,
-			Config: &config.SecurityHubOptions{
-				AWSConfig: config.AWSConfig{Endpoint: "endoint", Region: "region"},
+			Config: &target.SecurityHubOptions{
+				AWSConfig: target.AWSConfig{Endpoint: "endoint", Region: "region"},
 				AccountID: "accountID",
 			},
 		},
-		GCS: &config.Target[config.GCSOptions]{
+		GCS: &target.Config[target.GCSOptions]{
 			SecretRef: secretName,
-			Config: &config.GCSOptions{
+			Config: &target.GCSOptions{
 				Bucket: "policy-reporter",
 			},
 		},
 	}
 
 	clients := factory.CreateClients(&targets)
-	if len(clients) != 12 {
-		t.Fatalf("expected 12 clients created, got %d", len(clients))
+	if len(clients.Clients()) != 12 {
+		t.Fatalf("expected 12 clients created, got %d", len(clients.Clients()))
 	}
 
 	t.Run("Get Loki values from Secret", func(t *testing.T) {
-		fv := reflect.ValueOf(clients[0]).Elem().FieldByName("host")
+		fv := reflect.ValueOf(clients.Client("Loki")).Elem().FieldByName("host")
 		if v := fv.String(); v != "http://localhost:9200/api/prom/push" {
 			t.Errorf("Expected host from secret, got %s", v)
 		}
 	})
 
 	t.Run("Get Elasticsearch values from Secret", func(t *testing.T) {
-		client := reflect.ValueOf(clients[1]).Elem()
+		client := reflect.ValueOf(clients.Client("Elasticsearch")).Elem()
 
 		host := client.FieldByName("host").String()
 		if host != "http://localhost:9200" {
@@ -378,7 +571,7 @@ func Test_GetValuesFromSecret(t *testing.T) {
 	})
 
 	t.Run("Get Slack values from Secret", func(t *testing.T) {
-		client := reflect.ValueOf(clients[2]).Elem()
+		client := reflect.ValueOf(clients.Client("Slack")).Elem()
 
 		webhook := client.FieldByName("channel").String()
 		if webhook != "general" {
@@ -387,7 +580,7 @@ func Test_GetValuesFromSecret(t *testing.T) {
 	})
 
 	t.Run("Get Discord values from Secret", func(t *testing.T) {
-		client := reflect.ValueOf(clients[3]).Elem()
+		client := reflect.ValueOf(clients.Client("Discord")).Elem()
 
 		webhook := client.FieldByName("webhook").String()
 		if webhook != "http://localhost:9200/webhook" {
@@ -396,7 +589,7 @@ func Test_GetValuesFromSecret(t *testing.T) {
 	})
 
 	t.Run("Get MS Teams values from Secret", func(t *testing.T) {
-		client := reflect.ValueOf(clients[4]).Elem()
+		client := reflect.ValueOf(clients.Client("Teams")).Elem()
 
 		webhook := client.FieldByName("webhook").String()
 		if webhook != "http://localhost:9200/webhook" {
@@ -405,7 +598,7 @@ func Test_GetValuesFromSecret(t *testing.T) {
 	})
 
 	t.Run("Get GoogleChat Webhook from Secret", func(t *testing.T) {
-		client := reflect.ValueOf(clients[5]).Elem()
+		client := reflect.ValueOf(clients.Client("GoogleChat")).Elem()
 
 		host := client.FieldByName("webhook").String()
 		if host != "http://localhost:9200/webhook" {
@@ -414,7 +607,7 @@ func Test_GetValuesFromSecret(t *testing.T) {
 	})
 
 	t.Run("Get Telegram Token from Secret", func(t *testing.T) {
-		client := reflect.ValueOf(clients[6]).Elem()
+		client := reflect.ValueOf(clients.Client("Telegram")).Elem()
 
 		host := client.FieldByName("host").String()
 		if host != "http://localhost:9200/bottoken/sendMessage" {
@@ -423,7 +616,7 @@ func Test_GetValuesFromSecret(t *testing.T) {
 	})
 
 	t.Run("Get Webhook Authentication Token from Secret", func(t *testing.T) {
-		client := reflect.ValueOf(clients[7]).Elem()
+		client := reflect.ValueOf(clients.Client("Webhook")).Elem()
 
 		token := client.FieldByName("headers").MapIndex(reflect.ValueOf("Authorization")).String()
 		if token != "token" {
@@ -432,65 +625,65 @@ func Test_GetValuesFromSecret(t *testing.T) {
 	})
 
 	t.Run("Get none existing secret skips target", func(t *testing.T) {
-		clients := factory.CreateClients(&config.Targets{
-			Loki: &config.Target[config.LokiOptions]{SecretRef: "not-exist"},
+		clients := factory.CreateClients(&target.Targets{
+			Loki: &target.Config[target.LokiOptions]{SecretRef: "not-exist"},
 		})
 
-		if len(clients) != 0 {
+		if len(clients.Clients()) != 0 {
 			t.Error("Expected client are skipped")
 		}
 	})
 }
 
 func Test_CustomFields(t *testing.T) {
-	factory := config.NewTargetFactory(nil, nil)
+	factory := factory.NewFactory(nil, nil)
 
-	targets := &config.Targets{
-		Loki: &config.Target[config.LokiOptions]{
-			Config: &config.LokiOptions{
-				HostOptions: config.HostOptions{
+	targets := &target.Targets{
+		Loki: &target.Config[target.LokiOptions]{
+			Config: &target.LokiOptions{
+				HostOptions: target.HostOptions{
 					Host: "http://localhost:3100",
 				},
 			},
 			CustomFields: map[string]string{"field": "value"},
 		},
-		Elasticsearch: &config.Target[config.ElasticsearchOptions]{
-			Config: &config.ElasticsearchOptions{
-				HostOptions: config.HostOptions{
+		Elasticsearch: &target.Config[target.ElasticsearchOptions]{
+			Config: &target.ElasticsearchOptions{
+				HostOptions: target.HostOptions{
 					Host: "http://localhost:9200",
 				},
 			},
 			CustomFields: map[string]string{"field": "value"},
 		},
-		Slack: &config.Target[config.SlackOptions]{
-			Config: &config.SlackOptions{
-				WebhookOptions: config.WebhookOptions{
+		Slack: &target.Config[target.SlackOptions]{
+			Config: &target.SlackOptions{
+				WebhookOptions: target.WebhookOptions{
 					Webhook: "http://localhost:80",
 				},
 			},
 			CustomFields: map[string]string{"field": "value"},
 		},
-		Discord: &config.Target[config.WebhookOptions]{
-			Config: &config.WebhookOptions{
+		Discord: &target.Config[target.WebhookOptions]{
+			Config: &target.WebhookOptions{
 				Webhook: "http://discord:80",
 			},
 			CustomFields: map[string]string{"field": "value"},
 		},
-		Teams: &config.Target[config.WebhookOptions]{
-			Config: &config.WebhookOptions{
+		Teams: &target.Config[target.WebhookOptions]{
+			Config: &target.WebhookOptions{
 				Webhook: "http://hook.teams:80",
 			},
 			CustomFields: map[string]string{"field": "value"},
 		},
-		GoogleChat: &config.Target[config.WebhookOptions]{
-			Config: &config.WebhookOptions{
+		GoogleChat: &target.Config[target.WebhookOptions]{
+			Config: &target.WebhookOptions{
 				Webhook: "http://localhost:900/webhook",
 			},
 			CustomFields: map[string]string{"field": "value"},
 		},
-		Telegram: &config.Target[config.TelegramOptions]{
-			Config: &config.TelegramOptions{
-				WebhookOptions: config.WebhookOptions{
+		Telegram: &target.Config[target.TelegramOptions]{
+			Config: &target.TelegramOptions{
+				WebhookOptions: target.WebhookOptions{
 					Webhook: "http://localhost:80",
 				},
 				Token:  "XXX",
@@ -498,15 +691,15 @@ func Test_CustomFields(t *testing.T) {
 			},
 			CustomFields: map[string]string{"field": "value"},
 		},
-		Webhook: &config.Target[config.WebhookOptions]{
-			Config: &config.WebhookOptions{
+		Webhook: &target.Config[target.WebhookOptions]{
+			Config: &target.WebhookOptions{
 				Webhook: "http://localhost:8080",
 			},
 			CustomFields: map[string]string{"field": "value"},
 		},
-		S3: &config.Target[config.S3Options]{
-			Config: &config.S3Options{
-				AWSConfig: config.AWSConfig{
+		S3: &target.Config[target.S3Options]{
+			Config: &target.S3Options{
+				AWSConfig: target.AWSConfig{
 					AccessKeyID:     "AccessKey",
 					SecretAccessKey: "SecretAccessKey",
 					Endpoint:        "https://storage.yandexcloud.net",
@@ -516,9 +709,9 @@ func Test_CustomFields(t *testing.T) {
 			},
 			CustomFields: map[string]string{"field": "value"},
 		},
-		Kinesis: &config.Target[config.KinesisOptions]{
-			Config: &config.KinesisOptions{
-				AWSConfig: config.AWSConfig{
+		Kinesis: &target.Config[target.KinesisOptions]{
+			Config: &target.KinesisOptions{
+				AWSConfig: target.AWSConfig{
 					AccessKeyID:     "AccessKey",
 					SecretAccessKey: "SecretAccessKey",
 					Endpoint:        "https://storage.yandexcloud.net",
@@ -528,9 +721,9 @@ func Test_CustomFields(t *testing.T) {
 			},
 			CustomFields: map[string]string{"field": "value"},
 		},
-		SecurityHub: &config.Target[config.SecurityHubOptions]{
-			Config: &config.SecurityHubOptions{
-				AWSConfig: config.AWSConfig{
+		SecurityHub: &target.Config[target.SecurityHubOptions]{
+			Config: &target.SecurityHubOptions{
+				AWSConfig: target.AWSConfig{
 					AccessKeyID:     "AccessKey",
 					SecretAccessKey: "SecretAccessKey",
 					Endpoint:        "https://storage.yandexcloud.net",
@@ -540,8 +733,8 @@ func Test_CustomFields(t *testing.T) {
 			},
 			CustomFields: map[string]string{"field": "value"},
 		},
-		GCS: &config.Target[config.GCSOptions]{
-			Config: &config.GCSOptions{
+		GCS: &target.Config[target.GCSOptions]{
+			Config: &target.GCSOptions{
 				Credentials: `{"token": "token", "type": "authorized_user"}`,
 				Bucket:      "test",
 				Prefix:      "prefix",
@@ -552,12 +745,12 @@ func Test_CustomFields(t *testing.T) {
 
 	clients := factory.CreateClients(targets)
 
-	if len(clients) != 12 {
-		t.Fatalf("expected 12 client created, got %d", len(clients))
+	if len(clients.Clients()) != 12 {
+		t.Fatalf("expected 12 client created, got %d", len(clients.Clients()))
 	}
 
 	t.Run("Get CustomLabels from Loki", func(t *testing.T) {
-		client := reflect.ValueOf(clients[0]).Elem()
+		client := reflect.ValueOf(clients.Client("Loki")).Elem()
 
 		customFields := client.FieldByName("customLabels").MapKeys()
 		if customFields[0].String() != "field" {
@@ -566,7 +759,7 @@ func Test_CustomFields(t *testing.T) {
 	})
 
 	t.Run("Get CustomFields from Elasticsearch", func(t *testing.T) {
-		client := reflect.ValueOf(clients[1]).Elem()
+		client := reflect.ValueOf(clients.Client("Elasticsearch")).Elem()
 
 		customFields := client.FieldByName("customFields").MapKeys()
 		if customFields[0].String() != "field" {
@@ -575,7 +768,7 @@ func Test_CustomFields(t *testing.T) {
 	})
 
 	t.Run("Get CustomFields from Slack", func(t *testing.T) {
-		client := reflect.ValueOf(clients[2]).Elem()
+		client := reflect.ValueOf(clients.Client("Slack")).Elem()
 
 		customFields := client.FieldByName("customFields").MapKeys()
 		if customFields[0].String() != "field" {
@@ -583,7 +776,7 @@ func Test_CustomFields(t *testing.T) {
 		}
 	})
 	t.Run("Get CustomFields from Discord", func(t *testing.T) {
-		client := reflect.ValueOf(clients[3]).Elem()
+		client := reflect.ValueOf(clients.Client("Discord")).Elem()
 
 		customFields := client.FieldByName("customFields").MapKeys()
 		if customFields[0].String() != "field" {
@@ -591,7 +784,7 @@ func Test_CustomFields(t *testing.T) {
 		}
 	})
 	t.Run("Get CustomFields from MS Teams", func(t *testing.T) {
-		client := reflect.ValueOf(clients[4]).Elem()
+		client := reflect.ValueOf(clients.Client("Teams")).Elem()
 
 		customFields := client.FieldByName("customFields").MapKeys()
 		if customFields[0].String() != "field" {
@@ -600,7 +793,7 @@ func Test_CustomFields(t *testing.T) {
 	})
 
 	t.Run("Get CustomFields from GoogleChat", func(t *testing.T) {
-		client := reflect.ValueOf(clients[5]).Elem()
+		client := reflect.ValueOf(clients.Client("GoogleChat")).Elem()
 
 		customFields := client.FieldByName("customFields").MapKeys()
 		if customFields[0].String() != "field" {
@@ -609,7 +802,7 @@ func Test_CustomFields(t *testing.T) {
 	})
 
 	t.Run("Get CustomFields from Telegram", func(t *testing.T) {
-		client := reflect.ValueOf(clients[6]).Elem()
+		client := reflect.ValueOf(clients.Client("Telegram")).Elem()
 
 		customFields := client.FieldByName("customFields").MapKeys()
 		if customFields[0].String() != "field" {
@@ -618,7 +811,7 @@ func Test_CustomFields(t *testing.T) {
 	})
 
 	t.Run("Get CustomFields from Webhook", func(t *testing.T) {
-		client := reflect.ValueOf(clients[7]).Elem()
+		client := reflect.ValueOf(clients.Client("Webhook")).Elem()
 
 		customFields := client.FieldByName("customFields").MapKeys()
 		if customFields[0].String() != "field" {
@@ -626,7 +819,7 @@ func Test_CustomFields(t *testing.T) {
 		}
 	})
 	t.Run("Get CustomFields from S3", func(t *testing.T) {
-		client := reflect.ValueOf(clients[8]).Elem()
+		client := reflect.ValueOf(clients.Client("S3")).Elem()
 
 		customFields := client.FieldByName("customFields").MapKeys()
 		if customFields[0].String() != "field" {
@@ -634,7 +827,7 @@ func Test_CustomFields(t *testing.T) {
 		}
 	})
 	t.Run("Get CustomFields from Kinesis", func(t *testing.T) {
-		client := reflect.ValueOf(clients[9]).Elem()
+		client := reflect.ValueOf(clients.Client("Kinesis")).Elem()
 
 		customFields := client.FieldByName("customFields").MapKeys()
 		if customFields[0].String() != "field" {
@@ -642,7 +835,7 @@ func Test_CustomFields(t *testing.T) {
 		}
 	})
 	t.Run("Get CustomFields from GCS", func(t *testing.T) {
-		client := reflect.ValueOf(clients[11]).Elem()
+		client := reflect.ValueOf(clients.Client("GoogleCloudStorage")).Elem()
 
 		customFields := client.FieldByName("customFields").MapKeys()
 		if customFields[0].String() != "field" {
@@ -652,68 +845,68 @@ func Test_CustomFields(t *testing.T) {
 }
 
 func Test_GetValuesFromMountedSecret(t *testing.T) {
-	factory := config.NewTargetFactory(secrets.NewClient(newFakeClient()), nil)
+	factory := factory.NewFactory(secrets.NewClient(newFakeClient()), nil)
 
 	mountSecret()
 	defer os.Remove(mountedSecret)
 
-	targets := config.Targets{
-		Loki:          &config.Target[config.LokiOptions]{MountedSecret: mountedSecret},
-		Elasticsearch: &config.Target[config.ElasticsearchOptions]{MountedSecret: mountedSecret},
-		Slack:         &config.Target[config.SlackOptions]{MountedSecret: mountedSecret},
-		Discord:       &config.Target[config.WebhookOptions]{MountedSecret: mountedSecret},
-		Teams:         &config.Target[config.WebhookOptions]{MountedSecret: mountedSecret},
-		GoogleChat:    &config.Target[config.WebhookOptions]{MountedSecret: mountedSecret},
-		Webhook:       &config.Target[config.WebhookOptions]{MountedSecret: mountedSecret},
-		Telegram: &config.Target[config.TelegramOptions]{
+	targets := target.Targets{
+		Loki:          &target.Config[target.LokiOptions]{MountedSecret: mountedSecret},
+		Elasticsearch: &target.Config[target.ElasticsearchOptions]{MountedSecret: mountedSecret},
+		Slack:         &target.Config[target.SlackOptions]{MountedSecret: mountedSecret},
+		Discord:       &target.Config[target.WebhookOptions]{MountedSecret: mountedSecret},
+		Teams:         &target.Config[target.WebhookOptions]{MountedSecret: mountedSecret},
+		GoogleChat:    &target.Config[target.WebhookOptions]{MountedSecret: mountedSecret},
+		Webhook:       &target.Config[target.WebhookOptions]{MountedSecret: mountedSecret},
+		Telegram: &target.Config[target.TelegramOptions]{
 			MountedSecret: mountedSecret,
-			Config: &config.TelegramOptions{
+			Config: &target.TelegramOptions{
 				ChatID: "1234",
 			},
 		},
-		S3: &config.Target[config.S3Options]{
+		S3: &target.Config[target.S3Options]{
 			MountedSecret: mountedSecret,
-			Config: &config.S3Options{
-				AWSConfig: config.AWSConfig{Endpoint: "endoint", Region: "region"},
+			Config: &target.S3Options{
+				AWSConfig: target.AWSConfig{Endpoint: "endoint", Region: "region"},
 				Bucket:    "bucket",
 			},
 		},
-		Kinesis: &config.Target[config.KinesisOptions]{
+		Kinesis: &target.Config[target.KinesisOptions]{
 			MountedSecret: mountedSecret,
-			Config: &config.KinesisOptions{
-				AWSConfig:  config.AWSConfig{Endpoint: "endoint", Region: "region"},
+			Config: &target.KinesisOptions{
+				AWSConfig:  target.AWSConfig{Endpoint: "endoint", Region: "region"},
 				StreamName: "stream",
 			},
 		},
-		SecurityHub: &config.Target[config.SecurityHubOptions]{
+		SecurityHub: &target.Config[target.SecurityHubOptions]{
 			MountedSecret: mountedSecret,
-			Config: &config.SecurityHubOptions{
-				AWSConfig: config.AWSConfig{Endpoint: "endoint", Region: "region"},
+			Config: &target.SecurityHubOptions{
+				AWSConfig: target.AWSConfig{Endpoint: "endoint", Region: "region"},
 				AccountID: "accountID",
 			},
 		},
-		GCS: &config.Target[config.GCSOptions]{
+		GCS: &target.Config[target.GCSOptions]{
 			MountedSecret: mountedSecret,
-			Config: &config.GCSOptions{
+			Config: &target.GCSOptions{
 				Bucket: "policy-reporter",
 			},
 		},
 	}
 
 	clients := factory.CreateClients(&targets)
-	if len(clients) != 12 {
-		t.Fatalf("expected 12 client created, got %d", len(clients))
+	if len(clients.Clients()) != 12 {
+		t.Fatalf("expected 12 client created, got %d", len(clients.Clients()))
 	}
 
 	t.Run("Get Loki values from Secret", func(t *testing.T) {
-		fv := reflect.ValueOf(clients[0]).Elem().FieldByName("host")
+		fv := reflect.ValueOf(clients.Client("Loki")).Elem().FieldByName("host")
 		if v := fv.String(); v != "http://localhost:9200/api/prom/push" {
 			t.Errorf("Expected host from secret, got %s", v)
 		}
 	})
 
 	t.Run("Get Elasticsearch values from Secret", func(t *testing.T) {
-		client := reflect.ValueOf(clients[1]).Elem()
+		client := reflect.ValueOf(clients.Client("Elasticsearch")).Elem()
 
 		host := client.FieldByName("host").String()
 		if host != "http://localhost:9200" {
@@ -747,7 +940,7 @@ func Test_GetValuesFromMountedSecret(t *testing.T) {
 	})
 
 	t.Run("Get Slack values from Secret", func(t *testing.T) {
-		client := reflect.ValueOf(clients[2]).Elem()
+		client := reflect.ValueOf(clients.Client("Slack")).Elem()
 
 		webhook := client.FieldByName("channel").String()
 		if webhook != "general" {
@@ -756,7 +949,7 @@ func Test_GetValuesFromMountedSecret(t *testing.T) {
 	})
 
 	t.Run("Get Discord values from Secret", func(t *testing.T) {
-		client := reflect.ValueOf(clients[3]).Elem()
+		client := reflect.ValueOf(clients.Client("Discord")).Elem()
 
 		webhook := client.FieldByName("webhook").String()
 		if webhook != "http://localhost:9200/webhook" {
@@ -765,7 +958,7 @@ func Test_GetValuesFromMountedSecret(t *testing.T) {
 	})
 
 	t.Run("Get MS Teams values from Secret", func(t *testing.T) {
-		client := reflect.ValueOf(clients[4]).Elem()
+		client := reflect.ValueOf(clients.Client("Teams")).Elem()
 
 		webhook := client.FieldByName("webhook").String()
 		if webhook != "http://localhost:9200/webhook" {
@@ -774,7 +967,7 @@ func Test_GetValuesFromMountedSecret(t *testing.T) {
 	})
 
 	t.Run("Get GoogleChat Webhook from Secret", func(t *testing.T) {
-		client := reflect.ValueOf(clients[5]).Elem()
+		client := reflect.ValueOf(clients.Client("GoogleChat")).Elem()
 
 		host := client.FieldByName("webhook").String()
 		if host != "http://localhost:9200/webhook" {
@@ -783,7 +976,7 @@ func Test_GetValuesFromMountedSecret(t *testing.T) {
 	})
 
 	t.Run("Get Telegram Token from Secret", func(t *testing.T) {
-		client := reflect.ValueOf(clients[6]).Elem()
+		client := reflect.ValueOf(clients.Client("Telegram")).Elem()
 
 		host := client.FieldByName("host").String()
 		if host != "http://localhost:9200/bottoken/sendMessage" {
@@ -792,7 +985,7 @@ func Test_GetValuesFromMountedSecret(t *testing.T) {
 	})
 
 	t.Run("Get Webhook Authentication Token from Secret", func(t *testing.T) {
-		client := reflect.ValueOf(clients[7]).Elem()
+		client := reflect.ValueOf(clients.Client("Webhook")).Elem()
 
 		token := client.FieldByName("headers").MapIndex(reflect.ValueOf("Authorization")).String()
 		if token != "token" {
@@ -801,11 +994,11 @@ func Test_GetValuesFromMountedSecret(t *testing.T) {
 	})
 
 	t.Run("Get none existing secret skips target", func(t *testing.T) {
-		clients := factory.CreateClients(&config.Targets{
-			Loki: &config.Target[config.LokiOptions]{SecretRef: "not-exist"},
+		clients := factory.CreateClients(&target.Targets{
+			Loki: &target.Config[target.LokiOptions]{SecretRef: "not-exist"},
 		})
 
-		if len(clients) != 0 {
+		if len(clients.Clients()) != 0 {
 			t.Error("Expected client are skipped")
 		}
 	})

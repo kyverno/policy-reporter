@@ -6,17 +6,17 @@ import (
 	"github.com/stretchr/testify/assert"
 
 	v2 "github.com/kyverno/policy-reporter/pkg/api/v2"
-	"github.com/kyverno/policy-reporter/pkg/config"
 	"github.com/kyverno/policy-reporter/pkg/database"
+	"github.com/kyverno/policy-reporter/pkg/target"
 )
 
 func TestV2Views(t *testing.T) {
 	t.Run("MapValueFilter", func(t *testing.T) {
-		empty := v2.MapValueFilter(config.ValueFilter{})
+		empty := v2.MapValueFilter(target.ValueFilter{})
 
 		assert.Nil(t, empty)
 
-		original := config.ValueFilter{
+		original := target.ValueFilter{
 			Include:  []string{"default"},
 			Exclude:  []string{"kube-system"},
 			Selector: map[string]any{"team": "marketing"},
@@ -76,7 +76,7 @@ func TestV2Views(t *testing.T) {
 	})
 
 	t.Run("MapBaseToTarget", func(t *testing.T) {
-		target := v2.MapBaseToTarget(&config.Target[config.WebhookOptions]{
+		target := v2.MapBaseToTarget(&target.Config[target.WebhookOptions]{
 			Name:            "Webhook",
 			MinimumPriority: "warning",
 			SecretRef:       "ref",
@@ -96,12 +96,12 @@ func TestV2Views(t *testing.T) {
 	})
 
 	t.Run("MapSlackToTarget", func(t *testing.T) {
-		target := v2.MapSlackToTarget(&config.Target[config.SlackOptions]{
+		target := v2.MapSlackToTarget(&target.Config[target.SlackOptions]{
 			Name:            "Slack",
 			MinimumPriority: "warning",
-			Config: &config.SlackOptions{
+			Config: &target.SlackOptions{
 				Channel: "general",
-				WebhookOptions: config.WebhookOptions{
+				WebhookOptions: target.WebhookOptions{
 					Webhook: "http://slack.com/xxxx",
 				},
 			},
@@ -115,11 +115,11 @@ func TestV2Views(t *testing.T) {
 	})
 
 	t.Run("MapLokiToTarget", func(t *testing.T) {
-		target := v2.MapLokiToTarget(&config.Target[config.LokiOptions]{
+		target := v2.MapLokiToTarget(&target.Config[target.LokiOptions]{
 			Name:            "Loki 1",
 			MinimumPriority: "warning",
-			Config: &config.LokiOptions{
-				HostOptions: config.HostOptions{
+			Config: &target.LokiOptions{
+				HostOptions: target.HostOptions{
 					Host:        "http://loki.monitoring:3000",
 					Certificate: "cert",
 					SkipTLS:     true,
@@ -143,11 +143,11 @@ func TestV2Views(t *testing.T) {
 	})
 
 	t.Run("MapElasticsearchToTarget", func(t *testing.T) {
-		target := v2.MapElasticsearchToTarget(&config.Target[config.ElasticsearchOptions]{
+		target := v2.MapElasticsearchToTarget(&target.Config[target.ElasticsearchOptions]{
 			Name:            "Target",
 			MinimumPriority: "warning",
-			Config: &config.ElasticsearchOptions{
-				HostOptions: config.HostOptions{
+			Config: &target.ElasticsearchOptions{
+				HostOptions: target.HostOptions{
 					Host:        "http://elasticsearch.monitoring:3000",
 					Certificate: "cert",
 					SkipTLS:     true,
@@ -174,10 +174,10 @@ func TestV2Views(t *testing.T) {
 	})
 
 	t.Run("MapWebhhokToTarget", func(t *testing.T) {
-		target := v2.MapWebhhokToTarget("Discord")(&config.Target[config.WebhookOptions]{
+		target := v2.MapWebhhokToTarget("Discord")(&target.Config[target.WebhookOptions]{
 			Name:            "Target",
 			MinimumPriority: "warning",
-			Config: &config.WebhookOptions{
+			Config: &target.WebhookOptions{
 				Webhook:     "http://discord.com/12345/888XABC",
 				Certificate: "cert",
 				SkipTLS:     true,
@@ -199,13 +199,13 @@ func TestV2Views(t *testing.T) {
 	})
 
 	t.Run("MapTelegramToTarget", func(t *testing.T) {
-		target := v2.MapTelegramToTarget(&config.Target[config.TelegramOptions]{
+		target := v2.MapTelegramToTarget(&target.Config[target.TelegramOptions]{
 			Name:            "Target",
 			MinimumPriority: "warning",
-			Config: &config.TelegramOptions{
+			Config: &target.TelegramOptions{
 				Token:  "ABCDE",
 				ChatID: "1234567",
-				WebhookOptions: config.WebhookOptions{
+				WebhookOptions: target.WebhookOptions{
 					Webhook:     "http://telegram.com",
 					Certificate: "cert",
 					SkipTLS:     true,
@@ -226,13 +226,13 @@ func TestV2Views(t *testing.T) {
 	})
 
 	t.Run("MapS3ToTarget", func(t *testing.T) {
-		target := v2.MapS3ToTarget(&config.Target[config.S3Options]{
+		target := v2.MapS3ToTarget(&target.Config[target.S3Options]{
 			Name:            "Target",
 			MinimumPriority: "warning",
-			Config: &config.S3Options{
+			Config: &target.S3Options{
 				Prefix: "policy-reporter",
 				Bucket: "kyverno",
-				AWSConfig: config.AWSConfig{
+				AWSConfig: target.AWSConfig{
 					Region:   "eu-central-1",
 					Endpoint: "https://s3.aws.com",
 				},
@@ -252,12 +252,12 @@ func TestV2Views(t *testing.T) {
 	})
 
 	t.Run("MapKinesisToTarget", func(t *testing.T) {
-		target := v2.MapKinesisToTarget(&config.Target[config.KinesisOptions]{
+		target := v2.MapKinesisToTarget(&target.Config[target.KinesisOptions]{
 			Name:            "Target",
 			MinimumPriority: "warning",
-			Config: &config.KinesisOptions{
+			Config: &target.KinesisOptions{
 				StreamName: "policy-reporter",
-				AWSConfig: config.AWSConfig{
+				AWSConfig: target.AWSConfig{
 					Region:   "eu-central-1",
 					Endpoint: "https://kinesis.aws.com",
 				},
@@ -276,13 +276,13 @@ func TestV2Views(t *testing.T) {
 	})
 
 	t.Run("MapSecurityHubToTarget", func(t *testing.T) {
-		target := v2.MapSecurityHubToTarget(&config.Target[config.SecurityHubOptions]{
+		target := v2.MapSecurityHubToTarget(&target.Config[target.SecurityHubOptions]{
 			Name:            "Target",
 			MinimumPriority: "warning",
-			Config: &config.SecurityHubOptions{
+			Config: &target.SecurityHubOptions{
 				AccountID: "policy-reporter",
 				Cleanup:   true,
-				AWSConfig: config.AWSConfig{
+				AWSConfig: target.AWSConfig{
 					Region:   "eu-central-1",
 					Endpoint: "https://securityhub.aws.com",
 				},
@@ -301,10 +301,10 @@ func TestV2Views(t *testing.T) {
 	})
 
 	t.Run("MapGCSToTarget", func(t *testing.T) {
-		target := v2.MapGCSToTarget(&config.Target[config.GCSOptions]{
+		target := v2.MapGCSToTarget(&target.Config[target.GCSOptions]{
 			Name:            "Target",
 			MinimumPriority: "warning",
-			Config: &config.GCSOptions{
+			Config: &target.GCSOptions{
 				Prefix: "policy-reporter",
 				Bucket: "kyverno",
 			},
@@ -321,19 +321,19 @@ func TestV2Views(t *testing.T) {
 	})
 
 	t.Run("MapTargets", func(t *testing.T) {
-		targets := v2.MapTargets(&config.Target[config.GCSOptions]{
+		targets := v2.MapTargets(&target.Config[target.GCSOptions]{
 			Name:            "Target",
 			MinimumPriority: "warning",
-			Config: &config.GCSOptions{
+			Config: &target.GCSOptions{
 				Prefix: "policy-reporter",
 				Bucket: "kyverno",
 			},
 			Valid: true,
-			Channels: []*config.Target[config.GCSOptions]{
+			Channels: []*target.Config[target.GCSOptions]{
 				{
 					Name:            "Target 2",
 					MinimumPriority: "warning",
-					Config: &config.GCSOptions{
+					Config: &target.GCSOptions{
 						Prefix: "policy-reporter",
 						Bucket: "trivy",
 					},
@@ -342,7 +342,7 @@ func TestV2Views(t *testing.T) {
 				{
 					Name:            "Target 2",
 					MinimumPriority: "warning",
-					Config: &config.GCSOptions{
+					Config: &target.GCSOptions{
 						Prefix: "policy-reporter",
 						Bucket: "trivy",
 					},
