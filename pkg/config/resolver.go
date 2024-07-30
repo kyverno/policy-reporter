@@ -42,6 +42,7 @@ import (
 	"github.com/kyverno/policy-reporter/pkg/report"
 	"github.com/kyverno/policy-reporter/pkg/report/result"
 	"github.com/kyverno/policy-reporter/pkg/target"
+	"github.com/kyverno/policy-reporter/pkg/target/factory"
 	"github.com/kyverno/policy-reporter/pkg/validate"
 )
 
@@ -56,8 +57,9 @@ type Resolver struct {
 	policyReportClient report.PolicyReportClient
 	leaderElector      *leaderelection.Client
 	resultCache        cache.Cache
-	targetClients      []target.Client
+	targetClients      *target.Collection
 	targetsCreated     bool
+	targetFactory      target.Factory
 	logger             *zap.Logger
 	resultListener     *listener.ResultListener
 }
@@ -241,7 +243,7 @@ func (r *Resolver) Queue() (*kubernetes.Queue, error) {
 // RegisterNewResultsListener resolver method
 func (r *Resolver) RegisterNewResultsListener() {
 	targets := r.TargetClients()
-	if len(targets) == 0 {
+	if targets.Empty() {
 		return
 	}
 
@@ -256,7 +258,7 @@ func (r *Resolver) RegisterNewResultsListener() {
 func (r *Resolver) RegisterSendResultListener() {
 	targets := r.TargetClients()
 
-	if len(targets) == 0 {
+	if targets.Empty() {
 		return
 	}
 
@@ -264,24 +266,8 @@ func (r *Resolver) RegisterSendResultListener() {
 		r.RegisterNewResultsListener()
 	}
 
-	singleSend := make([]target.Client, 0)
-	batchSend := make([]target.Client, 0)
-
-	for _, client := range targets {
-		if client.SupportsBatchSend() {
-			batchSend = append(batchSend, client)
-		} else {
-			singleSend = append(singleSend, client)
-		}
-	}
-
-	if len(singleSend) > 0 {
-		r.resultListener.RegisterListener(listener.NewSendResultListener(singleSend))
-	}
-
-	if len(batchSend) > 0 {
-		r.resultListener.RegisterScopeListener(listener.NewSendScopeResultsListener(batchSend))
-	}
+	r.resultListener.RegisterListener(listener.NewSendResultListener(targets))
+	r.resultListener.RegisterScopeListener(listener.NewSendScopeResultsListener(targets))
 }
 
 // UnregisterSendResultListener resolver method
@@ -382,13 +368,28 @@ func (r *Resolver) JobClient() (jobs.Client, error) {
 	return jobs.NewClient(clientset.BatchV1()), nil
 }
 
-func (r *Resolver) TargetFactory() *TargetFactory {
+func (r *Resolver) TargetFactory() target.Factory {
+	if r.targetFactory != nil {
+		return r.targetFactory
+	}
+
 	ns, err := r.NamespaceClient()
 	if err != nil {
 		zap.L().Error("failed to create namespace client", zap.Error(err))
 	}
 
-	return NewTargetFactory(r.SecretClient(), target.NewResultFilterFactory(ns))
+	r.targetFactory = factory.NewFactory(r.SecretClient(), target.NewResultFilterFactory(ns))
+
+	return r.targetFactory
+}
+
+func (r *Resolver) SecretInformer() (secrets.Informer, error) {
+	client, err := r.CRDMetadataClient()
+	if err != nil {
+		return nil, err
+	}
+
+	return secrets.NewInformer(client, r.TargetFactory()), nil
 }
 
 func (r *Resolver) DatabaseFactory() *DatabaseFactory {
@@ -398,7 +399,7 @@ func (r *Resolver) DatabaseFactory() *DatabaseFactory {
 }
 
 // TargetClients resolver method
-func (r *Resolver) TargetClients() []target.Client {
+func (r *Resolver) TargetClients() *target.Collection {
 	if r.targetsCreated {
 		return r.targetClients
 	}
@@ -410,7 +411,7 @@ func (r *Resolver) TargetClients() []target.Client {
 }
 
 func (r *Resolver) HasTargets() bool {
-	return len(r.TargetClients()) > 0
+	return !r.TargetClients().Empty()
 }
 
 func (r *Resolver) EnableLeaderElection() bool {
@@ -427,7 +428,7 @@ func (r *Resolver) EnableLeaderElection() bool {
 
 // SkipExistingOnStartup config method
 func (r *Resolver) SkipExistingOnStartup() bool {
-	for _, client := range r.TargetClients() {
+	for _, client := range r.TargetClients().Clients() {
 		if !client.SkipExistingOnStartup() {
 			return false
 		}

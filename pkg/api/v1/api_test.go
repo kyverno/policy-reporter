@@ -44,8 +44,8 @@ func TestV1(t *testing.T) {
 
 	gin.SetMode(gin.ReleaseMode)
 
-	server := api.NewServer(gin.New(), v1.WithAPI(store, []target.Client{
-		webhook.NewClient(webhook.Options{
+	server := api.NewServer(gin.New(), v1.WithAPI(store, target.NewCollection(&target.Target{
+		Client: webhook.NewClient(webhook.Options{
 			ClientOptions: target.ClientOptions{
 				Name:                  "Webhook",
 				SkipExistingOnStartup: true,
@@ -56,7 +56,7 @@ func TestV1(t *testing.T) {
 			},
 			Host: "http://localhost:8080",
 		}),
-	}, violations.NewReporter("../../../templates", "Cluster", "Report")))
+	}), violations.NewReporter("../../../templates", "Cluster", "Report")))
 
 	t.Run("TargetResponse", func(t *testing.T) {
 		req, _ := http.NewRequest("GET", "/v1/targets", nil)
