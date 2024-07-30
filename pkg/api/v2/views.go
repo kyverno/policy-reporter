@@ -4,10 +4,10 @@ import (
 	"fmt"
 	"net/url"
 
-	"github.com/kyverno/policy-reporter/pkg/config"
 	"github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
 	db "github.com/kyverno/policy-reporter/pkg/database"
 	"github.com/kyverno/policy-reporter/pkg/helper"
+	"github.com/kyverno/policy-reporter/pkg/target"
 )
 
 type Category struct {
@@ -374,7 +374,7 @@ type Target struct {
 	Auth            bool              `json:"auth"`
 }
 
-func MapValueFilter(f config.ValueFilter) *ValueFilter {
+func MapValueFilter(f target.ValueFilter) *ValueFilter {
 	if len(f.Exclude)+len(f.Include) == 0+len(f.Selector) {
 		return nil
 	}
@@ -386,7 +386,7 @@ func MapValueFilter(f config.ValueFilter) *ValueFilter {
 	}
 }
 
-func MapBaseToTarget[T any](t *config.Target[T]) *Target {
+func MapBaseToTarget[T any](t *target.Config[T]) *Target {
 	fields := t.CustomFields
 	if fields == nil {
 		fields = make(map[string]string, 0)
@@ -404,14 +404,14 @@ func MapBaseToTarget[T any](t *config.Target[T]) *Target {
 			Priorities:   MapValueFilter(t.Filter.Priorities),
 			Policies:     MapValueFilter(t.Filter.Policies),
 			ReportLabels: MapValueFilter(t.Filter.ReportLabels),
-			Sources: MapValueFilter(config.ValueFilter{
+			Sources: MapValueFilter(target.ValueFilter{
 				Include: t.Sources,
 			}),
 		},
 	}
 }
 
-func MapSlackToTarget(ta *config.Target[config.SlackOptions]) *Target {
+func MapSlackToTarget(ta *target.Config[target.SlackOptions]) *Target {
 	t := MapBaseToTarget(ta)
 	t.Type = "Slack"
 	t.Properties["channel"] = ta.Config.Channel
@@ -419,7 +419,7 @@ func MapSlackToTarget(ta *config.Target[config.SlackOptions]) *Target {
 	return t
 }
 
-func MapLokiToTarget(ta *config.Target[config.LokiOptions]) *Target {
+func MapLokiToTarget(ta *target.Config[target.LokiOptions]) *Target {
 	t := MapBaseToTarget(ta)
 	t.Type = "Loki"
 	t.Host = ta.Config.Host
@@ -436,7 +436,7 @@ func MapLokiToTarget(ta *config.Target[config.LokiOptions]) *Target {
 	return t
 }
 
-func MapElasticsearchToTarget(ta *config.Target[config.ElasticsearchOptions]) *Target {
+func MapElasticsearchToTarget(ta *target.Config[target.ElasticsearchOptions]) *Target {
 	t := MapBaseToTarget(ta)
 	t.Type = "Elasticsearch"
 	t.Host = ta.Config.Host
@@ -453,8 +453,8 @@ func MapElasticsearchToTarget(ta *config.Target[config.ElasticsearchOptions]) *T
 	return t
 }
 
-func MapWebhhokToTarget(typeName string) func(ta *config.Target[config.WebhookOptions]) *Target {
-	return func(ta *config.Target[config.WebhookOptions]) *Target {
+func MapWebhhokToTarget(typeName string) func(ta *target.Config[target.WebhookOptions]) *Target {
+	return func(ta *target.Config[target.WebhookOptions]) *Target {
 		t := MapBaseToTarget(ta)
 		t.Type = typeName
 		t.SkipTLS = ta.Config.SkipTLS
@@ -473,7 +473,7 @@ func MapWebhhokToTarget(typeName string) func(ta *config.Target[config.WebhookOp
 	}
 }
 
-func MapTelegramToTarget(ta *config.Target[config.TelegramOptions]) *Target {
+func MapTelegramToTarget(ta *target.Config[target.TelegramOptions]) *Target {
 	t := MapBaseToTarget(ta)
 	t.Type = "Telegram"
 	t.Host = ta.Config.Webhook
@@ -484,7 +484,7 @@ func MapTelegramToTarget(ta *config.Target[config.TelegramOptions]) *Target {
 	return t
 }
 
-func MapS3ToTarget(ta *config.Target[config.S3Options]) *Target {
+func MapS3ToTarget(ta *target.Config[target.S3Options]) *Target {
 	t := MapBaseToTarget(ta)
 	t.Type = "S3"
 	t.Host = ta.Config.Endpoint
@@ -496,7 +496,7 @@ func MapS3ToTarget(ta *config.Target[config.S3Options]) *Target {
 	return t
 }
 
-func MapKinesisToTarget(ta *config.Target[config.KinesisOptions]) *Target {
+func MapKinesisToTarget(ta *target.Config[target.KinesisOptions]) *Target {
 	t := MapBaseToTarget(ta)
 	t.Type = "Kinesis"
 	t.Host = ta.Config.Endpoint
@@ -507,7 +507,7 @@ func MapKinesisToTarget(ta *config.Target[config.KinesisOptions]) *Target {
 	return t
 }
 
-func MapSecurityHubToTarget(ta *config.Target[config.SecurityHubOptions]) *Target {
+func MapSecurityHubToTarget(ta *target.Config[target.SecurityHubOptions]) *Target {
 	t := MapBaseToTarget(ta)
 	t.Type = "SecurityHub"
 	t.Host = ta.Config.Endpoint
@@ -518,7 +518,7 @@ func MapSecurityHubToTarget(ta *config.Target[config.SecurityHubOptions]) *Targe
 	return t
 }
 
-func MapGCSToTarget(ta *config.Target[config.GCSOptions]) *Target {
+func MapGCSToTarget(ta *target.Config[target.GCSOptions]) *Target {
 	t := MapBaseToTarget(ta)
 	t.Type = "GoogleCloudStore"
 	t.Properties["prefix"] = ta.Config.Prefix
@@ -528,7 +528,7 @@ func MapGCSToTarget(ta *config.Target[config.GCSOptions]) *Target {
 	return t
 }
 
-func MapTargets[T any](c *config.Target[T], mapper func(*config.Target[T]) *Target) []*Target {
+func MapTargets[T any](c *target.Config[T], mapper func(*target.Config[T]) *Target) []*Target {
 	targets := make([]*Target, 0)
 
 	if c == nil {
@@ -548,7 +548,7 @@ func MapTargets[T any](c *config.Target[T], mapper func(*config.Target[T]) *Targ
 	return targets
 }
 
-func MapConfigTagrgets(c config.Targets) map[string][]*Target {
+func MapConfigTagrgets(c target.Targets) map[string][]*Target {
 	targets := make(map[string][]*Target)
 
 	targets["loki"] = MapTargets(c.Loki, MapLokiToTarget)

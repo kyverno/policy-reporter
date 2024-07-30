@@ -8,9 +8,9 @@ import (
 	"go.uber.org/zap"
 
 	"github.com/kyverno/policy-reporter/pkg/api"
-	"github.com/kyverno/policy-reporter/pkg/config"
 	db "github.com/kyverno/policy-reporter/pkg/database"
 	"github.com/kyverno/policy-reporter/pkg/kubernetes/namespaces"
+	"github.com/kyverno/policy-reporter/pkg/target"
 )
 
 var defaultOrder = []string{"resource_namespace", "resource_name", "resource_uid", "policy", "rule", "message"}
@@ -237,7 +237,7 @@ func NewAPIHandler(store *db.Store, client namespaces.Client, targets map[string
 	}
 }
 
-func WithAPI(store *db.Store, client namespaces.Client, targets config.Targets) api.ServerOption {
+func WithAPI(store *db.Store, client namespaces.Client, targets target.Targets) api.ServerOption {
 	return func(s *api.Server) error {
 		return s.Register("v2", NewAPIHandler(store, client, MapConfigTagrgets(targets)))
 	}
