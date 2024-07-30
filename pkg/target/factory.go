@@ -38,11 +38,7 @@ func (config *Config[T]) MapBaseParent(parent *Config[T]) {
 }
 
 func (config *Config[T]) Secret() string {
-	if config.SecretRef != "" {
-		return config.SecretRef
-	}
-
-	return config.MountedSecret
+	return config.SecretRef
 }
 
 type AWSConfig struct {

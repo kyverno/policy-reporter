@@ -26,7 +26,7 @@ func NewSendScopeResultsListener(targets *target.Collection) report.ScopeResults
 					return target.Validate(re, result)
 				})
 
-				if preExisted && target.SkipExistingOnStartup() {
+				if len(filtered) == 0 || preExisted && target.SkipExistingOnStartup() {
 					return
 				}
 

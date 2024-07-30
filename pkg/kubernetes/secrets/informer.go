@@ -16,6 +16,7 @@ import (
 
 type Informer interface {
 	Sync(targets *target.Collection, stopper chan struct{}) error
+	HasSynced() bool
 }
 
 type informer struct {
@@ -28,10 +29,6 @@ type informer struct {
 
 func (k *informer) HasSynced() bool {
 	return k.synced
-}
-
-func (k *informer) Stop() {
-	close(k.stopChan)
 }
 
 func (k *informer) Sync(targets *target.Collection, stopper chan struct{}) error {

@@ -8,6 +8,7 @@ import (
 	"github.com/kyverno/policy-reporter/pkg/fixtures"
 	"github.com/kyverno/policy-reporter/pkg/listener"
 	"github.com/kyverno/policy-reporter/pkg/target"
+	"github.com/stretchr/testify/assert"
 )
 
 type client struct {
@@ -15,7 +16,7 @@ type client struct {
 	skipExistingOnStartup bool
 	validated             bool
 	cleanupCalled         bool
-	batchSendCalled       bool
+	batchSend             bool
 }
 
 func (c *client) Send(result v1alpha2.PolicyReportResult) {
@@ -47,11 +48,11 @@ func (c *client) CleanUp(_ context.Context, _ v1alpha2.ReportInterface) {
 }
 
 func (c *client) BatchSend(_ v1alpha2.ReportInterface, _ []v1alpha2.PolicyReportResult) {
-	c.batchSendCalled = true
+	c.Called = true
 }
 
 func (c *client) SupportsBatchSend() bool {
-	return false
+	return c.batchSend
 }
 
 func Test_SendResultListener(t *testing.T) {
@@ -60,26 +61,20 @@ func Test_SendResultListener(t *testing.T) {
 		slistener := listener.NewSendResultListener(target.NewCollection(&target.Target{Client: c}))
 		slistener(preport1, fixtures.FailResult, false)
 
-		if !c.Called {
-			t.Error("Expected Send to be called")
-		}
+		assert.True(t, c.Called, "Expected Send to be called")
 	})
 	t.Run("Don't Send Result when validation fails", func(t *testing.T) {
 		c := &client{validated: false}
 		slistener := listener.NewSendResultListener(target.NewCollection(&target.Target{Client: c}))
 		slistener(preport1, fixtures.FailResult, false)
 
-		if c.Called {
-			t.Error("Expected Send not to be called")
-		}
+		assert.False(t, c.Called, "Expected Send not to be called")
 	})
 	t.Run("Don't Send pre existing Result when skipExistingOnStartup is true", func(t *testing.T) {
 		c := &client{skipExistingOnStartup: true}
 		slistener := listener.NewSendResultListener(target.NewCollection(&target.Target{Client: c}))
 		slistener(preport1, fixtures.FailResult, true)
 
-		if c.Called {
-			t.Error("Expected Send not to be called")
-		}
+		assert.False(t, c.Called, "Expected Send not to be called")
 	})
 }

@@ -52,9 +52,8 @@ type Collection struct {
 func (c *Collection) Update(t *Target) {
 	c.mx.Lock()
 	c.targets[t.ID] = t
-	c.mx.Unlock()
-
 	c.clients = make([]Client, 0)
+	c.mx.Unlock()
 }
 
 func (c *Collection) Targets() []*Target {
@@ -115,7 +114,9 @@ func NewCollection(targets ...*Target) *Collection {
 	}
 
 	for _, t := range targets {
-		collection.Update(t)
+		if t != nil {
+			collection.Update(t)
+		}
 	}
 
 	return collection
