@@ -48,7 +48,7 @@ func Test_SecretInformer(t *testing.T) {
 
 		client, secret := NewFakeMetaClient()
 
-		informer := secrets.NewInformer(client, factory.NewFactory(secrets.NewClient(newFakeClient()), target.NewResultFilterFactory(nil)))
+		informer := secrets.NewInformer(client, factory.NewFactory(secrets.NewClient(newFakeClient()), target.NewResultFilterFactory(nil)), "default")
 
 		err := informer.Sync(collection, stop)
 		assert.Nil(t, err)
@@ -82,7 +82,7 @@ func Test_SecretInformer(t *testing.T) {
 
 		client, secret := NewFakeMetaClient()
 
-		informer := secrets.NewInformer(client, factory.NewFactory(secrets.NewClient(newFakeClient()), target.NewResultFilterFactory(nil)))
+		informer := secrets.NewInformer(client, factory.NewFactory(secrets.NewClient(newFakeClient()), target.NewResultFilterFactory(nil)), "default")
 
 		err := informer.Sync(collection, stop)
 		assert.Nil(t, err)
