@@ -11,7 +11,7 @@ image:
   registry: ghcr.io
   repository: kyverno/policy-reporter
   pullPolicy: IfNotPresent
-  tag: caa7e3e
+  tag: 65a0e04
 
 imagePullSecrets: []
 
