@@ -1,4 +1,4 @@
-targets:
+target:
   loki:
     {{- include "target.loki" .Values.target.loki | nindent 4 }}
     {{- if and .Values.target.loki .Values.target.loki.channels }}
