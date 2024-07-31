@@ -389,7 +389,7 @@ func (r *Resolver) SecretInformer() (secrets.Informer, error) {
 		return nil, err
 	}
 
-	return secrets.NewInformer(client, r.TargetFactory()), nil
+	return secrets.NewInformer(client, r.TargetFactory(), r.config.Namespace), nil
 }
 
 func (r *Resolver) DatabaseFactory() *DatabaseFactory {
