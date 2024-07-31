@@ -25,6 +25,7 @@ type informer struct {
 	mx         *sync.Mutex
 	stopChan   chan struct{}
 	factory    target.Factory
+	namespace  string
 }
 
 func (k *informer) HasSynced() bool {
@@ -34,7 +35,7 @@ func (k *informer) HasSynced() bool {
 func (k *informer) Sync(targets *target.Collection, stopper chan struct{}) error {
 	k.stopChan = stopper
 
-	factory := metadatainformer.NewSharedInformerFactory(k.metaClient, 15*time.Minute)
+	factory := metadatainformer.NewFilteredSharedInformerFactory(k.metaClient, 15*time.Minute, k.namespace, nil)
 
 	informer := k.configureInformer(targets, factory.ForResource(schema.GroupVersionResource{Version: "v1", Resource: "secrets"}).Informer())
 
@@ -120,11 +121,12 @@ func (k *informer) UpdateTarget(t *target.Target, secret string) *target.Target 
 }
 
 // NewPolicyReportClient new Client for Policy Report Kubernetes API
-func NewInformer(metaClient metadata.Interface, factory target.Factory) Informer {
+func NewInformer(metaClient metadata.Interface, factory target.Factory, namespace string) Informer {
 	return &informer{
 		metaClient: metaClient,
 		mx:         new(sync.Mutex),
 		factory:    factory,
+		namespace:  namespace,
 	}
 }
 
