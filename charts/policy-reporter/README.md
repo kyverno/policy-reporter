@@ -3,7 +3,7 @@
 Policy Reporter watches for PolicyReport Resources.
 It creates Prometheus Metrics and can send rule validation events to different targets like Loki, Elasticsearch, Slack or Discord
 
-![Version: 3.0.0-alpha.28](https://img.shields.io/badge/Version-3.0.0--alpha.28-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 3.0.0-alpha](https://img.shields.io/badge/AppVersion-3.0.0--alpha-informational?style=flat-square)
+![Version: 3.0.0-beta.1](https://img.shields.io/badge/Version-3.0.0--beta.1-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 3.0.0-beta](https://img.shields.io/badge/AppVersion-3.0.0--beta-informational?style=flat-square)
 
 ## Documentation
 
@@ -56,7 +56,7 @@ Check the [Documentation](https://kyverno.github.io/policy-reporter/guide/02-get
 | image.registry | string | `"ghcr.io"` |  |
 | image.repository | string | `"kyverno/policy-reporter"` |  |
 | image.pullPolicy | string | `"IfNotPresent"` |  |
-| image.tag | string | `"db97ffe"` |  |
+| image.tag | string | `"65a0e04"` |  |
 | imagePullSecrets | list | `[]` |  |
 | priorityClassName | string | `""` |  |
 | replicaCount | int | `1` |  |
@@ -110,6 +110,7 @@ Check the [Documentation](https://kyverno.github.io/policy-reporter/guide/02-get
 | reportFilter.namespaces.include | list | `[]` |  |
 | reportFilter.namespaces.exclude | list | `[]` |  |
 | reportFilter.clusterReports.disabled | bool | `false` |  |
+| sourceConfig | object | `{}` | Customize source specific logic like result ID generation |
 | sourceFilters | list | `[{"disableClusterReports":false,"kinds":{"exclude":["ReplicaSet"]},"selector":{"source":"kyverno"},"uncontrolledOnly":true}]` | Source based PolicyReport filter |
 | sourceFilters[0] | object | `{"disableClusterReports":false,"kinds":{"exclude":["ReplicaSet"]},"selector":{"source":"kyverno"},"uncontrolledOnly":true}` | PolicyReport selector. |
 | sourceFilters[0].selector.source | string | `"kyverno"` | select PolicyReport by source |
@@ -383,6 +384,8 @@ Check the [Documentation](https://kyverno.github.io/policy-reporter/guide/02-get
 | ui.serviceAccount.automount | bool | `true` | Enable ServiceAccount automaount |
 | ui.serviceAccount.annotations | object | `{}` | Annotations for the ServiceAccount |
 | ui.serviceAccount.name | string | `""` | The ServiceAccount name |
+| ui.extraManifests | list | `[]` | list of extra manifests |
+| ui.sidecarContainers | object | `{}` | Add sidecar containers to the UI deployment  sidecarContainers:    oauth-proxy:      image: quay.io/oauth2-proxy/oauth2-proxy:v7.6.0      args:      - --upstream=http://127.0.0.1:8080      - --http-address=0.0.0.0:8081      - ...      ports:      - containerPort: 8081        name: oauth-proxy        protocol: TCP      resources: {} |
 | ui.podAnnotations | object | `{}` | Additional annotations to add to each pod |
 | ui.podLabels | object | `{}` | Additional labels to add to each pod |
 | ui.updateStrategy | object | `{}` | Deployment update strategy. Ref: https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#strategy |
@@ -395,7 +398,9 @@ Check the [Documentation](https://kyverno.github.io/policy-reporter/guide/02-get
 | ui.service.port | int | `8080` | Service port. |
 | ui.service.annotations | object | `{}` | Service annotations. |
 | ui.service.labels | object | `{}` | Service labels. |
+| ui.service.additionalPorts | list | `[]` | Additional service ports for e.g. Sidecars  # - name: authenticated additionalPorts: - name: authenticated   port: 8081   targetPort: 8081 |
 | ui.ingress.enabled | bool | `false` | Create ingress resource. |
+| ui.ingress.port | string | `nil` | Redirect ingress to an additional defined port on the service |
 | ui.ingress.className | string | `""` | Ingress class name. |
 | ui.ingress.labels | object | `{}` | Ingress labels. |
 | ui.ingress.annotations | object | `{}` | Ingress annotations. |
@@ -532,6 +537,7 @@ Check the [Documentation](https://kyverno.github.io/policy-reporter/guide/02-get
 | monitoring.grafana.datasource.label | string | `"Prometheus"` |  |
 | monitoring.grafana.datasource.pluginId | string | `"prometheus"` |  |
 | monitoring.grafana.datasource.pluginName | string | `"Prometheus"` |  |
+| monitoring.grafana.grafanaDashboard | object | `{"allowCrossNamespaceImport":true,"enabled":false,"folder":"kyverno","matchLabels":{"dashboards":"grafana"}}` | create GrafanaDashboard custom resource referencing to the configMap. according to https://grafana-operator.github.io/grafana-operator/docs/examples/dashboard_from_configmap/readme/ |
 | monitoring.policyReportDetails.firstStatusRow.height | int | `8` |  |
 | monitoring.policyReportDetails.secondStatusRow.enabled | bool | `true` |  |
 | monitoring.policyReportDetails.secondStatusRow.height | int | `2` |  |

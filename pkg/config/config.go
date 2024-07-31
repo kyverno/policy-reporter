@@ -197,7 +197,7 @@ type Config struct {
 	K8sClient      K8sClient               `mapstructure:"k8sClient"`
 	Logging        Logging                 `mapstructure:"logging"`
 	Database       Database                `mapstructure:"database"`
-	Targets        target.Targets          `mapstructure:"targets"`
+	Targets        target.Targets          `mapstructure:"target"`
 	SourceConfig   map[string]SourceConfig `mapstructure:"sourceConfig"`
 	Templates      Templates               `mapstructure:"templates"`
 }
