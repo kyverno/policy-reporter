@@ -2,6 +2,7 @@ apiVersion: v1
 kind: Secret
 metadata:
   name: policy-reporter-ui-config
+  namespace: policy-reporter
   labels:
     app.kubernetes.io/name: policy-reporter-ui
     app.kubernetes.io/instance: policy-reporter

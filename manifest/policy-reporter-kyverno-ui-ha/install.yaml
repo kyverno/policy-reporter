@@ -42,6 +42,7 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
   name: policy-reporter-leaderelection
+  namespace: policy-reporter
 rules:
 - apiGroups:
   - coordination.k8s.io
@@ -58,6 +59,7 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
   name: policy-reporter-leaderelection
+  namespace: policy-reporter
 roleRef:
   kind: Role
   name: policy-reporter-leaderelection
@@ -143,6 +145,7 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
   name: policy-reporter-kyverno-plugin-leaderelection
+  namespace: policy-reporter
 rules:
 - apiGroups:
   - coordination.k8s.io
@@ -159,6 +162,7 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
   name: policy-reporter-kyverno-plugin-leaderelection
+  namespace: policy-reporter
 roleRef:
   kind: Role
   name: policy-reporter-kyverno-plugin-leaderelection
@@ -537,6 +541,7 @@ apiVersion: policy/v1
 kind: PodDisruptionBudget
 metadata:
   name: policy-reporter
+  namespace: policy-reporter
   labels:
     app.kubernetes.io/name: policy-reporter
     app.kubernetes.io/part-of: policy-reporter
@@ -551,6 +556,7 @@ apiVersion: policy/v1
 kind: PodDisruptionBudget
 metadata:
   name: kyverno-plugin
+  namespace: policy-reporter
   labels:
     app.kubernetes.io/name: kyverno-plugin
     app.kubernetes.io/part-of: policy-reporter
@@ -565,6 +571,7 @@ apiVersion: policy/v1
 kind: PodDisruptionBudget
 metadata:
   name: policy-reporter-ui
+  namespace: policy-reporter
   labels:
     app.kubernetes.io/name: policy-reporter-ui
     app.kubernetes.io/part-of: policy-reporter
