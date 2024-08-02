@@ -272,7 +272,6 @@ spec:
             runAsUser: 1234
           args:
             - --rest-enabled
-            - --template-dir=/app/templates
           ports:
             - name: http
               containerPort: 8080
