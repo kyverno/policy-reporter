@@ -31,7 +31,9 @@ spec:
           {{- toYaml . | nindent 8 }}
         {{- end }}
       annotations:
-        checksum/secret: {{ include (print .Template.BasePath "/config-secret.yaml") . | sha256sum | quote }}
+        {{- if not .Values.existingTargetConfig.enabled }}
+        checksum/config: {{ include (print .Template.BasePath "/config.yaml") . | sha256sum | quote }}
+        {{- end }}
         {{- with .Values.annotations }}
           {{- toYaml . | nindent 8 }}
         {{- end }}
@@ -89,6 +91,16 @@ spec:
             subPath: config.yaml
             {{- end }}
             readOnly: true
+          {{- if not .Values.existingTargetConfig.enabled }}
+          - name: config-secrets
+            mountPath: /app/secrets.yaml
+            {{- if and .Values.existingSecret.enabled .Values.existingSecret.subPath }}
+            subPath: {{ .Values.existingSecret.subPath }}
+            {{- else }}
+            subPath: secrets.yaml
+            {{- end }}
+            readOnly: true
+          {{- end }}
           - name: tmp
             mountPath: /tmp
           {{- with .Values.extraVolumes.volumeMounts }}
@@ -116,13 +128,28 @@ spec:
         emptyDir: {}
         {{- end }}
       - name: config-file
+        {{- /* keep existingTargetConfig a secret for backward compatibility */}}
+        {{- if .Values.existingTargetConfig.enabled }}
         secret:
           {{- if and .Values.existingTargetConfig.enabled .Values.existingTargetConfig.name }}
           secretName: {{ .Values.existingTargetConfig.name }}
           {{- else }}
           secretName: {{ include "policyreporter.fullname" . }}-config
           {{- end }}
+        {{- else}}
+        configMap:
+          name: {{ include "policyreporter.fullname" . }}-config
+        {{- end }}
           optional: true
+      {{- if not .Values.existingTargetConfig.enabled }}
+      - name: config-secrets
+        secret:
+          {{- if and .Values.existingSecret.enabled .Values.existingSecret.name }}
+          secretName: {{ .Values.existingSecret.name }}
+          {{- else }}
+          name: {{ include "policyreporter.fullname" . }}-secrets
+          {{- end }}
+      {{- end }}
       - name: tmp
         {{- if .Values.tmpVolume }}
           {{- toYaml .Values.tmpVolume | nindent 8 }}
