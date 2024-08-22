@@ -49,11 +49,11 @@ func MapToSourceDetails(categories []db.Category) []*SourceDetails {
 
 		list[r.Source] = &SourceDetails{
 			Name: r.Source,
-			Categories: []*Category{MapResultToCategory(r, &Category{
+			Categories: []*Category{{
 				Name:       helper.Defaults(r.Name, "Other"),
 				Status:     &StatusList{},
 				Severities: &SeverityList{},
-			})},
+			}},
 		}
 
 		UpdateCategory(r, list[r.Source])
