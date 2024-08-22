@@ -56,21 +56,27 @@ func TestV2Views(t *testing.T) {
 		assert.Contains(t, result, &v2.SourceDetails{Name: "Kyverno", Categories: []*v2.Category{
 			{
 				Name: "PSS Baseline",
-				Pass: 8,
-				Fail: 3,
+				Status: &v2.StatusList{
+					Pass: 8,
+					Fail: 3,
+				},
 			},
 			{
 				Name: "PSS Restricted",
-				Pass: 4,
-				Fail: 1,
+				Status: &v2.StatusList{
+					Pass: 4,
+					Fail: 1,
+				},
 			},
 		}})
 		assert.Contains(t, result, &v2.SourceDetails{Name: "Trivy", Categories: []*v2.Category{
 			{
 				Name: "Vulnr",
-				Pass: 0,
-				Fail: 2,
-				Warn: 4,
+				Status: &v2.StatusList{
+					Pass: 0,
+					Fail: 2,
+					Warn: 4,
+				},
 			},
 		}})
 	})

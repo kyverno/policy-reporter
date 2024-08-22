@@ -5,10 +5,11 @@ import "github.com/uptrace/bun"
 type Category struct {
 	bun.BaseModel `bun:"table:policy_report_filter,alias:f"`
 
-	Source string
-	Name   string `bun:"category"`
-	Result string
-	Count  int
+	Source   string
+	Name     string `bun:"category"`
+	Result   string
+	Severity string
+	Count    int
 }
 
 type ResourceCategory struct {
@@ -39,5 +40,14 @@ type StatusCount struct {
 	Source    string
 	Namespace string `bun:"resource_namespace"`
 	Status    string
+	Count     int
+}
+
+type SeverityCount struct {
+	bun.BaseModel `bun:"table:policy_report_filter,alias:f"`
+
+	Source    string
+	Namespace string `bun:"resource_namespace"`
+	Severity  string
 	Count     int
 }
