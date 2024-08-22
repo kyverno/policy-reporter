@@ -195,8 +195,8 @@ func TestV2(t *testing.T) {
 
 			json.NewDecoder(w.Body).Decode(&resp)
 
-			assert.Contains(t, resp, v2.SourceDetails{Name: "Kyverno", Categories: []*v2.Category{{Name: "test", Pass: 1, Warn: 1, Fail: 1}}})
-			assert.Contains(t, resp, v2.SourceDetails{Name: "test", Categories: []*v2.Category{{Name: "Other", Fail: 1}, {Name: "test", Fail: 2}}})
+			assert.Contains(t, resp, v2.SourceDetails{Name: "Kyverno", Categories: []*v2.Category{{Name: "test", Status: &v2.StatusList{Pass: 1, Warn: 1, Fail: 1}, Severities: &v2.SeverityList{}}}})
+			assert.Contains(t, resp, v2.SourceDetails{Name: "test", Categories: []*v2.Category{{Name: "Other", Status: &v2.StatusList{Fail: 1}, Severities: &v2.SeverityList{}}, {Name: "test", Status: &v2.StatusList{Fail: 2}, Severities: &v2.SeverityList{}}}})
 		}
 	})
 
@@ -211,7 +211,7 @@ func TestV2(t *testing.T) {
 
 			json.NewDecoder(w.Body).Decode(&resp)
 
-			assert.Equal(t, resp[0], v2.SourceDetails{Name: "test", Categories: []*v2.Category{{Name: "test", Fail: 1}}})
+			assert.Equal(t, resp[0], v2.SourceDetails{Name: "test", Categories: []*v2.Category{{Name: "test", Status: &v2.StatusList{Fail: 1}}}})
 		}
 	})
 

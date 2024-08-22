@@ -60,9 +60,12 @@ func TestFind(t *testing.T) {
 }
 
 func TestMapSlice(t *testing.T) {
-	assert.Equal(t, []string{"kyverno", "trivy"}, helper.MapSlice(map[int]string{2: "source_kyverno", 3: "source_trivy"}, func(value string) string {
+	mapped := helper.MapSlice(map[int]string{2: "source_kyverno", 3: "source_trivy"}, func(value string) string {
 		return strings.TrimPrefix(value, "source_")
-	}))
+	})
+
+	assert.Contains(t, mapped, "kyverno")
+	assert.Contains(t, mapped, "trivy")
 }
 
 func TestFilter(t *testing.T) {
