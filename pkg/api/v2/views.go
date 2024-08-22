@@ -10,13 +10,27 @@ import (
 	"github.com/kyverno/policy-reporter/pkg/target"
 )
 
+type StatusList struct {
+	Pass  int `json:"pass"`
+	Skip  int `json:"skip"`
+	Warn  int `json:"warn"`
+	Error int `json:"error"`
+	Fail  int `json:"fail"`
+}
+
+type SeverityList struct {
+	Unknown  int `json:"unknown"`
+	Low      int `json:"low"`
+	Info     int `json:"info"`
+	Medium   int `json:"medium"`
+	High     int `json:"high"`
+	Critical int `json:"critical"`
+}
+
 type Category struct {
-	Name  string `json:"name"`
-	Pass  int    `json:"pass"`
-	Skip  int    `json:"skip"`
-	Warn  int    `json:"warn"`
-	Error int    `json:"error"`
-	Fail  int    `json:"fail"`
+	Name       string        `json:"name"`
+	Status     *StatusList   `json:"status"`
+	Severities *SeverityList `json:"severities"`
 }
 
 type SourceDetails struct {
@@ -36,9 +50,13 @@ func MapToSourceDetails(categories []db.Category) []*SourceDetails {
 		list[r.Source] = &SourceDetails{
 			Name: r.Source,
 			Categories: []*Category{MapResultToCategory(r, &Category{
-				Name: helper.Defaults(r.Name, "Other"),
+				Name:       helper.Defaults(r.Name, "Other"),
+				Status:     &StatusList{},
+				Severities: &SeverityList{},
 			})},
 		}
+
+		UpdateCategory(r, list[r.Source])
 	}
 
 	return helper.ToList(list)
@@ -48,27 +66,54 @@ func UpdateCategory(result db.Category, source *SourceDetails) {
 	for _, c := range source.Categories {
 		if c.Name == helper.Defaults(result.Name, "Other") {
 			MapResultToCategory(result, c)
+			MapSeverityToCategory(result, c)
 			return
 		}
 	}
 
-	source.Categories = append(source.Categories, MapResultToCategory(result, &Category{
-		Name: helper.Defaults(result.Name, "Other"),
-	}))
+	category := &Category{
+		Name:       helper.Defaults(result.Name, "Other"),
+		Status:     &StatusList{},
+		Severities: &SeverityList{},
+	}
+
+	category = MapResultToCategory(result, category)
+	category = MapSeverityToCategory(result, category)
+
+	source.Categories = append(source.Categories, category)
 }
 
 func MapResultToCategory(result db.Category, category *Category) *Category {
 	switch result.Result {
 	case v1alpha2.StatusPass:
-		category.Pass = result.Count
+		category.Status.Pass += result.Count
 	case v1alpha2.StatusWarn:
-		category.Warn = result.Count
+		category.Status.Warn += result.Count
 	case v1alpha2.StatusFail:
-		category.Fail = result.Count
+		category.Status.Fail += result.Count
 	case v1alpha2.StatusError:
-		category.Error = result.Count
+		category.Status.Error += result.Count
 	case v1alpha2.StatusSkip:
-		category.Skip = result.Count
+		category.Status.Skip += result.Count
+	}
+
+	return category
+}
+
+func MapSeverityToCategory(result db.Category, category *Category) *Category {
+	switch result.Severity {
+	case v1alpha2.SeverityLow:
+		category.Severities.Low += result.Count
+	case v1alpha2.SeverityInfo:
+		category.Severities.Info += result.Count
+	case v1alpha2.SeverityMedium:
+		category.Severities.Medium += result.Count
+	case v1alpha2.SeverityHigh:
+		category.Severities.High += result.Count
+	case v1alpha2.SeverityCritical:
+		category.Severities.Critical += result.Count
+	default:
+		category.Severities.Unknown += result.Count
 	}
 
 	return category
@@ -163,6 +208,22 @@ type StatusCount struct {
 	Source    string `json:"source,omitempty"`
 	Status    string `json:"status"`
 	Count     int    `json:"count"`
+}
+
+func MapClusterSeverityCounts(results []db.SeverityCount) map[string]int {
+	mapping := map[string]int{
+		v1alpha2.SeverityLow:      0,
+		v1alpha2.SeverityInfo:     0,
+		v1alpha2.SeverityMedium:   0,
+		v1alpha2.SeverityHigh:     0,
+		v1alpha2.SeverityCritical: 0,
+	}
+
+	for _, result := range results {
+		mapping[result.Severity] = result.Count
+	}
+
+	return mapping
 }
 
 func MapClusterStatusCounts(results []db.StatusCount) map[string]int {
@@ -319,12 +380,14 @@ func MapResourceCategoryToSourceDetails(categories []db.ResourceCategory) []*Sou
 	for _, r := range categories {
 		if s, ok := list[r.Source]; ok {
 			s.Categories = append(s.Categories, &Category{
-				Name:  r.Name,
-				Pass:  r.Pass,
-				Fail:  r.Fail,
-				Warn:  r.Warn,
-				Error: r.Error,
-				Skip:  r.Skip,
+				Name: r.Name,
+				Status: &StatusList{
+					Pass:  r.Pass,
+					Fail:  r.Fail,
+					Warn:  r.Warn,
+					Error: r.Error,
+					Skip:  r.Skip,
+				},
 			})
 			continue
 		}
@@ -332,12 +395,14 @@ func MapResourceCategoryToSourceDetails(categories []db.ResourceCategory) []*Sou
 		list[r.Source] = &SourceDetails{
 			Name: r.Source,
 			Categories: []*Category{{
-				Name:  r.Name,
-				Pass:  r.Pass,
-				Fail:  r.Fail,
-				Warn:  r.Warn,
-				Error: r.Error,
-				Skip:  r.Skip,
+				Name: r.Name,
+				Status: &StatusList{
+					Pass:  r.Pass,
+					Fail:  r.Fail,
+					Warn:  r.Warn,
+					Error: r.Error,
+					Skip:  r.Skip,
+				},
 			}},
 		}
 	}
