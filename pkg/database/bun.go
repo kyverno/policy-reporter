@@ -246,7 +246,7 @@ func (s *Store) FetchCategories(ctx context.Context, filter Filter) ([]Category,
 	list := make([]Category, 0)
 
 	err := FromQuery(s.db.NewSelect().Model(&list).ColumnExpr("SUM(f.count) as count")).
-		Columns("f.source", "f.category", "f.result").
+		Columns("f.source", "f.category", "f.result", "f.severity").
 		FilterMap(map[string][]string{
 			"f.source":             filter.Sources,
 			"f.category":           filter.Categories,
@@ -255,7 +255,7 @@ func (s *Store) FetchCategories(ctx context.Context, filter Filter) ([]Category,
 		}).
 		Exclude(filter, "f").
 		FilterReportLabels(filter.ReportLabel).
-		Group("f.source", "f.category", "f.result").
+		Group("f.source", "f.category", "f.result", "f.severity").
 		Order("f.source ASC", "f.category ASC").
 		Scan(ctx, &list)
 
@@ -617,6 +617,27 @@ func (s *Store) FetchTotalStatusCounts(ctx context.Context, source string, filte
 		FilterReportLabels(filter.ReportLabel).
 		Exclude(filter, "f").
 		Group("status").
+		Scan(ctx, &results)
+
+	return results, err
+}
+
+func (s *Store) FetchTotalSeverityCounts(ctx context.Context, source string, filter Filter) ([]SeverityCount, error) {
+	results := make([]SeverityCount, 0)
+
+	err := FromQuery(s.db.
+		NewSelect().
+		TableExpr("policy_report_filter as f").
+		ColumnExpr("SUM(f.count) as count, f.severity")).
+		FilterMap(map[string][]string{
+			"category":      filter.Categories,
+			"policy":        filter.Policies,
+			"resource_kind": filter.Kinds,
+		}).
+		FilterValue("f.source", source).
+		FilterReportLabels(filter.ReportLabel).
+		Exclude(filter, "f").
+		Group("severity").
 		Scan(ctx, &results)
 
 	return results, err
