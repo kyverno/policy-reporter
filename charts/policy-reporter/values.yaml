@@ -11,7 +11,7 @@ image:
   registry: ghcr.io
   repository: kyverno/policy-reporter
   pullPolicy: IfNotPresent
-  tag: 56386a3
+  tag: 470ea67
 
 imagePullSecrets: []
 
@@ -757,7 +757,7 @@ ui:
     pullPolicy: IfNotPresent
       # -- (string) Image tag
       # Defaults to `Chart.AppVersion` if omitted
-    tag: "2.0.0-beta.2"
+    tag: "2.0.0-beta.4"
 
   # -- Deployment replica count
   replicaCount: 1
@@ -849,21 +849,6 @@ ui:
         results:
         - warn
         - error
-
-    - name: Trivy ConfigAudit
-      chartType: severity
-      excludes:
-        results:
-        - pass
-        - error
-
-    - name: Trivy Vulnerability
-      chartType: severity
-      excludes:
-        results:
-        - pass
-        - error
-
 
   # -- Connected Policy Reporter APIs
   clusters:
