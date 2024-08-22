@@ -840,13 +840,30 @@ ui:
   sources:
       # -- kyverno specific UI confiurations
     - name: kyverno
+      # -- show results per category, other option: severity
+      chartType: result
       # -- enabled action button to generate PolicyExceptions from the UI
       exceptions: false
-      # -- exclude Pod, Job and Replica resources from kyverno results by default if no kinds are specified
+      # -- exclude results or (cluster)kinds per source
       excludes:
         results:
         - warn
         - error
+
+    - name: Trivy ConfigAudit
+      chartType: severity
+      excludes:
+        results:
+        - pass
+        - error
+
+    - name: Trivy Vulnerability
+      chartType: severity
+      excludes:
+        results:
+        - pass
+        - error
+
 
   # -- Connected Policy Reporter APIs
   clusters:
