@@ -20,14 +20,14 @@ jobs:
   coverage:
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
       - name: Set up Go
-        uses: actions/setup-go@v2
+        uses: actions/setup-go@v5
         with:
           go-version-file: go.mod
           cache-dependency-path: go.sum
-
-      - name: Checkout code
-        uses: actions/checkout@v2
 
       - name: Get dependencies
         run: go get -v -t -d ./...
