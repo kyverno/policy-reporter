@@ -59,10 +59,11 @@ jobs:
           tags: |
             ghcr.io/kyverno/policy-reporter:${{ env.VERSION }}
 
-      - name: Set up Go 1.22
-        uses: actions/setup-go@v2
+      - name: Set up Go
+        uses: actions/setup-go@v5
         with:
-          go-version: 1.22
+          go-version-file: go.mod
+          cache-dependency-path: go.sum
 
       - uses: CycloneDX/gh-gomod-generate-sbom@efc74245d6802c8cefd925620515442756c70d8f # v2.0.0
         with:
