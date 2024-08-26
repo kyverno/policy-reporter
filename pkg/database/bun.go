@@ -115,6 +115,7 @@ func (s *Store) FetchNamespacedFilter(ctx context.Context, column string, filter
 
 	err := NewFilterQuery(s.db, "f."+column).
 		FilterMap(map[string][]string{
+			"f.result":             filter.Status,
 			"f.source":             filter.Sources,
 			"f.category":           filter.Categories,
 			"f.policy":             filter.Policies,
