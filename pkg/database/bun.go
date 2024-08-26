@@ -840,7 +840,7 @@ func (s *Store) Add(ctx context.Context, report v1alpha2.ReportInterface) error 
 
 	results := chunkSlice(MapPolicyReportResults(report), 50)
 	for _, list := range results {
-		_, err = s.db.NewInsert().Model(&list).Exec(ctx)
+		_, err = s.db.NewInsert().Ignore().Model(&list).Exec(ctx)
 		if err != nil {
 			zap.L().Error("failed to bulk import policy report results", zap.Error(err))
 			return err
