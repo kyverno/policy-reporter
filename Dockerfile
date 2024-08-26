@@ -1,4 +1,4 @@
-FROM golang:1.22 as builder
+FROM golang:1.23 as builder
 
 ARG LD_FLAGS='-s -w -linkmode external -extldflags "-static"'
 ARG TARGETPLATFORM
