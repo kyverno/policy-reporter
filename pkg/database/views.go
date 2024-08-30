@@ -34,6 +34,17 @@ type ResourceStatusCount struct {
 	Skip          int
 }
 
+type ResourceSeverityCount struct {
+	bun.BaseModel `bun:"table:policy_report_resource,alias:res"`
+	Source        string
+	Info          int
+	Low           int
+	Medium        int
+	High          int
+	Critical      int
+	Unknown       int
+}
+
 type StatusCount struct {
 	bun.BaseModel `bun:"table:policy_report_filter,alias:f"`
 
