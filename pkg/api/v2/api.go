@@ -23,6 +23,7 @@ type APIHandler struct {
 
 func (h *APIHandler) Register(engine *gin.RouterGroup) error {
 	engine.GET("resource/:id/status-counts", h.GetResourceStatusCounts)
+	engine.GET("resource/:id/severity-counts", h.GetResourceSeverityCounts)
 	engine.GET("resource/:id/resource-results", h.ListResourceResults)
 	engine.GET("resource/:id/results", h.ListResourcePolilcyResults)
 	engine.GET("resource/:id", h.GetResource)
@@ -37,18 +38,21 @@ func (h *APIHandler) Register(engine *gin.RouterGroup) error {
 	engine.GET("sources/categories", h.ListSourceWithCategories)
 	engine.GET("policies", h.ListPolicies)
 	engine.GET("findings", h.ListFindings)
+	engine.GET("severity-findings", h.ListSeverityFindings)
 	engine.GET("results-without-resources", h.ListResultsWithoutResource)
 	engine.GET("targets", h.ListTargets)
 
 	ns := engine.Group("namespace-scoped")
 	ns.GET("resource-results", h.ListNamespaceResourceResults)
 	ns.GET(":source/status-counts", h.GetNamespaceStatusCounts)
+	ns.GET(":source/severity-counts", h.GetNamespaceSeverityCounts)
 	ns.GET("kinds", h.ListNamespaceKinds)
 	ns.GET("results", h.ListPolicyResults(true))
 
 	cluster := engine.Group("cluster-scoped")
 	cluster.GET("resource-results", h.ListClusterResourceResults)
 	cluster.GET(":source/status-counts", h.GetClusterStatusCounts)
+	cluster.GET(":source/severity-counts", h.GetClusterSeverityCounts)
 	cluster.GET("kinds", h.ListClusterKinds)
 	cluster.GET("results", h.ListPolicyResults(false))
 
@@ -109,6 +113,12 @@ func (h *APIHandler) GetResourceStatusCounts(ctx *gin.Context) {
 	api.SendResponse(ctx, MapResourceStatusCounts(counts), "failed to load resource status counts", err)
 }
 
+func (h *APIHandler) GetResourceSeverityCounts(ctx *gin.Context) {
+	counts, err := h.store.FetchResourceSeverityCounts(ctx, ctx.Param("id"), api.BuildFilter(ctx))
+
+	api.SendResponse(ctx, MapResourceSeverityCounts(counts), "failed to load resource severity counts", err)
+}
+
 func (h *APIHandler) ListNamespaceResourceResults(ctx *gin.Context) {
 	filter := api.BuildFilter(ctx)
 	list, err := h.store.FetchNamespaceResourceResults(ctx, filter, api.BuildPagination(ctx, []string{"resource_namespace", "resource_name", "resource_uid"}))
@@ -141,10 +151,22 @@ func (h *APIHandler) GetClusterStatusCounts(ctx *gin.Context) {
 	api.SendResponse(ctx, MapClusterStatusCounts(results), "failed to calculate cluster status counts", err)
 }
 
+func (h *APIHandler) GetClusterSeverityCounts(ctx *gin.Context) {
+	results, err := h.store.FetchClusterSeverityCounts(ctx, ctx.Param("source"), api.BuildFilter(ctx))
+
+	api.SendResponse(ctx, MapClusterSeverityCounts(results), "failed to calculate cluster status counts", err)
+}
+
 func (h *APIHandler) GetNamespaceStatusCounts(ctx *gin.Context) {
 	results, err := h.store.FetchNamespaceStatusCounts(ctx, ctx.Param("source"), api.BuildFilter(ctx))
 
 	api.SendResponse(ctx, MapNamespaceStatusCounts(results), "failed to calculate namespace status counts", err)
+}
+
+func (h *APIHandler) GetNamespaceSeverityCounts(ctx *gin.Context) {
+	results, err := h.store.FetchNamespaceSeverityCounts(ctx, ctx.Param("source"), api.BuildFilter(ctx))
+
+	api.SendResponse(ctx, MapNamespaceSeverityCounts(results), "failed to calculate namespace severity counts", err)
 }
 
 func (h *APIHandler) GetTotalStatusCounts(ctx *gin.Context) {
@@ -230,6 +252,12 @@ func (h *APIHandler) ListFindings(ctx *gin.Context) {
 	results, err := h.store.FetchFindingCounts(ctx, api.BuildFilter(ctx))
 
 	api.SendResponse(ctx, MapFindings(results), "failed to load findings", err)
+}
+
+func (h *APIHandler) ListSeverityFindings(ctx *gin.Context) {
+	results, err := h.store.FetchSeverityFindingCounts(ctx, api.BuildFilter(ctx))
+
+	api.SendResponse(ctx, MapSeverityFindings(results), "failed to load findings", err)
 }
 
 func (h *APIHandler) ListTargets(ctx *gin.Context) {

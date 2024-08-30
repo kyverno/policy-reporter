@@ -147,6 +147,12 @@ func (q *QueryBuilder) SelectStatusSummaries() *QueryBuilder {
 	return q
 }
 
+func (q *QueryBuilder) SelectSeveritySummaries() *QueryBuilder {
+	q.query.ColumnExpr("SUM(res.info) as info, SUM(res.low) as low, SUM(res.medium) as medium, SUM(res.high) as high, SUM(res.critical) as critical, SUM(res.unknown) as unknown")
+
+	return q
+}
+
 func (q *QueryBuilder) Pagination(pagination Pagination) *QueryBuilder {
 	q.query.OrderExpr(fmt.Sprintf(
 		"%s %s",

@@ -86,6 +86,12 @@ type ResourceResult struct {
 	Fail           int
 	Error          int
 	Skip           int
+	Info           int
+	Low            int
+	Medium         int
+	High           int
+	Critical       int
+	Unknown        int
 }
 
 type PolicyReportFilter struct {
@@ -252,6 +258,21 @@ func MapPolicyReportResource(polr v1alpha2.ReportInterface) []*ResourceResult {
 			value.Fail = value.Fail + 1
 		case v1alpha2.StatusError:
 			value.Error = value.Error + 1
+		}
+
+		switch res.Severity {
+		case v1alpha2.SeverityInfo:
+			value.Info = value.Info + 1
+		case v1alpha2.SeverityLow:
+			value.Low = value.Low + 1
+		case v1alpha2.SeverityMedium:
+			value.Medium = value.Medium + 1
+		case v1alpha2.SeverityHigh:
+			value.High = value.High + 1
+		case v1alpha2.SeverityCritical:
+			value.Critical = value.Critical + 1
+		default:
+			value.Unknown = value.Unknown + 1
 		}
 	}
 
