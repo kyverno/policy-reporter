@@ -164,19 +164,60 @@ func MapResourceStatusCounts(results []db.ResourceStatusCount) []ResourceStatusC
 	return list
 }
 
+type ResourceSeverityCount struct {
+	Source   string `json:"source,omitempty"`
+	Info     int    `json:"info"`
+	Low      int    `json:"low"`
+	Medium   int    `json:"medium"`
+	High     int    `json:"high"`
+	Critical int    `json:"critical"`
+	Unknown  int    `json:"unknown"`
+}
+
+func MapResourceSeverityCounts(results []db.ResourceSeverityCount) []ResourceSeverityCount {
+	list := make([]ResourceSeverityCount, 0, len(results))
+	for _, result := range results {
+		list = append(list, ResourceSeverityCount{
+			Source:   result.Source,
+			Info:     result.Info,
+			Low:      result.Low,
+			Medium:   result.Medium,
+			High:     result.High,
+			Critical: result.Critical,
+			Unknown:  result.Unknown,
+		})
+	}
+
+	return list
+}
+
+type Status struct {
+	Pass  int `json:"pass"`
+	Skip  int `json:"skip"`
+	Warn  int `json:"warn"`
+	Fail  int `json:"fail"`
+	Error int `json:"error"`
+}
+
+type Severities struct {
+	Info     int `json:"info"`
+	Low      int `json:"low"`
+	Medium   int `json:"medium"`
+	High     int `json:"high"`
+	Critical int `json:"critical"`
+	Unknown  int `json:"unknown"`
+}
+
 type ResourceResult struct {
-	ID         string `json:"id"`
-	UID        string `json:"uid"`
-	Name       string `json:"name"`
-	Kind       string `json:"kind"`
-	APIVersion string `json:"apiVersion"`
-	Namespace  string `json:"namespace,omitempty"`
-	Source     string `json:"source,omitempty"`
-	Pass       int    `json:"pass"`
-	Skip       int    `json:"skip"`
-	Warn       int    `json:"warn"`
-	Fail       int    `json:"fail"`
-	Error      int    `json:"error"`
+	ID         string     `json:"id"`
+	UID        string     `json:"uid"`
+	Name       string     `json:"name"`
+	Kind       string     `json:"kind"`
+	APIVersion string     `json:"apiVersion"`
+	Namespace  string     `json:"namespace,omitempty"`
+	Source     string     `json:"source,omitempty"`
+	Status     Status     `json:"status"`
+	Severities Severities `json:"severities"`
 }
 
 func MapResourceResults(results []db.ResourceResult) []ResourceResult {
@@ -189,11 +230,21 @@ func MapResourceResults(results []db.ResourceResult) []ResourceResult {
 			APIVersion: res.Resource.APIVersion,
 			Name:       res.Resource.Name,
 			Source:     res.Source,
-			Pass:       res.Pass,
-			Skip:       res.Skip,
-			Warn:       res.Warn,
-			Fail:       res.Fail,
-			Error:      res.Error,
+			Status: Status{
+				Pass:  res.Pass,
+				Skip:  res.Skip,
+				Warn:  res.Warn,
+				Fail:  res.Fail,
+				Error: res.Error,
+			},
+			Severities: Severities{
+				Unknown:  res.Unknown,
+				Info:     res.Info,
+				Low:      res.Low,
+				Medium:   res.Medium,
+				High:     res.High,
+				Critical: res.Critical,
+			},
 		}
 	})
 }
@@ -212,6 +263,7 @@ type StatusCount struct {
 
 func MapClusterSeverityCounts(results []db.SeverityCount) map[string]int {
 	mapping := map[string]int{
+		"unknown":                 0,
 		v1alpha2.SeverityLow:      0,
 		v1alpha2.SeverityInfo:     0,
 		v1alpha2.SeverityMedium:   0,
@@ -257,6 +309,27 @@ func MapNamespaceStatusCounts(results []db.StatusCount) map[string]map[string]in
 		}
 
 		mapping[result.Namespace][result.Status] = result.Count
+	}
+
+	return mapping
+}
+
+func MapNamespaceSeverityCounts(results []db.SeverityCount) map[string]map[string]int {
+	mapping := map[string]map[string]int{}
+
+	for _, result := range results {
+		if _, ok := mapping[result.Namespace]; !ok {
+			mapping[result.Namespace] = map[string]int{
+				"unknown":                 0,
+				v1alpha2.SeverityInfo:     0,
+				v1alpha2.SeverityLow:      0,
+				v1alpha2.SeverityMedium:   0,
+				v1alpha2.SeverityHigh:     0,
+				v1alpha2.SeverityCritical: 0,
+			}
+		}
+
+		mapping[result.Namespace][result.Severity] = result.Count
 	}
 
 	return mapping
@@ -368,6 +441,32 @@ func MapFindings(results []db.StatusCount) Findings {
 		}
 
 		totals[count.Status] += count.Count
+		total += count.Count
+	}
+
+	return Findings{Counts: helper.ToList(findings), Total: total, PerResult: totals}
+}
+
+func MapSeverityFindings(results []db.SeverityCount) Findings {
+	findings := make(map[string]*FindingCounts, 0)
+	totals := make(map[string]int, 5)
+	total := 0
+
+	for _, count := range results {
+		if finding, ok := findings[count.Source]; ok {
+			finding.Counts[count.Severity] = count.Count
+			finding.Total = finding.Total + count.Count
+		} else {
+			findings[count.Source] = &FindingCounts{
+				Source: count.Source,
+				Total:  count.Count,
+				Counts: map[string]int{
+					count.Severity: count.Count,
+				},
+			}
+		}
+
+		totals[count.Severity] += count.Count
 		total += count.Count
 	}
 

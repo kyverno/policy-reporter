@@ -316,12 +316,32 @@ func (s *Store) FetchResourceStatusCounts(ctx context.Context, id string, filter
 	return result, err
 }
 
+func (s *Store) FetchResourceSeverityCounts(ctx context.Context, id string, filter Filter) ([]ResourceSeverityCount, error) {
+	result := []ResourceSeverityCount{}
+
+	err := FromQuery(s.db.NewSelect().Model(&result)).
+		Columns("res.source").
+		SelectSeveritySummaries().
+		FilterMap(map[string][]string{
+			"res.category": filter.Categories,
+			"res.source":   filter.Sources,
+			"policy":       filter.Policies,
+		}).
+		FilterValue("res.id", id).
+		FilterReportLabels(filter.ReportLabel).
+		Group("res.source").
+		Scan(ctx)
+
+	return result, err
+}
+
 func (s *Store) FetchNamespaceResourceResults(ctx context.Context, filter Filter, pagination Pagination) ([]ResourceResult, error) {
 	results := make([]ResourceResult, 0)
 
 	err := FromQuery(s.db.NewSelect().Model(&results)).
 		Columns("res.id", "resource_uid", "resource_kind", "resource_api_version", "resource_namespace", "resource_name").
 		SelectStatusSummaries().
+		SelectSeveritySummaries().
 		Group("res.id", "resource_uid", "resource_kind", "resource_api_version", "resource_namespace", "resource_name").
 		FilterMap(map[string][]string{
 			"source":             filter.Sources,
@@ -365,6 +385,7 @@ func (s *Store) FetchClusterResourceResults(ctx context.Context, filter Filter, 
 	err := FromQuery(s.db.NewSelect().Model(&results)).
 		Columns("res.id", "resource_uid", "resource_kind", "resource_api_version", "resource_namespace", "resource_name").
 		SelectStatusSummaries().
+		SelectSeveritySummaries().
 		Group("res.id", "resource_uid", "resource_kind", "resource_api_version", "resource_namespace", "resource_name").
 		FilterMap(map[string][]string{
 			"source":        filter.Sources,
@@ -577,6 +598,28 @@ func (s *Store) FetchClusterStatusCounts(ctx context.Context, source string, fil
 	return results, err
 }
 
+func (s *Store) FetchClusterSeverityCounts(ctx context.Context, source string, filter Filter) ([]SeverityCount, error) {
+	results := make([]SeverityCount, 0)
+
+	err := FromQuery(s.db.
+		NewSelect().
+		TableExpr("policy_report_filter as f").
+		ColumnExpr("SUM(f.count) as count, f.severity")).
+		FilterMap(map[string][]string{
+			"category":      filter.Categories,
+			"policy":        filter.Policies,
+			"resource_kind": filter.Kinds,
+		}).
+		FilterValue("f.source", source).
+		FilterReportLabels(filter.ReportLabel).
+		Exclude(filter, "f").
+		ClusterScope().
+		Group("f.severity").
+		Scan(ctx, &results)
+
+	return results, err
+}
+
 func (s *Store) FetchNamespaceStatusCounts(ctx context.Context, source string, filter Filter) ([]StatusCount, error) {
 	results := make([]StatusCount, 0)
 
@@ -597,6 +640,31 @@ func (s *Store) FetchNamespaceStatusCounts(ctx context.Context, source string, f
 		NamespaceScope().
 		Group("f.resource_namespace", "status").
 		Order("f.resource_namespace ASC", "status ASC").
+		Scan(ctx, &results)
+
+	return results, err
+}
+
+func (s *Store) FetchNamespaceSeverityCounts(ctx context.Context, source string, filter Filter) ([]SeverityCount, error) {
+	results := make([]SeverityCount, 0)
+
+	err := FromQuery(s.db.
+		NewSelect().
+		TableExpr("policy_report_filter as f").
+		ColumnExpr("f.resource_namespace, SUM(f.count) as count, f.severity")).
+		FilterMap(map[string][]string{
+			"f.category":           filter.Categories,
+			"f.resource_kind":      filter.Kinds,
+			"f.resource_namespace": filter.Namespaces,
+			"f.policy":             filter.Policies,
+			"f.severity":           filter.Severities,
+		}).
+		FilterValue("f.source", source).
+		FilterReportLabels(filter.ReportLabel).
+		Exclude(filter, "f").
+		NamespaceScope().
+		Group("f.resource_namespace", "f.severity").
+		Order("f.resource_namespace ASC", "f.severity ASC").
 		Scan(ctx, &results)
 
 	return results, err
@@ -723,6 +791,39 @@ func (s *Store) FetchFindingCounts(ctx context.Context, filter Filter) ([]Status
 		FilterReportLabels(filter.ReportLabel).
 		Exclude(filter, "f").
 		Group("f.source", "status").
+		Order("f.source").
+		Scan(ctx, &results)
+
+	return results, err
+}
+
+func (s *Store) FetchSeverityFindingCounts(ctx context.Context, filter Filter) ([]SeverityCount, error) {
+	results := make([]SeverityCount, 0)
+
+	query := FromQuery(s.db.
+		NewSelect().
+		TableExpr("policy_report_filter as f").
+		ColumnExpr("SUM(f.count) as count, f.severity, f.source"))
+
+	if filter.Namespaced {
+		query.
+			NamespaceScope().
+			Filter("resource_namespace", filter.Namespaces)
+	} else {
+		query.FilterOptionalNamespaces(filter.Namespaces)
+	}
+
+	err := query.
+		FilterMap(map[string][]string{
+			"source":        filter.Sources,
+			"category":      filter.Categories,
+			"resource_kind": filter.Kinds,
+			"policy":        filter.Policies,
+			"severity":      filter.Severities,
+		}).
+		FilterReportLabels(filter.ReportLabel).
+		Exclude(filter, "f").
+		Group("f.source", "f.severity").
 		Order("f.source").
 		Scan(ctx, &results)
 
