@@ -17,6 +17,9 @@ server:
     password: {{ .Values.basicAuth.password }}
     secretRef: {{ .Values.basicAuth.secretRef }}
 
+core:
+  host: {{ printf "http://%s:%d" (include "policyreporter.fullname" .) (.Values.service.port | int) }}
+
 {{- with .Values.plugin.kyverno.blockReports }}
 blockReports:
   {{- toYaml . | nindent 4 }}
