@@ -41,6 +41,7 @@ func (h *APIHandler) Register(engine *gin.RouterGroup) error {
 	engine.GET("severity-findings", h.ListSeverityFindings)
 	engine.GET("results-without-resources", h.ListResultsWithoutResource)
 	engine.GET("targets", h.ListTargets)
+	engine.GET("properties/:property", h.ListProperty)
 
 	ns := engine.Group("namespace-scoped")
 	ns.GET("resource-results", h.ListNamespaceResourceResults)
@@ -105,6 +106,12 @@ func (h *APIHandler) GetResource(ctx *gin.Context) {
 	resource, err := h.store.FetchResource(ctx, ctx.Param("id"))
 
 	api.SendResponse(ctx, MapResource(resource), "failed to load source details", err)
+}
+
+func (h *APIHandler) ListProperty(ctx *gin.Context) {
+	list, err := h.store.FetchProperty(ctx, ctx.Param("property"), api.BuildFilter(ctx))
+
+	api.SendResponse(ctx, MapResultPropertyList(list), "failed to load property value list", err)
 }
 
 func (h *APIHandler) GetResourceStatusCounts(ctx *gin.Context) {

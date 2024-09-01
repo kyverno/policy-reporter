@@ -736,3 +736,17 @@ func MapConfigTagrgets(c target.Targets) map[string][]*Target {
 
 	return targets
 }
+
+type ResultProperty struct {
+	Namespace string `json:"namespace"`
+	Property  string `json:"property"`
+}
+
+func MapResultPropertyList(results []db.ResultProperty) []ResultProperty {
+	return helper.Map(results, func(res db.ResultProperty) ResultProperty {
+		return ResultProperty{
+			Namespace: res.Namespace,
+			Property:  res.Property,
+		}
+	})
+}
