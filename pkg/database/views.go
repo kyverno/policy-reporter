@@ -62,3 +62,10 @@ type SeverityCount struct {
 	Severity  string
 	Count     int
 }
+
+type ResultProperty struct {
+	bun.BaseModel `bun:"table:policy_report_result,alias:pr"`
+
+	Namespace string `bun:"resource_namespace"`
+	Property  string `bun:"property"`
+}
