@@ -47,6 +47,10 @@ func (s *client) message(result v1alpha2.PolicyReportResult) *slack.WebhookMessa
 		Channel:     s.channel,
 	}
 
+	if s.channel != "" {
+		p.Channel = s.channel
+	}
+
 	att := slack.Attachment{
 		Color: colors[result.Priority],
 		Blocks: slack.Blocks{
@@ -176,6 +180,10 @@ func (s *client) batchMessage(polr v1alpha2.ReportInterface, results []v1alpha2.
 	p := &slack.WebhookMessage{
 		Attachments: make([]slack.Attachment, 0, 1),
 		Channel:     s.channel,
+	}
+
+	if s.channel != "" {
+		p.Channel = s.channel
 	}
 
 	att := slack.Attachment{
