@@ -782,6 +782,8 @@ func (f *TargetFactory) mapSecretValues(config any, ref, mountedSecret string) {
 	case *target.Config[target.SlackOptions]:
 		if values.Webhook != "" {
 			c.Config.Webhook = values.Webhook
+		}
+		if values.Channel != "" {
 			c.Config.Channel = values.Channel
 		}
 
