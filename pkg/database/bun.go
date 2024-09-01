@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"fmt"
 	"os"
 	"time"
 
@@ -295,6 +296,29 @@ func (s *Store) FetchResourceCategories(ctx context.Context, resource string, fi
 		Scan(ctx, &list)
 
 	return list, err
+}
+
+func (s *Store) FetchProperty(ctx context.Context, property string, filter Filter) ([]ResultProperty, error) {
+	result := make([]ResultProperty, 0)
+
+	err := FromQuery(
+		s.db.NewSelect().
+			Model(&result).
+			Distinct().
+			ColumnExpr(fmt.Sprintf("resource_namespace, properties->>'%s' as property", property))).
+		FilterMap(map[string][]string{
+			"category":           filter.Categories,
+			"source":             filter.Sources,
+			"policy":             filter.Policies,
+			"rules":              filter.Rules,
+			"status":             filter.Status,
+			"resource_namespace": filter.Namespaces,
+		}).
+		GetQuery().
+		Where(fmt.Sprintf("properties->'%s' IS NOT NULL", property)).
+		Scan(ctx)
+
+	return result, err
 }
 
 func (s *Store) FetchResourceStatusCounts(ctx context.Context, id string, filter Filter) ([]ResourceStatusCount, error) {
