@@ -2,6 +2,8 @@
 # DEFAULTS #
 ############
 
+KIND_IMAGE           ?= kindest/node:v1.30.2
+KIND_NAME            ?= kyverno
 USE_CONFIG           ?= standard,no-ingress,in-cluster,all-read-rbac
 KUBECONFIG           ?= ""
 PIP                  ?= "pip3"
@@ -19,6 +21,7 @@ GOOS                ?= $(shell go env GOOS)
 GOARCH              ?= $(shell go env GOARCH)
 REGISTRY            ?= ghcr.io
 OWNER               ?= kyverno
+KO_REGISTRY         := ko.local
 IMAGE               ?= policy-reporter
 LD_FLAGS            := -s -w -linkmode external -extldflags "-static"
 LOCAL_PLATFORM      := linux/$(GOARCH)
@@ -36,16 +39,20 @@ endif
 # TOOLS #
 #########
 
-TOOLS_DIR                          := $(PWD)/.tools
-HELM                               := $(TOOLS_DIR)/helm
-HELM_VERSION                       := v3.10.1
-HELM_DOCS                          := $(TOOLS_DIR)/helm-docs
-HELM_DOCS_VERSION                  := v1.11.0
-GCI                                := $(TOOLS_DIR)/gci
-GCI_VERSION                        := v0.9.1
-GOFUMPT                            := $(TOOLS_DIR)/gofumpt
-GOFUMPT_VERSION                    := v0.4.0
-TOOLS                              := $(HELM) $(HELM_DOCS) $(GCI) $(GOFUMPT)
+TOOLS_DIR                     := $(PWD)/.tools
+KIND                 		  := $(TOOLS_DIR)/kind
+KIND_VERSION         		  := v0.24.0
+KO             				  := $(TOOLS_DIR)/ko
+KO_VERSION     				  := v0.15.1
+HELM                          := $(TOOLS_DIR)/helm
+HELM_VERSION                  := v3.10.1
+HELM_DOCS                     := $(TOOLS_DIR)/helm-docs
+HELM_DOCS_VERSION             := v1.11.0
+GCI                           := $(TOOLS_DIR)/gci
+GCI_VERSION                   := v0.9.1
+GOFUMPT                       := $(TOOLS_DIR)/gofumpt
+GOFUMPT_VERSION               := v0.4.0
+TOOLS                         := $(HELM) $(HELM_DOCS) $(GCI) $(GOFUMPT)
 
 $(HELM):
 	@echo Install helm... >&2
@@ -62,6 +69,14 @@ $(GCI):
 $(GOFUMPT):
 	@echo Install gofumpt... >&2
 	@GOBIN=$(TOOLS_DIR) go install mvdan.cc/gofumpt@$(GOFUMPT_VERSION)
+
+$(KIND):
+	@echo Install kind... >&2
+	@GOBIN=$(TOOLS_DIR) go install sigs.k8s.io/kind@$(KIND_VERSION)
+
+$(KO):
+	@echo Install ko... >&2
+	@GOBIN=$(TOOLS_DIR) go install github.com/google/ko@$(KO_VERSION)
 
 .PHONY: gci
 gci: $(GCI)
@@ -83,6 +98,28 @@ install-tools: $(TOOLS) ## Install tools
 clean-tools: ## Remove installed tools
 	@echo Clean tools... >&2
 	@rm -rf $(TOOLS_DIR)
+
+########
+# KIND #
+########
+
+.PHONY: kind-create-cluster
+kind-create-cluster: $(KIND) ## Create kind cluster
+	@echo Create kind cluster... >&2
+	@$(KIND) create cluster --name $(KIND_NAME) --image $(KIND_IMAGE) --config ./scripts/kind.yaml
+	@kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/main/deploy/static/provider/kind/deploy.yaml
+	@sleep 15
+	@kubectl wait --namespace ingress-nginx --for=condition=ready pod --selector=app.kubernetes.io/component=controller --timeout=90s
+
+.PHONY: kind-delete-cluster
+kind-delete-cluster: $(KIND) ## Delete kind cluster
+	@echo Delete kind cluster... >&2
+	@$(KIND) delete cluster --name $(KIND_NAME)
+
+.PHONY: kind-load
+kind-load: $(KIND) ko-build ## Build playground image and load it in kind cluster
+	@echo Load playground image... >&2
+	@$(KIND) load docker-image --name $(KIND_NAME) ko.local/github.com/kyverno/policy-reporter:$(GIT_SHA)
 
 ###########
 # CODEGEN #
