@@ -78,6 +78,7 @@ ui:
     enabled: true
     annotations:
       nginx.ingress.kubernetes.io/rewrite-target: /$1
+    className: nginx
     hosts:
       - host: localhost
         paths:
