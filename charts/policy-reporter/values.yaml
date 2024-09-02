@@ -11,7 +11,7 @@ image:
   registry: ghcr.io
   repository: kyverno/policy-reporter
   pullPolicy: IfNotPresent
-  tag: 246288e
+  tag: 6a7c3a2
 
 imagePullSecrets: []
 
@@ -757,7 +757,7 @@ ui:
     pullPolicy: IfNotPresent
       # -- (string) Image tag
       # Defaults to `Chart.AppVersion` if omitted
-    tag: "2.0.0-beta.8"
+    tag: "2.0.0-beta.9"
 
   # -- Deployment replica count
   replicaCount: 1
@@ -837,23 +837,21 @@ ui:
   #     enabled: false
 
   # -- source specific configurations
-  sources:
-      # -- kyverno specific UI confiurations
-    - name: kyverno
-      # -- show results per category, other option: severity
-      chartType: result
-      # -- enabled action button to generate PolicyExceptions from the UI
-      exceptions: false
-      # -- exclude results or (cluster)kinds per source
-      excludes:
-        results:
-        - warn
-        - error
+  sources: []
+  # -- kyverno specific UI confiurations
+  # - name: kyverno
+  # -- show results per category, other option: severity
+  #  chartType: result
+  # -- enabled action button to generate PolicyExceptions from the UI
+  #  exceptions: false
+  # -- exclude results or (cluster)kinds per source
+  #  excludes:
+  #    results:
+  #    - warn
+  #    - error
 
   # -- Connected Policy Reporter APIs
-  clusters:
-  - name: Default
-    secretRef: policy-report-ui-default-cluster
+  clusters: []
   # - name: default
   #   host: http://policy-reporter:8080
   #   secretRef: ""
