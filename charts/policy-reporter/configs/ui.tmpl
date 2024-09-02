@@ -15,19 +15,46 @@ server:
 ui:
   displayMode: {{ .Values.ui.displayMode }}
 
-{{- with .Values.ui.clusters }}
+{{- $default := false -}}
+{{- range .Values.ui.clusters }}
+    {{- if eq .name "Default" -}}
+      {{- $default = true -}}
+    {{- end -}}
+{{- end }}
+
 clusters:
-  {{- toYaml . | nindent 4 }}
+{{- if not $default }}
+  - name: Default
+    secretRef: {{ include "ui.fullname" . }}-default-cluster
+{{- end }}
+{{- with .Values.ui.clusters }}
+  {{- toYaml . | nindent 2 }}
 {{- end }}
 
 {{- with .Values.ui.customBoards }}
 customBoards:
-  {{- toYaml . | nindent 4 }}
+  {{- toYaml . | nindent 2 }}
 {{- end }}
 
-{{- with .Values.ui.sources }}
+{{- $kyverno := false -}}
+{{- range .Values.ui.sources }}
+    {{- if eq .name "kyverno" -}}
+      {{- $kyverno = true -}}
+    {{- end -}}
+{{- end }}
+
 sources:
-  {{- toYaml . | nindent 4 }}
+{{- if not $kyverno }}
+  - name: kyverno
+    chartType: result
+    exceptions: false
+    excludes:
+      results:
+      - warn
+      - error
+{{- end }}
+{{- with .Values.ui.sources }}
+  {{- toYaml . | nindent 2 }}
 {{- end }}
 
 {{- with .Values.ui.openIDConnect }}
