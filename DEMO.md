@@ -61,6 +61,19 @@ helm repo add policy-reporter https://kyverno.github.io/policy-reporter
 
 ### Install
 
+#### Slack Secret
+
+```yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: webhook-secret
+  namespace: policy-reporter
+type: Opaque
+data:
+  webhook: aHR0cHM6Ly9ob29rcy5z...
+```
+
 #### Values
 
 ```yaml
@@ -105,6 +118,25 @@ ui:
         results:
         - pass
         - skip
+
+target:
+  slack:
+    name: Kyverno Channel
+    channel: kyverno
+    secretRef: webhook-secret
+    minimumPriority: warning
+    skipExistingOnStartup: true
+    sources: [kyverno]
+    filter:
+      namespaces:
+        exclude: ['trivy-system']
+    channels:
+      - name: Trivy Operator
+        channel: trivy-operator
+        sources: [Trivy Vulnerability]
+        filter:
+          namespaces:
+            exclude: ['trivy-system']
 ```
 
 ```bash
