@@ -8,7 +8,6 @@ import (
 	"go.uber.org/zap"
 
 	"github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
-	"github.com/kyverno/policy-reporter/pkg/helper"
 	"github.com/kyverno/policy-reporter/pkg/kubernetes/namespaces"
 	"github.com/kyverno/policy-reporter/pkg/report"
 	"github.com/kyverno/policy-reporter/pkg/validate"
@@ -47,7 +46,13 @@ func (rf *ResultFilterFactory) CreateFilter(namespace, priority, policy validate
 
 	if len(sources) > 0 {
 		f.AddValidation(func(r v1alpha2.PolicyReportResult) bool {
-			return helper.Contains(r.Source, sources)
+			for _, s := range sources {
+				if wildcard.Match(s, r.Source) {
+					return true
+				}
+			}
+
+			return false
 		})
 	}
 
