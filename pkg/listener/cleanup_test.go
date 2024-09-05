@@ -14,7 +14,7 @@ func Test_CleanupListener(t *testing.T) {
 		c := &client{}
 
 		slistener := listener.NewCleanupListener(ctx, target.NewCollection(&target.Target{Client: c}))
-		slistener(report.LifecycleEvent{Type: report.Added, PolicyReport: preport1})
+		slistener(report.LifecycleEvent{Type: report.Deleted, PolicyReport: preport1})
 
 		assert.True(t, c.cleanupCalled, "expected cleanup method was called")
 	})

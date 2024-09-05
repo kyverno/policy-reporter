@@ -112,7 +112,7 @@ func (c *client) mapFindings(polr v1alpha2.ReportInterface, results []v1alpha2.P
 }
 
 func (c *client) Send(result v1alpha2.PolicyReportResult) {
-	c.BatchSend(nil, []v1alpha2.PolicyReportResult{result})
+	c.BatchSend(&v1alpha2.PolicyReport{}, []v1alpha2.PolicyReportResult{result})
 }
 
 func (c *client) BatchSend(polr v1alpha2.ReportInterface, results []v1alpha2.PolicyReportResult) {
