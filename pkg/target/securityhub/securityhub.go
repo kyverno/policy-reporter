@@ -179,15 +179,20 @@ func (c *client) BatchSend(polr v1alpha2.ReportInterface, results []v1alpha2.Pol
 }
 
 func (c *client) Sync(ctx context.Context) error {
+	zap.L().Info("sync?", zap.Bool("sync", c.cleanup))
 	if !c.cleanup {
 		return nil
 	}
+
+	zap.L().Info("start sync")
 
 	list, err := c.getFindings(ctx, "")
 	if err != nil {
 		zap.L().Error(c.Name()+": failed to get findings", zap.Error(err))
 		return err
 	}
+
+	zap.L().Info("findings", zap.Int("count", len(list)))
 
 	if len(list) == 0 {
 		return nil
