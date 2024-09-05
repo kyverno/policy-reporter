@@ -41,6 +41,11 @@ func (c *client) GetFindings(ctx context.Context, params *hub.GetFindingsInput, 
 	}, nil
 }
 
+func (c *client) BatchUpdateFindings(ctx context.Context, params *hub.BatchUpdateFindingsInput, optFns ...func(*hub.Options)) (*hub.BatchUpdateFindingsOutput, error) {
+	c.fetched = true
+	return &hub.BatchUpdateFindingsOutput{}, nil
+}
+
 func TestSecurityHub(t *testing.T) {
 	t.Run("send result", func(t *testing.T) {
 		c := securityhub.NewClient(securityhub.Options{

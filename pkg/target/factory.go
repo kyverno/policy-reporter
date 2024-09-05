@@ -125,7 +125,7 @@ type KinesisOptions struct {
 
 type SecurityHubOptions struct {
 	AWSConfig      `mapstructure:",squash"`
-	AccountID      string `mapstructure:"accountId"`
+	AccountID      string `mapstructure:"accountID"`
 	ProductName    string `mapstructure:"productName"`
 	CompanyName    string `mapstructure:"companyName"`
 	DelayInSeconds int    `mapstructure:"delayInSeconds"`
