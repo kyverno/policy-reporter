@@ -9,6 +9,9 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	_ "github.com/mattn/go-sqlite3"
+	"go.uber.org/zap"
+
 	"github.com/kyverno/policy-reporter/pkg/helper"
 	"github.com/kyverno/policy-reporter/pkg/kubernetes/secrets"
 	"github.com/kyverno/policy-reporter/pkg/report"
@@ -29,8 +32,6 @@ import (
 	"github.com/kyverno/policy-reporter/pkg/target/telegram"
 	"github.com/kyverno/policy-reporter/pkg/target/webhook"
 	"github.com/kyverno/policy-reporter/pkg/validate"
-	_ "github.com/mattn/go-sqlite3"
-	"go.uber.org/zap"
 )
 
 // TargetFactory manages target creation
@@ -651,27 +652,31 @@ func (f *TargetFactory) CreateSecurityHubTarget(config, parent *target.Config[ta
 
 	sugar.Infof("%s configured", config.Name)
 
+	hub := securityhub.NewClient(securityhub.Options{
+		ClientOptions: target.ClientOptions{
+			Name:                  config.Name,
+			SkipExistingOnStartup: config.SkipExisting,
+			ResultFilter:          f.createResultFilter(config.Filter, config.MinimumPriority, config.Sources),
+			ReportFilter:          createReportFilter(config.Filter),
+		},
+		CustomFields: config.CustomFields,
+		Client:       client,
+		AccountID:    config.Config.AccountID,
+		ProductName:  config.Config.ProductName,
+		CompanyName:  config.Config.CompanyName,
+		Region:       config.Config.Region,
+		Delay:        time.Duration(config.Config.DelayInSeconds) * time.Second,
+		Cleanup:      config.Config.Cleanup,
+	})
+
+	hub.Sync(context.Background())
+
 	return &target.Target{
 		ID:           uuid.NewString(),
 		Type:         target.SecurityHub,
 		Config:       config,
 		ParentConfig: parent,
-		Client: securityhub.NewClient(securityhub.Options{
-			ClientOptions: target.ClientOptions{
-				Name:                  config.Name,
-				SkipExistingOnStartup: config.SkipExisting,
-				ResultFilter:          f.createResultFilter(config.Filter, config.MinimumPriority, config.Sources),
-				ReportFilter:          createReportFilter(config.Filter),
-			},
-			CustomFields: config.CustomFields,
-			Client:       client,
-			AccountID:    config.Config.AccountID,
-			ProductName:  config.Config.ProductName,
-			CompanyName:  config.Config.CompanyName,
-			Region:       config.Config.Region,
-			Delay:        time.Duration(config.Config.DelayInSeconds) * time.Second,
-			Cleanup:      config.Config.Cleanup,
-		}),
+		Client:       hub,
 	}
 }
 

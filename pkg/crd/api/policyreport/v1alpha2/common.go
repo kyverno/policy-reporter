@@ -277,8 +277,10 @@ func ToResourceString(res *corev1.ObjectReference) string {
 type ReportInterface interface {
 	metav1.Object
 	GetID() string
+	GetKey() string
 	GetScope() *corev1.ObjectReference
 	GetResults() []PolicyReportResult
+	HasResult(id string) bool
 	GetSummary() PolicyReportSummary
 	GetSource() string
 	GetKinds() []string
