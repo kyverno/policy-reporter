@@ -42,7 +42,8 @@ func (c *client) GetFindings(ctx context.Context, params *hub.GetFindingsInput, 
 }
 
 func (c *client) BatchUpdateFindings(ctx context.Context, params *hub.BatchUpdateFindingsInput, optFns ...func(*hub.Options)) (*hub.BatchUpdateFindingsOutput, error) {
-	c.fetched = true
+	c.batched = true
+
 	return &hub.BatchUpdateFindingsOutput{}, nil
 }
 
