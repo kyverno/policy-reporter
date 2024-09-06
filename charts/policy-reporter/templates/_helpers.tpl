@@ -237,6 +237,8 @@ config:
   accountID: {{ .accountID }}
   productName: {{ .productName }}
   companyName: {{ .companyName }}
+  delayInSeconds: {{ .delayInSeconds }}
+  cleanup: {{ .cleanup }}
 {{ include "target" . }}
 {{- end }}
 
