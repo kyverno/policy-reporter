@@ -14,6 +14,7 @@ server:
 
 ui:
   displayMode: {{ .Values.ui.displayMode }}
+  banner: {{ .Values.ui.banner }}
 
 {{- $default := false -}}
 {{- range .Values.ui.clusters }}

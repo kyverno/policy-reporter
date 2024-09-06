@@ -67,8 +67,8 @@ func (c *client) CleanUp(_ context.Context, _ v1alpha2.ReportInterface) {}
 
 func (c *client) BatchSend(_ v1alpha2.ReportInterface, _ []v1alpha2.PolicyReportResult) {}
 
-func (c *client) SupportsBatchSend() bool {
-	return false
+func (c *client) Type() target.ClientType {
+	return target.SingleSend
 }
 
 // NewClient creates a new GCS.client to send Results to Google Cloud Storage.

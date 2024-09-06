@@ -135,8 +135,8 @@ func (l *client) send(payload payload) {
 	http.ProcessHTTPResponse(l.Name(), resp, err)
 }
 
-func (l *client) SupportsBatchSend() bool {
-	return true
+func (l *client) Type() target.ClientType {
+	return target.BatchSend
 }
 
 func (l *client) CleanUp(_ context.Context, _ v1alpha2.ReportInterface) {}

@@ -131,9 +131,9 @@ func (c *client) BatchSend(polr v1alpha2.ReportInterface, results []v1alpha2.Pol
 		return
 	}
 
-	list, err := c.getFindingsByIDs(context.Background(), polr.GetSource(), toResourceIDFilter(polr, results))
+	list, err := c.getFindingsByIDs(context.Background(), polr.GetSource(), toResourceIDFilter(polr, results), "")
 	if err != nil {
-		zap.L().Error(c.Name()+": PUSH FAILED", zap.Error(err))
+		zap.L().Error(c.Name()+": failed to get findings", zap.Error(err))
 		return
 	}
 
@@ -153,8 +153,8 @@ func (c *client) BatchSend(polr v1alpha2.ReportInterface, results []v1alpha2.Pol
 			zap.L().Info(c.Name()+": PUSH OK", zap.Int("updated", updated))
 		}
 
-		mapping := make(map[string]bool, len(findings))
-		for _, f := range findings {
+		mapping := make(map[string]bool, len(list))
+		for _, f := range list {
 			mapping[*f.Id] = true
 		}
 
@@ -175,24 +175,19 @@ func (c *client) BatchSend(polr v1alpha2.ReportInterface, results []v1alpha2.Pol
 		return
 	}
 
-	zap.L().Info(c.Name()+": PUSH OK", zap.Int32("imported", *res.SuccessCount), zap.Int32("failed", *res.FailedCount))
+	zap.L().Info(c.Name()+": PUSH OK", zap.Int32("imported", *res.SuccessCount), zap.Int32("failed", *res.FailedCount), zap.String("report", polr.GetKey()))
 }
 
 func (c *client) Sync(ctx context.Context) error {
-	zap.L().Info("sync?", zap.Bool("sync", c.cleanup))
 	if !c.cleanup {
 		return nil
 	}
-
-	zap.L().Info("start sync")
 
 	list, err := c.getFindings(ctx, "")
 	if err != nil {
 		zap.L().Error(c.Name()+": failed to get findings", zap.Error(err))
 		return err
 	}
-
-	zap.L().Info("findings", zap.Int("count", len(list)))
 
 	if len(list) == 0 {
 		return nil
@@ -211,8 +206,6 @@ func (c *client) Sync(ctx context.Context) error {
 		return err
 	}
 
-	zap.L().Info("finished finding sync")
-
 	return nil
 }
 
@@ -221,19 +214,25 @@ func (c *client) CleanUp(ctx context.Context, report v1alpha2.ReportInterface) {
 		return
 	}
 
+	if source := report.GetSource(); source != "" && len(c.BaseClient.Sources()) > 0 {
+		if !helper.Contains(source, c.BaseClient.Sources()) {
+			return
+		}
+	}
+
 	resourceIds := toResourceIDFilter(report, report.GetResults())
 	if len(resourceIds) == 0 {
 		return
 	}
 
-	findings, err := c.getFindingsByIDs(ctx, report.GetSource(), resourceIds)
+	findings, err := c.getFindingsByIDs(ctx, report.GetSource(), resourceIds, string(types.WorkflowStatusNew))
 	if err != nil {
 		zap.L().Error(c.Name()+": failed to get findings", zap.Error(err))
 		return
 	}
+	defer time.Sleep(c.delay)
 
 	if len(findings) == 0 {
-		time.Sleep(c.delay)
 		return
 	}
 
@@ -251,7 +250,6 @@ func (c *client) CleanUp(ctx context.Context, report v1alpha2.ReportInterface) {
 	}
 
 	if len(mapping) == 0 {
-		time.Sleep(c.delay)
 		return
 	}
 
@@ -263,14 +261,13 @@ func (c *client) CleanUp(ctx context.Context, report v1alpha2.ReportInterface) {
 		})
 	}
 
-	if _, err := c.batchUpdate(ctx, list, types.WorkflowStatusResolved); err != nil {
+	count, err := c.batchUpdate(ctx, list, types.WorkflowStatusResolved)
+	if err != nil {
 		zap.L().Error(c.Name()+": failed to batch archived findings", zap.Error(err))
-		time.Sleep(c.delay)
 		return
 	}
 
-	zap.L().Info(c.Name()+": Findings updated", zap.Int("count", len(list)))
-	time.Sleep(c.delay)
+	zap.L().Info(c.Name()+": CLEANUP OK", zap.Int("count", count), zap.String("report", report.GetKey()))
 }
 
 func (c *client) mapOtherDetails(polr v1alpha2.ReportInterface, result v1alpha2.PolicyReportResult) map[string]string {
@@ -369,7 +366,7 @@ func (c *client) batchUpdate(ctx context.Context, findings []types.AwsSecurityFi
 	return updated, nil
 }
 
-func (c *client) getFindingsByIDs(ctx context.Context, source string, resources []types.StringFilter) ([]types.AwsSecurityFinding, error) {
+func (c *client) getFindingsByIDs(ctx context.Context, source string, resources []types.StringFilter, status string) ([]types.AwsSecurityFinding, error) {
 	list := make([]types.AwsSecurityFinding, 0)
 	if len(resources) == 0 {
 		return list, nil
@@ -380,6 +377,16 @@ func (c *client) getFindingsByIDs(ctx context.Context, source string, resources 
 	for _, res := range chunks {
 		filter := c.BaseFilter(source)
 		filter.ResourceId = res
+
+		if status != "" {
+			filter.WorkflowStatus = []types.StringFilter{
+				{
+					Comparison: types.StringFilterComparisonEquals,
+					Value:      toPointer(status),
+				},
+			}
+		}
+
 		var token *string
 
 		for {
@@ -448,8 +455,8 @@ func (c *client) BaseFilter(source string) *types.AwsSecurityFindingFilters {
 	}
 }
 
-func (c *client) SupportsBatchSend() bool {
-	return true
+func (c *client) Type() target.ClientType {
+	return target.SyncSend
 }
 
 // NewClient creates a new SecurityHub.client to send Results to SecurityHub.

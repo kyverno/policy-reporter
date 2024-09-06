@@ -119,8 +119,8 @@ func (d *client) CleanUp(_ context.Context, _ v1alpha2.ReportInterface) {}
 
 func (d *client) BatchSend(_ v1alpha2.ReportInterface, _ []v1alpha2.PolicyReportResult) {}
 
-func (d *client) SupportsBatchSend() bool {
-	return false
+func (d *client) Type() target.ClientType {
+	return target.SingleSend
 }
 
 // NewClient creates a new loki.client to send Results to Discord

@@ -68,8 +68,8 @@ func (s *client) PostMessage(message *adaptivecard.Message) {
 	http.ProcessHTTPResponse(s.Name(), resp, err)
 }
 
-func (s *client) SupportsBatchSend() bool {
-	return true
+func (s *client) Type() target.ClientType {
+	return target.BatchSend
 }
 
 func (s *client) newMessage(resource *corev1.ObjectReference, results []v1alpha2.PolicyReportResult) *adaptivecard.Message {
