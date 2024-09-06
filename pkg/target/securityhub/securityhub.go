@@ -137,6 +137,7 @@ func (c *client) BatchSend(polr v1alpha2.ReportInterface, results []v1alpha2.Pol
 		return
 	}
 
+	list = filterFindings(list, results)
 	findings := helper.Map(list, func(f types.AwsSecurityFinding) types.AwsSecurityFindingIdentifier {
 		return types.AwsSecurityFindingIdentifier{
 			Id:         f.Id,
@@ -572,4 +573,21 @@ func splitPolrKey(key string) (string, string) {
 	}
 
 	return parts[1], parts[0]
+}
+
+func filterFindings(findings []types.AwsSecurityFinding, results []v1alpha2.PolicyReportResult) []types.AwsSecurityFinding {
+	filtered := make([]types.AwsSecurityFinding, 0, len(findings))
+
+	mapping := make(map[string]bool, len(results))
+	for _, r := range results {
+		mapping[r.GetID()] = true
+	}
+
+	for _, finding := range findings {
+		if _, ok := mapping[*finding.Id]; ok {
+			filtered = append(filtered, finding)
+		}
+	}
+
+	return filtered
 }
