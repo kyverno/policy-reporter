@@ -183,6 +183,7 @@ func (c *client) Sync(ctx context.Context) error {
 	if !c.cleanup {
 		return nil
 	}
+	defer zap.L().Info(c.Name() + ": START SYNC")
 
 	list, err := c.getFindings(ctx, "")
 	if err != nil {
@@ -191,6 +192,7 @@ func (c *client) Sync(ctx context.Context) error {
 	}
 
 	if len(list) == 0 {
+		zap.L().Info(c.Name() + ": no findings to sync")
 		return nil
 	}
 
@@ -201,11 +203,13 @@ func (c *client) Sync(ctx context.Context) error {
 		}
 	})
 
-	_, err = c.batchUpdate(ctx, findings, types.WorkflowStatusResolved)
+	count, err := c.batchUpdate(ctx, findings, types.WorkflowStatusResolved)
 	if err != nil {
-		zap.L().Error("failed to sync findings", zap.Error(err))
+		zap.L().Error(c.Name()+": failed to sync findings", zap.Error(err))
 		return err
 	}
+
+	zap.L().Info(c.Name()+": FINISHED SYNC", zap.Int("updated", count))
 
 	return nil
 }
@@ -214,6 +218,8 @@ func (c *client) CleanUp(ctx context.Context, report v1alpha2.ReportInterface) {
 	if !c.cleanup {
 		return
 	}
+
+	zap.L().Info(c.Name()+": start cleanup", zap.String("report", report.GetKey()))
 
 	if source := report.GetSource(); source != "" && len(c.BaseClient.Sources()) > 0 {
 		if !helper.Contains(source, c.BaseClient.Sources()) {

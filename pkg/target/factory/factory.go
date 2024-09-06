@@ -650,7 +650,7 @@ func (f *TargetFactory) CreateSecurityHubTarget(config, parent *target.Config[ta
 		config.Config.Endpoint,
 	)
 
-	sugar.Infof("%s configured", config.Name)
+	zap.L().Info(config.Name+" configured", zap.Bool("cleanup", config.Config.Cleanup))
 
 	hub := securityhub.NewClient(securityhub.Options{
 		ClientOptions: target.ClientOptions{
