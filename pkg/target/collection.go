@@ -80,13 +80,18 @@ func (c *Collection) Client(name string) Client {
 
 func (c *Collection) SingleSendClients() []Client {
 	return helper.Filter(c.Clients(), func(c Client) bool {
-		return !c.SupportsBatchSend()
+		return c.Type() == SingleSend
+	})
+}
+func (c *Collection) SyncClients() []Client {
+	return helper.Filter(c.Clients(), func(c Client) bool {
+		return c.Type() == SyncSend
 	})
 }
 
 func (c *Collection) BatchSendClients() []Client {
 	return helper.Filter(c.Clients(), func(c Client) bool {
-		return c.SupportsBatchSend()
+		return c.Type() == BatchSend
 	})
 }
 

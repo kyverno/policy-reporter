@@ -75,13 +75,13 @@ func TestCollection(t *testing.T) {
 
 	t.Run("SingleSendClients only returns clients which do not support batch sending", func(t *testing.T) {
 		for _, c := range collection.SingleSendClients() {
-			assert.False(t, c.SupportsBatchSend())
+			assert.Equal(t, target.SingleSend, c.Type())
 		}
 	})
 
 	t.Run("BatchSendClients only returns clients which do support batch sending", func(t *testing.T) {
 		for _, c := range collection.BatchSendClients() {
-			assert.True(t, c.SupportsBatchSend())
+			assert.Equal(t, target.BatchSend, c.Type())
 		}
 	})
 }

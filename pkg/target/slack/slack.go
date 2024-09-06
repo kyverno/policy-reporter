@@ -310,8 +310,8 @@ func (s *client) PostMessage(message *slack.WebhookMessage) {
 	http.ProcessHTTPResponse(s.Name(), resp, err)
 }
 
-func (s *client) SupportsBatchSend() bool {
-	return true
+func (s *client) Type() target.ClientType {
+	return target.BatchSend
 }
 
 func (s *client) CleanUp(_ context.Context, _ v1alpha2.ReportInterface) {}

@@ -185,6 +185,6 @@ func Test_TeamsTarget(t *testing.T) {
 			HTTPClient:   testClient{},
 		})
 
-		assert.True(t, client.SupportsBatchSend())
+		assert.Equal(t, target.BatchSend, client.Type())
 	})
 }
