@@ -226,7 +226,7 @@ func (c *client) CleanUp(ctx context.Context, report v1alpha2.ReportInterface) {
 		return
 	}
 
-	findings, err := c.getFindingsByIDs(ctx, report.GetSource(), resourceIds, string(types.WorkflowStatusNew))
+	findings, err := c.getFindingsByIDs(ctx, report.GetSource(), resourceIds, "")
 	if err != nil {
 		zap.L().Error(c.Name()+": failed to get findings", zap.Error(err))
 		return
