@@ -224,8 +224,8 @@ func (e *client) CleanUp(_ context.Context, _ v1alpha2.ReportInterface) {}
 
 func (e *client) BatchSend(_ v1alpha2.ReportInterface, _ []v1alpha2.PolicyReportResult) {}
 
-func (e *client) SupportsBatchSend() bool {
-	return false
+func (e *client) Type() target.ClientType {
+	return target.SingleSend
 }
 
 // NewClient creates a new loki.client to send Results to Elasticsearch

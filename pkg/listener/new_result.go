@@ -16,6 +16,7 @@ type ResultListener struct {
 	skipExisting  bool
 	listener      []report.PolicyReportResultListener
 	scopeListener []report.ScopeResultsListener
+	syncListener  []report.SyncResultsListener
 	cache         cache.Cache
 	startUp       time.Time
 }
@@ -36,6 +37,14 @@ func (l *ResultListener) UnregisterScopeListener() {
 	l.scopeListener = make([]report.ScopeResultsListener, 0)
 }
 
+func (l *ResultListener) RegisterSyncListener(listener report.SyncResultsListener) {
+	l.syncListener = append(l.syncListener, listener)
+}
+
+func (l *ResultListener) UnregisterSyncListener() {
+	l.syncListener = make([]report.SyncResultsListener, 0)
+}
+
 func (l *ResultListener) Listen(event report.LifecycleEvent) {
 	if event.Type != report.Added && event.Type != report.Updated {
 		l.cache.RemoveReport(event.PolicyReport.GetID())
@@ -49,6 +58,21 @@ func (l *ResultListener) Listen(event report.LifecycleEvent) {
 
 	listenerCount := len(l.listener)
 	scopeListenerCount := len(l.scopeListener)
+	syncListenerCount := len(l.syncListener)
+
+	if syncListenerCount > 0 {
+		wg := sync.WaitGroup{}
+		wg.Add(syncListenerCount)
+
+		for _, cb := range l.syncListener {
+			go func(callback report.SyncResultsListener) {
+				defer wg.Done()
+
+				callback(event.PolicyReport)
+			}(cb)
+		}
+	}
+
 	if listenerCount == 0 && scopeListenerCount == 0 {
 		l.cache.AddReport(event.PolicyReport)
 		return

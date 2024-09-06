@@ -13,6 +13,14 @@ import (
 	"github.com/kyverno/policy-reporter/pkg/validate"
 )
 
+type ClientType = string
+
+const (
+	SingleSend ClientType = "single"
+	BatchSend  ClientType = "batch"
+	SyncSend   ClientType = "sync"
+)
+
 // Client for a provided Target
 type Client interface {
 	// Send the given Result to the configured Target
@@ -29,8 +37,8 @@ type Client interface {
 	MinimumPriority() string
 	// Sources of the Results which should send to this target, empty means all sources
 	Sources() []string
-	// SupportsBatchSend for the given target
-	SupportsBatchSend() bool
+	// Type for the given target
+	Type() ClientType
 	// CleanUp old results if supported by the target
 	CleanUp(context.Context, v1alpha2.ReportInterface)
 }

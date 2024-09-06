@@ -1,0 +1,22 @@
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: require-labels
+spec:
+  validationFailureAction: Audit
+  rules:
+    - name: check-for-labels
+      match:
+        any:
+          - resources:
+              kinds:
+                - Pod
+              namespaces:
+                - policy-reporter
+
+      validate:
+        message: "label 'app.kubernetes.io/test' is required"
+        pattern:
+          metadata:
+            labels:
+              app.kubernetes.io/test: "?*"

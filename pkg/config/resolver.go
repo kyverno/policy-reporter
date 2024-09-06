@@ -268,6 +268,7 @@ func (r *Resolver) RegisterSendResultListener() {
 
 	r.resultListener.RegisterListener(listener.NewSendResultListener(targets))
 	r.resultListener.RegisterScopeListener(listener.NewSendScopeResultsListener(targets))
+	r.resultListener.RegisterSyncListener(listener.NewSendSyncResultsListener(targets))
 }
 
 // UnregisterSendResultListener resolver method
