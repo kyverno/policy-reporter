@@ -11,7 +11,7 @@ type Filter struct {
 	Status       ValueFilter `mapstructure:"status"`
 	Severities   ValueFilter `mapstructure:"severities"`
 	Policies     ValueFilter `mapstructure:"policies"`
-	Sources      ValueFilter `mapstructure:"policies"`
+	Sources      ValueFilter `mapstructure:"sources"`
 	ReportLabels ValueFilter `mapstructure:"reportLabels"`
 }
 
