@@ -187,7 +187,7 @@ func (f *TargetFactory) CreateLokiTarget(config, parent *target.Config[target.Lo
 				ReportFilter:          createReportFilter(config.Filter),
 			},
 			Host:         config.Config.Host + config.Config.Path,
-			CustomLabels: config.CustomFields,
+			CustomFields: config.CustomFields,
 			Username:     config.Config.Username,
 			Password:     config.Config.Password,
 			HTTPClient:   http.NewClient(config.Config.Certificate, config.Config.SkipTLS),

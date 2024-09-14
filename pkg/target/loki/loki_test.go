@@ -97,7 +97,7 @@ func Test_LokiTarget(t *testing.T) {
 				Name: "Loki",
 			},
 			Host:         "http://localhost:3100/api/prom/push",
-			CustomLabels: map[string]string{"custom": "label"},
+			CustomFields: map[string]string{"custom": "label"},
 			HTTPClient:   testClient{callback, 200},
 			Username:     "username",
 			Password:     "password",
@@ -162,7 +162,7 @@ func Test_LokiTarget(t *testing.T) {
 				Name: "Loki",
 			},
 			Host:         "http://localhost:3100/api/prom/push",
-			CustomLabels: map[string]string{"custom": "label"},
+			CustomFields: map[string]string{"custom": "label"},
 			HTTPClient:   testClient{callback, 200},
 		})
 		client.Send(fixtures.MinimalTargetSendResult)
@@ -173,7 +173,7 @@ func Test_LokiTarget(t *testing.T) {
 				Name: "Loki",
 			},
 			Host:         "http://localhost:3100/api/prom/push",
-			CustomLabels: map[string]string{"custom": "label"},
+			CustomFields: map[string]string{"custom": "label"},
 			HTTPClient:   testClient{},
 		})
 

@@ -15,7 +15,7 @@ import (
 type Options struct {
 	target.ClientOptions
 	Host         string
-	CustomLabels map[string]string
+	CustomFields map[string]string
 	Headers      map[string]string
 	HTTPClient   http.Client
 	Username     string
@@ -36,7 +36,7 @@ type entry struct {
 	Line string `json:"line"`
 }
 
-func newLokiStream(result v1alpha2.PolicyReportResult, customLabels map[string]string) stream {
+func newLokiStream(result v1alpha2.PolicyReportResult, customFields map[string]string) stream {
 	timestamp := time.Now()
 	if result.Timestamp.Seconds != 0 {
 		timestamp = time.Unix(result.Timestamp.Seconds, int64(result.Timestamp.Nanos))
@@ -82,7 +82,7 @@ func newLokiStream(result v1alpha2.PolicyReportResult, customLabels map[string]s
 		labels = append(labels, strings.ReplaceAll(property, ".", "_")+"=\""+strings.ReplaceAll(value, "\"", "")+"\"")
 	}
 
-	for label, value := range customLabels {
+	for label, value := range customFields {
 		labels = append(labels, strings.ReplaceAll(label, ".", "_")+"=\""+strings.ReplaceAll(value, "\"", "")+"\"")
 	}
 
@@ -95,7 +95,7 @@ type client struct {
 	target.BaseClient
 	host         string
 	client       http.Client
-	customLabels map[string]string
+	customFields map[string]string
 	headers      map[string]string
 	username     string
 	password     string
@@ -104,14 +104,14 @@ type client struct {
 func (l *client) Send(result v1alpha2.PolicyReportResult) {
 	l.send(payload{
 		Streams: []stream{
-			newLokiStream(result, l.customLabels),
+			newLokiStream(result, l.customFields),
 		},
 	})
 }
 
 func (l *client) BatchSend(_ v1alpha2.ReportInterface, results []v1alpha2.PolicyReportResult) {
 	l.send(payload{Streams: helper.Map(results, func(result v1alpha2.PolicyReportResult) stream {
-		return newLokiStream(result, l.customLabels)
+		return newLokiStream(result, l.customFields)
 	})})
 }
 
@@ -146,7 +146,7 @@ func NewClient(options Options) target.Client {
 		target.NewBaseClient(options.ClientOptions),
 		options.Host,
 		options.HTTPClient,
-		options.CustomLabels,
+		options.CustomFields,
 		options.Headers,
 		options.Username,
 		options.Password,
