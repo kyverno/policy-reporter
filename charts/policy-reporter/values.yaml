@@ -11,7 +11,7 @@ image:
   registry: ghcr.io
   repository: kyverno/policy-reporter
   pullPolicy: IfNotPresent
-  tag: d8da748
+  tag: 7a1dc20
 
 imagePullSecrets: []
 
@@ -298,7 +298,7 @@ target:
     mountedSecret: ""
     # loki api path, defaults to "/api/prom/push" (deprecated)
     path: ""
-    # minimum priority "" < info < warning < critical < error
+    # minimum severity "" < info < low < medium < high < critical
     minimumSeverity: ""
     # list of sources which should send to loki
     sources: []
@@ -356,7 +356,7 @@ target:
     # elasticsearch index rotation and index suffix
     # possible values: daily, monthly, annually, none (default: daily)
     rotation: "daily"
-    # minimum priority "" < info < warning < critical < error
+    # minimum severity "" < info < low < medium < high < critical
     minimumSeverity: ""
     # list of sources which should send to elasticsearch
     sources: []
@@ -380,7 +380,7 @@ target:
     secretRef: ""
     # Mounted secret path by Secrets Controller, secret should be in json format
     mountedSecret: ""
-    # minimum priority "" < info < warning < critical < error
+    # minimum severity "" < info < low < medium < high < critical
     minimumSeverity: ""
     # list of sources which should send to slack
     sources: []
@@ -416,7 +416,7 @@ target:
     secretRef: ""
     # Mounted secret path by Secrets Controller, secret should be in json format
     mountedSecret: ""
-    # minimum priority "" < info < warning < critical < error
+    # minimum severity "" < info < low < medium < high < critical
     minimumSeverity: ""
     # list of sources which should send to discord
     sources: []
@@ -439,7 +439,7 @@ target:
     certificate: ""
     # skip TLS verification if necessary
     skipTLS: false
-    # minimum priority "" < info < warning < critical < error
+    # minimum severity "" < info < low < medium < high < critical
     minimumSeverity: ""
     # list of sources which should send to teams
     sources: []
@@ -464,7 +464,7 @@ target:
     mountedSecret: ""
     # additional http headers
     headers: {}
-    # minimum priority "" < info < warning < critical < error
+    # minimum severity "" < info < low < medium < high < critical
     minimumSeverity: ""
     # list of sources which should send to the UI Log
     sources: []
@@ -495,7 +495,7 @@ target:
     mountedSecret: ""
     # additional http headers
     headers: {}
-    # minimum priority "" < info < warning < critical < error
+    # minimum severity "" < info < low < medium < high < critical
     minimumSeverity: ""
     # list of sources which should send to telegram
     sources: []
@@ -522,7 +522,7 @@ target:
     mountedSecret: ""
     # additional http headers
     headers: {}
-    # minimum priority "" < info < warning < critical < error
+    # minimum severity "" < info < low < medium < high < critical
     minimumSeverity: ""
     # list of sources which should send to telegram
     sources: []
@@ -560,7 +560,7 @@ target:
     pathStyle: false
     # name of prefix, keys will have format: s3://<bucket>/<prefix>/YYYY-MM-DD/YYYY-MM-DDTHH:mm:ss.s+01:00.json
     prefix: ""
-    # minimum priority "" < info < warning < critical < error
+    # minimum severity "" < info < low < medium < high < critical
     minimumSeverity: ""
     # list of sources which should send to S3
     sources: []
@@ -588,7 +588,7 @@ target:
     endpoint: ""
     # AWS Kinesis stream name
     streamName: ""
-    # minimum priority "" < info < warning < critical < error
+    # minimum severity "" < info < low < medium < high < critical
     minimumSeverity: ""
     # list of sources which should send to S3
     sources: []
@@ -618,14 +618,14 @@ target:
     accountID: ""
     # Used product name, defaults to "Polilcy Reporter"
     productName: ""
-    # minimum priority "" < info < warning < critical < error
+    # minimum severity "" < info < low < medium < high < critical
     minimumSeverity: ""
     # list of sources which should send to S3
     sources: []
     # Skip already existing PolicyReportResults on startup
-    skipExistingOnStartup: true
+    skipExistingOnStartup: false
     # Enable cleanup listener for SecurityHub
-    cleanup: false
+    cleanup: true
     # Delay between AWS GetFindings API calls, to avoid hitting the API RequestLimit
     delayInSeconds: 2
     # Added as additional properties to each securityHub event
@@ -644,7 +644,7 @@ target:
     mountedSecret: ""
     # GCS Bucket
     bucket: ""
-    # minimum priority "" < info < warning < critical < error
+    # minimum severity "" < info < low < medium < high < critical
     minimumSeverity: ""
     # list of sources which should send to GCS
     sources: []
@@ -757,7 +757,7 @@ ui:
     pullPolicy: IfNotPresent
       # -- (string) Image tag
       # Defaults to `Chart.AppVersion` if omitted
-    tag: "2.0.0-beta.13"
+    tag: "2.0.0-beta.14"
 
   # -- Deployment replica count
   replicaCount: 1

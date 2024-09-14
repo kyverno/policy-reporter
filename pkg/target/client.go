@@ -47,22 +47,10 @@ type ResultFilterFactory struct {
 	client namespaces.Client
 }
 
-func (rf *ResultFilterFactory) CreateFilter(namespace, severity, status, policy validate.RuleSets, minimumSeverity string, sources []string) *report.ResultFilter {
+func (rf *ResultFilterFactory) CreateFilter(namespace, severity, status, policy, sources validate.RuleSets, minimumSeverity string) *report.ResultFilter {
 	f := report.NewResultFilter()
-	f.Sources = sources
+	f.Sources = sources.Include
 	f.MinimumSeverity = minimumSeverity
-
-	if len(sources) > 0 {
-		f.AddValidation(func(r v1alpha2.PolicyReportResult) bool {
-			for _, s := range sources {
-				if wildcard.Match(s, r.Source) {
-					return true
-				}
-			}
-
-			return false
-		})
-	}
 
 	if namespace.Count() > 0 {
 		f.AddValidation(func(r v1alpha2.PolicyReportResult) bool {
@@ -96,6 +84,12 @@ func (rf *ResultFilterFactory) CreateFilter(namespace, severity, status, policy 
 		})
 	}
 
+	if sources.Count() > 0 {
+		f.AddValidation(func(r v1alpha2.PolicyReportResult) bool {
+			return validate.MatchRuleSet(r.Source, sources)
+		})
+	}
+
 	if policy.Count() > 0 {
 		f.AddValidation(func(r v1alpha2.PolicyReportResult) bool {
 			return validate.MatchRuleSet(r.Policy, policy)
@@ -117,8 +111,9 @@ func (rf *ResultFilterFactory) CreateFilter(namespace, severity, status, policy 
 	return f
 }
 
-func NewReportFilter(labels validate.RuleSets) *report.ReportFilter {
+func NewReportFilter(labels, sources validate.RuleSets) *report.ReportFilter {
 	f := report.NewReportFilter()
+
 	if labels.Count() > 0 {
 		f.AddValidation(func(r v1alpha2.ReportInterface) bool {
 			if len(labels.Include) > 0 {
@@ -158,6 +153,17 @@ func NewReportFilter(labels validate.RuleSets) *report.ReportFilter {
 			}
 
 			return true
+		})
+	}
+
+	if sources.Count() > 0 {
+		f.AddValidation(func(r v1alpha2.ReportInterface) bool {
+			source := r.GetSource()
+			if source == "" {
+				return true
+			}
+
+			return validate.MatchRuleSet(source, sources)
 		})
 	}
 
@@ -203,15 +209,23 @@ func (c *BaseClient) Sources() []string {
 }
 
 func (c *BaseClient) Validate(rep v1alpha2.ReportInterface, result v1alpha2.PolicyReportResult) bool {
+	if !c.ValidateReport(rep) {
+		return false
+	}
+
+	if c.resultFilter != nil && !c.resultFilter.Validate(result) {
+		return false
+	}
+
+	return true
+}
+
+func (c *BaseClient) ValidateReport(rep v1alpha2.ReportInterface) bool {
 	if rep == nil {
 		return false
 	}
 
 	if c.reportFilter != nil && !c.reportFilter.Validate(rep) {
-		return false
-	}
-
-	if c.resultFilter != nil && !c.resultFilter.Validate(result) {
 		return false
 	}
 
