@@ -581,6 +581,8 @@ func (f *TargetFactory) CreateKinesisTarget(config, parent *target.Config[target
 		return nil
 	}
 
+	setFallback(&config.Config.Region, os.Getenv("AWS_REGION"))
+
 	config.MapBaseParent(parent)
 
 	kinesisClient := aws.NewKinesisClient(
@@ -628,6 +630,7 @@ func (f *TargetFactory) CreateSecurityHubTarget(config, parent *target.Config[ta
 	if config.Config.AccountID == "" {
 		return nil
 	}
+	setFallback(&config.Config.Region, os.Getenv("AWS_REGION"))
 
 	sugar := zap.S()
 	if err := checkAWSConfig(config.Name, config.Config.AWSConfig, parent.Config.AWSConfig); err != nil {
