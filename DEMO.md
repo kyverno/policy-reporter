@@ -124,7 +124,7 @@ target:
     name: Kyverno Channel
     channel: kyverno
     secretRef: webhook-secret
-    minimumPriority: warning
+    minimumSeverity: warning
     skipExistingOnStartup: true
     sources: [kyverno]
     filter:

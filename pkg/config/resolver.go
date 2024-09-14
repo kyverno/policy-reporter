@@ -192,12 +192,12 @@ func (r *Resolver) EventPublisher() report.EventPublisher {
 
 func (r *Resolver) CustomIDGenerators() map[string]result.IDGenerator {
 	generators := make(map[string]result.IDGenerator)
-	for s, c := range r.config.SourceConfig {
+	for _, c := range r.config.SourceConfig {
 		if !c.Enabled || len(c.Fields) == 0 {
 			continue
 		}
 
-		generators[strings.ToLower(s)] = result.NewIDGenerator(c.Fields)
+		generators[strings.ToLower(c.Selector.Source)] = result.NewIDGenerator(c.Fields)
 	}
 
 	return generators
@@ -553,7 +553,7 @@ func (r *Resolver) PolicyReportClient() (report.PolicyReportClient, error) {
 
 func (r *Resolver) ReportFilter() *report.MetaFilter {
 	return report.NewMetaFilter(
-		r.config.ReportFilter.ClusterReports.Disabled,
+		r.config.ReportFilter.DisableClusterReports,
 		ToRuleSet(r.config.ReportFilter.Namespaces),
 	)
 }

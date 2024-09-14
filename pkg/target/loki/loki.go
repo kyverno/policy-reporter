@@ -42,13 +42,12 @@ func newLokiStream(result v1alpha2.PolicyReportResult, customLabels map[string]s
 		timestamp = time.Unix(result.Timestamp.Seconds, int64(result.Timestamp.Nanos))
 	}
 
-	le := entry{Ts: timestamp.Format(time.RFC3339), Line: "[" + strings.ToUpper(result.Priority.String()) + "] " + result.Message}
+	le := entry{Ts: timestamp.Format(time.RFC3339), Line: "[" + strings.ToUpper(string(result.Severity)) + "] " + result.Message}
 	ls := stream{Entries: []entry{le}}
 
 	labels := []string{
 		"status=\"" + string(result.Result) + "\"",
 		"policy=\"" + result.Policy + "\"",
-		"priority=\"" + result.Priority.String() + "\"",
 		"source=\"policy-reporter\"",
 	}
 

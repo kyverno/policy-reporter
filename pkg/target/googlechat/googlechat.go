@@ -15,7 +15,7 @@ import (
 )
 
 const (
-	messageTempl  string = `[{{ .Priority }}] {{ or .Result.Policy .Result.Rule }}`
+	messageTempl  string = `[{{ .Result.Severity }}] {{ or .Result.Policy .Result.Rule }}`
 	resourceTempl string = `{{ if .Namespace }}[{{ .Namespace }}] {{ end }} {{ .APIVersion }}/{{ .Kind }} {{ .Name }}`
 )
 
@@ -98,13 +98,13 @@ func mapPayload(result v1alpha2.PolicyReportResult) (*Payload, error) {
 		return nil, err
 	}
 
-	prio := result.Priority.String()
+	prio := result.Severity
 	if prio == "" {
-		prio = v1alpha2.DebugPriority.String()
+		prio = v1alpha2.SeverityInfo
 	}
 
 	var textBuffer bytes.Buffer
-	err = ttmpl.Execute(&textBuffer, values{Result: result, Priority: prio, Resource: result.GetResource()})
+	err = ttmpl.Execute(&textBuffer, values{Result: result, Resource: result.GetResource()})
 	if err != nil {
 		return nil, err
 	}

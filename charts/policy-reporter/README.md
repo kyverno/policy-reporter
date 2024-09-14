@@ -162,7 +162,7 @@ Check the [Documentation](https://kyverno.github.io/policy-reporter/guide/02-get
 | target.loki.secretRef | string | `""` |  |
 | target.loki.mountedSecret | string | `""` |  |
 | target.loki.path | string | `""` |  |
-| target.loki.minimumPriority | string | `""` |  |
+| target.loki.minimumSeverity | string | `""` |  |
 | target.loki.sources | list | `[]` |  |
 | target.loki.skipExistingOnStartup | bool | `true` |  |
 | target.loki.customFields | object | `{}` |  |
@@ -181,7 +181,7 @@ Check the [Documentation](https://kyverno.github.io/policy-reporter/guide/02-get
 | target.elasticsearch.secretRef | string | `""` |  |
 | target.elasticsearch.mountedSecret | string | `""` |  |
 | target.elasticsearch.rotation | string | `"daily"` |  |
-| target.elasticsearch.minimumPriority | string | `""` |  |
+| target.elasticsearch.minimumSeverity | string | `""` |  |
 | target.elasticsearch.sources | list | `[]` |  |
 | target.elasticsearch.skipExistingOnStartup | bool | `true` |  |
 | target.elasticsearch.typelessApi | bool | `false` |  |
@@ -192,7 +192,7 @@ Check the [Documentation](https://kyverno.github.io/policy-reporter/guide/02-get
 | target.slack.channel | string | `""` |  |
 | target.slack.secretRef | string | `""` |  |
 | target.slack.mountedSecret | string | `""` |  |
-| target.slack.minimumPriority | string | `""` |  |
+| target.slack.minimumSeverity | string | `""` |  |
 | target.slack.sources | list | `[]` |  |
 | target.slack.skipExistingOnStartup | bool | `true` |  |
 | target.slack.customFields | object | `{}` |  |
@@ -201,7 +201,7 @@ Check the [Documentation](https://kyverno.github.io/policy-reporter/guide/02-get
 | target.discord.webhook | string | `""` |  |
 | target.discord.secretRef | string | `""` |  |
 | target.discord.mountedSecret | string | `""` |  |
-| target.discord.minimumPriority | string | `""` |  |
+| target.discord.minimumSeverity | string | `""` |  |
 | target.discord.sources | list | `[]` |  |
 | target.discord.skipExistingOnStartup | bool | `true` |  |
 | target.discord.filter | object | `{}` |  |
@@ -211,7 +211,7 @@ Check the [Documentation](https://kyverno.github.io/policy-reporter/guide/02-get
 | target.teams.mountedSecret | string | `""` |  |
 | target.teams.certificate | string | `""` |  |
 | target.teams.skipTLS | bool | `false` |  |
-| target.teams.minimumPriority | string | `""` |  |
+| target.teams.minimumSeverity | string | `""` |  |
 | target.teams.sources | list | `[]` |  |
 | target.teams.skipExistingOnStartup | bool | `true` |  |
 | target.teams.filter | object | `{}` |  |
@@ -222,7 +222,7 @@ Check the [Documentation](https://kyverno.github.io/policy-reporter/guide/02-get
 | target.webhook.secretRef | string | `""` |  |
 | target.webhook.mountedSecret | string | `""` |  |
 | target.webhook.headers | object | `{}` |  |
-| target.webhook.minimumPriority | string | `""` |  |
+| target.webhook.minimumSeverity | string | `""` |  |
 | target.webhook.sources | list | `[]` |  |
 | target.webhook.skipExistingOnStartup | bool | `true` |  |
 | target.webhook.customFields | object | `{}` |  |
@@ -236,7 +236,7 @@ Check the [Documentation](https://kyverno.github.io/policy-reporter/guide/02-get
 | target.telegram.secretRef | string | `""` |  |
 | target.telegram.mountedSecret | string | `""` |  |
 | target.telegram.headers | object | `{}` |  |
-| target.telegram.minimumPriority | string | `""` |  |
+| target.telegram.minimumSeverity | string | `""` |  |
 | target.telegram.sources | list | `[]` |  |
 | target.telegram.skipExistingOnStartup | bool | `true` |  |
 | target.telegram.customFields | object | `{}` |  |
@@ -248,7 +248,7 @@ Check the [Documentation](https://kyverno.github.io/policy-reporter/guide/02-get
 | target.googleChat.secretRef | string | `""` |  |
 | target.googleChat.mountedSecret | string | `""` |  |
 | target.googleChat.headers | object | `{}` |  |
-| target.googleChat.minimumPriority | string | `""` |  |
+| target.googleChat.minimumSeverity | string | `""` |  |
 | target.googleChat.sources | list | `[]` |  |
 | target.googleChat.skipExistingOnStartup | bool | `true` |  |
 | target.googleChat.customFields | object | `{}` |  |
@@ -266,7 +266,7 @@ Check the [Documentation](https://kyverno.github.io/policy-reporter/guide/02-get
 | target.s3.serverSideEncryption | string | `""` |  |
 | target.s3.pathStyle | bool | `false` |  |
 | target.s3.prefix | string | `""` |  |
-| target.s3.minimumPriority | string | `""` |  |
+| target.s3.minimumSeverity | string | `""` |  |
 | target.s3.sources | list | `[]` |  |
 | target.s3.skipExistingOnStartup | bool | `true` |  |
 | target.s3.customFields | object | `{}` |  |
@@ -279,7 +279,7 @@ Check the [Documentation](https://kyverno.github.io/policy-reporter/guide/02-get
 | target.kinesis.region | string | `""` |  |
 | target.kinesis.endpoint | string | `""` |  |
 | target.kinesis.streamName | string | `""` |  |
-| target.kinesis.minimumPriority | string | `""` |  |
+| target.kinesis.minimumSeverity | string | `""` |  |
 | target.kinesis.sources | list | `[]` |  |
 | target.kinesis.skipExistingOnStartup | bool | `true` |  |
 | target.kinesis.customFields | object | `{}` |  |
@@ -293,7 +293,7 @@ Check the [Documentation](https://kyverno.github.io/policy-reporter/guide/02-get
 | target.securityHub.endpoint | string | `""` |  |
 | target.securityHub.accountID | string | `""` |  |
 | target.securityHub.productName | string | `""` |  |
-| target.securityHub.minimumPriority | string | `""` |  |
+| target.securityHub.minimumSeverity | string | `""` |  |
 | target.securityHub.sources | list | `[]` |  |
 | target.securityHub.skipExistingOnStartup | bool | `true` |  |
 | target.securityHub.cleanup | bool | `false` |  |
@@ -305,7 +305,7 @@ Check the [Documentation](https://kyverno.github.io/policy-reporter/guide/02-get
 | target.gcs.secretRef | string | `""` |  |
 | target.gcs.mountedSecret | string | `""` |  |
 | target.gcs.bucket | string | `""` |  |
-| target.gcs.minimumPriority | string | `""` |  |
+| target.gcs.minimumSeverity | string | `""` |  |
 | target.gcs.sources | list | `[]` |  |
 | target.gcs.skipExistingOnStartup | bool | `true` |  |
 | target.gcs.customFields | object | `{}` |  |

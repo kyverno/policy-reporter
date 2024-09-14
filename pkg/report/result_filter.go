@@ -9,7 +9,7 @@ type ResultValidation = func(v1alpha2.PolicyReportResult) bool
 type ResultFilter struct {
 	validations     []ResultValidation
 	Sources         []string
-	MinimumPriority string
+	MinimumSeverity string
 }
 
 func (rf *ResultFilter) AddValidation(v ResultValidation) {

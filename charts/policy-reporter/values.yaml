@@ -162,13 +162,13 @@ reportFilter:
     # Ignore all PolicyReport resources from a excluded namespace, wildcards are supported
     # exclude will be ignored if an include filter exists
     exclude: []
-  clusterReports:
     # Disable the processing of ClusterPolicyReports
-    disabled: false
+  disableClusterReports: false
 
 # -- Customize source specific logic like result ID generation
-sourceConfig: {}
-# sourcename:
+sourceConfig: []
+# - selector:
+#     source: kyverno
 #   customID:
 #     enabled: true
 #     fields: ["resource", "policy", "rule", "category", "result", "message"]
@@ -299,7 +299,7 @@ target:
     # loki api path, defaults to "/api/prom/push" (deprecated)
     path: ""
     # minimum priority "" < info < warning < critical < error
-    minimumPriority: ""
+    minimumSeverity: ""
     # list of sources which should send to loki
     sources: []
     # Skip already existing PolicyReportResults on startup
@@ -357,7 +357,7 @@ target:
     # possible values: daily, monthly, annually, none (default: daily)
     rotation: "daily"
     # minimum priority "" < info < warning < critical < error
-    minimumPriority: ""
+    minimumSeverity: ""
     # list of sources which should send to elasticsearch
     sources: []
     # Skip already existing PolicyReportResults on startup
@@ -381,7 +381,7 @@ target:
     # Mounted secret path by Secrets Controller, secret should be in json format
     mountedSecret: ""
     # minimum priority "" < info < warning < critical < error
-    minimumPriority: ""
+    minimumSeverity: ""
     # list of sources which should send to slack
     sources: []
     # Skip already existing PolicyReportResults on startup
@@ -404,7 +404,7 @@ target:
 #        reportLabels:
 # .         include: ["app", "owner:team-b"]
 #    - webhook: "https://slack.webhook2"
-#      minimumPriority: "warning"
+#      minimumSeverity: "warning"
 #      filter:
 #        namespaces:
 #          include: ["team-a-*"]
@@ -417,7 +417,7 @@ target:
     # Mounted secret path by Secrets Controller, secret should be in json format
     mountedSecret: ""
     # minimum priority "" < info < warning < critical < error
-    minimumPriority: ""
+    minimumSeverity: ""
     # list of sources which should send to discord
     sources: []
     # Skip already existing PolicyReportResults on startup
@@ -440,7 +440,7 @@ target:
     # skip TLS verification if necessary
     skipTLS: false
     # minimum priority "" < info < warning < critical < error
-    minimumPriority: ""
+    minimumSeverity: ""
     # list of sources which should send to teams
     sources: []
     # Skip already existing PolicyReportResults on startup
@@ -465,7 +465,7 @@ target:
     # additional http headers
     headers: {}
     # minimum priority "" < info < warning < critical < error
-    minimumPriority: ""
+    minimumSeverity: ""
     # list of sources which should send to the UI Log
     sources: []
     # Skip already existing PolicyReportResults on startup
@@ -496,7 +496,7 @@ target:
     # additional http headers
     headers: {}
     # minimum priority "" < info < warning < critical < error
-    minimumPriority: ""
+    minimumSeverity: ""
     # list of sources which should send to telegram
     sources: []
     # Skip already existing PolicyReportResults on startup
@@ -523,7 +523,7 @@ target:
     # additional http headers
     headers: {}
     # minimum priority "" < info < warning < critical < error
-    minimumPriority: ""
+    minimumSeverity: ""
     # list of sources which should send to telegram
     sources: []
     # Skip already existing PolicyReportResults on startup
@@ -561,7 +561,7 @@ target:
     # name of prefix, keys will have format: s3://<bucket>/<prefix>/YYYY-MM-DD/YYYY-MM-DDTHH:mm:ss.s+01:00.json
     prefix: ""
     # minimum priority "" < info < warning < critical < error
-    minimumPriority: ""
+    minimumSeverity: ""
     # list of sources which should send to S3
     sources: []
     # Skip already existing PolicyReportResults on startup
@@ -589,7 +589,7 @@ target:
     # AWS Kinesis stream name
     streamName: ""
     # minimum priority "" < info < warning < critical < error
-    minimumPriority: ""
+    minimumSeverity: ""
     # list of sources which should send to S3
     sources: []
     # Skip already existing PolicyReportResults on startup
@@ -619,7 +619,7 @@ target:
     # Used product name, defaults to "Polilcy Reporter"
     productName: ""
     # minimum priority "" < info < warning < critical < error
-    minimumPriority: ""
+    minimumSeverity: ""
     # list of sources which should send to S3
     sources: []
     # Skip already existing PolicyReportResults on startup
@@ -645,7 +645,7 @@ target:
     # GCS Bucket
     bucket: ""
     # minimum priority "" < info < warning < critical < error
-    minimumPriority: ""
+    minimumSeverity: ""
     # list of sources which should send to GCS
     sources: []
     # Skip already existing PolicyReportResults on startup

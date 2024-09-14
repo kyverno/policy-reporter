@@ -22,7 +22,7 @@ var targets = target.Targets{
 			},
 		},
 		SkipExisting:    true,
-		MinimumPriority: "debug",
+		MinimumSeverity: "debug",
 		CustomFields:    map[string]string{"field": "value"},
 		Channels: []*target.Config[target.LokiOptions]{
 			{
@@ -40,7 +40,7 @@ var targets = target.Targets{
 			Rotation: "daily",
 		},
 		SkipExisting:    true,
-		MinimumPriority: "debug",
+		MinimumSeverity: "debug",
 		CustomFields:    map[string]string{"field": "value"},
 		Channels:        []*target.Config[target.ElasticsearchOptions]{{}},
 	},
@@ -52,7 +52,7 @@ var targets = target.Targets{
 			},
 		},
 		SkipExisting:    true,
-		MinimumPriority: "debug",
+		MinimumSeverity: "debug",
 		CustomFields:    map[string]string{"field": "value"},
 		Channels: []*target.Config[target.SlackOptions]{{
 			Config: &target.SlackOptions{
@@ -72,7 +72,7 @@ var targets = target.Targets{
 			SkipTLS: true,
 		},
 		SkipExisting:    true,
-		MinimumPriority: "debug",
+		MinimumSeverity: "debug",
 		CustomFields:    map[string]string{"field": "value"},
 		Channels: []*target.Config[target.WebhookOptions]{{
 			Config: &target.WebhookOptions{
@@ -86,7 +86,7 @@ var targets = target.Targets{
 			SkipTLS: true,
 		},
 		SkipExisting:    true,
-		MinimumPriority: "debug",
+		MinimumSeverity: "debug",
 		CustomFields:    map[string]string{"field": "value"},
 		Channels: []*target.Config[target.WebhookOptions]{{
 			Config: &target.WebhookOptions{
@@ -100,7 +100,7 @@ var targets = target.Targets{
 			SkipTLS: true,
 		},
 		SkipExisting:    true,
-		MinimumPriority: "debug",
+		MinimumSeverity: "debug",
 		CustomFields:    map[string]string{"field": "value"},
 		Channels:        []*target.Config[target.WebhookOptions]{{}},
 	},
@@ -114,7 +114,7 @@ var targets = target.Targets{
 			ChatID: "123456",
 		},
 		SkipExisting:    true,
-		MinimumPriority: "debug",
+		MinimumSeverity: "debug",
 		CustomFields:    map[string]string{"field": "value"},
 		Channels: []*target.Config[target.TelegramOptions]{{
 			Config: &target.TelegramOptions{
@@ -131,7 +131,7 @@ var targets = target.Targets{
 			},
 		},
 		SkipExisting:    true,
-		MinimumPriority: "debug",
+		MinimumSeverity: "debug",
 		CustomFields:    map[string]string{"field": "value"},
 		Channels: []*target.Config[target.WebhookOptions]{{
 			Config: &target.WebhookOptions{
@@ -158,7 +158,7 @@ var targets = target.Targets{
 			Prefix:               "prefix",
 		},
 		SkipExisting:    true,
-		MinimumPriority: "debug",
+		MinimumSeverity: "debug",
 		CustomFields:    map[string]string{"field": "value"},
 		Channels:        []*target.Config[target.S3Options]{{}},
 	},
@@ -173,7 +173,7 @@ var targets = target.Targets{
 			StreamName: "policy-reporter",
 		},
 		SkipExisting:    true,
-		MinimumPriority: "debug",
+		MinimumSeverity: "debug",
 		CustomFields:    map[string]string{"field": "value"},
 		Channels:        []*target.Config[target.KinesisOptions]{{}},
 	},
@@ -188,7 +188,7 @@ var targets = target.Targets{
 			AccountID: "AccountID",
 		},
 		SkipExisting:    true,
-		MinimumPriority: "debug",
+		MinimumSeverity: "debug",
 		CustomFields:    map[string]string{"field": "value"},
 		Channels:        []*target.Config[target.SecurityHubOptions]{{}},
 	},
@@ -199,7 +199,7 @@ var targets = target.Targets{
 			Prefix:      "prefix",
 		},
 		SkipExisting:    true,
-		MinimumPriority: "debug",
+		MinimumSeverity: "debug",
 		CustomFields:    map[string]string{"field": "value"},
 		Channels:        []*target.Config[target.GCSOptions]{{}},
 	},
@@ -223,14 +223,21 @@ var testConfig = &config.Config{
 	Logging: config.Logging{
 		Development: true,
 	},
-	SourceConfig: map[string]config.SourceConfig{
-		"test": {
+	SourceConfig: []config.SourceConfig{
+		{
+			Selector: config.SourceSelector{
+				Source: "test",
+			},
 			CustomID: config.CustomID{
 				Enabled: true,
 				Fields:  []string{"resource"},
 			},
 		},
-		"default": {},
+		{
+			Selector: config.SourceSelector{
+				Source: "default",
+			},
+		},
 	},
 }
 
@@ -256,7 +263,7 @@ func Test_ResolveSkipExistingOnStartup(t *testing.T) {
 					},
 				},
 				SkipExisting:    true,
-				MinimumPriority: "debug",
+				MinimumSeverity: "debug",
 			},
 			Elasticsearch: &target.Config[target.ElasticsearchOptions]{
 				Config: &target.ElasticsearchOptions{
@@ -265,7 +272,7 @@ func Test_ResolveSkipExistingOnStartup(t *testing.T) {
 					},
 				},
 				SkipExisting:    true,
-				MinimumPriority: "debug",
+				MinimumSeverity: "debug",
 			},
 		},
 	}
