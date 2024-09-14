@@ -740,6 +740,11 @@ func (f *TargetFactory) CreateGCSTarget(config, parent *target.Config[target.GCS
 }
 
 func (f *TargetFactory) createResultFilter(filter target.Filter, minimumSeverity string, sources []string) *report.ResultFilter {
+	sourceFilter := filter.Sources
+	if len(sources) > 0 {
+		sourceFilter = target.ValueFilter{Include: sources}
+	}
+
 	return f.filterFactory.CreateFilter(
 		validate.RuleSets{
 			Include:  filter.Namespaces.Include,
@@ -749,8 +754,8 @@ func (f *TargetFactory) createResultFilter(filter target.Filter, minimumSeverity
 		ToRuleSet(filter.Severities),
 		ToRuleSet(filter.Status),
 		ToRuleSet(filter.Policies),
+		ToRuleSet(sourceFilter),
 		minimumSeverity,
-		sources,
 	)
 }
 
@@ -942,6 +947,7 @@ func setInt(config *int, parent int) {
 func createReportFilter(filter target.Filter) *report.ReportFilter {
 	return target.NewReportFilter(
 		ToRuleSet(filter.ReportLabels),
+		ToRuleSet(filter.Sources),
 	)
 }
 

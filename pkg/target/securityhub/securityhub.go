@@ -227,8 +227,8 @@ func (c *client) CleanUp(ctx context.Context, report v1alpha2.ReportInterface) {
 
 	zap.L().Info(c.Name()+": start cleanup", zap.String("report", report.GetKey()))
 
-	if source := report.GetSource(); source != "" && len(c.BaseClient.Sources()) > 0 {
-		if !helper.Contains(source, c.BaseClient.Sources()) {
+	if report.GetSource() != "" {
+		if !c.BaseClient.ValidateReport(report) {
 			return
 		}
 	}
