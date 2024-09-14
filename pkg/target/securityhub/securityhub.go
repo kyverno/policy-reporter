@@ -137,7 +137,7 @@ func (c *client) BatchSend(polr v1alpha2.ReportInterface, results []v1alpha2.Pol
 		return
 	}
 
-	list, err := c.getFindingsByIDs(context.Background(), polr.GetSource(), toResourceIDFilter(polr, results), "")
+	list, err := c.getFindingsByIDs(context.Background(), polr, toResourceIDFilter(polr, results), "")
 	if err != nil {
 		zap.L().Error(c.Name()+": failed to get findings", zap.Error(err))
 		return
@@ -191,7 +191,7 @@ func (c *client) Sync(ctx context.Context) error {
 	}
 	defer zap.L().Info(c.Name() + ": START SYNC")
 
-	list, err := c.getFindings(ctx, "")
+	list, err := c.getFindings(ctx)
 	if err != nil {
 		zap.L().Error(c.Name()+": failed to get findings", zap.Error(err))
 		return err
@@ -234,11 +234,8 @@ func (c *client) CleanUp(ctx context.Context, report v1alpha2.ReportInterface) {
 	}
 
 	resourceIds := toResourceIDFilter(report, report.GetResults())
-	if len(resourceIds) == 0 {
-		return
-	}
 
-	findings, err := c.getFindingsByIDs(ctx, report.GetSource(), resourceIds, "")
+	findings, err := c.getFindingsByIDs(ctx, report, resourceIds, "")
 	if err != nil {
 		zap.L().Error(c.Name()+": failed to get findings", zap.Error(err))
 		return
@@ -326,7 +323,7 @@ func (c *client) mapOtherDetails(polr v1alpha2.ReportInterface, result v1alpha2.
 	return details
 }
 
-func (c *client) getFindings(ctx context.Context, source string) ([]types.AwsSecurityFinding, error) {
+func (c *client) getFindings(ctx context.Context) ([]types.AwsSecurityFinding, error) {
 	list := make([]types.AwsSecurityFinding, 0)
 
 	var token *string
@@ -334,7 +331,7 @@ func (c *client) getFindings(ctx context.Context, source string) ([]types.AwsSec
 	for {
 		resp, err := c.hub.GetFindings(ctx, &hub.GetFindingsInput{
 			NextToken: token,
-			Filters:   c.BaseFilter(source),
+			Filters:   c.BaseFilter(nil),
 		})
 		if err != nil {
 			return nil, err
@@ -378,17 +375,16 @@ func (c *client) batchUpdate(ctx context.Context, findings []types.AwsSecurityFi
 	return updated, nil
 }
 
-func (c *client) getFindingsByIDs(ctx context.Context, source string, resources []types.StringFilter, status string) ([]types.AwsSecurityFinding, error) {
+func (c *client) getFindingsByIDs(ctx context.Context, report v1alpha2.ReportInterface, resources []types.StringFilter, status string) ([]types.AwsSecurityFinding, error) {
 	list := make([]types.AwsSecurityFinding, 0)
-	if len(resources) == 0 {
-		return list, nil
-	}
 
 	chunks := helper.ChunkSlice(resources, 20)
 
 	for _, res := range chunks {
-		filter := c.BaseFilter(source)
-		filter.ResourceId = res
+		filter := c.BaseFilter(report)
+		if len(res) > 0 {
+			filter.ResourceId = res
+		}
 
 		if status != "" {
 			filter.WorkflowStatus = []types.StringFilter{
@@ -426,8 +422,13 @@ func (c *client) getFindingsByIDs(ctx context.Context, source string, resources 
 	return list, nil
 }
 
-func (c *client) BaseFilter(source string) *types.AwsSecurityFindingFilters {
-	return &types.AwsSecurityFindingFilters{
+func (c *client) BaseFilter(report v1alpha2.ReportInterface) *types.AwsSecurityFindingFilters {
+	source := ""
+	if report != nil {
+		source = report.GetSource()
+	}
+
+	filter := &types.AwsSecurityFindingFilters{
 		ProductArn: []types.StringFilter{
 			{
 				Comparison: types.StringFilterComparisonEquals,
@@ -465,6 +466,18 @@ func (c *client) BaseFilter(source string) *types.AwsSecurityFindingFilters {
 			},
 		},
 	}
+
+	if report != nil {
+		filter.ResourceDetailsOther = []types.MapFilter{
+			{
+				Comparison: types.MapFilterComparisonEquals,
+				Key:        toPointer("Report"),
+				Value:      toPointer(report.GetKey()),
+			},
+		}
+	}
+
+	return filter
 }
 
 func (c *client) Type() target.ClientType {
