@@ -517,7 +517,8 @@ type ValueFilter struct {
 
 type TargetFilter struct {
 	Namespaces   *ValueFilter `json:"namespaces,omitempty"`
-	Priorities   *ValueFilter `json:"priorities,omitempty"`
+	Severities   *ValueFilter `json:"severities,omitempty"`
+	Status       *ValueFilter `json:"status,omitempty"`
 	Policies     *ValueFilter `json:"policies,omitempty"`
 	ReportLabels *ValueFilter `json:"reportLabels,omitempty"`
 	Sources      *ValueFilter `json:"sources,omitempty"`
@@ -528,7 +529,7 @@ type Target struct {
 	Type            string            `json:"type"`
 	SecretRef       string            `json:"secretRef,omitempty"`
 	MountedSecret   string            `json:"mountedSecret,omitempty"`
-	MinimumPriority string            `json:"minimumPriority"`
+	MinimumSeverity string            `json:"minimumSeverity"`
 	Filter          TargetFilter      `json:"filter"`
 	CustomFields    map[string]string `json:"customFields"`
 	Properties      map[string]any    `json:"properties"`
@@ -558,14 +559,15 @@ func MapBaseToTarget[T any](t *target.Config[T]) *Target {
 
 	return &Target{
 		Name:            t.Name,
-		MinimumPriority: t.MinimumPriority,
+		MinimumSeverity: t.MinimumSeverity,
 		SecretRef:       t.SecretRef,
 		MountedSecret:   t.MountedSecret,
 		CustomFields:    fields,
 		Properties:      make(map[string]any),
 		Filter: TargetFilter{
 			Namespaces:   MapValueFilter(t.Filter.Namespaces),
-			Priorities:   MapValueFilter(t.Filter.Priorities),
+			Severities:   MapValueFilter(t.Filter.Severities),
+			Status:       MapValueFilter(t.Filter.Status),
 			Policies:     MapValueFilter(t.Filter.Policies),
 			ReportLabels: MapValueFilter(t.Filter.ReportLabels),
 			Sources: MapValueFilter(target.ValueFilter{

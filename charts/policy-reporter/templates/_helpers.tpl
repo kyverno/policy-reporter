@@ -126,7 +126,7 @@ name: {{ .name | quote }}
 path: {{ .path | quote }}
 secretRef: {{ .secretRef | quote }}
 mountedSecret: {{ .mountedSecret | quote }}
-minimumPriority: {{ .minimumPriority | quote }}
+minimumSeverity: {{ .minimumSeverity | quote }}
 skipExistingOnStartup: {{ .skipExistingOnStartup }}
 {{- with .customFields }}
 customFields:

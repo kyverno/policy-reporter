@@ -47,7 +47,7 @@ func Test_LokiTarget(t *testing.T) {
 				t.Error("Expected Authentication header for BasicAuth is set")
 			}
 
-			expectedLine := fmt.Sprintf("[%s] %s", strings.ToUpper(fixtures.CompleteTargetSendResult.Priority.String()), fixtures.CompleteTargetSendResult.Message)
+			expectedLine := fmt.Sprintf("[%s] %s", strings.ToUpper(string(fixtures.CompleteTargetSendResult.Severity)), fixtures.CompleteTargetSendResult.Message)
 			labels, line := convertAndValidateBody(req, t)
 			if line != expectedLine {
 				t.Errorf("Unexpected LineContent: %s", line)
@@ -57,9 +57,6 @@ func Test_LokiTarget(t *testing.T) {
 			}
 			if !strings.Contains(labels, "status=\""+string(fixtures.CompleteTargetSendResult.Result)+"\"") {
 				t.Error("Missing Content for Label 'status'")
-			}
-			if !strings.Contains(labels, "priority=\""+fixtures.CompleteTargetSendResult.Priority.String()+"\"") {
-				t.Error("Missing Content for Label 'priority'")
 			}
 			if !strings.Contains(labels, "source=\"policy-reporter\"") {
 				t.Error("Missing Content for Label 'policy-reporter'")
@@ -123,7 +120,7 @@ func Test_LokiTarget(t *testing.T) {
 				t.Errorf("Unexpected Host: %s", url)
 			}
 
-			expectedLine := fmt.Sprintf("[%s] %s", strings.ToUpper(fixtures.MinimalTargetSendResult.Priority.String()), fixtures.MinimalTargetSendResult.Message)
+			expectedLine := fmt.Sprintf("[%s] %s", strings.ToUpper(string(fixtures.MinimalTargetSendResult.Severity)), fixtures.MinimalTargetSendResult.Message)
 			labels, line := convertAndValidateBody(req, t)
 			if line != expectedLine {
 				t.Errorf("Unexpected LineContent: %s", line)
@@ -133,9 +130,6 @@ func Test_LokiTarget(t *testing.T) {
 			}
 			if !strings.Contains(labels, "status=\""+string(fixtures.MinimalTargetSendResult.Result)+"\"") {
 				t.Error("Missing Content for Label 'status'")
-			}
-			if !strings.Contains(labels, "priority=\""+fixtures.MinimalTargetSendResult.Priority.String()+"\"") {
-				t.Error("Missing Content for Label 'priority'")
 			}
 			if !strings.Contains(labels, "source=\"policy-reporter\"") {
 				t.Error("Missing Content for Label 'policy-reporter'")

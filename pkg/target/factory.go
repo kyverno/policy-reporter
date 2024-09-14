@@ -8,7 +8,8 @@ type ValueFilter struct {
 
 type Filter struct {
 	Namespaces   ValueFilter `mapstructure:"namespaces"`
-	Priorities   ValueFilter `mapstructure:"priorities"`
+	Status       ValueFilter `mapstructure:"status"`
+	Severities   ValueFilter `mapstructure:"severities"`
 	Policies     ValueFilter `mapstructure:"policies"`
 	ReportLabels ValueFilter `mapstructure:"reportLabels"`
 }
@@ -16,7 +17,7 @@ type Filter struct {
 type Config[T any] struct {
 	Config          *T                `mapstructure:"config"`
 	Name            string            `mapstructure:"name"`
-	MinimumPriority string            `mapstructure:"minimumPriority"`
+	MinimumSeverity string            `mapstructure:"minimumSeverity"`
 	Filter          Filter            `mapstructure:"filter"`
 	SecretRef       string            `mapstructure:"secretRef"`
 	MountedSecret   string            `mapstructure:"mountedSecret"`
@@ -28,8 +29,8 @@ type Config[T any] struct {
 }
 
 func (config *Config[T]) MapBaseParent(parent *Config[T]) {
-	if config.MinimumPriority == "" {
-		config.MinimumPriority = parent.MinimumPriority
+	if config.MinimumSeverity == "" {
+		config.MinimumSeverity = parent.MinimumSeverity
 	}
 
 	if !config.SkipExisting {

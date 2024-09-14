@@ -35,16 +35,16 @@ type embedField struct {
 	Inline bool   `json:"inline"`
 }
 
-var colors = map[v1alpha2.Priority]string{
-	v1alpha2.DebugPriority:    "12370112",
-	v1alpha2.InfoPriority:     "3066993",
-	v1alpha2.WarningPriority:  "15105570",
-	v1alpha2.CriticalPriority: "15158332",
-	v1alpha2.ErrorPriority:    "15158332",
+var colors = map[v1alpha2.PolicySeverity]string{
+	v1alpha2.SeverityInfo:     "12370112",
+	v1alpha2.SeverityLow:      "3066993",
+	v1alpha2.StatusWarn:       "15105570",
+	v1alpha2.SeverityHigh:     "15158332",
+	v1alpha2.SeverityCritical: "15158332",
 }
 
 func newPayload(result v1alpha2.PolicyReportResult, customFields map[string]string) payload {
-	color := colors[result.Priority]
+	color := colors[result.Severity]
 
 	embedFields := make([]embedField, 0)
 
@@ -53,8 +53,6 @@ func newPayload(result v1alpha2.PolicyReportResult, customFields map[string]stri
 	if result.Rule != "" {
 		embedFields = append(embedFields, embedField{"Rule", result.Rule, true})
 	}
-
-	embedFields = append(embedFields, embedField{"Priority", result.Priority.String(), true})
 
 	if result.Category != "" {
 		embedFields = append(embedFields, embedField{"Category", result.Category, true})

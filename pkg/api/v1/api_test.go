@@ -12,6 +12,7 @@ import (
 
 	"github.com/kyverno/policy-reporter/pkg/api"
 	v1 "github.com/kyverno/policy-reporter/pkg/api/v1"
+	"github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
 	"github.com/kyverno/policy-reporter/pkg/database"
 	"github.com/kyverno/policy-reporter/pkg/email/violations"
 	"github.com/kyverno/policy-reporter/pkg/fixtures"
@@ -50,7 +51,7 @@ func TestV1(t *testing.T) {
 				Name:                  "Webhook",
 				SkipExistingOnStartup: true,
 				ResultFilter: &report.ResultFilter{
-					MinimumPriority: "",
+					MinimumSeverity: "",
 					Sources:         []string{"Kyverno"},
 				},
 			},
@@ -74,7 +75,7 @@ func TestV1(t *testing.T) {
 			assert.Equal(t, 1, len(resp))
 			assert.Contains(t, resp, v1.Target{
 				Name:                  "Webhook",
-				MinimumPriority:       "debug",
+				MinimumSeverity:       v1alpha2.SeverityInfo,
 				Sources:               []string{"Kyverno"},
 				SkipExistingOnStartup: true,
 			})

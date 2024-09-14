@@ -82,7 +82,7 @@ func TestV2(t *testing.T) {
 	server := api.NewServer(gin.New(), v2.WithAPI(store, client, target.Targets{
 		Webhook: &target.Config[target.WebhookOptions]{
 			Name:            "Webhook",
-			MinimumPriority: "warn",
+			MinimumSeverity: "warn",
 			Config: &target.WebhookOptions{
 				Webhook: "http://localhost:8080",
 			},

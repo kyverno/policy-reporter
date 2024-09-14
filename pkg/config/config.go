@@ -30,19 +30,6 @@ type MetricsFilter struct {
 	Kinds      ValueFilter `mapstructure:"kinds"`
 }
 
-type ReportSelector struct {
-	Source string `mapstructure:"source"`
-}
-
-type SourceFilter struct {
-	Selector              ReportSelector `mapstructure:"selector"`
-	Kinds                 ValueFilter    `mapstructure:"kinds"`
-	Sources               ValueFilter    `mapstructure:"sources"`
-	Namespaces            ValueFilter    `mapstructure:"namespaces"`
-	UncontrolledOnly      bool           `mapstructure:"uncontrolledOnly"`
-	DisableClusterReports bool           `mapstructure:"disableClusterReports"`
-}
-
 // SMTP configuration
 type SMTP struct {
 	Host        string `mapstructure:"host"`
@@ -110,17 +97,12 @@ type Profiling struct {
 	Enabled bool `mapstructure:"enabled"`
 }
 
-// ClusterReportFilter configuration
-type ClusterReportFilter struct {
-	Disabled bool `mapstructure:"disabled"`
-}
-
 // ReportFilter configuration
 type ReportFilter struct {
-	Namespaces     ValueFilter         `mapstructure:"namespaces"`
-	Sources        ValueFilter         `mapstructure:"sources"`
-	Kinds          ValueFilter         `mapstructure:"kinds"`
-	ClusterReports ClusterReportFilter `mapstructure:"clusterReports"`
+	Namespaces            ValueFilter `mapstructure:"namespaces"`
+	Sources               ValueFilter `mapstructure:"sources"`
+	Kinds                 ValueFilter `mapstructure:"kinds"`
+	DisableClusterReports bool        `mapstructure:"disableClusterReports"`
 }
 
 // Redis configuration
@@ -170,34 +152,48 @@ type Database struct {
 	MountedSecret string `mapstructure:"mountedSecret"`
 }
 
+type SourceSelector struct {
+	Source string `mapstructure:"source"`
+}
+
+type SourceFilter struct {
+	Selector              SourceSelector `mapstructure:"selector"`
+	Kinds                 ValueFilter    `mapstructure:"kinds"`
+	Sources               ValueFilter    `mapstructure:"sources"`
+	Namespaces            ValueFilter    `mapstructure:"namespaces"`
+	UncontrolledOnly      bool           `mapstructure:"uncontrolledOnly"`
+	DisableClusterReports bool           `mapstructure:"disableClusterReports"`
+}
+
 type CustomID struct {
 	Enabled bool     `mapstructure:"enabled"`
 	Fields  []string `mapstructure:"fields"`
 }
 
 type SourceConfig struct {
+	Selector SourceSelector `mapstructure:"selector"`
 	CustomID `mapstructure:"customID"`
 }
 
 // Config of the PolicyReporter
 type Config struct {
 	Version        string
-	Namespace      string                  `mapstructure:"namespace"`
-	API            API                     `mapstructure:"api"`
-	WorkerCount    int                     `mapstructure:"worker"`
-	DBFile         string                  `mapstructure:"dbfile"`
-	Metrics        Metrics                 `mapstructure:"metrics"`
-	REST           REST                    `mapstructure:"rest"`
-	ReportFilter   ReportFilter            `mapstructure:"reportFilter"`
-	SourceFilters  []SourceFilter          `mapstructure:"sourceFilters"`
-	Redis          Redis                   `mapstructure:"redis"`
-	Profiling      Profiling               `mapstructure:"profiling"`
-	EmailReports   EmailReports            `mapstructure:"emailReports"`
-	LeaderElection LeaderElection          `mapstructure:"leaderElection"`
-	K8sClient      K8sClient               `mapstructure:"k8sClient"`
-	Logging        Logging                 `mapstructure:"logging"`
-	Database       Database                `mapstructure:"database"`
-	Targets        target.Targets          `mapstructure:"target"`
-	SourceConfig   map[string]SourceConfig `mapstructure:"sourceConfig"`
-	Templates      Templates               `mapstructure:"templates"`
+	Namespace      string         `mapstructure:"namespace"`
+	API            API            `mapstructure:"api"`
+	WorkerCount    int            `mapstructure:"worker"`
+	DBFile         string         `mapstructure:"dbfile"`
+	Metrics        Metrics        `mapstructure:"metrics"`
+	REST           REST           `mapstructure:"rest"`
+	ReportFilter   ReportFilter   `mapstructure:"reportFilter"`
+	SourceFilters  []SourceFilter `mapstructure:"sourceFilters"`
+	Redis          Redis          `mapstructure:"redis"`
+	Profiling      Profiling      `mapstructure:"profiling"`
+	EmailReports   EmailReports   `mapstructure:"emailReports"`
+	LeaderElection LeaderElection `mapstructure:"leaderElection"`
+	K8sClient      K8sClient      `mapstructure:"k8sClient"`
+	Logging        Logging        `mapstructure:"logging"`
+	Database       Database       `mapstructure:"database"`
+	Targets        target.Targets `mapstructure:"target"`
+	SourceConfig   []SourceConfig `mapstructure:"sourceConfig"`
+	Templates      Templates      `mapstructure:"templates"`
 }

@@ -12,6 +12,7 @@ import (
 	"k8s.io/client-go/kubernetes/fake"
 	v1 "k8s.io/client-go/kubernetes/typed/core/v1"
 
+	"github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
 	"github.com/kyverno/policy-reporter/pkg/kubernetes/secrets"
 	"github.com/kyverno/policy-reporter/pkg/target"
 	"github.com/kyverno/policy-reporter/pkg/target/factory"
@@ -81,7 +82,7 @@ var targets = target.Targets{
 			},
 		},
 		SkipExisting:    true,
-		MinimumPriority: "debug",
+		MinimumSeverity: v1alpha2.SeverityInfo,
 		CustomFields:    map[string]string{"field": "value"},
 		Channels: []*target.Config[target.LokiOptions]{
 			{
@@ -99,7 +100,7 @@ var targets = target.Targets{
 			Rotation: "daily",
 		},
 		SkipExisting:    true,
-		MinimumPriority: "debug",
+		MinimumSeverity: v1alpha2.SeverityInfo,
 		CustomFields:    map[string]string{"field": "value"},
 		Channels:        []*target.Config[target.ElasticsearchOptions]{{}},
 	},
@@ -111,7 +112,7 @@ var targets = target.Targets{
 			},
 		},
 		SkipExisting:    true,
-		MinimumPriority: "debug",
+		MinimumSeverity: v1alpha2.SeverityInfo,
 		CustomFields:    map[string]string{"field": "value"},
 		Channels: []*target.Config[target.SlackOptions]{{
 			Config: &target.SlackOptions{
@@ -131,7 +132,7 @@ var targets = target.Targets{
 			SkipTLS: true,
 		},
 		SkipExisting:    true,
-		MinimumPriority: "debug",
+		MinimumSeverity: v1alpha2.SeverityInfo,
 		CustomFields:    map[string]string{"field": "value"},
 		Channels: []*target.Config[target.WebhookOptions]{{
 			Config: &target.WebhookOptions{
@@ -145,7 +146,7 @@ var targets = target.Targets{
 			SkipTLS: true,
 		},
 		SkipExisting:    true,
-		MinimumPriority: "debug",
+		MinimumSeverity: v1alpha2.SeverityInfo,
 		CustomFields:    map[string]string{"field": "value"},
 		Channels: []*target.Config[target.WebhookOptions]{{
 			Config: &target.WebhookOptions{
@@ -159,7 +160,7 @@ var targets = target.Targets{
 			SkipTLS: true,
 		},
 		SkipExisting:    true,
-		MinimumPriority: "debug",
+		MinimumSeverity: v1alpha2.SeverityInfo,
 		CustomFields:    map[string]string{"field": "value"},
 		Channels:        []*target.Config[target.WebhookOptions]{{}},
 	},
@@ -173,7 +174,7 @@ var targets = target.Targets{
 			ChatID: "123456",
 		},
 		SkipExisting:    true,
-		MinimumPriority: "debug",
+		MinimumSeverity: v1alpha2.SeverityInfo,
 		CustomFields:    map[string]string{"field": "value"},
 		Channels: []*target.Config[target.TelegramOptions]{{
 			Config: &target.TelegramOptions{
@@ -190,7 +191,7 @@ var targets = target.Targets{
 			},
 		},
 		SkipExisting:    true,
-		MinimumPriority: "debug",
+		MinimumSeverity: v1alpha2.SeverityInfo,
 		CustomFields:    map[string]string{"field": "value"},
 		Channels: []*target.Config[target.WebhookOptions]{{
 			Config: &target.WebhookOptions{
@@ -217,7 +218,7 @@ var targets = target.Targets{
 			Prefix:               "prefix",
 		},
 		SkipExisting:    true,
-		MinimumPriority: "debug",
+		MinimumSeverity: v1alpha2.SeverityInfo,
 		CustomFields:    map[string]string{"field": "value"},
 		Channels:        []*target.Config[target.S3Options]{{}},
 	},
@@ -232,7 +233,7 @@ var targets = target.Targets{
 			StreamName: "policy-reporter",
 		},
 		SkipExisting:    true,
-		MinimumPriority: "debug",
+		MinimumSeverity: v1alpha2.SeverityInfo,
 		CustomFields:    map[string]string{"field": "value"},
 		Channels:        []*target.Config[target.KinesisOptions]{{}},
 	},
@@ -247,7 +248,7 @@ var targets = target.Targets{
 			AccountID: "AccountID",
 		},
 		SkipExisting:    true,
-		MinimumPriority: "debug",
+		MinimumSeverity: v1alpha2.SeverityInfo,
 		CustomFields:    map[string]string{"field": "value"},
 		Channels:        []*target.Config[target.SecurityHubOptions]{{}},
 	},
@@ -258,7 +259,7 @@ var targets = target.Targets{
 			Prefix:      "prefix",
 		},
 		SkipExisting:    true,
-		MinimumPriority: "debug",
+		MinimumSeverity: v1alpha2.SeverityInfo,
 		CustomFields:    map[string]string{"field": "value"},
 		Channels:        []*target.Config[target.GCSOptions]{{}},
 	},

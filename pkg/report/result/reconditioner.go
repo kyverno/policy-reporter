@@ -21,7 +21,6 @@ func (r *Reconditioner) Prepare(polr v1alpha2.ReportInterface) v1alpha2.ReportIn
 	results := polr.GetResults()
 	for i, r := range results {
 		r.ID = generator.Generate(polr, r)
-		r.Priority = ResolvePriority(r)
 		r.Category = helper.Defaults(r.Category, "Other")
 
 		scope := polr.GetScope()

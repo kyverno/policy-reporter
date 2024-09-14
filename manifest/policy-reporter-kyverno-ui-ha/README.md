@@ -8,7 +8,7 @@ Seet the [Documentation](https://kyverno.github.io/policy-reporter/core/config-r
 # send pushes to the Policy Reporter UI
 ui:
   host: http://policy-reporter-ui:8082
-  minimumPriority: "warning"
+  minimumSeverity: "medium"
   skipExistingOnStartup: true
 
 # (optional) cache results in an central, external redis

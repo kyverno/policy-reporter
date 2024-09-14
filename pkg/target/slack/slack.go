@@ -33,12 +33,12 @@ type client struct {
 	headers      map[string]string
 }
 
-var colors = map[v1alpha2.Priority]string{
-	v1alpha2.DebugPriority:    "#68c2ff",
-	v1alpha2.InfoPriority:     "#36a64f",
-	v1alpha2.WarningPriority:  "#f2c744",
-	v1alpha2.CriticalPriority: "#b80707",
-	v1alpha2.ErrorPriority:    "#e20b0b",
+var colors = map[v1alpha2.PolicySeverity]string{
+	v1alpha2.SeverityInfo:     "#68c2ff",
+	v1alpha2.SeverityLow:      "#36a64f",
+	v1alpha2.SeverityMedium:   "#f2c744",
+	v1alpha2.SeverityHigh:     "#b80707",
+	v1alpha2.SeverityCritical: "#e20b0b",
 }
 
 func (s *client) message(result v1alpha2.PolicyReportResult) *slack.WebhookMessage {
@@ -52,7 +52,7 @@ func (s *client) message(result v1alpha2.PolicyReportResult) *slack.WebhookMessa
 	}
 
 	att := slack.Attachment{
-		Color: colors[result.Priority],
+		Color: colors[result.Severity],
 		Blocks: slack.Blocks{
 			BlockSet: make([]slack.Block, 0),
 		},
@@ -74,7 +74,6 @@ func (s *client) message(result v1alpha2.PolicyReportResult) *slack.WebhookMessa
 		att.Blocks.BlockSet,
 		slack.NewSectionBlock(slack.NewTextBlockObject(slack.MarkdownType, "*Message*\n"+result.Message, false, false), nil, nil),
 		slack.NewSectionBlock(nil, []*slack.TextBlockObject{
-			slack.NewTextBlockObject(slack.MarkdownType, "*Priority*\n"+result.Priority.String(), false, false),
 			slack.NewTextBlockObject(slack.MarkdownType, "*Status*\n"+string(result.Result), false, false),
 		}, nil),
 	)
@@ -187,7 +186,7 @@ func (s *client) batchMessage(polr v1alpha2.ReportInterface, results []v1alpha2.
 	}
 
 	att := slack.Attachment{
-		Color: colors[v1alpha2.InfoPriority],
+		Color: colors[v1alpha2.SeverityInfo],
 		Blocks: slack.Blocks{
 			BlockSet: make([]slack.Block, 0),
 		},
@@ -221,7 +220,7 @@ func (s *client) batchMessage(polr v1alpha2.ReportInterface, results []v1alpha2.
 
 	for _, result := range results {
 		resultAttachment := slack.Attachment{
-			Color: colors[result.Priority],
+			Color: colors[result.Severity],
 			Blocks: slack.Blocks{
 				BlockSet: make([]slack.Block, 0),
 			},
