@@ -27,7 +27,7 @@ func escape(text interface{}) string {
 	return replacer.Replace(fmt.Sprintf("%v", text))
 }
 
-var notificationTempl = `*\[Policy Reporter\] \[{{ .Priority }}\] {{ escape (or .Result.Policy .Result.Rule) }}*
+var notificationTempl = `*\[Policy Reporter\] \[{{ .Result.Severity }}\] {{ escape (or .Result.Policy .Result.Rule) }}*
 {{- if .Resource }}
 
 *Resource*: {{ .Resource.Kind }} {{ if .Resource.Namespace }}{{ escape .Resource.Namespace }}/{{ end }}{{ escape .Resource.Name }}
@@ -118,16 +118,10 @@ func (e *client) Send(result v1alpha2.PolicyReportResult) {
 		res = result.GetResource()
 	}
 
-	prio := result.Priority.String()
-	if prio == "" {
-		prio = v1alpha2.DebugPriority.String()
-	}
-
 	err = ttmpl.Execute(&textBuffer, values{
 		Result:   result,
 		Time:     time.Now(),
 		Resource: res,
-		Priority: prio,
 	})
 	if err != nil {
 		zap.L().Error(e.Name()+": PUSH FAILED", zap.Error(err))

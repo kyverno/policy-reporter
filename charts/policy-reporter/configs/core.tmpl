@@ -119,11 +119,6 @@ target:
       {{- end }}
     {{- end }}
 
-{{- with .Values.policyPriorities }}
-priorityMap:
-  {{- toYaml . | nindent 2 }}
-{{- end }}
-
 worker: {{ .Values.worker }}
 
 metrics:

@@ -10,20 +10,20 @@ import (
 // Target API Model
 type Target struct {
 	Name                  string   `json:"name"`
-	MinimumPriority       string   `json:"minimumPriority"`
+	MinimumSeverity       string   `json:"minimumSeverity"`
 	Sources               []string `json:"sources,omitempty"`
 	SkipExistingOnStartup bool     `json:"skipExistingOnStartup"`
 }
 
 func mapTarget(t target.Client) Target {
-	minPrio := t.MinimumPriority()
-	if minPrio == "" {
-		minPrio = v1alpha2.DebugPriority.String()
+	minSev := t.MinimumSeverity()
+	if minSev == "" {
+		minSev = v1alpha2.SeverityInfo
 	}
 
 	return Target{
 		Name:                  t.Name(),
-		MinimumPriority:       minPrio,
+		MinimumSeverity:       minSev,
 		Sources:               t.Sources(),
 		SkipExistingOnStartup: t.SkipExistingOnStartup(),
 	}

@@ -84,7 +84,7 @@ func TestV2Views(t *testing.T) {
 	t.Run("MapBaseToTarget", func(t *testing.T) {
 		target := v2.MapBaseToTarget(&target.Config[target.WebhookOptions]{
 			Name:            "Webhook",
-			MinimumPriority: "warning",
+			MinimumSeverity: "medium",
 			SecretRef:       "ref",
 			MountedSecret:   "mounted",
 			Sources:         []string{"Kyverno"},
@@ -93,7 +93,7 @@ func TestV2Views(t *testing.T) {
 		})
 
 		assert.Equal(t, "Webhook", target.Name)
-		assert.Equal(t, "warning", target.MinimumPriority)
+		assert.Equal(t, "medium", target.MinimumSeverity)
 		assert.Equal(t, "ref", target.SecretRef)
 		assert.Equal(t, "mounted", target.MountedSecret)
 		assert.NotNil(t, target.CustomFields)
@@ -104,7 +104,7 @@ func TestV2Views(t *testing.T) {
 	t.Run("MapSlackToTarget", func(t *testing.T) {
 		target := v2.MapSlackToTarget(&target.Config[target.SlackOptions]{
 			Name:            "Slack",
-			MinimumPriority: "warning",
+			MinimumSeverity: "medium",
 			Config: &target.SlackOptions{
 				Channel: "general",
 				WebhookOptions: target.WebhookOptions{
@@ -115,7 +115,7 @@ func TestV2Views(t *testing.T) {
 		})
 
 		assert.Equal(t, "Slack", target.Name)
-		assert.Equal(t, "warning", target.MinimumPriority)
+		assert.Equal(t, "medium", target.MinimumSeverity)
 		assert.Equal(t, "Slack", target.Type)
 		assert.Equal(t, "general", target.Properties["channel"])
 	})
@@ -123,7 +123,7 @@ func TestV2Views(t *testing.T) {
 	t.Run("MapLokiToTarget", func(t *testing.T) {
 		target := v2.MapLokiToTarget(&target.Config[target.LokiOptions]{
 			Name:            "Loki 1",
-			MinimumPriority: "warning",
+			MinimumSeverity: "medium",
 			Config: &target.LokiOptions{
 				HostOptions: target.HostOptions{
 					Host:        "http://loki.monitoring:3000",
@@ -138,7 +138,7 @@ func TestV2Views(t *testing.T) {
 		})
 
 		assert.Equal(t, "Loki 1", target.Name)
-		assert.Equal(t, "warning", target.MinimumPriority)
+		assert.Equal(t, "medium", target.MinimumSeverity)
 
 		assert.Equal(t, "Loki", target.Type)
 		assert.Equal(t, "v1/push", target.Properties["api"])
@@ -151,7 +151,7 @@ func TestV2Views(t *testing.T) {
 	t.Run("MapElasticsearchToTarget", func(t *testing.T) {
 		target := v2.MapElasticsearchToTarget(&target.Config[target.ElasticsearchOptions]{
 			Name:            "Target",
-			MinimumPriority: "warning",
+			MinimumSeverity: "medium",
 			Config: &target.ElasticsearchOptions{
 				HostOptions: target.HostOptions{
 					Host:        "http://elasticsearch.monitoring:3000",
@@ -168,7 +168,7 @@ func TestV2Views(t *testing.T) {
 		})
 
 		assert.Equal(t, "Target", target.Name)
-		assert.Equal(t, "warning", target.MinimumPriority)
+		assert.Equal(t, "medium", target.MinimumSeverity)
 
 		assert.Equal(t, "Elasticsearch", target.Type)
 		assert.Equal(t, "policy-reporter", target.Properties["index"])
@@ -182,7 +182,7 @@ func TestV2Views(t *testing.T) {
 	t.Run("MapWebhhokToTarget", func(t *testing.T) {
 		target := v2.MapWebhhokToTarget("Discord")(&target.Config[target.WebhookOptions]{
 			Name:            "Target",
-			MinimumPriority: "warning",
+			MinimumSeverity: "medium",
 			Config: &target.WebhookOptions{
 				Webhook:     "http://discord.com/12345/888XABC",
 				Certificate: "cert",
@@ -195,7 +195,7 @@ func TestV2Views(t *testing.T) {
 		})
 
 		assert.Equal(t, "Target", target.Name)
-		assert.Equal(t, "warning", target.MinimumPriority)
+		assert.Equal(t, "medium", target.MinimumSeverity)
 
 		assert.Equal(t, "Discord", target.Type)
 		assert.Equal(t, "http://discord.com", target.Host)
@@ -207,7 +207,7 @@ func TestV2Views(t *testing.T) {
 	t.Run("MapTelegramToTarget", func(t *testing.T) {
 		target := v2.MapTelegramToTarget(&target.Config[target.TelegramOptions]{
 			Name:            "Target",
-			MinimumPriority: "warning",
+			MinimumSeverity: "medium",
 			Config: &target.TelegramOptions{
 				Token:  "ABCDE",
 				ChatID: "1234567",
@@ -221,7 +221,7 @@ func TestV2Views(t *testing.T) {
 		})
 
 		assert.Equal(t, "Target", target.Name)
-		assert.Equal(t, "warning", target.MinimumPriority)
+		assert.Equal(t, "medium", target.MinimumSeverity)
 
 		assert.Equal(t, "Telegram", target.Type)
 		assert.Equal(t, "http://telegram.com", target.Host)
@@ -234,7 +234,7 @@ func TestV2Views(t *testing.T) {
 	t.Run("MapS3ToTarget", func(t *testing.T) {
 		target := v2.MapS3ToTarget(&target.Config[target.S3Options]{
 			Name:            "Target",
-			MinimumPriority: "warning",
+			MinimumSeverity: "medium",
 			Config: &target.S3Options{
 				Prefix: "policy-reporter",
 				Bucket: "kyverno",
@@ -247,7 +247,7 @@ func TestV2Views(t *testing.T) {
 		})
 
 		assert.Equal(t, "Target", target.Name)
-		assert.Equal(t, "warning", target.MinimumPriority)
+		assert.Equal(t, "medium", target.MinimumSeverity)
 
 		assert.Equal(t, "S3", target.Type)
 		assert.Equal(t, "https://s3.aws.com", target.Host)
@@ -260,7 +260,7 @@ func TestV2Views(t *testing.T) {
 	t.Run("MapKinesisToTarget", func(t *testing.T) {
 		target := v2.MapKinesisToTarget(&target.Config[target.KinesisOptions]{
 			Name:            "Target",
-			MinimumPriority: "warning",
+			MinimumSeverity: "medium",
 			Config: &target.KinesisOptions{
 				StreamName: "policy-reporter",
 				AWSConfig: target.AWSConfig{
@@ -272,7 +272,7 @@ func TestV2Views(t *testing.T) {
 		})
 
 		assert.Equal(t, "Target", target.Name)
-		assert.Equal(t, "warning", target.MinimumPriority)
+		assert.Equal(t, "medium", target.MinimumSeverity)
 
 		assert.Equal(t, "Kinesis", target.Type)
 		assert.Equal(t, "https://kinesis.aws.com", target.Host)
@@ -284,7 +284,7 @@ func TestV2Views(t *testing.T) {
 	t.Run("MapSecurityHubToTarget", func(t *testing.T) {
 		target := v2.MapSecurityHubToTarget(&target.Config[target.SecurityHubOptions]{
 			Name:            "Target",
-			MinimumPriority: "warning",
+			MinimumSeverity: "medium",
 			Config: &target.SecurityHubOptions{
 				AccountID: "policy-reporter",
 				Cleanup:   true,
@@ -297,7 +297,7 @@ func TestV2Views(t *testing.T) {
 		})
 
 		assert.Equal(t, "Target", target.Name)
-		assert.Equal(t, "warning", target.MinimumPriority)
+		assert.Equal(t, "medium", target.MinimumSeverity)
 
 		assert.Equal(t, "SecurityHub", target.Type)
 		assert.Equal(t, "https://securityhub.aws.com", target.Host)
@@ -309,7 +309,7 @@ func TestV2Views(t *testing.T) {
 	t.Run("MapGCSToTarget", func(t *testing.T) {
 		target := v2.MapGCSToTarget(&target.Config[target.GCSOptions]{
 			Name:            "Target",
-			MinimumPriority: "warning",
+			MinimumSeverity: "medium",
 			Config: &target.GCSOptions{
 				Prefix: "policy-reporter",
 				Bucket: "kyverno",
@@ -318,7 +318,7 @@ func TestV2Views(t *testing.T) {
 		})
 
 		assert.Equal(t, "Target", target.Name)
-		assert.Equal(t, "warning", target.MinimumPriority)
+		assert.Equal(t, "medium", target.MinimumSeverity)
 
 		assert.Equal(t, "GoogleCloudStore", target.Type)
 		assert.Equal(t, "kyverno", target.Properties["bucket"])
@@ -329,7 +329,7 @@ func TestV2Views(t *testing.T) {
 	t.Run("MapTargets", func(t *testing.T) {
 		targets := v2.MapTargets(&target.Config[target.GCSOptions]{
 			Name:            "Target",
-			MinimumPriority: "warning",
+			MinimumSeverity: "medium",
 			Config: &target.GCSOptions{
 				Prefix: "policy-reporter",
 				Bucket: "kyverno",
@@ -338,7 +338,7 @@ func TestV2Views(t *testing.T) {
 			Channels: []*target.Config[target.GCSOptions]{
 				{
 					Name:            "Target 2",
-					MinimumPriority: "warning",
+					MinimumSeverity: "medium",
 					Config: &target.GCSOptions{
 						Prefix: "policy-reporter",
 						Bucket: "trivy",
@@ -347,7 +347,7 @@ func TestV2Views(t *testing.T) {
 				},
 				{
 					Name:            "Target 2",
-					MinimumPriority: "warning",
+					MinimumSeverity: "medium",
 					Config: &target.GCSOptions{
 						Prefix: "policy-reporter",
 						Bucket: "trivy",

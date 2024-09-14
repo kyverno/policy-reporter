@@ -3,6 +3,7 @@ package target_test
 import (
 	"testing"
 
+	"github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
 	"github.com/kyverno/policy-reporter/pkg/target"
 	"github.com/stretchr/testify/assert"
 )
@@ -26,29 +27,29 @@ func TestConfig(t *testing.T) {
 
 	t.Run("base mapper set expected fallbacks from parent config", func(t *testing.T) {
 		p := &target.Config[target.WebhookOptions]{
-			MinimumPriority: "warning",
+			MinimumSeverity: v1alpha2.SeverityMedium,
 			SkipExisting:    true,
 		}
 
 		c := &target.Config[target.WebhookOptions]{}
 		c.MapBaseParent(p)
 
-		assert.Equal(t, c.MinimumPriority, p.MinimumPriority)
+		assert.Equal(t, c.MinimumSeverity, p.MinimumSeverity)
 		assert.Equal(t, c.SkipExisting, p.SkipExisting)
 	})
 
 	t.Run("base mapper keeps none empty values", func(t *testing.T) {
 		p := &target.Config[target.WebhookOptions]{
-			MinimumPriority: "warning",
+			MinimumSeverity: v1alpha2.SeverityMedium,
 		}
 
 		c := &target.Config[target.WebhookOptions]{
-			MinimumPriority: "debug",
+			MinimumSeverity: v1alpha2.SeverityInfo,
 		}
 
 		c.MapBaseParent(p)
 
-		assert.Equal(t, c.MinimumPriority, "debug")
+		assert.Equal(t, c.MinimumSeverity, v1alpha2.SeverityInfo)
 	})
 }
 

@@ -115,18 +115,24 @@ func (c *client) Send(result v1alpha2.PolicyReportResult) {
 	c.BatchSend(&v1alpha2.PolicyReport{}, []v1alpha2.PolicyReportResult{result})
 }
 
-func (c *client) BatchSend(polr v1alpha2.ReportInterface, results []v1alpha2.PolicyReportResult) {
-	results = helper.Filter(results, func(r v1alpha2.PolicyReportResult) bool {
+func filterResults(results []v1alpha2.PolicyReportResult) []v1alpha2.PolicyReportResult {
+	return helper.Filter(results, func(r v1alpha2.PolicyReportResult) bool {
 		if r.Result == v1alpha2.StatusFail {
 			return true
 		}
 		if r.Result == v1alpha2.StatusWarn {
 			return true
 		}
+		if r.Result == v1alpha2.StatusError {
+			return true
+		}
 
 		return false
 	})
+}
 
+func (c *client) BatchSend(polr v1alpha2.ReportInterface, results []v1alpha2.PolicyReportResult) {
+	results = filterResults(results)
 	if len(results) == 0 {
 		return
 	}
@@ -146,7 +152,7 @@ func (c *client) BatchSend(polr v1alpha2.ReportInterface, results []v1alpha2.Pol
 	})
 
 	if len(findings) > 0 {
-		updated, err := c.batchUpdate(context.TODO(), findings, types.WorkflowStatusNew)
+		updated, err := c.batchUpdate(context.Background(), findings, types.WorkflowStatusNew)
 		if err != nil {
 			zap.L().Error(c.Name()+": PUSH FAILED", zap.Error(err))
 			return
@@ -168,7 +174,7 @@ func (c *client) BatchSend(polr v1alpha2.ReportInterface, results []v1alpha2.Pol
 		return
 	}
 
-	res, err := c.hub.BatchImportFindings(context.TODO(), &hub.BatchImportFindingsInput{
+	res, err := c.hub.BatchImportFindings(context.Background(), &hub.BatchImportFindingsInput{
 		Findings: c.mapFindings(polr, results),
 	})
 	if err != nil {
@@ -284,7 +290,6 @@ func (c *client) mapOtherDetails(polr v1alpha2.ReportInterface, result v1alpha2.
 		"Policy":   result.Policy,
 		"Rule":     result.Rule,
 		"Result":   string(result.Result),
-		"Priority": result.Priority.String(),
 		"Report":   polr.GetKey(),
 	}
 
@@ -463,6 +468,10 @@ func (c *client) BaseFilter(source string) *types.AwsSecurityFindingFilters {
 }
 
 func (c *client) Type() target.ClientType {
+	if !c.cleanup {
+		return target.BatchSend
+	}
+
 	return target.SyncSend
 }
 

@@ -67,7 +67,6 @@ func NewJSONResult(r v1alpha2.PolicyReportResult) Result {
 		Message:           r.Message,
 		Policy:            r.Policy,
 		Rule:              r.Rule,
-		Priority:          r.Priority.String(),
 		Status:            string(r.Result),
 		Severity:          string(r.Severity),
 		Category:          r.Category,

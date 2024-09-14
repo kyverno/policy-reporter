@@ -33,8 +33,8 @@ type Client interface {
 	Name() string
 	// Validate if a result should send
 	Validate(rep v1alpha2.ReportInterface, result v1alpha2.PolicyReportResult) bool
-	// MinimumPriority for a triggered Result to send to this target
-	MinimumPriority() string
+	// MinimumSeverity for a triggered Result to send to this target
+	MinimumSeverity() string
 	// Sources of the Results which should send to this target, empty means all sources
 	Sources() []string
 	// Type for the given target
@@ -47,10 +47,10 @@ type ResultFilterFactory struct {
 	client namespaces.Client
 }
 
-func (rf *ResultFilterFactory) CreateFilter(namespace, priority, policy validate.RuleSets, minimumPriority string, sources []string) *report.ResultFilter {
+func (rf *ResultFilterFactory) CreateFilter(namespace, severity, status, policy validate.RuleSets, minimumSeverity string, sources []string) *report.ResultFilter {
 	f := report.NewResultFilter()
 	f.Sources = sources
-	f.MinimumPriority = minimumPriority
+	f.MinimumSeverity = minimumSeverity
 
 	if len(sources) > 0 {
 		f.AddValidation(func(r v1alpha2.PolicyReportResult) bool {
@@ -90,9 +90,9 @@ func (rf *ResultFilterFactory) CreateFilter(namespace, priority, policy validate
 		})
 	}
 
-	if minimumPriority != "" {
+	if minimumSeverity != "" {
 		f.AddValidation(func(r v1alpha2.PolicyReportResult) bool {
-			return r.Priority >= v1alpha2.NewPriority(f.MinimumPriority)
+			return v1alpha2.SeverityLevel[r.Severity] >= v1alpha2.SeverityLevel[v1alpha2.PolicySeverity(f.MinimumSeverity)]
 		})
 	}
 
@@ -102,9 +102,15 @@ func (rf *ResultFilterFactory) CreateFilter(namespace, priority, policy validate
 		})
 	}
 
-	if priority.Count() > 0 {
+	if severity.Count() > 0 {
 		f.AddValidation(func(r v1alpha2.PolicyReportResult) bool {
-			return validate.ContainsRuleSet(r.Priority.String(), priority)
+			return validate.ContainsRuleSet(string(r.Severity), severity)
+		})
+	}
+
+	if status.Count() > 0 {
+		f.AddValidation(func(r v1alpha2.PolicyReportResult) bool {
+			return validate.ContainsRuleSet(string(r.Result), status)
 		})
 	}
 
@@ -180,12 +186,12 @@ func (c *BaseClient) Name() string {
 	return c.name
 }
 
-func (c *BaseClient) MinimumPriority() string {
+func (c *BaseClient) MinimumSeverity() string {
 	if c.resultFilter == nil {
-		return v1alpha2.DefaultPriority.String()
+		return v1alpha2.SeverityInfo
 	}
 
-	return c.resultFilter.MinimumPriority
+	return c.resultFilter.MinimumSeverity
 }
 
 func (c *BaseClient) Sources() []string {

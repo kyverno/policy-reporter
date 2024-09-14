@@ -24,8 +24,8 @@ func (c *client) Send(result v1alpha2.PolicyReportResult) {
 	c.Called = true
 }
 
-func (c *client) MinimumPriority() string {
-	return v1alpha2.InfoPriority.String()
+func (c *client) MinimumSeverity() string {
+	return v1alpha2.SeverityInfo
 }
 
 func (c *client) Name() string {

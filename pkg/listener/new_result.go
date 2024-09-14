@@ -45,6 +45,14 @@ func (l *ResultListener) UnregisterSyncListener() {
 	l.syncListener = make([]report.SyncResultsListener, 0)
 }
 
+func (l *ResultListener) Validate(r v1alpha2.PolicyReportResult) bool {
+	if r.Result == v1alpha2.StatusSkip || r.Result == v1alpha2.StatusPass {
+		return false
+	}
+
+	return true
+}
+
 func (l *ResultListener) Listen(event report.LifecycleEvent) {
 	if event.Type != report.Added && event.Type != report.Updated {
 		l.cache.RemoveReport(event.PolicyReport.GetID())
@@ -71,6 +79,8 @@ func (l *ResultListener) Listen(event report.LifecycleEvent) {
 				callback(event.PolicyReport)
 			}(cb)
 		}
+
+		wg.Wait()
 	}
 
 	if listenerCount == 0 && scopeListenerCount == 0 {
@@ -93,7 +103,7 @@ func (l *ResultListener) Listen(event report.LifecycleEvent) {
 	newResults := make([]v1alpha2.PolicyReportResult, 0)
 
 	for _, r := range event.PolicyReport.GetResults() {
-		if helper.Contains(r.GetID(), existing) {
+		if helper.Contains(r.GetID(), existing) || !l.Validate(r) {
 			continue
 		}
 
@@ -160,5 +170,6 @@ func NewResultListener(skipExisting bool, rcache cache.Cache, startUp time.Time)
 		startUp:       startUp,
 		listener:      make([]report.PolicyReportResultListener, 0),
 		scopeListener: make([]report.ScopeResultsListener, 0),
+		syncListener:  make([]report.SyncResultsListener, 0),
 	}
 }

@@ -59,9 +59,6 @@ func TestReconditioner(t *testing.T) {
 		if res.Category != "Other" {
 			t.Error("result category should default to Other")
 		}
-		if res.Priority != v1alpha2.ErrorPriority {
-			t.Error("result prioriry should be mapped")
-		}
 		if len(res.Resources) == 0 || res.Resources[0] != *report.GetScope() {
 			t.Error("result resource should be mapped to scope")
 		}
@@ -116,9 +113,6 @@ func TestReconditioner(t *testing.T) {
 		}
 		if res.Category != "Other" {
 			t.Error("result category should default to Other")
-		}
-		if res.Priority != v1alpha2.ErrorPriority {
-			t.Error("result prioriry should be mapped")
 		}
 		if len(res.Resources) == 0 || res.Resources[0] != *report.GetScope() {
 			t.Error("result resource should be mapped to scope")
