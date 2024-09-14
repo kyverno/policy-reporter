@@ -750,12 +750,12 @@ func Test_CustomFields(t *testing.T) {
 		t.Fatalf("expected 12 client created, got %d", len(clients.Clients()))
 	}
 
-	t.Run("Get CustomLabels from Loki", func(t *testing.T) {
+	t.Run("Get CustomFields from Loki", func(t *testing.T) {
 		client := reflect.ValueOf(clients.Client("Loki")).Elem()
 
-		customFields := client.FieldByName("customLabels").MapKeys()
+		customFields := client.FieldByName("customFields").MapKeys()
 		if customFields[0].String() != "field" {
-			t.Errorf("Expected customLabels are added")
+			t.Errorf("Expected customFields are added")
 		}
 	})
 
