@@ -1,5 +1,5 @@
 leaderElection:
-  enabled: {{ or .Values.plugin.kyverno.leaderElection.enabled (gt (int .Values.plugin.kyverno.replicaCount) 1) }}
+  enabled: {{ gt (int .Values.plugin.kyverno.replicaCount) 1 }}
   releaseOnCancel: {{ .Values.plugin.kyverno.leaderElection.releaseOnCancel }}
   leaseDuration: {{ .Values.plugin.kyverno.leaderElection.leaseDuration }}
   renewDeadline: {{ .Values.plugin.kyverno.leaderElection.renewDeadline }}
