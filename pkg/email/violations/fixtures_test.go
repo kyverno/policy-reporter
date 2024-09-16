@@ -10,7 +10,7 @@ import (
 )
 
 var (
-	filter = email.NewFilter(validate.RuleSets{}, validate.RuleSets{})
+	filter = email.NewFilter(nil, validate.RuleSets{}, validate.RuleSets{})
 	logger = zap.NewNop()
 )
 

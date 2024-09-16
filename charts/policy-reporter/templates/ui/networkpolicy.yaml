@@ -12,12 +12,41 @@ spec:
   policyTypes:
   - Ingress
   - Egress
-  {{- with .Values.ui.networkPolicy.ingress }}
   ingress:
+  - from:
+    ports:
+    - protocol: TCP
+      port: {{ .Values.ui.service.port }}
+  {{- with .Values.ui.networkPolicy.ingress }}
     {{- toYaml . | nindent 2 }}
   {{- end }}
-  {{- with .Values.ui.networkPolicy.egress }}
   egress:
+  - to:
+    - podSelector:
+        matchLabels:
+          {{- include "policyreporter.selectorLabels" . | nindent 10 }}
+    ports:
+    - protocol: TCP
+      port: {{ .Values.service.port }}
+  {{- if or .Values.plugin.kyverno.enabled }}
+  - to:
+    - podSelector:
+        matchLabels:
+          {{- include "kyverno-plugin.selectorLabels" . | nindent 10 }}
+    ports:
+    - protocol: TCP
+      port: {{ .Values.plugin.kyverno.service.port }}
+  {{- end }}
+  {{- if or .Values.plugin.trivy.enabled }}
+  - to:
+    - podSelector:
+        matchLabels:
+          {{- include "trivy-plugin.selectorLabels" . | nindent 10 }}
+    ports:
+    - protocol: TCP
+      port: {{ .Values.plugin.trivy.service.port }}
+  {{- end }}
+  {{- with .Values.networkPolicy.egress }}
     {{- toYaml . | nindent 2 }}
   {{- end }}
 {{- end }}

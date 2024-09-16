@@ -99,7 +99,7 @@ spec:
             valueFrom:
               fieldRef:
                 fieldPath: metadata.namespace
-          {{- if or .Values.leaderElection.enabled (gt (int .Values.replicaCount) 1) }}
+          {{- if gt (int .Values.replicaCount) 1 }}
           - name: POD_NAME
             valueFrom:
               fieldRef:

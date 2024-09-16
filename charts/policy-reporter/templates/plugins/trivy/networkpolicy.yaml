@@ -16,8 +16,15 @@ spec:
   ingress:
     {{- toYaml . | nindent 2 }}
   {{- end }}
-  {{- with .Values.plugin.trivy.networkPolicy.egress }}
   egress:
+  - to:
+    - podSelector:
+        matchLabels:
+          {{- include "policyreporter.selectorLabels" . | nindent 10 }}
+    ports:
+    - protocol: TCP
+      port: {{ .Values.service.port }}
+  {{- with .Values.plugin.trivy.networkPolicy.egress }}
     {{- toYaml . | nindent 2 }}
   {{- end }}
 {{- end }}

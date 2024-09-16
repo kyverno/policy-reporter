@@ -56,7 +56,7 @@ Check the [Documentation](https://kyverno.github.io/policy-reporter/guide/02-get
 | image.registry | string | `"ghcr.io"` |  |
 | image.repository | string | `"kyverno/policy-reporter"` |  |
 | image.pullPolicy | string | `"IfNotPresent"` |  |
-| image.tag | string | `"5cb6121"` |  |
+| image.tag | string | `"4d7a2e2"` |  |
 | imagePullSecrets | list | `[]` |  |
 | priorityClassName | string | `""` |  |
 | replicaCount | int | `1` |  |
@@ -117,8 +117,6 @@ Check the [Documentation](https://kyverno.github.io/policy-reporter/guide/02-get
 | sourceFilters[0].uncontrolledOnly | bool | `true` | Filter out PolicyReports of controlled Pods and Jobs, only works for PolicyReport with scope resource |
 | sourceFilters[0].disableClusterReports | bool | `false` | Filter out ClusterPolicyReports |
 | sourceFilters[0].kinds | object | `{"exclude":["ReplicaSet"]}` | Filter out PolicyReports based on the scope resource kind |
-| kyverno-plugin.enabled | bool | `false` |  |
-| trivy-plugin.enabled | bool | `false` |  |
 | global.labels | object | `{}` |  |
 | basicAuth.username | string | `""` |  |
 | basicAuth.password | string | `""` |  |
@@ -311,7 +309,6 @@ Check the [Documentation](https://kyverno.github.io/policy-reporter/guide/02-get
 | target.gcs.customFields | object | `{}` |  |
 | target.gcs.filter | object | `{}` |  |
 | target.gcs.channels | list | `[]` |  |
-| leaderElection.enabled | bool | `false` |  |
 | leaderElection.releaseOnCancel | bool | `true` |  |
 | leaderElection.leaseDuration | int | `15` |  |
 | leaderElection.renewDeadline | int | `10` |  |
@@ -373,7 +370,7 @@ Check the [Documentation](https://kyverno.github.io/policy-reporter/guide/02-get
 | ui.oauth.scopes | list | `[]` | OpenID Connect allowed Scopes |
 | ui.oauth.secretRef | string | `""` | Provide OpenID Connect configuration via Secret supported keys: `provider`, `clientId`, `clientSecret` |
 | ui.banner | string | `""` | optional banner text |
-| ui.displayMode | string | `""` | DisplayMode dark/light uses the OS configured prefered color scheme as default |
+| ui.displayMode | string | `""` | DisplayMode dark/light/colorblind/colorblinddark uses the OS configured prefered color scheme as default |
 | ui.customBoards | list | `[]` | Additional customizable dashboards |
 | ui.sources | list | `[]` | source specific configurations |
 | ui.clusters | list | `[]` | Connected Policy Reporter APIs |
@@ -454,7 +451,6 @@ Check the [Documentation](https://kyverno.github.io/policy-reporter/guide/02-get
 | plugin.kyverno.networkPolicy.egress | list | `[{"ports":[{"port":6443,"protocol":"TCP"}]}]` | A list of valid from selectors according to https://kubernetes.io/docs/concepts/services-networking/network-policies. Enables Kubernetes API Server by default |
 | plugin.kyverno.networkPolicy.ingress | list | `[]` | A list of valid from selectors according to https://kubernetes.io/docs/concepts/services-networking/network-policies. |
 | plugin.kyverno.resources | object | `{}` |  |
-| plugin.kyverno.leaderElection.enabled | bool | `false` | Enables LeaderElection. |
 | plugin.kyverno.leaderElection.lockName | string | `"kyverno-plugin"` | Lock Name |
 | plugin.kyverno.leaderElection.releaseOnCancel | bool | `true` | Released lock when the run context is cancelled. |
 | plugin.kyverno.leaderElection.leaseDuration | int | `15` | LeaseDuration is the duration that non-leader candidates will wait to force acquire leadership. |
