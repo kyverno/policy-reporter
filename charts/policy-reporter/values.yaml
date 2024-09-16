@@ -11,7 +11,7 @@ image:
   registry: ghcr.io
   repository: kyverno/policy-reporter
   pullPolicy: IfNotPresent
-  tag: 5cb6121
+  tag: 4d7a2e2
 
 imagePullSecrets: []
 
@@ -186,12 +186,6 @@ sourceFilters:
   # -- Filter out PolicyReports based on the scope resource kind
   kinds:
     exclude: [ReplicaSet]
-
-kyverno-plugin:
-  enabled: false
-
-trivy-plugin:
-  enabled: false
 
 global:
   # additional labels added on each resource
@@ -661,7 +655,6 @@ target:
 # if no targets are configured, leaderElection is disabled automatically
 # will be enabled when replicaCount > 1
 leaderElection:
-  enabled: false
   releaseOnCancel: true
   leaseDuration: 15
   renewDeadline: 10
@@ -819,7 +812,7 @@ ui:
   # -- optional banner text
   banner: ""
 
-  # -- DisplayMode dark/light
+  # -- DisplayMode dark/light/colorblind/colorblinddark
   # uses the OS configured prefered color scheme as default
   displayMode: ""
 
@@ -1190,8 +1183,6 @@ plugin:
     # if "blockReports" is disabled, leaderElection is also disabled automatically
     # will be enabled when replicaCount > 1
     leaderElection:
-      # -- Enables LeaderElection.
-      enabled: false
       # -- Lock Name
       lockName: kyverno-plugin
       # -- Released lock when the run context is cancelled.

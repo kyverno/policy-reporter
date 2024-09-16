@@ -9,7 +9,7 @@ import (
 
 func Test_Filters(t *testing.T) {
 	t.Run("Validate Default", func(t *testing.T) {
-		filter := email.NewFilter(validate.RuleSets{}, validate.RuleSets{})
+		filter := email.NewFilter(nil, validate.RuleSets{}, validate.RuleSets{})
 
 		if !filter.ValidateNamespace("test") {
 			t.Errorf("Unexpected Validation Result without configured rules")

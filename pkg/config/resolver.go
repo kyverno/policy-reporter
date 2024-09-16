@@ -462,9 +462,14 @@ func (r *Resolver) SummaryGenerator() (*summary.Generator, error) {
 		return nil, err
 	}
 
+	nsclient, err := r.NamespaceClient()
+	if err != nil {
+		return nil, err
+	}
+
 	return summary.NewGenerator(
 		client,
-		EmailReportFilterFromConfig(r.config.EmailReports.Summary.Filter),
+		EmailReportFilterFromConfig(nsclient, r.config.EmailReports.Summary.Filter),
 		!r.config.EmailReports.Summary.Filter.DisableClusterReports,
 	), nil
 }
@@ -483,9 +488,14 @@ func (r *Resolver) ViolationsGenerator() (*violations.Generator, error) {
 		return nil, err
 	}
 
+	nsclient, err := r.NamespaceClient()
+	if err != nil {
+		return nil, err
+	}
+
 	return violations.NewGenerator(
 		client,
-		EmailReportFilterFromConfig(r.config.EmailReports.Violations.Filter),
+		EmailReportFilterFromConfig(nsclient, r.config.EmailReports.Violations.Filter),
 		!r.config.EmailReports.Violations.Filter.DisableClusterReports,
 	), nil
 }
@@ -639,13 +649,18 @@ func NewResolver(config *Config, k8sConfig *rest.Config) Resolver {
 	}
 }
 
-func EmailReportFilterFromConfig(config EmailReportFilter) email.Filter {
-	return email.NewFilter(ToRuleSet(config.Namespaces), ToRuleSet(config.Sources))
+func EmailReportFilterFromConfig(client namespaces.Client, config EmailReportFilter) email.Filter {
+	return email.NewFilter(
+		client,
+		ToRuleSet(config.Namespaces),
+		ToRuleSet(config.Sources),
+	)
 }
 
 func ToRuleSet(filter ValueFilter) validate.RuleSets {
 	return validate.RuleSets{
-		Include: filter.Include,
-		Exclude: filter.Exclude,
+		Include:  filter.Include,
+		Exclude:  filter.Exclude,
+		Selector: helper.ConvertMap(filter.Selector),
 	}
 }

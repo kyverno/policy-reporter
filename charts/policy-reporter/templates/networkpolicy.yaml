@@ -22,21 +22,21 @@ spec:
         matchLabels: {{- include "ui.selectorLabels" . | nindent 10 }}
     ports:
     - protocol: TCP
-      port: 8080
+      port: {{ .Values.ui.service.port }}
+  {{- end }}
+  {{- if .Values.plugin.trivy.enabled }}
+  - from:
+    - podSelector:
+        matchLabels: {{- include "trivy-plugin.selectorLabels" . | nindent 10 }}
+    ports:
+    - protocol: TCP
+      port: {{ .Values.plugin.trivy.service.port }}
   {{- end }}
   {{- with .Values.networkPolicy.ingress }}
     {{- toYaml . | nindent 2 }}
   {{- end }}
-  egress:
-  {{- if .Values.ui.enabled }}
-  - to:
-    - podSelector:
-        matchLabels: {{- include "ui.selectorLabels" . | nindent 10 }}
-    ports:
-    - protocol: TCP
-      port: {{ .Values.ui.service.port }}
-  {{- end }}
   {{- with .Values.networkPolicy.egress }}
+  egress:
     {{- toYaml . | nindent 2 }}
   {{- end }}
 {{- end }}
