@@ -11,7 +11,7 @@ image:
   registry: ghcr.io
   repository: kyverno/policy-reporter
   pullPolicy: IfNotPresent
-  tag: 4d7a2e2
+  tag: cfc4406
 
 imagePullSecrets: []
 
@@ -845,6 +845,9 @@ ui:
   #    results:
   #    - warn
   #    - error
+
+  ## -- Default Cluster name
+  name: Default
 
   # -- Connected Policy Reporter APIs
   clusters: []
