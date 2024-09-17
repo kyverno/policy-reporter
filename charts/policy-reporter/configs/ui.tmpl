@@ -18,14 +18,14 @@ ui:
 
 {{- $default := false -}}
 {{- range .Values.ui.clusters }}
-    {{- if eq .name "Default" -}}
+    {{- if eq .name .Values.ui.name -}}
       {{- $default = true -}}
     {{- end -}}
 {{- end }}
 
 clusters:
 {{- if not $default }}
-  - name: Default
+  - name: {{ .Values.ui.name }}
     secretRef: {{ include "ui.fullname" . }}-default-cluster
 {{- end }}
 {{- with .Values.ui.clusters }}

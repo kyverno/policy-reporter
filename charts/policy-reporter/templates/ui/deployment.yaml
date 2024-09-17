@@ -80,8 +80,8 @@ spec:
           {{- with .Values.ui.envVars }}
           {{- . | toYaml | trim | nindent 10 }}
           {{- end }}
-      {{- if .Values.sidecarContainers }}
-        {{- range $name, $spec :=  .Values.sidecarContainers }}
+      {{- if .Values.ui.sidecarContainers }}
+        {{- range $name, $spec :=  .Values.ui.sidecarContainers }}
         - name: {{ $name }}
           {{- if kindIs "string" $spec }}
             {{- tpl $spec $ | nindent 10 }}
