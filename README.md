@@ -5,7 +5,7 @@
 ![Screenshot Policy Reporter UI v2](https://github.com/kyverno/policy-reporter/blob/3.x/docs/images/screen.png)
 
 
-## Preview Feature Docs
+## Documentation
 
 Documentation for upcoming features and changes for the new Policy Reporter UI v2 are located in [Docs](https://github.com/kyverno/policy-reporter/tree/3.x/docs)
 
@@ -13,6 +13,8 @@ Documentation for upcoming features and changes for the new Policy Reporter UI v
 * [OAUth2 / OpenIDConnect](https://github.com/kyverno/policy-reporter/blob/3.x/docs/UI_AUTH.md)
 * [UI CustomBoards](https://github.com/kyverno/policy-reporter/blob/3.x/docs/CUSTOM_BOARDS.md)
 * [Kyverno PolicyExceptions](https://github.com/kyverno/policy-reporter/blob/3.x/docs/EXCEPTIONS.md)
+
+The new documentation page for Policy Reporter v3 can be found here: [https://kyverno.github.io/policy-reporter-docs/](https://kyverno.github.io/policy-reporter-docs/)
 
 ## Getting Started
 
