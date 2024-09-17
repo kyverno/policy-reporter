@@ -56,7 +56,7 @@ Check the [Documentation](https://kyverno.github.io/policy-reporter/guide/02-get
 | image.registry | string | `"ghcr.io"` |  |
 | image.repository | string | `"kyverno/policy-reporter"` |  |
 | image.pullPolicy | string | `"IfNotPresent"` |  |
-| image.tag | string | `"4d7a2e2"` |  |
+| image.tag | string | `"cfc4406"` |  |
 | imagePullSecrets | list | `[]` |  |
 | priorityClassName | string | `""` |  |
 | replicaCount | int | `1` |  |
@@ -373,6 +373,7 @@ Check the [Documentation](https://kyverno.github.io/policy-reporter/guide/02-get
 | ui.displayMode | string | `""` | DisplayMode dark/light/colorblind/colorblinddark uses the OS configured prefered color scheme as default |
 | ui.customBoards | list | `[]` | Additional customizable dashboards |
 | ui.sources | list | `[]` | source specific configurations |
+| ui.name | string | `"Default"` |  |
 | ui.clusters | list | `[]` | Connected Policy Reporter APIs |
 | ui.imagePullSecrets | list | `[]` | Image pull secrets for image verification policies, this will define the `--imagePullSecrets` argument |
 | ui.serviceAccount.create | bool | `true` | Create ServiceAccount |
