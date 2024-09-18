@@ -93,7 +93,7 @@ func TestSecurityHub(t *testing.T) {
 			ProductName: "Policy Reporter",
 			CompanyName: "Kyverno",
 			Client:      h,
-			Cleanup:     false,
+			Synchronize: false,
 		})
 
 		c.CleanUp(context.TODO(), fixtures.DefaultPolicyReport)
@@ -114,7 +114,7 @@ func TestSecurityHub(t *testing.T) {
 			ProductName: "Policy Reporter",
 			CompanyName: "Kyverno",
 			Client:      h,
-			Cleanup:     true,
+			Synchronize: true,
 		})
 
 		c.CleanUp(context.TODO(), fixtures.DefaultPolicyReport)
@@ -141,7 +141,7 @@ func TestSecurityHub(t *testing.T) {
 			ProductName: "Policy Reporter",
 			CompanyName: "Kyverno",
 			Client:      h,
-			Cleanup:     true,
+			Synchronize: true,
 		})
 
 		c.CleanUp(context.TODO(), fixtures.DefaultPolicyReport)
@@ -168,7 +168,7 @@ func TestSecurityHub(t *testing.T) {
 			ProductName: "Policy Reporter",
 			CompanyName: "Kyverno",
 			Client:      h,
-			Cleanup:     true,
+			Synchronize: true,
 		})
 
 		c.CleanUp(context.TODO(), fixtures.DefaultPolicyReport)
