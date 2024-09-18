@@ -26,27 +26,27 @@ type Options struct {
 	Password     string
 }
 
-type payload struct {
-	Streams []stream `json:"streams"`
+type Payload struct {
+	Streams []Stream `json:"streams"`
 }
 
-type stream struct {
+type Stream struct {
 	Stream map[string]string `json:"stream"`
-	Values []value           `json:"values"`
+	Values []Value           `json:"values"`
 }
 
-type value = []string
+type Value = []string
 
-func newLokiStream(result v1alpha2.PolicyReportResult, customFields map[string]string) stream {
+func newLokiStream(result v1alpha2.PolicyReportResult, customFields map[string]string) Stream {
 	timestamp := time.Now()
 	if result.Timestamp.Seconds != 0 {
 		timestamp = time.Unix(result.Timestamp.Seconds, int64(result.Timestamp.Nanos))
 	}
 
 	labels := map[string]string{
-		"status": string(result.Result),
-		"policy": result.Policy,
-		"source": "policy-reporter",
+		"status":    string(result.Result),
+		"policy":    result.Policy,
+		"createdBy": "policy-reporter",
 	}
 
 	if result.Rule != "" {
@@ -59,7 +59,7 @@ func newLokiStream(result v1alpha2.PolicyReportResult, customFields map[string]s
 		labels["severity"] = string(result.Severity)
 	}
 	if result.Source != "" {
-		labels["producer"] = result.Source
+		labels["source"] = result.Source
 	}
 	if result.HasResource() {
 		res := result.GetResource()
@@ -84,8 +84,8 @@ func newLokiStream(result v1alpha2.PolicyReportResult, customFields map[string]s
 		labels[keyReplacer.Replace(label)] = labelReplacer.Replace(value)
 	}
 
-	return stream{
-		Values: []value{[]string{fmt.Sprintf("%v", timestamp.UnixNano()), "[" + strings.ToUpper(string(result.Severity)) + "] " + result.Message}},
+	return Stream{
+		Values: []Value{[]string{fmt.Sprintf("%v", timestamp.UnixNano()), "[" + strings.ToUpper(string(result.Severity)) + "] " + result.Message}},
 		Stream: labels,
 	}
 }
@@ -101,20 +101,20 @@ type client struct {
 }
 
 func (l *client) Send(result v1alpha2.PolicyReportResult) {
-	l.send(payload{
-		Streams: []stream{
+	l.send(Payload{
+		Streams: []Stream{
 			newLokiStream(result, l.customFields),
 		},
 	})
 }
 
 func (l *client) BatchSend(_ v1alpha2.ReportInterface, results []v1alpha2.PolicyReportResult) {
-	l.send(payload{Streams: helper.Map(results, func(result v1alpha2.PolicyReportResult) stream {
+	l.send(Payload{Streams: helper.Map(results, func(result v1alpha2.PolicyReportResult) Stream {
 		return newLokiStream(result, l.customFields)
 	})})
 }
 
-func (l *client) send(payload payload) {
+func (l *client) send(payload Payload) {
 	req, err := http.CreateJSONRequest("POST", l.host, payload)
 	if err != nil {
 		return
