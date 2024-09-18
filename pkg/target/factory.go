@@ -131,7 +131,7 @@ type SecurityHubOptions struct {
 	ProductName    string `mapstructure:"productName"`
 	CompanyName    string `mapstructure:"companyName"`
 	DelayInSeconds int    `mapstructure:"delayInSeconds"`
-	Cleanup        bool   `mapstructure:"cleanup"`
+	Synchronize    bool   `mapstructure:"synchronize"`
 }
 
 type GCSOptions struct {
