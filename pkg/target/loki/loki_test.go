@@ -56,7 +56,7 @@ func Test_LokiTarget(t *testing.T) {
 			assert.Equal(t, fixtures.CompleteTargetSendResult.Rule, stream.Stream["rule"])
 			assert.Equal(t, fixtures.CompleteTargetSendResult.Policy, stream.Stream["policy"])
 			assert.Equal(t, fixtures.CompleteTargetSendResult.Category, stream.Stream["category"])
-			assert.Equal(t, string(fixtures.CompleteTargetSendResult.Result), stream.Stream["result"])
+			assert.Equal(t, string(fixtures.CompleteTargetSendResult.Result), stream.Stream["status"])
 			assert.Equal(t, string(fixtures.CompleteTargetSendResult.Severity), stream.Stream["severity"])
 
 			res := fixtures.CompleteTargetSendResult.GetResource()
@@ -103,7 +103,7 @@ func Test_LokiTarget(t *testing.T) {
 			assert.Equal(t, fixtures.MinimalTargetSendResult.Rule, stream.Stream["rule"])
 			assert.Equal(t, fixtures.MinimalTargetSendResult.Policy, stream.Stream["policy"])
 			assert.Equal(t, fixtures.MinimalTargetSendResult.Category, stream.Stream["category"])
-			assert.Equal(t, string(fixtures.MinimalTargetSendResult.Result), stream.Stream["result"])
+			assert.Equal(t, string(fixtures.MinimalTargetSendResult.Result), stream.Stream["status"])
 			assert.Equal(t, string(fixtures.MinimalTargetSendResult.Severity), stream.Stream["severity"])
 
 			assert.Equal(t, "policy-reporter", stream.Stream["createdBy"])
