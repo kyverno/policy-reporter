@@ -532,7 +532,7 @@ func Test_GetValuesFromSecret(t *testing.T) {
 
 	t.Run("Get Loki values from Secret", func(t *testing.T) {
 		fv := reflect.ValueOf(clients.Client("Loki")).Elem().FieldByName("host")
-		if v := fv.String(); v != "http://localhost:9200/api/prom/push" {
+		if v := fv.String(); v != "http://localhost:9200/loki/api/v1/push" {
 			t.Errorf("Expected host from secret, got %s", v)
 		}
 	})
@@ -901,7 +901,7 @@ func Test_GetValuesFromMountedSecret(t *testing.T) {
 
 	t.Run("Get Loki values from Secret", func(t *testing.T) {
 		fv := reflect.ValueOf(clients.Client("Loki")).Elem().FieldByName("host")
-		if v := fv.String(); v != "http://localhost:9200/api/prom/push" {
+		if v := fv.String(); v != "http://localhost:9200/loki/api/v1/push" {
 			t.Errorf("Expected host from secret, got %s", v)
 		}
 	})
