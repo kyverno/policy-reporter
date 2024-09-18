@@ -238,7 +238,7 @@ config:
   productName: {{ .productName }}
   companyName: {{ .companyName }}
   delayInSeconds: {{ .delayInSeconds }}
-  cleanup: {{ .cleanup }}
+  synchronize: {{ .synchronize }}
 {{ include "target" . }}
 {{- end }}
 

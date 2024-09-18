@@ -37,7 +37,7 @@ type Options struct {
 	ProductName  string
 	CompanyName  string
 	Delay        time.Duration
-	Cleanup      bool
+	Synchronize  bool
 }
 
 type client struct {
@@ -49,9 +49,8 @@ type client struct {
 	productName  string
 	companyName  string
 	delay        time.Duration
-	cleanup      bool
+	synchronize  bool
 	arn          *string
-	synced       bool
 }
 
 func (c *client) mapFindings(polr v1alpha2.ReportInterface, results []v1alpha2.PolicyReportResult) []types.AwsSecurityFinding {
@@ -185,8 +184,8 @@ func (c *client) BatchSend(polr v1alpha2.ReportInterface, results []v1alpha2.Pol
 	zap.L().Info(c.Name()+": PUSH OK", zap.Int32("imported", *res.SuccessCount), zap.Int32("failed", *res.FailedCount), zap.String("report", polr.GetKey()))
 }
 
-func (c *client) Sync(ctx context.Context) error {
-	if !c.cleanup {
+func (c *client) ResetFindings(ctx context.Context) error {
+	if !c.synchronize {
 		return nil
 	}
 	defer zap.L().Info(c.Name() + ": START SYNC")
@@ -221,7 +220,7 @@ func (c *client) Sync(ctx context.Context) error {
 }
 
 func (c *client) CleanUp(ctx context.Context, report v1alpha2.ReportInterface) {
-	if !c.cleanup {
+	if !c.synchronize {
 		return
 	}
 
@@ -481,7 +480,7 @@ func (c *client) BaseFilter(report v1alpha2.ReportInterface) *types.AwsSecurityF
 }
 
 func (c *client) Type() target.ClientType {
-	if !c.cleanup {
+	if !c.synchronize {
 		return target.BatchSend
 	}
 
@@ -503,9 +502,8 @@ func NewClient(options Options) *client {
 		options.ProductName,
 		options.CompanyName,
 		options.Delay,
-		options.Cleanup,
+		options.Synchronize,
 		toPointer("arn:aws:securityhub:" + options.Region + ":" + options.AccountID + ":product/" + options.AccountID + "/default"),
-		false,
 	}
 }
 

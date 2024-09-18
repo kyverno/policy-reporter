@@ -2,6 +2,7 @@ package loki
 
 import (
 	"context"
+	"fmt"
 	"strings"
 	"time"
 
@@ -10,6 +11,9 @@ import (
 	"github.com/kyverno/policy-reporter/pkg/target"
 	"github.com/kyverno/policy-reporter/pkg/target/http"
 )
+
+var keyReplacer = strings.NewReplacer(".", "_", "]", "", "[", "")
+var labelReplacer = strings.NewReplacer("/", "")
 
 // Options to configure the Loki target
 type Options struct {
@@ -27,14 +31,11 @@ type payload struct {
 }
 
 type stream struct {
-	Labels  string  `json:"labels"`
-	Entries []entry `json:"entries"`
+	Stream map[string]string `json:"stream"`
+	Values []value           `json:"values"`
 }
 
-type entry struct {
-	Ts   string `json:"ts"`
-	Line string `json:"line"`
-}
+type value = []string
 
 func newLokiStream(result v1alpha2.PolicyReportResult, customFields map[string]string) stream {
 	timestamp := time.Now()
@@ -42,53 +43,51 @@ func newLokiStream(result v1alpha2.PolicyReportResult, customFields map[string]s
 		timestamp = time.Unix(result.Timestamp.Seconds, int64(result.Timestamp.Nanos))
 	}
 
-	le := entry{Ts: timestamp.Format(time.RFC3339), Line: "[" + strings.ToUpper(string(result.Severity)) + "] " + result.Message}
-	ls := stream{Entries: []entry{le}}
-
-	labels := []string{
-		"status=\"" + string(result.Result) + "\"",
-		"policy=\"" + result.Policy + "\"",
-		"source=\"policy-reporter\"",
+	labels := map[string]string{
+		"status": string(result.Result),
+		"policy": result.Policy,
+		"source": "policy-reporter",
 	}
 
 	if result.Rule != "" {
-		labels = append(labels, "rule=\""+result.Rule+"\"")
+		labels["rule"] = result.Rule
 	}
 	if result.Category != "" {
-		labels = append(labels, "category=\""+result.Category+"\"")
+		labels["category"] = result.Category
 	}
 	if result.Severity != "" {
-		labels = append(labels, "severity=\""+string(result.Severity)+"\"")
+		labels["severity"] = string(result.Severity)
 	}
 	if result.Source != "" {
-		labels = append(labels, "producer=\""+result.Source+"\"")
+		labels["producer"] = result.Source
 	}
 	if result.HasResource() {
 		res := result.GetResource()
 		if res.APIVersion != "" {
-			labels = append(labels, "apiVersion=\""+res.APIVersion+"\"")
+			labels["apiVersion"] = res.APIVersion
+			labels["kind"] = res.Kind
+			labels["name"] = res.Name
 		}
-		labels = append(labels, "kind=\""+res.Kind+"\"")
-		labels = append(labels, "name=\""+res.Name+"\"")
 		if res.UID != "" {
-			labels = append(labels, "uid=\""+string(res.UID)+"\"")
+			labels["uid"] = string(res.UID)
 		}
 		if res.Namespace != "" {
-			labels = append(labels, "namespace=\""+res.Namespace+"\"")
+			labels["namespace"] = res.Namespace
 		}
 	}
 
 	for property, value := range result.Properties {
-		labels = append(labels, strings.ReplaceAll(property, ".", "_")+"=\""+strings.ReplaceAll(value, "\"", "")+"\"")
+		labels[keyReplacer.Replace(property)] = labelReplacer.Replace(value)
 	}
 
 	for label, value := range customFields {
-		labels = append(labels, strings.ReplaceAll(label, ".", "_")+"=\""+strings.ReplaceAll(value, "\"", "")+"\"")
+		labels[keyReplacer.Replace(label)] = labelReplacer.Replace(value)
 	}
 
-	ls.Labels = "{" + strings.Join(labels, ",") + "}"
-
-	return ls
+	return stream{
+		Values: []value{[]string{fmt.Sprintf("%v", timestamp.UnixNano()), "[" + strings.ToUpper(string(result.Severity)) + "] " + result.Message}},
+		Stream: labels,
+	}
 }
 
 type client struct {

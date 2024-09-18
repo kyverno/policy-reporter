@@ -290,7 +290,7 @@ target:
     secretRef: ""
     # Mounted secret path by Secrets Controller, secret should be in json format
     mountedSecret: ""
-    # loki api path, defaults to "/api/prom/push" (deprecated)
+    # loki api path, defaults to "/loki/api/v1/push"
     path: ""
     # minimum severity "" < info < low < medium < high < critical
     minimumSeverity: ""
@@ -619,7 +619,7 @@ target:
     # Skip already existing PolicyReportResults on startup
     skipExistingOnStartup: false
     # Enable cleanup listener for SecurityHub
-    cleanup: true
+    synchronize: true
     # Delay between AWS GetFindings API calls, to avoid hitting the API RequestLimit
     delayInSeconds: 2
     # Added as additional properties to each securityHub event

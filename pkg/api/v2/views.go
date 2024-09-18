@@ -678,7 +678,7 @@ func MapSecurityHubToTarget(ta *target.Config[target.SecurityHubOptions]) *Targe
 	t.Type = "SecurityHub"
 	t.Host = ta.Config.Endpoint
 	t.Properties["region"] = ta.Config.Region
-	t.Properties["cleanup"] = ta.Config.Cleanup
+	t.Properties["cleanup"] = ta.Config.Synchronize
 	t.Auth = true
 
 	return t

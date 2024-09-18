@@ -286,8 +286,8 @@ func TestV2Views(t *testing.T) {
 			Name:            "Target",
 			MinimumSeverity: "medium",
 			Config: &target.SecurityHubOptions{
-				AccountID: "policy-reporter",
-				Cleanup:   true,
+				AccountID:   "policy-reporter",
+				Synchronize: true,
 				AWSConfig: target.AWSConfig{
 					Region:   "eu-central-1",
 					Endpoint: "https://securityhub.aws.com",

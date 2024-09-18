@@ -162,7 +162,7 @@ func (f *TargetFactory) CreateLokiTarget(config, parent *target.Config[target.Lo
 		return nil
 	}
 
-	setFallback(&config.Config.Path, "/api/prom/push")
+	setFallback(&config.Config.Path, "/loki/api/v1/push")
 	setFallback(&config.Config.Host, parent.Config.Host)
 	setFallback(&config.Config.Certificate, parent.Config.Certificate)
 	setFallback(&config.Config.Path, parent.Config.Path)
@@ -653,7 +653,7 @@ func (f *TargetFactory) CreateSecurityHubTarget(config, parent *target.Config[ta
 		config.Config.Endpoint,
 	)
 
-	zap.L().Info(config.Name+" configured", zap.Bool("cleanup", config.Config.Cleanup))
+	zap.L().Info(config.Name+" configured", zap.Bool("synchronize", config.Config.Synchronize))
 
 	hub := securityhub.NewClient(securityhub.Options{
 		ClientOptions: target.ClientOptions{
@@ -669,10 +669,10 @@ func (f *TargetFactory) CreateSecurityHubTarget(config, parent *target.Config[ta
 		CompanyName:  config.Config.CompanyName,
 		Region:       config.Config.Region,
 		Delay:        time.Duration(config.Config.DelayInSeconds) * time.Second,
-		Cleanup:      config.Config.Cleanup,
+		Synchronize:  config.Config.Synchronize,
 	})
 
-	hub.Sync(context.Background())
+	hub.ResetFindings(context.Background())
 
 	return &target.Target{
 		ID:           uuid.NewString(),
