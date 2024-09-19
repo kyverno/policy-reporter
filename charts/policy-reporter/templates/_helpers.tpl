@@ -191,7 +191,7 @@ config:
 
 {{- define "target.telegram" -}}
 config:
-  chatID: {{ .chatID | quote }}
+  chatId: {{ .chatId | quote }}
   token: {{ .token | quote }}
   webhook: {{ .webhook | quote }}
   certificate: {{ .certificate | quote }}
@@ -205,7 +205,7 @@ config:
 
 {{- define "target.s3" -}}
 config:
-  accessKeyID: {{ .accessKeyID }}
+  accessKeyId: {{ .accessKeyId }}
   secretAccessKey:  {{ .secretAccessKey }}
   region: {{ .region }}
   endpoint: {{ .endpoint }}
@@ -220,7 +220,7 @@ config:
 
 {{- define "target.kinesis" -}}
 config:
-  accessKeyID: {{ .accessKeyID }}
+  accessKeyId: {{ .accessKeyId }}
   secretAccessKey:  {{ .secretAccessKey }}
   region: {{ .region }}
   endpoint: {{ .endpoint }}
@@ -230,11 +230,11 @@ config:
 
 {{- define "target.securityhub" -}}
 config:
-  accessKeyID: {{ .accessKeyID }}
+  accessKeyId: {{ .accessKeyId }}
   secretAccessKey:  {{ .secretAccessKey }}
   region: {{ .region }}
   endpoint: {{ .endpoint }}
-  accountID: {{ .accountID }}
+  accountId: {{ .accountId }}
   productName: {{ .productName }}
   companyName: {{ .companyName }}
   delayInSeconds: {{ .delayInSeconds }}

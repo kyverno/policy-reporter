@@ -44,7 +44,7 @@ func (config *Config[T]) Secret() string {
 }
 
 type AWSConfig struct {
-	AccessKeyID     string `mapstructure:"accessKeyID"`
+	AccessKeyID     string `mapstructure:"accessKeyId"`
 	SecretAccessKey string `mapstructure:"secretAccessKey"`
 	Region          string `mapstructure:"region"`
 	Endpoint        string `mapstructure:"endpoint"`
@@ -85,7 +85,7 @@ type HostOptions struct {
 type TelegramOptions struct {
 	WebhookOptions `mapstructure:",squash"`
 	Token          string `mapstructure:"token"`
-	ChatID         string `mapstructure:"chatID"`
+	ChatID         string `mapstructure:"chatId"`
 }
 
 type SlackOptions struct {
@@ -127,7 +127,7 @@ type KinesisOptions struct {
 
 type SecurityHubOptions struct {
 	AWSConfig      `mapstructure:",squash"`
-	AccountID      string `mapstructure:"accountID"`
+	AccountID      string `mapstructure:"accountId"`
 	ProductName    string `mapstructure:"productName"`
 	CompanyName    string `mapstructure:"companyName"`
 	DelayInSeconds int    `mapstructure:"delayInSeconds"`

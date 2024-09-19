@@ -227,7 +227,7 @@ Check the [Documentation](https://kyverno.github.io/policy-reporter/guide/02-get
 | target.webhook.filter | object | `{}` |  |
 | target.webhook.channels | list | `[]` |  |
 | target.telegram.token | string | `""` |  |
-| target.telegram.chatID | string | `""` |  |
+| target.telegram.chatId | string | `""` |  |
 | target.telegram.host | string | `""` |  |
 | target.telegram.certificate | string | `""` |  |
 | target.telegram.skipTLS | bool | `false` |  |
@@ -252,7 +252,7 @@ Check the [Documentation](https://kyverno.github.io/policy-reporter/guide/02-get
 | target.googleChat.customFields | object | `{}` |  |
 | target.googleChat.filter | object | `{}` |  |
 | target.googleChat.channels | list | `[]` |  |
-| target.s3.accessKeyID | string | `""` |  |
+| target.s3.accessKeyId | string | `""` |  |
 | target.s3.secretAccessKey | string | `""` |  |
 | target.s3.secretRef | string | `""` |  |
 | target.s3.mountedSecret | string | `""` |  |
@@ -270,7 +270,7 @@ Check the [Documentation](https://kyverno.github.io/policy-reporter/guide/02-get
 | target.s3.customFields | object | `{}` |  |
 | target.s3.filter | object | `{}` |  |
 | target.s3.channels | list | `[]` |  |
-| target.kinesis.accessKeyID | string | `""` |  |
+| target.kinesis.accessKeyId | string | `""` |  |
 | target.kinesis.secretAccessKey | string | `""` |  |
 | target.kinesis.secretRef | string | `""` |  |
 | target.kinesis.mountedSecret | string | `""` |  |
@@ -283,7 +283,7 @@ Check the [Documentation](https://kyverno.github.io/policy-reporter/guide/02-get
 | target.kinesis.customFields | object | `{}` |  |
 | target.kinesis.filter | object | `{}` |  |
 | target.kinesis.channels | list | `[]` |  |
-| target.securityHub.accessKeyID | string | `""` |  |
+| target.securityHub.accessKeyId | string | `""` |  |
 | target.securityHub.secretAccessKey | string | `""` |  |
 | target.securityHub.secretRef | string | `""` |  |
 | target.securityHub.mountedSecret | string | `""` |  |

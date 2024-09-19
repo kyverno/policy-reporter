@@ -18,9 +18,9 @@ type Values struct {
 	Username        string `json:"username,omitempty"`
 	Password        string `json:"password,omitempty"`
 	APIKey          string `json:"apiKey,omitempty"`
-	AccessKeyID     string `json:"accessKeyID,omitempty"`
+	AccessKeyID     string `json:"accessKeyId,omitempty"`
 	SecretAccessKey string `json:"secretAccessKey,omitempty"`
-	AccountID       string `json:"accountID,omitempty"`
+	AccountID       string `json:"accountId,omitempty"`
 	KmsKeyID        string `json:"kmsKeyId,omitempty"`
 	Token           string `json:"token,omitempty"`
 	Credentials     string `json:"credentials,omitempty"`
@@ -79,7 +79,7 @@ func (c *k8sClient) Get(ctx context.Context, name string) (Values, error) {
 		values.DSN = string(dsn)
 	}
 
-	if accessKeyID, ok := secret.Data["accessKeyID"]; ok {
+	if accessKeyID, ok := secret.Data["accessKeyId"]; ok {
 		values.AccessKeyID = string(accessKeyID)
 	}
 
@@ -91,7 +91,7 @@ func (c *k8sClient) Get(ctx context.Context, name string) (Values, error) {
 		values.KmsKeyID = string(kmsKeyID)
 	}
 
-	if accountID, ok := secret.Data["accountID"]; ok {
+	if accountID, ok := secret.Data["accountId"]; ok {
 		values.AccountID = string(accountID)
 	}
 

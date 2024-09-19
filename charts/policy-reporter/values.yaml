@@ -169,7 +169,7 @@ reportFilter:
 sourceConfig: []
 # - selector:
 #     source: kyverno
-#   customID:
+#   customId:
 #     enabled: true
 #     fields: ["resource", "policy", "rule", "category", "result", "message"]
 
@@ -475,7 +475,7 @@ target:
     # telegram bot token
     token: ""
     # telegram chat id
-    chatID: ""
+    chatId: ""
     # optional telegram proxy host
     host: ""
     # path to your custom certificate
@@ -531,10 +531,10 @@ target:
 
   s3:
     # S3 access key
-    accessKeyID: ""
+    accessKeyId: ""
     # S3 secret access key
     secretAccessKey: ""
-    # receive the accessKeyID and/or secretAccessKey from an existing secret instead
+    # receive the accessKeyId and/or secretAccessKey from an existing secret instead
     secretRef: ""
     # Mounted secret path by Secrets Controller, secret should be in json format
     mountedSecret: ""
@@ -569,10 +569,10 @@ target:
 
   kinesis:
     # AWS access key
-    accessKeyID: ""
+    accessKeyId: ""
     # AWS secret access key
     secretAccessKey: ""
-    # receive the accessKeyID and/or secretAccessKey from an existing secret instead
+    # receive the accessKeyId and/or secretAccessKey from an existing secret instead
     secretRef: ""
     # Mounted secret path by Secrets Controller, secret should be in json format
     mountedSecret: ""
@@ -597,10 +597,10 @@ target:
 
   securityHub:
     # AWS access key
-    accessKeyID: ""
+    accessKeyId: ""
     # AWS secret access key
     secretAccessKey: ""
-    # receive the accessKeyID and/or secretAccessKey from an existing secret instead
+    # receive the accessKeyId and/or secretAccessKey from an existing secret instead
     secretRef: ""
     # Mounted secret path by Secrets Controller, secret should be in json format
     mountedSecret: ""
@@ -608,8 +608,8 @@ target:
     region: ""
     # AWS SecurityHub endpoint (optional)
     endpoint: ""
-    # AWS accountID
-    accountID: ""
+    # AWS accountId
+    accountId: ""
     # Used product name, defaults to "Polilcy Reporter"
     productName: ""
     # minimum severity "" < info < low < medium < high < critical

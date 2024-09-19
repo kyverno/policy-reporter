@@ -645,7 +645,7 @@ func MapTelegramToTarget(ta *target.Config[target.TelegramOptions]) *Target {
 	t.Host = ta.Config.Webhook
 	t.SkipTLS = ta.Config.SkipTLS
 	t.UseTLS = ta.Config.Certificate != ""
-	t.Properties["chatID"] = ta.Config.ChatID
+	t.Properties["chatId"] = ta.Config.ChatID
 
 	return t
 }
