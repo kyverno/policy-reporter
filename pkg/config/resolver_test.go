@@ -185,7 +185,7 @@ var targets = target.Targets{
 				Endpoint:        "https://storage.yandexcloud.net",
 				Region:          "ru-central1",
 			},
-			AccountID: "AccountID",
+			AccountID: "AccountId",
 		},
 		SkipExisting:    true,
 		MinimumSeverity: "debug",

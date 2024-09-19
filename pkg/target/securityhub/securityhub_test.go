@@ -50,7 +50,7 @@ func (c *client) BatchUpdateFindings(ctx context.Context, params *hub.BatchUpdat
 func TestSecurityHub(t *testing.T) {
 	t.Run("send result", func(t *testing.T) {
 		c := securityhub.NewClient(securityhub.Options{
-			AccountID:   "accountID",
+			AccountID:   "accountId",
 			Region:      "eu-central-1",
 			ProductName: "Policy Reporter",
 			CompanyName: "Kyverno",
@@ -63,13 +63,13 @@ func TestSecurityHub(t *testing.T) {
 
 					finding := findings[0]
 
-					if *finding.AwsAccountId != "accountID" {
-						t.Errorf("unexpected accountID: %s", *finding.AwsAccountId)
+					if *finding.AwsAccountId != "accountId" {
+						t.Errorf("unexpected accountId: %s", *finding.AwsAccountId)
 					}
 					if *finding.Id != fixtures.CompleteTargetSendResult.GetID() {
 						t.Errorf("unexpected id: %s", *finding.Id)
 					}
-					if *finding.ProductArn != "arn:aws:securityhub:eu-central-1:accountID:product/accountID/default" {
+					if *finding.ProductArn != "arn:aws:securityhub:eu-central-1:accountId:product/accountId/default" {
 						t.Errorf("unexpected product arn: %s", *finding.ProductArn)
 					}
 					if *finding.ProductName != "Policy Reporter" {
@@ -88,7 +88,7 @@ func TestSecurityHub(t *testing.T) {
 		h := &client{}
 
 		c := securityhub.NewClient(securityhub.Options{
-			AccountID:   "accountID",
+			AccountID:   "accountId",
 			Region:      "eu-central-1",
 			ProductName: "Policy Reporter",
 			CompanyName: "Kyverno",
@@ -109,7 +109,7 @@ func TestSecurityHub(t *testing.T) {
 		h := &client{}
 
 		c := securityhub.NewClient(securityhub.Options{
-			AccountID:   "accountID",
+			AccountID:   "accountId",
 			Region:      "eu-central-1",
 			ProductName: "Policy Reporter",
 			CompanyName: "Kyverno",
@@ -136,7 +136,7 @@ func TestSecurityHub(t *testing.T) {
 		}
 
 		c := securityhub.NewClient(securityhub.Options{
-			AccountID:   "accountID",
+			AccountID:   "accountId",
 			Region:      "eu-central-1",
 			ProductName: "Policy Reporter",
 			CompanyName: "Kyverno",
@@ -163,7 +163,7 @@ func TestSecurityHub(t *testing.T) {
 		}
 
 		c := securityhub.NewClient(securityhub.Options{
-			AccountID:   "accountID",
+			AccountID:   "accountId",
 			Region:      "eu-central-1",
 			ProductName: "Policy Reporter",
 			CompanyName: "Kyverno",

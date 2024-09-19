@@ -36,9 +36,9 @@ func newFakeClient() v1.SecretInterface {
 			"channel":         []byte("general"),
 			"apiKey":          []byte("apiKey"),
 			"webhook":         []byte("http://localhost:9200/webhook"),
-			"accountId":       []byte("accountID"),
+			"accountId":       []byte("accountId"),
 			"typelessApi":     []byte("true"),
-			"accessKeyID":     []byte("accessKeyID"),
+			"accessKeyId":     []byte("accessKeyId"),
 			"secretAccessKey": []byte("secretAccessKey"),
 			"kmsKeyId":        []byte("kmsKeyId"),
 			"token":           []byte("token"),
@@ -57,7 +57,7 @@ func mountSecret() {
 		Username:        "username",
 		Password:        "password",
 		APIKey:          "apiKey",
-		AccountID:       "accountID",
+		AccountID:       "accountId",
 		AccessKeyID:     "accessKeyId",
 		SecretAccessKey: "secretAccessKey",
 		KmsKeyID:        "kmsKeyId",
@@ -426,13 +426,13 @@ func Test_SecurityHubValidation(t *testing.T) {
 		},
 	}
 
-	t.Run("SecurityHub.AccountID", func(t *testing.T) {
+	t.Run("SecurityHub.AccountId", func(t *testing.T) {
 		if len(factory.CreateClients(&targets).Clients()) != 0 {
-			t.Error("Expected Client to be nil if no accountID is configured")
+			t.Error("Expected Client to be nil if no accountId is configured")
 		}
 	})
 
-	targets.SecurityHub.Config.AccountID = "accountID"
+	targets.SecurityHub.Config.AccountID = "accountId"
 	t.Run("SecurityHub.AccessKey", func(t *testing.T) {
 		if len(factory.CreateClients(&targets).Clients()) != 0 {
 			t.Error("Expected Client to be nil if no accessKey is configured")
@@ -514,7 +514,7 @@ func Test_GetValuesFromSecret(t *testing.T) {
 			SecretRef: secretName,
 			Config: &target.SecurityHubOptions{
 				AWSConfig: target.AWSConfig{Endpoint: "endoint", Region: "region"},
-				AccountID: "accountID",
+				AccountID: "accountId",
 			},
 		},
 		GCS: &target.Config[target.GCSOptions]{
@@ -730,7 +730,7 @@ func Test_CustomFields(t *testing.T) {
 					Endpoint:        "https://storage.yandexcloud.net",
 					Region:          "ru-central1",
 				},
-				AccountID: "AccountID",
+				AccountID: "AccountId",
 			},
 			CustomFields: map[string]string{"field": "value"},
 		},
@@ -883,7 +883,7 @@ func Test_GetValuesFromMountedSecret(t *testing.T) {
 			MountedSecret: mountedSecret,
 			Config: &target.SecurityHubOptions{
 				AWSConfig: target.AWSConfig{Endpoint: "endoint", Region: "region"},
-				AccountID: "accountID",
+				AccountID: "accountId",
 			},
 		},
 		GCS: &target.Config[target.GCSOptions]{

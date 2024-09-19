@@ -172,7 +172,7 @@ type CustomID struct {
 
 type SourceConfig struct {
 	Selector SourceSelector `mapstructure:"selector"`
-	CustomID `mapstructure:"customID"`
+	CustomID `mapstructure:"customId"`
 }
 
 // Config of the PolicyReporter
