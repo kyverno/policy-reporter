@@ -305,7 +305,7 @@
 * Policy Reporter
     * New `certificate` config for `loki`, `elasticsearch`, `teams`, `webhook` and `ui`, to set the path to your custom certificate for the related client.
     * New `skipTLS` config for `loki`, `elasticsearch`, `teams`, `webhook` and `ui`, to skip tls if needed for the given target.
-    * New `secretRef` for targets to reference a secret with the related `username`, `password`, `webhook`, `host`, `accessKeyID`, `secretAccessKey` information of the given target, instead of configure your credentials directly.
+    * New `secretRef` for targets to reference a secret with the related `username`, `password`, `webhook`, `host`, `accessKeyId`, `secretAccessKey` information of the given target, instead of configure your credentials directly.
 * Policy Reporter UI
     * New value `refreshInterval` to configure the default refresh interval for API polling. Set `0` to disable polling.
 * Policy Reporter Kyverno Plugin

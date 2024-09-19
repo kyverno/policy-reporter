@@ -225,7 +225,7 @@ func TestV2Views(t *testing.T) {
 
 		assert.Equal(t, "Telegram", target.Type)
 		assert.Equal(t, "http://telegram.com", target.Host)
-		assert.Equal(t, "1234567", target.Properties["chatID"])
+		assert.Equal(t, "1234567", target.Properties["chatId"])
 		assert.True(t, target.SkipTLS)
 		assert.True(t, target.UseTLS)
 		assert.False(t, target.Auth)
@@ -302,7 +302,7 @@ func TestV2Views(t *testing.T) {
 		assert.Equal(t, "SecurityHub", target.Type)
 		assert.Equal(t, "https://securityhub.aws.com", target.Host)
 		assert.Equal(t, "eu-central-1", target.Properties["region"])
-		assert.Equal(t, true, target.Properties["cleanup"])
+		assert.Equal(t, true, target.Properties["synchronize"])
 		assert.True(t, target.Auth)
 	})
 
