@@ -123,7 +123,6 @@ maxUnavailable: {{ .Values.podDisruptionBudget.maxUnavailable }}
 
 {{- define "target" -}}
 name: {{ .name | quote }}
-path: {{ .path | quote }}
 secretRef: {{ .secretRef | quote }}
 mountedSecret: {{ .mountedSecret | quote }}
 minimumSeverity: {{ .minimumSeverity | quote }}

@@ -128,7 +128,7 @@ func NewSourceFilter(pods PodClient, jobs JobClient, validations []SourceValidat
 	return &SourceFilter{pods: pods, jobs: jobs, validations: validations}
 }
 
-var controller = []string{"ReplicaSet", "DaemonSet", "CronJob", "Job"}
+var controller = []string{"ReplicaSet", "DaemonSet", "CronJob", "Job", "Job", "StatefulSet"}
 
 func Uncontrolled(owner []metav1.OwnerReference) bool {
 	if len(owner) == 0 {
