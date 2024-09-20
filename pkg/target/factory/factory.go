@@ -672,8 +672,6 @@ func (f *TargetFactory) CreateSecurityHubTarget(config, parent *target.Config[ta
 		Synchronize:  config.Config.Synchronize,
 	})
 
-	hub.ResetFindings(context.Background())
-
 	return &target.Target{
 		ID:           uuid.NewString(),
 		Type:         target.SecurityHub,

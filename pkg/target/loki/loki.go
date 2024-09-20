@@ -1,7 +1,6 @@
 package loki
 
 import (
-	"context"
 	"fmt"
 	"strings"
 	"time"
@@ -136,8 +135,6 @@ func (l *client) send(payload Payload) {
 func (l *client) Type() target.ClientType {
 	return target.BatchSend
 }
-
-func (l *client) CleanUp(_ context.Context, _ v1alpha2.ReportInterface) {}
 
 // NewClient creates a new loki.client to send Results to Loki
 func NewClient(options Options) target.Client {

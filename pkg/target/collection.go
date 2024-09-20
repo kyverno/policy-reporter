@@ -1,9 +1,11 @@
 package target
 
 import (
+	"context"
 	"sync"
 
 	"github.com/kyverno/policy-reporter/pkg/helper"
+	"go.uber.org/zap"
 )
 
 type TargetType = string
@@ -54,6 +56,16 @@ func (c *Collection) Update(t *Target) {
 	c.targets[t.ID] = t
 	c.clients = make([]Client, 0)
 	c.mx.Unlock()
+}
+
+func (c *Collection) Reset(ctx context.Context) {
+	clients := c.SyncClients()
+
+	for _, c := range clients {
+		if err := c.Reset(ctx); err != nil {
+			zap.L().Error("failed to reset target", zap.String("type", c.Type()), zap.String("name", c.Name()))
+		}
+	}
 }
 
 func (c *Collection) Targets() []*Target {
