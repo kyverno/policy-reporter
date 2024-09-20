@@ -56,7 +56,7 @@ Check the [Documentation](https://kyverno.github.io/policy-reporter/guide/02-get
 | image.registry | string | `"ghcr.io"` |  |
 | image.repository | string | `"kyverno/policy-reporter"` |  |
 | image.pullPolicy | string | `"IfNotPresent"` |  |
-| image.tag | string | `"e712c9b"` |  |
+| image.tag | string | `"ab7c0b6"` |  |
 | imagePullSecrets | list | `[]` |  |
 | priorityClassName | string | `""` |  |
 | replicaCount | int | `1` |  |
@@ -289,7 +289,7 @@ Check the [Documentation](https://kyverno.github.io/policy-reporter/guide/02-get
 | target.securityHub.mountedSecret | string | `""` |  |
 | target.securityHub.region | string | `""` |  |
 | target.securityHub.endpoint | string | `""` |  |
-| target.securityHub.accountID | string | `""` |  |
+| target.securityHub.accountId | string | `""` |  |
 | target.securityHub.productName | string | `""` |  |
 | target.securityHub.minimumSeverity | string | `""` |  |
 | target.securityHub.sources | list | `[]` |  |
