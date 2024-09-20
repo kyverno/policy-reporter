@@ -1,7 +1,6 @@
 package slack
 
 import (
-	"context"
 	"fmt"
 
 	"github.com/slack-go/slack"
@@ -312,8 +311,6 @@ func (s *client) PostMessage(message *slack.WebhookMessage) {
 func (s *client) Type() target.ClientType {
 	return target.BatchSend
 }
-
-func (s *client) CleanUp(_ context.Context, _ v1alpha2.ReportInterface) {}
 
 // NewClient creates a new slack.client to send Results to Slack
 func NewClient(options Options) target.Client {

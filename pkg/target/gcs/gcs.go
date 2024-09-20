@@ -2,7 +2,6 @@ package gcs
 
 import (
 	"bytes"
-	"context"
 	"encoding/json"
 	"fmt"
 	"time"
@@ -62,10 +61,6 @@ func (c *client) Send(result v1alpha2.PolicyReportResult) {
 
 	zap.L().Info(c.Name() + ": PUSH OK")
 }
-
-func (c *client) CleanUp(_ context.Context, _ v1alpha2.ReportInterface) {}
-
-func (c *client) BatchSend(_ v1alpha2.ReportInterface, _ []v1alpha2.PolicyReportResult) {}
 
 func (c *client) Type() target.ClientType {
 	return target.SingleSend
