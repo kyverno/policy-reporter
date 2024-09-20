@@ -273,7 +273,7 @@ func (c *client) CleanUp(ctx context.Context, report v1alpha2.ReportInterface) {
 
 	count, err := c.batchUpdate(ctx, list, types.WorkflowStatusResolved)
 	if err != nil {
-		zap.L().Error(c.Name()+": failed to batch archived findings", zap.Error(err))
+		zap.L().Error(c.Name()+": failed to batch resolve findings", zap.Error(err))
 		return
 	}
 

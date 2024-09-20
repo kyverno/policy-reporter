@@ -11,7 +11,7 @@ image:
   registry: ghcr.io
   repository: kyverno/policy-reporter
   pullPolicy: IfNotPresent
-  tag: ab7c0b6
+  tag: 05a2b24
 
 imagePullSecrets: []
 
@@ -612,6 +612,8 @@ target:
     accountId: ""
     # Used product name, defaults to "Polilcy Reporter"
     productName: ""
+    # Used product name, defaults to "Kyverno"
+    companyName: ""
     # minimum severity "" < info < low < medium < high < critical
     minimumSeverity: ""
     # list of sources which should send to S3
