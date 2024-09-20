@@ -54,20 +54,6 @@ func (k *informer) Sync(targets *target.Collection, stopper chan struct{}) error
 
 func (k *informer) configureInformer(targets *target.Collection, informer cache.SharedIndexInformer) cache.SharedIndexInformer {
 	informer.AddEventHandler(cache.ResourceEventHandlerFuncs{
-		AddFunc: func(obj interface{}) {
-			if s, ok := obj.(*v1.PartialObjectMetadata); ok {
-				for _, t := range targets.Targets() {
-					if t.Secret() == s.Name {
-						zap.L().Info("Target Updated", zap.String("name", t.Client.Name()), zap.String("secretRef", s.Name))
-						targets.Update(k.UpdateTarget(t, s.Name))
-					}
-				}
-			}
-		},
-		DeleteFunc: func(obj interface{}) {
-			if _, ok := obj.(*v1.PartialObjectMetadata); ok {
-			}
-		},
 		UpdateFunc: func(_, newObj interface{}) {
 			if s, ok := newObj.(*v1.PartialObjectMetadata); ok {
 				for _, t := range targets.Targets() {

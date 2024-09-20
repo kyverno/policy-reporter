@@ -854,7 +854,7 @@ func (f *TargetFactory) mapSecretValues(config any, ref, mountedSecret string) {
 			c.Config.SecretAccessKey = values.SecretAccessKey
 		}
 		if values.AccountID != "" {
-			c.Config.AccountID = values.AccessKeyID
+			c.Config.AccountID = values.AccountID
 		}
 
 	case *target.Config[target.GCSOptions]:
