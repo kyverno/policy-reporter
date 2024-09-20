@@ -184,11 +184,12 @@ func (c *client) BatchSend(polr v1alpha2.ReportInterface, results []v1alpha2.Pol
 	zap.L().Info(c.Name()+": PUSH OK", zap.Int32("imported", *res.SuccessCount), zap.Int32("failed", *res.FailedCount), zap.String("report", polr.GetKey()))
 }
 
-func (c *client) ResetFindings(ctx context.Context) error {
+func (c *client) Reset(ctx context.Context) error {
 	if !c.synchronize {
 		return nil
 	}
-	defer zap.L().Info(c.Name() + ": START SYNC")
+
+	zap.L().Info(c.Name() + ": START SYNC")
 
 	list, err := c.getFindings(ctx)
 	if err != nil {

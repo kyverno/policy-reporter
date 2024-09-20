@@ -147,6 +147,10 @@ func (e *client) Send(result v1alpha2.PolicyReportResult) {
 
 func (e *client) CleanUp(_ context.Context, _ v1alpha2.ReportInterface) {}
 
+func (e *client) Reset(_ context.Context) error {
+	return nil
+}
+
 func (e *client) BatchSend(_ v1alpha2.ReportInterface, _ []v1alpha2.PolicyReportResult) {}
 
 func (e *client) Type() target.ClientType {

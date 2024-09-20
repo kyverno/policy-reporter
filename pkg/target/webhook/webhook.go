@@ -1,8 +1,6 @@
 package webhook
 
 import (
-	"context"
-
 	"github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
 	"github.com/kyverno/policy-reporter/pkg/target"
 	"github.com/kyverno/policy-reporter/pkg/target/http"
@@ -52,10 +50,6 @@ func (e *client) Send(result v1alpha2.PolicyReportResult) {
 	resp, err := e.client.Do(req)
 	http.ProcessHTTPResponse(e.Name(), resp, err)
 }
-
-func (e *client) CleanUp(_ context.Context, _ v1alpha2.ReportInterface) {}
-
-func (e *client) BatchSend(_ v1alpha2.ReportInterface, _ []v1alpha2.PolicyReportResult) {}
 
 func (e *client) Type() target.ClientType {
 	return target.SingleSend

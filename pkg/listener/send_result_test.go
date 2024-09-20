@@ -44,6 +44,10 @@ func (c client) Validate(rep v1alpha2.ReportInterface, result v1alpha2.PolicyRep
 	return c.validated
 }
 
+func (c *client) Reset(_ context.Context) error {
+	return nil
+}
+
 func (c *client) CleanUp(_ context.Context, _ v1alpha2.ReportInterface) {
 	c.cleanupCalled = true
 }

@@ -1,6 +1,7 @@
 package listener
 
 import (
+	"context"
 	"sync"
 
 	"github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
@@ -12,6 +13,8 @@ import (
 const SendSyncResults = "send_sync_results_listener"
 
 func NewSendSyncResultsListener(targets *target.Collection) report.SyncResultsListener {
+	targets.Reset(context.Background())
+
 	return func(rep v1alpha2.ReportInterface) {
 		clients := targets.SyncClients()
 		if len(clients) == 0 {
