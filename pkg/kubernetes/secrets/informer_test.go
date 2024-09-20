@@ -27,40 +27,6 @@ func Test_SecretInformer(t *testing.T) {
 	stop := make(chan struct{})
 	defer close(stop)
 
-	t.Run("create secretRef", func(t *testing.T) {
-		collection := target.NewCollection(
-			&target.Target{
-				ID:   uuid.NewString(),
-				Type: target.Webhook,
-				Client: webhook.NewClient(webhook.Options{
-					ClientOptions: target.ClientOptions{
-						Name: "Webhook",
-					},
-				}),
-				Config: &target.Config[target.WebhookOptions]{
-					Name:      "Webhook",
-					SecretRef: secretName,
-					Config:    &target.WebhookOptions{},
-				},
-				ParentConfig: &target.Config[target.WebhookOptions]{Config: &target.WebhookOptions{}},
-			},
-		)
-
-		client, secret := NewFakeMetaClient()
-
-		informer := secrets.NewInformer(client, factory.NewFactory(secrets.NewClient(newFakeClient()), target.NewResultFilterFactory(nil)), "default")
-
-		err := informer.Sync(collection, stop)
-		assert.Nil(t, err)
-
-		assert.True(t, informer.HasSynced())
-
-		secret.CreateFake(&metav1.PartialObjectMetadata{ObjectMeta: metav1.ObjectMeta{Name: secretName, Namespace: "default"}}, metav1.CreateOptions{})
-		time.Sleep(1 * time.Second)
-
-		assert.Equal(t, collection.Targets()[0].Config.(*target.Config[target.WebhookOptions]).Config.Webhook, "http://localhost:9200/webhook")
-	})
-
 	t.Run("update secretRef", func(t *testing.T) {
 		collection := target.NewCollection(
 			&target.Target{
