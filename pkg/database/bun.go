@@ -1089,6 +1089,10 @@ func (s *Store) fetchResults(ctx context.Context, id string) ([]v1alpha2.PolicyR
 }
 
 func (s *Store) RequireSchemaUpgrade(ctx context.Context) bool {
+	if s.IsSQLite() {
+		return true
+	}
+
 	config := Config{}
 
 	err := s.db.NewSelect().Model(&config).Where("id = ?", 1).Scan(ctx)
