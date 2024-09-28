@@ -3,9 +3,10 @@ package email
 import (
 	"context"
 
+	"go.uber.org/zap"
+
 	"github.com/kyverno/policy-reporter/pkg/kubernetes/namespaces"
 	"github.com/kyverno/policy-reporter/pkg/validate"
-	"go.uber.org/zap"
 )
 
 type Filter struct {

@@ -11,8 +11,10 @@ import (
 	"github.com/kyverno/policy-reporter/pkg/target/http"
 )
 
-var keyReplacer = strings.NewReplacer(".", "_", "]", "", "[", "")
-var labelReplacer = strings.NewReplacer("/", "")
+var (
+	keyReplacer   = strings.NewReplacer(".", "_", "]", "", "[", "")
+	labelReplacer = strings.NewReplacer("/", "")
+)
 
 // Options to configure the Loki target
 type Options struct {

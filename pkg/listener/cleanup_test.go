@@ -3,10 +3,11 @@ package listener_test
 import (
 	"testing"
 
+	"github.com/stretchr/testify/assert"
+
 	"github.com/kyverno/policy-reporter/pkg/listener"
 	"github.com/kyverno/policy-reporter/pkg/report"
 	"github.com/kyverno/policy-reporter/pkg/target"
-	"github.com/stretchr/testify/assert"
 )
 
 func Test_CleanupListener(t *testing.T) {

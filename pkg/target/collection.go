@@ -4,8 +4,9 @@ import (
 	"context"
 	"sync"
 
-	"github.com/kyverno/policy-reporter/pkg/helper"
 	"go.uber.org/zap"
+
+	"github.com/kyverno/policy-reporter/pkg/helper"
 )
 
 type TargetType = string
@@ -95,6 +96,7 @@ func (c *Collection) SingleSendClients() []Client {
 		return c.Type() == SingleSend
 	})
 }
+
 func (c *Collection) SyncClients() []Client {
 	return helper.Filter(c.Clients(), func(c Client) bool {
 		return c.Type() == SyncSend

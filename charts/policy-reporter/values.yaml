@@ -11,7 +11,7 @@ image:
   registry: ghcr.io
   repository: kyverno/policy-reporter
   pullPolicy: IfNotPresent
-  tag: 2d66b8d
+  tag: 3047d63
 
 imagePullSecrets: []
 
@@ -1036,7 +1036,7 @@ plugin:
       pullPolicy: IfNotPresent
         # -- (string) Image tag
         # Defaults to `Chart.AppVersion` if omitted
-      tag: "0.2.0"
+      tag: "0.2.2"
 
     # -- Deployment replica count
     replicaCount: 1

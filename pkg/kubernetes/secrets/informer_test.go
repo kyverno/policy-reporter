@@ -5,14 +5,15 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/kyverno/policy-reporter/pkg/kubernetes/secrets"
-	"github.com/kyverno/policy-reporter/pkg/target"
-	"github.com/kyverno/policy-reporter/pkg/target/factory"
-	"github.com/kyverno/policy-reporter/pkg/target/webhook"
 	"github.com/stretchr/testify/assert"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	metafake "k8s.io/client-go/metadata/fake"
+
+	"github.com/kyverno/policy-reporter/pkg/kubernetes/secrets"
+	"github.com/kyverno/policy-reporter/pkg/target"
+	"github.com/kyverno/policy-reporter/pkg/target/factory"
+	"github.com/kyverno/policy-reporter/pkg/target/webhook"
 )
 
 func NewFakeMetaClient() (*metafake.FakeMetadataClient, metafake.MetadataClient) {
