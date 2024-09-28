@@ -142,6 +142,7 @@ func newRunCMD(version string) *cobra.Command {
 				})
 			} else {
 				resolver.RegisterSendResultListener()
+				readinessProbe.Ready()
 			}
 
 			g.Go(server.Start)
