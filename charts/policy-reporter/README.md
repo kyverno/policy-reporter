@@ -3,7 +3,7 @@
 Policy Reporter watches for PolicyReport Resources.
 It creates Prometheus Metrics and can send rule validation events to different targets like Loki, Elasticsearch, Slack or Discord
 
-![Version: 3.0.0-beta.17](https://img.shields.io/badge/Version-3.0.0--beta.17-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 3.0.0-beta](https://img.shields.io/badge/AppVersion-3.0.0--beta-informational?style=flat-square)
+![Version: 3.0.0-beta.18](https://img.shields.io/badge/Version-3.0.0--beta.18-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 3.0.0-beta](https://img.shields.io/badge/AppVersion-3.0.0--beta-informational?style=flat-square)
 
 ## Documentation
 
@@ -56,7 +56,7 @@ Check the [Documentation](https://kyverno.github.io/policy-reporter/guide/02-get
 | image.registry | string | `"ghcr.io"` |  |
 | image.repository | string | `"kyverno/policy-reporter"` |  |
 | image.pullPolicy | string | `"IfNotPresent"` |  |
-| image.tag | string | `"2d66b8d"` |  |
+| image.tag | string | `"3047d63"` |  |
 | imagePullSecrets | list | `[]` |  |
 | priorityClassName | string | `""` |  |
 | replicaCount | int | `1` |  |
@@ -416,7 +416,7 @@ Check the [Documentation](https://kyverno.github.io/policy-reporter/guide/02-get
 | plugin.kyverno.image.registry | string | `"ghcr.io"` | Image registry |
 | plugin.kyverno.image.repository | string | `"kyverno/policy-reporter/kyverno-plugin"` | Image repository |
 | plugin.kyverno.image.pullPolicy | string | `"IfNotPresent"` | Image PullPolicy |
-| plugin.kyverno.image.tag | string | `"0.2.0"` | Image tag Defaults to `Chart.AppVersion` if omitted |
+| plugin.kyverno.image.tag | string | `"0.2.2"` | Image tag Defaults to `Chart.AppVersion` if omitted |
 | plugin.kyverno.replicaCount | int | `1` | Deployment replica count |
 | plugin.kyverno.logging.encoding | string | `"console"` | log encoding possible encodings are console and json |
 | plugin.kyverno.logging.logLevel | int | `0` | log level default info |

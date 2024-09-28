@@ -5,13 +5,14 @@ import (
 	"sync"
 	"time"
 
-	"github.com/kyverno/policy-reporter/pkg/target"
 	"go.uber.org/zap"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/client-go/metadata"
 	"k8s.io/client-go/metadata/metadatainformer"
 	"k8s.io/client-go/tools/cache"
+
+	"github.com/kyverno/policy-reporter/pkg/target"
 )
 
 type Informer interface {

@@ -3,6 +3,7 @@ package target_test
 import (
 	"testing"
 
+	"github.com/stretchr/testify/assert"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
@@ -10,7 +11,6 @@ import (
 	"github.com/kyverno/policy-reporter/pkg/report"
 	"github.com/kyverno/policy-reporter/pkg/target"
 	"github.com/kyverno/policy-reporter/pkg/validate"
-	"github.com/stretchr/testify/assert"
 )
 
 var preport = &v1alpha2.PolicyReport{

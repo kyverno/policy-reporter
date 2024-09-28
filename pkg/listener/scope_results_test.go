@@ -3,11 +3,12 @@ package listener_test
 import (
 	"testing"
 
+	"github.com/stretchr/testify/assert"
+
 	"github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
 	"github.com/kyverno/policy-reporter/pkg/fixtures"
 	"github.com/kyverno/policy-reporter/pkg/listener"
 	"github.com/kyverno/policy-reporter/pkg/target"
-	"github.com/stretchr/testify/assert"
 )
 
 func Test_ScopeResultsListener(t *testing.T) {

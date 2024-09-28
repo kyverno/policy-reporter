@@ -3,9 +3,10 @@ package target_test
 import (
 	"testing"
 
+	"github.com/stretchr/testify/assert"
+
 	"github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
 	"github.com/kyverno/policy-reporter/pkg/target"
-	"github.com/stretchr/testify/assert"
 )
 
 func TestConfig(t *testing.T) {
