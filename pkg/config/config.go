@@ -8,7 +8,7 @@ type ValueFilter struct {
 }
 
 type EmailReportFilter struct {
-	DisableClusterReports bool        `mapstructure:"disableClusterReports" json: "disableClusterReports,omitempty"`
+	DisableClusterReports bool        `mapstructure:"disableClusterReports" json:"disableClusterReports,omitempty"`
 	Namespaces            ValueFilter `mapstructure:"namespaces" json:"namespaces,omitempty"`
 	Sources               ValueFilter `mapstructure:"sources" json:"sources,omitempty"`
 }
@@ -26,18 +26,18 @@ type MetricsFilter struct {
 	Severities ValueFilter `mapstructure:"severities" json:"severities,omitempty"`
 	Status     ValueFilter `mapstructure:"status" json:"status,omitempty"`
 	Sources    ValueFilter `mapstructure:"sources" json:"sources,omitempty"`
-	Kinds      ValueFilter `mapstructure:"kinds" json: "kinds,omitempty"`
+	Kinds      ValueFilter `mapstructure:"kinds" json:"kinds,omitempty"`
 }
 
 type TargetBaseOptions struct {
 	Name            string            `mapstructure:"name" json:"name,omitempty"`
-	MinimumPriority string            `mapstructure:"minimumPriority" json: "minimumPriority,omitempty"`
-	Filter          TargetFilter      `mapstructure:"filter" json: "filter,omitempty"`
-	SecretRef       string            `mapstructure:"secretRef" json: "secretRef,omitempty"`
-	MountedSecret   string            `mapstructure:"mountedSecret" json: "mountedSecret,omitempty"`
-	Sources         []string          `mapstructure:"sources" json: "sources,omitempty"`
-	CustomFields    map[string]string `mapstructure:"customFields" json: "customFields,omitempty"`
-	SkipExisting    bool              `mapstructure:"skipExistingOnStartup", json: "skipExistingOnStartup,omitempty"`
+	MinimumPriority string            `mapstructure:"minimumPriority" json:"minimumPriority,omitempty"`
+	Filter          TargetFilter      `mapstructure:"filter" json:"filter,omitempty"`
+	SecretRef       string            `mapstructure:"secretRef" json:"secretRef,omitempty"`
+	MountedSecret   string            `mapstructure:"mountedSecret" json:"mountedSecret,omitempty"`
+	Sources         []string          `mapstructure:"sources" json:"sources,omitempty"`
+	CustomFields    map[string]string `mapstructure:"customFields" json:"customFields,omitempty"`
+	SkipExisting    bool              `mapstructure:"skipExistingOnStartup" json:"skipExistingOnStartup,omitempty"`
 }
 
 func (config *TargetBaseOptions) MapBaseParent(parent TargetBaseOptions) {
@@ -60,10 +60,10 @@ func (config *TargetBaseOptions) ClientOptions() target.ClientOptions {
 }
 
 type AWSConfig struct {
-	AccessKeyID     string `mapstructure:"accessKeyID" json: "accessKeyID,omitempty"`
-	SecretAccessKey string `mapstructure:"secretAccessKey" json: "secretAccessKey,omitempty"`
-	Region          string `mapstructure:"region" json: "region,omitempty"`
-	Endpoint        string `mapstructure:"endpoint" json: "endpoint,omitempty"`
+	AccessKeyID     string `mapstructure:"accessKeyID" json:"accessKeyID,omitempty"`
+	SecretAccessKey string `mapstructure:"secretAccessKey" json:"secretAccessKey,omitempty"`
+	Region          string `mapstructure:"region" json:"region,omitempty"`
+	Endpoint        string `mapstructure:"endpoint" json:"endpoint,omitempty"`
 }
 
 func (config *AWSConfig) MapAWSParent(parent AWSConfig) {
