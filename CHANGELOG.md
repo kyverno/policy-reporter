@@ -1,5 +1,9 @@
 # Changelog
 
+# 2.24.2
+* Policy Reporter v2.20.2
+    * Fix LeaderElection without configurared pushes
+
 # 2.24.1
 * Policy Reporter v2.20.1
     * Propagate Slack channel Override [[#459](https://github.com/kyverno/policy-reporter/pull/459)] [[#460](https://github.com/kyverno/policy-reporter/pull/460)] by [jescarri](https://github.com/jescarri)
