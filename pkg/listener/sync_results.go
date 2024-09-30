@@ -13,12 +13,23 @@ import (
 const SendSyncResults = "send_sync_results_listener"
 
 func NewSendSyncResultsListener(targets *target.Collection) report.SyncResultsListener {
-	targets.Reset(context.Background())
+	ready := make(chan bool)
+	ok := false
+	go func() {
+		ok = targets.Reset(context.Background())
+		if ok {
+			close(ready)
+		}
+	}()
 
 	return func(rep v1alpha2.ReportInterface) {
 		clients := targets.SyncClients()
 		if len(clients) == 0 {
 			return
+		}
+
+		if !ok {
+			<-ready
 		}
 
 		wg := &sync.WaitGroup{}

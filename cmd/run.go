@@ -44,6 +44,8 @@ func newRunCMD(version string) *cobra.Command {
 			k8sConfig.Burst = c.K8sClient.Burst
 
 			readinessProbe := config.NewReadinessProbe(c)
+			defer readinessProbe.Close()
+
 			resolver := config.NewResolver(c, k8sConfig)
 			logger, err := resolver.Logger()
 			if err != nil {

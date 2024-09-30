@@ -59,7 +59,7 @@ func (c *Collection) Update(t *Target) {
 	c.mx.Unlock()
 }
 
-func (c *Collection) Reset(ctx context.Context) {
+func (c *Collection) Reset(ctx context.Context) bool {
 	clients := c.SyncClients()
 
 	for _, c := range clients {
@@ -67,6 +67,8 @@ func (c *Collection) Reset(ctx context.Context) {
 			zap.L().Error("failed to reset target", zap.String("type", c.Type()), zap.String("name", c.Name()))
 		}
 	}
+
+	return true
 }
 
 func (c *Collection) Targets() []*Target {
