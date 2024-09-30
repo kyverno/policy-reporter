@@ -47,13 +47,8 @@ spec:
     {{- if .Values.monitoring.serviceMonitor.interval }}
     interval: {{ .Values.monitoring.serviceMonitor.interval }}
     {{- end }}
-    relabelings:
-    - action: labeldrop
-      regex: pod|service|container
-    - targetLabel: instance
-      replacement: policy-reporter
-      action: replace
     {{- with .Values.monitoring.serviceMonitor.relabelings }}
+    relabelings:
       {{- toYaml . | nindent 4 }}
     {{- end }}
     {{- with .Values.monitoring.serviceMonitor.metricRelabelings }}
