@@ -37,7 +37,7 @@ func Test_PolicyReportWatcher(t *testing.T) {
 
 	queue := kubernetes.NewQueue(
 		kubernetes.NewDebouncer(0, publisher),
-		workqueue.NewNamedRateLimitingQueue(workqueue.DefaultControllerRateLimiter(), "test-queue"),
+		workqueue.NewTypedRateLimitingQueue(workqueue.DefaultTypedControllerRateLimiter[string]()),
 		restClient.Wgpolicyk8sV1alpha2(),
 		report.NewSourceFilter(nil, nil, []report.SourceValidation{}),
 		result.NewReconditioner(nil),
@@ -89,7 +89,7 @@ func Test_ClusterPolicyReportWatcher(t *testing.T) {
 
 	queue := kubernetes.NewQueue(
 		kubernetes.NewDebouncer(0, publisher),
-		workqueue.NewNamedRateLimitingQueue(workqueue.DefaultControllerRateLimiter(), "test-queue"),
+		workqueue.NewTypedRateLimitingQueue(workqueue.DefaultTypedControllerRateLimiter[string]()),
 		restClient.Wgpolicyk8sV1alpha2(),
 		report.NewSourceFilter(nil, nil, []report.SourceValidation{}),
 		result.NewReconditioner(nil),
@@ -131,7 +131,7 @@ func Test_HasSynced(t *testing.T) {
 
 	queue := kubernetes.NewQueue(
 		kubernetes.NewDebouncer(0, report.NewEventPublisher()),
-		workqueue.NewNamedRateLimitingQueue(workqueue.DefaultControllerRateLimiter(), "test-queue"),
+		workqueue.NewTypedRateLimitingQueue(workqueue.DefaultTypedControllerRateLimiter[string]()),
 		restClient.Wgpolicyk8sV1alpha2(),
 		report.NewSourceFilter(nil, nil, []report.SourceValidation{}),
 		result.NewReconditioner(nil),
