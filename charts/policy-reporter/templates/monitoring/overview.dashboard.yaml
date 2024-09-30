@@ -117,7 +117,7 @@ data:
         "pluginVersion": "7.1.5",
         "targets": [
             {
-            "expr": "sum(policy_report_result{policy=~\"$policy\", category=~\"$category\", severity=~\"$severity\", source=~\"$source\", kind=~\"$kind\", {{ $nsLabel }}=~\"$namespace\", status=~\"fail|error\"{{ range $filters }}, {{.}}=~\"${{.}}\"{{ end }} } > 0) by ({{ $nsLabel }})",
+            "expr": "max(sum(policy_report_result{policy=~\"$policy\", category=~\"$category\", severity=~\"$severity\", source=~\"$source\", kind=~\"$kind\", {{ $nsLabel }}=~\"$namespace\", status=~\"fail|error\"{{ range $filters }}, {{.}}=~\"${{.}}\"{{ end }} } > 0) by ({{ $nsLabel }}, pod)) by ({{ $nsLabel }})",
             "instant": true,
             "interval": "",
             "legendFormat": "{{ printf `{{%s}}` $nsLabel }}",
@@ -178,7 +178,7 @@ data:
         "pluginVersion": "7.1.5",
         "targets": [
             {
-            "expr": "sum(cluster_policy_report_result{policy=~\"$policy\", category=~\"$category\", severity=~\"$severity\", source=~\"$source\", kind=~\"$kind\", status=~\"fail|error\"{{ range $filters }}, {{.}}=~\"${{.}}\"{{ end }} } > 0) by (status)",
+            "expr": "max(sum(cluster_policy_report_result{policy=~\"$policy\", category=~\"$category\", severity=~\"$severity\", source=~\"$source\", kind=~\"$kind\", status=~\"fail|error\"{{ range $filters }}, {{.}}=~\"${{.}}\"{{ end }} } > 0) by (status, pod)) by (status)",
             "format": "time_series",
             "interval": "",
             "intervalFactor": 1,
@@ -303,7 +303,7 @@ data:
           "pluginVersion": "10.4.1",
           "targets": [
             {
-              "expr": "sum(cluster_policy_report_result{policy=~\"$policy\", category=~\"$category\", severity=~\"$severity\", source=~\"$source\", kind=~\"$kind\", status=~\"fail|error\"{{ range $filters }}, {{.}}=~\"${{.}}\"{{ end }} } > 0) by (policy)",
+              "expr": "max(sum(cluster_policy_report_result{policy=~\"$policy\", category=~\"$category\", severity=~\"$severity\", source=~\"$source\", kind=~\"$kind\", status=~\"fail|error\"{{ range $filters }}, {{.}}=~\"${{.}}\"{{ end }} } > 0) by (policy, pod)) by (policy)",
               "interval": "",
               "legendFormat": "{{`{{ policy }}`}}",
               "refId": "A",
@@ -312,7 +312,7 @@ data:
               }
             },
             {
-              "expr": "sum(policy_report_result{policy=~\"$policy\", category=~\"$category\", severity=~\"$severity\", source=~\"$source\", kind=~\"$kind\", {{ $nsLabel }}=~\"$namespace\", status=~\"fail|error\"{{ range $filters }}, {{.}}=~\"${{.}}\"{{ end }} } > 0) by (policy)",
+              "expr": "max(sum(policy_report_result{policy=~\"$policy\", category=~\"$category\", severity=~\"$severity\", source=~\"$source\", kind=~\"$kind\", {{ $nsLabel }}=~\"$namespace\", status=~\"fail|error\"{{ range $filters }}, {{.}}=~\"${{.}}\"{{ end }} } > 0) by (policy, pod)) by (policy)",
               "interval": "",
               "legendFormat": "{{`{{ policy }}`}}",
               "refId": "B",
@@ -377,7 +377,7 @@ data:
         "pluginVersion": "7.1.5",
         "targets": [
             {
-            "expr": "sum(policy_report_result{policy=~\"$policy\", category=~\"$category\", severity=~\"$severity\", source=~\"$source\", kind=~\"$kind\", {{ $nsLabel }}=~\"$namespace\", status=~\"fail|error\"{{ range $filters }}, {{.}}=~\"${{.}}\"{{ end }} }) by ({{ $nsLabel }},policy,rule,kind,name,status,category,severity,source{{ range $filters }},{{.}}{{ end }})",
+            "expr": "max(sum(policy_report_result{policy=~\"$policy\", category=~\"$category\", severity=~\"$severity\", source=~\"$source\", kind=~\"$kind\", {{ $nsLabel }}=~\"$namespace\", status=~\"fail|error\"{{ range $filters }}, {{.}}=~\"${{.}}\"{{ end }} }) by (pod,{{ $nsLabel }},policy,rule,kind,name,status,category,severity,source{{ range $filters }},{{.}}{{ end }})) by ({{ $nsLabel }},policy,rule,kind,name,status,category,severity,source{{ range $filters }},{{.}}{{ end }})",
             "format": "table",
             "instant": true,
             "interval": "",
@@ -393,8 +393,7 @@ data:
             "id": "organize",
             "options": {
                 "excludeByName": {
-                "Time": true,
-                "Value": true
+                "Time": true
                 },
                 "indexByName": {
                 "source": 0,
@@ -405,7 +404,8 @@ data:
                 "name": 5,
                 "policy": 6,
                 "rule": 7,
-                "status": 8
+                "status": 8,
+                "Value": 9
                 },
                 "renameByName": {
                 "{{ $nsLabel }}": "namespace"
@@ -452,7 +452,7 @@ data:
         "pluginVersion": "7.1.5",
         "targets": [
             {
-            "expr": "sum(cluster_policy_report_result{policy=~\"$policy\", category=~\"$category\", severity=~\"$severity\", source=~\"$source\", kind=~\"$kind\", status=~\"fail|error\"{{ range $filters }}, {{.}}=~\"${{.}}\"{{ end }} }) by (policy,rule,kind,name,status,category,severity,source{{ range $filters }},{{.}}{{ end }})",
+            "expr": "max(sum(cluster_policy_report_result{policy=~\"$policy\", category=~\"$category\", severity=~\"$severity\", source=~\"$source\", kind=~\"$kind\", status=~\"fail|error\"{{ range $filters }}, {{.}}=~\"${{.}}\"{{ end }} })by (pod,policy,rule,kind,name,status,category,severity,source{{ range $filters }},{{.}}{{ end }})) by (policy,rule,kind,name,status,category,severity,source{{ range $filters }},{{.}}{{ end }})",
             "format": "table",
             "instant": true,
             "interval": "",
@@ -469,7 +469,6 @@ data:
             "options": {
                 "excludeByName": {
                 "Time": true,
-                "Value": true,
                 "__name__": true,
                 "endpoint": true,
                 "instance": true,
@@ -488,7 +487,8 @@ data:
                 "name": 4,
                 "policy": 5,
                 "rule": 6,
-                "status": 7
+                "status": 7,
+                "Value": 8
                 },
                 "renameByName": {}
             }

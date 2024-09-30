@@ -127,7 +127,7 @@ data:
         "pluginVersion": "7.1.5",
         "targets": [
             {
-            "expr": "sum(policy_report_result{policy=~\"$policy\", rule=~\"$rule\", category=~\"$category\", severity=~\"$severity\", source=~\"$source\", kind=~\"$kind\", {{ $nsLabel }}=~\"$namespace\", status=\"pass\"{{ range $filters }}, {{.}}=~\"${{.}}\"{{ end }} } > 0) by ({{ $nsLabel }})",
+            "expr": "max(sum(policy_report_result{policy=~\"$policy\", rule=~\"$rule\", category=~\"$category\", severity=~\"$severity\", source=~\"$source\", kind=~\"$kind\", {{ $nsLabel }}=~\"$namespace\", status=\"pass\"{{ range $filters }}, {{.}}=~\"${{.}}\"{{ end }} } > 0) by ({{ $nsLabel }}, pod)) by ({{ $nsLabel }})",
             "instant": true,
             "interval": "",
             "legendFormat": "{{ printf `{{%s}}` $nsLabel }}",
@@ -182,7 +182,7 @@ data:
         "pluginVersion": "7.1.5",
         "targets": [
             {
-            "expr": "sum(policy_report_result{policy=~\"$policy\", rule=~\"$rule\", category=~\"$category\", severity=~\"$severity\", source=~\"$source\", kind=~\"$kind\", {{ $nsLabel }}=~\"$namespace\", status=\"fail\"{{ range $filters }}, {{.}}=~\"${{.}}\"{{ end }} } > 0) by ({{ $nsLabel }})",
+            "expr": "max(sum(policy_report_result{policy=~\"$policy\", rule=~\"$rule\", category=~\"$category\", severity=~\"$severity\", source=~\"$source\", kind=~\"$kind\", {{ $nsLabel }}=~\"$namespace\", status=\"fail\"{{ range $filters }}, {{.}}=~\"${{.}}\"{{ end }} } > 0) by ({{ $nsLabel }}, pod)) by ({{ $nsLabel }})",
             "instant": true,
             "interval": "",
             "legendFormat": "{{ printf `{{%s}}` $nsLabel }}",
@@ -238,7 +238,7 @@ data:
         "pluginVersion": "7.1.5",
         "targets": [
             {
-            "expr": "sum(policy_report_result{policy=~\"$policy\", rule=~\"$rule\", category=~\"$category\", severity=~\"$severity\", source=~\"$source\", kind=~\"$kind\", {{ $nsLabel }}=~\"$namespace\", status=\"warn\"{{ range $filters }}, {{.}}=~\"${{.}}\"{{ end }} } > 0) by ({{ $nsLabel }})",
+            "expr": "max(sum(policy_report_result{policy=~\"$policy\", rule=~\"$rule\", category=~\"$category\", severity=~\"$severity\", source=~\"$source\", kind=~\"$kind\", {{ $nsLabel }}=~\"$namespace\", status=\"warn\"{{ range $filters }}, {{.}}=~\"${{.}}\"{{ end }} } > 0)  by ({{ $nsLabel }}, pod)) by ({{ $nsLabel }})",
             "instant": true,
             "interval": "",
             "legendFormat": "{{ printf `{{%s}}` $nsLabel }}",
@@ -293,7 +293,7 @@ data:
         "pluginVersion": "7.1.5",
         "targets": [
             {
-            "expr": "sum(policy_report_result{policy=~\"$policy\", rule=~\"$rule\", category=~\"$category\", severity=~\"$severity\", source=~\"$source\", kind=~\"$kind\", {{ $nsLabel }}=~\"$namespace\", status=\"error\"{{ range $filters }}, {{.}}=~\"${{.}}\"{{ end }} } > 0) by ({{ $nsLabel }})",
+            "expr": "max(sum(policy_report_result{policy=~\"$policy\", rule=~\"$rule\", category=~\"$category\", severity=~\"$severity\", source=~\"$source\", kind=~\"$kind\", {{ $nsLabel }}=~\"$namespace\", status=\"error\"{{ range $filters }}, {{.}}=~\"${{.}}\"{{ end }} } > 0) by ({{ $nsLabel }}, pod)) by ({{ $nsLabel }})",
             "instant": true,
             "interval": "",
             "legendFormat": "{{ printf `{{%s}}` $nsLabel }}",
@@ -419,7 +419,7 @@ data:
           "pluginVersion": "10.4.1",
           "targets": [
             {
-              "expr": "sum(policy_report_result{policy=~\"$policy\", rule=~\"$rule\", category=~\"$category\", severity=~\"$severity\", source=~\"$source\", kind=~\"$kind\", {{ $nsLabel }}=~\"$namespace\"{{ range $filters }}, {{.}}=~\"${{.}}\"{{ end }} } > 0) by (status, {{ $nsLabel }})",
+              "expr": "max(sum(policy_report_result{policy=~\"$policy\", rule=~\"$rule\", category=~\"$category\", severity=~\"$severity\", source=~\"$source\", kind=~\"$kind\", {{ $nsLabel }}=~\"$namespace\"{{ range $filters }}, {{.}}=~\"${{.}}\"{{ end }} } > 0) by (status, pod, {{ $nsLabel }})) by (status, {{ $nsLabel }})",
               "interval": "",
               "legendFormat": "{{ printf `{{%s}}` $nsLabel }} {{`{{ status }}`}}",
               "refId": "A",
@@ -486,7 +486,7 @@ data:
         "pluginVersion": "7.1.5",
         "targets": [
             {
-            "expr": "sum(policy_report_result{policy=~\"$policy\", rule=~\"$rule\", category=~\"$category\", severity=~\"$severity\", source=~\"$source\", kind=~\"$kind\", {{ $nsLabel }}=~\"$namespace\", status=\"pass\"{{ range $filters }}, {{.}}=~\"${{.}}\"{{ end }} }) by ({{ $nsLabel }},category,policy,rule,kind,name,severity,status,source{{ range $filters }},{{.}}{{ end }} )",
+            "expr": "max(sum(policy_report_result{policy=~\"$policy\", rule=~\"$rule\", category=~\"$category\", severity=~\"$severity\", source=~\"$source\", kind=~\"$kind\", {{ $nsLabel }}=~\"$namespace\", status=\"pass\"{{ range $filters }}, {{.}}=~\"${{.}}\"{{ end }} }) by ({{ $nsLabel }},category,policy,rule,kind,name,severity,status,source{{ range $filters }},{{.}}{{ end }})) by ({{ $nsLabel }},category,policy,rule,kind,name,severity,status,source{{ range $filters }},{{.}}{{ end }})",
             "format": "table",
             "instant": true,
             "interval": "",
@@ -503,7 +503,6 @@ data:
             "options": {
                 "excludeByName": {
                 "Time": true,
-                "Value": true,
                 "status": false
                 },
                 "indexByName": {
@@ -566,7 +565,7 @@ data:
         "pluginVersion": "7.1.5",
         "targets": [
             {
-            "expr": "sum(policy_report_result{policy=~\"$policy\", rule=~\"$rule\", category=~\"$category\", severity=~\"$severity\", source=~\"$source\", kind=~\"$kind\", {{ $nsLabel }}=~\"$namespace\", status=\"fail\"{{ range $filters }}, {{.}}=~\"${{.}}\"{{ end }} }) by ({{ $nsLabel }},category,policy,rule,kind,name,severity,status,source{{ range $filters }},{{.}}{{ end }})",
+            "expr": "max(sum(policy_report_result{policy=~\"$policy\", rule=~\"$rule\", category=~\"$category\", severity=~\"$severity\", source=~\"$source\", kind=~\"$kind\", {{ $nsLabel }}=~\"$namespace\", status=\"fail\"{{ range $filters }}, {{.}}=~\"${{.}}\"{{ end }} }) by ({{ $nsLabel }},category,policy,rule,kind,name,severity,status,source{{ range $filters }},{{.}}{{ end }})) by ({{ $nsLabel }},category,policy,rule,kind,name,severity,status,source{{ range $filters }},{{.}}{{ end }})",
             "format": "table",
             "instant": true,
             "interval": "",
@@ -583,7 +582,6 @@ data:
             "options": {
                 "excludeByName": {
                 "Time": true,
-                "Value": true,
                 "status": false
                 },
                 "indexByName": {
@@ -643,7 +641,7 @@ data:
         "pluginVersion": "7.1.5",
         "targets": [
             {
-            "expr": "sum(policy_report_result{policy=~\"$policy\", rule=~\"$rule\", category=~\"$category\", severity=~\"$severity\", source=~\"$source\", kind=~\"$kind\", {{ $nsLabel }}=~\"$namespace\", status=\"warn\"{{ range $filters }}, {{.}}=~\"${{.}}\"{{ end }} }) by ({{ $nsLabel }},category,policy,rule,kind,name,severity,status,source{{ range $filters }},{{.}}{{ end }} )",
+            "expr": "max(sum(policy_report_result{policy=~\"$policy\", rule=~\"$rule\", category=~\"$category\", severity=~\"$severity\", source=~\"$source\", kind=~\"$kind\", {{ $nsLabel }}=~\"$namespace\", status=\"warn\"{{ range $filters }}, {{.}}=~\"${{.}}\"{{ end }} }) by ({{ $nsLabel }},category,policy,rule,kind,name,severity,status,source{{ range $filters }},{{.}}{{ end }})) by ({{ $nsLabel }},category,policy,rule,kind,name,severity,status,source{{ range $filters }},{{.}}{{ end }} )",
             "format": "table",
             "instant": true,
             "interval": "",
@@ -660,7 +658,6 @@ data:
             "options": {
                 "excludeByName": {
                 "Time": true,
-                "Value": true,
                 "status": false
                 },
                 "indexByName": {
@@ -720,7 +717,7 @@ data:
         "pluginVersion": "7.1.5",
         "targets": [
             {
-            "expr": "sum(policy_report_result{policy=~\"$policy\", rule=~\"$rule\", category=~\"$category\", severity=~\"$severity\", source=~\"$source\", kind=~\"$kind\", {{ $nsLabel }}=~\"$namespace\", status=\"error\"{{ range $filters }}, {{.}}=~\"${{.}}\"{{ end }} }) by ({{ $nsLabel }},category,policy,rule,kind,name,severity,status,source{{ range $filters }},{{.}}{{ end }} )",
+            "expr": "max(sum(policy_report_result{policy=~\"$policy\", rule=~\"$rule\", category=~\"$category\", severity=~\"$severity\", source=~\"$source\", kind=~\"$kind\", {{ $nsLabel }}=~\"$namespace\", status=\"error\"{{ range $filters }}, {{.}}=~\"${{.}}\"{{ end }} }) by ({{ $nsLabel }},category,policy,rule,kind,name,severity,status,source{{ range $filters }},{{.}}{{ end }})) by ({{ $nsLabel }},category,policy,rule,kind,name,severity,status,source{{ range $filters }},{{.}}{{ end }})",
             "format": "table",
             "instant": true,
             "interval": "",
@@ -737,12 +734,10 @@ data:
             "options": {
                 "excludeByName": {
                 "Time": true,
-                "Value": true,
                 "status": false
                 },
                 "indexByName": {
                     "Time": 0,
-                    "Value": 9,
                     "category": 1,
                     "{{ $nsLabel }}": 3,
                     "kind": 4,
@@ -750,7 +745,8 @@ data:
                     "policy": 6,
                     "rule": 7,
                     "severity": 2,
-                    "status": 8
+                    "status": 8,
+                    "Value": 9
                 },
                 "renameByName": {
                 "{{ $nsLabel }}": "namespace"
