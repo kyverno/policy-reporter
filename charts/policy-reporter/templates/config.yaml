@@ -1,9 +1,8 @@
 {{- if not .Values.existingTargetConfig.enabled }}
-{{- if not .Values.existingSecret.enabled }}
 apiVersion: v1
-kind: Secret
+kind: ConfigMap
 metadata:
-  name: {{ include "policyreporter.fullname" . }}-secrets
+  name: {{ include "policyreporter.fullname" . }}-config
   namespace: {{ include "policyreporter.namespace" . }}
   {{- if .Values.annotations }}
   annotations:
@@ -11,8 +10,6 @@ metadata:
   {{- end }}
   labels:
     {{- include "policyreporter.labels" . | nindent 4 }}
-type: Opaque
 data:
-  secrets.yaml: {{ tpl (.Files.Get "secret.yaml") . | b65enc }}
-{{- end }}
+  config.yaml: {{ tpl (.Files.Get "config.yaml") . }}
 {{- end }}
