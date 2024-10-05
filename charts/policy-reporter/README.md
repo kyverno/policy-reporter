@@ -7,7 +7,7 @@ It creates Prometheus Metrics and can send rule validation events to different t
 
 ## Documentation
 
-You can find detailed Information and Screens about Features and Configurations in the [Documentation](https://kyverno.github.io/policy-reporter/guide/02-getting-started#core--policy-reporter-ui).
+You can find detailed Information and Screens about Features and Configurations in the [Documentation](https://kyverno.github.io/policy-reporter-docs).
 
 ## Installation with Helm v3
 
@@ -32,49 +32,42 @@ helm install policy-reporter policy-reporter/policy-reporter -n policy-reporter 
 You can use the Policy Reporter as standalone Application along with the optional UI SubChart.
 
 ### Installation with Policy Reporter UI and Kyverno Plugin enabled
+
 ```bash
-helm install policy-reporter policy-reporter/policy-reporter --set kyvernoPlugin.enabled=true --set ui.enabled=true --set ui.plugins.kyverno=true -n policy-reporter --create-namespace
+helm install policy-reporter policy-reporter/policy-reporter --set plugin.kyverno.enabled=true --set ui.enabled=true -n policy-reporter --create-namespace
 kubectl port-forward service/policy-reporter-ui 8082:8080 -n policy-reporter
 ```
 Open `http://localhost:8082/` in your browser.
-
-Check the [Documentation](https://kyverno.github.io/policy-reporter/guide/02-getting-started#core--policy-reporter-ui) for Screens and additional Information
-
-## Resources
-
-* [[Video] 37. #EveryoneCanContribute cafe: Policy reporter for Kyverno](https://youtu.be/1mKywg9f5Fw)
-* [[Video] Rawkode Live: Hands on Policy Reporter](https://www.youtube.com/watch?v=ZrOtTELNLyg)
-* [[Blog] Monitor Security and Best Practices with Kyverno and Policy Reporter](https://blog.webdev-jogeleit.de/blog/monitor-security-with-kyverno-and-policy-reporter/)
 
 ## Values
 
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
-| nameOverride | string | `""` |  |
-| fullnameOverride | string | `"policy-reporter"` |  |
-| namespaceOverride | string | `""` |  |
-| image.registry | string | `"ghcr.io"` |  |
-| image.repository | string | `"kyverno/policy-reporter"` |  |
-| image.pullPolicy | string | `"IfNotPresent"` |  |
-| image.tag | string | `"0dfbaa0"` |  |
-| imagePullSecrets | list | `[]` |  |
-| priorityClassName | string | `""` |  |
-| replicaCount | int | `1` |  |
-| revisionHistoryLimit | int | `10` |  |
-| deploymentStrategy | object | `{}` |  |
-| port.name | string | `"http"` |  |
-| port.number | int | `8080` |  |
-| annotations | object | `{}` |  |
-| rbac.enabled | bool | `true` |  |
-| serviceAccount.create | bool | `true` |  |
-| serviceAccount.annotations | object | `{}` |  |
-| serviceAccount.name | string | `""` |  |
-| service.enabled | bool | `true` |  |
-| service.annotations | object | `{}` |  |
-| service.labels | object | `{}` |  |
-| service.type | string | `"ClusterIP"` |  |
-| service.port | int | `8080` |  |
-| podSecurityContext.fsGroup | int | `1234` |  |
+| nameOverride | string | `""` | Override the chart name used for all resources |
+| fullnameOverride | string | `"policy-reporter"` | Overwrite the fullname of all resources |
+| namespaceOverride | string | `""` | Overwrite the namespace of all resources |
+| image.registry | string | `"ghcr.io"` | Image registry |
+| image.repository | string | `"kyverno/policy-reporter"` | Image repository |
+| image.pullPolicy | string | `"IfNotPresent"` | Image pullPolicy |
+| image.tag | string | `"0dfbaa0"` | Image tag |
+| imagePullSecrets | list | `[]` | Image pullSecrets |
+| priorityClassName | string | `""` | Deployment priorityClassName |
+| replicaCount | int | `1` | Deployment replica count |
+| revisionHistoryLimit | int | `10` | The number of revisions to keep |
+| updateStrategy | object | `{}` | Deployment strategy |
+| port | object | `{"name":"http","number":8080}` | Container port |
+| annotations | object | `{}` | Key/value pairs that are attached to all resources. |
+| rbac.enabled | bool | `true` | Create RBAC resources |
+| serviceAccount.create | bool | `true` | Create ServiceAccount |
+| serviceAccount.automount | bool | `true` | Enable ServiceAccount automaount |
+| serviceAccount.annotations | object | `{}` | Annotations for the ServiceAccount |
+| serviceAccount.name | string | `""` | The ServiceAccount name |
+| service.enabled | bool | `true` | Create Service |
+| service.type | string | `"ClusterIP"` | Service type |
+| service.port | int | `8080` | Service port |
+| service.annotations | object | `{}` | Service annotations |
+| service.labels | object | `{}` | Service labels |
+| podSecurityContext | object | `{"fsGroup":1234}` | Security context for the pod |
 | securityContext.runAsUser | int | `1234` |  |
 | securityContext.runAsNonRoot | bool | `true` |  |
 | securityContext.privileged | bool | `false` |  |
@@ -82,279 +75,266 @@ Check the [Documentation](https://kyverno.github.io/policy-reporter/guide/02-get
 | securityContext.readOnlyRootFilesystem | bool | `true` |  |
 | securityContext.capabilities.drop[0] | string | `"ALL"` |  |
 | securityContext.seccompProfile.type | string | `"RuntimeDefault"` |  |
-| podAnnotations | object | `{}` |  |
-| podLabels | object | `{}` |  |
-| resources | object | `{}` |  |
-| networkPolicy.enabled | bool | `false` |  |
-| networkPolicy.egress[0].to | string | `nil` |  |
-| networkPolicy.egress[0].ports[0].protocol | string | `"TCP"` |  |
-| networkPolicy.egress[0].ports[0].port | int | `6443` |  |
+| securityContext.podAnnotations | object | `{}` | Additional annotations to add to each pod |
+| securityContext.podLabels | object | `{}` | Additional labels to add to each pod |
+| resources | object | `{}` | Resource constraints |
+| networkPolicy.enabled | bool | `false` | Create NetworkPolicy |
+| networkPolicy.egress | list | `[{"ports":[{"port":6443,"protocol":"TCP"}],"to":null}]` | Egress rule to allowe Kubernetes API Server access |
 | networkPolicy.ingress | list | `[]` |  |
-| ingress.enabled | bool | `false` |  |
-| ingress.className | string | `""` |  |
-| ingress.labels | object | `{}` |  |
-| ingress.annotations | object | `{}` |  |
-| ingress.hosts[0].host | string | `"chart-example.local"` |  |
-| ingress.hosts[0].paths | list | `[]` |  |
-| ingress.tls | list | `[]` |  |
-| logging.encoding | string | `"console"` |  |
-| logging.logLevel | int | `0` |  |
-| logging.development | bool | `false` |  |
-| api.logging | bool | `false` |  |
-| rest.enabled | bool | `false` |  |
-| metrics.enabled | bool | `false` |  |
-| metrics.mode | string | `"detailed"` |  |
-| metrics.customLabels | list | `[]` |  |
-| profiling.enabled | bool | `false` |  |
-| worker | int | `5` |  |
-| reportFilter.namespaces.include | list | `[]` |  |
-| reportFilter.namespaces.exclude | list | `[]` |  |
-| reportFilter.disableClusterReports | bool | `false` |  |
+| ingress.enabled | bool | `false` | Create Ingress This ingress exposes the policy-reporter core app. |
+| ingress.className | string | `""` | Ingress className |
+| ingress.labels | object | `{}` | Labels for the Ingress |
+| ingress.annotations | object | `{}` | Annotations for the Ingress |
+| ingress.hosts | string | `nil` | Ingress host list |
+| ingress.tls | list | `[]` | Ingress tls list |
+| logging.server | bool | `false` | Enables server access logging |
+| logging.encoding | string | `"console"` | Log encoding possible encodings are console and json |
+| logging.logLevel | int | `0` | Log level default info |
+| rest.enabled | bool | `false` | Enables the REST API |
+| metrics.enabled | bool | `false` | Enables Prometheus Metrics |
+| metrics.mode | string | `"detailed"` | Metric Mode allowes to customize labels Allowed values: detailed, simple, custom |
+| metrics.customLabels | list | `[]` | List of used labels in custom mode Supported fields are: ["namespace", "rule", "policy", "report" // PolicyReport name, "kind" // resource kind, "name" // resource name, "status", "severity", "category", "source"] |
+| metrics.filter | object | `{}` | Filter results to reduce cardinality |
+| profiling.enabled | bool | `false` | Enable profiling with pprof |
+| worker | int | `5` | Amount of queue workers for PolicyReport resource processing |
+| reportFilter | object | `{}` | Filter PolicyReport resources to process |
 | sourceConfig | list | `[]` | Customize source specific logic like result ID generation |
-| sourceFilters | list | `[{"disableClusterReports":false,"kinds":{"exclude":["ReplicaSet"]},"selector":{"source":"kyverno"},"uncontrolledOnly":true}]` | Source based PolicyReport filter |
-| sourceFilters[0] | object | `{"disableClusterReports":false,"kinds":{"exclude":["ReplicaSet"]},"selector":{"source":"kyverno"},"uncontrolledOnly":true}` | PolicyReport selector. |
 | sourceFilters[0].selector.source | string | `"kyverno"` | select PolicyReport by source |
 | sourceFilters[0].uncontrolledOnly | bool | `true` | Filter out PolicyReports of controlled Pods and Jobs, only works for PolicyReport with scope resource |
 | sourceFilters[0].disableClusterReports | bool | `false` | Filter out ClusterPolicyReports |
 | sourceFilters[0].kinds | object | `{"exclude":["ReplicaSet"]}` | Filter out PolicyReports based on the scope resource kind |
-| global.labels | object | `{}` |  |
-| basicAuth.username | string | `""` |  |
-| basicAuth.password | string | `""` |  |
-| basicAuth.secretRef | string | `""` |  |
-| emailReports.clusterName | string | `""` |  |
-| emailReports.titlePrefix | string | `"Report"` |  |
-| emailReports.resources | object | `{}` |  |
-| emailReports.smtp.secret | string | `""` |  |
-| emailReports.smtp.host | string | `""` |  |
-| emailReports.smtp.port | int | `465` |  |
-| emailReports.smtp.username | string | `""` |  |
-| emailReports.smtp.password | string | `""` |  |
-| emailReports.smtp.from | string | `""` |  |
-| emailReports.smtp.encryption | string | `""` |  |
-| emailReports.smtp.skipTLS | bool | `false` |  |
-| emailReports.smtp.certificate | string | `""` |  |
-| emailReports.summary.enabled | bool | `false` |  |
-| emailReports.summary.schedule | string | `"0 8 * * *"` |  |
-| emailReports.summary.activeDeadlineSeconds | int | `300` |  |
-| emailReports.summary.backoffLimit | int | `3` |  |
-| emailReports.summary.ttlSecondsAfterFinished | int | `0` |  |
-| emailReports.summary.restartPolicy | string | `"Never"` |  |
-| emailReports.summary.to | list | `[]` |  |
-| emailReports.summary.filter | object | `{}` |  |
-| emailReports.summary.channels | list | `[]` |  |
-| emailReports.violations.enabled | bool | `false` |  |
-| emailReports.violations.schedule | string | `"0 8 * * *"` |  |
-| emailReports.violations.activeDeadlineSeconds | int | `300` |  |
-| emailReports.violations.backoffLimit | int | `3` |  |
-| emailReports.violations.ttlSecondsAfterFinished | int | `0` |  |
-| emailReports.violations.restartPolicy | string | `"Never"` |  |
-| emailReports.violations.to | list | `[]` |  |
-| emailReports.violations.filter | object | `{}` |  |
-| emailReports.violations.channels | list | `[]` |  |
-| existingTargetConfig.enabled | bool | `false` |  |
-| existingTargetConfig.name | string | `""` |  |
-| existingTargetConfig.subPath | string | `""` |  |
-| target.loki.host | string | `""` |  |
-| target.loki.certificate | string | `""` |  |
-| target.loki.skipTLS | bool | `false` |  |
-| target.loki.secretRef | string | `""` |  |
-| target.loki.mountedSecret | string | `""` |  |
-| target.loki.path | string | `""` |  |
-| target.loki.minimumSeverity | string | `""` |  |
-| target.loki.sources | list | `[]` |  |
-| target.loki.skipExistingOnStartup | bool | `true` |  |
-| target.loki.customFields | object | `{}` |  |
-| target.loki.headers | object | `{}` |  |
-| target.loki.username | string | `""` |  |
-| target.loki.password | string | `""` |  |
-| target.loki.filter | object | `{}` |  |
-| target.loki.channels | list | `[]` |  |
-| target.elasticsearch.host | string | `""` |  |
-| target.elasticsearch.certificate | string | `""` |  |
-| target.elasticsearch.skipTLS | bool | `false` |  |
-| target.elasticsearch.index | string | `"policy-reporter"` |  |
-| target.elasticsearch.username | string | `""` |  |
-| target.elasticsearch.password | string | `""` |  |
-| target.elasticsearch.apiKey | string | `""` |  |
-| target.elasticsearch.secretRef | string | `""` |  |
-| target.elasticsearch.mountedSecret | string | `""` |  |
-| target.elasticsearch.rotation | string | `"daily"` |  |
-| target.elasticsearch.minimumSeverity | string | `""` |  |
-| target.elasticsearch.sources | list | `[]` |  |
-| target.elasticsearch.skipExistingOnStartup | bool | `true` |  |
-| target.elasticsearch.typelessApi | bool | `false` |  |
-| target.elasticsearch.customFields | object | `{}` |  |
-| target.elasticsearch.filter | object | `{}` |  |
-| target.elasticsearch.channels | list | `[]` |  |
-| target.slack.webhook | string | `""` |  |
-| target.slack.channel | string | `""` |  |
-| target.slack.secretRef | string | `""` |  |
-| target.slack.mountedSecret | string | `""` |  |
-| target.slack.minimumSeverity | string | `""` |  |
-| target.slack.sources | list | `[]` |  |
-| target.slack.skipExistingOnStartup | bool | `true` |  |
-| target.slack.customFields | object | `{}` |  |
-| target.slack.filter | object | `{}` |  |
-| target.slack.channels | list | `[]` |  |
-| target.discord.webhook | string | `""` |  |
-| target.discord.secretRef | string | `""` |  |
-| target.discord.mountedSecret | string | `""` |  |
-| target.discord.minimumSeverity | string | `""` |  |
-| target.discord.sources | list | `[]` |  |
-| target.discord.skipExistingOnStartup | bool | `true` |  |
-| target.discord.filter | object | `{}` |  |
-| target.discord.channels | list | `[]` |  |
-| target.teams.webhook | string | `""` |  |
-| target.teams.secretRef | string | `""` |  |
-| target.teams.mountedSecret | string | `""` |  |
-| target.teams.certificate | string | `""` |  |
-| target.teams.skipTLS | bool | `false` |  |
-| target.teams.minimumSeverity | string | `""` |  |
-| target.teams.sources | list | `[]` |  |
-| target.teams.skipExistingOnStartup | bool | `true` |  |
-| target.teams.filter | object | `{}` |  |
-| target.teams.channels | list | `[]` |  |
-| target.webhook.host | string | `""` |  |
-| target.webhook.certificate | string | `""` |  |
-| target.webhook.skipTLS | bool | `false` |  |
-| target.webhook.secretRef | string | `""` |  |
-| target.webhook.mountedSecret | string | `""` |  |
-| target.webhook.headers | object | `{}` |  |
-| target.webhook.minimumSeverity | string | `""` |  |
-| target.webhook.sources | list | `[]` |  |
-| target.webhook.skipExistingOnStartup | bool | `true` |  |
-| target.webhook.customFields | object | `{}` |  |
-| target.webhook.filter | object | `{}` |  |
-| target.webhook.channels | list | `[]` |  |
-| target.telegram.token | string | `""` |  |
-| target.telegram.chatId | string | `""` |  |
-| target.telegram.host | string | `""` |  |
-| target.telegram.certificate | string | `""` |  |
-| target.telegram.skipTLS | bool | `false` |  |
-| target.telegram.secretRef | string | `""` |  |
-| target.telegram.mountedSecret | string | `""` |  |
-| target.telegram.headers | object | `{}` |  |
-| target.telegram.minimumSeverity | string | `""` |  |
-| target.telegram.sources | list | `[]` |  |
-| target.telegram.skipExistingOnStartup | bool | `true` |  |
-| target.telegram.customFields | object | `{}` |  |
-| target.telegram.filter | object | `{}` |  |
-| target.telegram.channels | list | `[]` |  |
-| target.googleChat.webhook | string | `""` |  |
-| target.googleChat.certificate | string | `""` |  |
-| target.googleChat.skipTLS | bool | `false` |  |
-| target.googleChat.secretRef | string | `""` |  |
-| target.googleChat.mountedSecret | string | `""` |  |
-| target.googleChat.headers | object | `{}` |  |
-| target.googleChat.minimumSeverity | string | `""` |  |
-| target.googleChat.sources | list | `[]` |  |
-| target.googleChat.skipExistingOnStartup | bool | `true` |  |
-| target.googleChat.customFields | object | `{}` |  |
-| target.googleChat.filter | object | `{}` |  |
-| target.googleChat.channels | list | `[]` |  |
-| target.s3.accessKeyId | string | `""` |  |
-| target.s3.secretAccessKey | string | `""` |  |
-| target.s3.secretRef | string | `""` |  |
-| target.s3.mountedSecret | string | `""` |  |
-| target.s3.region | string | `""` |  |
-| target.s3.endpoint | string | `""` |  |
-| target.s3.bucket | string | `""` |  |
-| target.s3.bucketKeyEnabled | bool | `false` |  |
-| target.s3.kmsKeyId | string | `""` |  |
-| target.s3.serverSideEncryption | string | `""` |  |
-| target.s3.pathStyle | bool | `false` |  |
-| target.s3.prefix | string | `""` |  |
-| target.s3.minimumSeverity | string | `""` |  |
-| target.s3.sources | list | `[]` |  |
-| target.s3.skipExistingOnStartup | bool | `true` |  |
-| target.s3.customFields | object | `{}` |  |
-| target.s3.filter | object | `{}` |  |
-| target.s3.channels | list | `[]` |  |
-| target.kinesis.accessKeyId | string | `""` |  |
-| target.kinesis.secretAccessKey | string | `""` |  |
-| target.kinesis.secretRef | string | `""` |  |
-| target.kinesis.mountedSecret | string | `""` |  |
-| target.kinesis.region | string | `""` |  |
-| target.kinesis.endpoint | string | `""` |  |
-| target.kinesis.streamName | string | `""` |  |
-| target.kinesis.minimumSeverity | string | `""` |  |
-| target.kinesis.sources | list | `[]` |  |
-| target.kinesis.skipExistingOnStartup | bool | `true` |  |
-| target.kinesis.customFields | object | `{}` |  |
-| target.kinesis.filter | object | `{}` |  |
-| target.kinesis.channels | list | `[]` |  |
-| target.securityHub.accessKeyId | string | `""` |  |
-| target.securityHub.secretAccessKey | string | `""` |  |
-| target.securityHub.secretRef | string | `""` |  |
-| target.securityHub.mountedSecret | string | `""` |  |
-| target.securityHub.region | string | `""` |  |
-| target.securityHub.endpoint | string | `""` |  |
-| target.securityHub.accountId | string | `""` |  |
-| target.securityHub.productName | string | `""` |  |
-| target.securityHub.companyName | string | `""` |  |
-| target.securityHub.minimumSeverity | string | `""` |  |
-| target.securityHub.sources | list | `[]` |  |
-| target.securityHub.skipExistingOnStartup | bool | `false` |  |
-| target.securityHub.synchronize | bool | `true` |  |
-| target.securityHub.delayInSeconds | int | `2` |  |
-| target.securityHub.customFields | object | `{}` |  |
-| target.securityHub.filter | object | `{}` |  |
-| target.securityHub.channels | list | `[]` |  |
-| target.gcs.credentials | string | `""` |  |
-| target.gcs.secretRef | string | `""` |  |
-| target.gcs.mountedSecret | string | `""` |  |
-| target.gcs.bucket | string | `""` |  |
-| target.gcs.minimumSeverity | string | `""` |  |
-| target.gcs.sources | list | `[]` |  |
-| target.gcs.skipExistingOnStartup | bool | `true` |  |
-| target.gcs.customFields | object | `{}` |  |
-| target.gcs.filter | object | `{}` |  |
-| target.gcs.channels | list | `[]` |  |
+| global.labels | object | `{}` | additional labels added on each resource |
+| basicAuth.username | string | `""` | HTTP BasicAuth username |
+| basicAuth.password | string | `""` | HTTP BasicAuth password |
+| basicAuth.secretRef | optional | `""` | Secret reference to get username and/or password from |
+| emailReports.clusterName | optional | `""` | - Displayed in the email report if configured |
+| emailReports.titlePrefix | string | `"Report"` | Title prefix in the email subject |
+| emailReports.resources | object | `{}` | Resource constraints for the created CronJobs |
+| emailReports.smtp.secret | optional | `""` | Secret reference to provide the complete or partial SMTP configuration |
+| emailReports.smtp.host | string | `""` | SMTP Server Host |
+| emailReports.smtp.port | int | `465` | SMTP Server Port |
+| emailReports.smtp.username | string | `""` | SMTP Username |
+| emailReports.smtp.password | string | `""` | SMTP Password |
+| emailReports.smtp.from | string | `""` | Displayed from email address |
+| emailReports.smtp.encryption | string | `""` | SMTP Encryption Default is none, supports ssl/tls and starttls |
+| emailReports.smtp.skipTLS | bool | `false` | Skip SMTP TLS verification |
+| emailReports.smtp.certificate | string | `""` | SMTP Server Certificate file path |
+| emailReports.summary.enabled | bool | `false` | Enable Summary E-Mail reports |
+| emailReports.summary.schedule | string | `"0 8 * * *"` | CronJob schedule |
+| emailReports.summary.activeDeadlineSeconds | int | `300` | CronJob activeDeadlineSeconds |
+| emailReports.summary.backoffLimit | int | `3` | CronJob backoffLimit |
+| emailReports.summary.ttlSecondsAfterFinished | int | `0` | CronJob ttlSecondsAfterFinished |
+| emailReports.summary.restartPolicy | string | `"Never"` | CronJob restartPolicy |
+| emailReports.summary.to | list | `[]` | List of receiver email addresses |
+| emailReports.summary.filter | optional | `{}` | Report filter |
+| emailReports.summary.channels | optional | `[]` | Channels can be used to to send only a subset of namespaces / sources to dedicated email addresses |
+| emailReports.violations.enabled | bool | `false` | Enable Violation Summary E-Mail reports |
+| emailReports.violations.schedule | string | `"0 8 * * *"` | CronJob schedule |
+| emailReports.violations.activeDeadlineSeconds | int | `300` | CronJob activeDeadlineSeconds |
+| emailReports.violations.backoffLimit | int | `3` | CronJob backoffLimit |
+| emailReports.violations.ttlSecondsAfterFinished | int | `0` | CronJob ttlSecondsAfterFinished |
+| emailReports.violations.restartPolicy | string | `"Never"` | CronJob restartPolicy |
+| emailReports.violations.to | list | `[]` | List of receiver email addresses |
+| emailReports.violations.filter | optional | `{}` | Report filter |
+| emailReports.violations.channels | optional | `[]` | Channels can be used to to send only a subset of namespaces / sources to dedicated email addresses |
+| existingTargetConfig.enabled | bool | `false` | Use an already existing configuration |
+| existingTargetConfig.name | string | `""` | Name of the secret with the config |
+| existingTargetConfig.subPath | string | `""` | SubPath within the secret (defaults to config.yaml) |
+| target.loki.host | string | `""` | Host Address |
+| target.loki.path | string | `""` | Loki API, defaults to "/loki/api/v1/push" |
+| target.loki.certificate | string | `""` | Server Certificate file path Can be added under extraVolumes |
+| target.loki.skipTLS | bool | `false` | Skip TLS verification |
+| target.loki.secretRef | string | `""` | Read configuration from an already existing Secret |
+| target.loki.mountedSecret | string | `""` | Mounted secret path by Secrets Controller, secret should be in json format |
+| target.loki.minimumSeverity | string | `""` | Minimum severity: "" < info < low < medium < high < critical |
+| target.loki.sources | list | `[]` | List of sources which should send |
+| target.loki.skipExistingOnStartup | bool | `true` | Skip already existing PolicyReportResults on startup |
+| target.loki.customFields | object | `{}` | Added as additional labels |
+| target.loki.headers | object | `{}` | Additional HTTP Headers |
+| target.loki.username | string | `""` | HTTP BasicAuth username |
+| target.loki.password | string | `""` | HTTP BasicAuth password |
+| target.loki.filter | object | `{}` | Filter Results which should send to this target Wildcars for namespaces and policies are supported, you can either define exclude or include values Filters are available for all targets except the UI |
+| target.loki.channels | list | `[]` | List of channels to route results to different configurations |
+| target.elasticsearch.host | string | `""` | Host address |
+| target.elasticsearch.certificate | string | `""` | Server Certificate file path Can be added under extraVolumes |
+| target.elasticsearch.skipTLS | bool | `false` | Skip TLS verification |
+| target.elasticsearch.index | string | `"policy-reporter"` | Elasticsearch index (default: policy-reporter) |
+| target.elasticsearch.rotation | string | `"daily"` | Elasticsearch index rotation and index suffix Possible values: daily, monthly, annually, none (default: daily) |
+| target.elasticsearch.typelessApi | bool | `false` | Enables Elasticsearch typless API https://www.elastic.co/blog/moving-from-types-to-typeless-apis-in-elasticsearch-7-0 keeping as false for retrocompatibility. |
+| target.elasticsearch.username | string | `""` | HTTP BasicAuth username |
+| target.elasticsearch.password | string | `""` | HTTP BasicAuth password |
+| target.elasticsearch.apiKey | string | `""` | Elasticsearch API Key for api key authentication |
+| target.elasticsearch.secretRef | string | `""` | Read configuration from an already existing Secret |
+| target.elasticsearch.mountedSecret | string | `""` | Mounted secret path by Secrets Controller, secret should be in json format |
+| target.elasticsearch.minimumSeverity | string | `""` | Minimum severity: "" < info < low < medium < high < critical |
+| target.elasticsearch.sources | list | `[]` | List of sources which should send |
+| target.elasticsearch.skipExistingOnStartup | bool | `true` | Skip already existing PolicyReportResults on startup |
+| target.elasticsearch.customFields | object | `{}` | Added as additional labels |
+| target.elasticsearch.filter | object | `{}` | Filter Results which should send to this target Wildcars for namespaces and policies are supported, you can either define exclude or include values Filters are available for all targets except the UI |
+| target.elasticsearch.channels | list | `[]` | List of channels to route results to different configurations |
+| target.slack.webhook | string | `""` | Webhook Address |
+| target.slack.channel | string | `""` | Slack Channel |
+| target.slack.secretRef | string | `""` | Read configuration from an already existing Secret |
+| target.slack.mountedSecret | string | `""` | Mounted secret path by Secrets Controller, secret should be in json format |
+| target.slack.minimumSeverity | string | `""` | Minimum severity: "" < info < low < medium < high < critical |
+| target.slack.sources | list | `[]` | List of sources which should send |
+| target.slack.skipExistingOnStartup | bool | `true` | Skip already existing PolicyReportResults on startup |
+| target.slack.customFields | object | `{}` | Added as additional labels |
+| target.slack.filter | object | `{}` | Filter Results which should send to this target Wildcars for namespaces and policies are supported, you can either define exclude or include values Filters are available for all targets except the UI |
+| target.slack.channels | list | `[]` | List of channels to route results to different configurations |
+| target.discord.webhook | string | `""` | Webhook Address |
+| target.discord.secretRef | string | `""` | Read configuration from an already existing Secret |
+| target.discord.mountedSecret | string | `""` | Mounted secret path by Secrets Controller, secret should be in json format |
+| target.discord.minimumSeverity | string | `""` | Minimum severity: "" < info < low < medium < high < critical |
+| target.discord.sources | list | `[]` | List of sources which should send |
+| target.discord.skipExistingOnStartup | bool | `true` | Skip already existing PolicyReportResults on startup |
+| target.discord.customFields | object | `{}` | Added as additional labels |
+| target.discord.filter | object | `{}` | Filter Results which should send to this target Wildcars for namespaces and policies are supported, you can either define exclude or include values Filters are available for all targets except the UI |
+| target.discord.channels | list | `[]` | List of channels to route results to different configurations |
+| target.teams.webhook | string | `""` | Webhook Address |
+| target.teams.secretRef | string | `""` | Read configuration from an already existing Secret |
+| target.teams.mountedSecret | string | `""` | Mounted secret path by Secrets Controller, secret should be in json format |
+| target.teams.minimumSeverity | string | `""` | Minimum severity: "" < info < low < medium < high < critical |
+| target.teams.sources | list | `[]` | List of sources which should send |
+| target.teams.skipExistingOnStartup | bool | `true` | Skip already existing PolicyReportResults on startup |
+| target.teams.customFields | object | `{}` | Added as additional labels |
+| target.teams.filter | object | `{}` | Filter Results which should send to this target Wildcars for namespaces and policies are supported, you can either define exclude or include values Filters are available for all targets except the UI |
+| target.teams.channels | list | `[]` | List of channels to route results to different configurations |
+| target.webhook.host | string | `""` | Webhook Address |
+| target.webhook.headers | object | `{}` | Additional HTTP Headers |
+| target.webhook.secretRef | string | `""` | Read configuration from an already existing Secret |
+| target.webhook.mountedSecret | string | `""` | Mounted secret path by Secrets Controller, secret should be in json format |
+| target.webhook.minimumSeverity | string | `""` | Minimum severity: "" < info < low < medium < high < critical |
+| target.webhook.sources | list | `[]` | List of sources which should send |
+| target.webhook.skipExistingOnStartup | bool | `true` | Skip already existing PolicyReportResults on startup |
+| target.webhook.customFields | object | `{}` | Added as additional labels |
+| target.webhook.filter | object | `{}` | Filter Results which should send to this target Wildcars for namespaces and policies are supported, you can either define exclude or include values Filters are available for all targets except the UI |
+| target.webhook.channels | list | `[]` | List of channels to route results to different configurations |
+| target.telegram.token | string | `""` | Telegram bot token |
+| target.telegram.chatId | string | `""` | Telegram chat id |
+| target.telegram.host | optional | `""` | Telegram proxy host |
+| target.telegram.headers | object | `{}` | Additional HTTP Headers |
+| target.telegram.secretRef | string | `""` | Read configuration from an already existing Secret |
+| target.telegram.mountedSecret | string | `""` | Mounted secret path by Secrets Controller, secret should be in json format |
+| target.telegram.minimumSeverity | string | `""` | Minimum severity: "" < info < low < medium < high < critical |
+| target.telegram.sources | list | `[]` | List of sources which should send |
+| target.telegram.skipExistingOnStartup | bool | `true` | Skip already existing PolicyReportResults on startup |
+| target.telegram.customFields | object | `{}` | Added as additional labels |
+| target.telegram.filter | object | `{}` | Filter Results which should send to this target Wildcars for namespaces and policies are supported, you can either define exclude or include values Filters are available for all targets except the UI |
+| target.telegram.channels | list | `[]` | List of channels to route results to different configurations |
+| target.googleChat.webhook | string | `""` | Webhook Address |
+| target.googleChat.headers | object | `{}` | Additional HTTP Headers |
+| target.googleChat.secretRef | string | `""` | Read configuration from an already existing Secret |
+| target.googleChat.mountedSecret | string | `""` | Mounted secret path by Secrets Controller, secret should be in json format |
+| target.googleChat.minimumSeverity | string | `""` | Minimum severity: "" < info < low < medium < high < critical |
+| target.googleChat.sources | list | `[]` | List of sources which should send |
+| target.googleChat.skipExistingOnStartup | bool | `true` | Skip already existing PolicyReportResults on startup |
+| target.googleChat.customFields | object | `{}` | Added as additional labels |
+| target.googleChat.filter | object | `{}` | Filter Results which should send to this target Wildcars for namespaces and policies are supported, you can either define exclude or include values Filters are available for all targets except the UI |
+| target.googleChat.channels | list | `[]` | List of channels to route results to different configurations |
+| target.s3.accessKeyId | optional | `""` | S3 Access key |
+| target.s3.secretAccessKey | optional | `""` | S3 SecretAccess key |
+| target.s3.region | optional | `""` | S3 Storage region |
+| target.s3.endpoint | optional | `""` | S3 Storage endpoint |
+| target.s3.bucket | required | `""` | S3 Storage bucket name |
+| target.s3.bucketKeyEnabled | bool | `false` | S3 Storage to use an S3 Bucket Key for object encryption with SSE-KMS |
+| target.s3.kmsKeyId | string | `""` | S3 Storage KMS Key ID for object encryption with SSE-KMS |
+| target.s3.serverSideEncryption | string | `""` | S3 Storage server-side encryption algorithm used when storing this object in Amazon S3, AES256, aws:kms |
+| target.s3.pathStyle | bool | `false` | S3 Storage, force path style configuration |
+| target.s3.prefix | string | `""` | Used prefix, keys will have format: s3://<bucket>/<prefix>/YYYY-MM-DD/YYYY-MM-DDTHH:mm:ss.s+01:00.json |
+| target.s3.secretRef | string | `""` | Read configuration from an already existing Secret |
+| target.s3.mountedSecret | string | `""` | Mounted secret path by Secrets Controller, secret should be in json format |
+| target.s3.minimumSeverity | string | `""` | Minimum severity: "" < info < low < medium < high < critical |
+| target.s3.sources | list | `[]` | List of sources which should send |
+| target.s3.skipExistingOnStartup | bool | `true` | Skip already existing PolicyReportResults on startup |
+| target.s3.customFields | object | `{}` | Added as additional labels |
+| target.s3.filter | object | `{}` | Filter Results which should send to this target Wildcars for namespaces and policies are supported, you can either define exclude or include values Filters are available for all targets except the UI |
+| target.s3.channels | list | `[]` | List of channels to route results to different configurations |
+| target.kinesis.accessKeyId | optional | `""` | Access key |
+| target.kinesis.secretAccessKey | optional | `""` | SecretAccess key |
+| target.kinesis.region | optional | `""` | Region |
+| target.kinesis.endpoint | optional | `""` | Endpoint |
+| target.kinesis.streamName | required | `""` | StreamName |
+| target.kinesis.secretRef | string | `""` | Read configuration from an already existing Secret |
+| target.kinesis.mountedSecret | string | `""` | Mounted secret path by Secrets Controller, secret should be in json format |
+| target.kinesis.minimumSeverity | string | `""` | Minimum severity: "" < info < low < medium < high < critical |
+| target.kinesis.sources | list | `[]` | List of sources which should send |
+| target.kinesis.skipExistingOnStartup | bool | `true` | Skip already existing PolicyReportResults on startup |
+| target.kinesis.customFields | object | `{}` | Added as additional labels |
+| target.kinesis.filter | object | `{}` | Filter Results which should send to this target Wildcars for namespaces and policies are supported, you can either define exclude or include values Filters are available for all targets except the UI |
+| target.kinesis.channels | list | `[]` | List of channels to route results to different configurations |
+| target.securityHub.accessKeyId | optional | `""` | Access key |
+| target.securityHub.secretAccessKey | optional | `""` | SecretAccess key |
+| target.securityHub.region | optional | `""` | Region |
+| target.securityHub.endpoint | optional | `""` | Endpoint |
+| target.securityHub.accountId | required | `""` | AccountId |
+| target.securityHub.productName | optional | `""` | Used product name, defaults to "Polilcy Reporter" |
+| target.securityHub.companyName | optional | `""` | Used company name, defaults to "Kyverno" |
+| target.securityHub.synchronize | bool | `true` | Enable cleanup listener for SecurityHub |
+| target.securityHub.delayInSeconds | int | `2` | Delay between AWS GetFindings API calls, to avoid hitting the API RequestLimit |
+| target.securityHub.secretRef | string | `""` | Read configuration from an already existing Secret |
+| target.securityHub.mountedSecret | string | `""` | Mounted secret path by Secrets Controller, secret should be in json format |
+| target.securityHub.minimumSeverity | string | `""` | Minimum severity: "" < info < low < medium < high < critical |
+| target.securityHub.sources | list | `[]` | List of sources which should send |
+| target.securityHub.skipExistingOnStartup | bool | `true` | Skip already existing PolicyReportResults on startup |
+| target.securityHub.customFields | object | `{}` | Added as additional labels |
+| target.securityHub.filter | object | `{}` | Filter Results which should send to this target Wildcars for namespaces and policies are supported, you can either define exclude or include values Filters are available for all targets except the UI |
+| target.securityHub.channels | list | `[]` | List of channels to route results to different configurations |
+| target.gcs.credentials | optional | `""` | GCS (Google Cloud Storage) Service Accout Credentials |
+| target.gcs.bucket | required | `""` | GCS Bucket |
+| target.gcs.secretRef | string | `""` | Read configuration from an already existing Secret |
+| target.gcs.mountedSecret | string | `""` | Mounted secret path by Secrets Controller, secret should be in json format |
+| target.gcs.minimumSeverity | string | `""` | Minimum severity: "" < info < low < medium < high < critical |
+| target.gcs.sources | list | `[]` | List of sources which should send |
+| target.gcs.skipExistingOnStartup | bool | `true` | Skip already existing PolicyReportResults on startup |
+| target.gcs.customFields | object | `{}` | Added as additional labels |
+| target.gcs.filter | object | `{}` | Filter Results which should send to this target Wildcars for namespaces and policies are supported, you can either define exclude or include values Filters are available for all targets except the UI |
+| target.gcs.channels | list | `[]` | List of channels to route results to different configurations |
 | leaderElection.releaseOnCancel | bool | `true` |  |
 | leaderElection.leaseDuration | int | `15` |  |
 | leaderElection.renewDeadline | int | `10` |  |
 | leaderElection.retryPeriod | int | `2` |  |
-| redis.enabled | bool | `false` |  |
-| redis.address | string | `""` |  |
-| redis.database | int | `0` |  |
-| redis.prefix | string | `"policy-reporter"` |  |
-| redis.username | string | `""` |  |
-| redis.password | string | `""` |  |
-| database.type | string | `""` |  |
-| database.database | string | `""` |  |
-| database.username | string | `""` |  |
-| database.password | string | `""` |  |
-| database.host | string | `""` |  |
-| database.enableSSL | bool | `false` |  |
-| database.dsn | string | `""` |  |
-| database.secretRef | string | `""` |  |
+| redis.enabled | bool | `false` | Enables Redis as external result cache, uses in memory cache by default |
+| redis.address | string | `""` | Redis host |
+| redis.database | int | `0` | Redis database |
+| redis.prefix | string | `"policy-reporter"` | Redis key prefix |
+| redis.username | optional | `""` | Username |
+| redis.password | optional | `""` | Password |
+| database.type | string | `""` | Use an external Database, supported: mysql, postgres, mariadb |
+| database.database | string | `""` | Database |
+| database.username | string | `""` | Username |
+| database.password | string | `""` | Password |
+| database.host | string | `""` | Host Address |
+| database.enableSSL | bool | `false` | Enables SSL |
+| database.dsn | string | `""` | Instead of configure the individual values you can also provide an DSN string example postgres: postgres://postgres:password@localhost:5432/postgres?sslmode=disable example mysql: root:password@tcp(localhost:3306)/test?tls=false |
+| database.secretRef | string | `""` | Read configuration from an existing Secret supported fields: username, password, host, dsn, database |
 | database.mountedSecret | string | `""` |  |
 | podDisruptionBudget.minAvailable | int | `1` | Configures the minimum available pods for policy-reporter disruptions. Cannot be used if `maxUnavailable` is set. |
 | podDisruptionBudget.maxUnavailable | string | `nil` | Configures the maximum unavailable pods for policy-reporter disruptions. Cannot be used if `minAvailable` is set. |
-| nodeSelector | object | `{}` |  |
-| tolerations | list | `[]` |  |
-| affinity | object | `{}` |  |
-| topologySpreadConstraints | list | `[]` |  |
-| livenessProbe.httpGet.path | string | `"/ready"` |  |
-| livenessProbe.httpGet.port | string | `"http"` |  |
-| readinessProbe.httpGet.path | string | `"/healthz"` |  |
-| readinessProbe.httpGet.port | string | `"http"` |  |
-| extraVolumes.volumeMounts | list | `[]` |  |
-| extraVolumes.volumes | list | `[]` |  |
-| sqliteVolume | object | `{}` |  |
+| nodeSelector | object | `{}` | Node labels for pod assignment ref: https://kubernetes.io/docs/user-guide/node-selection/ |
+| tolerations | list | `[]` | Tolerations for pod assignment ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/ |
+| affinity | object | `{}` | Anti-affinity to disallow deploying client and master nodes on the same worker node |
+| topologySpreadConstraints | list | `[]` | Topology Spread Constraints to better spread pods |
+| livenessProbe | object | `{"httpGet":{"path":"/ready","port":"http"}}` | Deployment livenessProbe for policy-reporter |
+| readinessProbe | object | `{"httpGet":{"path":"/healthz","port":"http"}}` | Deployment readinessProbe for policy-reporter |
+| extraVolumes.volumeMounts | list | `[]` | Deployment volumeMounts |
+| extraVolumes.volumes | list | `[]` | Deployment values |
+| sqliteVolume | object | `{}` | If set the volume for sqlite is freely configurable below "- name: sqlite". If no value is set an emptyDir is used. |
 | envVars | list | `[]` | Allow additional env variables to be added |
 | tmpVolume | object | `{}` | Allow custom configuration of the /tmp volume |
-| ui.enabled | bool | `false` |  |
+| ui.enabled | bool | `false` | Enable Policy Reporter UI |
 | ui.image.registry | string | `"ghcr.io"` | Image registry |
 | ui.image.repository | string | `"kyverno/policy-reporter-ui"` | Image repository |
 | ui.image.pullPolicy | string | `"IfNotPresent"` | Image PullPolicy |
-| ui.image.tag | string | `"2.0.0-beta.14"` | Image tag Defaults to `Chart.AppVersion` if omitted |
+| ui.image.tag | string | `"2.0.0-rc.1"` | Image tag |
 | ui.replicaCount | int | `1` | Deployment replica count |
 | ui.tempDir | string | `"/tmp"` | Temporary Directory to persist session data for authentication |
-| ui.logging.encoding | string | `"console"` | log encoding possible encodings are console and json |
-| ui.logging.logLevel | int | `0` | log level default info |
+| ui.logging.api | bool | `false` | Enables external api request logging |
+| ui.logging.server | bool | `false` | Enables server access logging |
+| ui.logging.encoding | string | `"console"` | Log encoding possible encodings are console and json |
+| ui.logging.logLevel | int | `0` | Log level default info |
 | ui.server.port | int | `8080` | Application port |
-| ui.server.logging | bool | `false` | Enables Access logging |
+| ui.server.cors | bool | `true` | Enabled CORS header |
 | ui.server.overwriteHost | bool | `true` | Overwrites Request Host with Proxy Host and adds `X-Forwarded-Host` and `X-Origin-Host` headers |
 | ui.openIDConnect.enabled | bool | `false` | Enable openID Connect authentication |
 | ui.openIDConnect.discoveryUrl | string | `""` | OpenID Connect Discovery URL |
@@ -390,7 +370,13 @@ Check the [Documentation](https://kyverno.github.io/policy-reporter/guide/02-get
 | ui.podSecurityContext | object | `{"runAsGroup":1234,"runAsUser":1234}` | Security context for the pod |
 | ui.envVars | list | `[]` | Allow additional env variables to be added |
 | ui.rbac.enabled | bool | `true` | Create RBAC resources |
-| ui.securityContext | object | `{"allowPrivilegeEscalation":false,"capabilities":{"drop":["ALL"]},"privileged":false,"readOnlyRootFilesystem":true,"runAsNonRoot":true,"runAsUser":1234,"seccompProfile":{"type":"RuntimeDefault"}}` | Container security context |
+| ui.securityContext.runAsUser | int | `1234` |  |
+| ui.securityContext.runAsNonRoot | bool | `true` |  |
+| ui.securityContext.privileged | bool | `false` |  |
+| ui.securityContext.allowPrivilegeEscalation | bool | `false` |  |
+| ui.securityContext.readOnlyRootFilesystem | bool | `true` |  |
+| ui.securityContext.capabilities.drop[0] | string | `"ALL"` |  |
+| ui.securityContext.seccompProfile.type | string | `"RuntimeDefault"` |  |
 | ui.service.type | string | `"ClusterIP"` | Service type. |
 | ui.service.port | int | `8080` | Service port. |
 | ui.service.annotations | object | `{}` | Service annotations. |
@@ -406,7 +392,7 @@ Check the [Documentation](https://kyverno.github.io/policy-reporter/guide/02-get
 | ui.networkPolicy.enabled | bool | `false` | When true, use a NetworkPolicy to allow ingress to the webhook This is useful on clusters using Calico and/or native k8s network policies in a default-deny setup. |
 | ui.networkPolicy.egress | list | `[{"ports":[{"port":6443,"protocol":"TCP"}]}]` | A list of valid from selectors according to https://kubernetes.io/docs/concepts/services-networking/network-policies. Enables Kubernetes API Server by default |
 | ui.networkPolicy.ingress | list | `[]` | A list of valid from selectors according to https://kubernetes.io/docs/concepts/services-networking/network-policies. |
-| ui.resources | object | `{}` |  |
+| ui.resources | object | `{}` | Resource constraints |
 | ui.podDisruptionBudget.minAvailable | int | `1` | Configures the minimum available pods for kyvernoPlugin disruptions. Cannot be used if `maxUnavailable` is set. |
 | ui.podDisruptionBudget.maxUnavailable | string | `nil` | Configures the maximum unavailable pods for kyvernoPlugin disruptions. Cannot be used if `minAvailable` is set. |
 | ui.nodeSelector | object | `{}` | Node labels for pod assignment |
@@ -418,10 +404,10 @@ Check the [Documentation](https://kyverno.github.io/policy-reporter/guide/02-get
 | plugin.kyverno.image.pullPolicy | string | `"IfNotPresent"` | Image PullPolicy |
 | plugin.kyverno.image.tag | string | `"0.2.2"` | Image tag Defaults to `Chart.AppVersion` if omitted |
 | plugin.kyverno.replicaCount | int | `1` | Deployment replica count |
+| plugin.kyverno.logging.server | bool | `false` | Enables Server access logging |
 | plugin.kyverno.logging.encoding | string | `"console"` | log encoding possible encodings are console and json |
 | plugin.kyverno.logging.logLevel | int | `0` | log level default info |
 | plugin.kyverno.server.port | int | `8080` | Application port |
-| plugin.kyverno.server.logging | bool | `false` | Enables Access logging |
 | plugin.kyverno.blockReports.enabled | bool | `false` | Enables he BlockReport feature |
 | plugin.kyverno.blockReports.eventNamespace | string | `"default"` | Watches for Kyverno Events in the configured namespace leave blank to watch in all namespaces |
 | plugin.kyverno.blockReports.results.maxPerReport | int | `200` | Max items per PolicyReport resource |
@@ -438,7 +424,13 @@ Check the [Documentation](https://kyverno.github.io/policy-reporter/guide/02-get
 | plugin.kyverno.podSecurityContext | object | `{"runAsGroup":1234,"runAsUser":1234}` | Security context for the pod |
 | plugin.kyverno.envVars | list | `[]` | Allow additional env variables to be added |
 | plugin.kyverno.rbac.enabled | bool | `true` | Create RBAC resources |
-| plugin.kyverno.securityContext | object | `{"allowPrivilegeEscalation":false,"capabilities":{"drop":["ALL"]},"privileged":false,"readOnlyRootFilesystem":true,"runAsNonRoot":true,"runAsUser":1234,"seccompProfile":{"type":"RuntimeDefault"}}` | Container security context |
+| plugin.kyverno.securityContext.runAsUser | int | `1234` |  |
+| plugin.kyverno.securityContext.runAsNonRoot | bool | `true` |  |
+| plugin.kyverno.securityContext.privileged | bool | `false` |  |
+| plugin.kyverno.securityContext.allowPrivilegeEscalation | bool | `false` |  |
+| plugin.kyverno.securityContext.readOnlyRootFilesystem | bool | `true` |  |
+| plugin.kyverno.securityContext.capabilities.drop[0] | string | `"ALL"` |  |
+| plugin.kyverno.securityContext.seccompProfile.type | string | `"RuntimeDefault"` |  |
 | plugin.kyverno.service.type | string | `"ClusterIP"` | Service type. |
 | plugin.kyverno.service.port | int | `8080` | Service port. |
 | plugin.kyverno.service.annotations | object | `{}` | Service annotations. |
@@ -452,7 +444,7 @@ Check the [Documentation](https://kyverno.github.io/policy-reporter/guide/02-get
 | plugin.kyverno.networkPolicy.enabled | bool | `false` | When true, use a NetworkPolicy to allow ingress to the webhook This is useful on clusters using Calico and/or native k8s network policies in a default-deny setup. |
 | plugin.kyverno.networkPolicy.egress | list | `[{"ports":[{"port":6443,"protocol":"TCP"}]}]` | A list of valid from selectors according to https://kubernetes.io/docs/concepts/services-networking/network-policies. Enables Kubernetes API Server by default |
 | plugin.kyverno.networkPolicy.ingress | list | `[]` | A list of valid from selectors according to https://kubernetes.io/docs/concepts/services-networking/network-policies. |
-| plugin.kyverno.resources | object | `{}` |  |
+| plugin.kyverno.resources | object | `{}` | Resource constraints |
 | plugin.kyverno.leaderElection.lockName | string | `"kyverno-plugin"` | Lock Name |
 | plugin.kyverno.leaderElection.releaseOnCancel | bool | `true` | Released lock when the run context is cancelled. |
 | plugin.kyverno.leaderElection.leaseDuration | int | `15` | LeaseDuration is the duration that non-leader candidates will wait to force acquire leadership. |
@@ -469,10 +461,10 @@ Check the [Documentation](https://kyverno.github.io/policy-reporter/guide/02-get
 | plugin.trivy.image.pullPolicy | string | `"IfNotPresent"` | Image PullPolicy |
 | plugin.trivy.image.tag | string | `"0.0.3"` | Image tag Defaults to `Chart.AppVersion` if omitted |
 | plugin.trivy.replicaCount | int | `1` | Deployment replica count |
+| plugin.trivy.logging.server | bool | `false` | Enables Server access logging |
 | plugin.trivy.logging.encoding | string | `"console"` | log encoding possible encodings are console and json |
 | plugin.trivy.logging.logLevel | int | `0` | log level default info |
 | plugin.trivy.server.port | int | `8080` | Application port |
-| plugin.trivy.server.logging | bool | `false` | Enables Access logging |
 | plugin.trivy.policyReporter.skipTLS | bool | `false` | Skip TLS Verification |
 | plugin.trivy.policyReporter.certificate | string | `""` | TLS Certificate |
 | plugin.trivy.policyReporter.secretRef | string | `""` | Secret to read the API configuration from supports `host`, `certificate`, `skipTLS`, `username`, `password` key |
@@ -488,7 +480,13 @@ Check the [Documentation](https://kyverno.github.io/policy-reporter/guide/02-get
 | plugin.trivy.podSecurityContext | object | `{"runAsGroup":1234,"runAsUser":1234}` | Security context for the pod |
 | plugin.trivy.envVars | list | `[]` | Allow additional env variables to be added |
 | plugin.trivy.rbac.enabled | bool | `true` | Create RBAC resources |
-| plugin.trivy.securityContext | object | `{"allowPrivilegeEscalation":false,"capabilities":{"drop":["ALL"]},"privileged":false,"readOnlyRootFilesystem":true,"runAsNonRoot":true,"runAsUser":1234,"seccompProfile":{"type":"RuntimeDefault"}}` | Container security context |
+| plugin.trivy.securityContext.runAsUser | int | `1234` |  |
+| plugin.trivy.securityContext.runAsNonRoot | bool | `true` |  |
+| plugin.trivy.securityContext.privileged | bool | `false` |  |
+| plugin.trivy.securityContext.allowPrivilegeEscalation | bool | `false` |  |
+| plugin.trivy.securityContext.readOnlyRootFilesystem | bool | `true` |  |
+| plugin.trivy.securityContext.capabilities.drop[0] | string | `"ALL"` |  |
+| plugin.trivy.securityContext.seccompProfile.type | string | `"RuntimeDefault"` |  |
 | plugin.trivy.service.type | string | `"ClusterIP"` | Service type. |
 | plugin.trivy.service.port | int | `8080` | Service port. |
 | plugin.trivy.service.annotations | object | `{}` | Service annotations. |
@@ -502,38 +500,41 @@ Check the [Documentation](https://kyverno.github.io/policy-reporter/guide/02-get
 | plugin.trivy.networkPolicy.enabled | bool | `false` | When true, use a NetworkPolicy to allow ingress to the webhook This is useful on clusters using Calico and/or native k8s network policies in a default-deny setup. |
 | plugin.trivy.networkPolicy.egress | list | `[{"ports":[{"port":6443,"protocol":"TCP"}]}]` | A list of valid from selectors according to https://kubernetes.io/docs/concepts/services-networking/network-policies. Enables Kubernetes API Server by default |
 | plugin.trivy.networkPolicy.ingress | list | `[]` | A list of valid from selectors according to https://kubernetes.io/docs/concepts/services-networking/network-policies. |
-| plugin.trivy.resources | object | `{}` |  |
+| plugin.trivy.resources | object | `{}` | Resource constraints |
 | plugin.trivy.podDisruptionBudget.minAvailable | int | `1` | Configures the minimum available pods for kyvernoPlugin disruptions. Cannot be used if `maxUnavailable` is set. |
 | plugin.trivy.podDisruptionBudget.maxUnavailable | string | `nil` | Configures the maximum unavailable pods for kyvernoPlugin disruptions. Cannot be used if `minAvailable` is set. |
 | plugin.trivy.nodeSelector | object | `{}` | Node labels for pod assignment |
 | plugin.trivy.tolerations | list | `[]` | List of node taints to tolerate |
 | plugin.trivy.affinity | object | `{}` | Affinity constraints. |
-| monitoring.enabled | bool | `false` |  |
-| monitoring.annotations | object | `{}` |  |
-| monitoring.serviceMonitor.honorLabels | bool | `false` |  |
-| monitoring.serviceMonitor.namespace | string | `nil` |  |
-| monitoring.serviceMonitor.labels | object | `{}` |  |
-| monitoring.serviceMonitor.relabelings | list | `[]` |  |
-| monitoring.serviceMonitor.metricRelabelings | list | `[]` |  |
-| monitoring.serviceMonitor.namespaceSelector | object | `{}` |  |
-| monitoring.serviceMonitor.scrapeTimeout | string | `nil` |  |
-| monitoring.serviceMonitor.interval | string | `nil` |  |
-| monitoring.grafana.namespace | string | `nil` |  |
-| monitoring.grafana.dashboards.enabled | bool | `true` |  |
-| monitoring.grafana.dashboards.label | string | `"grafana_dashboard"` |  |
-| monitoring.grafana.dashboards.value | string | `"1"` |  |
-| monitoring.grafana.dashboards.labelFilter | list | `[]` |  |
-| monitoring.grafana.dashboards.multicluster.enabled | bool | `false` |  |
-| monitoring.grafana.dashboards.multicluster.label | string | `"cluster"` |  |
-| monitoring.grafana.dashboards.enable.overview | bool | `true` |  |
-| monitoring.grafana.dashboards.enable.policyReportDetails | bool | `true` |  |
-| monitoring.grafana.dashboards.enable.clusterPolicyReportDetails | bool | `true` |  |
-| monitoring.grafana.folder.annotation | string | `"grafana_folder"` |  |
-| monitoring.grafana.folder.name | string | `"Policy Reporter"` |  |
-| monitoring.grafana.datasource.label | string | `"Prometheus"` |  |
-| monitoring.grafana.datasource.pluginId | string | `"prometheus"` |  |
-| monitoring.grafana.datasource.pluginName | string | `"Prometheus"` |  |
-| monitoring.grafana.grafanaDashboard | object | `{"allowCrossNamespaceImport":true,"enabled":false,"folder":"kyverno","matchLabels":{"dashboards":"grafana"}}` | create GrafanaDashboard custom resource referencing to the configMap. according to https://grafana-operator.github.io/grafana-operator/docs/examples/dashboard_from_configmap/readme/ |
+| monitoring.enabled | bool | `false` | Enables the Prometheus Operator integration |
+| monitoring.annotations | object | `{}` | Key/value pairs that are attached to all resources. |
+| monitoring.serviceMonitor.honorLabels | bool | `false` | HonorLabels chooses the metrics labels on collisions with target labels |
+| monitoring.serviceMonitor.namespace | string | `nil` | Allow to override the namespace for serviceMonitor |
+| monitoring.serviceMonitor.labels | object | `{}` | Labels to match the serviceMonitorSelector of the Prometheus Resource |
+| monitoring.serviceMonitor.relabelings | list | `[]` | ServiceMonitor Relabelings https://github.com/prometheus-operator/prometheus-operator/blob/main/Documentation/api.md#relabelconfig |
+| monitoring.serviceMonitor.metricRelabelings | list | `[]` | See serviceMonitor.relabelings |
+| monitoring.serviceMonitor.namespaceSelector | optional | `{}` | NamespaceSelector |
+| monitoring.serviceMonitor.scrapeTimeout | optional | `nil` | ScrapeTimeout |
+| monitoring.serviceMonitor.interval | optional | `nil` | Scrape interval |
+| monitoring.grafana.namespace | string | `nil` | Naamespace for configMap of grafana dashboards |
+| monitoring.grafana.dashboards.enabled | bool | `true` | Enable the deployment of grafana dashboards |
+| monitoring.grafana.dashboards.label | string | `"grafana_dashboard"` | Label to find dashboards using the k8s sidecar |
+| monitoring.grafana.dashboards.value | string | `"1"` | Label value to find dashboards using the k8s sidecar |
+| monitoring.grafana.dashboards.labelFilter | list | `[]` | List of custom label filter Used to add filter for report label based metric labels defined in custom mode |
+| monitoring.grafana.dashboards.multicluster.enabled | bool | `false` | Enable cluster filter in all dashboards |
+| monitoring.grafana.dashboards.multicluster.label | string | `"cluster"` | Metric Label which is used to filter clusters |
+| monitoring.grafana.dashboards.enable.overview | bool | `true` | Enable the Overview Dashboard |
+| monitoring.grafana.dashboards.enable.policyReportDetails | bool | `true` | Enable the PolicyReport Dashboard |
+| monitoring.grafana.dashboards.enable.clusterPolicyReportDetails | bool | `true` | Enable the ClusterPolicyReport Dashboard |
+| monitoring.grafana.folder.annotation | string | `"grafana_folder"` | Annotation to enable folder storage using the k8s sidecar |
+| monitoring.grafana.folder.name | string | `"Policy Reporter"` | Grafana folder in which to store the dashboards |
+| monitoring.grafana.datasource.label | string | `"Prometheus"` | Grafana Datasource Label |
+| monitoring.grafana.datasource.pluginId | string | `"prometheus"` | Grafana Datasource PluginId |
+| monitoring.grafana.datasource.pluginName | string | `"Prometheus"` | Grafana Datasource PluginName |
+| monitoring.grafana.grafanaDashboard.enabled | bool | `false` | Create GrafanaDashboard custom resource referencing to the configMap. according to https://grafana-operator.github.io/grafana-operator/docs/examples/dashboard_from_configmap/readme/ |
+| monitoring.grafana.grafanaDashboard.folder | string | `"kyverno"` | Dashboard folder |
+| monitoring.grafana.grafanaDashboard.allowCrossNamespaceImport | bool | `true` | Allow cross Namespace import |
+| monitoring.grafana.grafanaDashboard.matchLabels | object | `{"dashboards":"grafana"}` | Label match selector |
 | monitoring.policyReportDetails.firstStatusRow.height | int | `8` |  |
 | monitoring.policyReportDetails.secondStatusRow.enabled | bool | `true` |  |
 | monitoring.policyReportDetails.secondStatusRow.height | int | `2` |  |

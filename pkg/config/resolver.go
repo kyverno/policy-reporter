@@ -84,7 +84,7 @@ func (r *Resolver) Server(ctx context.Context, options []api.ServerOption) (*api
 		api.WithGZIP(),
 	}
 
-	if r.config.API.Logging || r.config.API.DebugMode {
+	if r.config.Logging.Server || r.config.API.DebugMode {
 		defaults = append(defaults, api.WithLogging(zap.L()))
 	} else {
 		defaults = append(defaults, api.WithRecovery())

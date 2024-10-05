@@ -169,7 +169,6 @@ sourceConfig:
 logging:
   encoding: {{ .Values.logging.encoding }}
   logLevel: {{ include "policyreporter.logLevel" . }}
-  development: {{ .Values.logging.development }}
 
 api:
   logging: {{ .Values.api.logging }}

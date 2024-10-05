@@ -74,7 +74,6 @@ type BasicAuth struct {
 // API configuration
 type API struct {
 	Port      int       `mapstructure:"port"`
-	Logging   bool      `mapstructure:"logging"`
 	BasicAuth BasicAuth `mapstructure:"basicAuth"`
 	DebugMode bool      `mapstructure:"debug"`
 }
@@ -135,6 +134,7 @@ type K8sClient struct {
 }
 
 type Logging struct {
+	Server      bool   `mapstructure:"server"`
 	LogLevel    int8   `mapstructure:"logLevel"`
 	Encoding    string `mapstructure:"encoding"`
 	Development bool   `mapstructure:"development"`

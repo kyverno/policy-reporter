@@ -3,13 +3,14 @@ namespace: {{ .Release.Namespace }}
 tempDir: {{ .Values.ui.tempDir }}
 
 logging:
-  enabled: {{ .Values.ui.logging.enabled }}
+  api: {{ .Values.ui.logging.api }}
+  server: {{ .Values.ui.logging.server }}
   encoding: {{ .Values.ui.logging.encoding }}
   logLevel: {{ .Values.ui.logging.logLevel }}
 
 server:
   port: {{ .Values.ui.server.port }}
-  logging: {{ .Values.ui.server.logging }}
+  cors: {{ .Values.ui.server.cors }}
   overwriteHost: {{ .Values.ui.server.overwriteHost }}
 
 ui:

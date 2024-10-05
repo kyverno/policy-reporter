@@ -6,7 +6,7 @@
 
 ## Documentation
 
-You can find detailed Information and Screens about Features and Configurations in the [Documentation](https://kyverno.github.io/policy-reporter/guide/02-getting-started#core--policy-reporter-ui).
+You can find detailed Information and Screens about Features and Configurations in the [Documentation](https://kyverno.github.io/policy-reporter-docs).
 
 ## Installation with Helm v3
 
@@ -31,19 +31,12 @@ helm install policy-reporter policy-reporter/policy-reporter -n policy-reporter 
 You can use the Policy Reporter as standalone Application along with the optional UI SubChart.
 
 ### Installation with Policy Reporter UI and Kyverno Plugin enabled
+
 ```bash
-helm install policy-reporter policy-reporter/policy-reporter --set kyvernoPlugin.enabled=true --set ui.enabled=true --set ui.plugins.kyverno=true -n policy-reporter --create-namespace
+helm install policy-reporter policy-reporter/policy-reporter --set plugin.kyverno.enabled=true --set ui.enabled=true -n policy-reporter --create-namespace
 kubectl port-forward service/policy-reporter-ui 8082:8080 -n policy-reporter
 ```
 Open `http://localhost:8082/` in your browser.
-
-Check the [Documentation](https://kyverno.github.io/policy-reporter/guide/02-getting-started#core--policy-reporter-ui) for Screens and additional Information
-
-## Resources
-
-* [[Video] 37. #EveryoneCanContribute cafe: Policy reporter for Kyverno](https://youtu.be/1mKywg9f5Fw)
-* [[Video] Rawkode Live: Hands on Policy Reporter](https://www.youtube.com/watch?v=ZrOtTELNLyg)
-* [[Blog] Monitor Security and Best Practices with Kyverno and Policy Reporter](https://blog.webdev-jogeleit.de/blog/monitor-security-with-kyverno-and-policy-reporter/)
 
 
 {{ template "chart.valuesSection" . }}

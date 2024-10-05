@@ -12,9 +12,9 @@ metadata:
 spec:
   replicas: {{ .Values.replicaCount }}
   revisionHistoryLimit: {{ .Values.revisionHistoryLimit }}
-  {{- if .Values.deploymentStrategy }}
+  {{- with .Values.plugin.kyverno.updateStrategy }}
   strategy:
-    {{- toYaml .Values.deploymentStrategy | nindent 4 }}
+    {{- toYaml . | nindent 4 }}
   {{- end }}
   selector:
     matchLabels:

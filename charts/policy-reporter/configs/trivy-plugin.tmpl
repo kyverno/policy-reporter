@@ -3,7 +3,7 @@ logging:
   logLevel: {{ .Values.plugin.trivy.logging.logLevel }}
 
 server:
-  logging: {{ .Values.plugin.trivy.server.logging }}
+  logging: {{ .Values.plugin.trivy.logging.server }}
   basicAuth:
     username: {{ .Values.basicAuth.username }}
     password: {{ .Values.basicAuth.password }}
