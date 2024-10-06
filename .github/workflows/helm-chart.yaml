@@ -5,7 +5,6 @@ on:
     # run pipeline on push on master
     branches:
       - main
-      - development
     paths:
       - "charts/**"
   
@@ -18,17 +17,19 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@d632683dd7b4114ad314bca15554477dd762a938 # v4.2.0
         with:
           fetch-depth: "0"
 
       - name: chart-testing (ct lint)
-        uses: helm/chart-testing-action@v2.0.1
+        uses: helm/chart-testing-action@e6669bcd63d7cb57cb4380c33043eebe5d111992 # v2.6.1
 
       - name: Run Helm Chart lint
         run: |
-            ct lint --lint-conf=.github/ct_lintconf.yaml \
-                    --chart-yaml-schema=.github/ct_chart_schema.yaml \
-                    --target-branch=main --validate-maintainers=false \
-                    --check-version-increment=false \
-                    --chart-dirs charts
+          set -e
+          ct lint --lint-conf=.github/ct_lintconf.yaml \
+                  --chart-yaml-schema=.github/ct_chart_schema.yaml \
+                  --target-branch=main \
+                  --validate-maintainers=false \
+                  --check-version-increment=false \
+                  --chart-dirs charts

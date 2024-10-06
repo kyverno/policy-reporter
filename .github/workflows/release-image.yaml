@@ -19,7 +19,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@d632683dd7b4114ad314bca15554477dd762a938 # v4.2.0
 
       - name: Push image
         id: params
@@ -32,24 +32,24 @@ jobs:
           echo "VERSION=$VERSION" >> "$GITHUB_ENV"
 
       - name: Login to Github Packages
-        uses: docker/login-action@v2
+        uses: docker/login-action@9780b0c442fbb1117ed29e0efdff1e18412f7567 # v3.3.0
         with:
           registry: ghcr.io
           username: ${{ github.repository_owner }}
           password: ${{ secrets.CR_PAT }}
 
       - name: Set up QEMU
-        uses: docker/setup-qemu-action@v2
+        uses: docker/setup-qemu-action@49b3bc8e6bdd4a60e6116a5414239cba5943d3cf # v3.2.0
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
+        uses: docker/setup-buildx-action@c47758b77c9736f4b2ef4073d4d51994fabfe349 #v3.7.1
         id: buildx
         with:
           install: true
           version: latest
 
       - name: Build image and push to GitHub Container Registry
-        uses: docker/build-push-action@v3
+        uses: docker/build-push-action@4f58ea79222b3b9dc2c8bbdd6debcef730109a75 # v6.9.0
         id: push
         with:
           push: true
@@ -60,7 +60,7 @@ jobs:
             ghcr.io/kyverno/policy-reporter:${{ env.VERSION }}
 
       - name: Set up Go
-        uses: actions/setup-go@v5
+        uses: actions/setup-go@0a12ed9d6a96ab950c8f026ed9f722fe0da7ef32 # v5.2.0
         with:
           go-version-file: go.mod
           cache-dependency-path: go.sum
@@ -70,7 +70,7 @@ jobs:
           version: v1
           args: app -licenses -json -output policy-reporter-bom.cdx.json -main .
 
-      - uses: actions/upload-artifact@a8a3f3ad30e3422c9c7b888a15615d19a852ae32 # v3.1.3
+      - uses: actions/upload-artifact@50769540e7f4bd5e21e526ee35c689e35e0d6874 # v4.4.0
         with:
           name: policy-reporter-bom-cdx
           path: policy-reporter-bom.cdx.json
