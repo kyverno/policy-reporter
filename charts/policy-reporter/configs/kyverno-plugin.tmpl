@@ -7,11 +7,12 @@ leaderElection:
   lockName: {{ .Values.plugin.kyverno.leaderElection.lockName }}
 
 logging:
+  api: {{ .Values.plugin.kyverno.logging.api }}
+  server: {{ .Values.plugin.kyverno.logging.server }}
   encoding: {{ .Values.plugin.kyverno.logging.encoding }}
   logLevel: {{ .Values.plugin.kyverno.logging.logLevel }}
 
 server:
-  logging: {{ .Values.plugin.kyverno.logging.server }}
   basicAuth:
     username: {{ .Values.basicAuth.username }}
     password: {{ .Values.basicAuth.password }}

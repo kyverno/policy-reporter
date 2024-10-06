@@ -15,7 +15,7 @@ image:
   # -- (string) Image pullPolicy
   pullPolicy: IfNotPresent
   # -- (string) Image tag
-  tag: 0dfbaa0
+  tag: 12da466
 
 # -- Image pullSecrets
 imagePullSecrets: []
@@ -1102,12 +1102,14 @@ plugin:
       pullPolicy: IfNotPresent
         # -- (string) Image tag
         # Defaults to `Chart.AppVersion` if omitted
-      tag: "0.2.2"
+      tag: "0.3.0"
 
     # -- Deployment replica count
     replicaCount: 1
 
     logging:
+      # -- Enables external API request logging
+      api: false
       # -- Enables Server access logging
       server: false
       # -- log encoding
@@ -1291,12 +1293,14 @@ plugin:
       pullPolicy: IfNotPresent
         # -- (string) Image tag
         # Defaults to `Chart.AppVersion` if omitted
-      tag: "0.0.3"
+      tag: "0.2.0"
 
     # -- Deployment replica count
     replicaCount: 1
 
     logging:
+      # -- Enables external API request logging
+      api: false
       # -- Enables Server access logging
       server: false
       # -- log encoding

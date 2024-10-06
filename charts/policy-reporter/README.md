@@ -49,7 +49,7 @@ Open `http://localhost:8082/` in your browser.
 | image.registry | string | `"ghcr.io"` | Image registry |
 | image.repository | string | `"kyverno/policy-reporter"` | Image repository |
 | image.pullPolicy | string | `"IfNotPresent"` | Image pullPolicy |
-| image.tag | string | `"0dfbaa0"` | Image tag |
+| image.tag | string | `"12da466"` | Image tag |
 | imagePullSecrets | list | `[]` | Image pullSecrets |
 | priorityClassName | string | `""` | Deployment priorityClassName |
 | replicaCount | int | `1` | Deployment replica count |
@@ -402,8 +402,9 @@ Open `http://localhost:8082/` in your browser.
 | plugin.kyverno.image.registry | string | `"ghcr.io"` | Image registry |
 | plugin.kyverno.image.repository | string | `"kyverno/policy-reporter/kyverno-plugin"` | Image repository |
 | plugin.kyverno.image.pullPolicy | string | `"IfNotPresent"` | Image PullPolicy |
-| plugin.kyverno.image.tag | string | `"0.2.2"` | Image tag Defaults to `Chart.AppVersion` if omitted |
+| plugin.kyverno.image.tag | string | `"0.3.0"` | Image tag Defaults to `Chart.AppVersion` if omitted |
 | plugin.kyverno.replicaCount | int | `1` | Deployment replica count |
+| plugin.kyverno.logging.api | bool | `false` | Enables external API request logging |
 | plugin.kyverno.logging.server | bool | `false` | Enables Server access logging |
 | plugin.kyverno.logging.encoding | string | `"console"` | log encoding possible encodings are console and json |
 | plugin.kyverno.logging.logLevel | int | `0` | log level default info |
@@ -459,8 +460,9 @@ Open `http://localhost:8082/` in your browser.
 | plugin.trivy.image.registry | string | `"ghcr.io"` | Image registry |
 | plugin.trivy.image.repository | string | `"kyverno/policy-reporter/trivy-plugin"` | Image repository |
 | plugin.trivy.image.pullPolicy | string | `"IfNotPresent"` | Image PullPolicy |
-| plugin.trivy.image.tag | string | `"0.0.3"` | Image tag Defaults to `Chart.AppVersion` if omitted |
+| plugin.trivy.image.tag | string | `"0.2.0"` | Image tag Defaults to `Chart.AppVersion` if omitted |
 | plugin.trivy.replicaCount | int | `1` | Deployment replica count |
+| plugin.trivy.logging.api | bool | `false` | Enables external API request logging |
 | plugin.trivy.logging.server | bool | `false` | Enables Server access logging |
 | plugin.trivy.logging.encoding | string | `"console"` | log encoding possible encodings are console and json |
 | plugin.trivy.logging.logLevel | int | `0` | log level default info |

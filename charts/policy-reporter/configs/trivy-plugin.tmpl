@@ -1,9 +1,10 @@
 logging:
+  api: {{ .Values.plugin.trivy.logging.api }}
+  server: {{ .Values.plugin.trivy.logging.server }}
   encoding: {{ .Values.plugin.trivy.logging.encoding }}
   logLevel: {{ .Values.plugin.trivy.logging.logLevel }}
 
 server:
-  logging: {{ .Values.plugin.trivy.logging.server }}
   basicAuth:
     username: {{ .Values.basicAuth.username }}
     password: {{ .Values.basicAuth.password }}
