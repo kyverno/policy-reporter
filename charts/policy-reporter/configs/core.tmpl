@@ -121,28 +121,15 @@ target:
 
 worker: {{ .Values.worker }}
 
+{{- with .Values.metrics }}
 metrics:
-  mode: {{ .Values.metrics.mode }}
-  {{- with .Values.metrics.filter }}
-  filter:
-    {{- toYaml . | nindent 4 }}
-  {{- end }}
-  {{- with .Values.metrics.customLabels }}
-  customLabels:
-    {{- toYaml . | nindent 4 }}
-  {{- end }}
+  {{- toYaml . | nindent 2 }}
+{{- end }}
 
+{{- with .Values.reportFilter }}
 reportFilter:
-  namespaces:
-    {{- with .Values.reportFilter.namespaces.include }}
-    include:
-      {{- toYaml . | nindent 6 }}
-    {{- end }}
-    {{- with .Values.reportFilter.namespaces.exclude }}
-    exclude:
-      {{- toYaml . | nindent 6 }}
-    {{- end }}
-  disableClusterReports: {{ .Values.reportFilter.disableClusterReports }}
+  {{- toYaml . | nindent 2 }}
+{{- end }}
 
 {{- with .Values.sourceFilters }}
 sourceFilters:
@@ -167,11 +154,11 @@ sourceConfig:
 {{- end }}
 
 logging:
+  server: {{ .Values.logging.server }}
   encoding: {{ .Values.logging.encoding }}
   logLevel: {{ include "policyreporter.logLevel" . }}
 
 api:
-  logging: {{ .Values.api.logging }}
   basicAuth:
     username: {{ .Values.basicAuth.username }}
     password: {{ .Values.basicAuth.password }}

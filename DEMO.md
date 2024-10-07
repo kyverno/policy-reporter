@@ -140,5 +140,5 @@ target:
 ```
 
 ```bash
-helm upgrade --install policy-reporter policy-reporter/policy-reporter-preview --create-namespace -n policy-reporter -f values.yaml --devel
+helm upgrade --install policy-reporter policy-reporter/policy-reporter --create-namespace -n policy-reporter -f values.yaml --devel
 ```

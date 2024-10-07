@@ -173,12 +173,12 @@ worker: 5
 
 # -- Filter PolicyReport resources to process
 reportFilter: {}
-  # -- Filter reports based on an namespace allow- or disallow list, wildcards are supported
-  #namespaces:
+  # # -- Filter reports based on an namespace allow- or disallow list, wildcards are supported
+  # namespaces:
   #  include: []
   #  exclude: []
-  # -- Disable the processing of ClusterPolicyReports
-  #disableClusterReports: false
+  # # -- Disable the processing of ClusterPolicyReports
+  # disableClusterReports: false
 
 # -- Customize source specific logic like result ID generation
 sourceConfig: []

@@ -114,7 +114,7 @@ maxUnavailable: {{ .Values.podDisruptionBudget.maxUnavailable }}
 
 {{/* Get the namespace name. */}}
 {{- define "policyreporter.logLevel" -}}
-{{- if .Values.api.logging -}}
+{{- if .Values.logging.server -}}
 -1
 {{- else -}}
 {{- .Values.logging.logLevel -}}
