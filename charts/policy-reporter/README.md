@@ -49,7 +49,7 @@ Open `http://localhost:8082/` in your browser.
 | image.registry | string | `"ghcr.io"` | Image registry |
 | image.repository | string | `"kyverno/policy-reporter"` | Image repository |
 | image.pullPolicy | string | `"IfNotPresent"` | Image pullPolicy |
-| image.tag | string | `"12da466"` | Image tag |
+| image.tag | string | `"3.0.0-rc.1"` | Image tag |
 | imagePullSecrets | list | `[]` | Image pullSecrets |
 | priorityClassName | string | `""` | Deployment priorityClassName |
 | replicaCount | int | `1` | Deployment replica count |
@@ -75,8 +75,8 @@ Open `http://localhost:8082/` in your browser.
 | securityContext.readOnlyRootFilesystem | bool | `true` |  |
 | securityContext.capabilities.drop[0] | string | `"ALL"` |  |
 | securityContext.seccompProfile.type | string | `"RuntimeDefault"` |  |
-| securityContext.podAnnotations | object | `{}` | Additional annotations to add to each pod |
-| securityContext.podLabels | object | `{}` | Additional labels to add to each pod |
+| podAnnotations | object | `{}` | Additional annotations to add to each pod |
+| podLabels | object | `{}` | Additional labels to add to each pod |
 | resources | object | `{}` | Resource constraints |
 | networkPolicy.enabled | bool | `false` | Create NetworkPolicy |
 | networkPolicy.egress | list | `[{"ports":[{"port":6443,"protocol":"TCP"}],"to":null}]` | Egress rule to allowe Kubernetes API Server access |

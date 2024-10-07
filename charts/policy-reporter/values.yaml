@@ -15,7 +15,7 @@ image:
   # -- (string) Image pullPolicy
   pullPolicy: IfNotPresent
   # -- (string) Image tag
-  tag: 12da466
+  tag: 3.0.0-rc.1
 
 # -- Image pullSecrets
 imagePullSecrets: []
@@ -86,11 +86,11 @@ securityContext:
   seccompProfile:
     type: RuntimeDefault
 
-  # -- Additional annotations to add to each pod
-  podAnnotations: {}
+# -- Additional annotations to add to each pod
+podAnnotations: {}
 
-  # -- Additional labels to add to each pod
-  podLabels: {}
+# -- Additional labels to add to each pod
+podLabels: {}
 
 # -- Resource constraints
 resources: {}

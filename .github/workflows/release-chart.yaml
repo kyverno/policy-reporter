@@ -9,8 +9,10 @@ jobs:
   helm-chart:
     runs-on: ubuntu-latest
     permissions:
+      packages: write
       contents: write
       pages: write
+      id-token: write 
     steps:
       - name: Checkout
         uses: actions/checkout@d632683dd7b4114ad314bca15554477dd762a938 # v4.2.0
@@ -57,9 +59,27 @@ jobs:
       - name: Install Cosign
         uses: sigstore/cosign-installer@dc72c7d5c4d10cd6bcb8cf6e3fd625a9e5e537da # v3.7.0
 
+      - name: Login to Github Packages
+        uses: docker/login-action@9780b0c442fbb1117ed29e0efdff1e18412f7567 # v3.3.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set version
+        run: |
+          set -e
+          TAG=${{ github.ref_name }}
+          echo "VERSION=${TAG#policy-reporter-chart-v}" >> $GITHUB_ENV
+
       - name: Push to OCI
         run: |
           set -e
-          output=$(helm push .cr-release-packages/policy-reporter-{{ steps.cr.outputs.chart_version }}.tgz oci://ghcr.io/kyverno/charts 2>&1)
+          output=$(helm push .cr-release-packages/policy-reporter-${{ env.VERSION }}.tgz oci://ghcr.io/kyverno/charts 2>&1)
           digest=$( echo "$output" | grep Digest | cut -c9-)
-          cosign sign --yes ghcr.io/kyverno/charts/policy-reporter@$digest
+          echo CR_DIGEST=$digest
+          echo "CR_DIGEST=$digest" >> "$GITHUB_ENV"
+      
+      - name: Sign Chart
+        run: |
+          cosign sign --yes ghcr.io/kyverno/charts/policy-reporter@${{ env.CR_DIGEST }}
