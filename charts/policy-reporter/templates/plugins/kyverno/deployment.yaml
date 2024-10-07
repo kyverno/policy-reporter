@@ -56,11 +56,11 @@ spec:
               protocol: TCP
           livenessProbe:
             httpGet:
-              path: /api/v1/policies
+              path: /v1/policies
               port: http
           readinessProbe:
             httpGet:
-              path: /api/v1/policies
+              path: /v1/policies
               port: http
           resources:
             {{- toYaml .Values.plugin.kyverno.resources | nindent 12 }}
