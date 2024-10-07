@@ -7,6 +7,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/aws"
 	hub "github.com/aws/aws-sdk-go-v2/service/securityhub"
 	"github.com/aws/aws-sdk-go-v2/service/securityhub/types"
+
 	"github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
 	"github.com/kyverno/policy-reporter/pkg/fixtures"
 	"github.com/kyverno/policy-reporter/pkg/target/securityhub"
@@ -40,10 +41,16 @@ func (c *client) GetFindings(ctx context.Context, params *hub.GetFindingsInput, 
 	}, nil
 }
 
+func (c *client) BatchUpdateFindings(ctx context.Context, params *hub.BatchUpdateFindingsInput, optFns ...func(*hub.Options)) (*hub.BatchUpdateFindingsOutput, error) {
+	c.batched = true
+
+	return &hub.BatchUpdateFindingsOutput{}, nil
+}
+
 func TestSecurityHub(t *testing.T) {
 	t.Run("send result", func(t *testing.T) {
 		c := securityhub.NewClient(securityhub.Options{
-			AccountID:   "accountID",
+			AccountID:   "accountId",
 			Region:      "eu-central-1",
 			ProductName: "Policy Reporter",
 			CompanyName: "Kyverno",
@@ -56,13 +63,13 @@ func TestSecurityHub(t *testing.T) {
 
 					finding := findings[0]
 
-					if *finding.AwsAccountId != "accountID" {
-						t.Errorf("unexpected accountID: %s", *finding.AwsAccountId)
+					if *finding.AwsAccountId != "accountId" {
+						t.Errorf("unexpected accountId: %s", *finding.AwsAccountId)
 					}
 					if *finding.Id != fixtures.CompleteTargetSendResult.GetID() {
 						t.Errorf("unexpected id: %s", *finding.Id)
 					}
-					if *finding.ProductArn != "arn:aws:securityhub:eu-central-1:accountID:product/accountID/default" {
+					if *finding.ProductArn != "arn:aws:securityhub:eu-central-1:accountId:product/accountId/default" {
 						t.Errorf("unexpected product arn: %s", *finding.ProductArn)
 					}
 					if *finding.ProductName != "Policy Reporter" {
@@ -81,12 +88,12 @@ func TestSecurityHub(t *testing.T) {
 		h := &client{}
 
 		c := securityhub.NewClient(securityhub.Options{
-			AccountID:   "accountID",
+			AccountID:   "accountId",
 			Region:      "eu-central-1",
 			ProductName: "Policy Reporter",
 			CompanyName: "Kyverno",
 			Client:      h,
-			Cleanup:     false,
+			Synchronize: false,
 		})
 
 		c.CleanUp(context.TODO(), fixtures.DefaultPolicyReport)
@@ -102,12 +109,12 @@ func TestSecurityHub(t *testing.T) {
 		h := &client{}
 
 		c := securityhub.NewClient(securityhub.Options{
-			AccountID:   "accountID",
+			AccountID:   "accountId",
 			Region:      "eu-central-1",
 			ProductName: "Policy Reporter",
 			CompanyName: "Kyverno",
 			Client:      h,
-			Cleanup:     true,
+			Synchronize: true,
 		})
 
 		c.CleanUp(context.TODO(), fixtures.DefaultPolicyReport)
@@ -129,12 +136,12 @@ func TestSecurityHub(t *testing.T) {
 		}
 
 		c := securityhub.NewClient(securityhub.Options{
-			AccountID:   "accountID",
+			AccountID:   "accountId",
 			Region:      "eu-central-1",
 			ProductName: "Policy Reporter",
 			CompanyName: "Kyverno",
 			Client:      h,
-			Cleanup:     true,
+			Synchronize: true,
 		})
 
 		c.CleanUp(context.TODO(), fixtures.DefaultPolicyReport)
@@ -156,12 +163,12 @@ func TestSecurityHub(t *testing.T) {
 		}
 
 		c := securityhub.NewClient(securityhub.Options{
-			AccountID:   "accountID",
+			AccountID:   "accountId",
 			Region:      "eu-central-1",
 			ProductName: "Policy Reporter",
 			CompanyName: "Kyverno",
 			Client:      h,
-			Cleanup:     true,
+			Synchronize: true,
 		})
 
 		c.CleanUp(context.TODO(), fixtures.DefaultPolicyReport)

@@ -6,8 +6,8 @@ import (
 	"github.com/segmentio/fasthash/fnv1a"
 	"github.com/uptrace/bun"
 
-	api "github.com/kyverno/policy-reporter/pkg/api/v1"
 	"github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
+	"github.com/kyverno/policy-reporter/pkg/helper"
 	"github.com/kyverno/policy-reporter/pkg/report"
 	"github.com/kyverno/policy-reporter/pkg/report/result"
 )
@@ -44,11 +44,22 @@ type Resource struct {
 	UID        string
 }
 
+func (r Resource) GetID() string {
+	h1 := fnv1a.Init64
+	h1 = fnv1a.AddString64(h1, r.Namespace)
+	h1 = fnv1a.AddString64(h1, r.Name)
+	h1 = fnv1a.AddString64(h1, r.Kind)
+	h1 = fnv1a.AddString64(h1, r.APIVersion)
+
+	return strconv.FormatUint(h1, 10)
+}
+
 type PolicyReportResult struct {
 	bun.BaseModel `bun:"table:policy_report_result,alias:r" json:"-"`
 
 	ID             string   `bun:",pk" json:"id"`
-	PolicyReportID string   `bund:"policy_report_id" json:"-"`
+	PolicyReportID string   `bun:"policy_report_id" json:"-"`
+	ResourceID     string   `bun:"resource_id"`
 	Resource       Resource `bun:"embed:resource_"`
 	Policy         string
 	Rule           string
@@ -62,13 +73,34 @@ type PolicyReportResult struct {
 	Created        int64
 }
 
+type ResourceResult struct {
+	bun.BaseModel `bun:"table:policy_report_resource,alias:res" json:"-"`
+
+	ID             string   `bun:",pk"`
+	PolicyReportID string   `bun:"policy_report_id,pk"`
+	Resource       Resource `bun:"embed:resource_"`
+	Source         string   `bun:",pk"`
+	Category       string   `bun:"category,pk"`
+	Pass           int
+	Warn           int
+	Fail           int
+	Error          int
+	Skip           int
+	Info           int
+	Low            int
+	Medium         int
+	High           int
+	Critical       int
+	Unknown        int
+}
+
 type PolicyReportFilter struct {
 	bun.BaseModel `bun:"table:policy_report_filter,alias:f"`
 
-	PolicyReportID string `bund:"policy_report_id"`
-	Namespace      string
+	PolicyReportID string `bun:"policy_report_id"`
+	Namespace      string `bun:"resource_namespace"`
+	Kind           string `bun:"resource_kind"`
 	Policy         string
-	Kind           string
 	Result         string
 	Severity       string
 	Category       string
@@ -117,26 +149,29 @@ func MapPolicyReportResults(polr v1alpha2.ReportInterface) []*PolicyReportResult
 			ns = polr.GetNamespace()
 		}
 
+		resource := Resource{
+			APIVersion: res.APIVersion,
+			Kind:       res.Kind,
+			Name:       res.Name,
+			Namespace:  ns,
+			UID:        string(res.UID),
+		}
+
 		list = append(list, &PolicyReportResult{
 			ID:             r.GetID(),
 			PolicyReportID: polr.GetID(),
-			Resource: Resource{
-				APIVersion: res.APIVersion,
-				Kind:       res.Kind,
-				Name:       res.Name,
-				Namespace:  ns,
-				UID:        string(res.UID),
-			},
-			Policy:     r.Policy,
-			Rule:       r.Rule,
-			Source:     r.Source,
-			Scored:     r.Scored,
-			Message:    r.Message,
-			Result:     string(r.Result),
-			Severity:   string(r.Severity),
-			Category:   r.Category,
-			Properties: r.Properties,
-			Created:    r.Timestamp.Seconds,
+			ResourceID:     resource.GetID(),
+			Resource:       resource,
+			Policy:         r.Policy,
+			Rule:           r.Rule,
+			Source:         r.Source,
+			Scored:         r.Scored,
+			Message:        r.Message,
+			Result:         string(r.Result),
+			Severity:       string(r.Severity),
+			Category:       r.Category,
+			Properties:     r.Properties,
+			Created:        r.Timestamp.Seconds,
 		})
 	}
 
@@ -177,25 +212,93 @@ func MapPolicyReportFilter(polr v1alpha2.ReportInterface) []*PolicyReportFilter 
 	return list
 }
 
-func MapListResult(results []*PolicyReportResult) []*api.ListResult {
-	list := make([]*api.ListResult, 0, len(results))
-	for _, res := range results {
-		list = append(list, &api.ListResult{
-			ID:         res.ID,
-			Namespace:  res.Resource.Namespace,
-			Kind:       res.Resource.Kind,
-			APIVersion: res.Resource.APIVersion,
-			Name:       res.Resource.Name,
-			Message:    res.Message,
-			Category:   res.Category,
-			Policy:     res.Policy,
-			Rule:       res.Rule,
-			Status:     res.Result,
-			Severity:   res.Severity,
-			Timestamp:  res.Created,
-			Properties: res.Properties,
-		})
+func MapPolicyReportResource(polr v1alpha2.ReportInterface) []*ResourceResult {
+	mapping := make(map[string]*ResourceResult)
+	for _, res := range polr.GetResults() {
+		resource := polr.GetScope()
+		if res.HasResource() {
+			resource = res.GetResource()
+		}
+
+		if resource == nil {
+			continue
+		}
+
+		r := Resource{
+			APIVersion: resource.APIVersion,
+			Kind:       resource.Kind,
+			UID:        string(resource.UID),
+			Namespace:  resource.Namespace,
+			Name:       resource.Name,
+		}
+
+		id := r.GetID() + res.Category + polr.GetID()
+
+		value, ok := mapping[id]
+		if !ok {
+			value = &ResourceResult{
+				ID:             r.GetID(),
+				PolicyReportID: polr.GetID(),
+				Resource:       r,
+				Source:         res.Source,
+				Category:       res.Category,
+			}
+
+			mapping[id] = value
+		}
+
+		switch res.Result {
+		case v1alpha2.StatusPass:
+			value.Pass = value.Pass + 1
+		case v1alpha2.StatusSkip:
+			value.Skip = value.Skip + 1
+		case v1alpha2.StatusWarn:
+			value.Warn = value.Warn + 1
+		case v1alpha2.StatusFail:
+			value.Fail = value.Fail + 1
+		case v1alpha2.StatusError:
+			value.Error = value.Error + 1
+		}
+
+		switch res.Severity {
+		case v1alpha2.SeverityInfo:
+			value.Info = value.Info + 1
+		case v1alpha2.SeverityLow:
+			value.Low = value.Low + 1
+		case v1alpha2.SeverityMedium:
+			value.Medium = value.Medium + 1
+		case v1alpha2.SeverityHigh:
+			value.High = value.High + 1
+		case v1alpha2.SeverityCritical:
+			value.Critical = value.Critical + 1
+		default:
+			value.Unknown = value.Unknown + 1
+		}
 	}
 
-	return list
+	return helper.ToList(mapping)
+}
+
+type Filter struct {
+	Kinds       []string
+	Categories  []string
+	Namespaces  []string
+	Sources     []string
+	Policies    []string
+	Rules       []string
+	Severities  []string
+	Status      []string
+	Resources   []string
+	ResourceID  string
+	ReportLabel map[string]string
+	Exclude     map[string][]string
+	Namespaced  bool
+	Search      string
+}
+
+type Pagination struct {
+	Page      int
+	Offset    int
+	SortBy    []string
+	Direction string
 }

@@ -5,6 +5,8 @@ import (
 	"net/http"
 	"testing"
 
+	"github.com/stretchr/testify/assert"
+
 	"github.com/kyverno/policy-reporter/pkg/fixtures"
 	"github.com/kyverno/policy-reporter/pkg/target"
 	"github.com/kyverno/policy-reporter/pkg/target/teams"
@@ -44,10 +46,6 @@ func Test_TeamsTarget(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
-
-			if payload["themeColor"] != "f2c744" {
-				t.Errorf("Unexpected ThemeColor %s", payload["themeColor"])
-			}
 		}
 
 		client := teams.NewClient(teams.Options{
@@ -81,10 +79,6 @@ func Test_TeamsTarget(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
-
-			if payload["themeColor"] != "b80707" {
-				t.Errorf("Unexpected ThemeColor %s", payload["themeColor"])
-			}
 		}
 
 		client := teams.NewClient(teams.Options{
@@ -105,10 +99,6 @@ func Test_TeamsTarget(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
-
-			if payload["themeColor"] != "36a64f" {
-				t.Errorf("Unexpected ThemeColor %s", payload["themeColor"])
-			}
 		}
 
 		client := teams.NewClient(teams.Options{
@@ -128,10 +118,6 @@ func Test_TeamsTarget(t *testing.T) {
 			err := json.NewDecoder(req.Body).Decode(&payload)
 			if err != nil {
 				t.Fatal(err)
-			}
-
-			if payload["themeColor"] != "e20b0b" {
-				t.Errorf("Unexpected ThemeColor %s", payload["themeColor"])
 			}
 		}
 
@@ -165,10 +151,6 @@ func Test_TeamsTarget(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
-
-			if payload["themeColor"] != "68c2ff" {
-				t.Errorf("Unexpected ThemeColor %s", payload["themeColor"])
-			}
 		}
 
 		client := teams.NewClient(teams.Options{
@@ -191,8 +173,18 @@ func Test_TeamsTarget(t *testing.T) {
 			HTTPClient:   testClient{},
 		})
 
-		if client.Name() != "Teams" {
-			t.Errorf("Unexpected Name %s", client.Name())
-		}
+		assert.Equal(t, "Teams", client.Name())
+	})
+	t.Run("SupportBatchSend", func(t *testing.T) {
+		client := teams.NewClient(teams.Options{
+			ClientOptions: target.ClientOptions{
+				Name: "Teams",
+			},
+			Webhook:      "http://hook.teams:80",
+			CustomFields: map[string]string{"Cluster": "Name"},
+			HTTPClient:   testClient{},
+		})
+
+		assert.Equal(t, target.BatchSend, client.Type())
 	})
 }

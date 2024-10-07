@@ -16,7 +16,6 @@ var CompleteTargetSendResult = v1alpha2.PolicyReportResult{
 	Policy:    "require-requests-and-limits-required",
 	Rule:      "autogen-check-for-requests-and-limits",
 	Timestamp: v1.Timestamp{Seconds: seconds},
-	Priority:  v1alpha2.WarningPriority,
 	Result:    v1alpha2.StatusFail,
 	Severity:  v1alpha2.SeverityHigh,
 	Category:  "resources",
@@ -33,11 +32,10 @@ var CompleteTargetSendResult = v1alpha2.PolicyReportResult{
 }
 
 var MinimalTargetSendResult = v1alpha2.PolicyReportResult{
-	Message:  "validation error: label required. Rule app-label-required failed at path /spec/template/spec/containers/0/resources/requests/",
-	Policy:   "app-label-requirement",
-	Priority: v1alpha2.CriticalPriority,
-	Result:   v1alpha2.StatusFail,
-	Scored:   true,
+	Message: "validation error: label required. Rule app-label-required failed at path /spec/template/spec/containers/0/resources/requests/",
+	Policy:  "app-label-requirement",
+	Result:  v1alpha2.StatusFail,
+	Scored:  true,
 }
 
 var EnforceTargetSendResult = v1alpha2.PolicyReportResult{
@@ -45,7 +43,6 @@ var EnforceTargetSendResult = v1alpha2.PolicyReportResult{
 	Policy:    "require-requests-and-limits-required",
 	Rule:      "check-for-requests-and-limits",
 	Timestamp: v1.Timestamp{Seconds: seconds},
-	Priority:  v1alpha2.WarningPriority,
 	Result:    v1alpha2.StatusFail,
 	Severity:  v1alpha2.SeverityHigh,
 	Category:  "resources",
@@ -66,7 +63,6 @@ var MissingUIDSendResult = v1alpha2.PolicyReportResult{
 	Policy:    "require-requests-and-limits-required",
 	Rule:      "check-for-requests-and-limits",
 	Timestamp: v1.Timestamp{Seconds: seconds},
-	Priority:  v1alpha2.WarningPriority,
 	Result:    v1alpha2.StatusFail,
 	Severity:  v1alpha2.SeverityHigh,
 	Category:  "resources",
@@ -87,7 +83,6 @@ var MissingAPIVersionSendResult = v1alpha2.PolicyReportResult{
 	Policy:    "require-requests-and-limits-required",
 	Rule:      "check-for-requests-and-limits",
 	Timestamp: v1.Timestamp{Seconds: seconds},
-	Priority:  v1alpha2.WarningPriority,
 	Result:    v1alpha2.StatusFail,
 	Severity:  v1alpha2.SeverityHigh,
 	Category:  "resources",
@@ -104,33 +99,29 @@ var MissingAPIVersionSendResult = v1alpha2.PolicyReportResult{
 }
 
 var ErrorSendResult = v1alpha2.PolicyReportResult{
-	Message:  "validation error: label required. Rule app-label-required failed at path /spec/template/spec/containers/0/resources/requests/",
-	Policy:   "app-label-requirement",
-	Priority: v1alpha2.ErrorPriority,
-	Result:   v1alpha2.StatusFail,
-	Scored:   true,
+	Message: "validation error: label required. Rule app-label-required failed at path /spec/template/spec/containers/0/resources/requests/",
+	Policy:  "app-label-requirement",
+	Result:  v1alpha2.StatusFail,
+	Scored:  true,
 }
 
 var CritcalSendResult = v1alpha2.PolicyReportResult{
-	Message:  "validation error: label required. Rule app-label-required failed at path /spec/template/spec/containers/0/resources/requests/",
-	Policy:   "app-label-requirement",
-	Priority: v1alpha2.CriticalPriority,
-	Result:   v1alpha2.StatusFail,
-	Scored:   true,
+	Message: "validation error: label required. Rule app-label-required failed at path /spec/template/spec/containers/0/resources/requests/",
+	Policy:  "app-label-requirement",
+	Result:  v1alpha2.StatusFail,
+	Scored:  true,
 }
 
 var InfoSendResult = v1alpha2.PolicyReportResult{
-	Message:  "validation error: label required. Rule app-label-required failed at path /spec/template/spec/containers/0/resources/requests/",
-	Policy:   "app-label-requirement",
-	Priority: v1alpha2.InfoPriority,
-	Result:   v1alpha2.StatusFail,
-	Scored:   true,
+	Message: "validation error: label required. Rule app-label-required failed at path /spec/template/spec/containers/0/resources/requests/",
+	Policy:  "app-label-requirement",
+	Result:  v1alpha2.StatusFail,
+	Scored:  true,
 }
 
 var DebugSendResult = v1alpha2.PolicyReportResult{
-	Message:  "validation error: label required. Rule app-label-required failed at path /spec/template/spec/containers/0/resources/requests/",
-	Policy:   "app-label-requirement",
-	Priority: v1alpha2.DebugPriority,
-	Result:   v1alpha2.StatusFail,
-	Scored:   true,
+	Message: "validation error: label required. Rule app-label-required failed at path /spec/template/spec/containers/0/resources/requests/",
+	Policy:  "app-label-requirement",
+	Result:  v1alpha2.StatusFail,
+	Scored:  true,
 }

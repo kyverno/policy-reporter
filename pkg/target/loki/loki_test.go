@@ -7,6 +7,8 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/stretchr/testify/assert"
+
 	"github.com/kyverno/policy-reporter/pkg/fixtures"
 	"github.com/kyverno/policy-reporter/pkg/target"
 	"github.com/kyverno/policy-reporter/pkg/target/loki"
@@ -39,7 +41,7 @@ func Test_LokiTarget(t *testing.T) {
 				t.Errorf("Unexpected Host: %s", agend)
 			}
 
-			if url := req.URL.String(); url != "http://localhost:3100/api/prom/push" {
+			if url := req.URL.String(); url != "http://localhost:3100/loki/api/v1/push" {
 				t.Errorf("Unexpected Host: %s", url)
 			}
 
@@ -47,60 +49,32 @@ func Test_LokiTarget(t *testing.T) {
 				t.Error("Expected Authentication header for BasicAuth is set")
 			}
 
-			expectedLine := fmt.Sprintf("[%s] %s", strings.ToUpper(fixtures.CompleteTargetSendResult.Priority.String()), fixtures.CompleteTargetSendResult.Message)
-			labels, line := convertAndValidateBody(req, t)
-			if line != expectedLine {
-				t.Errorf("Unexpected LineContent: %s", line)
-			}
-			if !strings.Contains(labels, "policy=\""+fixtures.CompleteTargetSendResult.Policy+"\"") {
-				t.Error("Missing Content for Label 'policy'")
-			}
-			if !strings.Contains(labels, "status=\""+string(fixtures.CompleteTargetSendResult.Result)+"\"") {
-				t.Error("Missing Content for Label 'status'")
-			}
-			if !strings.Contains(labels, "priority=\""+fixtures.CompleteTargetSendResult.Priority.String()+"\"") {
-				t.Error("Missing Content for Label 'priority'")
-			}
-			if !strings.Contains(labels, "source=\"policy-reporter\"") {
-				t.Error("Missing Content for Label 'policy-reporter'")
-			}
-			if !strings.Contains(labels, "rule=\""+fixtures.CompleteTargetSendResult.Rule+"\"") {
-				t.Error("Missing Content for Label 'rule'")
-			}
-			if !strings.Contains(labels, "category=\""+fixtures.CompleteTargetSendResult.Category+"\"") {
-				t.Error("Missing Content for Label 'category'")
-			}
-			if !strings.Contains(labels, "severity=\""+string(fixtures.CompleteTargetSendResult.Severity)+"\"") {
-				t.Error("Missing Content for Label 'severity'")
-			}
-			if !strings.Contains(labels, "custom=\"label\"") {
-				t.Error("Missing Content for Label 'severity'")
-			}
+			expectedLine := fmt.Sprintf("[%s] %s", strings.ToUpper(string(fixtures.CompleteTargetSendResult.Severity)), fixtures.CompleteTargetSendResult.Message)
+
+			stream := convertAndValidateBody(req, t)
+
+			assert.Equal(t, expectedLine, stream.Values[0][1])
+			assert.Equal(t, fixtures.CompleteTargetSendResult.Rule, stream.Stream["rule"])
+			assert.Equal(t, fixtures.CompleteTargetSendResult.Policy, stream.Stream["policy"])
+			assert.Equal(t, fixtures.CompleteTargetSendResult.Category, stream.Stream["category"])
+			assert.Equal(t, string(fixtures.CompleteTargetSendResult.Result), stream.Stream["status"])
+			assert.Equal(t, string(fixtures.CompleteTargetSendResult.Severity), stream.Stream["severity"])
 
 			res := fixtures.CompleteTargetSendResult.GetResource()
-			if !strings.Contains(labels, "kind=\""+res.Kind+"\"") {
-				t.Error("Missing Content for Label 'kind'")
-			}
-			if !strings.Contains(labels, "name=\""+res.Name+"\"") {
-				t.Error("Missing Content for Label 'name'")
-			}
-			if !strings.Contains(labels, "uid=\""+string(res.UID)+"\"") {
-				t.Error("Missing Content for Label 'uid'")
-			}
-			if !strings.Contains(labels, "namespace=\""+res.Namespace+"\"") {
-				t.Error("Missing Content for Label 'namespace'")
-			}
-			if !strings.Contains(labels, "version=\""+fixtures.CompleteTargetSendResult.Properties["version"]+"\"") {
-				t.Error("Missing Content for Label 'version'")
-			}
+			assert.Equal(t, res.Kind, stream.Stream["kind"])
+			assert.Equal(t, res.Name, stream.Stream["name"])
+			assert.Equal(t, string(res.UID), stream.Stream["uid"])
+			assert.Equal(t, res.Namespace, stream.Stream["namespace"])
+
+			assert.Equal(t, fixtures.CompleteTargetSendResult.Properties["version"], stream.Stream["version"])
 		}
 
 		client := loki.NewClient(loki.Options{
 			ClientOptions: target.ClientOptions{
 				Name: "Loki",
 			},
-			Host:         "http://localhost:3100/api/prom/push",
-			CustomLabels: map[string]string{"custom": "label"},
+			Host:         "http://localhost:3100/loki/api/v1/push",
+			CustomFields: map[string]string{"custom": "label"},
 			HTTPClient:   testClient{callback, 200},
 			Username:     "username",
 			Password:     "password",
@@ -119,56 +93,29 @@ func Test_LokiTarget(t *testing.T) {
 				t.Errorf("Unexpected Host: %s", agend)
 			}
 
-			if url := req.URL.String(); url != "http://localhost:3100/api/prom/push" {
+			if url := req.URL.String(); url != "http://localhost:3100/loki/api/v1/push" {
 				t.Errorf("Unexpected Host: %s", url)
 			}
 
-			expectedLine := fmt.Sprintf("[%s] %s", strings.ToUpper(fixtures.MinimalTargetSendResult.Priority.String()), fixtures.MinimalTargetSendResult.Message)
-			labels, line := convertAndValidateBody(req, t)
-			if line != expectedLine {
-				t.Errorf("Unexpected LineContent: %s", line)
-			}
-			if !strings.Contains(labels, "policy=\""+fixtures.MinimalTargetSendResult.Policy+"\"") {
-				t.Error("Missing Content for Label 'policy'")
-			}
-			if !strings.Contains(labels, "status=\""+string(fixtures.MinimalTargetSendResult.Result)+"\"") {
-				t.Error("Missing Content for Label 'status'")
-			}
-			if !strings.Contains(labels, "priority=\""+fixtures.MinimalTargetSendResult.Priority.String()+"\"") {
-				t.Error("Missing Content for Label 'priority'")
-			}
-			if !strings.Contains(labels, "source=\"policy-reporter\"") {
-				t.Error("Missing Content for Label 'policy-reporter'")
-			}
-			if strings.Contains(labels, "rule") {
-				t.Error("Unexpected Label 'rule'")
-			}
-			if strings.Contains(labels, "category") {
-				t.Error("Unexpected Label 'category'")
-			}
-			if strings.Contains(labels, "severity") {
-				t.Error("Unexpected 'severity'")
-			}
-			if strings.Contains(labels, "kind") {
-				t.Error("Unexpected Label 'kind'")
-			}
-			if strings.Contains(labels, "name") {
-				t.Error("Unexpected 'name'")
-			}
-			if strings.Contains(labels, "uid") {
-				t.Error("Unexpected 'uid'")
-			}
-			if strings.Contains(labels, "namespace") {
-				t.Error("Unexpected 'namespace'")
-			}
+			expectedLine := fmt.Sprintf("[%s] %s", strings.ToUpper(string(fixtures.MinimalTargetSendResult.Severity)), fixtures.MinimalTargetSendResult.Message)
+			stream := convertAndValidateBody(req, t)
+
+			assert.Equal(t, expectedLine, stream.Values[0][1])
+			assert.Equal(t, fixtures.MinimalTargetSendResult.Rule, stream.Stream["rule"])
+			assert.Equal(t, fixtures.MinimalTargetSendResult.Policy, stream.Stream["policy"])
+			assert.Equal(t, fixtures.MinimalTargetSendResult.Category, stream.Stream["category"])
+			assert.Equal(t, string(fixtures.MinimalTargetSendResult.Result), stream.Stream["status"])
+			assert.Equal(t, string(fixtures.MinimalTargetSendResult.Severity), stream.Stream["severity"])
+
+			assert.Equal(t, "policy-reporter", stream.Stream["createdBy"])
 		}
 
 		client := loki.NewClient(loki.Options{
 			ClientOptions: target.ClientOptions{
 				Name: "Loki",
 			},
-			Host:         "http://localhost:3100/api/prom/push",
-			CustomLabels: map[string]string{"custom": "label"},
+			Host:         "http://localhost:3100/loki/api/v1/push",
+			CustomFields: map[string]string{"custom": "label"},
 			HTTPClient:   testClient{callback, 200},
 		})
 		client.Send(fixtures.MinimalTargetSendResult)
@@ -178,8 +125,8 @@ func Test_LokiTarget(t *testing.T) {
 			ClientOptions: target.ClientOptions{
 				Name: "Loki",
 			},
-			Host:         "http://localhost:3100/api/prom/push",
-			CustomLabels: map[string]string{"custom": "label"},
+			Host:         "http://localhost:3100/loki/api/v1/push",
+			CustomFields: map[string]string{"custom": "label"},
 			HTTPClient:   testClient{},
 		})
 
@@ -189,44 +136,16 @@ func Test_LokiTarget(t *testing.T) {
 	})
 }
 
-func convertAndValidateBody(req *http.Request, t *testing.T) (string, string) {
-	payload := make(map[string]interface{})
+func convertAndValidateBody(req *http.Request, t *testing.T) loki.Stream {
+	payload := loki.Payload{}
 
 	err := json.NewDecoder(req.Body).Decode(&payload)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	streamsContent, ok := payload["streams"]
-	if !ok {
-		t.Errorf("Expected payload key 'streams' is missing")
-	}
+	assert.Len(t, payload.Streams[0].Values, 1)
+	assert.Len(t, payload.Streams[0].Values[0], 2)
 
-	streams := streamsContent.([]interface{})
-	if len(streams) != 1 {
-		t.Errorf("Expected one streams entry")
-	}
-
-	firstStream := streams[0].(map[string]interface{})
-	entriesContent, ok := firstStream["entries"]
-	if !ok {
-		t.Errorf("Expected stream key 'entries' is missing")
-	}
-	labels, ok := firstStream["labels"]
-	if !ok {
-		t.Errorf("Expected stream key 'labels' is missing")
-	}
-
-	entryContent := entriesContent.([]interface{})[0]
-	entry := entryContent.(map[string]interface{})
-	_, ok = entry["ts"]
-	if !ok {
-		t.Errorf("Expected entry key 'ts' is missing")
-	}
-	line, ok := entry["line"]
-	if !ok {
-		t.Errorf("Expected entry key 'line' is missing")
-	}
-
-	return labels.(string), line.(string)
+	return payload.Streams[0]
 }

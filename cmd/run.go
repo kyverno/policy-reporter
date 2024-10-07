@@ -11,6 +11,9 @@ import (
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
 
+	"github.com/kyverno/policy-reporter/pkg/api"
+	v1 "github.com/kyverno/policy-reporter/pkg/api/v1"
+	v2 "github.com/kyverno/policy-reporter/pkg/api/v2"
 	"github.com/kyverno/policy-reporter/pkg/config"
 	"github.com/kyverno/policy-reporter/pkg/database"
 	"github.com/kyverno/policy-reporter/pkg/listener"
@@ -41,6 +44,8 @@ func newRunCMD(version string) *cobra.Command {
 			k8sConfig.Burst = c.K8sClient.Burst
 
 			readinessProbe := config.NewReadinessProbe(c)
+			defer readinessProbe.Close()
+
 			resolver := config.NewResolver(c, k8sConfig)
 			logger, err := resolver.Logger()
 			if err != nil {
@@ -52,11 +57,25 @@ func newRunCMD(version string) *cobra.Command {
 				return err
 			}
 
-			server := resolver.APIServer(cmd.Context(), client.HasSynced)
+			secretInformer, err := resolver.SecretInformer()
+			if err != nil {
+				return err
+			}
 
 			g := &errgroup.Group{}
 
 			var store *database.Store
+			servOptions := []api.ServerOption{
+				api.WithPort(c.API.Port),
+				api.WithHealthChecks([]api.HealthCheck{
+					func() error {
+						if !client.HasSynced() {
+							return errors.New("informer not ready")
+						}
+						return nil
+					},
+				}),
+			}
 
 			if c.REST.Enabled {
 				db := resolver.Database()
@@ -65,7 +84,12 @@ func newRunCMD(version string) *cobra.Command {
 				}
 				defer db.Close()
 
-				store, err = resolver.PolicyReportStore(db)
+				store, err = resolver.Store(db)
+				if err != nil {
+					return err
+				}
+
+				nsClient, err := resolver.NamespaceClient()
 				if err != nil {
 					return err
 				}
@@ -76,18 +100,18 @@ func newRunCMD(version string) *cobra.Command {
 				}
 
 				logger.Info("REST api enabled")
-				server.RegisterV1Handler(store, resolver.ViolationsReporter())
+				servOptions = append(servOptions, v1.WithAPI(store, resolver.TargetClients(), resolver.ViolationsReporter()), v2.WithAPI(store, nsClient, c.Targets))
 			}
 
 			if c.Metrics.Enabled {
 				logger.Info("metrics enabled")
 				resolver.RegisterMetricsListener()
-				server.RegisterMetricsHandler()
+				servOptions = append(servOptions, api.WithMetrics())
 			}
 
 			if c.Profiling.Enabled {
 				logger.Info("pprof profiling enabled")
-				server.RegisterProfilingHandler()
+				servOptions = append(servOptions, api.WithProfiling())
 			}
 
 			if !resolver.ResultCache().Shared() {
@@ -145,9 +169,15 @@ func newRunCMD(version string) *cobra.Command {
 				readinessProbe.Ready()
 			}
 
+			server, err := resolver.Server(cmd.Context(), servOptions)
+			if err != nil {
+				return err
+			}
+
 			g.Go(server.Start)
 
 			g.Go(func() error {
+				logger.Info("wait policy informer")
 				readinessProbe.Wait()
 
 				logger.Info("start client", zap.Int("worker", c.WorkerCount))
@@ -162,6 +192,26 @@ func newRunCMD(version string) *cobra.Command {
 				}
 			})
 
+			g.Go(func() error {
+				collection := resolver.TargetClients()
+				if !collection.UsesSecrets() {
+					return nil
+				}
+
+				readinessProbe.Wait()
+
+				stop := make(chan struct{})
+				if err := secretInformer.Sync(collection, stop); err != nil {
+					zap.L().Error("secret informer error", zap.Error(err))
+
+					return err
+				}
+
+				<-stop
+
+				return nil
+			})
+
 			return g.Wait()
 		},
 	}
@@ -169,8 +219,8 @@ func newRunCMD(version string) *cobra.Command {
 	// For local usage
 	cmd.PersistentFlags().StringP("kubeconfig", "k", "", "absolute path to the kubeconfig file")
 	cmd.PersistentFlags().StringP("config", "c", "", "target configuration file")
-	cmd.PersistentFlags().IntP("port", "p", 8080, "http port for the optional rest api")
-	cmd.PersistentFlags().StringP("dbfile", "d", "sqlite-database.db", "path to the SQLite DB File")
+	cmd.PersistentFlags().IntP("port", "p", 8001, "http port for the optional rest api")
+	cmd.PersistentFlags().StringP("dbfile", "d", "sqlite-database-v2.db", "path to the SQLite DB File")
 	cmd.PersistentFlags().BoolP("metrics-enabled", "m", false, "Enable Policy Reporter's Metrics API")
 	cmd.PersistentFlags().BoolP("rest-enabled", "r", false, "Enable Policy Reporter's REST API")
 	cmd.PersistentFlags().Bool("profile", false, "Enable application profiling with pprof")

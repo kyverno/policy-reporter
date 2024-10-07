@@ -5,6 +5,7 @@ import (
 
 	"github.com/prometheus/client_golang/prometheus"
 	ioprometheusclient "github.com/prometheus/client_model/go"
+	"github.com/stretchr/testify/assert"
 
 	"github.com/kyverno/policy-reporter/pkg/listener"
 	"github.com/kyverno/policy-reporter/pkg/listener/metrics"
@@ -26,13 +27,10 @@ func Test_SimpleMetricsListener(t *testing.T) {
 		}
 
 		summary := findMetric(metricFam, "cluster_policy_report_summary")
-		if summary != nil {
-			t.Fatalf("Metric should not be created: cluster_policy_report_summary")
-		}
+		assert.Nil(t, summary, "Metric should not be created: cluster_policy_report_summary")
+
 		result := findMetric(metricFam, "cluster_policy_report_simple_result")
-		if result == nil {
-			t.Fatalf("Metric not found: cluster_policy_report_simple_result")
-		}
+		assert.NotNil(t, result, "Metric not found: cluster_policy_report_simple_result")
 	})
 	t.Run("Add PolicyReport Metric", func(t *testing.T) {
 		slistener(report.LifecycleEvent{Type: report.Added, PolicyReport: preport1})
@@ -43,13 +41,10 @@ func Test_SimpleMetricsListener(t *testing.T) {
 		}
 
 		summary := findMetric(metricFam, "policy_report_summary")
-		if summary != nil {
-			t.Fatalf("Metric should not be created: policy_report_summary")
-		}
+		assert.Nil(t, summary, "Metric should not be created: policy_report_summary")
+
 		result := findMetric(metricFam, "policy_report_simple_result")
-		if result == nil {
-			t.Fatalf("Metric not found: policy_report_simple_result")
-		}
+		assert.NotNil(t, result, "Metric not found: policy_report_simple_result")
 	})
 }
 
@@ -69,13 +64,10 @@ func Test_CustomMetricsListener(t *testing.T) {
 		}
 
 		summary := findMetric(metricFam, "cluster_policy_report_summary")
-		if summary != nil {
-			t.Fatalf("Metric should not be created: cluster_policy_report_summary")
-		}
+		assert.Nil(t, summary, "Metric should not be created: cluster_policy_report_summary")
+
 		result := findMetric(metricFam, "cluster_policy_report_custom_result")
-		if result == nil {
-			t.Fatalf("Metric not found: cluster_policy_report_custom_result")
-		}
+		assert.NotNil(t, result, "Metric not found: cluster_policy_report_custom_result")
 	})
 	t.Run("Add PolicyReport Metric", func(t *testing.T) {
 		slistener(report.LifecycleEvent{Type: report.Added, PolicyReport: preport1})
@@ -86,13 +78,10 @@ func Test_CustomMetricsListener(t *testing.T) {
 		}
 
 		summary := findMetric(metricFam, "policy_report_summary")
-		if summary != nil {
-			t.Fatalf("Metric should not be created: policy_report_summary")
-		}
+		assert.Nil(t, summary, "Metric should not be created: policy_report_summary")
+
 		result := findMetric(metricFam, "policy_report_custom_result")
-		if result == nil {
-			t.Fatalf("Metric not found: policy_report_custom_result")
-		}
+		assert.NotNil(t, result, "Metric not found: policy_report_custom_result")
 	})
 }
 
@@ -110,14 +99,8 @@ func Test_MetricsListener(t *testing.T) {
 			t.Errorf("unexpected Error: %s", err)
 		}
 
-		summary := findMetric(metricFam, "cluster_policy_report_summary")
-		if summary == nil {
-			t.Fatalf("Metric not found: cluster_policy_report_summary")
-		}
 		result := findMetric(metricFam, "cluster_policy_report_result")
-		if result == nil {
-			t.Fatalf("Metric not found: cluster_policy_report_result")
-		}
+		assert.NotNil(t, result, "Metric not found: cluster_policy_report_result")
 	})
 	t.Run("Add PolicyReport Metric", func(t *testing.T) {
 		slistener(report.LifecycleEvent{Type: report.Added, PolicyReport: preport1})
@@ -127,14 +110,8 @@ func Test_MetricsListener(t *testing.T) {
 			t.Errorf("unexpected Error: %s", err)
 		}
 
-		summary := findMetric(metricFam, "policy_report_summary")
-		if summary == nil {
-			t.Fatalf("Metric not found: policy_report_summary")
-		}
 		result := findMetric(metricFam, "policy_report_result")
-		if result == nil {
-			t.Fatalf("Metric not found: policy_report_result")
-		}
+		assert.NotNil(t, result, "Metric not found: policy_report_result")
 	})
 }
 

@@ -2,7 +2,6 @@ package gcs
 
 import (
 	"bytes"
-	"context"
 	"encoding/json"
 	"fmt"
 	"time"
@@ -10,23 +9,23 @@ import (
 	"go.uber.org/zap"
 
 	"github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
-	"github.com/kyverno/policy-reporter/pkg/helper"
 	"github.com/kyverno/policy-reporter/pkg/target"
 	"github.com/kyverno/policy-reporter/pkg/target/http"
+	"github.com/kyverno/policy-reporter/pkg/target/provider/gcs"
 )
 
 // Options to configure the GCS target
 type Options struct {
 	target.ClientOptions
 	CustomFields map[string]string
-	Client       helper.GCPClient
+	Client       gcs.Client
 	Prefix       string
 }
 
 type client struct {
 	target.BaseClient
 	customFields map[string]string
-	client       helper.GCPClient
+	client       gcs.Client
 	prefix       string
 }
 
@@ -63,7 +62,9 @@ func (c *client) Send(result v1alpha2.PolicyReportResult) {
 	zap.L().Info(c.Name() + ": PUSH OK")
 }
 
-func (c *client) CleanUp(_ context.Context, _ v1alpha2.ReportInterface) {}
+func (c *client) Type() target.ClientType {
+	return target.SingleSend
+}
 
 // NewClient creates a new GCS.client to send Results to Google Cloud Storage.
 func NewClient(options Options) target.Client {

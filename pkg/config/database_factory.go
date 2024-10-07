@@ -14,6 +14,7 @@ import (
 	"github.com/uptrace/bun/dialect/mysqldialect"
 	"github.com/uptrace/bun/dialect/pgdialect"
 	"github.com/uptrace/bun/driver/pgdriver"
+	"github.com/uptrace/bun/extra/bundebug"
 	"go.uber.org/zap"
 
 	"github.com/kyverno/policy-reporter/pkg/database"
@@ -87,6 +88,8 @@ func (f *DatabaseFactory) NewSQLite(file string) *bun.DB {
 		zap.L().Error("failed to create sqlite connection", zap.Error(err))
 		return nil
 	}
+
+	sqldb.AddQueryHook(bundebug.NewQueryHook())
 
 	return sqldb
 }

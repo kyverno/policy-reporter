@@ -9,8 +9,8 @@ If release name contains chart name it will be used as a full name.
 */}}
 {{- define "policyreporter.fullname" -}}
 {{- $name := default .Chart.Name .Values.nameOverride }}
-{{- if .Values.global.fullnameOverride }}
-{{- .Values.global.fullnameOverride }}
+{{- if .Values.fullnameOverride }}
+{{- .Values.fullnameOverride }}
 {{- else if contains $name .Release.Name }}
 {{- .Release.Name | trunc 63 | trimSuffix "-" }}
 {{- else }}
@@ -78,8 +78,6 @@ Create UI target host based on configuration
 {{- .Values.target.ui.host }}
 {{- else if not .Values.ui.enabled }}
 {{- "" }}
-{{- else if and .Values.ui.enabled (and .Values.ui.views.logs .Values.ui.service.enabled) }}
-{{- printf "http://%s:%s" (include "ui.fullname" .) (.Values.ui.service.port | toString) }}
 {{- else }}
 {{- "" }}
 {{- end }}
@@ -95,7 +93,7 @@ Create UI target host based on configuration
 
 {{- define "policyreporter.podDisruptionBudget" -}}
 {{- if and .Values.podDisruptionBudget.minAvailable .Values.podDisruptionBudget.maxUnavailable }}
-{{- fail "Cannot set both .Values.podDisruptionBudget.minAvailable and .Values.podDisruptionBudget.maxUnavailable" -}}
+{{- fail "Cannot set both minAvailable and maxUnavailable" -}}
 {{- end }}
 {{- if not .Values.podDisruptionBudget.maxUnavailable }}
 minAvailable: {{ default 1 .Values.podDisruptionBudget.minAvailable }}
@@ -107,8 +105,8 @@ maxUnavailable: {{ .Values.podDisruptionBudget.maxUnavailable }}
 
 {{/* Get the namespace name. */}}
 {{- define "policyreporter.namespace" -}}
-{{- if .Values.global.namespace -}}
-    {{- .Values.global.namespace -}}
+{{- if .Values.namespaceOverride -}}
+    {{- .Values.namespaceOverride -}}
 {{- else -}}
     {{- .Release.Namespace -}}
 {{- end -}}
@@ -116,9 +114,137 @@ maxUnavailable: {{ .Values.podDisruptionBudget.maxUnavailable }}
 
 {{/* Get the namespace name. */}}
 {{- define "policyreporter.logLevel" -}}
-{{- if .Values.api.logging -}}
+{{- if .Values.logging.server -}}
 -1
 {{- else -}}
 {{- .Values.logging.logLevel -}}
 {{- end -}}
 {{- end -}}
+
+{{- define "target" -}}
+name: {{ .name | quote }}
+secretRef: {{ .secretRef | quote }}
+mountedSecret: {{ .mountedSecret | quote }}
+minimumSeverity: {{ .minimumSeverity | quote }}
+skipExistingOnStartup: {{ .skipExistingOnStartup }}
+{{- with .customFields }}
+customFields:
+{{- toYaml . | nindent 2 }}
+{{- end }}
+{{- with .sources }}
+sources:
+{{- toYaml . | nindent 2 }}
+{{- end }}
+{{- with .filter }}
+filter:
+{{- toYaml . | nindent 2 }}
+{{- end }}
+{{- end }}
+
+{{- define "target.loki" -}}
+config:
+  host: {{ .host | quote }}
+  certificate: {{ .certificate | quote }}
+  skipTLS: {{ .skipTLS }}
+  path: {{ .path | quote }}
+{{ include "target" . }}
+{{- end }}
+
+{{- define "target.elasticsearch" -}}
+config:
+  host: {{ .host | quote }}
+  certificate: {{ .certificate | quote }}
+  skipTLS: {{ .skipTLS }}
+  username: {{ .username | quote }}
+  password: {{ .password | quote }}
+  apiKey: {{ .apiKey | quote }}
+  index: {{ .index| quote }}
+  rotation: {{ .rotation | quote }}
+{{ include "target" . }}
+{{- end }}
+
+{{- define "target.slack" -}}
+config:
+  webhook: {{ .webhook | quote }}
+  channel: {{ .channel | quote }}
+  certificate: {{ .certificate | quote }}
+  skipTLS: {{ .skipTLS }}
+  {{- with .headers }}
+  headers:
+  {{- toYaml . | nindent 4 }}
+  {{- end }}
+{{ include "target" . }}
+{{- end }}
+
+{{- define "target.webhook" -}}
+config:
+  webhook: {{ .webhook | quote }}
+  certificate: {{ .certificate | quote }}
+  skipTLS: {{ .skipTLS }}
+  {{- with .headers }}
+  headers:
+  {{- toYaml . | nindent 4 }}
+  {{- end }}
+{{ include "target" . }}
+{{- end }}
+
+{{- define "target.telegram" -}}
+config:
+  chatId: {{ .chatId | quote }}
+  token: {{ .token | quote }}
+  webhook: {{ .webhook | quote }}
+  certificate: {{ .certificate | quote }}
+  skipTLS: {{ .skipTLS }}
+  {{- with .headers }}
+  headers:
+  {{- toYaml . | nindent 4 }}
+  {{- end }}
+{{ include "target" . }}
+{{- end }}
+
+{{- define "target.s3" -}}
+config:
+  accessKeyId: {{ .accessKeyId }}
+  secretAccessKey:  {{ .secretAccessKey }}
+  region: {{ .region }}
+  endpoint: {{ .endpoint }}
+  bucket: {{ .bucket }}
+  bucketKeyEnabled: {{ .bucketKeyEnabled }}
+  kmsKeyId: {{ .kmsKeyId }}
+  serverSideEncryption: {{ .serverSideEncryption }}
+  pathStyle: {{ .pathStyle }}
+  prefix: {{ .prefix }}
+{{ include "target" . }}
+{{- end }}
+
+{{- define "target.kinesis" -}}
+config:
+  accessKeyId: {{ .accessKeyId }}
+  secretAccessKey:  {{ .secretAccessKey }}
+  region: {{ .region }}
+  endpoint: {{ .endpoint }}
+  streamName: {{ .streamName }}
+{{ include "target" . }}
+{{- end }}
+
+{{- define "target.securityhub" -}}
+config:
+  accessKeyId: {{ .accessKeyId }}
+  secretAccessKey:  {{ .secretAccessKey }}
+  region: {{ .region }}
+  endpoint: {{ .endpoint }}
+  accountId: {{ .accountId }}
+  productName: {{ .productName }}
+  companyName: {{ .companyName }}
+  delayInSeconds: {{ .delayInSeconds }}
+  synchronize: {{ .synchronize }}
+{{ include "target" . }}
+{{- end }}
+
+{{- define "target.gcs" -}}
+config:
+  credentials: {{ .credentials }}
+  bucket: {{ .bucket }}
+  prefix: {{ .prefix }}
+{{ include "target" . }}
+{{- end }}

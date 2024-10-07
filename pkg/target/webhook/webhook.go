@@ -1,8 +1,6 @@
 package webhook
 
 import (
-	"context"
-
 	"github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
 	"github.com/kyverno/policy-reporter/pkg/target"
 	"github.com/kyverno/policy-reporter/pkg/target/http"
@@ -40,7 +38,7 @@ func (e *client) Send(result v1alpha2.PolicyReportResult) {
 		result.Properties = props
 	}
 
-	req, err := http.CreateJSONRequest(e.Name(), "POST", e.host, http.NewJSONResult(result))
+	req, err := http.CreateJSONRequest("POST", e.host, http.NewJSONResult(result))
 	if err != nil {
 		return
 	}
@@ -53,7 +51,9 @@ func (e *client) Send(result v1alpha2.PolicyReportResult) {
 	http.ProcessHTTPResponse(e.Name(), resp, err)
 }
 
-func (e *client) CleanUp(_ context.Context, _ v1alpha2.ReportInterface) {}
+func (e *client) Type() target.ClientType {
+	return target.SingleSend
+}
 
 // NewClient creates a new loki.client to send Results to Elasticsearch
 func NewClient(options Options) target.Client {

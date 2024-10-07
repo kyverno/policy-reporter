@@ -4,7 +4,7 @@ on:
   push:
     branches:
       - main
-      - development
+      - 3.x
 
     paths-ignore:
       - README.md
@@ -14,25 +14,62 @@ on:
   pull_request:
     branches:
       - main
+      - 3.x
 
 jobs:
   coverage:
     runs-on: ubuntu-latest
     steps:
-      - name: Set up Go 1.22
-        uses: actions/setup-go@v2
+      - name: Checkout
+        uses: actions/checkout@d632683dd7b4114ad314bca15554477dd762a938 # v4.2.0
+
+      - name: Set up Go
+        uses: actions/setup-go@0a12ed9d6a96ab950c8f026ed9f722fe0da7ef32 # v5.2.0
         with:
-          go-version: 1.22
-      - name: Checkout code
-        uses: actions/checkout@v2
-      - name: Get dependencies
-        run: go get -v -t -d ./...
+          go-version-file: go.mod
+          cache-dependency-path: go.sum
+
+      - name: Check go.mod
+        run: |
+          set -e
+          go mod tidy && git diff --exit-code
+
+      - name: Check code format
+        run: |
+          set -e
+          make fmt
+          git diff --exit-code
+
+      - name: Run Trivy vulnerability scanner in repo mode
+        uses: aquasecurity/trivy-action@6e7b7d1fd3e4fef0c5fa8cce1229c54b2c9bd0d8 # v0.24.0
+        with:
+          scan-type: 'fs'
+          ignore-unfixed: true
+          format: 'sarif'
+          output: 'trivy-results.sarif'
+          severity: 'CRITICAL,HIGH'
+
       - name: Calc coverage
         run: make coverage
+
       - name: Convert coverage to lcov
-        uses: jandelgado/gcov2lcov-action@v1.0.9
+        uses: jandelgado/gcov2lcov-action@c680c0f7c7442485f1749eb2a13e54a686e76eb5 #v1.0.9
+
       - name: Coveralls
-        uses: coverallsapp/github-action@v2.0.0
+        uses: coverallsapp/github-action@643bc377ffa44ace6394b2b5d0d3950076de9f63 # v2.3.0
         with:
           github-token: ${{ secrets.github_token }}
           file: coverage.lcov
+
+  check-actions:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@d632683dd7b4114ad314bca15554477dd762a938 # v4.2.0
+      - name: Ensure SHA pinned actions
+        uses: zgosalvez/github-actions-ensure-sha-pinned-actions@b8f9a25a51fe633d9215ac7734854dc11cd299cb # v3.0.13
+        with:
+          # slsa-github-generator requires using a semver tag for reusable workflows. 
+          # See: https://github.com/slsa-framework/slsa-github-generator#referencing-slsa-builders-and-generators
+          allowlist: |
+            slsa-framework/slsa-github-generator

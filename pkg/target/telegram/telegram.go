@@ -27,7 +27,7 @@ func escape(text interface{}) string {
 	return replacer.Replace(fmt.Sprintf("%v", text))
 }
 
-var notificationTempl = `*\[Policy Reporter\] \[{{ .Priority }}\] {{ escape (or .Result.Policy .Result.Rule) }}*
+var notificationTempl = `*\[Policy Reporter\] \[{{ .Result.Severity }}\] {{ escape (or .Result.Policy .Result.Rule) }}*
 {{- if .Resource }}
 
 *Resource*: {{ .Resource.Kind }} {{ if .Resource.Namespace }}{{ escape .Resource.Namespace }}/{{ end }}{{ escape .Resource.Name }}
@@ -118,16 +118,10 @@ func (e *client) Send(result v1alpha2.PolicyReportResult) {
 		res = result.GetResource()
 	}
 
-	prio := result.Priority.String()
-	if prio == "" {
-		prio = v1alpha2.DebugPriority.String()
-	}
-
 	err = ttmpl.Execute(&textBuffer, values{
 		Result:   result,
 		Time:     time.Now(),
 		Resource: res,
-		Priority: prio,
 	})
 	if err != nil {
 		zap.L().Error(e.Name()+": PUSH FAILED", zap.Error(err))
@@ -136,7 +130,7 @@ func (e *client) Send(result v1alpha2.PolicyReportResult) {
 
 	payload.Text = textBuffer.String()
 
-	req, err := http.CreateJSONRequest(e.Name(), "POST", e.host, payload)
+	req, err := http.CreateJSONRequest("POST", e.host, payload)
 	if err != nil {
 		zap.L().Error(e.Name()+": PUSH FAILED", zap.Error(err))
 		fmt.Println(err)
@@ -152,6 +146,16 @@ func (e *client) Send(result v1alpha2.PolicyReportResult) {
 }
 
 func (e *client) CleanUp(_ context.Context, _ v1alpha2.ReportInterface) {}
+
+func (e *client) Reset(_ context.Context) error {
+	return nil
+}
+
+func (e *client) BatchSend(_ v1alpha2.ReportInterface, _ []v1alpha2.PolicyReportResult) {}
+
+func (e *client) Type() target.ClientType {
+	return target.SingleSend
+}
 
 // NewClient creates a new loki.client to send Results to Elasticsearch
 func NewClient(options Options) target.Client {

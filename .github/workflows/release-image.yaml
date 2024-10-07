@@ -1,0 +1,99 @@
+name: release-image
+on:
+  push:
+    branches:
+      - main
+
+    tags:
+      - 'v*'
+
+    paths-ignore:
+      - README.md
+      - charts/**
+      - manifest/**
+
+permissions:
+  contents: read
+  packages: write
+  id-token: write 
+
+jobs:
+  push-policy-reporter:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@d632683dd7b4114ad314bca15554477dd762a938 # v4.2.0
+
+      - name: Push image
+        id: params
+        run: |
+          # Strip git ref prefix from version
+          VERSION=$(git rev-parse --short "$GITHUB_SHA")
+          # Strip "v" prefix from tag name
+          [[ "${{ github.ref }}" == "refs/tags/"* ]] && VERSION=$(echo $VERSION | sed -e 's/^v//')
+          echo VERSION=$VERSION
+          echo "VERSION=$VERSION" >> "$GITHUB_ENV"
+
+      - name: Login to Github Packages
+        uses: docker/login-action@9780b0c442fbb1117ed29e0efdff1e18412f7567 # v3.3.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.CR_PAT }}
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@49b3bc8e6bdd4a60e6116a5414239cba5943d3cf # v3.2.0
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@c47758b77c9736f4b2ef4073d4d51994fabfe349 #v3.7.1
+        id: buildx
+        with:
+          install: true
+          version: latest
+
+      - name: Build image and push to GitHub Container Registry
+        uses: docker/build-push-action@4f58ea79222b3b9dc2c8bbdd6debcef730109a75 # v6.9.0
+        id: push
+        with:
+          push: true
+          platforms: linux/arm64,linux/amd64
+          cache-from: type=registry,ref=ghcr.io/kyverno/policy-reporter:buildcache
+          cache-to: type=registry,ref=ghcr.io/kyverno/policy-reporter:buildcache,mode=max
+          tags: |
+            ghcr.io/kyverno/policy-reporter:${{ env.VERSION }}
+
+      - name: Set up Go
+        uses: actions/setup-go@0a12ed9d6a96ab950c8f026ed9f722fe0da7ef32 # v5.2.0
+        with:
+          go-version-file: go.mod
+          cache-dependency-path: go.sum
+
+      - uses: CycloneDX/gh-gomod-generate-sbom@efc74245d6802c8cefd925620515442756c70d8f # v2.0.0
+        with:
+          version: v1
+          args: app -licenses -json -output policy-reporter-bom.cdx.json -main .
+
+      - uses: actions/upload-artifact@50769540e7f4bd5e21e526ee35c689e35e0d6874 # v4.4.0
+        with:
+          name: policy-reporter-bom-cdx
+          path: policy-reporter-bom.cdx.json
+
+      - name: Install Cosign
+        uses: sigstore/cosign-installer@1fc5bd396d372bee37d608f955b336615edf79c8 # v3.2.0
+
+      - shell: bash
+        env:
+          COSIGN_REPOSITORY: ghcr.io/kyverno/signatures
+        run: |
+          set -e
+          cosign sign --yes \
+            -a "repo=${{ github.repository }}" \
+            -a "workflow=${{ github.workflow }}" \
+            -a "ref=${{ github.sha }}" \
+            ghcr.io/kyverno/policy-reporter@${{ steps.push.outputs.digest }}
+      
+      - shell: bash
+        env:
+          COSIGN_REPOSITORY: ghcr.io/kyverno/sbom
+        run: |
+          cosign attach sbom --sbom ./policy-reporter-bom.cdx.json --type cyclonedx ghcr.io/kyverno/policy-reporter@${{ steps.push.outputs.digest }}

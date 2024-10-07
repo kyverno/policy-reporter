@@ -1,86 +1,139 @@
 package api_test
 
 import (
-	"context"
-	"fmt"
-	"math/rand"
 	"net/http"
+	"net/http/httptest"
 	"testing"
-	"time"
 
+	"github.com/gin-gonic/gin"
+	"github.com/stretchr/testify/assert"
 	"go.uber.org/zap"
 
 	"github.com/kyverno/policy-reporter/pkg/api"
-	"github.com/kyverno/policy-reporter/pkg/target"
 )
 
-var logger = zap.NewNop()
-
-func Test_NewServer(t *testing.T) {
-	rnd := rand.New(rand.NewSource(time.Now().Unix())).Float64()
-	if rnd < 0.3 {
-		rnd += 0.4
-	}
-
-	port := int(rnd * 10000)
-
-	server := api.NewServer(
-		make([]target.Client, 0),
-		port,
-		logger,
-		nil,
-		func() bool { return true },
-	)
-
-	server.RegisterMetricsHandler()
-	server.RegisterV1Handler(nil, nil)
-	server.RegisterProfilingHandler()
-
-	serviceRunning := make(chan struct{})
-	serviceDone := make(chan struct{})
-
-	go func() {
-		close(serviceRunning)
-		err := server.Start()
-		if err != nil {
-			fmt.Println(err)
-		}
-		defer close(serviceDone)
-	}()
-
-	<-serviceRunning
-
-	client := http.Client{}
-
-	req, err := http.NewRequest("GET", fmt.Sprintf("http://localhost:%d/ready", port), nil)
-	if err != nil {
-		return
-	}
-
-	res, err := client.Do(req)
-
-	server.Shutdown(context.Background())
-	if err != nil {
-		return
-	}
-
-	if res.StatusCode != http.StatusOK {
-		t.Errorf("Unexpected Error Code: %d", res.StatusCode)
-	}
-
-	<-serviceDone
+var check = func() error {
+	return nil
 }
 
-func Test_SetupServerWithAuth(t *testing.T) {
-	server := api.NewServer(
-		make([]target.Client, 0),
-		8080,
-		logger,
-		&api.BasicAuth{Username: "user", Password: "password"},
-		func() bool { return true },
-	)
+func TestWithoutGZIP(t *testing.T) {
+	gin.SetMode(gin.ReleaseMode)
 
-	server.RegisterMetricsHandler()
-	server.RegisterV1Handler(nil, nil)
-	server.RegisterProfilingHandler()
+	engine := gin.New()
+
+	server := api.NewServer(engine, api.WithHealthChecks([]api.HealthCheck{check}))
+
+	req, _ := http.NewRequest("GET", "/healthz", nil)
+	req.Header.Add("Accept-Encoding", "gzip")
+	w := httptest.NewRecorder()
+
+	server.Serve(w, req)
+
+	assert := assert.New(t)
+	assert.Equal(http.StatusOK, w.Code)
+	assert.Equal("", w.Header().Get("Content-Encoding"))
+}
+
+func TestWithGZIP(t *testing.T) {
+	gin.SetMode(gin.ReleaseMode)
+
+	server := api.NewServer(gin.New(), api.WithGZIP(), api.WithHealthChecks([]api.HealthCheck{check}))
+
+	req, _ := http.NewRequest("GET", "/healthz", nil)
+	req.Header.Add("Accept-Encoding", "gzip")
+	w := httptest.NewRecorder()
+
+	server.Serve(w, req)
+
+	assert := assert.New(t)
+	assert.Equal(http.StatusOK, w.Code)
+	assert.Equal("gzip", w.Header().Get("Content-Encoding"))
+}
+
+func TestWithProfiling(t *testing.T) {
+	gin.SetMode(gin.ReleaseMode)
+
+	server := api.NewServer(gin.New(), api.WithProfiling())
+
+	req, _ := http.NewRequest("GET", "/debug/pprof/", nil)
+	w := httptest.NewRecorder()
+
+	server.Serve(w, req)
+
+	assert := assert.New(t)
+	assert.Equal(http.StatusOK, w.Code)
+}
+
+type testHandler struct{}
+
+func (h *testHandler) Register(group *gin.RouterGroup) error {
+	group.GET("", func(ctx *gin.Context) {
+		ctx.JSON(http.StatusOK, nil)
+	})
+
+	return nil
+}
+
+func TestWithCustomHandler(t *testing.T) {
+	gin.SetMode(gin.ReleaseMode)
+
+	server := api.NewServer(gin.New(), api.WithProfiling())
+	server.Register("/test", &testHandler{})
+
+	req, _ := http.NewRequest("GET", "/test", nil)
+	w := httptest.NewRecorder()
+
+	server.Serve(w, req)
+
+	assert := assert.New(t)
+	assert.Equal(http.StatusOK, w.Code)
+}
+
+func TestWithRecover(t *testing.T) {
+	gin.SetMode(gin.ReleaseMode)
+	engine := gin.New()
+	server := api.NewServer(engine, api.WithRecovery())
+
+	engine.GET("/recover", func(ctx *gin.Context) {
+		panic("recover")
+	})
+
+	req, _ := http.NewRequest("GET", "/recover", nil)
+	w := httptest.NewRecorder()
+
+	server.Serve(w, req)
+
+	assert := assert.New(t)
+	assert.Equal(http.StatusInternalServerError, w.Code)
+}
+
+func TestWithZapLoggingRecover(t *testing.T) {
+	gin.SetMode(gin.ReleaseMode)
+	engine := gin.New()
+	server := api.NewServer(engine, api.WithLogging(zap.L()))
+
+	engine.GET("/recover", func(ctx *gin.Context) {
+		panic("recover")
+	})
+
+	req, _ := http.NewRequest("GET", "/recover", nil)
+	w := httptest.NewRecorder()
+
+	server.Serve(w, req)
+
+	assert := assert.New(t)
+	assert.Equal(http.StatusInternalServerError, w.Code)
+}
+
+func TestWithPort(t *testing.T) {
+	gin.SetMode(gin.ReleaseMode)
+
+	server := api.NewServer(gin.New(), api.WithProfiling(), api.WithPort(8082))
+	req, _ := http.NewRequest("GET", "/debug/pprof/", nil)
+	w := httptest.NewRecorder()
+
+	server.Serve(w, req)
+
+	assert := assert.New(t)
+	assert.Equal(http.StatusOK, w.Code)
 }

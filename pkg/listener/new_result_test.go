@@ -4,6 +4,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/stretchr/testify/assert"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/kyverno/policy-reporter/pkg/cache"
@@ -25,9 +26,7 @@ func Test_ResultListener(t *testing.T) {
 		slistener.Listen(report.LifecycleEvent{Type: report.Added, PolicyReport: preport1})
 		slistener.Listen(report.LifecycleEvent{Type: report.Updated, PolicyReport: preport2})
 
-		if called.GetID() != fixtures.FailPodResult.GetID() {
-			t.Error("Expected Listener to be called with FailPodResult")
-		}
+		assert.Equal(t, called.GetID(), fixtures.FailPodResult.GetID(), "Expected Listener to be called with FailPodResult")
 	})
 
 	t.Run("Ignore Delete Event", func(t *testing.T) {
@@ -40,9 +39,7 @@ func Test_ResultListener(t *testing.T) {
 
 		slistener.Listen(report.LifecycleEvent{Type: report.Deleted, PolicyReport: preport2})
 
-		if called {
-			t.Error("Expected Listener not be called on Deleted event")
-		}
+		assert.False(t, called, "Expected Listener not be called on Deleted event")
 	})
 
 	t.Run("Ignore Added Results created before startup", func(t *testing.T) {
@@ -55,9 +52,7 @@ func Test_ResultListener(t *testing.T) {
 
 		slistener.Listen(report.LifecycleEvent{Type: report.Added, PolicyReport: preport2})
 
-		if called {
-			t.Error("Expected Listener not be called on Deleted event")
-		}
+		assert.False(t, called, "Expected Listener not be called on Deleted event")
 	})
 
 	t.Run("Ignore CacheResults", func(t *testing.T) {
@@ -71,9 +66,7 @@ func Test_ResultListener(t *testing.T) {
 		slistener.Listen(report.LifecycleEvent{Type: report.Added, PolicyReport: preport2})
 		slistener.Listen(report.LifecycleEvent{Type: report.Updated, PolicyReport: preport2})
 
-		if called {
-			t.Error("Expected Listener not be called on cached results")
-		}
+		assert.False(t, called, "Expected Listener not be called on cached results")
 	})
 
 	t.Run("Early Return if Results are empty", func(t *testing.T) {
@@ -86,9 +79,7 @@ func Test_ResultListener(t *testing.T) {
 
 		slistener.Listen(report.LifecycleEvent{Type: report.Updated, PolicyReport: preport3})
 
-		if called {
-			t.Error("Expected Listener not be called with empty results")
-		}
+		assert.False(t, called, "Expected Listener not be called with empty results")
 	})
 
 	t.Run("Skip process events when no listeners registered", func(t *testing.T) {
@@ -97,9 +88,7 @@ func Test_ResultListener(t *testing.T) {
 		slistener := listener.NewResultListener(true, c, time.Now())
 		slistener.Listen(report.LifecycleEvent{Type: report.Added, PolicyReport: preport2})
 
-		if res := c.GetResults(preport2.GetID()); len(res) == 0 {
-			t.Error("Expected cached report was found")
-		}
+		assert.Greater(t, len(c.GetResults(preport2.GetID())), 0, "Expected cached report was found")
 	})
 
 	t.Run("UnregisterListener removes all listeners", func(t *testing.T) {
@@ -114,9 +103,7 @@ func Test_ResultListener(t *testing.T) {
 
 		slistener.Listen(report.LifecycleEvent{Type: report.Updated, PolicyReport: preport2})
 
-		if called {
-			t.Error("Expected Listener not called because it was unregistered")
-		}
+		assert.False(t, called, "Expected Listener not called because it was unregistered")
 	})
 	t.Run("ignore results with past timestamps", func(t *testing.T) {
 		var called bool
@@ -136,8 +123,6 @@ func Test_ResultListener(t *testing.T) {
 
 		slistener.Listen(report.LifecycleEvent{Type: report.Updated, PolicyReport: rep})
 
-		if called {
-			t.Error("Expected Listener not called because it was unregistered")
-		}
+		assert.False(t, called, "Expected Listener not called because it was unregistered")
 	})
 }

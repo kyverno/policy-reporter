@@ -31,10 +31,13 @@ func (r *ReadinessProbe) Ready() {
 func (r *ReadinessProbe) Wait() {
 	if r.required() && !r.running {
 		r.running = <-r.ready
-		close(r.ready)
 		zap.L().Debug("readiness probe finished")
 		return
 	}
+}
+
+func (r *ReadinessProbe) Close() {
+	close(r.ready)
 }
 
 func (r *ReadinessProbe) Running() bool {

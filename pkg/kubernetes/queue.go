@@ -21,12 +21,13 @@ import (
 )
 
 type Queue struct {
-	queue         workqueue.RateLimitingInterface
+	queue         workqueue.TypedRateLimitingInterface[string]
 	client        v1alpha2.Wgpolicyk8sV1alpha2Interface
 	reconditioner *result.Reconditioner
 	debouncer     Debouncer
 	lock          *sync.Mutex
 	cache         sets.Set[string]
+	filter        *report.SourceFilter
 }
 
 func (q *Queue) Add(obj *v1.PartialObjectMetadata) error {
@@ -56,11 +57,10 @@ func (q *Queue) runWorker() {
 }
 
 func (q *Queue) processNextItem() bool {
-	obj, quit := q.queue.Get()
+	key, quit := q.queue.Get()
 	if quit {
 		return false
 	}
-	key := obj.(string)
 	defer q.queue.Done(key)
 
 	namespace, name, err := cache.SplitMetaNamespaceKey(key)
@@ -103,6 +103,10 @@ func (q *Queue) processNextItem() bool {
 		return true
 	}
 
+	if ok := q.filter.Validate(polr); !ok {
+		return true
+	}
+
 	event := func() report.Event {
 		q.lock.Lock()
 		defer q.lock.Unlock()
@@ -122,7 +126,7 @@ func (q *Queue) processNextItem() bool {
 	return true
 }
 
-func (q *Queue) handleErr(err error, key interface{}) {
+func (q *Queue) handleErr(err error, key string) {
 	if err == nil {
 		q.queue.Forget(key)
 		return
@@ -143,8 +147,9 @@ func (q *Queue) handleErr(err error, key interface{}) {
 
 func NewQueue(
 	debouncer Debouncer,
-	queue workqueue.RateLimitingInterface,
+	queue workqueue.TypedRateLimitingInterface[string],
 	client v1alpha2.Wgpolicyk8sV1alpha2Interface,
+	filter *report.SourceFilter,
 	reconditioner *result.Reconditioner,
 ) *Queue {
 	return &Queue{
@@ -153,6 +158,7 @@ func NewQueue(
 		client:        client,
 		cache:         sets.New[string](),
 		lock:          &sync.Mutex{},
+		filter:        filter,
 		reconditioner: reconditioner,
 	}
 }

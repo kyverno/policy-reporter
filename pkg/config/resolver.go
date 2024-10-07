@@ -8,8 +8,10 @@ import (
 	"strings"
 	"time"
 
+	"github.com/gin-gonic/gin"
 	goredis "github.com/go-redis/redis/v8"
 	_ "github.com/mattn/go-sqlite3"
+	gocache "github.com/patrickmn/go-cache"
 	"github.com/uptrace/bun"
 	"github.com/uptrace/bun/dialect"
 	mail "github.com/xhit/go-simple-mail/v2"
@@ -30,6 +32,9 @@ import (
 	"github.com/kyverno/policy-reporter/pkg/email/violations"
 	"github.com/kyverno/policy-reporter/pkg/helper"
 	"github.com/kyverno/policy-reporter/pkg/kubernetes"
+	"github.com/kyverno/policy-reporter/pkg/kubernetes/jobs"
+	"github.com/kyverno/policy-reporter/pkg/kubernetes/namespaces"
+	"github.com/kyverno/policy-reporter/pkg/kubernetes/pods"
 	"github.com/kyverno/policy-reporter/pkg/kubernetes/secrets"
 	"github.com/kyverno/policy-reporter/pkg/leaderelection"
 	"github.com/kyverno/policy-reporter/pkg/listener"
@@ -37,6 +42,7 @@ import (
 	"github.com/kyverno/policy-reporter/pkg/report"
 	"github.com/kyverno/policy-reporter/pkg/report/result"
 	"github.com/kyverno/policy-reporter/pkg/target"
+	"github.com/kyverno/policy-reporter/pkg/target/factory"
 	"github.com/kyverno/policy-reporter/pkg/validate"
 )
 
@@ -44,25 +50,22 @@ import (
 type Resolver struct {
 	config             *Config
 	k8sConfig          *rest.Config
+	clientset          *k8s.Clientset
 	publisher          report.EventPublisher
 	policyStore        *database.Store
 	database           *bun.DB
 	policyReportClient report.PolicyReportClient
 	leaderElector      *leaderelection.Client
 	resultCache        cache.Cache
-	targetClients      []target.Client
+	targetClients      *target.Collection
 	targetsCreated     bool
+	targetFactory      target.Factory
 	logger             *zap.Logger
 	resultListener     *listener.ResultListener
 }
 
 // APIServer resolver method
-func (r *Resolver) APIServer(ctx context.Context, synced func() bool) api.Server {
-	var logger *zap.Logger
-	if r.config.API.Logging {
-		logger, _ = r.Logger()
-	}
-
+func (r *Resolver) Server(ctx context.Context, options []api.ServerOption) (*api.Server, error) {
 	if r.config.API.BasicAuth.SecretRef != "" {
 		values, err := r.SecretClient().Get(ctx, r.config.API.BasicAuth.SecretRef)
 		if err != nil {
@@ -77,23 +80,34 @@ func (r *Resolver) APIServer(ctx context.Context, synced func() bool) api.Server
 		}
 	}
 
-	var auth *api.BasicAuth
+	defaults := []api.ServerOption{
+		api.WithGZIP(),
+	}
+
+	if r.config.Logging.Server || r.config.API.DebugMode {
+		defaults = append(defaults, api.WithLogging(zap.L()))
+	} else {
+		defaults = append(defaults, api.WithRecovery())
+	}
+
 	if r.config.API.BasicAuth.Username != "" && r.config.API.BasicAuth.Password != "" {
-		auth = &api.BasicAuth{
+		defaults = append(defaults, api.WithBasicAuth(api.BasicAuth{
 			Username: r.config.API.BasicAuth.Username,
 			Password: r.config.API.BasicAuth.Password,
-		}
+		}))
 
 		zap.L().Info("API BasicAuth enabled")
 	}
 
-	return api.NewServer(
-		r.TargetClients(),
-		r.config.API.Port,
-		logger,
-		auth,
-		synced,
-	)
+	if r.config.Profiling.Enabled {
+		defaults = append(defaults, api.WithProfiling())
+	}
+
+	if !r.config.API.DebugMode {
+		gin.SetMode(gin.ReleaseMode)
+	}
+
+	return api.NewServer(gin.New(), append(defaults, options...)...), nil
 }
 
 // Database resolver method
@@ -128,7 +142,7 @@ func (r *Resolver) Database() *bun.DB {
 }
 
 // PolicyReportStore resolver method
-func (r *Resolver) PolicyReportStore(db *bun.DB) (*database.Store, error) {
+func (r *Resolver) Store(db *bun.DB) (*database.Store, error) {
 	if r.policyStore != nil {
 		return r.policyStore, nil
 	}
@@ -178,12 +192,12 @@ func (r *Resolver) EventPublisher() report.EventPublisher {
 
 func (r *Resolver) CustomIDGenerators() map[string]result.IDGenerator {
 	generators := make(map[string]result.IDGenerator)
-	for s, c := range r.config.SourceConfig {
+	for _, c := range r.config.SourceConfig {
 		if !c.Enabled || len(c.Fields) == 0 {
 			continue
 		}
 
-		generators[strings.ToLower(s)] = result.NewIDGenerator(c.Fields)
+		generators[strings.ToLower(c.Selector.Source)] = result.NewIDGenerator(c.Fields)
 	}
 
 	return generators
@@ -196,10 +210,32 @@ func (r *Resolver) Queue() (*kubernetes.Queue, error) {
 		return nil, err
 	}
 
+	podsClient, err := r.PodClient()
+	if err != nil {
+		return nil, err
+	}
+
+	jobsClient, err := r.JobClient()
+	if err != nil {
+		return nil, err
+	}
+
 	return kubernetes.NewQueue(
 		kubernetes.NewDebouncer(1*time.Minute, r.EventPublisher()),
-		workqueue.NewNamedRateLimitingQueue(workqueue.DefaultControllerRateLimiter(), "report-queue"),
+		workqueue.NewTypedRateLimitingQueueWithConfig(workqueue.DefaultTypedControllerRateLimiter[string](), workqueue.TypedRateLimitingQueueConfig[string]{
+			Name: "report-queue",
+		}),
 		client,
+		report.NewSourceFilter(podsClient, jobsClient, helper.Map(r.config.SourceFilters, func(f SourceFilter) report.SourceValidation {
+			return report.SourceValidation{
+				Selector:              report.ReportSelector{Source: f.Selector.Source},
+				Kinds:                 ToRuleSet(f.Kinds),
+				Sources:               ToRuleSet(f.Sources),
+				Namespaces:            ToRuleSet(f.Namespaces),
+				UncontrolledOnly:      f.UncontrolledOnly,
+				DisableClusterReports: f.DisableClusterReports,
+			}
+		})),
 		result.NewReconditioner(r.CustomIDGenerators()),
 	), nil
 }
@@ -207,7 +243,7 @@ func (r *Resolver) Queue() (*kubernetes.Queue, error) {
 // RegisterNewResultsListener resolver method
 func (r *Resolver) RegisterNewResultsListener() {
 	targets := r.TargetClients()
-	if len(targets) == 0 {
+	if targets.Empty() {
 		return
 	}
 
@@ -222,7 +258,7 @@ func (r *Resolver) RegisterNewResultsListener() {
 func (r *Resolver) RegisterSendResultListener() {
 	targets := r.TargetClients()
 
-	if len(targets) == 0 {
+	if targets.Empty() {
 		return
 	}
 
@@ -231,9 +267,11 @@ func (r *Resolver) RegisterSendResultListener() {
 	}
 
 	r.resultListener.RegisterListener(listener.NewSendResultListener(targets))
+	r.resultListener.RegisterScopeListener(listener.NewSendScopeResultsListener(targets))
+	r.resultListener.RegisterSyncListener(listener.NewSendSyncResultsListener(targets))
 }
 
-// RegisterSendResultListener resolver method
+// UnregisterSendResultListener resolver method
 func (r *Resolver) UnregisterSendResultListener() {
 	if r.ResultCache().Shared() {
 		r.EventPublisher().UnregisterListener(listener.NewResults)
@@ -244,9 +282,10 @@ func (r *Resolver) UnregisterSendResultListener() {
 	}
 
 	r.resultListener.UnregisterListener()
+	r.resultListener.UnregisterScopeListener()
 }
 
-// RegisterSendResultListener resolver method
+// RegisterStoreListener resolver method
 func (r *Resolver) RegisterStoreListener(ctx context.Context, store report.PolicyReportStore) {
 	r.EventPublisher().RegisterListener(listener.Store, listener.NewStoreListener(ctx, store))
 }
@@ -271,9 +310,25 @@ func (r *Resolver) RegisterMetricsListener() {
 	))
 }
 
+// Clientset resolver method
+func (r *Resolver) Clientset() (*k8s.Clientset, error) {
+	if r.clientset != nil {
+		return r.clientset, nil
+	}
+
+	clientset, err := k8s.NewForConfig(r.k8sConfig)
+	if err != nil {
+		return nil, err
+	}
+
+	r.clientset = clientset
+
+	return r.clientset, nil
+}
+
 // SecretClient resolver method
 func (r *Resolver) SecretClient() secrets.Client {
-	clientset, err := k8s.NewForConfig(r.k8sConfig)
+	clientset, err := r.Clientset()
 	if err != nil {
 		return nil
 	}
@@ -281,10 +336,61 @@ func (r *Resolver) SecretClient() secrets.Client {
 	return secrets.NewClient(clientset.CoreV1().Secrets(r.config.Namespace))
 }
 
-func (r *Resolver) TargetFactory() *TargetFactory {
-	return &TargetFactory{
-		secretClient: r.SecretClient(),
+// NamespaceClient resolver method
+func (r *Resolver) NamespaceClient() (namespaces.Client, error) {
+	clientset, err := r.Clientset()
+	if err != nil {
+		return nil, err
 	}
+
+	return namespaces.NewClient(
+		clientset.CoreV1().Namespaces(),
+		gocache.New(15*time.Second, 5*time.Second),
+	), nil
+}
+
+// PodClient resolver method
+func (r *Resolver) PodClient() (pods.Client, error) {
+	clientset, err := r.Clientset()
+	if err != nil {
+		return nil, err
+	}
+
+	return pods.NewClient(clientset.CoreV1()), nil
+}
+
+// JobClient resolver method
+func (r *Resolver) JobClient() (jobs.Client, error) {
+	clientset, err := r.Clientset()
+	if err != nil {
+		return nil, err
+	}
+
+	return jobs.NewClient(clientset.BatchV1()), nil
+}
+
+func (r *Resolver) TargetFactory() target.Factory {
+	if r.targetFactory != nil {
+		return r.targetFactory
+	}
+
+	ns, err := r.NamespaceClient()
+	if err != nil {
+		zap.L().Error("failed to create namespace client", zap.Error(err))
+	}
+
+	r.targetFactory = factory.NewFactory(r.SecretClient(), target.NewResultFilterFactory(ns))
+
+	return r.targetFactory
+}
+
+func (r *Resolver) SecretInformer() (secrets.Informer, error) {
+	client, err := r.CRDMetadataClient()
+	if err != nil {
+		return nil, err
+	}
+
+	return secrets.NewInformer(client, r.TargetFactory(), r.config.Namespace), nil
 }
 
 func (r *Resolver) DatabaseFactory() *DatabaseFactory {
@@ -294,40 +400,19 @@ func (r *Resolver) DatabaseFactory() *DatabaseFactory {
 }
 
 // TargetClients resolver method
-func (r *Resolver) TargetClients() []target.Client {
+func (r *Resolver) TargetClients() *target.Collection {
 	if r.targetsCreated {
 		return r.targetClients
 	}
 
-	factory := r.TargetFactory()
-
-	clients := make([]target.Client, 0)
-
-	clients = append(clients, factory.LokiClients(r.config.Loki)...)
-	clients = append(clients, factory.ElasticsearchClients(r.config.Elasticsearch)...)
-	clients = append(clients, factory.SlackClients(r.config.Slack)...)
-	clients = append(clients, factory.DiscordClients(r.config.Discord)...)
-	clients = append(clients, factory.TeamsClients(r.config.Teams)...)
-	clients = append(clients, factory.S3Clients(r.config.S3)...)
-	clients = append(clients, factory.KinesisClients(r.config.Kinesis)...)
-	clients = append(clients, factory.SecurityHubs(r.config.SecurityHub)...)
-	clients = append(clients, factory.WebhookClients(r.config.Webhook)...)
-	clients = append(clients, factory.GCSClients(r.config.GCS)...)
-	clients = append(clients, factory.TelegramClients(r.config.Telegram)...)
-	clients = append(clients, factory.GoogleChatClients(r.config.GoogleChat)...)
-
-	if ui := factory.UIClient(r.config.UI); ui != nil {
-		clients = append(clients, ui)
-	}
-
-	r.targetClients = clients
+	r.targetClients = r.TargetFactory().CreateClients(&r.config.Targets)
 	r.targetsCreated = true
 
 	return r.targetClients
 }
 
 func (r *Resolver) HasTargets() bool {
-	return len(r.TargetClients()) > 0
+	return !r.TargetClients().Empty()
 }
 
 func (r *Resolver) EnableLeaderElection() bool {
@@ -344,7 +429,7 @@ func (r *Resolver) EnableLeaderElection() bool {
 
 // SkipExistingOnStartup config method
 func (r *Resolver) SkipExistingOnStartup() bool {
-	for _, client := range r.TargetClients() {
+	for _, client := range r.TargetClients().Clients() {
 		if !client.SkipExistingOnStartup() {
 			return false
 		}
@@ -377,9 +462,14 @@ func (r *Resolver) SummaryGenerator() (*summary.Generator, error) {
 		return nil, err
 	}
 
+	nsclient, err := r.NamespaceClient()
+	if err != nil {
+		return nil, err
+	}
+
 	return summary.NewGenerator(
 		client,
-		EmailReportFilterFromConfig(r.config.EmailReports.Summary.Filter),
+		EmailReportFilterFromConfig(nsclient, r.config.EmailReports.Summary.Filter),
 		!r.config.EmailReports.Summary.Filter.DisableClusterReports,
 	), nil
 }
@@ -398,9 +488,14 @@ func (r *Resolver) ViolationsGenerator() (*violations.Generator, error) {
 		return nil, err
 	}
 
+	nsclient, err := r.NamespaceClient()
+	if err != nil {
+		return nil, err
+	}
+
 	return violations.NewGenerator(
 		client,
-		EmailReportFilterFromConfig(r.config.EmailReports.Violations.Filter),
+		EmailReportFilterFromConfig(nsclient, r.config.EmailReports.Violations.Filter),
 		!r.config.EmailReports.Violations.Filter.DisableClusterReports,
 	), nil
 }
@@ -466,9 +561,9 @@ func (r *Resolver) PolicyReportClient() (report.PolicyReportClient, error) {
 	return r.policyReportClient, nil
 }
 
-func (r *Resolver) ReportFilter() *report.Filter {
-	return report.NewFilter(
-		r.config.ReportFilter.ClusterReports.Disabled,
+func (r *Resolver) ReportFilter() *report.MetaFilter {
+	return report.NewMetaFilter(
+		r.config.ReportFilter.DisableClusterReports,
 		ToRuleSet(r.config.ReportFilter.Namespaces),
 	)
 }
@@ -554,13 +649,18 @@ func NewResolver(config *Config, k8sConfig *rest.Config) Resolver {
 	}
 }
 
-func EmailReportFilterFromConfig(config EmailReportFilter) email.Filter {
-	return email.NewFilter(ToRuleSet(config.Namespaces), ToRuleSet(config.Sources))
+func EmailReportFilterFromConfig(client namespaces.Client, config EmailReportFilter) email.Filter {
+	return email.NewFilter(
+		client,
+		ToRuleSet(config.Namespaces),
+		ToRuleSet(config.Sources),
+	)
 }
 
 func ToRuleSet(filter ValueFilter) validate.RuleSets {
 	return validate.RuleSets{
-		Include: filter.Include,
-		Exclude: filter.Exclude,
+		Include:  filter.Include,
+		Exclude:  filter.Exclude,
+		Selector: helper.ConvertMap(filter.Selector),
 	}
 }
