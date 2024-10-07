@@ -1,20 +1,12 @@
-# Policy Reporter 3.x Preview
+# Policy Reporter 3.x
 [![CI](https://github.com/kyverno/policy-reporter/actions/workflows/ci.yaml/badge.svg)](https://github.com/kyverno/policy-reporter/actions/workflows/ci.yaml) [![Go Report Card](https://goreportcard.com/badge/github.com/kyverno/policy-reporter)](https://goreportcard.com/report/github.com/kyverno/policy-reporter) [![Coverage Status](https://coveralls.io/repos/github/kyverno/policy-reporter/badge.svg?branch=main)](https://coveralls.io/github/kyverno/policy-reporter?branch=main)
 
 
-![Screenshot Policy Reporter UI v2](https://github.com/kyverno/policy-reporter/blob/3.x/docs/images/screen.png)
-
+![Screenshot Policy Reporter UI v2](https://github.com/kyverno/policy-reporter/blob/main/docs/images/screen.png)
 
 ## Documentation
 
-Documentation for upcoming features and changes for the new Policy Reporter UI v2 are located in [Docs](https://github.com/kyverno/policy-reporter/tree/3.x/docs)
-
-* [Installation](https://github.com/kyverno/policy-reporter/blob/3.x/docs/SETUP.md)
-* [OAUth2 / OpenIDConnect](https://github.com/kyverno/policy-reporter/blob/3.x/docs/UI_AUTH.md)
-* [UI CustomBoards](https://github.com/kyverno/policy-reporter/blob/3.x/docs/CUSTOM_BOARDS.md)
-* [Kyverno PolicyExceptions](https://github.com/kyverno/policy-reporter/blob/3.x/docs/EXCEPTIONS.md)
-
-The new documentation page for Policy Reporter v3 can be found here: [https://kyverno.github.io/policy-reporter-docs/](https://kyverno.github.io/policy-reporter-docs/)
+The documentation for Policy Reporter v3 can be found here: [https://kyverno.github.io/policy-reporter-docs/](https://kyverno.github.io/policy-reporter-docs/)
 
 ## Getting Started
 
