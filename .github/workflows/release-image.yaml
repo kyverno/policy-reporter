@@ -2,7 +2,10 @@ name: release-image
 on:
   push:
     branches:
-      - 3.x
+      - main
+
+    tags:
+      - 'v*'
 
     paths-ignore:
       - README.md
