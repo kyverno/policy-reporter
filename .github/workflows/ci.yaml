@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - main
-      - 3.x
 
     paths-ignore:
       - README.md
@@ -14,7 +13,6 @@ on:
   pull_request:
     branches:
       - main
-      - 3.x
 
 jobs:
   coverage:
@@ -40,15 +38,6 @@ jobs:
           make fmt
           git diff --exit-code
 
-      - name: Run Trivy vulnerability scanner in repo mode
-        uses: aquasecurity/trivy-action@6e7b7d1fd3e4fef0c5fa8cce1229c54b2c9bd0d8 # v0.24.0
-        with:
-          scan-type: 'fs'
-          ignore-unfixed: true
-          format: 'sarif'
-          output: 'trivy-results.sarif'
-          severity: 'CRITICAL,HIGH'
-
       - name: Calc coverage
         run: make coverage
 
@@ -60,6 +49,27 @@ jobs:
         with:
           github-token: ${{ secrets.github_token }}
           file: coverage.lcov
+
+  trivy-scan:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@d632683dd7b4114ad314bca15554477dd762a938 # v4.2.0
+
+      - name: Set up Go
+        uses: actions/setup-go@0a12ed9d6a96ab950c8f026ed9f722fe0da7ef32 # v5.2.0
+        with:
+          go-version-file: go.mod
+          cache-dependency-path: go.sum
+
+      - name: Run Trivy vulnerability scanner in repo mode
+        uses: aquasecurity/trivy-action@6e7b7d1fd3e4fef0c5fa8cce1229c54b2c9bd0d8 # v0.24.0
+        with:
+          scan-type: 'fs'
+          ignore-unfixed: true
+          format: 'sarif'
+          output: 'trivy-results.sarif'
+          severity: 'CRITICAL,HIGH'
 
   check-actions:
     runs-on: ubuntu-latest

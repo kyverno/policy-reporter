@@ -1,9 +1,6 @@
 name: release-image
 on:
   push:
-    branches:
-      - main
-
     tags:
       - 'v*'
 
