@@ -70,7 +70,7 @@ jobs:
           version: v1
           args: app -licenses -json -output policy-reporter-bom.cdx.json -main .
 
-      - uses: actions/upload-artifact@604373da6381bf24206979c74d06a550515601b9 # v4.4.1
+      - uses: actions/upload-artifact@84480863f228bb9747b473957fcc9e309aa96097 # v4.4.2
         with:
           name: policy-reporter-bom-cdx
           path: policy-reporter-bom.cdx.json
