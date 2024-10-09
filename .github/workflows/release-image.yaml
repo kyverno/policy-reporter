@@ -55,10 +55,10 @@ jobs:
           push: true
           platforms: linux/arm64,linux/amd64
           provenance: mode=max
-          cache-from: type=registry,ref=ghcr.io/kyverno/policy-reporter:buildcache
-          cache-to: type=registry,ref=ghcr.io/kyverno/policy-reporter:buildcache,mode=max
+          cache-from: type=registry,ref=ghcr.io/${{github.repository_owner}}/policy-reporter:buildcache
+          cache-to: type=registry,ref=ghcr.io/${{github.repository_owner}}/policy-reporter:buildcache,mode=max
           tags: |
-            ghcr.io/kyverno/policy-reporter:${{ env.VERSION }}
+            ghcr.io/${{github.repository_owner}}/policy-reporter:${{ env.VERSION }}
 
       - name: Install Cosign
         uses: sigstore/cosign-installer@dc72c7d5c4d10cd6bcb8cf6e3fd625a9e5e537da # v3.7.0
@@ -66,14 +66,14 @@ jobs:
       - name: Sign image
         shell: bash
         env:
-          COSIGN_REPOSITORY: ghcr.io/kyverno/signatures
+          COSIGN_REPOSITORY: ghcr.io/${{github.repository_owner}}/signatures
         run: |
           set -e
           cosign sign --yes \
             -a "repo=${{ github.repository }}" \
             -a "workflow=${{ github.workflow }}" \
             -a "ref=${{ github.sha }}" \
-            ghcr.io/kyverno/policy-reporter@${{ steps.push.outputs.digest }}
+            ghcr.io/${{github.repository_owner}}/policy-reporter@${{ steps.push.outputs.digest }}
 
       - name: Set up Go
         uses: actions/setup-go@0a12ed9d6a96ab950c8f026ed9f722fe0da7ef32 # v5.2.0
@@ -95,9 +95,9 @@ jobs:
       - name: Attach SBOM to image
         shell: bash
         env:
-          COSIGN_REPOSITORY: ghcr.io/kyverno/sbom
+          COSIGN_REPOSITORY: ghcr.io/${{github.repository_owner}}/sbom
         run: |
-          cosign attach sbom --sbom ./policy-reporter-bom.cdx.json --type cyclonedx ghcr.io/kyverno/policy-reporter@${{ steps.push.outputs.digest }}
+          cosign attach sbom --sbom ./policy-reporter-bom.cdx.json --type cyclonedx ghcr.io/${{github.repository_owner}}/policy-reporter@${{ steps.push.outputs.digest }}
 
       - name: Install the crane command
         uses: kubewarden/github-actions/crane-installer@d94509d260ee11a92b4f65bc0acd297feec24d7f # v3.3.5
@@ -118,11 +118,11 @@ jobs:
       - name: Find attestation digest
         run: |
           set -e
-          DIGEST_AMD64=$(crane manifest ghcr.io/kyverno/policy-reporter@${{ steps.push.outputs.digest }} \
+          DIGEST_AMD64=$(crane manifest ghcr.io/${{github.repository_owner}}/policy-reporter@${{ steps.push.outputs.digest }} \
             | jq '.manifests[] | select(.annotations["vnd.docker.reference.type"]=="attestation-manifest") | select(.annotations["vnd.docker.reference.digest"]=="${{ env.PLATFORM_DIGEST_AMD64 }}") | .digest'
           )
           echo "ATTESTATION_MANIFEST_DIGEST_AMD64=${DIGEST_AMD64}" >> "$GITHUB_ENV"
-          DIGEST_ARM64=$(crane manifest ghcr.io/kyverno/policy-reporter@${{ steps.push.outputs.digest }} \
+          DIGEST_ARM64=$(crane manifest ghcr.io/${{github.repository_owner}}/policy-reporter@${{ steps.push.outputs.digest }} \
             | jq '.manifests[] | select(.annotations["vnd.docker.reference.type"]=="attestation-manifest") | select(.annotations["vnd.docker.reference.digest"]=="${{ env.PLATFORM_DIGEST_ARM64 }}") | .digest'
           )
           echo "ATTESTATION_MANIFEST_DIGEST_ARM64=${DIGEST_ARM64}" >> "$GITHUB_ENV"
@@ -133,21 +133,21 @@ jobs:
             -a "repo=${{ github.repository }}" \
             -a "workflow=${{ github.workflow }}" \
             -a "ref=${{ github.sha }}" \
-            ghcr.io/kyverno/policy-reporter@${{ env.ATTESTATION_MANIFEST_DIGEST_AMD64}}
+            ghcr.io/${{github.repository_owner}}/policy-reporter@${{ env.ATTESTATION_MANIFEST_DIGEST_AMD64}}
 
           cosign sign --yes \
             -a "repo=${{ github.repository }}" \
             -a "workflow=${{ github.workflow }}" \
             -a "ref=${{ github.sha }}" \
-            ghcr.io/kyverno/policy-reporter@${{ env.ATTESTATION_MANIFEST_DIGEST_ARM64}}
+            ghcr.io/${{github.repository_owner}}/policy-reporter@${{ env.ATTESTATION_MANIFEST_DIGEST_ARM64}}
 
       - name: Find provenance manifest digest
         run: |
           set -e
-          DIGEST_AMD64=$(crane manifest ghcr.io/kyverno/policy-reporter@${{ env.ATTESTATION_MANIFEST_DIGEST_AMD64}} | \
+          DIGEST_AMD64=$(crane manifest ghcr.io/${{github.repository_owner}}/policy-reporter@${{ env.ATTESTATION_MANIFEST_DIGEST_AMD64}} | \
             jq '.layers[] | select(.annotations["in-toto.io/predicate-type"] == "https://slsa.dev/provenance/v0.2") | .digest')
           echo "PROVENANCE_DIGEST_AMD64=${DIGEST_AMD64}" >> "$GITHUB_ENV"
-          DIGEST_ARM64=$(crane manifest ghcr.io/kyverno/policy-reporter@${{ env.ATTESTATION_MANIFEST_DIGEST_ARM64}} | \
+          DIGEST_ARM64=$(crane manifest ghcr.io/${{github.repository_owner}}/policy-reporter@${{ env.ATTESTATION_MANIFEST_DIGEST_ARM64}} | \
             jq '.layers[] | select(.annotations["in-toto.io/predicate-type"] == "https://slsa.dev/provenance/v0.2") | .digest')
           echo "PROVENANCE_DIGEST_ARM64=${DIGEST_ARM64}" >> "$GITHUB_ENV"
 
@@ -157,10 +157,10 @@ jobs:
             -a "repo=${{ github.repository }}" \
             -a "workflow=${{ github.workflow }}" \
             -a "ref=${{ github.sha }}" \
-          ghcr.io/kyverno/policy-reporter@${{ env.PROVENANCE_DIGEST_AMD64}}
+          ghcr.io/${{github.repository_owner}}/policy-reporter@${{ env.PROVENANCE_DIGEST_AMD64}}
 
           cosign sign --yes \
             -a "repo=${{ github.repository }}" \
             -a "workflow=${{ github.workflow }}" \
             -a "ref=${{ github.sha }}" \
-          ghcr.io/kyverno/policy-reporter@${{ env.PROVENANCE_DIGEST_ARM64}}
+          ghcr.io/${{github.repository_owner}}/policy-reporter@${{ env.PROVENANCE_DIGEST_ARM64}}
