@@ -2,7 +2,7 @@ name: release-image
 on:
   push:
     tags:
-      - 'v*'
+      - "v*"
 
     paths-ignore:
       - README.md
@@ -12,7 +12,7 @@ on:
 permissions:
   contents: read
   packages: write
-  id-token: write 
+  id-token: write
 
 jobs:
   push-policy-reporter:
@@ -54,31 +54,17 @@ jobs:
         with:
           push: true
           platforms: linux/arm64,linux/amd64
+          provenance: mode=max
           cache-from: type=registry,ref=ghcr.io/kyverno/policy-reporter:buildcache
           cache-to: type=registry,ref=ghcr.io/kyverno/policy-reporter:buildcache,mode=max
           tags: |
             ghcr.io/kyverno/policy-reporter:${{ env.VERSION }}
 
-      - name: Set up Go
-        uses: actions/setup-go@0a12ed9d6a96ab950c8f026ed9f722fe0da7ef32 # v5.2.0
-        with:
-          go-version-file: go.mod
-          cache-dependency-path: go.sum
-
-      - uses: CycloneDX/gh-gomod-generate-sbom@efc74245d6802c8cefd925620515442756c70d8f # v2.0.0
-        with:
-          version: v1
-          args: app -licenses -json -output policy-reporter-bom.cdx.json -main .
-
-      - uses: actions/upload-artifact@84480863f228bb9747b473957fcc9e309aa96097 # v4.4.2
-        with:
-          name: policy-reporter-bom-cdx
-          path: policy-reporter-bom.cdx.json
-
       - name: Install Cosign
         uses: sigstore/cosign-installer@dc72c7d5c4d10cd6bcb8cf6e3fd625a9e5e537da # v3.7.0
 
-      - shell: bash
+      - name: Sign image
+        shell: bash
         env:
           COSIGN_REPOSITORY: ghcr.io/kyverno/signatures
         run: |
@@ -88,9 +74,93 @@ jobs:
             -a "workflow=${{ github.workflow }}" \
             -a "ref=${{ github.sha }}" \
             ghcr.io/kyverno/policy-reporter@${{ steps.push.outputs.digest }}
-      
-      - shell: bash
+
+      - name: Set up Go
+        uses: actions/setup-go@0a12ed9d6a96ab950c8f026ed9f722fe0da7ef32 # v5.2.0
+        with:
+          go-version-file: go.mod
+          cache-dependency-path: go.sum
+
+      - name: Generate SBOM
+        uses: CycloneDX/gh-gomod-generate-sbom@efc74245d6802c8cefd925620515442756c70d8f # v2.0.0
+        with:
+          version: v1
+          args: app -licenses -json -output policy-reporter-bom.cdx.json -main .
+
+      - uses: actions/upload-artifact@84480863f228bb9747b473957fcc9e309aa96097 # v4.4.2
+        with:
+          name: policy-reporter-bom-cdx
+          path: policy-reporter-bom.cdx.json
+
+      - name: Attach SBOM to image
+        shell: bash
         env:
           COSIGN_REPOSITORY: ghcr.io/kyverno/sbom
         run: |
           cosign attach sbom --sbom ./policy-reporter-bom.cdx.json --type cyclonedx ghcr.io/kyverno/policy-reporter@${{ steps.push.outputs.digest }}
+
+      - name: Install the crane command
+        uses: kubewarden/github-actions/crane-installer@d94509d260ee11a92b4f65bc0acd297feec24d7f # v3.3.5
+
+      - name: Find platform digest
+        shell: bash
+        run: |
+          set -e
+          DIGEST_AMD64=$(crane digest \
+            --platform "linux/amd64" \
+            ghcr.io/${{github.repository_owner}}/policy-reporter@${{ steps.push.outputs.digest }})
+          echo "PLATFORM_DIGEST_AMD64=${DIGEST_AMD64}" >> "$GITHUB_ENV"
+          DIGEST_ARM64=$(crane digest \
+            --platform "linux/arm64" \
+            ghcr.io/${{github.repository_owner}}/policy-reporter@${{ steps.push.outputs.digest }})
+          echo "PLATFORM_DIGEST_ARM64=${DIGEST_ARM64}" >> "$GITHUB_ENV"
+
+      - name: Find attestation digest
+        run: |
+          set -e
+          DIGEST_AMD64=$(crane manifest ghcr.io/kyverno/policy-reporter@${{ steps.push.outputs.digest }} \
+            | jq '.manifests[] | select(.annotations["vnd.docker.reference.type"]=="attestation-manifest") | select(.annotations["vnd.docker.reference.digest"]=="${{ env.PLATFORM_DIGEST_AMD64 }}") | .digest'
+          )
+          echo "ATTESTATION_MANIFEST_DIGEST_AMD64=${DIGEST_AMD64}" >> "$GITHUB_ENV"
+          DIGEST_ARM64=$(crane manifest ghcr.io/kyverno/policy-reporter@${{ steps.push.outputs.digest }} \
+            | jq '.manifests[] | select(.annotations["vnd.docker.reference.type"]=="attestation-manifest") | select(.annotations["vnd.docker.reference.digest"]=="${{ env.PLATFORM_DIGEST_ARM64 }}") | .digest'
+          )
+          echo "ATTESTATION_MANIFEST_DIGEST_ARM64=${DIGEST_ARM64}" >> "$GITHUB_ENV"
+
+      - name: Sign attestation manifest
+        run: |
+          cosign sign --yes \
+            -a "repo=${{ github.repository }}" \
+            -a "workflow=${{ github.workflow }}" \
+            -a "ref=${{ github.sha }}" \
+            ghcr.io/kyverno/policy-reporter@${{ env.ATTESTATION_MANIFEST_DIGEST_AMD64}}
+
+          cosign sign --yes \
+            -a "repo=${{ github.repository }}" \
+            -a "workflow=${{ github.workflow }}" \
+            -a "ref=${{ github.sha }}" \
+            ghcr.io/kyverno/policy-reporter@${{ env.ATTESTATION_MANIFEST_DIGEST_ARM64}}
+
+      - name: Find provenance manifest digest
+        run: |
+          set -e
+          DIGEST_AMD64=$(crane manifest ghcr.io/kyverno/policy-reporter@${{ env.ATTESTATION_MANIFEST_DIGEST_AMD64}} | \
+            jq '.layers[] | select(.annotations["in-toto.io/predicate-type"] == "https://slsa.dev/provenance/v0.2") | .digest')
+          echo "PROVENANCE_DIGEST_AMD64=${DIGEST_AMD64}" >> "$GITHUB_ENV"
+          DIGEST_ARM64=$(crane manifest ghcr.io/kyverno/policy-reporter@${{ env.ATTESTATION_MANIFEST_DIGEST_ARM64}} | \
+            jq '.layers[] | select(.annotations["in-toto.io/predicate-type"] == "https://slsa.dev/provenance/v0.2") | .digest')
+          echo "PROVENANCE_DIGEST_ARM64=${DIGEST_ARM64}" >> "$GITHUB_ENV"
+
+      - name: Sign provenance manifest
+        run: |
+          cosign sign --yes \
+            -a "repo=${{ github.repository }}" \
+            -a "workflow=${{ github.workflow }}" \
+            -a "ref=${{ github.sha }}" \
+          ghcr.io/kyverno/policy-reporter@${{ env.PROVENANCE_DIGEST_AMD64}}
+
+          cosign sign --yes \
+            -a "repo=${{ github.repository }}" \
+            -a "workflow=${{ github.workflow }}" \
+            -a "ref=${{ github.sha }}" \
+          ghcr.io/kyverno/policy-reporter@${{ env.PROVENANCE_DIGEST_ARM64}}
