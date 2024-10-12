@@ -15,7 +15,7 @@ image:
   # -- (string) Image pullPolicy
   pullPolicy: IfNotPresent
   # -- (string) Image tag
-  tag: 3.0.0-rc.1
+  tag: 3.0.0-rc.2
 
 # -- Image pullSecrets
 imagePullSecrets: []
@@ -1096,13 +1096,12 @@ plugin:
     image:
       # -- (string) Image registry
       registry: ghcr.io
-        # -- (string) Image repository
+      # -- (string) Image repository
       repository: kyverno/policy-reporter/kyverno-plugin
-        # -- (string) Image PullPolicy
+      # -- (string) Image PullPolicy
       pullPolicy: IfNotPresent
-        # -- (string) Image tag
-        # Defaults to `Chart.AppVersion` if omitted
-      tag: "0.3.0"
+      # -- (string) Image tag
+      tag: "0.4.0"
 
     # -- Deployment replica count
     replicaCount: 1
@@ -1134,6 +1133,11 @@ plugin:
         maxPerReport: 200
         # -- Keep only the latest of duplicated events
         keepOnlyLatest: false
+      policyReport:
+        # -- Labels for all created (Cluster)PolicyReports
+        labels: []
+        # -- Annotations for all created (Cluster)PolicyReports
+        annotations: []
 
     # -- Image pull secrets for image verification policies, this will define the `--imagePullSecrets` argument
     imagePullSecrets: []
