@@ -3,7 +3,7 @@
 Policy Reporter watches for PolicyReport Resources.
 It creates Prometheus Metrics and can send rule validation events to different targets like Loki, Elasticsearch, Slack or Discord
 
-![Version: 3.0.0-rc.1](https://img.shields.io/badge/Version-3.0.0--rc.1-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 3.0.0-rc.1](https://img.shields.io/badge/AppVersion-3.0.0--rc.1-informational?style=flat-square)
+![Version: 3.0.0-rc.2](https://img.shields.io/badge/Version-3.0.0--rc.2-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 3.0.0-rc.2](https://img.shields.io/badge/AppVersion-3.0.0--rc.2-informational?style=flat-square)
 
 ## Documentation
 
@@ -49,7 +49,7 @@ Open `http://localhost:8082/` in your browser.
 | image.registry | string | `"ghcr.io"` | Image registry |
 | image.repository | string | `"kyverno/policy-reporter"` | Image repository |
 | image.pullPolicy | string | `"IfNotPresent"` | Image pullPolicy |
-| image.tag | string | `"3.0.0-rc.1"` | Image tag |
+| image.tag | string | `"3.0.0-rc.2"` | Image tag |
 | imagePullSecrets | list | `[]` | Image pullSecrets |
 | priorityClassName | string | `""` | Deployment priorityClassName |
 | replicaCount | int | `1` | Deployment replica count |
@@ -402,7 +402,7 @@ Open `http://localhost:8082/` in your browser.
 | plugin.kyverno.image.registry | string | `"ghcr.io"` | Image registry |
 | plugin.kyverno.image.repository | string | `"kyverno/policy-reporter/kyverno-plugin"` | Image repository |
 | plugin.kyverno.image.pullPolicy | string | `"IfNotPresent"` | Image PullPolicy |
-| plugin.kyverno.image.tag | string | `"0.3.0"` | Image tag Defaults to `Chart.AppVersion` if omitted |
+| plugin.kyverno.image.tag | string | `"0.4.0"` | Image tag |
 | plugin.kyverno.replicaCount | int | `1` | Deployment replica count |
 | plugin.kyverno.logging.api | bool | `false` | Enables external API request logging |
 | plugin.kyverno.logging.server | bool | `false` | Enables Server access logging |
@@ -413,6 +413,8 @@ Open `http://localhost:8082/` in your browser.
 | plugin.kyverno.blockReports.eventNamespace | string | `"default"` | Watches for Kyverno Events in the configured namespace leave blank to watch in all namespaces |
 | plugin.kyverno.blockReports.results.maxPerReport | int | `200` | Max items per PolicyReport resource |
 | plugin.kyverno.blockReports.results.keepOnlyLatest | bool | `false` | Keep only the latest of duplicated events |
+| plugin.kyverno.blockReports.policyReport.labels | list | `[]` | Labels for all created (Cluster)PolicyReports |
+| plugin.kyverno.blockReports.policyReport.annotations | list | `[]` | Annotations for all created (Cluster)PolicyReports |
 | plugin.kyverno.imagePullSecrets | list | `[]` | Image pull secrets for image verification policies, this will define the `--imagePullSecrets` argument |
 | plugin.kyverno.serviceAccount.create | bool | `true` | Create ServiceAccount |
 | plugin.kyverno.serviceAccount.automount | bool | `true` | Enable ServiceAccount automaount |
