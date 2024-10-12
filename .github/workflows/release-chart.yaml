@@ -75,11 +75,11 @@ jobs:
       - name: Push to OCI
         run: |
           set -e
-          output=$(helm push .cr-release-packages/policy-reporter-${{ env.VERSION }}.tgz oci://ghcr.io/kyverno/charts 2>&1)
+          output=$(helm push .cr-release-packages/policy-reporter-${{ env.VERSION }}.tgz oci://ghcr.io/${{github.repository_owner}}/charts 2>&1)
           digest=$( echo "$output" | grep Digest | cut -c9-)
           echo CR_DIGEST=$digest
           echo "CR_DIGEST=$digest" >> "$GITHUB_ENV"
-      
+
       - name: Sign Chart
         run: |
-          cosign sign --yes ghcr.io/kyverno/charts/policy-reporter@${{ env.CR_DIGEST }}
+          cosign sign --yes ghcr.io/${{github.repository_owner}}/charts/policy-reporter@${{ env.CR_DIGEST }}
