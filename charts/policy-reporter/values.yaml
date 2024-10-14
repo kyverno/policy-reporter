@@ -818,7 +818,7 @@ ui:
     # -- (string) Image PullPolicy
     pullPolicy: IfNotPresent
     # -- (string) Image tag
-    tag: "2.0.0-rc.1"
+    tag: "2.0.0-rc.2"
 
   # -- Deployment replica count
   replicaCount: 1
@@ -857,6 +857,9 @@ ui:
     clientId: ""
     # -- OpenID Connect ClientSecret
     clientSecret: ""
+    # -- Optional Group Claim to map user groups to the profile
+    # groups can be used to define access control for clusters, boards and custom boards.
+    groupClaim: ""
     # -- OpenID Connect allowed Scopes
     scopes: []
     # -- Provide OpenID Connect configuration via Secret
@@ -1128,6 +1131,8 @@ plugin:
       # -- Watches for Kyverno Events in the configured namespace
       # leave blank to watch in all namespaces
       eventNamespace: default
+      # -- Used value for the source field in the created (Cluster)PolicyReports
+      source: Kyverno Event
       results:
         # -- Max items per PolicyReport resource
         maxPerReport: 200
