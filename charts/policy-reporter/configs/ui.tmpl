@@ -19,7 +19,7 @@ ui:
 
 {{- $default := false -}}
 {{- range .Values.ui.clusters }}
-    {{- if eq .name .Values.ui.name -}}
+    {{- if eq .name $.Values.ui.name -}}
       {{- $default = true -}}
     {{- end -}}
 {{- end }}
