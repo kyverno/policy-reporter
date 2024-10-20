@@ -17,6 +17,8 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/securityhub"
 	"github.com/aws/aws-sdk-go-v2/service/sts"
 	"go.uber.org/zap"
+
+	"github.com/kyverno/policy-reporter/pkg/target/http"
 )
 
 var enable = true
@@ -151,6 +153,8 @@ func createConfig(accessKeyID, secretAccessKey, region string) (aws.Config, erro
 		if region != "" {
 			o.Region = region
 		}
+
+		o.HTTPClient = http.NewClient("", false)
 
 		return nil
 	})

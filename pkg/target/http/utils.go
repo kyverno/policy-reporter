@@ -5,6 +5,7 @@ import (
 	"crypto/tls"
 	"crypto/x509"
 	"encoding/json"
+	"net"
 	"net/http"
 	"os"
 	"time"
@@ -79,13 +80,23 @@ func NewJSONResult(r v1alpha2.PolicyReportResult) Result {
 }
 
 func NewClient(certificatePath string, skipTLS bool) *http.Client {
-	transport := http.DefaultTransport.(*http.Transport).Clone()
-	transport.TLSClientConfig = &tls.Config{
-		InsecureSkipVerify: skipTLS,
+	transport := &http.Transport{
+		DialContext: (&net.Dialer{
+			Timeout:   10 * time.Second,
+			KeepAlive: 60 * time.Second,
+		}).DialContext,
+		MaxIdleConns:          100,
+		IdleConnTimeout:       90 * time.Second,
+		TLSHandshakeTimeout:   10 * time.Second,
+		ExpectContinueTimeout: 1 * time.Second,
+		TLSClientConfig: &tls.Config{
+			InsecureSkipVerify: skipTLS,
+		},
 	}
 
 	client := &http.Client{
 		Transport: NewLoggingRoundTripper(transport),
+		Timeout:   30 * time.Second,
 	}
 
 	if certificatePath != "" {
