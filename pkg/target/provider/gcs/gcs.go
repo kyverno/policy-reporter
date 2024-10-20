@@ -8,6 +8,8 @@ import (
 	"go.uber.org/zap"
 	"golang.org/x/oauth2/google"
 	"google.golang.org/api/option"
+
+	"github.com/kyverno/policy-reporter/pkg/target/http"
 )
 
 type Client interface {
@@ -36,7 +38,9 @@ func (c *client) Upload(body *bytes.Buffer, key string) error {
 
 // NewClient creates a new GCS.client to send Results to GCS Bucket
 func NewClient(ctx context.Context, credentials, bucket string) Client {
-	options := make([]option.ClientOption, 0, 1)
+	options := []option.ClientOption{
+		option.WithHTTPClient(http.NewClient("", false)),
+	}
 
 	if credentials != "" {
 		cred, err := google.CredentialsFromJSON(ctx, []byte(credentials), storage.ScopeReadWrite)
