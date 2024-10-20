@@ -15,7 +15,7 @@ image:
   # -- (string) Image pullPolicy
   pullPolicy: IfNotPresent
   # -- (string) Image tag
-  tag: 3.0.0-rc.2
+  tag: 3.0.0-rc.3
 
 # -- Image pullSecrets
 imagePullSecrets: []
