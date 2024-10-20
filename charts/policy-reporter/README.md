@@ -3,7 +3,7 @@
 Policy Reporter watches for PolicyReport Resources.
 It creates Prometheus Metrics and can send rule validation events to different targets like Loki, Elasticsearch, Slack or Discord
 
-![Version: 3.0.0-rc.4](https://img.shields.io/badge/Version-3.0.0--rc.4-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 3.0.0-rc.2](https://img.shields.io/badge/AppVersion-3.0.0--rc.2-informational?style=flat-square)
+![Version: 3.0.0-rc.5](https://img.shields.io/badge/Version-3.0.0--rc.5-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 3.0.0-rc.3](https://img.shields.io/badge/AppVersion-3.0.0--rc.3-informational?style=flat-square)
 
 ## Documentation
 
@@ -49,7 +49,7 @@ Open `http://localhost:8082/` in your browser.
 | image.registry | string | `"ghcr.io"` | Image registry |
 | image.repository | string | `"kyverno/policy-reporter"` | Image repository |
 | image.pullPolicy | string | `"IfNotPresent"` | Image pullPolicy |
-| image.tag | string | `"3.0.0-rc.2"` | Image tag |
+| image.tag | string | `"3.0.0-rc.3"` | Image tag |
 | imagePullSecrets | list | `[]` | Image pullSecrets |
 | priorityClassName | string | `""` | Deployment priorityClassName |
 | replicaCount | int | `1` | Deployment replica count |
