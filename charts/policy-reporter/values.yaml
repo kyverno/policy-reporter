@@ -455,6 +455,13 @@ target:
   discord:
     # -- Webhook Address
     webhook: ""
+    # -- Server Certificate file path
+    # Can be added under extraVolumes
+    certificate: ""
+    # -- Skip TLS verification
+    skipTLS: false
+    # -- Additional HTTP Headers
+    headers: {}
     # -- Read configuration from an already existing Secret
     secretRef: ""
     # -- Mounted secret path by Secrets Controller, secret should be in json format
@@ -477,6 +484,13 @@ target:
   teams:
     # -- Webhook Address
     webhook: ""
+    # -- Server Certificate file path
+    # Can be added under extraVolumes
+    certificate: ""
+    # -- Skip TLS verification
+    skipTLS: false
+    # -- Additional HTTP Headers
+    headers: {}
     # -- Read configuration from an already existing Secret
     secretRef: ""
     # -- Mounted secret path by Secrets Controller, secret should be in json format
@@ -498,7 +512,12 @@ target:
 
   webhook:
     # -- Webhook Address
-    host: ""
+    webhook: ""
+    # -- Server Certificate file path
+    # Can be added under extraVolumes
+    certificate: ""
+    # -- Skip TLS verification
+    skipTLS: false
     # -- Additional HTTP Headers
     headers: {}
     # -- Read configuration from an already existing Secret
@@ -527,6 +546,11 @@ target:
     chatId: ""
     # -- (optional) Telegram proxy host
     host: ""
+    # -- Server Certificate file path
+    # Can be added under extraVolumes
+    certificate: ""
+    # -- Skip TLS verification
+    skipTLS: false
     # -- Additional HTTP Headers
     headers: {}
     # -- Read configuration from an already existing Secret
@@ -551,6 +575,11 @@ target:
   googleChat:
     # -- Webhook Address
     webhook: ""
+    # -- Server Certificate file path
+    # Can be added under extraVolumes
+    certificate: ""
+    # -- Skip TLS verification
+    skipTLS: false
     # -- Additional HTTP Headers
     headers: {}
     # -- Read configuration from an already existing Secret
