@@ -3,7 +3,7 @@
 Policy Reporter watches for PolicyReport Resources.
 It creates Prometheus Metrics and can send rule validation events to different targets like Loki, Elasticsearch, Slack or Discord
 
-![Version: 3.0.0-rc.5](https://img.shields.io/badge/Version-3.0.0--rc.5-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 3.0.0-rc.3](https://img.shields.io/badge/AppVersion-3.0.0--rc.3-informational?style=flat-square)
+![Version: 3.0.0-rc.6](https://img.shields.io/badge/Version-3.0.0--rc.6-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 3.0.0-rc.3](https://img.shields.io/badge/AppVersion-3.0.0--rc.3-informational?style=flat-square)
 
 ## Documentation
 
@@ -183,6 +183,9 @@ Open `http://localhost:8082/` in your browser.
 | target.slack.filter | object | `{}` | Filter Results which should send to this target Wildcars for namespaces and policies are supported, you can either define exclude or include values Filters are available for all targets except the UI |
 | target.slack.channels | list | `[]` | List of channels to route results to different configurations |
 | target.discord.webhook | string | `""` | Webhook Address |
+| target.discord.certificate | string | `""` | Server Certificate file path Can be added under extraVolumes |
+| target.discord.skipTLS | bool | `false` | Skip TLS verification |
+| target.discord.headers | object | `{}` | Additional HTTP Headers |
 | target.discord.secretRef | string | `""` | Read configuration from an already existing Secret |
 | target.discord.mountedSecret | string | `""` | Mounted secret path by Secrets Controller, secret should be in json format |
 | target.discord.minimumSeverity | string | `""` | Minimum severity: "" < info < low < medium < high < critical |
@@ -192,6 +195,9 @@ Open `http://localhost:8082/` in your browser.
 | target.discord.filter | object | `{}` | Filter Results which should send to this target Wildcars for namespaces and policies are supported, you can either define exclude or include values Filters are available for all targets except the UI |
 | target.discord.channels | list | `[]` | List of channels to route results to different configurations |
 | target.teams.webhook | string | `""` | Webhook Address |
+| target.teams.certificate | string | `""` | Server Certificate file path Can be added under extraVolumes |
+| target.teams.skipTLS | bool | `false` | Skip TLS verification |
+| target.teams.headers | object | `{}` | Additional HTTP Headers |
 | target.teams.secretRef | string | `""` | Read configuration from an already existing Secret |
 | target.teams.mountedSecret | string | `""` | Mounted secret path by Secrets Controller, secret should be in json format |
 | target.teams.minimumSeverity | string | `""` | Minimum severity: "" < info < low < medium < high < critical |
@@ -200,7 +206,9 @@ Open `http://localhost:8082/` in your browser.
 | target.teams.customFields | object | `{}` | Added as additional labels |
 | target.teams.filter | object | `{}` | Filter Results which should send to this target Wildcars for namespaces and policies are supported, you can either define exclude or include values Filters are available for all targets except the UI |
 | target.teams.channels | list | `[]` | List of channels to route results to different configurations |
-| target.webhook.host | string | `""` | Webhook Address |
+| target.webhook.webhook | string | `""` | Webhook Address |
+| target.webhook.certificate | string | `""` | Server Certificate file path Can be added under extraVolumes |
+| target.webhook.skipTLS | bool | `false` | Skip TLS verification |
 | target.webhook.headers | object | `{}` | Additional HTTP Headers |
 | target.webhook.secretRef | string | `""` | Read configuration from an already existing Secret |
 | target.webhook.mountedSecret | string | `""` | Mounted secret path by Secrets Controller, secret should be in json format |
@@ -213,6 +221,8 @@ Open `http://localhost:8082/` in your browser.
 | target.telegram.token | string | `""` | Telegram bot token |
 | target.telegram.chatId | string | `""` | Telegram chat id |
 | target.telegram.host | optional | `""` | Telegram proxy host |
+| target.telegram.certificate | string | `""` | Server Certificate file path Can be added under extraVolumes |
+| target.telegram.skipTLS | bool | `false` | Skip TLS verification |
 | target.telegram.headers | object | `{}` | Additional HTTP Headers |
 | target.telegram.secretRef | string | `""` | Read configuration from an already existing Secret |
 | target.telegram.mountedSecret | string | `""` | Mounted secret path by Secrets Controller, secret should be in json format |
@@ -223,6 +233,8 @@ Open `http://localhost:8082/` in your browser.
 | target.telegram.filter | object | `{}` | Filter Results which should send to this target Wildcars for namespaces and policies are supported, you can either define exclude or include values Filters are available for all targets except the UI |
 | target.telegram.channels | list | `[]` | List of channels to route results to different configurations |
 | target.googleChat.webhook | string | `""` | Webhook Address |
+| target.googleChat.certificate | string | `""` | Server Certificate file path Can be added under extraVolumes |
+| target.googleChat.skipTLS | bool | `false` | Skip TLS verification |
 | target.googleChat.headers | object | `{}` | Additional HTTP Headers |
 | target.googleChat.secretRef | string | `""` | Read configuration from an already existing Secret |
 | target.googleChat.mountedSecret | string | `""` | Mounted secret path by Secrets Controller, secret should be in json format |
