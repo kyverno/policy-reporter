@@ -40,7 +40,7 @@ require (
 	golang.org/x/sync v0.8.0
 	golang.org/x/text v0.19.0
 	google.golang.org/api v0.203.0
-	k8s.io/apimachinery v0.31.1
+	k8s.io/apimachinery v0.31.2
 	k8s.io/client-go v0.31.1
 )
 
@@ -185,7 +185,7 @@ require (
 	golang.org/x/term v0.25.0 // indirect
 	golang.org/x/time v0.7.0 // indirect
 	gopkg.in/ini.v1 v1.67.0 // indirect
-	k8s.io/api v0.31.1
+	k8s.io/api v0.31.2
 	k8s.io/kube-openapi v0.0.0-20241009091222-67ed5848f094 // indirect
 	sigs.k8s.io/json v0.0.0-20241014173422-cfa47c3a1cc8 // indirect
 )
