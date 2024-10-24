@@ -40,7 +40,7 @@ require (
 	golang.org/x/sync v0.8.0
 	golang.org/x/text v0.19.0
 	google.golang.org/api v0.203.0
-	k8s.io/apimachinery v0.31.1
+	k8s.io/apimachinery v0.31.2
 	k8s.io/client-go v0.31.1
 )
 
