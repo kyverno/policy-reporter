@@ -229,11 +229,11 @@ config:
 
 {{- define "target.securityhub" -}}
 config:
-  accessKeyId: {{ .accessKeyId }}
-  secretAccessKey:  {{ .secretAccessKey }}
+  accessKeyId: {{ .accessKeyId | quote }}
+  secretAccessKey:  {{ .secretAccessKey | quote }}
   region: {{ .region }}
   endpoint: {{ .endpoint }}
-  accountId: {{ .accountId }}
+  accountId: {{ .accountId | quote }}
   productName: {{ .productName }}
   companyName: {{ .companyName }}
   delayInSeconds: {{ .delayInSeconds }}
