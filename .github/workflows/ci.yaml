@@ -26,7 +26,7 @@ jobs:
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
       - name: Set up Go
-        uses: actions/setup-go@0a12ed9d6a96ab950c8f026ed9f722fe0da7ef32 # v5.2.0
+        uses: actions/setup-go@41dfa10bad2bb2ae585af6ee5bb4d7d973ad74ed # v5.2.0
         with:
           go-version-file: go.mod
           cache-dependency-path: go.sum
@@ -49,7 +49,7 @@ jobs:
         uses: jandelgado/gcov2lcov-action@4e1989767862652e6ca8d3e2e61aabe6d43be28b #v1.1.1
 
       - name: Coveralls
-        uses: coverallsapp/github-action@4cdef0b2dbe0c9aa26bed48edb868db738625e79 # v2.3.3
+        uses: coverallsapp/github-action@cfd0633edbd2411b532b808ba7a8b5e04f76d2c8 # v2.3.4
         with:
           github-token: ${{ secrets.github_token }}
           file: coverage.lcov
@@ -61,7 +61,7 @@ jobs:
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
       - name: Set up Go
-        uses: actions/setup-go@0a12ed9d6a96ab950c8f026ed9f722fe0da7ef32 # v5.2.0
+        uses: actions/setup-go@41dfa10bad2bb2ae585af6ee5bb4d7d973ad74ed # v5.2.0
         with:
           go-version-file: go.mod
           cache-dependency-path: go.sum
