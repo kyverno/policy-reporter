@@ -49,7 +49,7 @@ Open `http://localhost:8082/` in your browser.
 | image.registry | string | `"ghcr.io"` | Image registry |
 | image.repository | string | `"kyverno/policy-reporter"` | Image repository |
 | image.pullPolicy | string | `"IfNotPresent"` | Image pullPolicy |
-| image.tag | string | `"3.0.0-rc.3"` | Image tag |
+| image.tag | string | `"3.0.0-rc.4"` | Image tag |
 | imagePullSecrets | list | `[]` | Image pullSecrets |
 | priorityClassName | string | `""` | Deployment priorityClassName |
 | replicaCount | int | `1` | Deployment replica count |
@@ -338,7 +338,7 @@ Open `http://localhost:8082/` in your browser.
 | ui.image.registry | string | `"ghcr.io"` | Image registry |
 | ui.image.repository | string | `"kyverno/policy-reporter-ui"` | Image repository |
 | ui.image.pullPolicy | string | `"IfNotPresent"` | Image PullPolicy |
-| ui.image.tag | string | `"2.0.0-rc.2"` | Image tag |
+| ui.image.tag | string | `"2.0.0-rc.3"` | Image tag |
 | ui.replicaCount | int | `1` | Deployment replica count |
 | ui.tempDir | string | `"/tmp"` | Temporary Directory to persist session data for authentication |
 | ui.logging.api | bool | `false` | Enables external api request logging |
