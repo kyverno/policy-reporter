@@ -15,7 +15,7 @@ image:
   # -- (string) Image pullPolicy
   pullPolicy: IfNotPresent
   # -- (string) Image tag
-  tag: 3.0.0-rc.3
+  tag: 3.0.0-rc.4
 
 # -- Image pullSecrets
 imagePullSecrets: []
@@ -847,7 +847,7 @@ ui:
     # -- (string) Image PullPolicy
     pullPolicy: IfNotPresent
     # -- (string) Image tag
-    tag: "2.0.0-rc.2"
+    tag: "2.0.0-rc.3"
 
   # -- Deployment replica count
   replicaCount: 1
