@@ -3,7 +3,7 @@
 Policy Reporter watches for PolicyReport Resources.
 It creates Prometheus Metrics and can send rule validation events to different targets like Loki, Elasticsearch, Slack or Discord
 
-![Version: 3.0.0-rc.7](https://img.shields.io/badge/Version-3.0.0--rc.7-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 3.0.0-rc.3](https://img.shields.io/badge/AppVersion-3.0.0--rc.3-informational?style=flat-square)
+![Version: 3.0.0-rc.8](https://img.shields.io/badge/Version-3.0.0--rc.8-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 3.0.0-rc.3](https://img.shields.io/badge/AppVersion-3.0.0--rc.3-informational?style=flat-square)
 
 ## Documentation
 
