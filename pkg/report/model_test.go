@@ -3,6 +3,7 @@ package report_test
 import (
 	"testing"
 
+	"github.com/stretchr/testify/assert"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
@@ -31,31 +32,16 @@ var creport = &v1alpha2.ClusterPolicyReport{
 
 func Test_Events(t *testing.T) {
 	t.Run("Event.String", func(t *testing.T) {
-		if report.Added.String() != "add" {
-			t.Errorf("Unexpected type conversion, expected %s go %s", "add", report.Added.String())
-		}
-		if report.Updated.String() != "update" {
-			t.Errorf("Unexpected type conversion, expected %s go %s", "update", report.Updated.String())
-		}
-		if report.Deleted.String() != "delete" {
-			t.Errorf("Unexpected type conversion, expected %s go %s", "delete", report.Deleted.String())
-		}
-		if report.Event(4).String() != "unknown" {
-			t.Errorf("Unexpected type conversion, expected %s go %s", "unknown", report.Event(4).String())
-		}
+		assert.Equal(t, "add", report.Added.String(), "Unexpected type conversion")
+		assert.Equal(t, "update", report.Updated.String(), "Unexpected type conversion")
+		assert.Equal(t, "delete", report.Deleted.String(), "Unexpected type conversion")
+		assert.Equal(t, "unknown", report.Event(4).String(), "Unexpected type conversion")
 	})
 }
 
 func Test_GetType(t *testing.T) {
-	pr := report.GetType(preport)
-	if pr != report.PolicyReportType {
-		t.Fatal("expected type policy report")
-	}
-
-	cpr := report.GetType(creport)
-	if cpr != report.ClusterPolicyReportType {
-		t.Fatal("expected type cluster policy report")
-	}
+	assert.Equal(t, report.PolicyReportType, report.GetType(preport), "expected type")
+	assert.Equal(t, report.ClusterPolicyReportType, report.GetType(creport), "expected type")
 }
 
 func Test_FindNewEvents(t *testing.T) {
@@ -79,15 +65,9 @@ func Test_FindNewEvents(t *testing.T) {
 	}
 
 	diff := report.FindNewResults(preport2, preport1)
-	if len(diff) != 1 {
-		t.Fatal("should only return one new result")
-	}
-	if diff[0].GetResource().UID != fixtures.FailPodResult.GetResource().UID {
-		t.Fatal("should only return the new result2")
-	}
+	assert.Len(t, diff, 1, "should only return one new result")
+	assert.Equal(t, fixtures.FailPodResult.GetResource().UID, diff[0].GetResource().UID, "should only return the new result2")
 
 	diff2 := report.FindNewResults(preport2, nil)
-	if len(diff2) != 2 {
-		t.Fatal("should return all results in the new report")
-	}
+	assert.Len(t, diff2, 2, "should return all results in the new report")
 }

@@ -30,24 +30,11 @@ func (c testClient) Do(req *http.Request) (*http.Response, error) {
 func Test_LokiTarget(t *testing.T) {
 	t.Run("Send Complete Result", func(t *testing.T) {
 		callback := func(req *http.Request) {
-			if contentType := req.Header.Get("Content-Type"); contentType != "application/json" {
-				t.Errorf("Unexpected Content-Type: %s", contentType)
-			}
-			if header := req.Header.Get("X-Forward"); header != "http://loki" {
-				t.Errorf("Unexpected Header Value: %s", header)
-			}
-
-			if agend := req.Header.Get("User-Agent"); agend != "Policy-Reporter" {
-				t.Errorf("Unexpected Host: %s", agend)
-			}
-
-			if url := req.URL.String(); url != "http://localhost:3100/loki/api/v1/push" {
-				t.Errorf("Unexpected Host: %s", url)
-			}
-
-			if req.Header.Get("Authorization") == "" {
-				t.Error("Expected Authentication header for BasicAuth is set")
-			}
+			assert.Equal(t, "application/json", req.Header.Get("Content-Type"), "unexpected Content-Type")
+			assert.Equal(t, "http://loki", req.Header.Get("X-Forward"), "unexpected X-Forward")
+			assert.Equal(t, "Policy-Reporter", req.Header.Get("User-Agent"), "unexpected Agent")
+			assert.Equal(t, "http://localhost:3100/loki/api/v1/push", req.URL.String(), "unexpected Host")
+			assert.NotEqual(t, "", req.Header.Get("Authorization"), "unexpected auth header")
 
 			expectedLine := fmt.Sprintf("[%s] %s", strings.ToUpper(string(fixtures.CompleteTargetSendResult.Severity)), fixtures.CompleteTargetSendResult.Message)
 
@@ -85,17 +72,9 @@ func Test_LokiTarget(t *testing.T) {
 
 	t.Run("Send Minimal Result", func(t *testing.T) {
 		callback := func(req *http.Request) {
-			if contentType := req.Header.Get("Content-Type"); contentType != "application/json" {
-				t.Errorf("Unexpected Content-Type: %s", contentType)
-			}
-
-			if agend := req.Header.Get("User-Agent"); agend != "Policy-Reporter" {
-				t.Errorf("Unexpected Host: %s", agend)
-			}
-
-			if url := req.URL.String(); url != "http://localhost:3100/loki/api/v1/push" {
-				t.Errorf("Unexpected Host: %s", url)
-			}
+			assert.Equal(t, "application/json", req.Header.Get("Content-Type"), "unexpected Content-Type")
+			assert.Equal(t, "Policy-Reporter", req.Header.Get("User-Agent"), "unexpected Agent")
+			assert.Equal(t, "http://localhost:3100/loki/api/v1/push", req.URL.String(), "unexpected Host")
 
 			expectedLine := fmt.Sprintf("[%s] %s", strings.ToUpper(string(fixtures.MinimalTargetSendResult.Severity)), fixtures.MinimalTargetSendResult.Message)
 			stream := convertAndValidateBody(req, t)

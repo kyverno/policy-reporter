@@ -1,11 +1,11 @@
 package metrics_test
 
 import (
-	"fmt"
 	"testing"
 
 	"github.com/prometheus/client_golang/prometheus"
 	ioprometheusclient "github.com/prometheus/client_model/go"
+	"github.com/stretchr/testify/assert"
 	corev1 "k8s.io/api/core/v1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
@@ -44,22 +44,14 @@ func Test_DetailedClusterResultMetricGeneration(t *testing.T) {
 		handler(report.LifecycleEvent{Type: report.Added, PolicyReport: report1})
 
 		metricFam, err := prometheus.DefaultGatherer.Gather()
-		if err != nil {
-			t.Errorf("unexpected Error: %s", err)
-		}
+		assert.NoError(t, err)
 
 		results := findMetric(metricFam, "cluster_policy_report_result")
-		if results == nil {
-			t.Fatalf("Metric not found: cluster_policy_report_result")
-		}
+		assert.NotNil(t, results, "Metric not found: cluster_policy_report_result")
 
 		metrics := results.GetMetric()
-		if err = testClusterResultMetricLabels(metrics[0], fixtures.FailResultWithoutResource); err != nil {
-			t.Error(err)
-		}
-		if err = testClusterResultMetricLabels(metrics[1], fixtures.PassResult); err != nil {
-			t.Error(err)
-		}
+		testClusterResultMetricLabels(t, metrics[0], fixtures.FailResultWithoutResource)
+		testClusterResultMetricLabels(t, metrics[1], fixtures.PassResult)
 	})
 
 	t.Run("Modified Metric", func(t *testing.T) {
@@ -67,22 +59,14 @@ func Test_DetailedClusterResultMetricGeneration(t *testing.T) {
 		handler(report.LifecycleEvent{Type: report.Updated, PolicyReport: report2})
 
 		metricFam, err := prometheus.DefaultGatherer.Gather()
-		if err != nil {
-			t.Errorf("unexpected Error: %s", err)
-		}
+		assert.NoError(t, err)
 
 		results := findMetric(metricFam, "cluster_policy_report_result")
-		if results == nil {
-			t.Fatalf("Metric not found: cluster_policy_report_result")
-		}
+		assert.NotNil(t, results, "Metric not found: cluster_policy_report_result")
 
 		metrics := results.GetMetric()
-		if len(metrics) != 1 {
-			t.Error("Expected one metric, the second metric should be deleted")
-		}
-		if err = testClusterResultMetricLabels(metrics[0], fixtures.FailResult); err != nil {
-			t.Error(err)
-		}
+		assert.Len(t, metrics, 1, "Expected one metric, the second metric should be deleted")
+		testClusterResultMetricLabels(t, metrics[0], fixtures.FailResult)
 	})
 
 	t.Run("Deleted Metric", func(t *testing.T) {
@@ -91,85 +75,46 @@ func Test_DetailedClusterResultMetricGeneration(t *testing.T) {
 		handler(report.LifecycleEvent{Type: report.Deleted, PolicyReport: report2})
 
 		metricFam, err := prometheus.DefaultGatherer.Gather()
-		if err != nil {
-			t.Errorf("unexpected Error: %s", err)
-		}
+		assert.NoError(t, err)
 
 		results := findMetric(metricFam, "cluster_policy_report_result")
-		if results != nil {
-			t.Error("cluster_policy_report_result shoud no longer exist", *results.Name)
-		}
+		assert.Nil(t, results, "Metric found: cluster_policy_report_result")
 	})
 }
 
-func testClusterResultMetricLabels(metric *ioprometheusclient.Metric, result v1alpha2.PolicyReportResult) error {
+func testClusterResultMetricLabels(t *testing.T, metric *ioprometheusclient.Metric, result v1alpha2.PolicyReportResult) error {
 	res := &corev1.ObjectReference{}
 	if result.HasResource() {
 		res = result.GetResource()
 	}
-	if name := *metric.Label[0].Name; name != "category" {
-		return fmt.Errorf("unexpected Category Label: %s", name)
-	}
-	if value := *metric.Label[0].Value; value != result.Category {
-		return fmt.Errorf("unexpected Category Label Value: %s", value)
-	}
 
-	if name := *metric.Label[1].Name; name != "kind" {
-		return fmt.Errorf("unexpected Name Label: %s", name)
-	}
-	if value := *metric.Label[1].Value; value != res.Kind {
-		return fmt.Errorf("unexpected Kind Label Value: %s", value)
-	}
+	assert.Equal(t, "category", *metric.Label[0].Name, "unexpected name")
+	assert.Equal(t, result.Category, *metric.Label[0].Value, "unexpected value")
 
-	if name := *metric.Label[2].Name; name != "name" {
-		return fmt.Errorf("unexpected Name Label: %s", name)
-	}
-	if value := *metric.Label[2].Value; value != res.Name {
-		return fmt.Errorf("unexpected Name Label Value: %s", value)
-	}
+	assert.Equal(t, "kind", *metric.Label[1].Name, "unexpected name")
+	assert.Equal(t, res.Kind, *metric.Label[1].Value, "unexpected value")
 
-	if name := *metric.Label[3].Name; name != "policy" {
-		return fmt.Errorf("unexpected Name Label: %s", name)
-	}
-	if value := *metric.Label[3].Value; value != result.Policy {
-		return fmt.Errorf("unexpected Policy Label Value: %s", value)
-	}
+	assert.Equal(t, "name", *metric.Label[2].Name, "unexpected name")
+	assert.Equal(t, res.Name, *metric.Label[2].Value, "unexpected value")
 
-	if name := *metric.Label[4].Name; name != "report" {
-		return fmt.Errorf("unexpected Name Label: %s", name)
-	}
+	assert.Equal(t, "policy", *metric.Label[3].Name, "unexpected name")
+	assert.Equal(t, result.Policy, *metric.Label[3].Value, "unexpected value")
 
-	if name := *metric.Label[5].Name; name != "rule" {
-		return fmt.Errorf("unexpected Name Label: %s", name)
-	}
-	if value := *metric.Label[5].Value; value != result.Rule {
-		return fmt.Errorf("unexpected Rule Label Value: %s", value)
-	}
+	assert.Equal(t, "report", *metric.Label[4].Name, "unexpected name")
 
-	if name := *metric.Label[6].Name; name != "severity" {
-		return fmt.Errorf("unexpected Name Label: %s", name)
-	}
-	if value := *metric.Label[6].Value; value != string(result.Severity) {
-		return fmt.Errorf("unexpected Severity Label Value: %s", value)
-	}
+	assert.Equal(t, "rule", *metric.Label[5].Name, "unexpected name")
+	assert.Equal(t, result.Rule, *metric.Label[5].Value, "unexpected value")
 
-	if name := *metric.Label[7].Name; name != "source" {
-		return fmt.Errorf("unexpected Source Label: %s", name)
-	}
-	if value := *metric.Label[7].Value; value != result.Source {
-		return fmt.Errorf("unexpected Source Label Value: %s", value)
-	}
+	assert.Equal(t, "severity", *metric.Label[6].Name, "unexpected name")
+	assert.Equal(t, string(result.Severity), *metric.Label[6].Value, "unexpected value")
 
-	if name := *metric.Label[8].Name; name != "status" {
-		return fmt.Errorf("unexpected Name Label: %s", name)
-	}
-	if value := *metric.Label[8].Value; value != string(result.Result) {
-		return fmt.Errorf("unexpected Status Label Value: %s", value)
-	}
+	assert.Equal(t, "source", *metric.Label[7].Name, "unexpected name")
+	assert.Equal(t, result.Source, *metric.Label[7].Value, "unexpected value")
 
-	if value := metric.Gauge.GetValue(); value != 1 {
-		return fmt.Errorf("unexpected Metric Value: %v", value)
-	}
+	assert.Equal(t, "status", *metric.Label[8].Name, "unexpected name")
+	assert.Equal(t, string(result.Result), *metric.Label[8].Value, "unexpected value")
+
+	assert.Equal(t, float64(1), metric.Gauge.GetValue(), "unexpected metric value")
 
 	return nil
 }

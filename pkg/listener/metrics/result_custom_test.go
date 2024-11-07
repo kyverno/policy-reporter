@@ -1,11 +1,11 @@
 package metrics_test
 
 import (
-	"fmt"
 	"testing"
 
 	"github.com/prometheus/client_golang/prometheus"
 	ioprometheusclient "github.com/prometheus/client_model/go"
+	"github.com/stretchr/testify/assert"
 	corev1 "k8s.io/api/core/v1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
@@ -48,22 +48,14 @@ func Test_CustomResultMetricGeneration(t *testing.T) {
 		handler(report.LifecycleEvent{Type: report.Added, PolicyReport: report1})
 
 		metricFam, err := prometheus.DefaultGatherer.Gather()
-		if err != nil {
-			t.Errorf("unexpected Error: %s", err)
-		}
+		assert.NoError(t, err)
 
 		results := findMetric(metricFam, "policy_report_custom_result")
-		if results == nil {
-			t.Fatalf("Metric not found: policy_report_custom_result")
-		}
+		assert.NotNil(t, results, "Metric not found: policy_report_custom_result")
 
 		metrics := results.GetMetric()
-		if err = testCustomResultMetricLabels(metrics[0], fixtures.FailPodResult, 1); err != nil {
-			t.Error(err)
-		}
-		if err = testCustomResultMetricLabels(metrics[1], fixtures.PassResult, 2); err != nil {
-			t.Error(err)
-		}
+		testCustomResultMetricLabels(t, metrics[0], fixtures.FailPodResult, 1)
+		testCustomResultMetricLabels(t, metrics[1], fixtures.PassResult, 2)
 	})
 
 	t.Run("Modified Metric", func(t *testing.T) {
@@ -74,22 +66,15 @@ func Test_CustomResultMetricGeneration(t *testing.T) {
 		handler(report.LifecycleEvent{Type: report.Updated, PolicyReport: report2})
 
 		metricFam, err := prometheus.DefaultGatherer.Gather()
-		if err != nil {
-			t.Errorf("unexpected Error: %s", err)
-		}
+		assert.NoError(t, err)
 
 		results := findMetric(metricFam, "policy_report_custom_result")
-		if results == nil {
-			t.Fatalf("Metric not found: policy_report_custom_result")
-		}
+		assert.NotNil(t, results, "Metric not found: policy_report_custom_result")
 
 		metrics := results.GetMetric()
-		if len(metrics) != 1 {
-			t.Fatalf("Expected only one metric is left, got %d\n", len(metrics))
-		}
-		if err = testCustomResultMetricLabels(metrics[0], fixtures.FailResult, 2); err != nil {
-			t.Error(err)
-		}
+		assert.Len(t, metrics, 1, "Expected only one metric is left")
+
+		testCustomResultMetricLabels(t, metrics[0], fixtures.FailResult, 2)
 	})
 
 	t.Run("Deleted Metric", func(t *testing.T) {
@@ -101,14 +86,10 @@ func Test_CustomResultMetricGeneration(t *testing.T) {
 		handler(report.LifecycleEvent{Type: report.Deleted, PolicyReport: report2})
 
 		metricFam, err := prometheus.DefaultGatherer.Gather()
-		if err != nil {
-			t.Errorf("unexpected Error: %s", err)
-		}
+		assert.NoError(t, err)
 
 		results := findMetric(metricFam, "policy_report_custom_result")
-		if results != nil {
-			t.Fatalf(" expected metric policy_report_custom_result no longer exists")
-		}
+		assert.Nil(t, results, "Metric found: policy_report_custom_result")
 	})
 
 	t.Run("Decrease Metric", func(t *testing.T) {
@@ -120,29 +101,20 @@ func Test_CustomResultMetricGeneration(t *testing.T) {
 		handler(report.LifecycleEvent{Type: report.Deleted, PolicyReport: report1})
 
 		metricFam, err := prometheus.DefaultGatherer.Gather()
-		if err != nil {
-			t.Errorf("unexpected Error: %s", err)
-		}
+		assert.NoError(t, err)
 
 		results := findMetric(metricFam, "policy_report_custom_result")
-		if results == nil {
-			t.Fatalf("Metric not found: policy_report_custom_result")
-		}
+		assert.NotNil(t, results, "Metric not found: policy_report_custom_result")
 
 		metrics := results.GetMetric()
-		if len(metrics) != 2 {
-			t.Fatalf("Expected only one metric is left, got %d\n", len(metrics))
-		}
-		if err = testCustomResultMetricLabels(metrics[0], fixtures.FailPodResult, 1); err != nil {
-			t.Error(err)
-		}
-		if err = testCustomResultMetricLabels(metrics[1], fixtures.PassResult, 2); err != nil {
-			t.Error(err)
-		}
+		assert.Len(t, metrics, 2, "Expected two metric are left")
+
+		testCustomResultMetricLabels(t, metrics[0], fixtures.FailPodResult, 1)
+		testCustomResultMetricLabels(t, metrics[1], fixtures.PassResult, 2)
 	})
 }
 
-func testCustomResultMetricLabels(metric *ioprometheusclient.Metric, result v1alpha2.PolicyReportResult, expVal float64) error {
+func testCustomResultMetricLabels(t *testing.T, metric *ioprometheusclient.Metric, result v1alpha2.PolicyReportResult, expVal float64) error {
 	var index int
 
 	res := &corev1.ObjectReference{}
@@ -150,61 +122,35 @@ func testCustomResultMetricLabels(metric *ioprometheusclient.Metric, result v1al
 		res = result.GetResource()
 	}
 
-	if name := *metric.Label[index].Name; name != "app" {
-		return fmt.Errorf("unexpected App Label: %s", name)
-	}
-	if value := *metric.Label[index].Value; value != "policy-reporter" {
-		return fmt.Errorf("unexpected Namespace Label Value: %s", value)
-	}
+	assert.Equal(t, "app", *metric.Label[index].Name, "unexpected name")
+	assert.Equal(t, "policy-reporter", *metric.Label[index].Value, "unexpected value")
 
 	index++
 
-	if name := *metric.Label[index].Name; name != "namespace" {
-		return fmt.Errorf("unexpected Name Label: %s", name)
-	}
-	if value := *metric.Label[index].Value; value != res.Namespace {
-		return fmt.Errorf("unexpected Namespace Label Value: %s", value)
-	}
+	assert.Equal(t, "namespace", *metric.Label[index].Name, "unexpected name")
+	assert.Equal(t, res.Namespace, *metric.Label[index].Value, "unexpected value")
 
 	index++
 
-	if name := *metric.Label[index].Name; name != "policy" {
-		return fmt.Errorf("unexpected Name Label: %s", name)
-	}
-	if value := *metric.Label[index].Value; value != result.Policy {
-		return fmt.Errorf("unexpected Policy Label Value: %s", value)
-	}
+	assert.Equal(t, "policy", *metric.Label[index].Name, "unexpected name")
+	assert.Equal(t, result.Policy, *metric.Label[index].Value, "unexpected value")
 
 	index++
 
-	if name := *metric.Label[index].Name; name != "source" {
-		return fmt.Errorf("unexpected Source Label: %s", name)
-	}
-	if value := *metric.Label[index].Value; value != result.Source {
-		return fmt.Errorf("unexpected Source Label Value: %s", value)
-	}
+	assert.Equal(t, "source", *metric.Label[index].Name, "unexpected name")
+	assert.Equal(t, result.Source, *metric.Label[index].Value, "unexpected value")
 
 	index++
 
-	if name := *metric.Label[index].Name; name != "status" {
-		return fmt.Errorf("unexpected Name Label: %s", name)
-	}
-	if value := *metric.Label[index].Value; value != string(result.Result) {
-		return fmt.Errorf("unexpected Status Label Value: %s", value)
-	}
+	assert.Equal(t, "status", *metric.Label[index].Name, "unexpected name")
+	assert.Equal(t, string(result.Result), *metric.Label[index].Value, "unexpected value")
 
 	index++
 
-	if name := *metric.Label[index].Name; name != "xyz" {
-		return fmt.Errorf("unexpected Name Label: %s", name)
-	}
-	if value := *metric.Label[index].Value; value != result.Properties["xyz"] {
-		return fmt.Errorf("unexpected Status Label Value: %s", value)
-	}
+	assert.Equal(t, "xyz", *metric.Label[index].Name, "unexpected name")
+	assert.Equal(t, result.Properties["xyz"], *metric.Label[index].Value, "unexpected value")
 
-	if value := metric.Gauge.GetValue(); value != expVal {
-		return fmt.Errorf("unexpected Metric Value: %v", value)
-	}
+	assert.Equal(t, expVal, metric.Gauge.GetValue(), "unexpected metric value")
 
 	return nil
 }
