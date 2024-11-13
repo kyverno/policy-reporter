@@ -59,7 +59,7 @@ Open `http://localhost:8082/` in your browser.
 | annotations | object | `{}` | Key/value pairs that are attached to all resources. |
 | rbac.enabled | bool | `true` | Create RBAC resources |
 | serviceAccount.create | bool | `true` | Create ServiceAccount |
-| serviceAccount.automount | bool | `true` | Enable ServiceAccount automaount |
+| serviceAccount.automount | bool | `true` | Enable ServiceAccount automount |
 | serviceAccount.annotations | object | `{}` | Annotations for the ServiceAccount |
 | serviceAccount.name | string | `""` | The ServiceAccount name |
 | service.enabled | bool | `true` | Create Service |
@@ -371,7 +371,7 @@ Open `http://localhost:8082/` in your browser.
 | ui.clusters | list | `[]` | Connected Policy Reporter APIs |
 | ui.imagePullSecrets | list | `[]` | Image pull secrets for image verification policies, this will define the `--imagePullSecrets` argument |
 | ui.serviceAccount.create | bool | `true` | Create ServiceAccount |
-| ui.serviceAccount.automount | bool | `true` | Enable ServiceAccount automaount |
+| ui.serviceAccount.automount | bool | `true` | Enable ServiceAccount automount |
 | ui.serviceAccount.annotations | object | `{}` | Annotations for the ServiceAccount |
 | ui.serviceAccount.name | string | `""` | The ServiceAccount name |
 | ui.extraManifests | list | `[]` | list of extra manifests |
@@ -431,7 +431,7 @@ Open `http://localhost:8082/` in your browser.
 | plugin.kyverno.blockReports.policyReport.annotations | list | `[]` | Annotations for all created (Cluster)PolicyReports |
 | plugin.kyverno.imagePullSecrets | list | `[]` | Image pull secrets for image verification policies, this will define the `--imagePullSecrets` argument |
 | plugin.kyverno.serviceAccount.create | bool | `true` | Create ServiceAccount |
-| plugin.kyverno.serviceAccount.automount | bool | `true` | Enable ServiceAccount automaount |
+| plugin.kyverno.serviceAccount.automount | bool | `true` | Enable ServiceAccount automount |
 | plugin.kyverno.serviceAccount.annotations | object | `{}` | Annotations for the ServiceAccount |
 | plugin.kyverno.serviceAccount.name | string | `""` | The ServiceAccount name |
 | plugin.kyverno.podAnnotations | object | `{}` | Additional annotations to add to each pod |
@@ -488,7 +488,7 @@ Open `http://localhost:8082/` in your browser.
 | plugin.trivy.policyReporter.secretRef | string | `""` | Secret to read the API configuration from supports `host`, `certificate`, `skipTLS`, `username`, `password` key |
 | plugin.trivy.imagePullSecrets | list | `[]` | Image pull secrets for image verification policies, this will define the `--imagePullSecrets` argument |
 | plugin.trivy.serviceAccount.create | bool | `true` | Create ServiceAccount |
-| plugin.trivy.serviceAccount.automount | bool | `true` | Enable ServiceAccount automaount |
+| plugin.trivy.serviceAccount.automount | bool | `true` | Enable ServiceAccount automount |
 | plugin.trivy.serviceAccount.annotations | object | `{}` | Annotations for the ServiceAccount |
 | plugin.trivy.serviceAccount.name | string | `""` | The ServiceAccount name |
 | plugin.trivy.podAnnotations | object | `{}` | Additional annotations to add to each pod |

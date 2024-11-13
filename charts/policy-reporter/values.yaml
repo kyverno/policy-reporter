@@ -51,7 +51,7 @@ rbac:
 serviceAccount:
   # -- Create ServiceAccount
   create: true
-  # -- Enable ServiceAccount automaount
+  # -- Enable ServiceAccount automount
   automount: true
   # -- Annotations for the ServiceAccount
   annotations: {}
@@ -974,7 +974,7 @@ ui:
   serviceAccount:
     # -- Create ServiceAccount
     create: true
-    # -- Enable ServiceAccount automaount
+    # -- Enable ServiceAccount automount
     automount: true
     # -- Annotations for the ServiceAccount
     annotations: {}
@@ -1183,7 +1183,7 @@ plugin:
     serviceAccount:
       # -- Create ServiceAccount
       create: true
-      # -- Enable ServiceAccount automaount
+      # -- Enable ServiceAccount automount
       automount: true
       # -- Annotations for the ServiceAccount
       annotations: {}
@@ -1371,7 +1371,7 @@ plugin:
     serviceAccount:
       # -- Create ServiceAccount
       create: true
-      # -- Enable ServiceAccount automaount
+      # -- Enable ServiceAccount automount
       automount: true
       # -- Annotations for the ServiceAccount
       annotations: {}
