@@ -92,6 +92,7 @@ func NewClient(certificatePath string, skipTLS bool) *http.Client {
 		TLSClientConfig: &tls.Config{
 			InsecureSkipVerify: skipTLS,
 		},
+		Proxy: http.ProxyFromEnvironment,
 	}
 
 	client := &http.Client{
