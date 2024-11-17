@@ -1121,6 +1121,13 @@ ui:
     # -- Affinity constraints.
   affinity: {}
 
+  extraVolumes:
+    # -- Deployment volumeMounts
+    volumeMounts: []
+
+    # -- Deployment values
+    volumes: []
+
 plugin:
   kyverno:
     # -- (bool) Enable Kyverno Plugin

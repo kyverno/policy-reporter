@@ -73,6 +73,9 @@ spec:
             readOnly: true
           - name: tmp
             mountPath: /tmp
+          {{- with .Values.ui.extraVolumes.volumeMounts }}
+          {{ toYaml . | nindent 10 | trim }}
+          {{- end }}
           env:
           - name: POD_NAMESPACE
             valueFrom:
@@ -98,6 +101,9 @@ spec:
           optional: true
       - name: tmp
         emptyDir: {}
+      {{- with .Values.ui.extraVolumes.volumes }}
+      {{ toYaml . | nindent 6 | trim }}
+      {{- end }}           
       {{- with .Values.ui.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
