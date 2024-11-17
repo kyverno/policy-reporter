@@ -1326,6 +1326,13 @@ plugin:
       # -- Affinity constraints.
     affinity: {}
 
+    extraVolumes:
+      # -- Deployment volumeMounts
+      volumeMounts: []
+
+      # -- Deployment values
+      volumes: []
+
   trivy:
       # -- (bool) Enable Trivy Operator Plugin
     enabled: false
@@ -1498,6 +1505,13 @@ plugin:
 
       # -- Affinity constraints.
     affinity: {}
+
+    extraVolumes:
+      # -- Deployment volumeMounts
+      volumeMounts: []
+
+      # -- Deployment values
+      volumes: []
 
 monitoring:
   # -- Enables the Prometheus Operator integration
