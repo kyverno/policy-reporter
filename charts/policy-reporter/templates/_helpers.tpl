@@ -112,6 +112,15 @@ maxUnavailable: {{ .Values.podDisruptionBudget.maxUnavailable }}
 {{- end -}}
 {{- end -}}
 
+{{/* Get the namespace name for grafana. */}}
+{{- define "grafana.namespace" -}}
+{{- if .Values.monitoring.grafana.namespace -}}
+    {{- .Values.monitoring.grafana.namespace -}}
+{{- else -}}
+    {{- include "policyreporter.namespace" . -}}
+{{- end -}}
+{{- end -}}
+
 {{/* Get the namespace name. */}}
 {{- define "policyreporter.logLevel" -}}
 {{- if .Values.logging.server -}}
