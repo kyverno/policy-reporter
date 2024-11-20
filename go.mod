@@ -7,11 +7,11 @@ require (
 	github.com/atc0005/go-teams-notify/v2 v2.13.0
 	github.com/aws/aws-sdk-go-v2 v1.32.5
 	github.com/aws/aws-sdk-go-v2/config v1.28.4
-	github.com/aws/aws-sdk-go-v2/credentials v1.17.45
+	github.com/aws/aws-sdk-go-v2/credentials v1.17.46
 	github.com/aws/aws-sdk-go-v2/service/kinesis v1.32.6
 	github.com/aws/aws-sdk-go-v2/service/s3 v1.67.0
 	github.com/aws/aws-sdk-go-v2/service/securityhub v1.54.7
-	github.com/aws/aws-sdk-go-v2/service/sts v1.33.0
+	github.com/aws/aws-sdk-go-v2/service/sts v1.33.1
 	github.com/gin-contrib/gzip v1.0.1
 	github.com/gin-contrib/pprof v1.5.1
 	github.com/gin-contrib/zap v1.1.4
@@ -57,17 +57,17 @@ require (
 	github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/metric v0.49.0 // indirect
 	github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/resourcemapping v0.49.0 // indirect
 	github.com/aws/aws-sdk-go-v2/aws/protocol/eventstream v1.6.7 // indirect
-	github.com/aws/aws-sdk-go-v2/feature/ec2/imds v1.16.19 // indirect
+	github.com/aws/aws-sdk-go-v2/feature/ec2/imds v1.16.20 // indirect
 	github.com/aws/aws-sdk-go-v2/internal/configsources v1.3.24 // indirect
 	github.com/aws/aws-sdk-go-v2/internal/endpoints/v2 v2.6.24 // indirect
 	github.com/aws/aws-sdk-go-v2/internal/ini v1.8.1 // indirect
 	github.com/aws/aws-sdk-go-v2/internal/v4a v1.3.23 // indirect
-	github.com/aws/aws-sdk-go-v2/service/internal/accept-encoding v1.12.0 // indirect
+	github.com/aws/aws-sdk-go-v2/service/internal/accept-encoding v1.12.1 // indirect
 	github.com/aws/aws-sdk-go-v2/service/internal/checksum v1.4.4 // indirect
-	github.com/aws/aws-sdk-go-v2/service/internal/presigned-url v1.12.4 // indirect
+	github.com/aws/aws-sdk-go-v2/service/internal/presigned-url v1.12.5 // indirect
 	github.com/aws/aws-sdk-go-v2/service/internal/s3shared v1.18.4 // indirect
-	github.com/aws/aws-sdk-go-v2/service/sso v1.24.5 // indirect
-	github.com/aws/aws-sdk-go-v2/service/ssooidc v1.28.4 // indirect
+	github.com/aws/aws-sdk-go-v2/service/sso v1.24.6 // indirect
+	github.com/aws/aws-sdk-go-v2/service/ssooidc v1.28.5 // indirect
 	github.com/aws/smithy-go v1.22.1 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/bytedance/sonic v1.12.4 // indirect
