@@ -15,7 +15,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: {{ include "monitoring.fullname" . }}-clusterpolicy-details-dashboard
-  namespace: {{ include "policyreporter.namespace" . }}
+  namespace: {{ include "grafana.namespace" . }}
   annotations:
     {{ $root.grafana.folder.annotation }}: {{ $root.grafana.folder.name }}
     {{- with .Values.annotations }}
