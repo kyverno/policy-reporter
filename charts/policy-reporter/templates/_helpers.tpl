@@ -169,6 +169,7 @@ config:
   apiKey: {{ .apiKey | quote }}
   index: {{ .index| quote }}
   rotation: {{ .rotation | quote }}
+  typelessApi: {{ .typelessApi | quote }}
 {{ include "target" . }}
 {{- end }}
 
