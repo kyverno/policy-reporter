@@ -3,7 +3,7 @@
 Policy Reporter watches for PolicyReport Resources.
 It creates Prometheus Metrics and can send rule validation events to different targets like Loki, Elasticsearch, Slack or Discord
 
-![Version: 3.0.0-rc.9](https://img.shields.io/badge/Version-3.0.0--rc.9-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 3.0.0-rc.5](https://img.shields.io/badge/AppVersion-3.0.0--rc.5-informational?style=flat-square)
+![Version: 3.0.0-rc.10](https://img.shields.io/badge/Version-3.0.0--rc.10-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 3.0.0-rc.6](https://img.shields.io/badge/AppVersion-3.0.0--rc.6-informational?style=flat-square)
 
 ## Documentation
 
@@ -411,6 +411,8 @@ Open `http://localhost:8082/` in your browser.
 | ui.nodeSelector | object | `{}` | Node labels for pod assignment |
 | ui.tolerations | list | `[]` | List of node taints to tolerate |
 | ui.affinity | object | `{}` | Affinity constraints. |
+| ui.extraVolumes.volumeMounts | list | `[]` | Deployment volumeMounts |
+| ui.extraVolumes.volumes | list | `[]` | Deployment values |
 | plugin.kyverno.enabled | bool | `false` | Enable Kyverno Plugin |
 | plugin.kyverno.image.registry | string | `"ghcr.io"` | Image registry |
 | plugin.kyverno.image.repository | string | `"kyverno/policy-reporter/kyverno-plugin"` | Image repository |
@@ -472,6 +474,8 @@ Open `http://localhost:8082/` in your browser.
 | plugin.kyverno.nodeSelector | object | `{}` | Node labels for pod assignment |
 | plugin.kyverno.tolerations | list | `[]` | List of node taints to tolerate |
 | plugin.kyverno.affinity | object | `{}` | Affinity constraints. |
+| plugin.kyverno.extraVolumes.volumeMounts | list | `[]` | Deployment volumeMounts |
+| plugin.kyverno.extraVolumes.volumes | list | `[]` | Deployment values |
 | plugin.trivy.enabled | bool | `false` | Enable Trivy Operator Plugin |
 | plugin.trivy.image.registry | string | `"ghcr.io"` | Image registry |
 | plugin.trivy.image.repository | string | `"kyverno/policy-reporter/trivy-plugin"` | Image repository |
@@ -524,6 +528,8 @@ Open `http://localhost:8082/` in your browser.
 | plugin.trivy.nodeSelector | object | `{}` | Node labels for pod assignment |
 | plugin.trivy.tolerations | list | `[]` | List of node taints to tolerate |
 | plugin.trivy.affinity | object | `{}` | Affinity constraints. |
+| plugin.trivy.extraVolumes.volumeMounts | list | `[]` | Deployment volumeMounts |
+| plugin.trivy.extraVolumes.volumes | list | `[]` | Deployment values |
 | monitoring.enabled | bool | `false` | Enables the Prometheus Operator integration |
 | monitoring.annotations | object | `{}` | Key/value pairs that are attached to all resources. |
 | monitoring.serviceMonitor.honorLabels | bool | `false` | HonorLabels chooses the metrics labels on collisions with target labels |
