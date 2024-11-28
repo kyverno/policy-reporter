@@ -21,8 +21,9 @@ func newFakeClient() v1.NamespaceInterface {
 			ObjectMeta: metav1.ObjectMeta{
 				Name: "default",
 				Labels: map[string]string{
-					"team": "team-a",
-					"name": "default",
+					"team":  "team-a",
+					"name":  "default",
+					"exist": "yes",
 				},
 			},
 		},
@@ -47,6 +48,33 @@ func (s *nsErrorClient) List(ctx context.Context, opts metav1.ListOptions) (*cor
 }
 
 func TestClient(t *testing.T) {
+	t.Run("read from api with list", func(t *testing.T) {
+		client := namespaces.NewClient(newFakeClient(), gocache.New(gocache.DefaultExpiration, gocache.DefaultExpiration))
+
+		list, err := client.List(context.Background(), map[string]string{"name": "default,user"})
+
+		assert.Nil(t, err)
+		assert.Equal(t, 2, len(list))
+	})
+	t.Run("read from api with exist check", func(t *testing.T) {
+		client := namespaces.NewClient(newFakeClient(), gocache.New(gocache.DefaultExpiration, gocache.DefaultExpiration))
+
+		list, err := client.List(context.Background(), map[string]string{"exist": "*"})
+
+		assert.Nil(t, err)
+		assert.Equal(t, 1, len(list))
+		assert.Equal(t, list[0], "default")
+	})
+	t.Run("read from api with not exist check", func(t *testing.T) {
+		client := namespaces.NewClient(newFakeClient(), gocache.New(gocache.DefaultExpiration, gocache.DefaultExpiration))
+
+		list, err := client.List(context.Background(), map[string]string{"exist": "!*"})
+
+		assert.Nil(t, err)
+		assert.Equal(t, 1, len(list))
+		assert.Equal(t, list[0], "user")
+	})
+
 	t.Run("read from api", func(t *testing.T) {
 		client := namespaces.NewClient(newFakeClient(), gocache.New(gocache.DefaultExpiration, gocache.DefaultExpiration))
 
