@@ -156,6 +156,10 @@ config:
   certificate: {{ .certificate | quote }}
   skipTLS: {{ .skipTLS }}
   path: {{ .path | quote }}
+  {{- with .headers }}
+  headers:
+  {{- toYaml . | nindent 4 }}
+  {{- end }}
 {{ include "target" . }}
 {{- end }}
 
@@ -170,6 +174,10 @@ config:
   index: {{ .index| quote }}
   rotation: {{ .rotation | quote }}
   typelessApi: {{ .typelessApi | quote }}
+  {{- with .headers }}
+  headers:
+  {{- toYaml . | nindent 4 }}
+  {{- end }}
 {{ include "target" . }}
 {{- end }}
 

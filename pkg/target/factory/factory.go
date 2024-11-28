@@ -247,6 +247,7 @@ func (f *TargetFactory) CreateElasticsearchTarget(config, parent *target.Config[
 			Index:        config.Config.Index,
 			TypelessApi:  config.Config.TypelessAPI,
 			CustomFields: config.CustomFields,
+			Headers:      config.Config.Headers,
 			HTTPClient:   http.NewClient(config.Config.Certificate, config.Config.SkipTLS),
 		}),
 	}
