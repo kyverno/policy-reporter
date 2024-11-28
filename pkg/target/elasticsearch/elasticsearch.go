@@ -18,6 +18,7 @@ type Options struct {
 	Index        string
 	Rotation     string
 	CustomFields map[string]string
+	Headers      map[string]string
 	HTTPClient   http.Client
 	// https://www.elastic.co/blog/moving-from-types-to-typeless-apis-in-elasticsearch-7-0
 	TypelessApi bool
@@ -43,6 +44,7 @@ type client struct {
 	apiKey       string
 	rotation     Rotation
 	customFields map[string]string
+	headers      map[string]string
 	client       http.Client
 	// https://www.elastic.co/blog/moving-from-types-to-typeless-apis-in-elasticsearch-7-0
 	typelessApi bool
@@ -87,6 +89,10 @@ func (e *client) Send(result v1alpha2.PolicyReportResult) {
 		return
 	}
 
+	for k, v := range e.headers {
+		req.Header.Set(k, v)
+	}
+
 	if e.username != "" {
 		req.SetBasicAuth(e.username, e.password)
 	} else if e.apiKey != "" {
@@ -112,6 +118,7 @@ func NewClient(options Options) target.Client {
 		options.ApiKey,
 		options.Rotation,
 		options.CustomFields,
+		options.Headers,
 		options.HTTPClient,
 		options.TypelessApi,
 	}
