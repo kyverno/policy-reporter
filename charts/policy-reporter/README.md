@@ -3,7 +3,7 @@
 Policy Reporter watches for PolicyReport Resources.
 It creates Prometheus Metrics and can send rule validation events to different targets like Loki, Elasticsearch, Slack or Discord
 
-![Version: 3.0.0-rc.10](https://img.shields.io/badge/Version-3.0.0--rc.10-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 3.0.0-rc.6](https://img.shields.io/badge/AppVersion-3.0.0--rc.6-informational?style=flat-square)
+![Version: 3.0.0-rc.11](https://img.shields.io/badge/Version-3.0.0--rc.11-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 3.0.0-rc.7](https://img.shields.io/badge/AppVersion-3.0.0--rc.7-informational?style=flat-square)
 
 ## Documentation
 
@@ -158,6 +158,7 @@ Open `http://localhost:8082/` in your browser.
 | target.elasticsearch.host | string | `""` | Host address |
 | target.elasticsearch.certificate | string | `""` | Server Certificate file path Can be added under extraVolumes |
 | target.elasticsearch.skipTLS | bool | `false` | Skip TLS verification |
+| target.elasticsearch.headers | object | `{}` | Additional HTTP Headers |
 | target.elasticsearch.index | string | `"policy-reporter"` | Elasticsearch index (default: policy-reporter) |
 | target.elasticsearch.rotation | string | `"daily"` | Elasticsearch index rotation and index suffix Possible values: daily, monthly, annually, none (default: daily) |
 | target.elasticsearch.typelessApi | bool | `false` | Enables Elasticsearch typless API https://www.elastic.co/blog/moving-from-types-to-typeless-apis-in-elasticsearch-7-0 keeping as false for retrocompatibility. |
