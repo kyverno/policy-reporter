@@ -379,6 +379,8 @@ target:
     certificate: ""
     # -- Skip TLS verification
     skipTLS: false
+    # -- Additional HTTP Headers
+    headers: {}
     # -- Elasticsearch index (default: policy-reporter)
     index: "policy-reporter"
     # -- Elasticsearch index rotation and index suffix
@@ -928,7 +930,10 @@ ui:
   #     list: []
   #     # -- selector for displayed namespaces
   #     selector:
-  #       team: team-a
+  #       team: team-a  # equal
+  #       workload: *   # label exists
+  #       infra: !*     # label does not exist
+  #       env: dev,test # label value is one of [dev, test]
   #   sources:
   #     # -- list of displayed sources
   #     list: []
