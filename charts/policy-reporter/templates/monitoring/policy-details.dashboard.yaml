@@ -1,3 +1,4 @@
+{{- if and .Values.monitoring.enabled }}
 {{ $root := .Values.monitoring }}
 
 {{- if and $root.grafana.dashboards.enabled $root.grafana.dashboards.enable.policyReportDetails }}
@@ -970,4 +971,5 @@ data:
     "uid": "Tf1skG8Mz",
     "version": 1
     }
+{{- end }}
 {{- end }}

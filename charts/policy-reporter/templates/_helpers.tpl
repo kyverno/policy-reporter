@@ -29,14 +29,16 @@ Create chart name and version as used by the chart label.
 Common labels
 */}}
 {{- define "policyreporter.labels" -}}
-helm.sh/chart: {{ include "policyreporter.chart" . }}
 {{ include "policyreporter.selectorLabels" . }}
 {{- if .Chart.AppVersion }}
 app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
 {{- end }}
 app.kubernetes.io/component: reporting
-app.kubernetes.io/managed-by: {{ .Release.Service }}
 app.kubernetes.io/part-of: policy-reporter
+{{- if not .Values.static }}
+app.kubernetes.io/managed-by: {{ .Release.Service }}
+helm.sh/chart: {{ include "policyreporter.chart" . }}
+{{- end }}
 {{- with .Values.global.labels }}
 {{ toYaml . }}
 {{- end -}}
@@ -46,9 +48,11 @@ app.kubernetes.io/part-of: policy-reporter
 Pod labels
 */}}
 {{- define "policyreporter.podLabels" -}}
-helm.sh/chart: {{ include "policyreporter.chart" . }}
 app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
 app.kubernetes.io/part-of: policy-reporter
+{{- if not .Values.static }}
+helm.sh/chart: {{ include "policyreporter.chart" . }}
+{{- end }}
 {{- end }}
 
 {{/*

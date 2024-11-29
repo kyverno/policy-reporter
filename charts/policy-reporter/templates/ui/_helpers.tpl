@@ -25,12 +25,14 @@ Create chart name and version as used by the chart label.
 Common labels
 */}}
 {{- define "ui.labels" -}}
-helm.sh/chart: {{ include "ui.chart" . }}
 {{ include "ui.selectorLabels" . }}
 {{- if .Chart.AppVersion }}
 app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
 {{- end }}
+{{- if not .Values.static }}
 app.kubernetes.io/managed-by: {{ .Release.Service }}
+helm.sh/chart: {{ include "ui.chart" . }}
+{{- end }}
 {{- with .Values.global.labels }}
 {{ toYaml . }}
 {{- end -}}

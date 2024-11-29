@@ -1,0 +1,252 @@
+---
+# Source: policy-reporter/templates/serviceaccount.yaml
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: policy-reporter
+  namespace: policy-reporter
+  labels:
+    app.kubernetes.io/name: policy-reporter
+    app.kubernetes.io/instance: policy-reporter
+    app.kubernetes.io/version: "3.0.0-rc.7"
+    app.kubernetes.io/component: reporting
+    app.kubernetes.io/part-of: policy-reporter
+---
+# Source: policy-reporter/templates/config-secret.yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: policy-reporter-config
+  namespace: policy-reporter
+  labels:
+    app.kubernetes.io/name: policy-reporter
+    app.kubernetes.io/instance: policy-reporter
+    app.kubernetes.io/version: "3.0.0-rc.7"
+    app.kubernetes.io/component: reporting
+    app.kubernetes.io/part-of: policy-reporter
+type: Opaque
+data:
+  config.yaml: dGFyZ2V0OgogIGxva2k6CiAgICBjb25maWc6CiAgICAgIGhvc3Q6ICIiCiAgICAgIGNlcnRpZmljYXRlOiAiIgogICAgICBza2lwVExTOiBmYWxzZQogICAgICBwYXRoOiAiIgogICAgbmFtZTogCiAgICBzZWNyZXRSZWY6ICIiCiAgICBtb3VudGVkU2VjcmV0OiAiIgogICAgbWluaW11bVNldmVyaXR5OiAiIgogICAgc2tpcEV4aXN0aW5nT25TdGFydHVwOiB0cnVlCgogIGVsYXN0aWNzZWFyY2g6CiAgICBjb25maWc6CiAgICAgIGhvc3Q6ICIiCiAgICAgIGNlcnRpZmljYXRlOiAiIgogICAgICBza2lwVExTOiBmYWxzZQogICAgICB1c2VybmFtZTogIiIKICAgICAgcGFzc3dvcmQ6ICIiCiAgICAgIGFwaUtleTogIiIKICAgICAgaW5kZXg6ICJwb2xpY3ktcmVwb3J0ZXIiCiAgICAgIHJvdGF0aW9uOiAiZGFpbHkiCiAgICAgIHR5cGVsZXNzQXBpOiAiZmFsc2UiCiAgICBuYW1lOiAKICAgIHNlY3JldFJlZjogIiIKICAgIG1vdW50ZWRTZWNyZXQ6ICIiCiAgICBtaW5pbXVtU2V2ZXJpdHk6ICIiCiAgICBza2lwRXhpc3RpbmdPblN0YXJ0dXA6IHRydWUKCiAgc2xhY2s6CiAgICBjb25maWc6CiAgICAgIHdlYmhvb2s6ICIiCiAgICAgIGNoYW5uZWw6ICIiCiAgICAgIGNlcnRpZmljYXRlOiAKICAgICAgc2tpcFRMUzogCiAgICBuYW1lOiAKICAgIHNlY3JldFJlZjogIiIKICAgIG1vdW50ZWRTZWNyZXQ6ICIiCiAgICBtaW5pbXVtU2V2ZXJpdHk6ICIiCiAgICBza2lwRXhpc3RpbmdPblN0YXJ0dXA6IHRydWUKCiAgZGlzY29yZDoKICAgIGNvbmZpZzoKICAgICAgd2ViaG9vazogIiIKICAgICAgY2VydGlmaWNhdGU6ICIiCiAgICAgIHNraXBUTFM6IGZhbHNlCiAgICBuYW1lOiAKICAgIHNlY3JldFJlZjogIiIKICAgIG1vdW50ZWRTZWNyZXQ6ICIiCiAgICBtaW5pbXVtU2V2ZXJpdHk6ICIiCiAgICBza2lwRXhpc3RpbmdPblN0YXJ0dXA6IHRydWUKCiAgdGVhbXM6CiAgICBjb25maWc6CiAgICAgIHdlYmhvb2s6ICIiCiAgICAgIGNlcnRpZmljYXRlOiAiIgogICAgICBza2lwVExTOiBmYWxzZQogICAgbmFtZTogCiAgICBzZWNyZXRSZWY6ICIiCiAgICBtb3VudGVkU2VjcmV0OiAiIgogICAgbWluaW11bVNldmVyaXR5OiAiIgogICAgc2tpcEV4aXN0aW5nT25TdGFydHVwOiB0cnVlCgogIHdlYmhvb2s6CiAgICBjb25maWc6CiAgICAgIHdlYmhvb2s6ICIiCiAgICAgIGNlcnRpZmljYXRlOiAiIgogICAgICBza2lwVExTOiBmYWxzZQogICAgbmFtZTogCiAgICBzZWNyZXRSZWY6ICIiCiAgICBtb3VudGVkU2VjcmV0OiAiIgogICAgbWluaW11bVNldmVyaXR5OiAiIgogICAgc2tpcEV4aXN0aW5nT25TdGFydHVwOiB0cnVlCgogIHRlbGVncmFtOgogICAgY29uZmlnOgogICAgICBjaGF0SWQ6ICIiCiAgICAgIHRva2VuOiAiIgogICAgICB3ZWJob29rOiAKICAgICAgY2VydGlmaWNhdGU6ICIiCiAgICAgIHNraXBUTFM6IGZhbHNlCiAgICBuYW1lOiAKICAgIHNlY3JldFJlZjogIiIKICAgIG1vdW50ZWRTZWNyZXQ6ICIiCiAgICBtaW5pbXVtU2V2ZXJpdHk6ICIiCiAgICBza2lwRXhpc3RpbmdPblN0YXJ0dXA6IHRydWUKCiAgZ29vZ2xlQ2hhdDoKICAgIGNvbmZpZzoKICAgICAgd2ViaG9vazogIiIKICAgICAgY2VydGlmaWNhdGU6ICIiCiAgICAgIHNraXBUTFM6IGZhbHNlCiAgICBuYW1lOiAKICAgIHNlY3JldFJlZjogIiIKICAgIG1vdW50ZWRTZWNyZXQ6ICIiCiAgICBtaW5pbXVtU2V2ZXJpdHk6ICIiCiAgICBza2lwRXhpc3RpbmdPblN0YXJ0dXA6IHRydWUKCiAgczM6CiAgICBjb25maWc6CiAgICAgIGFjY2Vzc0tleUlkOiAKICAgICAgc2VjcmV0QWNjZXNzS2V5OiAgCiAgICAgIHJlZ2lvbjogCiAgICAgIGVuZHBvaW50OiAKICAgICAgYnVja2V0OiAKICAgICAgYnVja2V0S2V5RW5hYmxlZDogZmFsc2UKICAgICAga21zS2V5SWQ6IAogICAgICBzZXJ2ZXJTaWRlRW5jcnlwdGlvbjogCiAgICAgIHBhdGhTdHlsZTogZmFsc2UKICAgICAgcHJlZml4OiAKICAgIG5hbWU6IAogICAgc2VjcmV0UmVmOiAiIgogICAgbW91bnRlZFNlY3JldDogIiIKICAgIG1pbmltdW1TZXZlcml0eTogIiIKICAgIHNraXBFeGlzdGluZ09uU3RhcnR1cDogdHJ1ZQoKICBraW5lc2lzOgogICAgY29uZmlnOgogICAgICBhY2Nlc3NLZXlJZDogCiAgICAgIHNlY3JldEFjY2Vzc0tleTogIAogICAgICByZWdpb246IAogICAgICBlbmRwb2ludDogCiAgICAgIHN0cmVhbU5hbWU6IAogICAgbmFtZTogCiAgICBzZWNyZXRSZWY6ICIiCiAgICBtb3VudGVkU2VjcmV0OiAiIgogICAgbWluaW11bVNldmVyaXR5OiAiIgogICAgc2tpcEV4aXN0aW5nT25TdGFydHVwOiB0cnVlCgogIHNlY3VyaXR5SHViOgogICAgY29uZmlnOgogICAgICBhY2Nlc3NLZXlJZDogIiIKICAgICAgc2VjcmV0QWNjZXNzS2V5OiAgIiIKICAgICAgcmVnaW9uOiAKICAgICAgZW5kcG9pbnQ6IAogICAgICBhY2NvdW50SWQ6ICIiCiAgICAgIHByb2R1Y3ROYW1lOiAKICAgICAgY29tcGFueU5hbWU6IAogICAgICBkZWxheUluU2Vjb25kczogMgogICAgICBzeW5jaHJvbml6ZTogdHJ1ZQogICAgbmFtZTogCiAgICBzZWNyZXRSZWY6ICIiCiAgICBtb3VudGVkU2VjcmV0OiAiIgogICAgbWluaW11bVNldmVyaXR5OiAiIgogICAgc2tpcEV4aXN0aW5nT25TdGFydHVwOiB0cnVlCgogIGdjczoKICAgIGNvbmZpZzoKICAgICAgY3JlZGVudGlhbHM6IAogICAgICBidWNrZXQ6IAogICAgICBwcmVmaXg6IAogICAgbmFtZTogCiAgICBzZWNyZXRSZWY6ICIiCiAgICBtb3VudGVkU2VjcmV0OiAiIgogICAgbWluaW11bVNldmVyaXR5OiAiIgogICAgc2tpcEV4aXN0aW5nT25TdGFydHVwOiB0cnVlCgp3b3JrZXI6IDUKbWV0cmljczoKICBjdXN0b21MYWJlbHM6IFtdCiAgZW5hYmxlZDogdHJ1ZQogIGZpbHRlcjoge30KICBtb2RlOiBkZXRhaWxlZApzb3VyY2VGaWx0ZXJzOgogIC0gZGlzYWJsZUNsdXN0ZXJSZXBvcnRzOiBmYWxzZQogICAga2luZHM6CiAgICAgIGV4Y2x1ZGU6CiAgICAgIC0gUmVwbGljYVNldAogICAgc2VsZWN0b3I6CiAgICAgIHNvdXJjZToga3l2ZXJubwogICAgdW5jb250cm9sbGVkT25seTogdHJ1ZQoKbGVhZGVyRWxlY3Rpb246CiAgZW5hYmxlZDogZmFsc2UKICByZWxlYXNlT25DYW5jZWw6IHRydWUKICBsZWFzZUR1cmF0aW9uOiAxNQogIHJlbmV3RGVhZGxpbmU6IDEwCiAgcmV0cnlQZXJpb2Q6IDIKcmVkaXM6CiAgYWRkcmVzczogIiIKICBkYXRhYmFzZTogMAogIGVuYWJsZWQ6IGZhbHNlCiAgcGFzc3dvcmQ6ICIiCiAgcHJlZml4OiBwb2xpY3ktcmVwb3J0ZXIKICB1c2VybmFtZTogIiIKCmxvZ2dpbmc6CiAgc2VydmVyOiBmYWxzZQogIGVuY29kaW5nOiBjb25zb2xlCiAgbG9nTGV2ZWw6IDAKCmFwaToKICBiYXNpY0F1dGg6CiAgICB1c2VybmFtZTogCiAgICBwYXNzd29yZDogCiAgICBzZWNyZXRSZWY6IAoKZGF0YWJhc2U6CiAgdHlwZTogCiAgZGF0YWJhc2U6IAogIHVzZXJuYW1lOiAKICBwYXNzd29yZDogCiAgaG9zdDogCiAgZW5hYmxlU1NMOiBmYWxzZQogIGRzbjogCiAgc2VjcmV0UmVmOiAKICBtb3VudGVkU2VjcmV0OiAK
+---
+# Source: policy-reporter/templates/clusterrole.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  labels:
+    rbac.authorization.k8s.io/aggregate-to-admin: "true"
+    app.kubernetes.io/name: policy-reporter
+    app.kubernetes.io/instance: policy-reporter
+    app.kubernetes.io/version: "3.0.0-rc.7"
+    app.kubernetes.io/component: reporting
+    app.kubernetes.io/part-of: policy-reporter
+  name: policy-reporter
+rules:
+- apiGroups:
+  - '*'
+  resources:
+  - policyreports
+  - policyreports/status
+  - clusterpolicyreports
+  - clusterpolicyreports/status
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - ''
+  resources:
+  - namespaces
+  verbs:
+  - list
+- apiGroups:
+  - ''
+  resources:
+  - pods
+  verbs:
+  - get
+- apiGroups:
+  - 'batch'
+  resources:
+  - jobs
+  verbs:
+  - get
+---
+# Source: policy-reporter/templates/clusterrolebinding.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: policy-reporter
+  labels:
+    app.kubernetes.io/name: policy-reporter
+    app.kubernetes.io/instance: policy-reporter
+    app.kubernetes.io/version: "3.0.0-rc.7"
+    app.kubernetes.io/component: reporting
+    app.kubernetes.io/part-of: policy-reporter
+roleRef:
+  kind: ClusterRole
+  name: policy-reporter
+  apiGroup: rbac.authorization.k8s.io
+subjects:
+- kind: "ServiceAccount"
+  name: policy-reporter
+  namespace: policy-reporter
+---
+# Source: policy-reporter/templates/secret-role.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  labels:
+    app.kubernetes.io/name: policy-reporter
+    app.kubernetes.io/instance: policy-reporter
+    app.kubernetes.io/version: "3.0.0-rc.7"
+    app.kubernetes.io/component: reporting
+    app.kubernetes.io/part-of: policy-reporter
+  name: policy-reporter-secret-reader
+  namespace: policy-reporter
+rules:
+- apiGroups: ['']
+  resources:
+  - secrets
+  verbs:
+  - get
+  - list
+  - watch
+---
+# Source: policy-reporter/templates/secret-rolebinding.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: policy-reporter-secret-reader
+  namespace: policy-reporter
+  labels:
+    app.kubernetes.io/name: policy-reporter
+    app.kubernetes.io/instance: policy-reporter
+    app.kubernetes.io/version: "3.0.0-rc.7"
+    app.kubernetes.io/component: reporting
+    app.kubernetes.io/part-of: policy-reporter
+roleRef:
+  kind: Role
+  name: policy-reporter-secret-reader
+  apiGroup: rbac.authorization.k8s.io
+subjects:
+- kind: "ServiceAccount"
+  name: policy-reporter
+  namespace: policy-reporter
+---
+# Source: policy-reporter/templates/service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: policy-reporter
+  namespace: policy-reporter
+  labels:
+    app.kubernetes.io/name: policy-reporter
+    app.kubernetes.io/instance: policy-reporter
+    app.kubernetes.io/version: "3.0.0-rc.7"
+    app.kubernetes.io/component: reporting
+    app.kubernetes.io/part-of: policy-reporter
+spec:
+  type: ClusterIP
+  ports:
+    - port: 8080
+      targetPort: http
+      protocol: TCP
+      name: http
+  selector:
+    app.kubernetes.io/name: policy-reporter
+    app.kubernetes.io/instance: policy-reporter
+---
+# Source: policy-reporter/templates/deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: policy-reporter
+  namespace: policy-reporter
+  labels:
+    app.kubernetes.io/name: policy-reporter
+    app.kubernetes.io/instance: policy-reporter
+    app.kubernetes.io/version: "3.0.0-rc.7"
+    app.kubernetes.io/component: reporting
+    app.kubernetes.io/part-of: policy-reporter
+spec:
+  replicas: 1
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: policy-reporter
+      app.kubernetes.io/instance: policy-reporter
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: policy-reporter
+        app.kubernetes.io/instance: policy-reporter
+        app.kubernetes.io/version: "3.0.0-rc.7"
+        app.kubernetes.io/part-of: policy-reporter
+      annotations:
+        checksum/secret: "c4ddd7e3cc5e720b143ba69f57a5db8d468bdf6db53d6d623a19a56b0dee7d5e"
+    spec:
+      serviceAccountName: policy-reporter
+      automountServiceAccountToken: true
+      securityContext:
+        fsGroup: 1234
+      containers:
+        - name: policy-reporter
+          image: "ghcr.io/kyverno/policy-reporter:3.0.0-rc.7"
+          imagePullPolicy: IfNotPresent
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+              - ALL
+            privileged: false
+            readOnlyRootFilesystem: true
+            runAsNonRoot: true
+            runAsUser: 1234
+            seccompProfile:
+              type: RuntimeDefault
+          args:
+            - --port=8080
+            - --config=/app/config.yaml
+            - --dbfile=/sqlite/database.db
+            - --metrics-enabled=true
+            - --rest-enabled=true
+            - --profile=false
+            - --lease-name=policy-reporter
+            - --template-dir=/app/templates
+          ports:
+            - name: http
+              containerPort: 8080
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /ready
+              port: http
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+          resources:
+            {}
+          volumeMounts:
+          - name: sqlite
+            mountPath: /sqlite
+          - name: config-file
+            mountPath: /app/config.yaml
+            subPath: config.yaml
+            readOnly: true
+          - name: tmp
+            mountPath: /tmp
+          env:
+          - name: POD_NAMESPACE
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.namespace
+      volumes:
+      - name: sqlite
+        emptyDir: {}
+      - name: config-file
+        secret:
+          secretName: policy-reporter-config
+          optional: true
+      - name: tmp
+        emptyDir: {}
