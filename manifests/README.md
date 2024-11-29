@@ -1,8 +1,8 @@
 # Installation Manifests for Policy Reporter
 
-You can use this manifests to install Policy Reporter without additional tools like Helm or Kustomize. The manifests are structured into five installations.
+You can use this manifests to install Policy Reporter without additional tools like Helm or Kustomize. The manifests are structured into different feature sets.
 
-The installation requires to be in the `policy-reporter` namespace. As its the configured namespaces for RBAC resources.
+All installations must take place in the `policy-reporter` namespace. As its the configured namespace for RBAC resources.
 
 ## Policy Reporter
 
