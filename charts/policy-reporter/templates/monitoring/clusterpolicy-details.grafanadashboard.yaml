@@ -1,4 +1,4 @@
-{{- if and .Values.monitoring.grafana.dashboards.enabled .Values.monitoring.grafana.dashboards.enable.clusterPolicyReportDetails .Values.monitoring.grafana.grafanaDashboard.enabled }}
+{{- if and .Values.monitoring.enabled .Values.monitoring.grafana.dashboards.enabled .Values.monitoring.grafana.dashboards.enable.clusterPolicyReportDetails .Values.monitoring.grafana.grafanaDashboard.enabled }}
 apiVersion: grafana.integreatly.org/v1beta1
 kind: GrafanaDashboard
 metadata:

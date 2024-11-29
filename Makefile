@@ -125,6 +125,38 @@ kind-load: $(KIND) ko-build ## Build playground image and load it in kind cluste
 # CODEGEN #
 ###########
 
+.PHONY: codegen-static-manifests
+codegen-static-manifests: $(HELM) ## Generate helm docs
+	@echo Generate static manifests... >&2
+	@$(HELM) template policy-reporter ./charts/policy-reporter \
+		--set static=true \
+		--set metrics.enabled=true \
+		--set rest.enabled=true \
+		-n policy-reporter \
+		--create-namespace > manifests/policy-reporter/install.yaml
+	@$(HELM) template policy-reporter ./charts/policy-reporter \
+		--set static=true \
+		--set metrics.enabled=true \
+		--set ui.enabled=true \
+		-n policy-reporter \
+		--create-namespace > manifests/policy-reporter-ui/install.yaml
+	@$(HELM) template policy-reporter ./charts/policy-reporter --set static=true \
+		--set metrics.enabled=true \
+		--set ui.enabled=true \
+		--set plugin.kyverno.enabled=true \
+		-n policy-reporter \
+		--create-namespace > manifests/policy-reporter-kyverno-ui/install.yaml
+	@$(HELM) template policy-reporter ./charts/policy-reporter \
+		--set static=true \
+		--set metrics.enabled=true \
+		--set ui.enabled=true \
+		--set plugin.kyverno.enabled=true \
+		--set replicaCount=2 \
+		--set ui.replicaCount=2 \
+		--set plugin.kyverno.replicaCount=2 \
+		-n policy-reporter \
+		--create-namespace > manifests/policy-reporter-kyverno-ui-ha/install.yaml
+
 .PHONY: codegen-helm-docs
 codegen-helm-docs: ## Generate helm docs
 	@echo Generate helm docs... >&2

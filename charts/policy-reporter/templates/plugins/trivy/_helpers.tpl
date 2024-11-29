@@ -25,12 +25,14 @@ Create chart name and version as used by the chart label.
 Common labels
 */}}
 {{- define "trivy-plugin.labels" -}}
-helm.sh/chart: {{ include "trivy-plugin.chart" . }}
 {{ include "trivy-plugin.selectorLabels" . }}
 {{- if .Chart.AppVersion }}
 app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
 {{- end }}
+{{- if not .Values.static }}
 app.kubernetes.io/managed-by: {{ .Release.Service }}
+helm.sh/chart: {{ include "trivy-plugin.chart" . }}
+{{- end }}
 {{- with .Values.global.labels }}
 {{ toYaml . }}
 {{- end -}}
