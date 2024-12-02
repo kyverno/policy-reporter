@@ -3,7 +3,7 @@
 Policy Reporter watches for PolicyReport Resources.
 It creates Prometheus Metrics and can send rule validation events to different targets like Loki, Elasticsearch, Slack or Discord
 
-![Version: 3.0.0-rc.11](https://img.shields.io/badge/Version-3.0.0--rc.11-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 3.0.0-rc.7](https://img.shields.io/badge/AppVersion-3.0.0--rc.7-informational?style=flat-square)
+![Version: 3.0.0-rc.12](https://img.shields.io/badge/Version-3.0.0--rc.12-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 3.0.0-rc.7](https://img.shields.io/badge/AppVersion-3.0.0--rc.7-informational?style=flat-square)
 
 ## Documentation
 
@@ -339,7 +339,7 @@ Open `http://localhost:8082/` in your browser.
 | ui.image.registry | string | `"ghcr.io"` | Image registry |
 | ui.image.repository | string | `"kyverno/policy-reporter-ui"` | Image repository |
 | ui.image.pullPolicy | string | `"IfNotPresent"` | Image PullPolicy |
-| ui.image.tag | string | `"2.0.0-rc.3"` | Image tag |
+| ui.image.tag | string | `"2.0.0-rc.4"` | Image tag |
 | ui.replicaCount | int | `1` | Deployment replica count |
 | ui.tempDir | string | `"/tmp"` | Temporary Directory to persist session data for authentication |
 | ui.logging.api | bool | `false` | Enables external api request logging |
