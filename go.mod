@@ -41,7 +41,7 @@ require (
 	golang.org/x/text v0.21.0
 	google.golang.org/api v0.211.0
 	k8s.io/apimachinery v0.31.4
-	k8s.io/client-go v0.31.3
+	k8s.io/client-go v0.31.4
 )
 
 require (
