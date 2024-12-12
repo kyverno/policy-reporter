@@ -40,8 +40,8 @@ require (
 	golang.org/x/sync v0.10.0
 	golang.org/x/text v0.21.0
 	google.golang.org/api v0.211.0
-	k8s.io/apimachinery v0.31.4
-	k8s.io/client-go v0.31.4
+	k8s.io/apimachinery v0.32.0
+	k8s.io/client-go v0.32.0
 )
 
 require (
@@ -179,7 +179,6 @@ require (
 require (
 	github.com/go-logr/logr v1.4.2 // indirect
 	github.com/go-openapi/jsonreference v0.21.0 // indirect
-	github.com/imdario/mergo v0.3.16 // indirect
 	github.com/prometheus/common v0.60.1 // indirect
 	github.com/subosito/gotenv v1.6.0 // indirect
 	golang.org/x/net v0.32.0 // indirect
@@ -187,7 +186,7 @@ require (
 	golang.org/x/term v0.27.0 // indirect
 	golang.org/x/time v0.8.0 // indirect
 	gopkg.in/ini.v1 v1.67.0 // indirect
-	k8s.io/api v0.31.4
+	k8s.io/api v0.32.0
 	k8s.io/kube-openapi v0.0.0-20241105132330-32ad38e42d3f // indirect
 	sigs.k8s.io/json v0.0.0-20241014173422-cfa47c3a1cc8 // indirect
 )
