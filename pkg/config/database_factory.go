@@ -52,7 +52,10 @@ func (f *DatabaseFactory) NewPostgres(config Database) *bun.DB {
 	sqldb.SetMaxIdleConns(25)
 	sqldb.SetConnMaxLifetime(15 * time.Minute)
 
-	return bun.NewDB(sqldb, pgdialect.New())
+	db := bun.NewDB(sqldb, pgdialect.New())
+	db.AddQueryHook(bundebug.NewQueryHook())
+
+	return db
 }
 
 func (f *DatabaseFactory) NewMySQL(config Database) *bun.DB {

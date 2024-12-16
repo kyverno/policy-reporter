@@ -271,6 +271,7 @@ func (s *Store) FetchResource(ctx context.Context, id string) (ResourceResult, e
 		Columns("res.id", "resource_uid", "resource_kind", "resource_api_version", "resource_namespace", "resource_name", "res.source", "res.category").
 		SelectStatusSummaries().
 		FilterValue("res.id", id).
+		Group("res.id", "resource_uid", "resource_kind", "resource_api_version", "resource_namespace", "resource_name", "res.source", "res.category").
 		GetQuery().
 		Limit(1).
 		Scan(ctx)
@@ -386,6 +387,7 @@ func (s *Store) FetchNamespaceResourceResults(ctx context.Context, filter Filter
 
 func (s *Store) CountNamespaceResourceResults(ctx context.Context, filter Filter) (int, error) {
 	query := FromQuery(s.db.NewSelect().Model((*ResourceResult)(nil))).
+		Columns("res.id").
 		FilterMap(map[string][]string{
 			"source":             filter.Sources,
 			"category":           filter.Categories,
@@ -429,6 +431,7 @@ func (s *Store) FetchClusterResourceResults(ctx context.Context, filter Filter, 
 
 func (s *Store) CountClusterResourceResults(ctx context.Context, filter Filter) (int, error) {
 	query := FromQuery(s.db.NewSelect().Model((*ResourceResult)(nil))).
+		Columns("res.id").
 		FilterMap(map[string][]string{
 			"source":        filter.Sources,
 			"category":      filter.Categories,
@@ -656,14 +659,14 @@ func (s *Store) FetchNamespaceStatusCounts(ctx context.Context, source string, f
 			"f.resource_kind":      filter.Kinds,
 			"f.resource_namespace": filter.Namespaces,
 			"f.policy":             filter.Policies,
-			"status":               filter.Status,
+			"f.result":             filter.Status,
 		}).
 		FilterValue("f.source", source).
 		FilterReportLabels(filter.ReportLabel).
 		Exclude(filter, "f").
 		NamespaceScope().
-		Group("f.resource_namespace", "status").
-		Order("f.resource_namespace ASC", "status ASC").
+		Group("f.resource_namespace", "f.result").
+		Order("f.resource_namespace ASC", "f.result ASC").
 		Scan(ctx, &results)
 
 	return results, err
@@ -700,7 +703,7 @@ func (s *Store) FetchTotalStatusCounts(ctx context.Context, source string, filte
 	err := FromQuery(s.db.
 		NewSelect().
 		TableExpr("policy_report_filter as f").
-		ColumnExpr("SUM(f.count) as count, f.result as status")).
+		ColumnExpr("SUM(f.count) as count, f.result AS status")).
 		FilterMap(map[string][]string{
 			"category":      filter.Categories,
 			"policy":        filter.Policies,
@@ -709,7 +712,7 @@ func (s *Store) FetchTotalStatusCounts(ctx context.Context, source string, filte
 		FilterValue("f.source", source).
 		FilterReportLabels(filter.ReportLabel).
 		Exclude(filter, "f").
-		Group("status").
+		Group("f.result").
 		Scan(ctx, &results)
 
 	return results, err
@@ -810,11 +813,11 @@ func (s *Store) FetchFindingCounts(ctx context.Context, filter Filter) ([]Status
 			"category":      filter.Categories,
 			"resource_kind": filter.Kinds,
 			"policy":        filter.Policies,
-			"status":        filter.Status,
+			"f.result":      filter.Status,
 		}).
 		FilterReportLabels(filter.ReportLabel).
 		Exclude(filter, "f").
-		Group("f.source", "status").
+		Group("f.source", "f.result").
 		Order("f.source").
 		Scan(ctx, &results)
 
