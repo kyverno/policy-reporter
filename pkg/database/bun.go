@@ -386,8 +386,9 @@ func (s *Store) FetchNamespaceResourceResults(ctx context.Context, filter Filter
 }
 
 func (s *Store) CountNamespaceResourceResults(ctx context.Context, filter Filter) (int, error) {
-	query := FromQuery(s.db.NewSelect().Model((*ResourceResult)(nil))).
+	return FromQuery(s.db.NewSelect().Model((*ResourceResult)(nil))).
 		Columns("res.id").
+		Distinct().
 		FilterMap(map[string][]string{
 			"source":             filter.Sources,
 			"category":           filter.Categories,
@@ -399,10 +400,8 @@ func (s *Store) CountNamespaceResourceResults(ctx context.Context, filter Filter
 		FilterReportLabels(filter.ReportLabel).
 		Exclude(filter, "res").
 		NamespaceScope().
-		Group("res.id").
-		GetQuery()
-
-	return query.Count(ctx)
+		GetQuery().
+		Count(ctx)
 }
 
 func (s *Store) FetchClusterResourceResults(ctx context.Context, filter Filter, pagination Pagination) ([]ResourceResult, error) {
@@ -430,8 +429,9 @@ func (s *Store) FetchClusterResourceResults(ctx context.Context, filter Filter, 
 }
 
 func (s *Store) CountClusterResourceResults(ctx context.Context, filter Filter) (int, error) {
-	query := FromQuery(s.db.NewSelect().Model((*ResourceResult)(nil))).
+	return FromQuery(s.db.NewSelect().Model((*ResourceResult)(nil))).
 		Columns("res.id").
+		Distinct().
 		FilterMap(map[string][]string{
 			"source":        filter.Sources,
 			"category":      filter.Categories,
@@ -442,10 +442,8 @@ func (s *Store) CountClusterResourceResults(ctx context.Context, filter Filter) 
 		FilterReportLabels(filter.ReportLabel).
 		Exclude(filter, "res").
 		ClusterScope().
-		Group("res.id").
-		GetQuery()
-
-	return query.Count(ctx)
+		GetQuery().
+		Count(ctx)
 }
 
 func (s *Store) FetchResourceResults(ctx context.Context, id string, filter Filter) ([]ResourceResult, error) {

@@ -129,6 +129,18 @@ func (q *QueryBuilder) Columns(columns ...string) *QueryBuilder {
 	return q
 }
 
+func (q *QueryBuilder) ColumnExpr(query string, args ...any) *QueryBuilder {
+	q.query.ColumnExpr(query, args...)
+
+	return q
+}
+
+func (q *QueryBuilder) Distinct() *QueryBuilder {
+	q.query.Distinct()
+
+	return q
+}
+
 func (q *QueryBuilder) Group(columns ...string) *QueryBuilder {
 	q.query.Group(columns...)
 
