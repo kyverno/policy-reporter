@@ -1045,6 +1045,18 @@ ui:
     seccompProfile:
       type: RuntimeDefault
 
+  # -- Deployment livenessProbe for policy-reporter-ui
+  livenessProbe:
+    httpGet:
+      path: /healthz
+      port: http
+
+  # -- Deployment readinessProbe for policy-reporter-ui
+  readinessProbe:
+    httpGet:
+      path: /healthz
+      port: http
+
   service:
     # -- Service type.
     type: ClusterIP
