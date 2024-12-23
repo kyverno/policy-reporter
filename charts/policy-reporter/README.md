@@ -3,7 +3,7 @@
 Policy Reporter watches for PolicyReport Resources.
 It creates Prometheus Metrics and can send rule validation events to different targets like Loki, Elasticsearch, Slack or Discord
 
-![Version: 3.0.0-rc.13](https://img.shields.io/badge/Version-3.0.0--rc.13-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 3.0.0-rc.7](https://img.shields.io/badge/AppVersion-3.0.0--rc.7-informational?style=flat-square)
+![Version: 3.0.0-rc.14](https://img.shields.io/badge/Version-3.0.0--rc.14-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 3.0.0-rc.9](https://img.shields.io/badge/AppVersion-3.0.0--rc.9-informational?style=flat-square)
 
 ## Documentation
 
@@ -391,6 +391,8 @@ Open `http://localhost:8082/` in your browser.
 | ui.securityContext.readOnlyRootFilesystem | bool | `true` |  |
 | ui.securityContext.capabilities.drop[0] | string | `"ALL"` |  |
 | ui.securityContext.seccompProfile.type | string | `"RuntimeDefault"` |  |
+| ui.livenessProbe | object | `{"httpGet":{"path":"/healthz","port":"http"}}` | Deployment livenessProbe for policy-reporter-ui |
+| ui.readinessProbe | object | `{"httpGet":{"path":"/healthz","port":"http"}}` | Deployment readinessProbe for policy-reporter-ui |
 | ui.service.type | string | `"ClusterIP"` | Service type. |
 | ui.service.port | int | `8080` | Service port. |
 | ui.service.annotations | object | `{}` | Service annotations. |
