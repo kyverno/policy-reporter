@@ -986,8 +986,6 @@ ui:
     # -- The ServiceAccount name
     name: ""
 
-  # -- list of extra manifests
-  extraManifests: []
 
   # -- Add sidecar containers to the UI deployment
   #  sidecarContainers:
@@ -1659,3 +1657,6 @@ monitoring:
       height: 10
     failingClusterPolicyRuleTable:
       height: 10
+
+# -- list of extra manifests
+extraManifests: []
