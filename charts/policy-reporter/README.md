@@ -375,7 +375,6 @@ Open `http://localhost:8082/` in your browser.
 | ui.serviceAccount.automount | bool | `true` | Enable ServiceAccount automount |
 | ui.serviceAccount.annotations | object | `{}` | Annotations for the ServiceAccount |
 | ui.serviceAccount.name | string | `""` | The ServiceAccount name |
-| ui.extraManifests | list | `[]` | list of extra manifests |
 | ui.sidecarContainers | object | `{}` | Add sidecar containers to the UI deployment  sidecarContainers:    oauth-proxy:      image: quay.io/oauth2-proxy/oauth2-proxy:v7.6.0      args:      - --upstream=http://127.0.0.1:8080      - --http-address=0.0.0.0:8081      - ...      ports:      - containerPort: 8081        name: oauth-proxy        protocol: TCP      resources: {} |
 | ui.podAnnotations | object | `{}` | Additional annotations to add to each pod |
 | ui.podLabels | object | `{}` | Additional labels to add to each pod |
@@ -590,6 +589,7 @@ Open `http://localhost:8082/` in your browser.
 | monitoring.policyReportOverview.failingTimeline.height | int | `10` |  |
 | monitoring.policyReportOverview.failingPolicyRuleTable.height | int | `10` |  |
 | monitoring.policyReportOverview.failingClusterPolicyRuleTable.height | int | `10` |  |
+| extraManifests | list | `[]` | list of extra manifests |
 
 ## Source Code
 
