@@ -29,9 +29,9 @@ require (
 	github.com/spf13/cobra v1.8.1
 	github.com/spf13/viper v1.19.0
 	github.com/stretchr/testify v1.10.0
-	github.com/uptrace/bun v1.2.6
+	github.com/uptrace/bun v1.2.7
 	github.com/uptrace/bun/dialect/mysqldialect v1.2.6
-	github.com/uptrace/bun/dialect/pgdialect v1.2.6
+	github.com/uptrace/bun/dialect/pgdialect v1.2.7
 	github.com/uptrace/bun/dialect/sqlitedialect v1.2.6
 	github.com/uptrace/bun/driver/pgdriver v1.2.6
 	github.com/uptrace/bun/extra/bundebug v1.2.6
@@ -69,9 +69,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/sso v1.24.8 // indirect
 	github.com/aws/aws-sdk-go-v2/service/ssooidc v1.28.7 // indirect
 	github.com/aws/smithy-go v1.22.1 // indirect
-	github.com/bahlo/generic-list-go v0.2.0 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
-	github.com/buger/jsonparser v1.1.1 // indirect
 	github.com/bytedance/sonic v1.12.6 // indirect
 	github.com/bytedance/sonic/loader v0.2.1 // indirect
 	github.com/census-instrumentation/opencensus-proto v0.4.1 // indirect
@@ -143,7 +141,6 @@ require (
 	github.com/ugorji/go/codec v1.2.12 // indirect
 	github.com/vmihailenco/msgpack/v5 v5.4.1 // indirect
 	github.com/vmihailenco/tagparser/v2 v2.0.0 // indirect
-	github.com/wk8/go-ordered-map/v2 v2.1.9-0.20240816141633-0a40785b4f41 // indirect
 	github.com/x448/float16 v0.8.4 // indirect
 	go.opencensus.io v0.24.0 // indirect
 	go.opentelemetry.io/contrib/detectors/gcp v1.32.0 // indirect
