@@ -29,11 +29,11 @@ require (
 	github.com/spf13/cobra v1.8.1
 	github.com/spf13/viper v1.19.0
 	github.com/stretchr/testify v1.10.0
-	github.com/uptrace/bun v1.2.6
+	github.com/uptrace/bun v1.2.8
 	github.com/uptrace/bun/dialect/mysqldialect v1.2.6
 	github.com/uptrace/bun/dialect/pgdialect v1.2.6
 	github.com/uptrace/bun/dialect/sqlitedialect v1.2.6
-	github.com/uptrace/bun/driver/pgdriver v1.2.6
+	github.com/uptrace/bun/driver/pgdriver v1.2.8
 	github.com/uptrace/bun/extra/bundebug v1.2.6
 	github.com/xhit/go-simple-mail/v2 v2.16.0
 	go.uber.org/zap v1.27.0
@@ -159,7 +159,7 @@ require (
 	golang.org/x/crypto v0.31.0 // indirect
 	golang.org/x/exp v0.0.0-20241108190413-2d47ceb2692f // indirect
 	golang.org/x/mod v0.22.0 // indirect
-	golang.org/x/sys v0.28.0 // indirect
+	golang.org/x/sys v0.29.0 // indirect
 	google.golang.org/genproto v0.0.0-20241118233622-e639e219e697 // indirect
 	google.golang.org/genproto/googleapis/api v0.0.0-20241118233622-e639e219e697 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20241209162323-e6fa225c2576 // indirect
