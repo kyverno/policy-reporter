@@ -346,10 +346,10 @@ github.com/twitchyliquid64/golang-asm v0.15.1 h1:SU5vSMR7hnwNxj24w34ZyCi/FmDZTkS
 github.com/twitchyliquid64/golang-asm v0.15.1/go.mod h1:a1lVb/DtPvCB8fslRZhAngC2+aY1QWCk3Cedj/Gdt08=
 github.com/ugorji/go/codec v1.2.12 h1:9LC83zGrHhuUA9l16C9AHXAqEV/2wBQ4nkvumAE65EE=
 github.com/ugorji/go/codec v1.2.12/go.mod h1:UNopzCgEMSXjBc6AOMqYvWC1ktqTAfzJZUZgYf6w6lg=
-github.com/uptrace/bun v1.2.6 h1:lyGBQAhNiClchb97HA2cBnDeRxwTRLhSIgiFPXVisV8=
-github.com/uptrace/bun v1.2.6/go.mod h1:xMgnVFf+/5xsrFBU34HjDJmzZnXbVuNEt/Ih56I8qBU=
-github.com/uptrace/bun/dialect/mysqldialect v1.2.6 h1:ygoS0S7bQNoB6Gj4hz2DlkrZa12irsgCgOussvZLg1I=
-github.com/uptrace/bun/dialect/mysqldialect v1.2.6/go.mod h1:4exripyh2maGdH7E22RE5VTZO4ODNxh7XQV5XKQsO+Y=
+github.com/uptrace/bun v1.2.8 h1:HEiLvy9wc7ehU5S02+O6NdV5BLz48lL4REPhTkMX3Dg=
+github.com/uptrace/bun v1.2.8/go.mod h1:JBq0uBKsKqNT0Ccce1IAFZY337Wkf08c6F6qlmfOHE8=
+github.com/uptrace/bun/dialect/mysqldialect v1.2.8 h1:0OBLIbxptPwXdkjDk+PNAyNKhs8d1m3QLNg5i+VIkl4=
+github.com/uptrace/bun/dialect/mysqldialect v1.2.8/go.mod h1:P/eOt7YkTM1k6ik/s9/jXv6QW9mljx3TVNLyrXgcikM=
 github.com/uptrace/bun/dialect/pgdialect v1.2.6 h1:iNd1YLx619K+sZK+dRcWPzluurXYK1QwIkp9FEfNB/8=
 github.com/uptrace/bun/dialect/pgdialect v1.2.6/go.mod h1:OL7d3qZLxKYP8kxNhMg3IheN1pDR3UScGjoUP+ivxJQ=
 github.com/uptrace/bun/dialect/sqlitedialect v1.2.6 h1:p8vA39kR9Ypw0so+gUhFhd8NOufx3MzvoxJeUpwieQU=
@@ -440,8 +440,8 @@ golang.org/x/sys v0.0.0-20190412213103-97732733099d/go.mod h1:h1NjWce9XRLGQEsW7w
 golang.org/x/sys v0.0.0-20200930185726-fdedc70b468f/go.mod h1:h1NjWce9XRLGQEsW7wpKNCjG9DtNlClVuFLEZdDNbEs=
 golang.org/x/sys v0.0.0-20220811171246-fbc7d0a398ab/go.mod h1:oPkhp1MJrh7nUepCBck5+mAzfO9JrbApNNgaTdGDITg=
 golang.org/x/sys v0.6.0/go.mod h1:oPkhp1MJrh7nUepCBck5+mAzfO9JrbApNNgaTdGDITg=
-golang.org/x/sys v0.28.0 h1:Fksou7UEQUWlKvIdsqzJmUmCX3cZuD2+P3XyyzwMhlA=
-golang.org/x/sys v0.28.0/go.mod h1:/VUhepiaJMQUp4+oa/7Zr1D23ma6VTLIYjOOTFZPUcA=
+golang.org/x/sys v0.29.0 h1:TPYlXGxvx1MGTn2GiZDhnjPA9wZzZeGKHHmKhHYvgaU=
+golang.org/x/sys v0.29.0/go.mod h1:/VUhepiaJMQUp4+oa/7Zr1D23ma6VTLIYjOOTFZPUcA=
 golang.org/x/term v0.27.0 h1:WP60Sv1nlK1T6SupCHbXzSaN0b9wUmsPoRS9b61A23Q=
 golang.org/x/term v0.27.0/go.mod h1:iMsnZpn0cago0GOrHO2+Y7u7JPn5AylBrcoWkElMTSM=
 golang.org/x/text v0.3.0/go.mod h1:NqM8EUOU14njkJ3fqMW+pc6Ldnwhi/IjpwHt7yyuwOQ=
