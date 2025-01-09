@@ -166,11 +166,11 @@ func (q *QueryBuilder) SelectSeveritySummaries() *QueryBuilder {
 }
 
 func (q *QueryBuilder) Pagination(pagination Pagination) *QueryBuilder {
-	q.query.OrderExpr(fmt.Sprintf(
-		"%s %s",
-		strings.Join(pagination.SortBy, ","),
-		pagination.Direction,
-	))
+	sortExpr := []string{}
+	for _, sort := range pagination.SortBy {
+		sortExpr = append(sortExpr, fmt.Sprintf("%s %s", sort, pagination.Direction))
+	}
+	q.query.OrderExpr(strings.Join(sortExpr, ","))
 
 	if pagination.Page == 0 || pagination.Offset == 0 {
 		return q
