@@ -7,11 +7,11 @@ require (
 	github.com/atc0005/go-teams-notify/v2 v2.13.0
 	github.com/aws/aws-sdk-go-v2 v1.32.8
 	github.com/aws/aws-sdk-go-v2/config v1.28.10
-	github.com/aws/aws-sdk-go-v2/credentials v1.17.51
+	github.com/aws/aws-sdk-go-v2/credentials v1.17.52
 	github.com/aws/aws-sdk-go-v2/service/kinesis v1.32.11
 	github.com/aws/aws-sdk-go-v2/service/s3 v1.72.2
 	github.com/aws/aws-sdk-go-v2/service/securityhub v1.55.3
-	github.com/aws/aws-sdk-go-v2/service/sts v1.33.6
+	github.com/aws/aws-sdk-go-v2/service/sts v1.33.7
 	github.com/gin-contrib/gzip v1.2.0
 	github.com/gin-contrib/pprof v1.5.2
 	github.com/gin-contrib/zap v1.1.4
