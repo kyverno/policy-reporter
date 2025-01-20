@@ -39,6 +39,23 @@ spec:
       securityContext:
         {{- toYaml .Values.plugin.trivy.podSecurityContext | nindent 8 }}
       {{- end }}
+      initContainers:
+        - name: trivy-db
+          image: "{{ .Values.plugin.trivy.cli.image.registry }}/{{ .Values.plugin.trivy.cli.image.repository }}:{{ .Values.plugin.trivy.cli.image.tag }}"
+          args:
+          - --cache-dir
+          - /
+          - image
+          - --download-db-only
+          securityContext:
+          {{- if .Values.plugin.trivy.securityContext }}
+            {{- toYaml .Values.plugin.trivy.securityContext | nindent 12 }}
+          {{- end }}
+          volumeMounts:
+          - name: db
+            mountPath: /db
+          - name: tmp
+            mountPath: /tmp
       containers:
         - name: policy-reporter-trivy-plugin
           {{- if .Values.plugin.trivy.securityContext }}
@@ -70,6 +87,8 @@ spec:
             mountPath: /app/config.yaml
             subPath: config.yaml
             readOnly: true
+          - name: db
+            mountPath: /db
           {{- with .Values.plugin.trivy.extraVolumes.volumeMounts }}
           {{ toYaml . | nindent 10 | trim }}
           {{- end }}
@@ -86,6 +105,18 @@ spec:
         secret:
           secretName: {{ include "trivy-plugin.fullname" . }}-config
           optional: true
+      - name: db
+        {{- with .Values.plugin.trivy.dbVolume }}
+          {{- toYaml . | nindent 8 }}
+        {{- else }}
+        emptyDir: {}
+        {{- end }}
+      - name: tmp
+        {{- with .Values.plugin.trivy.tmpVolume }}
+          {{- toYaml . | nindent 8 }}
+        {{- else }}
+        emptyDir: {}
+        {{- end }}
       {{- with .Values.plugin.trivy.extraVolumes.volumes }}
       {{ toYaml . | nindent 6 | trim }}
       {{- end }}
