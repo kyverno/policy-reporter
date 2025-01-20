@@ -45,15 +45,31 @@ customBoards:
     {{- end -}}
 {{- end }}
 
+{{- $trivy := false -}}
+{{- range .Values.ui.sources }}
+    {{- if eq .name "Trivy Vulnerability" -}}
+      {{- $trivy = true -}}
+    {{- end -}}
+{{- end }}
+
 sources:
 {{- if not $kyverno }}
   - name: kyverno
-    chartType: result
+    type: result
     exceptions: false
     excludes:
       results:
       - warn
       - error
+{{- end }}
+{{- if and (not $trivy) .Values.plugin.trivy.enabled }}
+  - name: Trivy Vulnerability
+    type: severity
+    exceptions: false
+    excludes:
+      results:
+      - pass
+      - skip
 {{- end }}
 {{- with .Values.ui.sources }}
   {{- toYaml . | nindent 2 }}
