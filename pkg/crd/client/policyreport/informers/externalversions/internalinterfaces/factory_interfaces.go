@@ -25,7 +25,7 @@ import (
 	runtime "k8s.io/apimachinery/pkg/runtime"
 	cache "k8s.io/client-go/tools/cache"
 
-	versioned "github.com/kyverno/policy-reporter/pkg/crd/client/policy-report/clientset/versioned"
+	versioned "github.com/kyverno/policy-reporter/pkg/crd/client/policyreport/clientset/versioned"
 )
 
 // NewInformerFunc takes versioned.Interface and time.Duration to return a SharedIndexInformer.

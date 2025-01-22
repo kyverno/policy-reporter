@@ -22,7 +22,7 @@ import (
 	rest "k8s.io/client-go/rest"
 	testing "k8s.io/client-go/testing"
 
-	v1alpha2 "github.com/kyverno/policy-reporter/pkg/crd/client/policy-report/clientset/versioned/typed/policyreport/v1alpha2"
+	v1alpha2 "github.com/kyverno/policy-reporter/pkg/crd/client/policyreport/clientset/versioned/typed/policyreport/v1alpha2"
 )
 
 type FakeWgpolicyk8sV1alpha2 struct {

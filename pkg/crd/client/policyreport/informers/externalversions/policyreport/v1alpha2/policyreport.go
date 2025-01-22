@@ -28,9 +28,9 @@ import (
 	cache "k8s.io/client-go/tools/cache"
 
 	policyreportv1alpha2 "github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
-	versioned "github.com/kyverno/policy-reporter/pkg/crd/client/policy-report/clientset/versioned"
-	internalinterfaces "github.com/kyverno/policy-reporter/pkg/crd/client/policy-report/informers/externalversions/internalinterfaces"
-	v1alpha2 "github.com/kyverno/policy-reporter/pkg/crd/client/policy-report/listers/policyreport/v1alpha2"
+	versioned "github.com/kyverno/policy-reporter/pkg/crd/client/policyreport/clientset/versioned"
+	internalinterfaces "github.com/kyverno/policy-reporter/pkg/crd/client/policyreport/informers/externalversions/internalinterfaces"
+	v1alpha2 "github.com/kyverno/policy-reporter/pkg/crd/client/policyreport/listers/policyreport/v1alpha2"
 )
 
 // PolicyReportInformer provides access to a shared informer and lister for
