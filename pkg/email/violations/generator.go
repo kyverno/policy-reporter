@@ -8,7 +8,7 @@ import (
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
-	api "github.com/kyverno/policy-reporter/pkg/crd/client/clientset/versioned/typed/policyreport/v1alpha2"
+	api "github.com/kyverno/policy-reporter/pkg/crd/client/policyreport/clientset/versioned/typed/policyreport/v1alpha2"
 	"github.com/kyverno/policy-reporter/pkg/email"
 )
 

@@ -12,3 +12,4 @@ heap*
 /.env*
 .tools
 /.idea/
+.gopath

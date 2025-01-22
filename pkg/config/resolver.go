@@ -24,8 +24,8 @@ import (
 
 	"github.com/kyverno/policy-reporter/pkg/api"
 	"github.com/kyverno/policy-reporter/pkg/cache"
-	"github.com/kyverno/policy-reporter/pkg/crd/client/clientset/versioned"
-	wgpolicyk8sv1alpha2 "github.com/kyverno/policy-reporter/pkg/crd/client/clientset/versioned/typed/policyreport/v1alpha2"
+	"github.com/kyverno/policy-reporter/pkg/crd/client/policyreport/clientset/versioned"
+	wgpolicyk8sv1alpha2 "github.com/kyverno/policy-reporter/pkg/crd/client/policyreport/clientset/versioned/typed/policyreport/v1alpha2"
 	"github.com/kyverno/policy-reporter/pkg/database"
 	"github.com/kyverno/policy-reporter/pkg/email"
 	"github.com/kyverno/policy-reporter/pkg/email/summary"
