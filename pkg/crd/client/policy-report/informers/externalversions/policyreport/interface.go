@@ -19,8 +19,8 @@ limitations under the License.
 package policyreport
 
 import (
-	internalinterfaces "github.com/kyverno/policy-reporter/pkg/crd/client/informers/externalversions/internalinterfaces"
-	v1alpha2 "github.com/kyverno/policy-reporter/pkg/crd/client/informers/externalversions/policyreport/v1alpha2"
+	internalinterfaces "github.com/kyverno/policy-reporter/pkg/crd/client/policy-report/informers/externalversions/internalinterfaces"
+	v1alpha2 "github.com/kyverno/policy-reporter/pkg/crd/client/policy-report/informers/externalversions/policyreport/v1alpha2"
 )
 
 // Interface provides access to each of this group's versions.

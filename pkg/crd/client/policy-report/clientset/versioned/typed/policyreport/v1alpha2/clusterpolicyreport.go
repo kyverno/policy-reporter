@@ -28,7 +28,7 @@ import (
 	rest "k8s.io/client-go/rest"
 
 	v1alpha2 "github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
-	scheme "github.com/kyverno/policy-reporter/pkg/crd/client/clientset/versioned/scheme"
+	scheme "github.com/kyverno/policy-reporter/pkg/crd/client/policy-report/clientset/versioned/scheme"
 )
 
 // ClusterPolicyReportsGetter has a method to return a ClusterPolicyReportInterface.

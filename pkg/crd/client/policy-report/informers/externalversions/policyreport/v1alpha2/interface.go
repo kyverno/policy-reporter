@@ -19,7 +19,7 @@ limitations under the License.
 package v1alpha2
 
 import (
-	internalinterfaces "github.com/kyverno/policy-reporter/pkg/crd/client/informers/externalversions/internalinterfaces"
+	internalinterfaces "github.com/kyverno/policy-reporter/pkg/crd/client/policy-report/informers/externalversions/internalinterfaces"
 )
 
 // Interface provides access to all the informers in this group version.
