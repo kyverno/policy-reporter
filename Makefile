@@ -408,7 +408,7 @@ image-build-all: $(BUILD_WITH)-build-all
 
 GOPATH_SHIM                 := ${PWD}/.gopath
 PACKAGE_SHIM                := $(GOPATH_SHIM)/src/$(PACKAGE)
-OUT_PACKAGE                 := $(PACKAGE)/pkg/client
+OUT_PACKAGE                 := $(PACKAGE)/pkg/crd/client/targetconfig
 INPUT_DIRS                  := $(PACKAGE)/pkg/crd/api/targetconfig/v1alpha1
 CLIENT_INPUT_DIRS           := $(PACKAGE)/pkg/crd/api/targetconfig/v1alpha1
 CLIENTSET_PACKAGE           := $(OUT_PACKAGE)/clientset
