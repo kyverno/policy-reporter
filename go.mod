@@ -6,7 +6,7 @@ require (
 	cloud.google.com/go/storage v1.50.0
 	github.com/atc0005/go-teams-notify/v2 v2.13.0
 	github.com/aws/aws-sdk-go-v2 v1.33.0
-	github.com/aws/aws-sdk-go-v2/config v1.28.11
+	github.com/aws/aws-sdk-go-v2/config v1.29.1
 	github.com/aws/aws-sdk-go-v2/credentials v1.17.54
 	github.com/aws/aws-sdk-go-v2/service/kinesis v1.32.11
 	github.com/aws/aws-sdk-go-v2/service/s3 v1.74.0
