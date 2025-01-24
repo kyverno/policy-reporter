@@ -20,14 +20,13 @@ import (
 	k8s "k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/metadata"
 	"k8s.io/client-go/rest"
-	k8scache "k8s.io/client-go/tools/cache"
 	"k8s.io/client-go/util/workqueue"
 
 	"github.com/kyverno/policy-reporter/pkg/api"
 	"github.com/kyverno/policy-reporter/pkg/cache"
-	"github.com/kyverno/policy-reporter/pkg/crd/api/targetconfig/v1alpha1"
 	"github.com/kyverno/policy-reporter/pkg/crd/client/policyreport/clientset/versioned"
 	wgpolicyk8sv1alpha2 "github.com/kyverno/policy-reporter/pkg/crd/client/policyreport/clientset/versioned/typed/policyreport/v1alpha2"
+	tcv1alpha1 "github.com/kyverno/policy-reporter/pkg/crd/client/targetconfig/clientset/versioned"
 	"github.com/kyverno/policy-reporter/pkg/database"
 	"github.com/kyverno/policy-reporter/pkg/email"
 	"github.com/kyverno/policy-reporter/pkg/email/summary"
@@ -45,26 +44,27 @@ import (
 	"github.com/kyverno/policy-reporter/pkg/report/result"
 	"github.com/kyverno/policy-reporter/pkg/target"
 	"github.com/kyverno/policy-reporter/pkg/target/factory"
+	"github.com/kyverno/policy-reporter/pkg/targetconfig"
 	"github.com/kyverno/policy-reporter/pkg/validate"
 )
 
 // Resolver manages dependencies
 type Resolver struct {
-	config               *Config
-	k8sConfig            *rest.Config
-	clientset            *k8s.Clientset
-	publisher            report.EventPublisher
-	policyStore          *database.Store
-	database             *bun.DB
-	policyReportClient   report.PolicyReportClient
-	leaderElector        *leaderelection.Client
-	resultCache          cache.Cache
-	targetClients        *target.Collection
-	targetsCreated       bool
-	targetFactory        target.Factory
-	targetConfigInformer k8scache.SharedIndexInformer
-	logger               *zap.Logger
-	resultListener       *listener.ResultListener
+	config             *Config
+	k8sConfig          *rest.Config
+	clientset          *k8s.Clientset
+	publisher          report.EventPublisher
+	policyStore        *database.Store
+	database           *bun.DB
+	policyReportClient report.PolicyReportClient
+	leaderElector      *leaderelection.Client
+	resultCache        cache.Cache
+	targetClients      *target.Collection
+	targetsCreated     bool
+	targetFactory      target.Factory
+	targetConfigClient *targetconfig.TargetConfigClient
+	logger             *zap.Logger
+	resultListener     *listener.ResultListener
 }
 
 // APIServer resolver method
@@ -206,25 +206,8 @@ func (r *Resolver) CustomIDGenerators() map[string]result.IDGenerator {
 	return generators
 }
 
-func (r *Resolver) AddTargetConfigEventHandlers() {
-	r.targetConfigInformer.AddEventHandler(k8scache.ResourceEventHandlerFuncs{
-		AddFunc: func(obj interface{}) {
-			tc := obj.(*v1alpha1.TargetConfig)
-			targetKey := tc.Name + "," + tc.Namespace + "," + tc.Spec.TargetType
-
-			t, err := r.TargetFactory().CreateSingleClient(tc)
-			if err != nil {
-				r.logger.Error("unable to create target from TargetConfig: " + err.Error())
-			}
-			r.targetClients.AddCrdTarget(targetKey, t)
-		},
-		UpdateFunc: func(oldObj, newObj interface{}) {
-			// todo
-		},
-		DeleteFunc: func(obj interface{}) {
-			// todo
-		},
-	})
+func (r *Resolver) StartTargetConfigInformer(stopChan chan struct{}) {
+	r.targetConfigClient.Run(stopChan)
 }
 
 // EventPublisher resolver method
@@ -563,6 +546,21 @@ func (r *Resolver) SMTPServer() *mail.SMTPServer {
 
 func (r *Resolver) EmailClient() *email.Client {
 	return email.NewClient(r.config.EmailReports.SMTP.From, r.SMTPServer())
+}
+
+func (r *Resolver) TargetConfigClient() (*targetconfig.TargetConfigClient, error) {
+	if r.targetConfigClient != nil {
+		return r.targetConfigClient, nil
+	}
+
+	tcClient, err := tcv1alpha1.NewForConfig(r.k8sConfig)
+	if err != nil {
+		return nil, err
+	}
+
+	tcc := targetconfig.NewTargetConfigClient(tcClient, r.TargetFactory(), r.TargetClients())
+	r.targetConfigClient = tcc
+	return tcc, nil
 }
 
 func (r *Resolver) PolicyReportClient() (report.PolicyReportClient, error) {

@@ -546,10 +546,15 @@ func MapValueFilter(f filters.ValueFilter) *ValueFilter {
 		return nil
 	}
 
+	s := map[string]any{}
+	for k, v := range f.Selector {
+		s[k] = v
+	}
+
 	return &ValueFilter{
 		Include:  f.Include,
 		Exclude:  f.Exclude,
-		Selector: f.Selector,
+		Selector: s,
 	}
 }
 

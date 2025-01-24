@@ -14,7 +14,6 @@ import (
 
 	"github.com/kyverno/policy-reporter/pkg/crd/api/targetconfig/v1alpha1"
 	"github.com/kyverno/policy-reporter/pkg/filters"
-	"github.com/kyverno/policy-reporter/pkg/helper"
 	"github.com/kyverno/policy-reporter/pkg/kubernetes/secrets"
 	"github.com/kyverno/policy-reporter/pkg/report"
 	"github.com/kyverno/policy-reporter/pkg/target"
@@ -44,7 +43,7 @@ type TargetFactory struct {
 
 // LokiClients resolver method
 // Why does it return an array ?
-func CreateClients[T any](name string, config *v1alpha1.Config[T], mapper func(*v1alpha1.Config[T], *v1alpha1.Config[T]) *target.Target) []*target.Target {
+func createClients[T any](name string, config *v1alpha1.Config[T], mapper func(*v1alpha1.Config[T], *v1alpha1.Config[T]) *target.Target) []*target.Target {
 	clients := make([]*target.Target, 0)
 	if config == nil {
 		return clients
@@ -84,18 +83,18 @@ func (f *TargetFactory) CreateClients(config *target.Targets) *target.Collection
 		return target.NewCollection()
 	}
 
-	targets = append(targets, CreateClients("Loki", config.Loki, f.CreateLokiTarget)...)
-	targets = append(targets, CreateClients("Elasticsearch", config.Elasticsearch, f.CreateElasticsearchTarget)...)
-	targets = append(targets, CreateClients("Slack", config.Slack, f.CreateSlackTarget)...)
-	targets = append(targets, CreateClients("Discord", config.Discord, f.CreateDiscordTarget)...)
-	targets = append(targets, CreateClients("Teams", config.Teams, f.CreateTeamsTarget)...)
-	targets = append(targets, CreateClients("GoogleChat", config.GoogleChat, f.CreateGoogleChatTarget)...)
-	targets = append(targets, CreateClients("Telegram", config.Telegram, f.CreateTelegramTarget)...)
-	targets = append(targets, CreateClients("Webhook", config.Webhook, f.CreateWebhookTarget)...)
-	targets = append(targets, CreateClients("S3", config.S3, f.CreateS3Target)...)
-	targets = append(targets, CreateClients("Kinesis", config.Kinesis, f.CreateKinesisTarget)...)
-	targets = append(targets, CreateClients("SecurityHub", config.SecurityHub, f.CreateSecurityHubTarget)...)
-	targets = append(targets, CreateClients("GoogleCloudStorage", config.GCS, f.CreateGCSTarget)...)
+	targets = append(targets, createClients("Loki", config.Loki, f.CreateLokiTarget)...)
+	targets = append(targets, createClients("Elasticsearch", config.Elasticsearch, f.CreateElasticsearchTarget)...)
+	targets = append(targets, createClients("Slack", config.Slack, f.CreateSlackTarget)...)
+	targets = append(targets, createClients("Discord", config.Discord, f.CreateDiscordTarget)...)
+	targets = append(targets, createClients("Teams", config.Teams, f.CreateTeamsTarget)...)
+	targets = append(targets, createClients("GoogleChat", config.GoogleChat, f.CreateGoogleChatTarget)...)
+	targets = append(targets, createClients("Telegram", config.Telegram, f.CreateTelegramTarget)...)
+	targets = append(targets, createClients("Webhook", config.Webhook, f.CreateWebhookTarget)...)
+	targets = append(targets, createClients("S3", config.S3, f.CreateS3Target)...)
+	targets = append(targets, createClients("Kinesis", config.Kinesis, f.CreateKinesisTarget)...)
+	targets = append(targets, createClients("SecurityHub", config.SecurityHub, f.CreateSecurityHubTarget)...)
+	targets = append(targets, createClients("GoogleCloudStorage", config.GCS, f.CreateGCSTarget)...)
 
 	return target.NewCollection(targets...)
 }
@@ -104,10 +103,10 @@ func (f *TargetFactory) CreateSingleClient(tc *v1alpha1.TargetConfig) (*target.T
 	var t *target.Target
 	switch tc.Spec.TargetType {
 	case "s3":
-		t = CreateClients("", &v1alpha1.Config[v1alpha1.S3Options]{}, f.CreateS3Target)[0] // potential panic ?
+		t = createClients("", &v1alpha1.Config[v1alpha1.S3Options]{}, f.CreateS3Target)[0] // potential panic ?
 		return t, nil
 	case "webhook":
-		t = CreateClients("", &v1alpha1.Config[v1alpha1.WebhookOptions]{}, f.CreateWebhookTarget)[0]
+		t = createClients("", &v1alpha1.Config[v1alpha1.WebhookOptions]{}, f.CreateWebhookTarget)[0]
 	}
 	return nil, fmt.Errorf("Invalid target type passed")
 }
@@ -767,7 +766,7 @@ func (f *TargetFactory) createResultFilter(filter filters.Filter, minimumSeverit
 		validate.RuleSets{
 			Include:  filter.Namespaces.Include,
 			Exclude:  filter.Namespaces.Exclude,
-			Selector: helper.ConvertMap(filter.Namespaces.Selector),
+			Selector: filter.Namespaces.Selector, // todo: i removed the helper convert map, what is the effect of this ?
 		},
 		ToRuleSet(filter.Severities),
 		ToRuleSet(filter.Status),

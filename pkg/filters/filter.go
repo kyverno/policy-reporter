@@ -1,9 +1,9 @@
 package filters
 
 type ValueFilter struct {
-	Include  []string               `mapstructure:"include" json:"include"`
-	Exclude  []string               `mapstructure:"exclude" json:"exclude"`
-	Selector map[string]interface{} `mapstructure:"selector" json:"selector"`
+	Include  []string          `mapstructure:"include" json:"include"`
+	Exclude  []string          `mapstructure:"exclude" json:"exclude"`
+	Selector map[string]string `mapstructure:"selector" json:"selector"`
 }
 
 type Filter struct {

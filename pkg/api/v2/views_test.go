@@ -20,7 +20,7 @@ func TestV2Views(t *testing.T) {
 		original := filters.ValueFilter{
 			Include:  []string{"default"},
 			Exclude:  []string{"kube-system"},
-			Selector: map[string]any{"team": "marketing"},
+			Selector: map[string]string{"team": "marketing"},
 		}
 
 		filter := v2.MapValueFilter(original)

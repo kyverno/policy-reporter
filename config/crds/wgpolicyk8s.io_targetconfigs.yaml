@@ -57,7 +57,10 @@ spec:
                         items:
                           type: string
                         type: array
-                      selector: {}
+                      selector:
+                        additionalProperties:
+                          type: string
+                        type: object
                     required:
                     - exclude
                     - include
@@ -73,7 +76,10 @@ spec:
                         items:
                           type: string
                         type: array
-                      selector: {}
+                      selector:
+                        additionalProperties:
+                          type: string
+                        type: object
                     required:
                     - exclude
                     - include
@@ -89,7 +95,10 @@ spec:
                         items:
                           type: string
                         type: array
-                      selector: {}
+                      selector:
+                        additionalProperties:
+                          type: string
+                        type: object
                     required:
                     - exclude
                     - include
@@ -105,7 +114,10 @@ spec:
                         items:
                           type: string
                         type: array
-                      selector: {}
+                      selector:
+                        additionalProperties:
+                          type: string
+                        type: object
                     required:
                     - exclude
                     - include
@@ -121,7 +133,10 @@ spec:
                         items:
                           type: string
                         type: array
-                      selector: {}
+                      selector:
+                        additionalProperties:
+                          type: string
+                        type: object
                     required:
                     - exclude
                     - include
@@ -137,7 +152,10 @@ spec:
                         items:
                           type: string
                         type: array
-                      selector: {}
+                      selector:
+                        additionalProperties:
+                          type: string
+                        type: object
                     required:
                     - exclude
                     - include

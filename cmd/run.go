@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"flag"
-	"time"
 
 	"github.com/spf13/cobra"
 	"go.uber.org/zap"
@@ -16,8 +15,7 @@ import (
 	v1 "github.com/kyverno/policy-reporter/pkg/api/v1"
 	v2 "github.com/kyverno/policy-reporter/pkg/api/v2"
 	"github.com/kyverno/policy-reporter/pkg/config"
-	tcv1alpha1 "github.com/kyverno/policy-reporter/pkg/crd/client/targetconfig/clientset/versioned"
-	tcinformer "github.com/kyverno/policy-reporter/pkg/crd/client/targetconfig/informers/externalversions"
+
 	"github.com/kyverno/policy-reporter/pkg/database"
 	"github.com/kyverno/policy-reporter/pkg/listener"
 )
@@ -64,14 +62,6 @@ func newRunCMD(version string) *cobra.Command {
 			if err != nil {
 				return err
 			}
-
-			tcClient, err := tcv1alpha1.NewForConfig(k8sConfig)
-			if err != nil {
-				return err
-			}
-
-			tcInformer := tcinformer.NewSharedInformerFactory(tcClient, time.Second)
-			inf := tcInformer.Wgpolicyk8s().V1alpha1().TargetConfigs().Informer()
 
 			g := &errgroup.Group{}
 
@@ -217,6 +207,13 @@ func newRunCMD(version string) *cobra.Command {
 
 					return err
 				}
+
+				_, err = resolver.TargetConfigClient()
+				if err != nil {
+					return err
+				}
+
+				resolver.StartTargetConfigInformer(stop)
 
 				<-stop
 

@@ -40,9 +40,6 @@ func (k *k8sPolicyReportClient) Stop() {
 func (k *k8sPolicyReportClient) Sync(stopper chan struct{}) error {
 	factory := metadatainformer.NewSharedInformerFactory(k.metaClient, 15*time.Minute)
 
-	// tcInformer := tcinformer.NewSharedInformerFactory(tcv1alpha1.New(&rest.RESTClient{}), time.Second)
-	// inf := tcInformer.Wgpolicyk8s().V1alpha1().TargetConfigs().Informer()
-
 	var cpolrInformer cache.SharedIndexInformer
 
 	polrInformer := k.configureInformer(factory.ForResource(polrResource).Informer())
@@ -52,7 +49,6 @@ func (k *k8sPolicyReportClient) Sync(stopper chan struct{}) error {
 	}
 
 	factory.Start(stopper)
-	// tcInformer.Start(stopper)
 
 	if !cache.WaitForCacheSync(stopper, polrInformer.HasSynced) {
 		return fmt.Errorf("failed to sync policy reports")
