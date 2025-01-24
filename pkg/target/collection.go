@@ -6,6 +6,7 @@ import (
 
 	"go.uber.org/zap"
 
+	"github.com/kyverno/policy-reporter/pkg/crd/api/targetconfig/v1alpha1"
 	"github.com/kyverno/policy-reporter/pkg/helper"
 )
 
@@ -25,6 +26,21 @@ const (
 	SecurityHub   TargetType = "SecurityHub"
 	GCS           TargetType = "GCS"
 )
+
+type Targets struct {
+	Loki          *v1alpha1.Config[v1alpha1.LokiOptions]          `mapstructure:"loki"`
+	Elasticsearch *v1alpha1.Config[v1alpha1.ElasticsearchOptions] `mapstructure:"elasticsearch"`
+	Slack         *v1alpha1.Config[v1alpha1.SlackOptions]         `mapstructure:"slack"`
+	Discord       *v1alpha1.Config[v1alpha1.WebhookOptions]       `mapstructure:"discord"`
+	Teams         *v1alpha1.Config[v1alpha1.WebhookOptions]       `mapstructure:"teams"`
+	Webhook       *v1alpha1.Config[v1alpha1.WebhookOptions]       `mapstructure:"webhook"`
+	GoogleChat    *v1alpha1.Config[v1alpha1.WebhookOptions]       `mapstructure:"googleChat"`
+	Telegram      *v1alpha1.Config[v1alpha1.TelegramOptions]      `mapstructure:"telegram"`
+	S3            *v1alpha1.Config[v1alpha1.S3Options]            `mapstructure:"s3"`
+	Kinesis       *v1alpha1.Config[v1alpha1.KinesisOptions]       `mapstructure:"kinesis"`
+	SecurityHub   *v1alpha1.Config[v1alpha1.SecurityHubOptions]   `mapstructure:"securityHub"`
+	GCS           *v1alpha1.Config[v1alpha1.GCSOptions]           `mapstructure:"gcs"`
+}
 
 type TargetConfig interface {
 	Secret() string
@@ -47,9 +63,26 @@ func (t *Target) Secret() string {
 }
 
 type Collection struct {
-	mx      *sync.Mutex
-	clients []Client
-	targets map[string]*Target
+	mx         *sync.Mutex
+	clients    []Client
+	targets    map[string]*Target
+	crdTargets map[string]*Target
+}
+
+func (c *Collection) CrdTargets() map[string]*Target {
+	return c.crdTargets
+}
+
+func (c *Collection) AddCrdTarget(key string, t *Target) {
+	c.mx.Lock()
+	c.crdTargets[key] = t // todo: what use as a key ? name,ns,type ?
+	c.mx.Unlock()
+}
+
+func (c *Collection) RemoveCrdTarget(key string) {
+	c.mx.Lock()
+	delete(c.crdTargets, key)
+	c.mx.Unlock()
 }
 
 func (c *Collection) Update(t *Target) {
@@ -80,9 +113,12 @@ func (c *Collection) Clients() []Client {
 		return c.clients
 	}
 
-	c.clients = helper.MapSlice(c.targets, func(t *Target) Client {
+	filterFunc := func(t *Target) Client {
 		return t.Client
-	})
+	}
+
+	c.clients = helper.MapSlice(c.targets, filterFunc)
+	c.clients = append(c.clients, helper.MapSlice(c.crdTargets, filterFunc)...)
 
 	return c.clients
 }

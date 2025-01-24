@@ -20,22 +20,25 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-// EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
-// NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
-
 // TargetConfigSpec defines the desired state of TargetConfig.
 type TargetConfigSpec struct {
-	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
-	// Important: Run "make" to regenerate code after modifying this file
+	// todo: struct fields
+	ConfigStrict `json:",inline"`
 
-	// Foo is an example field of TargetConfig. Edit targetconfig_types.go to remove/update
-	Foo string `json:"foo,omitempty"`
+	//+optional
+	S3 S3Options `json:"s3,omitempty"`
+
+	// // +optional
+	// Webhook WebhookOptions `json:"webhook,omitempty"`
+
+	// // +optional
+	// Telegram TelegramOptions `json:"telegram,omitempty"`
+
+	TargetType string `json:"targetType,omitempty"`
 }
 
 // TargetConfigStatus defines the observed state of TargetConfig.
 type TargetConfigStatus struct {
-	// INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
-	// Important: Run "make" to regenerate code after modifying this file
 }
 
 // +kubebuilder:object:root=true

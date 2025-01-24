@@ -12,6 +12,7 @@ import (
 	"k8s.io/client-go/metadata/metadatainformer"
 	"k8s.io/client-go/tools/cache"
 
+	"github.com/kyverno/policy-reporter/pkg/crd/api/targetconfig/v1alpha1"
 	"github.com/kyverno/policy-reporter/pkg/target"
 )
 
@@ -117,6 +118,6 @@ func NewInformer(metaClient metadata.Interface, factory target.Factory, namespac
 	}
 }
 
-func createClients[T any](config, parent any, mapper func(*target.Config[T], *target.Config[T]) *target.Target) *target.Target {
-	return mapper(config.(*target.Config[T]), parent.(*target.Config[T]))
+func createClients[T any](config, parent any, mapper func(*v1alpha1.Config[T], *v1alpha1.Config[T]) *target.Target) *target.Target {
+	return mapper(config.(*v1alpha1.Config[T]), parent.(*v1alpha1.Config[T]))
 }

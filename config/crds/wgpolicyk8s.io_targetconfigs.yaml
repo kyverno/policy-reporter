@@ -1,0 +1,221 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: (devel)
+  name: targetconfigs.wgpolicyk8s.io
+spec:
+  group: wgpolicyk8s.io
+  names:
+    kind: TargetConfig
+    listKind: TargetConfigList
+    plural: targetconfigs
+    shortNames:
+    - tcfg
+    singular: targetconfig
+  scope: Namespaced
+  versions:
+  - name: v1alpha1
+    schema:
+      openAPIV3Schema:
+        description: TargetConfig is the Schema for the targetconfigs API.
+        properties:
+          apiVersion:
+            description: |-
+              APIVersion defines the versioned schema of this representation of an object.
+              Servers should convert recognized schemas to the latest internal value, and
+              may reject unrecognized values.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
+            type: string
+          kind:
+            description: |-
+              Kind is a string value representing the REST resource this object represents.
+              Servers may infer this from the endpoint the client submits requests to.
+              Cannot be updated.
+              In CamelCase.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: TargetConfigSpec defines the desired state of TargetConfig.
+            properties:
+              customFields:
+                additionalProperties:
+                  type: string
+                type: object
+              filter:
+                properties:
+                  namespaces:
+                    properties:
+                      exclude:
+                        items:
+                          type: string
+                        type: array
+                      include:
+                        items:
+                          type: string
+                        type: array
+                      selector: {}
+                    required:
+                    - exclude
+                    - include
+                    - selector
+                    type: object
+                  policies:
+                    properties:
+                      exclude:
+                        items:
+                          type: string
+                        type: array
+                      include:
+                        items:
+                          type: string
+                        type: array
+                      selector: {}
+                    required:
+                    - exclude
+                    - include
+                    - selector
+                    type: object
+                  reportLabels:
+                    properties:
+                      exclude:
+                        items:
+                          type: string
+                        type: array
+                      include:
+                        items:
+                          type: string
+                        type: array
+                      selector: {}
+                    required:
+                    - exclude
+                    - include
+                    - selector
+                    type: object
+                  severities:
+                    properties:
+                      exclude:
+                        items:
+                          type: string
+                        type: array
+                      include:
+                        items:
+                          type: string
+                        type: array
+                      selector: {}
+                    required:
+                    - exclude
+                    - include
+                    - selector
+                    type: object
+                  sources:
+                    properties:
+                      exclude:
+                        items:
+                          type: string
+                        type: array
+                      include:
+                        items:
+                          type: string
+                        type: array
+                      selector: {}
+                    required:
+                    - exclude
+                    - include
+                    - selector
+                    type: object
+                  status:
+                    properties:
+                      exclude:
+                        items:
+                          type: string
+                        type: array
+                      include:
+                        items:
+                          type: string
+                        type: array
+                      selector: {}
+                    required:
+                    - exclude
+                    - include
+                    - selector
+                    type: object
+                required:
+                - namespaces
+                - policies
+                - reportLabels
+                - severities
+                - sources
+                - status
+                type: object
+              minimumSeverity:
+                type: string
+              mountedSecret:
+                type: string
+              name:
+                type: string
+              s3:
+                properties:
+                  accessKeyId:
+                    type: string
+                  bucket:
+                    type: string
+                  bucketKeyEnabled:
+                    type: boolean
+                  endpoint:
+                    type: string
+                  kmsKeyId:
+                    type: string
+                  pathStyle:
+                    type: boolean
+                  prefix:
+                    type: string
+                  region:
+                    type: string
+                  secretAccessKey:
+                    type: string
+                  serverSideEncryption:
+                    type: string
+                required:
+                - accessKeyId
+                - bucket
+                - bucketKeyEnabled
+                - endpoint
+                - kmsKeyId
+                - pathStyle
+                - prefix
+                - region
+                - secretAccessKey
+                - serverSideEncryption
+                type: object
+              secretRef:
+                type: string
+              skipExistingOnStartup:
+                type: boolean
+              sources:
+                items:
+                  type: string
+                type: array
+              targetType:
+                type: string
+            required:
+            - customFields
+            - filter
+            - minimumSeverity
+            - mountedSecret
+            - name
+            - secretRef
+            - skipExistingOnStartup
+            - sources
+            type: object
+          status:
+            description: TargetConfigStatus defines the observed state of TargetConfig.
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}

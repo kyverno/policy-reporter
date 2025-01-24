@@ -6,17 +6,18 @@ import (
 	"github.com/stretchr/testify/assert"
 
 	v2 "github.com/kyverno/policy-reporter/pkg/api/v2"
+	"github.com/kyverno/policy-reporter/pkg/crd/api/targetconfig/v1alpha1"
 	"github.com/kyverno/policy-reporter/pkg/database"
-	"github.com/kyverno/policy-reporter/pkg/target"
+	"github.com/kyverno/policy-reporter/pkg/filters"
 )
 
 func TestV2Views(t *testing.T) {
 	t.Run("MapValueFilter", func(t *testing.T) {
-		empty := v2.MapValueFilter(target.ValueFilter{})
+		empty := v2.MapValueFilter(filters.ValueFilter{})
 
 		assert.Nil(t, empty)
 
-		original := target.ValueFilter{
+		original := filters.ValueFilter{
 			Include:  []string{"default"},
 			Exclude:  []string{"kube-system"},
 			Selector: map[string]any{"team": "marketing"},
@@ -82,7 +83,7 @@ func TestV2Views(t *testing.T) {
 	})
 
 	t.Run("MapBaseToTarget", func(t *testing.T) {
-		target := v2.MapBaseToTarget(&target.Config[target.WebhookOptions]{
+		target := v2.MapBaseToTarget(&v1alpha1.Config[v1alpha1.WebhookOptions]{
 			Name:            "Webhook",
 			MinimumSeverity: "medium",
 			SecretRef:       "ref",
@@ -102,12 +103,12 @@ func TestV2Views(t *testing.T) {
 	})
 
 	t.Run("MapSlackToTarget", func(t *testing.T) {
-		target := v2.MapSlackToTarget(&target.Config[target.SlackOptions]{
+		target := v2.MapSlackToTarget(&v1alpha1.Config[v1alpha1.SlackOptions]{
 			Name:            "Slack",
 			MinimumSeverity: "medium",
-			Config: &target.SlackOptions{
+			Config: &v1alpha1.SlackOptions{
 				Channel: "general",
-				WebhookOptions: target.WebhookOptions{
+				WebhookOptions: v1alpha1.WebhookOptions{
 					Webhook: "http://slack.com/xxxx",
 				},
 			},
@@ -121,11 +122,11 @@ func TestV2Views(t *testing.T) {
 	})
 
 	t.Run("MapLokiToTarget", func(t *testing.T) {
-		target := v2.MapLokiToTarget(&target.Config[target.LokiOptions]{
+		target := v2.MapLokiToTarget(&v1alpha1.Config[v1alpha1.LokiOptions]{
 			Name:            "Loki 1",
 			MinimumSeverity: "medium",
-			Config: &target.LokiOptions{
-				HostOptions: target.HostOptions{
+			Config: &v1alpha1.LokiOptions{
+				HostOptions: v1alpha1.HostOptions{
 					Host:        "http://loki.monitoring:3000",
 					Certificate: "cert",
 					SkipTLS:     true,
@@ -149,11 +150,11 @@ func TestV2Views(t *testing.T) {
 	})
 
 	t.Run("MapElasticsearchToTarget", func(t *testing.T) {
-		target := v2.MapElasticsearchToTarget(&target.Config[target.ElasticsearchOptions]{
+		target := v2.MapElasticsearchToTarget(&v1alpha1.Config[v1alpha1.ElasticsearchOptions]{
 			Name:            "Target",
 			MinimumSeverity: "medium",
-			Config: &target.ElasticsearchOptions{
-				HostOptions: target.HostOptions{
+			Config: &v1alpha1.ElasticsearchOptions{
+				HostOptions: v1alpha1.HostOptions{
 					Host:        "http://elasticsearch.monitoring:3000",
 					Certificate: "cert",
 					SkipTLS:     true,
@@ -180,10 +181,10 @@ func TestV2Views(t *testing.T) {
 	})
 
 	t.Run("MapWebhhokToTarget", func(t *testing.T) {
-		target := v2.MapWebhhokToTarget("Discord")(&target.Config[target.WebhookOptions]{
+		target := v2.MapWebhhokToTarget("Discord")(&v1alpha1.Config[v1alpha1.WebhookOptions]{
 			Name:            "Target",
 			MinimumSeverity: "medium",
-			Config: &target.WebhookOptions{
+			Config: &v1alpha1.WebhookOptions{
 				Webhook:     "http://discord.com/12345/888XABC",
 				Certificate: "cert",
 				SkipTLS:     true,
@@ -205,13 +206,13 @@ func TestV2Views(t *testing.T) {
 	})
 
 	t.Run("MapTelegramToTarget", func(t *testing.T) {
-		target := v2.MapTelegramToTarget(&target.Config[target.TelegramOptions]{
+		target := v2.MapTelegramToTarget(&v1alpha1.Config[v1alpha1.TelegramOptions]{
 			Name:            "Target",
 			MinimumSeverity: "medium",
-			Config: &target.TelegramOptions{
+			Config: &v1alpha1.TelegramOptions{
 				Token:  "ABCDE",
 				ChatID: "1234567",
-				WebhookOptions: target.WebhookOptions{
+				WebhookOptions: v1alpha1.WebhookOptions{
 					Webhook:     "http://telegram.com",
 					Certificate: "cert",
 					SkipTLS:     true,
@@ -232,13 +233,13 @@ func TestV2Views(t *testing.T) {
 	})
 
 	t.Run("MapS3ToTarget", func(t *testing.T) {
-		target := v2.MapS3ToTarget(&target.Config[target.S3Options]{
+		target := v2.MapS3ToTarget(&v1alpha1.Config[v1alpha1.S3Options]{
 			Name:            "Target",
 			MinimumSeverity: "medium",
-			Config: &target.S3Options{
+			Config: &v1alpha1.S3Options{
 				Prefix: "policy-reporter",
 				Bucket: "kyverno",
-				AWSConfig: target.AWSConfig{
+				AWSConfig: v1alpha1.AWSConfig{
 					Region:   "eu-central-1",
 					Endpoint: "https://s3.aws.com",
 				},
@@ -258,12 +259,12 @@ func TestV2Views(t *testing.T) {
 	})
 
 	t.Run("MapKinesisToTarget", func(t *testing.T) {
-		target := v2.MapKinesisToTarget(&target.Config[target.KinesisOptions]{
+		target := v2.MapKinesisToTarget(&v1alpha1.Config[v1alpha1.KinesisOptions]{
 			Name:            "Target",
 			MinimumSeverity: "medium",
-			Config: &target.KinesisOptions{
+			Config: &v1alpha1.KinesisOptions{
 				StreamName: "policy-reporter",
-				AWSConfig: target.AWSConfig{
+				AWSConfig: v1alpha1.AWSConfig{
 					Region:   "eu-central-1",
 					Endpoint: "https://kinesis.aws.com",
 				},
@@ -282,13 +283,13 @@ func TestV2Views(t *testing.T) {
 	})
 
 	t.Run("MapSecurityHubToTarget", func(t *testing.T) {
-		target := v2.MapSecurityHubToTarget(&target.Config[target.SecurityHubOptions]{
+		target := v2.MapSecurityHubToTarget(&v1alpha1.Config[v1alpha1.SecurityHubOptions]{
 			Name:            "Target",
 			MinimumSeverity: "medium",
-			Config: &target.SecurityHubOptions{
+			Config: &v1alpha1.SecurityHubOptions{
 				AccountID:   "policy-reporter",
 				Synchronize: true,
-				AWSConfig: target.AWSConfig{
+				AWSConfig: v1alpha1.AWSConfig{
 					Region:   "eu-central-1",
 					Endpoint: "https://securityhub.aws.com",
 				},
@@ -307,10 +308,10 @@ func TestV2Views(t *testing.T) {
 	})
 
 	t.Run("MapGCSToTarget", func(t *testing.T) {
-		target := v2.MapGCSToTarget(&target.Config[target.GCSOptions]{
+		target := v2.MapGCSToTarget(&v1alpha1.Config[v1alpha1.GCSOptions]{
 			Name:            "Target",
 			MinimumSeverity: "medium",
-			Config: &target.GCSOptions{
+			Config: &v1alpha1.GCSOptions{
 				Prefix: "policy-reporter",
 				Bucket: "kyverno",
 			},
@@ -327,19 +328,19 @@ func TestV2Views(t *testing.T) {
 	})
 
 	t.Run("MapTargets", func(t *testing.T) {
-		targets := v2.MapTargets(&target.Config[target.GCSOptions]{
+		targets := v2.MapTargets(&v1alpha1.Config[v1alpha1.GCSOptions]{
 			Name:            "Target",
 			MinimumSeverity: "medium",
-			Config: &target.GCSOptions{
+			Config: &v1alpha1.GCSOptions{
 				Prefix: "policy-reporter",
 				Bucket: "kyverno",
 			},
 			Valid: true,
-			Channels: []*target.Config[target.GCSOptions]{
+			Channels: []*v1alpha1.Config[v1alpha1.GCSOptions]{
 				{
 					Name:            "Target 2",
 					MinimumSeverity: "medium",
-					Config: &target.GCSOptions{
+					Config: &v1alpha1.GCSOptions{
 						Prefix: "policy-reporter",
 						Bucket: "trivy",
 					},
@@ -348,7 +349,7 @@ func TestV2Views(t *testing.T) {
 				{
 					Name:            "Target 2",
 					MinimumSeverity: "medium",
-					Config: &target.GCSOptions{
+					Config: &v1alpha1.GCSOptions{
 						Prefix: "policy-reporter",
 						Bucket: "trivy",
 					},

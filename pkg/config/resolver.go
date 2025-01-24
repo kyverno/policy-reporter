@@ -20,10 +20,12 @@ import (
 	k8s "k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/metadata"
 	"k8s.io/client-go/rest"
+	k8scache "k8s.io/client-go/tools/cache"
 	"k8s.io/client-go/util/workqueue"
 
 	"github.com/kyverno/policy-reporter/pkg/api"
 	"github.com/kyverno/policy-reporter/pkg/cache"
+	"github.com/kyverno/policy-reporter/pkg/crd/api/targetconfig/v1alpha1"
 	"github.com/kyverno/policy-reporter/pkg/crd/client/policyreport/clientset/versioned"
 	wgpolicyk8sv1alpha2 "github.com/kyverno/policy-reporter/pkg/crd/client/policyreport/clientset/versioned/typed/policyreport/v1alpha2"
 	"github.com/kyverno/policy-reporter/pkg/database"
@@ -48,20 +50,21 @@ import (
 
 // Resolver manages dependencies
 type Resolver struct {
-	config             *Config
-	k8sConfig          *rest.Config
-	clientset          *k8s.Clientset
-	publisher          report.EventPublisher
-	policyStore        *database.Store
-	database           *bun.DB
-	policyReportClient report.PolicyReportClient
-	leaderElector      *leaderelection.Client
-	resultCache        cache.Cache
-	targetClients      *target.Collection
-	targetsCreated     bool
-	targetFactory      target.Factory
-	logger             *zap.Logger
-	resultListener     *listener.ResultListener
+	config               *Config
+	k8sConfig            *rest.Config
+	clientset            *k8s.Clientset
+	publisher            report.EventPublisher
+	policyStore          *database.Store
+	database             *bun.DB
+	policyReportClient   report.PolicyReportClient
+	leaderElector        *leaderelection.Client
+	resultCache          cache.Cache
+	targetClients        *target.Collection
+	targetsCreated       bool
+	targetFactory        target.Factory
+	targetConfigInformer k8scache.SharedIndexInformer
+	logger               *zap.Logger
+	resultListener       *listener.ResultListener
 }
 
 // APIServer resolver method
@@ -201,6 +204,27 @@ func (r *Resolver) CustomIDGenerators() map[string]result.IDGenerator {
 	}
 
 	return generators
+}
+
+func (r *Resolver) AddTargetConfigEventHandlers() {
+	r.targetConfigInformer.AddEventHandler(k8scache.ResourceEventHandlerFuncs{
+		AddFunc: func(obj interface{}) {
+			tc := obj.(*v1alpha1.TargetConfig)
+			targetKey := tc.Name + "," + tc.Namespace + "," + tc.Spec.TargetType
+
+			t, err := r.TargetFactory().CreateSingleClient(tc)
+			if err != nil {
+				r.logger.Error("unable to create target from TargetConfig: " + err.Error())
+			}
+			r.targetClients.AddCrdTarget(targetKey, t)
+		},
+		UpdateFunc: func(oldObj, newObj interface{}) {
+			// todo
+		},
+		DeleteFunc: func(obj interface{}) {
+			// todo
+		},
+	})
 }
 
 // EventPublisher resolver method

@@ -15,6 +15,7 @@ const SendResults = "send_results_listener"
 func NewSendResultListener(targets *target.Collection) report.PolicyReportResultListener {
 	return func(rep v1alpha2.ReportInterface, r v1alpha2.PolicyReportResult, e bool) {
 		clients := targets.SingleSendClients()
+		// also iterate on the targets obtained by crds
 
 		wg := &sync.WaitGroup{}
 		wg.Add(len(clients))

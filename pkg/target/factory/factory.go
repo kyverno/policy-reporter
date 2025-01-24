@@ -12,6 +12,8 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 	"go.uber.org/zap"
 
+	"github.com/kyverno/policy-reporter/pkg/crd/api/targetconfig/v1alpha1"
+	"github.com/kyverno/policy-reporter/pkg/filters"
 	"github.com/kyverno/policy-reporter/pkg/helper"
 	"github.com/kyverno/policy-reporter/pkg/kubernetes/secrets"
 	"github.com/kyverno/policy-reporter/pkg/report"
@@ -41,7 +43,8 @@ type TargetFactory struct {
 }
 
 // LokiClients resolver method
-func createClients[T any](name string, config *target.Config[T], mapper func(*target.Config[T], *target.Config[T]) *target.Target) []*target.Target {
+// Why does it return an array ?
+func CreateClients[T any](name string, config *v1alpha1.Config[T], mapper func(*v1alpha1.Config[T], *v1alpha1.Config[T]) *target.Target) []*target.Target {
 	clients := make([]*target.Target, 0)
 	if config == nil {
 		return clients
@@ -53,7 +56,7 @@ func createClients[T any](name string, config *target.Config[T], mapper func(*ta
 
 	setFallback(&config.Name, name)
 
-	if client := mapper(config, &target.Config[T]{Config: new(T)}); client != nil {
+	if client := mapper(config, &v1alpha1.Config[T]{Config: new(T)}); client != nil {
 		clients = append(clients, client)
 		config.Valid = true
 	}
@@ -81,23 +84,35 @@ func (f *TargetFactory) CreateClients(config *target.Targets) *target.Collection
 		return target.NewCollection()
 	}
 
-	targets = append(targets, createClients("Loki", config.Loki, f.CreateLokiTarget)...)
-	targets = append(targets, createClients("Elasticsearch", config.Elasticsearch, f.CreateElasticsearchTarget)...)
-	targets = append(targets, createClients("Slack", config.Slack, f.CreateSlackTarget)...)
-	targets = append(targets, createClients("Discord", config.Discord, f.CreateDiscordTarget)...)
-	targets = append(targets, createClients("Teams", config.Teams, f.CreateTeamsTarget)...)
-	targets = append(targets, createClients("GoogleChat", config.GoogleChat, f.CreateGoogleChatTarget)...)
-	targets = append(targets, createClients("Telegram", config.Telegram, f.CreateTelegramTarget)...)
-	targets = append(targets, createClients("Webhook", config.Webhook, f.CreateWebhookTarget)...)
-	targets = append(targets, createClients("S3", config.S3, f.CreateS3Target)...)
-	targets = append(targets, createClients("Kinesis", config.Kinesis, f.CreateKinesisTarget)...)
-	targets = append(targets, createClients("SecurityHub", config.SecurityHub, f.CreateSecurityHubTarget)...)
-	targets = append(targets, createClients("GoogleCloudStorage", config.GCS, f.CreateGCSTarget)...)
+	targets = append(targets, CreateClients("Loki", config.Loki, f.CreateLokiTarget)...)
+	targets = append(targets, CreateClients("Elasticsearch", config.Elasticsearch, f.CreateElasticsearchTarget)...)
+	targets = append(targets, CreateClients("Slack", config.Slack, f.CreateSlackTarget)...)
+	targets = append(targets, CreateClients("Discord", config.Discord, f.CreateDiscordTarget)...)
+	targets = append(targets, CreateClients("Teams", config.Teams, f.CreateTeamsTarget)...)
+	targets = append(targets, CreateClients("GoogleChat", config.GoogleChat, f.CreateGoogleChatTarget)...)
+	targets = append(targets, CreateClients("Telegram", config.Telegram, f.CreateTelegramTarget)...)
+	targets = append(targets, CreateClients("Webhook", config.Webhook, f.CreateWebhookTarget)...)
+	targets = append(targets, CreateClients("S3", config.S3, f.CreateS3Target)...)
+	targets = append(targets, CreateClients("Kinesis", config.Kinesis, f.CreateKinesisTarget)...)
+	targets = append(targets, CreateClients("SecurityHub", config.SecurityHub, f.CreateSecurityHubTarget)...)
+	targets = append(targets, CreateClients("GoogleCloudStorage", config.GCS, f.CreateGCSTarget)...)
 
 	return target.NewCollection(targets...)
 }
 
-func (f *TargetFactory) CreateSlackTarget(config, parent *target.Config[target.SlackOptions]) *target.Target {
+func (f *TargetFactory) CreateSingleClient(tc *v1alpha1.TargetConfig) (*target.Target, error) {
+	var t *target.Target
+	switch tc.Spec.TargetType {
+	case "s3":
+		t = CreateClients("", &v1alpha1.Config[v1alpha1.S3Options]{}, f.CreateS3Target)[0] // potential panic ?
+		return t, nil
+	case "webhook":
+		t = CreateClients("", &v1alpha1.Config[v1alpha1.WebhookOptions]{}, f.CreateWebhookTarget)[0]
+	}
+	return nil, fmt.Errorf("Invalid target type passed")
+}
+
+func (f *TargetFactory) CreateSlackTarget(config, parent *v1alpha1.Config[v1alpha1.SlackOptions]) *target.Target {
 	if config == nil {
 		return nil
 	}
@@ -145,7 +160,7 @@ func (f *TargetFactory) CreateSlackTarget(config, parent *target.Config[target.S
 	}
 }
 
-func (f *TargetFactory) CreateLokiTarget(config, parent *target.Config[target.LokiOptions]) *target.Target {
+func (f *TargetFactory) CreateLokiTarget(config, parent *v1alpha1.Config[v1alpha1.LokiOptions]) *target.Target {
 	if config == nil || config.Config == nil {
 		return nil
 	}
@@ -196,7 +211,7 @@ func (f *TargetFactory) CreateLokiTarget(config, parent *target.Config[target.Lo
 	}
 }
 
-func (f *TargetFactory) CreateElasticsearchTarget(config, parent *target.Config[target.ElasticsearchOptions]) *target.Target {
+func (f *TargetFactory) CreateElasticsearchTarget(config, parent *v1alpha1.Config[v1alpha1.ElasticsearchOptions]) *target.Target {
 	if config == nil || config.Config == nil {
 		return nil
 	}
@@ -253,7 +268,7 @@ func (f *TargetFactory) CreateElasticsearchTarget(config, parent *target.Config[
 	}
 }
 
-func (f *TargetFactory) CreateDiscordTarget(config, parent *target.Config[target.WebhookOptions]) *target.Target {
+func (f *TargetFactory) CreateDiscordTarget(config, parent *v1alpha1.Config[v1alpha1.WebhookOptions]) *target.Target {
 	if config == nil || config.Config == nil {
 		return nil
 	}
@@ -293,7 +308,7 @@ func (f *TargetFactory) CreateDiscordTarget(config, parent *target.Config[target
 	}
 }
 
-func (f *TargetFactory) CreateTeamsTarget(config, parent *target.Config[target.WebhookOptions]) *target.Target {
+func (f *TargetFactory) CreateTeamsTarget(config, parent *v1alpha1.Config[v1alpha1.WebhookOptions]) *target.Target {
 	if config == nil || config.Config == nil {
 		return nil
 	}
@@ -334,7 +349,7 @@ func (f *TargetFactory) CreateTeamsTarget(config, parent *target.Config[target.W
 	}
 }
 
-func (f *TargetFactory) CreateWebhookTarget(config, parent *target.Config[target.WebhookOptions]) *target.Target {
+func (f *TargetFactory) CreateWebhookTarget(config, parent *v1alpha1.Config[v1alpha1.WebhookOptions]) *target.Target {
 	if config == nil || config.Config == nil {
 		return nil
 	}
@@ -375,7 +390,7 @@ func (f *TargetFactory) CreateWebhookTarget(config, parent *target.Config[target
 	}
 }
 
-func (f *TargetFactory) CreateTelegramTarget(config, parent *target.Config[target.TelegramOptions]) *target.Target {
+func (f *TargetFactory) CreateTelegramTarget(config, parent *v1alpha1.Config[v1alpha1.TelegramOptions]) *target.Target {
 	if config == nil {
 		return nil
 	}
@@ -440,7 +455,7 @@ func (f *TargetFactory) CreateTelegramTarget(config, parent *target.Config[targe
 	}
 }
 
-func (f *TargetFactory) CreateGoogleChatTarget(config, parent *target.Config[target.WebhookOptions]) *target.Target {
+func (f *TargetFactory) CreateGoogleChatTarget(config, parent *v1alpha1.Config[v1alpha1.WebhookOptions]) *target.Target {
 	if config == nil || config.Config == nil {
 		return nil
 	}
@@ -481,7 +496,7 @@ func (f *TargetFactory) CreateGoogleChatTarget(config, parent *target.Config[tar
 	}
 }
 
-func (f *TargetFactory) CreateS3Target(config, parent *target.Config[target.S3Options]) *target.Target {
+func (f *TargetFactory) CreateS3Target(config, parent *v1alpha1.Config[v1alpha1.S3Options]) *target.Target {
 	if config == nil || config.Config == nil {
 		return nil
 	}
@@ -551,7 +566,7 @@ func (f *TargetFactory) CreateS3Target(config, parent *target.Config[target.S3Op
 	}
 }
 
-func (f *TargetFactory) CreateKinesisTarget(config, parent *target.Config[target.KinesisOptions]) *target.Target {
+func (f *TargetFactory) CreateKinesisTarget(config, parent *v1alpha1.Config[v1alpha1.KinesisOptions]) *target.Target {
 	if config == nil || config.Config == nil {
 		return nil
 	}
@@ -614,7 +629,7 @@ func (f *TargetFactory) CreateKinesisTarget(config, parent *target.Config[target
 	}
 }
 
-func (f *TargetFactory) CreateSecurityHubTarget(config, parent *target.Config[target.SecurityHubOptions]) *target.Target {
+func (f *TargetFactory) CreateSecurityHubTarget(config, parent *v1alpha1.Config[v1alpha1.SecurityHubOptions]) *target.Target {
 	if config == nil || config.Config == nil {
 		return nil
 	}
@@ -682,7 +697,7 @@ func (f *TargetFactory) CreateSecurityHubTarget(config, parent *target.Config[ta
 	}
 }
 
-func (f *TargetFactory) CreateGCSTarget(config, parent *target.Config[target.GCSOptions]) *target.Target {
+func (f *TargetFactory) CreateGCSTarget(config, parent *v1alpha1.Config[v1alpha1.GCSOptions]) *target.Target {
 	if config == nil || config.Config == nil {
 		return nil
 	}
@@ -741,10 +756,11 @@ func (f *TargetFactory) CreateGCSTarget(config, parent *target.Config[target.GCS
 	}
 }
 
-func (f *TargetFactory) createResultFilter(filter target.Filter, minimumSeverity string, sources []string) *report.ResultFilter {
+// todo: not move filters
+func (f *TargetFactory) createResultFilter(filter filters.Filter, minimumSeverity string, sources []string) *report.ResultFilter {
 	sourceFilter := filter.Sources
 	if len(sources) > 0 {
-		sourceFilter = target.ValueFilter{Include: sources}
+		sourceFilter = filters.ValueFilter{Include: sources}
 	}
 
 	return f.filterFactory.CreateFilter(
@@ -787,12 +803,12 @@ func (f *TargetFactory) mapSecretValues(config any, ref, mountedSecret string) {
 	}
 
 	switch c := config.(type) {
-	case *target.Config[target.LokiOptions]:
+	case *v1alpha1.Config[v1alpha1.LokiOptions]:
 		if values.Host != "" {
 			c.Config.Host = values.Host
 		}
 
-	case *target.Config[target.SlackOptions]:
+	case *v1alpha1.Config[v1alpha1.SlackOptions]:
 		if values.Webhook != "" {
 			c.Config.Webhook = values.Webhook
 		}
@@ -800,7 +816,7 @@ func (f *TargetFactory) mapSecretValues(config any, ref, mountedSecret string) {
 			c.Config.Channel = values.Channel
 		}
 
-	case *target.Config[target.WebhookOptions]:
+	case *v1alpha1.Config[v1alpha1.WebhookOptions]:
 		if values.Webhook != "" {
 			c.Config.Webhook = values.Webhook
 		}
@@ -812,7 +828,7 @@ func (f *TargetFactory) mapSecretValues(config any, ref, mountedSecret string) {
 			c.Config.Headers["Authorization"] = values.Token
 		}
 
-	case *target.Config[target.ElasticsearchOptions]:
+	case *v1alpha1.Config[v1alpha1.ElasticsearchOptions]:
 		if values.Host != "" {
 			c.Config.Host = values.Host
 		}
@@ -826,7 +842,7 @@ func (f *TargetFactory) mapSecretValues(config any, ref, mountedSecret string) {
 			c.Config.APIKey = values.APIKey
 		}
 
-	case *target.Config[target.S3Options]:
+	case *v1alpha1.Config[v1alpha1.S3Options]:
 		if values.AccessKeyID != "" {
 			c.Config.AccessKeyID = values.AccessKeyID
 		}
@@ -837,7 +853,7 @@ func (f *TargetFactory) mapSecretValues(config any, ref, mountedSecret string) {
 			c.Config.KmsKeyID = values.KmsKeyID
 		}
 
-	case *target.Config[target.KinesisOptions]:
+	case *v1alpha1.Config[v1alpha1.KinesisOptions]:
 		if values.AccessKeyID != "" {
 			c.Config.AccessKeyID = values.AccessKeyID
 		}
@@ -845,7 +861,7 @@ func (f *TargetFactory) mapSecretValues(config any, ref, mountedSecret string) {
 			c.Config.SecretAccessKey = values.SecretAccessKey
 		}
 
-	case *target.Config[target.SecurityHubOptions]:
+	case *v1alpha1.Config[v1alpha1.SecurityHubOptions]:
 		if values.AccessKeyID != "" {
 			c.Config.AccessKeyID = values.AccessKeyID
 		}
@@ -856,12 +872,12 @@ func (f *TargetFactory) mapSecretValues(config any, ref, mountedSecret string) {
 			c.Config.AccountID = values.AccountID
 		}
 
-	case *target.Config[target.GCSOptions]:
+	case *v1alpha1.Config[v1alpha1.GCSOptions]:
 		if values.Credentials != "" {
 			c.Config.Credentials = values.Credentials
 		}
 
-	case *target.Config[target.TelegramOptions]:
+	case *v1alpha1.Config[v1alpha1.TelegramOptions]:
 		if values.Token != "" {
 			c.Config.Token = values.Token
 		}
@@ -871,11 +887,12 @@ func (f *TargetFactory) mapSecretValues(config any, ref, mountedSecret string) {
 	}
 }
 
+// what are those parameters ?
 func NewFactory(secretClient secrets.Client, filterFactory *target.ResultFilterFactory) target.Factory {
 	return &TargetFactory{secretClient: secretClient, filterFactory: filterFactory}
 }
 
-func mapWebhookTarget(config, parent *target.Config[target.WebhookOptions]) {
+func mapWebhookTarget(config, parent *v1alpha1.Config[v1alpha1.WebhookOptions]) {
 	setFallback(&config.Config.Webhook, parent.Config.Webhook)
 	setFallback(&config.Config.Certificate, parent.Config.Certificate)
 	setBool(&config.Config.SkipTLS, parent.Config.SkipTLS)
@@ -905,7 +922,7 @@ func hasAWSIdentity() bool {
 	return (irsaARN != "" && irsaFile != "") || (podIdentityFile != "" && podIdentityURI != "")
 }
 
-func checkAWSConfig(name string, config target.AWSConfig, parent target.AWSConfig) error {
+func checkAWSConfig(name string, config v1alpha1.AWSConfig, parent v1alpha1.AWSConfig) error {
 	noEnvConfig := !hasAWSIdentity()
 
 	if noEnvConfig && (config.AccessKeyID == "" && parent.AccessKeyID == "") {
@@ -946,14 +963,14 @@ func setInt(config *int, parent int) {
 	}
 }
 
-func createReportFilter(filter target.Filter) *report.ReportFilter {
+func createReportFilter(filter filters.Filter) *report.ReportFilter {
 	return target.NewReportFilter(
 		ToRuleSet(filter.ReportLabels),
 		ToRuleSet(filter.Sources),
 	)
 }
 
-func ToRuleSet(filter target.ValueFilter) validate.RuleSets {
+func ToRuleSet(filter filters.ValueFilter) validate.RuleSets {
 	return validate.RuleSets{
 		Include: filter.Include,
 		Exclude: filter.Exclude,
