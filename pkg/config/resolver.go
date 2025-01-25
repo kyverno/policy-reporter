@@ -558,7 +558,8 @@ func (r *Resolver) TargetConfigClient() (*targetconfig.TargetConfigClient, error
 		return nil, err
 	}
 
-	tcc := targetconfig.NewTargetConfigClient(tcClient, r.TargetFactory(), r.TargetClients())
+	tcc := targetconfig.NewTargetConfigClient(tcClient, r.TargetFactory(), r.TargetClients(), r.logger)
+	tcc.CreateInformer()
 	r.targetConfigClient = tcc
 	return tcc, nil
 }

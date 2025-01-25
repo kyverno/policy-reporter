@@ -107,8 +107,9 @@ func (f *TargetFactory) CreateSingleClient(tc *v1alpha1.TargetConfig) (*target.T
 		return t, nil
 	case "webhook":
 		t = createClients("", &v1alpha1.Config[v1alpha1.WebhookOptions]{}, f.CreateWebhookTarget)[0]
+		return t, nil
 	}
-	return nil, fmt.Errorf("Invalid target type passed")
+	return nil, fmt.Errorf("invalid target type passed")
 }
 
 func (f *TargetFactory) CreateSlackTarget(config, parent *v1alpha1.Config[v1alpha1.SlackOptions]) *target.Target {

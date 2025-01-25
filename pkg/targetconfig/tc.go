@@ -28,7 +28,7 @@ func (c *TargetConfigClient) configureInformer() {
 
 			t, err := c.targetFactory.CreateSingleClient(tc)
 			if err != nil {
-				c.logger.Error("unable to create target from TargetConfig: " + err.Error())
+				c.logger.Error("unable to create target from TargetConfig: " + err.Error()) // logger is nil
 			}
 			c.targetClients.AddCrdTarget(targetKey, t)
 		},
@@ -59,10 +59,11 @@ func (c *TargetConfigClient) Run(stopChan chan struct{}) {
 	fmt.Println("Target config cache synced")
 }
 
-func NewTargetConfigClient(tcClient tcv1alpha1.Interface, f target.Factory, targets *target.Collection) *TargetConfigClient {
+func NewTargetConfigClient(tcClient tcv1alpha1.Interface, f target.Factory, targets *target.Collection, logger *zap.Logger) *TargetConfigClient {
 	return &TargetConfigClient{
 		tcClient:      tcClient,
 		targetFactory: f,
 		targetClients: targets,
+		logger:        logger,
 	}
 }

@@ -194,6 +194,22 @@ func newRunCMD(version string) *cobra.Command {
 			})
 
 			g.Go(func() error {
+				resolver.TargetClients()
+				stop := make(chan struct{})
+
+				_, err = resolver.TargetConfigClient()
+				if err != nil {
+					return err
+				}
+
+				resolver.StartTargetConfigInformer(stop)
+
+				<-stop
+
+				return nil
+			})
+
+			g.Go(func() error {
 				collection := resolver.TargetClients()
 				if !collection.UsesSecrets() {
 					return nil
@@ -207,13 +223,6 @@ func newRunCMD(version string) *cobra.Command {
 
 					return err
 				}
-
-				_, err = resolver.TargetConfigClient()
-				if err != nil {
-					return err
-				}
-
-				resolver.StartTargetConfigInformer(stop)
 
 				<-stop
 
