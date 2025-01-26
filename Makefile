@@ -55,7 +55,7 @@ GOFUMPT                       := $(TOOLS_DIR)/gofumpt
 GOFUMPT_VERSION               := v0.4.0
 TOOLS                         := $(HELM) $(HELM_DOCS) $(GCI) $(GOFUMPT)
 
-# ammar
+
 CONTROLLER_GEN                     := $(TOOLS_DIR)/controller-gen
 CONTROLLER_GEN_VERSION             ?= v0.16.1
 CLIENT_GEN                         ?= $(TOOLS_DIR)/client-gen
@@ -250,12 +250,12 @@ build: prepare
 
 .PHONY: docker-build
 docker-build:
-	@docker buildx build --progress plane --platform $(PLATFORMS)  --tag $(REPO):$(IMAGE_TAG) . --build-arg LD_FLAGS='$(LD_FLAGS) -X main.Version=$(IMAGE_TAG)'
+	@docker buildx build --progress plain --platform $(PLATFORMS)  --tag $(REPO):$(IMAGE_TAG) . --build-arg LD_FLAGS='$(LD_FLAGS) -X main.Version=$(IMAGE_TAG)'
 
 .PHONY: docker-push
 docker-push:
-	@docker buildx build --progress plane --platform $(PLATFORMS)  --tag $(REPO):$(IMAGE_TAG) . --build-arg LD_FLAGS='$(LD_FLAGS) -X main.Version=$(IMAGE_TAG)' --push
-	@docker buildx build --progress plane --platform $(PLATFORMS)  --tag $(REPO):latest . --build-arg LD_FLAGS='$(LD_FLAGS) -X main.Version=$(IMAGE_TAG)' --push
+	@docker buildx build --progress plain --platform $(PLATFORMS)  --tag $(REPO):$(IMAGE_TAG) . --build-arg LD_FLAGS='$(LD_FLAGS) -X main.Version=$(IMAGE_TAG)' --push
+	@docker buildx build --progress plain --platform $(PLATFORMS)  --tag $(REPO):latest . --build-arg LD_FLAGS='$(LD_FLAGS) -X main.Version=$(IMAGE_TAG)' --push
 
 .PHONY: docker-push-dev
 docker-push-dev:
@@ -360,3 +360,4 @@ codegen-crds: $(CONTROLLER_GEN)
 	@echo Generate kyverno crds... >&2
 	@rm -rf $(CRDS_PATH) && mkdir -p $(CRDS_PATH)
 	@GOPATH=$(GOPATH_SHIM) $(CONTROLLER_GEN) paths=./pkg/crd/api/targetconfig/... crd:crdVersions=v1,ignoreUnexportedFields=true,generateEmbeddedObjectMeta=false output:dir=$(CRDS_PATH)
+
