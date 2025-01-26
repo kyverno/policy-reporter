@@ -26,5 +26,5 @@ helm repo update
 Install the Policy Reporter Preview
 
 ```bash
-helm upgrade --install policy-reporter policy-reporter/policy-reporter --create-namespace -n policy-reporter --devel --set ui.enabled=true --set plugin.kyverno.enabled=true
+helm upgrade --install policy-reporter policy-reporter/policy-reporter --create-namespace -n policy-reporter --set ui.enabled=true --set plugin.kyverno.enabled=true
 ```
