@@ -104,7 +104,6 @@ type ConfigStrict struct {
 	Sources         []string          `mapstructure:"sources" json:"sources"`
 	CustomFields    map[string]string `mapstructure:"customFields" json:"customFields"`
 	SkipExisting    bool              `mapstructure:"skipExistingOnStartup" json:"skipExistingOnStartup"`
-	Valid           bool              `mapstructure:"-" json:"-"`
 }
 
 func (config *Config[T]) MapBaseParent(parent *Config[T]) {

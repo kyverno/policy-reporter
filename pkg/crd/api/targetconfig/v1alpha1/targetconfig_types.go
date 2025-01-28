@@ -22,17 +22,25 @@ import (
 
 // TargetConfigSpec defines the desired state of TargetConfig.
 type TargetConfigSpec struct {
-	// todo: struct fields
 	ConfigStrict `json:",inline"`
 
 	//+optional
 	S3 S3Options `json:"s3,omitempty"`
 
-	// // +optional
-	// Webhook WebhookOptions `json:"webhook,omitempty"`
+	// +optional
+	Webhook WebhookOptions `json:"webhook,omitempty"`
 
-	// // +optional
-	// Telegram TelegramOptions `json:"telegram,omitempty"`
+	// +optional
+	Telegram TelegramOptions `json:"telegram,omitempty"`
+
+	// +optional
+	Slack SlackOptions `json:"slack,omitempty"`
+
+	// +optional
+	ElasticSearch ElasticsearchOptions `json:"elasticSearch,omitempty"`
+
+	// +optional
+	GCS GCSOptions `json:"gcs,omitempty"`
 
 	TargetType string `json:"targetType,omitempty"`
 }

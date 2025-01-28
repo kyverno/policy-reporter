@@ -103,10 +103,19 @@ func (f *TargetFactory) CreateSingleClient(tc *v1alpha1.TargetConfig) (*target.T
 	var t *target.Target
 	switch tc.Spec.TargetType {
 	case "s3":
-		t = createClients("", &v1alpha1.Config[v1alpha1.S3Options]{}, f.CreateS3Target)[0] // potential panic ?
+		t = createClients(tc.Name, createConfig(tc, &tc.Spec.S3), f.CreateS3Target)[0] // todo: verify if using the name is the right thing to do
 		return t, nil
 	case "webhook":
-		t = createClients("", &v1alpha1.Config[v1alpha1.WebhookOptions]{}, f.CreateWebhookTarget)[0]
+		t = createClients(tc.Name, createConfig(tc, &tc.Spec.Webhook), f.CreateWebhookTarget)[0]
+		return t, nil
+	case "gcs":
+		t = createClients(tc.Name, createConfig(tc, &tc.Spec.GCS), f.CreateGCSTarget)[0]
+		return t, nil
+	case "elasticSearch":
+		t = createClients(tc.Name, createConfig(tc, &tc.Spec.ElasticSearch), f.CreateElasticsearchTarget)[0]
+		return t, nil
+	case "telegram":
+		t = createClients(tc.Name, createConfig(tc, &tc.Spec.Telegram), f.CreateTelegramTarget)[0]
 		return t, nil
 	}
 	return nil, fmt.Errorf("invalid target type passed")
@@ -974,5 +983,19 @@ func ToRuleSet(filter filters.ValueFilter) validate.RuleSets {
 	return validate.RuleSets{
 		Include: filter.Include,
 		Exclude: filter.Exclude,
+	}
+}
+
+func createConfig[T any](tc *v1alpha1.TargetConfig, config *T) *v1alpha1.Config[T] {
+	return &v1alpha1.Config[T]{
+		Name:            tc.Spec.Name,
+		MinimumSeverity: tc.Spec.MinimumSeverity,
+		Filter:          tc.Spec.Filter,
+		SecretRef:       tc.Spec.SecretRef,
+		SkipExisting:    tc.Spec.SkipExisting,
+		CustomFields:    tc.Spec.CustomFields,
+		MountedSecret:   tc.Spec.MountedSecret,
+		Sources:         tc.Spec.Sources,
+		Config:          config,
 	}
 }

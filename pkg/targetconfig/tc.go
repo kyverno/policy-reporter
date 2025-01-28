@@ -21,22 +21,38 @@ type TargetConfigClient struct {
 }
 
 func (c *TargetConfigClient) configureInformer() {
+	f := func(obj interface{}) (string, *target.Target, error) {
+		tc := obj.(*v1alpha1.TargetConfig)
+		targetKey := tc.Name + "," + tc.Namespace + "," + tc.Spec.TargetType
+
+		t, err := c.targetFactory.CreateSingleClient(tc)
+		if err != nil {
+			return "", nil, err
+		}
+		return targetKey, t, nil
+	}
+
 	c.informer.AddEventHandler(cache.ResourceEventHandlerFuncs{
 		AddFunc: func(obj interface{}) {
-			tc := obj.(*v1alpha1.TargetConfig)
-			targetKey := tc.Name + "," + tc.Namespace + "," + tc.Spec.TargetType
-
-			t, err := c.targetFactory.CreateSingleClient(tc)
+			key, target, err := f(obj)
 			if err != nil {
-				c.logger.Error("unable to create target from TargetConfig: " + err.Error()) // logger is nil
+				c.logger.Error("unable to create target from TargetConfig: " + err.Error())
 			}
-			c.targetClients.AddCrdTarget(targetKey, t)
+			c.targetClients.AddCrdTarget(key, target)
 		},
 		UpdateFunc: func(oldObj, newObj interface{}) {
-			// todo
+			key, target, err := f(newObj)
+			if err != nil {
+				c.logger.Error("unable to create target from TargetConfig: " + err.Error())
+			}
+			c.targetClients.AddCrdTarget(key, target)
 		},
 		DeleteFunc: func(obj interface{}) {
-			// todo
+			key, _, err := f(obj)
+			if err != nil {
+				c.logger.Error("unable to create target from TargetConfig: " + err.Error())
+			}
+			c.targetClients.RemoveCrdTarget(key)
 		},
 	})
 }
