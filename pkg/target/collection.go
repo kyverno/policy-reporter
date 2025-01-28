@@ -165,9 +165,10 @@ func (c *Collection) Length() int {
 
 func NewCollection(targets ...*Target) *Collection {
 	collection := &Collection{
-		clients: make([]Client, 0),
-		targets: make(map[string]*Target, 0),
-		mx:      new(sync.Mutex),
+		clients:    make([]Client, 0),
+		targets:    make(map[string]*Target, 0),
+		crdTargets: make(map[string]*Target, 0),
+		mx:         new(sync.Mutex),
 	}
 
 	for _, t := range targets {
