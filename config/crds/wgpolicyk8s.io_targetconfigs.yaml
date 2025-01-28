@@ -45,6 +45,42 @@ spec:
                 additionalProperties:
                   type: string
                 type: object
+              elasticSearch:
+                properties:
+                  apiKey:
+                    type: string
+                  certificate:
+                    type: string
+                  headers:
+                    additionalProperties:
+                      type: string
+                    type: object
+                  host:
+                    type: string
+                  index:
+                    type: string
+                  password:
+                    type: string
+                  rotation:
+                    type: string
+                  skipTLS:
+                    type: boolean
+                  typelessApi:
+                    type: boolean
+                  username:
+                    type: string
+                required:
+                - apiKey
+                - certificate
+                - headers
+                - host
+                - index
+                - password
+                - rotation
+                - skipTLS
+                - typelessApi
+                - username
+                type: object
               filter:
                 properties:
                   namespaces:
@@ -169,6 +205,19 @@ spec:
                 - sources
                 - status
                 type: object
+              gcs:
+                properties:
+                  bucket:
+                    type: string
+                  credentials:
+                    type: string
+                  prefix:
+                    type: string
+                required:
+                - bucket
+                - credentials
+                - prefix
+                type: object
               minimumSeverity:
                 type: string
               mountedSecret:
@@ -213,12 +262,75 @@ spec:
                 type: string
               skipExistingOnStartup:
                 type: boolean
+              slack:
+                properties:
+                  certificate:
+                    type: string
+                  channel:
+                    type: string
+                  headers:
+                    additionalProperties:
+                      type: string
+                    type: object
+                  skipTLS:
+                    type: boolean
+                  webhook:
+                    type: string
+                required:
+                - certificate
+                - channel
+                - headers
+                - skipTLS
+                - webhook
+                type: object
               sources:
                 items:
                   type: string
                 type: array
               targetType:
                 type: string
+              telegram:
+                properties:
+                  certificate:
+                    type: string
+                  chatId:
+                    type: string
+                  headers:
+                    additionalProperties:
+                      type: string
+                    type: object
+                  skipTLS:
+                    type: boolean
+                  token:
+                    type: string
+                  webhook:
+                    type: string
+                required:
+                - certificate
+                - chatId
+                - headers
+                - skipTLS
+                - token
+                - webhook
+                type: object
+              webhook:
+                properties:
+                  certificate:
+                    type: string
+                  headers:
+                    additionalProperties:
+                      type: string
+                    type: object
+                  skipTLS:
+                    type: boolean
+                  webhook:
+                    type: string
+                required:
+                - certificate
+                - headers
+                - skipTLS
+                - webhook
+                type: object
             required:
             - customFields
             - filter
