@@ -20,59 +20,58 @@ type TargetConfigClient struct {
 	informer      cache.SharedIndexInformer
 }
 
-func (c *TargetConfigClient) configureInformer() {
-	f := func(obj interface{}) (string, *target.Target, error) {
-		tc := obj.(*v1alpha1.TargetConfig)
-		targetKey := tc.Name + "," + tc.Namespace + "," + tc.Spec.TargetType
-
+func (c *TargetConfigClient) configureInformer(targetChan chan *target.Collection) {
+	f := func(tc *v1alpha1.TargetConfig) (*target.Target, error) {
 		t, err := c.targetFactory.CreateSingleClient(tc)
 		if err != nil {
-			return "", nil, err
+			return nil, err
 		}
-		return targetKey, t, nil
+		return t, nil
 	}
 
 	c.informer.AddEventHandler(cache.ResourceEventHandlerFuncs{
 		AddFunc: func(obj interface{}) {
-			key, target, err := f(obj)
+			tc := obj.(*v1alpha1.TargetConfig)
+			targetKey := tc.Name + "," + tc.Namespace + "," + tc.Spec.TargetType
+			c.logger.Info(fmt.Sprintf("new target: %s, namespace: %s, type: %s", tc.Name, tc.Namespace, tc.Spec.TargetType))
+
+			target, err := f(tc)
 			if err != nil {
 				c.logger.Error("unable to create target from TargetConfig: " + err.Error())
 			}
-			c.targetClients.AddCrdTarget(key, target)
+
+			c.targetClients.AddCrdTarget(targetKey, target)
+			targetChan <- c.targetClients
 		},
 		UpdateFunc: func(oldObj, newObj interface{}) {
-			key, target, err := f(newObj)
-			if err != nil {
-				c.logger.Error("unable to create target from TargetConfig: " + err.Error())
-			}
-			c.targetClients.AddCrdTarget(key, target)
 		},
 		DeleteFunc: func(obj interface{}) {
-			key, _, err := f(obj)
-			if err != nil {
-				c.logger.Error("unable to create target from TargetConfig: " + err.Error())
-			}
-			c.targetClients.RemoveCrdTarget(key)
+			tc := obj.(*v1alpha1.TargetConfig)
+			targetKey := tc.Name + "," + tc.Namespace + "," + tc.Spec.TargetType
+			c.logger.Info(fmt.Sprintf("deleting target: %s, namespace: %s, type: %s", tc.Name, tc.Namespace, tc.Spec.TargetType))
+
+			c.targetClients.RemoveCrdTarget(targetKey)
+			targetChan <- c.targetClients
 		},
 	})
 }
 
-func (c *TargetConfigClient) CreateInformer() {
+func (c *TargetConfigClient) CreateInformer(targetChan chan *target.Collection) {
 	tcInformer := tcinformer.NewSharedInformerFactory(c.tcClient, time.Second)
 	inf := tcInformer.Wgpolicyk8s().V1alpha1().TargetConfigs().Informer()
 	c.informer = inf
 
-	c.configureInformer()
+	c.configureInformer(targetChan)
 }
 
 func (c *TargetConfigClient) Run(stopChan chan struct{}) {
 	go c.informer.Run(stopChan)
 
 	if !cache.WaitForCacheSync(stopChan, c.informer.HasSynced) {
-		fmt.Println("Failed to sync target config cache")
+		c.logger.Error("Failed to sync target config cache") // todo
 		return
 	}
-	fmt.Println("Target config cache synced")
+	c.logger.Info("target config cache synced")
 }
 
 func NewTargetConfigClient(tcClient tcv1alpha1.Interface, f target.Factory, targets *target.Collection, logger *zap.Logger) *TargetConfigClient {

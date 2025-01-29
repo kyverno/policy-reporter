@@ -8,13 +8,13 @@ import (
 	"github.com/spf13/cobra"
 	"go.uber.org/zap"
 	"golang.org/x/sync/errgroup"
-	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
 
 	"github.com/kyverno/policy-reporter/pkg/api"
 	v1 "github.com/kyverno/policy-reporter/pkg/api/v1"
 	v2 "github.com/kyverno/policy-reporter/pkg/api/v2"
 	"github.com/kyverno/policy-reporter/pkg/config"
+	"github.com/kyverno/policy-reporter/pkg/target"
 
 	"github.com/kyverno/policy-reporter/pkg/database"
 	"github.com/kyverno/policy-reporter/pkg/listener"
@@ -31,12 +31,7 @@ func newRunCMD(version string) *cobra.Command {
 			}
 			c.Version = version
 
-			var k8sConfig *rest.Config
-			if c.K8sClient.Kubeconfig != "" {
-				k8sConfig, err = clientcmd.BuildConfigFromFlags("", c.K8sClient.Kubeconfig)
-			} else {
-				k8sConfig, err = rest.InClusterConfig()
-			}
+			k8sConfig, err := clientcmd.BuildConfigFromFlags("", "/Users/ammaryasser/Downloads/ips")
 			if err != nil {
 				return err
 			}
@@ -63,6 +58,7 @@ func newRunCMD(version string) *cobra.Command {
 				return err
 			}
 
+			targetChan := make(chan *target.Collection)
 			g := &errgroup.Group{}
 
 			var store *database.Store
@@ -141,7 +137,7 @@ func newRunCMD(version string) *cobra.Command {
 						}
 					}
 
-					resolver.RegisterSendResultListener()
+					resolver.RegisterSendResultListener(targetChan)
 
 					readinessProbe.Ready()
 				}).RegisterOnNew(func(currentID, lockID string) {
@@ -166,7 +162,7 @@ func newRunCMD(version string) *cobra.Command {
 					return elector.Run(cmd.Context())
 				})
 			} else {
-				resolver.RegisterSendResultListener()
+				resolver.RegisterSendResultListener(targetChan)
 				readinessProbe.Ready()
 			}
 
@@ -197,7 +193,7 @@ func newRunCMD(version string) *cobra.Command {
 				resolver.TargetClients()
 				stop := make(chan struct{})
 
-				_, err = resolver.TargetConfigClient()
+				_, err = resolver.TargetConfigClient(targetChan)
 				if err != nil {
 					return err
 				}

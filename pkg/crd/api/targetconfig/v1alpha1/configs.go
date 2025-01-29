@@ -5,8 +5,10 @@ import "github.com/kyverno/policy-reporter/pkg/filters"
 type AWSConfig struct {
 	AccessKeyID     string `mapstructure:"accessKeyId" json:"accessKeyId"`
 	SecretAccessKey string `mapstructure:"secretAccessKey" json:"secretAccessKey"`
-	Region          string `mapstructure:"region" json:"region"`
-	Endpoint        string `mapstructure:"endpoint" json:"endpoint"`
+	// +optional
+	Region string `mapstructure:"region" json:"region"`
+	// +optional
+	Endpoint string `mapstructure:"endpoint" json:"endpoint"`
 }
 
 type WebhookOptions struct {
@@ -52,13 +54,18 @@ type ElasticsearchOptions struct {
 }
 
 type S3Options struct {
-	AWSConfig            `mapstructure:",squash" json:",inline"`
-	Prefix               string `mapstructure:"prefix" json:"prefix"`
-	Bucket               string `mapstructure:"bucket" json:"bucket"`
-	BucketKeyEnabled     bool   `mapstructure:"bucketKeyEnabled" json:"bucketKeyEnabled"`
-	KmsKeyID             string `mapstructure:"kmsKeyId" json:"kmsKeyId"`
+	AWSConfig `mapstructure:",squash" json:",inline"`
+	// +optional
+	Prefix string `mapstructure:"prefix" json:"prefix"`
+	Bucket string `mapstructure:"bucket" json:"bucket"`
+	// +optional
+	BucketKeyEnabled bool `mapstructure:"bucketKeyEnabled" json:"bucketKeyEnabled"`
+	// +optional
+	KmsKeyID string `mapstructure:"kmsKeyId" json:"kmsKeyId"`
+	// +optional
 	ServerSideEncryption string `mapstructure:"serverSideEncryption" json:"serverSideEncryption"`
-	PathStyle            bool   `mapstructure:"pathStyle" json:"pathStyle"`
+	// +optional
+	PathStyle bool `mapstructure:"pathStyle" json:"pathStyle"`
 }
 
 type KinesisOptions struct {
@@ -96,14 +103,22 @@ type Config[T any] struct {
 }
 
 type ConfigStrict struct {
-	Name            string            `mapstructure:"name" json:"name"`
-	MinimumSeverity string            `mapstructure:"minimumSeverity" json:"minimumSeverity"`
-	Filter          filters.Filter    `mapstructure:"filter" json:"filter"`
-	SecretRef       string            `mapstructure:"secretRef" json:"secretRef"`
-	MountedSecret   string            `mapstructure:"mountedSecret" json:"mountedSecret"`
-	Sources         []string          `mapstructure:"sources" json:"sources"`
-	CustomFields    map[string]string `mapstructure:"customFields" json:"customFields"`
-	SkipExisting    bool              `mapstructure:"skipExistingOnStartup" json:"skipExistingOnStartup"`
+	// +optional
+	Name string `mapstructure:"name" json:"name"`
+	// +optional
+	MinimumSeverity string `mapstructure:"minimumSeverity" json:"minimumSeverity"`
+	// +optional
+	Filter filters.Filter `mapstructure:"filter" json:"filter"`
+	// +optional
+	SecretRef string `mapstructure:"secretRef" json:"secretRef"`
+	// +optional
+	MountedSecret string `mapstructure:"mountedSecret" json:"mountedSecret"`
+	// +optional
+	Sources []string `mapstructure:"sources" json:"sources"`
+	// +optional
+	CustomFields map[string]string `mapstructure:"customFields" json:"customFields"`
+	// +optional
+	SkipExisting bool `mapstructure:"skipExistingOnStartup" json:"skipExistingOnStartup"`
 }
 
 func (config *Config[T]) MapBaseParent(parent *Config[T]) {

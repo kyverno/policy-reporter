@@ -75,13 +75,13 @@ func (c *Collection) CrdTargets() map[string]*Target {
 
 func (c *Collection) AddCrdTarget(key string, t *Target) {
 	c.mx.Lock()
-	c.crdTargets[key] = t // todo: what use as a key ? name,ns,type ?
+	c.targets[key] = t
 	c.mx.Unlock()
 }
 
 func (c *Collection) RemoveCrdTarget(key string) {
 	c.mx.Lock()
-	delete(c.crdTargets, key)
+	delete(c.targets, key)
 	c.mx.Unlock()
 }
 

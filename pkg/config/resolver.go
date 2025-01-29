@@ -250,11 +250,8 @@ func (r *Resolver) Queue() (*kubernetes.Queue, error) {
 // RegisterNewResultsListener resolver method
 func (r *Resolver) RegisterNewResultsListener() {
 	targets := r.TargetClients()
-	if targets.Empty() {
-		return
-	}
 
-	newResultListener := listener.NewResultListener(r.SkipExistingOnStartup(), r.ResultCache(), time.Now())
+	newResultListener := listener.NewResultListener(false, r.ResultCache(), time.Now()) // revert this
 	r.resultListener = newResultListener
 	r.EventPublisher().RegisterListener(listener.NewResults, newResultListener.Listen)
 
@@ -262,20 +259,31 @@ func (r *Resolver) RegisterNewResultsListener() {
 }
 
 // RegisterSendResultListener resolver method
-func (r *Resolver) RegisterSendResultListener() {
-	targets := r.TargetClients()
-
-	if targets.Empty() {
-		return
+func (r *Resolver) RegisterSendResultListener(targetChan chan *target.Collection) {
+	registerFunc := func(targets *target.Collection) {
+		r.resultListener.RegisterListener(listener.NewSendResultListener(targets))
+		r.resultListener.RegisterScopeListener(listener.NewSendScopeResultsListener(targets))
+		r.resultListener.RegisterSyncListener(listener.NewSendSyncResultsListener(targets))
 	}
 
+	go func() {
+		r.logger.Info("starting listener loop")
+		for {
+			select {
+			case targets := <-targetChan:
+				registerFunc(targets)
+			default:
+				time.Sleep(time.Second * 5)
+			}
+		}
+	}()
+
+	targets := r.TargetClients()
 	if r.resultListener == nil {
 		r.RegisterNewResultsListener()
 	}
 
-	r.resultListener.RegisterListener(listener.NewSendResultListener(targets))
-	r.resultListener.RegisterScopeListener(listener.NewSendScopeResultsListener(targets))
-	r.resultListener.RegisterSyncListener(listener.NewSendSyncResultsListener(targets))
+	registerFunc(targets)
 }
 
 // UnregisterSendResultListener resolver method
@@ -548,7 +556,7 @@ func (r *Resolver) EmailClient() *email.Client {
 	return email.NewClient(r.config.EmailReports.SMTP.From, r.SMTPServer())
 }
 
-func (r *Resolver) TargetConfigClient() (*targetconfig.TargetConfigClient, error) {
+func (r *Resolver) TargetConfigClient(targetChan chan *target.Collection) (*targetconfig.TargetConfigClient, error) {
 	if r.targetConfigClient != nil {
 		return r.targetConfigClient, nil
 	}
@@ -559,7 +567,7 @@ func (r *Resolver) TargetConfigClient() (*targetconfig.TargetConfigClient, error
 	}
 
 	tcc := targetconfig.NewTargetConfigClient(tcClient, r.TargetFactory(), r.TargetClients(), r.logger)
-	tcc.CreateInformer()
+	tcc.CreateInformer(targetChan)
 	r.targetConfigClient = tcc
 	return tcc, nil
 }
@@ -665,8 +673,8 @@ func (r *Resolver) Logger() (*zap.Logger, error) {
 }
 
 // NewResolver constructor function
-func NewResolver(config *Config, k8sConfig *rest.Config) Resolver {
-	return Resolver{
+func NewResolver(config *Config, k8sConfig *rest.Config) *Resolver {
+	return &Resolver{
 		config:    config,
 		k8sConfig: k8sConfig,
 	}

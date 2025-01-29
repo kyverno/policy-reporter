@@ -248,15 +248,7 @@ spec:
                     type: string
                 required:
                 - accessKeyId
-                - bucket
-                - bucketKeyEnabled
-                - endpoint
-                - kmsKeyId
-                - pathStyle
-                - prefix
-                - region
                 - secretAccessKey
-                - serverSideEncryption
                 type: object
               secretRef:
                 type: string
@@ -331,15 +323,6 @@ spec:
                 - skipTLS
                 - webhook
                 type: object
-            required:
-            - customFields
-            - filter
-            - minimumSeverity
-            - mountedSecret
-            - name
-            - secretRef
-            - skipExistingOnStartup
-            - sources
             type: object
           status:
             description: TargetConfigStatus defines the observed state of TargetConfig.
