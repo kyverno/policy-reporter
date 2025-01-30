@@ -26,6 +26,7 @@ import (
 	"github.com/kyverno/policy-reporter/pkg/cache"
 	"github.com/kyverno/policy-reporter/pkg/crd/client/policyreport/clientset/versioned"
 	wgpolicyk8sv1alpha2 "github.com/kyverno/policy-reporter/pkg/crd/client/policyreport/clientset/versioned/typed/policyreport/v1alpha2"
+	tcv1alpha1 "github.com/kyverno/policy-reporter/pkg/crd/client/targetconfig/clientset/versioned"
 	"github.com/kyverno/policy-reporter/pkg/database"
 	"github.com/kyverno/policy-reporter/pkg/email"
 	"github.com/kyverno/policy-reporter/pkg/email/summary"
@@ -43,6 +44,7 @@ import (
 	"github.com/kyverno/policy-reporter/pkg/report/result"
 	"github.com/kyverno/policy-reporter/pkg/target"
 	"github.com/kyverno/policy-reporter/pkg/target/factory"
+	"github.com/kyverno/policy-reporter/pkg/targetconfig"
 	"github.com/kyverno/policy-reporter/pkg/validate"
 )
 
@@ -60,6 +62,7 @@ type Resolver struct {
 	targetClients      *target.Collection
 	targetsCreated     bool
 	targetFactory      target.Factory
+	targetConfigClient *targetconfig.TargetConfigClient
 	logger             *zap.Logger
 	resultListener     *listener.ResultListener
 }
@@ -203,6 +206,10 @@ func (r *Resolver) CustomIDGenerators() map[string]result.IDGenerator {
 	return generators
 }
 
+func (r *Resolver) StartTargetConfigInformer(stopChan chan struct{}) {
+	r.targetConfigClient.Run(stopChan)
+}
+
 // EventPublisher resolver method
 func (r *Resolver) Queue() (*kubernetes.Queue, error) {
 	client, err := r.CRDClient()
@@ -243,11 +250,8 @@ func (r *Resolver) Queue() (*kubernetes.Queue, error) {
 // RegisterNewResultsListener resolver method
 func (r *Resolver) RegisterNewResultsListener() {
 	targets := r.TargetClients()
-	if targets.Empty() {
-		return
-	}
 
-	newResultListener := listener.NewResultListener(r.SkipExistingOnStartup(), r.ResultCache(), time.Now())
+	newResultListener := listener.NewResultListener(false, r.ResultCache(), time.Now()) // revert this
 	r.resultListener = newResultListener
 	r.EventPublisher().RegisterListener(listener.NewResults, newResultListener.Listen)
 
@@ -255,20 +259,31 @@ func (r *Resolver) RegisterNewResultsListener() {
 }
 
 // RegisterSendResultListener resolver method
-func (r *Resolver) RegisterSendResultListener() {
-	targets := r.TargetClients()
-
-	if targets.Empty() {
-		return
+func (r *Resolver) RegisterSendResultListener(targetChan chan *target.Collection) {
+	registerFunc := func(targets *target.Collection) {
+		r.resultListener.RegisterListener(listener.NewSendResultListener(targets))
+		r.resultListener.RegisterScopeListener(listener.NewSendScopeResultsListener(targets))
+		r.resultListener.RegisterSyncListener(listener.NewSendSyncResultsListener(targets))
 	}
 
+	go func() {
+		r.logger.Info("starting listener loop")
+		for {
+			select {
+			case targets := <-targetChan:
+				registerFunc(targets)
+			default:
+				time.Sleep(time.Second * 5)
+			}
+		}
+	}()
+
+	targets := r.TargetClients()
 	if r.resultListener == nil {
 		r.RegisterNewResultsListener()
 	}
 
-	r.resultListener.RegisterListener(listener.NewSendResultListener(targets))
-	r.resultListener.RegisterScopeListener(listener.NewSendScopeResultsListener(targets))
-	r.resultListener.RegisterSyncListener(listener.NewSendSyncResultsListener(targets))
+	registerFunc(targets)
 }
 
 // UnregisterSendResultListener resolver method
@@ -541,6 +556,22 @@ func (r *Resolver) EmailClient() *email.Client {
 	return email.NewClient(r.config.EmailReports.SMTP.From, r.SMTPServer())
 }
 
+func (r *Resolver) TargetConfigClient(targetChan chan *target.Collection) (*targetconfig.TargetConfigClient, error) {
+	if r.targetConfigClient != nil {
+		return r.targetConfigClient, nil
+	}
+
+	tcClient, err := tcv1alpha1.NewForConfig(r.k8sConfig)
+	if err != nil {
+		return nil, err
+	}
+
+	tcc := targetconfig.NewTargetConfigClient(tcClient, r.TargetFactory(), r.TargetClients(), r.logger)
+	tcc.CreateInformer(targetChan)
+	r.targetConfigClient = tcc
+	return tcc, nil
+}
+
 func (r *Resolver) PolicyReportClient() (report.PolicyReportClient, error) {
 	if r.policyReportClient != nil {
 		return r.policyReportClient, nil
@@ -642,8 +673,8 @@ func (r *Resolver) Logger() (*zap.Logger, error) {
 }
 
 // NewResolver constructor function
-func NewResolver(config *Config, k8sConfig *rest.Config) Resolver {
-	return Resolver{
+func NewResolver(config *Config, k8sConfig *rest.Config) *Resolver {
+	return &Resolver{
 		config:    config,
 		k8sConfig: k8sConfig,
 	}
