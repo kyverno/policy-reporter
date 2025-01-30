@@ -29,10 +29,10 @@ require (
 	github.com/spf13/cobra v1.8.1
 	github.com/spf13/viper v1.19.0
 	github.com/stretchr/testify v1.10.0
-	github.com/uptrace/bun v1.2.8
+	github.com/uptrace/bun v1.2.9
 	github.com/uptrace/bun/dialect/mysqldialect v1.2.8
 	github.com/uptrace/bun/dialect/pgdialect v1.2.8
-	github.com/uptrace/bun/dialect/sqlitedialect v1.2.8
+	github.com/uptrace/bun/dialect/sqlitedialect v1.2.9
 	github.com/uptrace/bun/driver/pgdriver v1.2.8
 	github.com/uptrace/bun/extra/bundebug v1.2.8
 	github.com/xhit/go-simple-mail/v2 v2.16.0
@@ -116,7 +116,7 @@ require (
 	github.com/leodido/go-urn v1.4.0 // indirect
 	github.com/magiconair/properties v1.8.7 // indirect
 	github.com/mailru/easyjson v0.7.7 // indirect
-	github.com/mattn/go-colorable v0.1.13 // indirect
+	github.com/mattn/go-colorable v0.1.14 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
 	github.com/mitchellh/mapstructure v1.5.0 // indirect
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
@@ -127,7 +127,7 @@ require (
 	github.com/planetscale/vtprotobuf v0.6.1-0.20240319094008-0393e58bdf10 // indirect
 	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect
 	github.com/prometheus/procfs v0.15.1 // indirect
-	github.com/puzpuzpuz/xsync/v3 v3.4.0 // indirect
+	github.com/puzpuzpuz/xsync/v3 v3.5.0 // indirect
 	github.com/sagikazarmark/locafero v0.6.0 // indirect
 	github.com/sagikazarmark/slog-shim v0.1.0 // indirect
 	github.com/sourcegraph/conc v0.3.0 // indirect
