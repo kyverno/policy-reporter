@@ -12,7 +12,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/s3 v1.74.1
 	github.com/aws/aws-sdk-go-v2/service/securityhub v1.55.5
 	github.com/aws/aws-sdk-go-v2/service/sts v1.33.10
-	github.com/gin-contrib/gzip v1.2.0
+	github.com/gin-contrib/gzip v1.2.2
 	github.com/gin-contrib/pprof v1.5.2
 	github.com/gin-contrib/zap v1.1.4
 	github.com/gin-gonic/gin v1.10.0
