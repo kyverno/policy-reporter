@@ -65,12 +65,30 @@ func (k *k8sPolicyReportClient) Sync(stopper chan struct{}) error {
 	return nil
 }
 
-func (k *k8sPolicyReportClient) Run(worker int, stopper chan struct{}) error {
+func (k *k8sPolicyReportClient) Run(worker int, stopper chan struct{}, restartChan chan struct{}) error {
 	k.stopChan = stopper
 
 	if err := k.Sync(stopper); err != nil {
 		return err
 	}
+
+	// todo: clean this up
+	go func() {
+		for {
+			select {
+			case <-restartChan:
+				k.Stop()
+				stopper = make(chan struct{})
+				if err := k.Sync(stopper); err != nil {
+					panic(err)
+				}
+
+				k.queue.Run(worker, stopper)
+			default:
+				time.Sleep(time.Second * 3)
+			}
+		}
+	}()
 
 	k.queue.Run(worker, stopper)
 

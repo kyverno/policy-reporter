@@ -3,6 +3,7 @@ package listener_test
 import (
 	"context"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 
@@ -23,6 +24,11 @@ type client struct {
 
 func (c *client) Send(result v1alpha2.PolicyReportResult) {
 	c.Called = true
+}
+
+// todo: check if this breaks tests
+func (c *client) CreationTimestamp() time.Time {
+	return time.Now()
 }
 
 func (c *client) MinimumSeverity() string {
@@ -72,21 +78,21 @@ func Test_SendResultListener(t *testing.T) {
 	t.Run("Send Result", func(t *testing.T) {
 		c := &client{validated: true}
 		slistener := listener.NewSendResultListener(target.NewCollection(&target.Target{Client: c}))
-		slistener(preport1, fixtures.FailResult, false)
+		slistener(preport1, fixtures.FailResult)
 
 		assert.True(t, c.Called, "Expected Send to be called")
 	})
 	t.Run("Don't Send Result when validation fails", func(t *testing.T) {
 		c := &client{validated: false}
 		slistener := listener.NewSendResultListener(target.NewCollection(&target.Target{Client: c}))
-		slistener(preport1, fixtures.FailResult, false)
+		slistener(preport1, fixtures.FailResult)
 
 		assert.False(t, c.Called, "Expected Send not to be called")
 	})
 	t.Run("Don't Send pre existing Result when skipExistingOnStartup is true", func(t *testing.T) {
 		c := &client{skipExistingOnStartup: true}
 		slistener := listener.NewSendResultListener(target.NewCollection(&target.Target{Client: c}))
-		slistener(preport1, fixtures.FailResult, true)
+		slistener(preport1, fixtures.FailResult)
 
 		assert.False(t, c.Called, "Expected Send not to be called")
 	})

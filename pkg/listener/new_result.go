@@ -6,7 +6,6 @@ import (
 
 	"github.com/kyverno/policy-reporter/pkg/cache"
 	"github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
-	"github.com/kyverno/policy-reporter/pkg/helper"
 	"github.com/kyverno/policy-reporter/pkg/report"
 )
 
@@ -88,34 +87,16 @@ func (l *ResultListener) Listen(event report.LifecycleEvent) {
 		return
 	}
 
-	var preExisted bool
-
-	if event.Type == report.Added {
-		preExisted = event.PolicyReport.GetCreationTimestamp().Local().Before(l.startUp)
-
-		if l.skipExisting && preExisted {
-			l.cache.AddReport(event.PolicyReport)
-			return
-		}
-	}
-
-	existing := l.cache.GetResults(event.PolicyReport.GetID())
+	// existing := l.cache.GetResults(event.PolicyReport.GetID())
 	newResults := make([]v1alpha2.PolicyReportResult, 0)
 
-	for _, r := range event.PolicyReport.GetResults() {
-		if helper.Contains(r.GetID(), existing) || !l.Validate(r) {
-			continue
-		}
-
-		if r.Timestamp.Seconds > 0 {
-			created := time.Unix(r.Timestamp.Seconds, int64(r.Timestamp.Nanos))
-			if l.skipExisting && created.Local().Before(l.startUp) {
-				continue
-			}
-		}
-
-		newResults = append(newResults, r)
-	}
+	// for _, r := range  {
+	// 	// new things get skipped because the cache has seen them before, but this is incorrect since new targets may be created
+	// 	// if helper.Contains(r.GetID(), existing) {
+	// 	// 	continue
+	// 	// }
+	// }
+	newResults = append(newResults, event.PolicyReport.GetResults()...)
 
 	l.cache.AddReport(event.PolicyReport)
 	if len(newResults) == 0 {
@@ -130,7 +111,7 @@ func (l *ResultListener) Listen(event report.LifecycleEvent) {
 			go func(callback report.ScopeResultsListener, results []v1alpha2.PolicyReportResult) {
 				defer wg.Done()
 
-				callback(event.PolicyReport, results, preExisted)
+				callback(event.PolicyReport, results)
 			}(cb, newResults)
 		}
 	}
@@ -152,7 +133,7 @@ func (l *ResultListener) Listen(event report.LifecycleEvent) {
 				go func(callback report.PolicyReportResultListener, result v1alpha2.PolicyReportResult) {
 					defer wg.Done()
 
-					callback(event.PolicyReport, result, preExisted)
+					callback(event.PolicyReport, result)
 				}(cb, r)
 			}
 
@@ -163,11 +144,9 @@ func (l *ResultListener) Listen(event report.LifecycleEvent) {
 	grp.Wait()
 }
 
-func NewResultListener(skipExisting bool, rcache cache.Cache, startUp time.Time) *ResultListener {
+func NewResultListener(rcache cache.Cache, startUp time.Time) *ResultListener {
 	return &ResultListener{
-		skipExisting:  skipExisting,
 		cache:         rcache,
-		startUp:       startUp,
 		listener:      make([]report.PolicyReportResultListener, 0),
 		scopeListener: make([]report.ScopeResultsListener, 0),
 		syncListener:  make([]report.SyncResultsListener, 0),

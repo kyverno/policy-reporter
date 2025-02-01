@@ -181,7 +181,10 @@ func newRunCMD(version string) *cobra.Command {
 
 				for {
 					stop := make(chan struct{})
-					if err := client.Run(c.WorkerCount, stop); err != nil {
+					restart := make(chan struct{})
+					resolver.SetRestartCh(restart)
+
+					if err := client.Run(c.WorkerCount, stop, restart); err != nil {
 						zap.L().Error("informer client error", zap.Error(err))
 					}
 

@@ -65,6 +65,7 @@ type Resolver struct {
 	targetConfigClient *targetconfig.TargetConfigClient
 	logger             *zap.Logger
 	resultListener     *listener.ResultListener
+	polrRestartCh      chan struct{}
 }
 
 // APIServer resolver method
@@ -142,6 +143,14 @@ func (r *Resolver) Database() *bun.DB {
 	zap.L().Info("sqlite connection created")
 	r.database = factory.NewSQLite(r.config.DBFile)
 	return r.database
+}
+
+func (r *Resolver) PolicyReportRestartCh() chan struct{} {
+	return r.polrRestartCh
+}
+
+func (r *Resolver) SetRestartCh(restart chan struct{}) {
+	r.polrRestartCh = restart
 }
 
 // PolicyReportStore resolver method
@@ -251,7 +260,7 @@ func (r *Resolver) Queue() (*kubernetes.Queue, error) {
 func (r *Resolver) RegisterNewResultsListener() {
 	targets := r.TargetClients()
 
-	newResultListener := listener.NewResultListener(false, r.ResultCache(), time.Now()) // revert this
+	newResultListener := listener.NewResultListener(r.ResultCache(), time.Now())
 	r.resultListener = newResultListener
 	r.EventPublisher().RegisterListener(listener.NewResults, newResultListener.Listen)
 
@@ -272,6 +281,8 @@ func (r *Resolver) RegisterSendResultListener(targetChan chan *target.Collection
 			select {
 			case targets := <-targetChan:
 				registerFunc(targets)
+				r.polrRestartCh <- struct{}{}
+				r.logger.Info("sent restart signal")
 			default:
 				time.Sleep(time.Second * 5)
 			}
