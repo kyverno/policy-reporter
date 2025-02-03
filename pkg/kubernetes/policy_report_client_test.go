@@ -21,6 +21,7 @@ var filter = report.NewMetaFilter(false, validate.RuleSets{})
 func Test_PolicyReportWatcher(t *testing.T) {
 	ctx := context.Background()
 	stop := make(chan struct{})
+	restart := make(chan struct{})
 	defer close(stop)
 
 	wg := sync.WaitGroup{}
@@ -47,7 +48,7 @@ func Test_PolicyReportWatcher(t *testing.T) {
 	client := kubernetes.NewPolicyReportClient(kclient, filter, queue)
 
 	go func() {
-		err := client.Run(1, stop)
+		err := client.Run(1, stop, restart)
 		if err != nil {
 			t.Error(err)
 		}
@@ -74,6 +75,7 @@ func Test_PolicyReportWatcher(t *testing.T) {
 func Test_ClusterPolicyReportWatcher(t *testing.T) {
 	ctx := context.Background()
 	stop := make(chan struct{})
+	restart := make(chan struct{})
 	defer close(stop)
 	wg := sync.WaitGroup{}
 	wg.Add(3)
@@ -99,7 +101,7 @@ func Test_ClusterPolicyReportWatcher(t *testing.T) {
 	client := kubernetes.NewPolicyReportClient(kclient, filter, queue)
 
 	go func() {
-		err := client.Run(1, stop)
+		err := client.Run(1, stop, restart)
 		if err != nil {
 			t.Error(err)
 		}

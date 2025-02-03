@@ -12,12 +12,10 @@ import (
 const NewResults = "new_results_listener"
 
 type ResultListener struct {
-	skipExisting  bool
 	listener      []report.PolicyReportResultListener
 	scopeListener []report.ScopeResultsListener
 	syncListener  []report.SyncResultsListener
 	cache         cache.Cache
-	startUp       time.Time
 }
 
 func (l *ResultListener) RegisterListener(listener report.PolicyReportResultListener) {
@@ -87,15 +85,7 @@ func (l *ResultListener) Listen(event report.LifecycleEvent) {
 		return
 	}
 
-	// existing := l.cache.GetResults(event.PolicyReport.GetID())
 	newResults := make([]v1alpha2.PolicyReportResult, 0)
-
-	// for _, r := range  {
-	// 	// new things get skipped because the cache has seen them before, but this is incorrect since new targets may be created
-	// 	// if helper.Contains(r.GetID(), existing) {
-	// 	// 	continue
-	// 	// }
-	// }
 	newResults = append(newResults, event.PolicyReport.GetResults()...)
 
 	l.cache.AddReport(event.PolicyReport)

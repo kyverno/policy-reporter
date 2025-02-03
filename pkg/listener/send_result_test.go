@@ -7,6 +7,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
+	"github.com/kyverno/policy-reporter/pkg/cache"
 	"github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
 	"github.com/kyverno/policy-reporter/pkg/fixtures"
 	"github.com/kyverno/policy-reporter/pkg/listener"
@@ -20,6 +21,10 @@ type client struct {
 	cleanupCalled         bool
 	batchSend             bool
 	cleanup               bool
+}
+
+func (c *client) Cache() cache.Cache {
+	return cache.NewInMermoryCache(time.Second, time.Second)
 }
 
 func (c *client) Send(result v1alpha2.PolicyReportResult) {

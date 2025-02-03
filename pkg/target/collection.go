@@ -63,23 +63,18 @@ func (t *Target) Secret() string {
 }
 
 type Collection struct {
-	mx         *sync.Mutex
-	clients    []Client
-	targets    map[string]*Target
-	crdTargets map[string]*Target
+	mx      *sync.Mutex
+	clients []Client
+	targets map[string]*Target
 }
 
-func (c *Collection) CrdTargets() map[string]*Target {
-	return c.crdTargets
-}
-
-func (c *Collection) AddCrdTarget(key string, t *Target) {
+func (c *Collection) AddTarget(key string, t *Target) {
 	c.mx.Lock()
 	c.targets[key] = t
 	c.mx.Unlock()
 }
 
-func (c *Collection) RemoveCrdTarget(key string) {
+func (c *Collection) RemoveTarget(key string) {
 	c.mx.Lock()
 	delete(c.targets, key)
 	c.mx.Unlock()
@@ -109,16 +104,11 @@ func (c *Collection) Targets() []*Target {
 }
 
 func (c *Collection) Clients() []Client {
-	if len(c.clients) != 0 {
-		return c.clients
-	}
-
 	filterFunc := func(t *Target) Client {
 		return t.Client
 	}
 
 	c.clients = helper.MapSlice(c.targets, filterFunc)
-	c.clients = append(c.clients, helper.MapSlice(c.crdTargets, filterFunc)...)
 
 	return c.clients
 }
@@ -165,10 +155,9 @@ func (c *Collection) Length() int {
 
 func NewCollection(targets ...*Target) *Collection {
 	collection := &Collection{
-		clients:    make([]Client, 0),
-		targets:    make(map[string]*Target, 0),
-		crdTargets: make(map[string]*Target, 0),
-		mx:         new(sync.Mutex),
+		clients: make([]Client, 0),
+		targets: make(map[string]*Target, 0),
+		mx:      new(sync.Mutex),
 	}
 
 	for _, t := range targets {

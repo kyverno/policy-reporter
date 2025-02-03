@@ -462,14 +462,15 @@ func Test_RegisterMetricsListener(t *testing.T) {
 func Test_RegisterSendResultListener(t *testing.T) {
 	t.Run("Register SendResultListener with Targets", func(t *testing.T) {
 		resolver := config.NewResolver(testConfig, &rest.Config{})
-		resolver.RegisterSendResultListener()
+		targetChan := make(chan *target.Collection)
+		resolver.RegisterSendResultListener(targetChan)
 
 		assert.Len(t, resolver.EventPublisher().GetListener(), 1, "Expected one Listener to be registered")
 	})
 	t.Run("Register SendResultListener without Targets", func(t *testing.T) {
 		resolver := config.NewResolver(&config.Config{}, &rest.Config{})
-
-		resolver.RegisterSendResultListener()
+		targetChan := make(chan *target.Collection)
+		resolver.RegisterSendResultListener(targetChan)
 
 		assert.Len(t, resolver.EventPublisher().GetListener(), 0, "Expected no Listener to be registered because no target exists")
 	})

@@ -40,7 +40,7 @@ func (c *TargetConfigClient) configureInformer(targetChan chan *target.Collectio
 				c.logger.Error("unable to create target from TargetConfig: " + err.Error())
 			}
 
-			c.targetClients.AddCrdTarget(targetKey, target)
+			c.targetClients.AddTarget(targetKey, target)
 			targetChan <- c.targetClients
 		},
 		UpdateFunc: func(oldObj, newObj interface{}) {
@@ -51,7 +51,7 @@ func (c *TargetConfigClient) configureInformer(targetChan chan *target.Collectio
 			c.logger.Info(fmt.Sprintf("deleting target: %s, namespace: %s, type: %s", tc.Name, tc.Namespace, tc.Spec.TargetType))
 
 			// todo: dont restart informer sync on delete
-			c.targetClients.RemoveCrdTarget(targetKey)
+			c.targetClients.RemoveTarget(targetKey)
 			targetChan <- c.targetClients
 		},
 	})

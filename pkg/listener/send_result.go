@@ -35,8 +35,10 @@ func NewSendResultListener(targets *target.Collection) report.PolicyReportResult
 
 				// check if this report was sent on this target
 				existing := target.Cache().GetResults(re.GetID())
-				if helper.Contains(re.GetID(), existing) {
-					return
+				for _, r := range re.GetResults() {
+					if helper.Contains(r.GetID(), existing) {
+						return
+					}
 				}
 
 				target.Cache().AddReport(re)
