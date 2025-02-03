@@ -12,6 +12,7 @@ import (
 	"github.com/kyverno/policy-reporter/pkg/database"
 	"github.com/kyverno/policy-reporter/pkg/report"
 	"github.com/kyverno/policy-reporter/pkg/target"
+	"github.com/kyverno/policy-reporter/pkg/targetconfig"
 )
 
 var targets = target.Targets{
@@ -462,14 +463,14 @@ func Test_RegisterMetricsListener(t *testing.T) {
 func Test_RegisterSendResultListener(t *testing.T) {
 	t.Run("Register SendResultListener with Targets", func(t *testing.T) {
 		resolver := config.NewResolver(testConfig, &rest.Config{})
-		targetChan := make(chan *target.Collection)
+		targetChan := make(chan targetconfig.TcEvent)
 		resolver.RegisterSendResultListener(targetChan)
 
 		assert.Len(t, resolver.EventPublisher().GetListener(), 1, "Expected one Listener to be registered")
 	})
 	t.Run("Register SendResultListener without Targets", func(t *testing.T) {
 		resolver := config.NewResolver(&config.Config{}, &rest.Config{})
-		targetChan := make(chan *target.Collection)
+		targetChan := make(chan targetconfig.TcEvent)
 		resolver.RegisterSendResultListener(targetChan)
 
 		assert.Len(t, resolver.EventPublisher().GetListener(), 0, "Expected no Listener to be registered because no target exists")

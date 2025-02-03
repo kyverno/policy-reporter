@@ -71,24 +71,6 @@ func (k *k8sPolicyReportClient) Run(worker int, stopper chan struct{}, restartCh
 		return err
 	}
 
-	// todo: clean this up + the informer receives two restart signals
-	go func() {
-		for {
-			select {
-			case <-restartChan:
-				k.Stop()
-				stopper = make(chan struct{})
-				if err := k.Sync(stopper); err != nil {
-					panic(err)
-				}
-
-				k.queue.Run(worker, stopper)
-			default:
-				time.Sleep(time.Second * 3)
-			}
-		}
-	}()
-
 	k.queue.Run(worker, stopper)
 	return nil
 }

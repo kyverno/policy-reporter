@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"flag"
+	"time"
 
 	"github.com/spf13/cobra"
 	"go.uber.org/zap"
@@ -14,7 +15,7 @@ import (
 	v1 "github.com/kyverno/policy-reporter/pkg/api/v1"
 	v2 "github.com/kyverno/policy-reporter/pkg/api/v2"
 	"github.com/kyverno/policy-reporter/pkg/config"
-	"github.com/kyverno/policy-reporter/pkg/target"
+	"github.com/kyverno/policy-reporter/pkg/targetconfig"
 
 	"github.com/kyverno/policy-reporter/pkg/database"
 	"github.com/kyverno/policy-reporter/pkg/listener"
@@ -58,7 +59,7 @@ func newRunCMD(version string) *cobra.Command {
 				return err
 			}
 
-			targetChan := make(chan *target.Collection)
+			targetChan := make(chan targetconfig.TcEvent)
 			g := &errgroup.Group{}
 
 			var store *database.Store
@@ -178,11 +179,22 @@ func newRunCMD(version string) *cobra.Command {
 				readinessProbe.Wait()
 
 				logger.Info("start client", zap.Int("worker", c.WorkerCount))
+				restart := make(chan struct{})
+				resolver.SetRestartCh(restart)
+
+				go func() {
+					for {
+						select {
+						case <-restart:
+							zap.L().Info("received restart signal")
+							client.Stop()
+						case <-time.After(time.Second * 3):
+						}
+					}
+				}()
 
 				for {
 					stop := make(chan struct{})
-					restart := make(chan struct{})
-					resolver.SetRestartCh(restart)
 
 					if err := client.Run(c.WorkerCount, stop, restart); err != nil {
 						zap.L().Error("informer client error", zap.Error(err))

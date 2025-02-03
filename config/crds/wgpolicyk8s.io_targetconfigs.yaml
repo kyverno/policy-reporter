@@ -97,10 +97,6 @@ spec:
                         additionalProperties:
                           type: string
                         type: object
-                    required:
-                    - exclude
-                    - include
-                    - selector
                     type: object
                   policies:
                     properties:
@@ -116,10 +112,6 @@ spec:
                         additionalProperties:
                           type: string
                         type: object
-                    required:
-                    - exclude
-                    - include
-                    - selector
                     type: object
                   reportLabels:
                     properties:
@@ -135,10 +127,6 @@ spec:
                         additionalProperties:
                           type: string
                         type: object
-                    required:
-                    - exclude
-                    - include
-                    - selector
                     type: object
                   severities:
                     properties:
@@ -154,10 +142,6 @@ spec:
                         additionalProperties:
                           type: string
                         type: object
-                    required:
-                    - exclude
-                    - include
-                    - selector
                     type: object
                   sources:
                     properties:
@@ -173,10 +157,6 @@ spec:
                         additionalProperties:
                           type: string
                         type: object
-                    required:
-                    - exclude
-                    - include
-                    - selector
                     type: object
                   status:
                     properties:
@@ -192,18 +172,7 @@ spec:
                         additionalProperties:
                           type: string
                         type: object
-                    required:
-                    - exclude
-                    - include
-                    - selector
                     type: object
-                required:
-                - namespaces
-                - policies
-                - reportLabels
-                - severities
-                - sources
-                - status
                 type: object
               gcs:
                 properties:
@@ -248,6 +217,7 @@ spec:
                     type: string
                 required:
                 - accessKeyId
+                - bucket
                 - secretAccessKey
                 type: object
               secretRef:
@@ -264,16 +234,16 @@ spec:
                     additionalProperties:
                       type: string
                     type: object
+                  host:
+                    type: string
                   skipTLS:
                     type: boolean
-                  webhook:
-                    type: string
                 required:
                 - certificate
                 - channel
                 - headers
+                - host
                 - skipTLS
-                - webhook
                 type: object
               sources:
                 items:
@@ -291,19 +261,19 @@ spec:
                     additionalProperties:
                       type: string
                     type: object
+                  host:
+                    type: string
                   skipTLS:
                     type: boolean
                   token:
-                    type: string
-                  webhook:
                     type: string
                 required:
                 - certificate
                 - chatId
                 - headers
+                - host
                 - skipTLS
                 - token
-                - webhook
                 type: object
               webhook:
                 properties:
@@ -313,15 +283,15 @@ spec:
                     additionalProperties:
                       type: string
                     type: object
+                  host:
+                    type: string
                   skipTLS:
                     type: boolean
-                  webhook:
-                    type: string
                 required:
                 - certificate
                 - headers
+                - host
                 - skipTLS
-                - webhook
                 type: object
             type: object
           status:

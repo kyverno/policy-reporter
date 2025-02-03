@@ -20,7 +20,19 @@ type TargetConfigClient struct {
 	informer      cache.SharedIndexInformer
 }
 
-func (c *TargetConfigClient) configureInformer(targetChan chan *target.Collection) {
+type EventType string
+
+const (
+	DeleteTcEvent = "delete"
+	CreateTcEvent = "create"
+)
+
+type TcEvent struct {
+	Type    EventType
+	Targets *target.Collection
+}
+
+func (c *TargetConfigClient) configureInformer(targetChan chan TcEvent) {
 	f := func(tc *v1alpha1.TargetConfig) (*target.Target, error) {
 		t, err := c.targetFactory.CreateSingleClient(tc)
 		if err != nil {
@@ -41,7 +53,7 @@ func (c *TargetConfigClient) configureInformer(targetChan chan *target.Collectio
 			}
 
 			c.targetClients.AddTarget(targetKey, target)
-			targetChan <- c.targetClients
+			targetChan <- TcEvent{Type: CreateTcEvent, Targets: c.targetClients}
 		},
 		UpdateFunc: func(oldObj, newObj interface{}) {
 		},
@@ -52,12 +64,12 @@ func (c *TargetConfigClient) configureInformer(targetChan chan *target.Collectio
 
 			// todo: dont restart informer sync on delete
 			c.targetClients.RemoveTarget(targetKey)
-			targetChan <- c.targetClients
+			targetChan <- TcEvent{Type: DeleteTcEvent, Targets: c.targetClients}
 		},
 	})
 }
 
-func (c *TargetConfigClient) CreateInformer(targetChan chan *target.Collection) {
+func (c *TargetConfigClient) CreateInformer(targetChan chan TcEvent) {
 	tcInformer := tcinformer.NewSharedInformerFactory(c.tcClient, time.Second)
 	inf := tcInformer.Wgpolicyk8s().V1alpha1().TargetConfigs().Informer()
 	c.informer = inf

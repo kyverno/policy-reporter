@@ -18,6 +18,12 @@ type ResultListener struct {
 	cache         cache.Cache
 }
 
+func (l *ResultListener) ResetListeners() {
+	l.listener = []report.PolicyReportResultListener{}
+	l.scopeListener = []report.ScopeResultsListener{}
+	l.syncListener = []report.SyncResultsListener{}
+}
+
 func (l *ResultListener) RegisterListener(listener report.PolicyReportResultListener) {
 	l.listener = append(l.listener, listener)
 }

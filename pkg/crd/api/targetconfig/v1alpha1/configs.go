@@ -11,7 +11,6 @@ type AWSConfig struct {
 	Endpoint string `mapstructure:"endpoint" json:"endpoint"`
 }
 
-// todo: change this to be called host
 type WebhookOptions struct {
 	Host        string            `mapstructure:"host" json:"host"`
 	SkipTLS     bool              `mapstructure:"skipTLS" json:"skipTLS"`

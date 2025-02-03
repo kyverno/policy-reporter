@@ -1,16 +1,25 @@
 package filters
 
 type ValueFilter struct {
-	Include  []string          `mapstructure:"include" json:"include"`
-	Exclude  []string          `mapstructure:"exclude" json:"exclude"`
+	// +optional
+	Include []string `mapstructure:"include" json:"include"`
+	// +optional
+	Exclude []string `mapstructure:"exclude" json:"exclude"`
+	// +optional
 	Selector map[string]string `mapstructure:"selector" json:"selector"`
 }
 
 type Filter struct {
-	Namespaces   ValueFilter `mapstructure:"namespaces" json:"namespaces"`
-	Status       ValueFilter `mapstructure:"status" json:"status"`
-	Severities   ValueFilter `mapstructure:"severities" json:"severities"`
-	Policies     ValueFilter `mapstructure:"policies" json:"policies"`
-	Sources      ValueFilter `mapstructure:"sources" json:"sources"`
+	// +optional
+	Namespaces ValueFilter `mapstructure:"namespaces" json:"namespaces"`
+	// +optional
+	Status ValueFilter `mapstructure:"status" json:"status"`
+	// +optional
+	Severities ValueFilter `mapstructure:"severities" json:"severities"`
+	// +optional
+	Policies ValueFilter `mapstructure:"policies" json:"policies"`
+	// +optional
+	Sources ValueFilter `mapstructure:"sources" json:"sources"`
+	// +optional
 	ReportLabels ValueFilter `mapstructure:"reportLabels" json:"reportLabels"`
 }

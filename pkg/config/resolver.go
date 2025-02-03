@@ -4,6 +4,7 @@ import (
 	"context"
 	"crypto/tls"
 	"crypto/x509"
+	"fmt"
 	"os"
 	"strings"
 	"time"
@@ -268,7 +269,7 @@ func (r *Resolver) RegisterNewResultsListener() {
 }
 
 // RegisterSendResultListener resolver method
-func (r *Resolver) RegisterSendResultListener(targetChan chan *target.Collection) {
+func (r *Resolver) RegisterSendResultListener(targetChan chan targetconfig.TcEvent) {
 	registerFunc := func(targets *target.Collection) {
 		r.resultListener.RegisterListener(listener.NewSendResultListener(targets))
 		r.resultListener.RegisterScopeListener(listener.NewSendScopeResultsListener(targets))
@@ -279,12 +280,17 @@ func (r *Resolver) RegisterSendResultListener(targetChan chan *target.Collection
 		r.logger.Info("starting listener loop")
 		for {
 			select {
-			case targets := <-targetChan:
-				registerFunc(targets)
-				r.polrRestartCh <- struct{}{}
-				r.logger.Info("sent restart signal")
-			default:
-				time.Sleep(time.Second * 5)
+			case event := <-targetChan:
+				// clear existing listeners and create new ones
+				r.logger.Info(fmt.Sprintf("received targetconfig event of type %s", event.Type))
+				r.resultListener.ResetListeners()
+				registerFunc(event.Targets)
+
+				if event.Type == targetconfig.CreateTcEvent {
+					r.polrRestartCh <- struct{}{}
+					r.logger.Info("sent restart signal")
+				}
+			case <-time.After(5 * time.Second):
 			}
 		}
 	}()
@@ -567,7 +573,7 @@ func (r *Resolver) EmailClient() *email.Client {
 	return email.NewClient(r.config.EmailReports.SMTP.From, r.SMTPServer())
 }
 
-func (r *Resolver) TargetConfigClient(targetChan chan *target.Collection) (*targetconfig.TargetConfigClient, error) {
+func (r *Resolver) TargetConfigClient(targetChan chan targetconfig.TcEvent) (*targetconfig.TargetConfigClient, error) {
 	if r.targetConfigClient != nil {
 		return r.targetConfigClient, nil
 	}
