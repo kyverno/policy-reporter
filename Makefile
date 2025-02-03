@@ -354,10 +354,10 @@ codegen-applyconfigurations: $(PACKAGE_SHIM) $(APPLYCONFIGURATION_GEN) ## Genera
 		--output-package $(APPLYCONFIGURATIONS_PACKAGE)
 
 .PHONY: codegen-crds
-codegen-crds: ## Generate kyverno CRDs
+codegen-crds: ## Generate policy reporter CRDs
 codegen-crds: $(PACKAGE_SHIM)
 codegen-crds: $(CONTROLLER_GEN)
-	@echo Generate kyverno crds... >&2
+	@echo Generate policy reporter crds... >&2
 	@rm -rf $(CRDS_PATH) && mkdir -p $(CRDS_PATH)
 	@GOPATH=$(GOPATH_SHIM) $(CONTROLLER_GEN) paths=./pkg/crd/api/targetconfig/... crd:crdVersions=v1,ignoreUnexportedFields=true,generateEmbeddedObjectMeta=false output:dir=$(CRDS_PATH)
 
