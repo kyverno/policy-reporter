@@ -61,8 +61,6 @@ func (c *TargetConfigClient) configureInformer(targetChan chan TcEvent) {
 			tc := obj.(*v1alpha1.TargetConfig)
 			targetKey := tc.Name + "," + tc.Namespace + "," + tc.Spec.TargetType
 			c.logger.Info(fmt.Sprintf("deleting target: %s, namespace: %s, type: %s", tc.Name, tc.Namespace, tc.Spec.TargetType))
-
-			// todo: dont restart informer sync on delete
 			c.targetClients.RemoveTarget(targetKey)
 			targetChan <- TcEvent{Type: DeleteTcEvent, Targets: c.targetClients}
 		},
