@@ -15,10 +15,9 @@ import (
 	v1 "github.com/kyverno/policy-reporter/pkg/api/v1"
 	v2 "github.com/kyverno/policy-reporter/pkg/api/v2"
 	"github.com/kyverno/policy-reporter/pkg/config"
-	"github.com/kyverno/policy-reporter/pkg/targetconfig"
-
 	"github.com/kyverno/policy-reporter/pkg/database"
 	"github.com/kyverno/policy-reporter/pkg/listener"
+	"github.com/kyverno/policy-reporter/pkg/targetconfig"
 )
 
 func newRunCMD(version string) *cobra.Command {

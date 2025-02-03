@@ -19,9 +19,10 @@ limitations under the License.
 package fake
 
 import (
-	v1alpha1 "github.com/kyverno/policy-reporter/pkg/crd/client/targetconfig/clientset/versioned/typed/targetconfig/v1alpha1"
 	rest "k8s.io/client-go/rest"
 	testing "k8s.io/client-go/testing"
+
+	v1alpha1 "github.com/kyverno/policy-reporter/pkg/crd/client/targetconfig/clientset/versioned/typed/targetconfig/v1alpha1"
 )
 
 type FakeWgpolicyk8sV1alpha1 struct {

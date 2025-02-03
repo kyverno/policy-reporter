@@ -4,12 +4,13 @@ import (
 	"fmt"
 	"time"
 
+	"go.uber.org/zap"
+	"k8s.io/client-go/tools/cache"
+
 	"github.com/kyverno/policy-reporter/pkg/crd/api/targetconfig/v1alpha1"
 	tcv1alpha1 "github.com/kyverno/policy-reporter/pkg/crd/client/targetconfig/clientset/versioned"
 	tcinformer "github.com/kyverno/policy-reporter/pkg/crd/client/targetconfig/informers/externalversions"
 	"github.com/kyverno/policy-reporter/pkg/target"
-	"go.uber.org/zap"
-	"k8s.io/client-go/tools/cache"
 )
 
 type TargetConfigClient struct {
