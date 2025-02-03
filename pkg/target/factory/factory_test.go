@@ -108,7 +108,7 @@ var targets = target.Targets{
 	Slack: &v1alpha1.Config[v1alpha1.SlackOptions]{
 		Config: &v1alpha1.SlackOptions{
 			WebhookOptions: v1alpha1.WebhookOptions{
-				Webhook: "http://localhost:80",
+				Host:    "http://localhost:80",
 				SkipTLS: true,
 			},
 		},
@@ -118,7 +118,7 @@ var targets = target.Targets{
 		Channels: []*v1alpha1.Config[v1alpha1.SlackOptions]{{
 			Config: &v1alpha1.SlackOptions{
 				WebhookOptions: v1alpha1.WebhookOptions{
-					Webhook: "http://localhost:9200",
+					Host: "http://localhost:9200",
 				},
 			},
 		}, {
@@ -129,7 +129,7 @@ var targets = target.Targets{
 	},
 	Discord: &v1alpha1.Config[v1alpha1.WebhookOptions]{
 		Config: &v1alpha1.WebhookOptions{
-			Webhook: "http://discord:80",
+			Host:    "http://discord:80",
 			SkipTLS: true,
 		},
 		SkipExisting:    true,
@@ -137,13 +137,13 @@ var targets = target.Targets{
 		CustomFields:    map[string]string{"field": "value"},
 		Channels: []*v1alpha1.Config[v1alpha1.WebhookOptions]{{
 			Config: &v1alpha1.WebhookOptions{
-				Webhook: "http://localhost:9200",
+				Host: "http://localhost:9200",
 			},
 		}},
 	},
 	Teams: &v1alpha1.Config[v1alpha1.WebhookOptions]{
 		Config: &v1alpha1.WebhookOptions{
-			Webhook: "http://hook.teams:80",
+			Host:    "http://hook.teams:80",
 			SkipTLS: true,
 		},
 		SkipExisting:    true,
@@ -151,13 +151,13 @@ var targets = target.Targets{
 		CustomFields:    map[string]string{"field": "value"},
 		Channels: []*v1alpha1.Config[v1alpha1.WebhookOptions]{{
 			Config: &v1alpha1.WebhookOptions{
-				Webhook: "http://localhost:9200",
+				Host: "http://localhost:9200",
 			},
 		}},
 	},
 	GoogleChat: &v1alpha1.Config[v1alpha1.WebhookOptions]{
 		Config: &v1alpha1.WebhookOptions{
-			Webhook: "http://localhost:900/webhook",
+			Host:    "http://localhost:900/webhook",
 			SkipTLS: true,
 		},
 		SkipExisting:    true,
@@ -168,7 +168,7 @@ var targets = target.Targets{
 	Telegram: &v1alpha1.Config[v1alpha1.TelegramOptions]{
 		Config: &v1alpha1.TelegramOptions{
 			WebhookOptions: v1alpha1.WebhookOptions{
-				Webhook: "http://localhost:80",
+				Host:    "http://localhost:80",
 				SkipTLS: true,
 			},
 			Token:  "XXX",
@@ -185,7 +185,7 @@ var targets = target.Targets{
 	},
 	Webhook: &v1alpha1.Config[v1alpha1.WebhookOptions]{
 		Config: &v1alpha1.WebhookOptions{
-			Webhook: "http://localhost:8080",
+			Host:    "http://localhost:8080",
 			SkipTLS: true,
 			Headers: map[string]string{
 				"X-Custom": "Header",
@@ -196,7 +196,7 @@ var targets = target.Targets{
 		CustomFields:    map[string]string{"field": "value"},
 		Channels: []*v1alpha1.Config[v1alpha1.WebhookOptions]{{
 			Config: &v1alpha1.WebhookOptions{
-				Webhook: "http://localhost:8081",
+				Host: "http://localhost:8081",
 				Headers: map[string]string{
 					"X-Custom-2": "Header",
 				},
@@ -660,33 +660,33 @@ func Test_CustomFields(t *testing.T) {
 		Slack: &v1alpha1.Config[v1alpha1.SlackOptions]{
 			Config: &v1alpha1.SlackOptions{
 				WebhookOptions: v1alpha1.WebhookOptions{
-					Webhook: "http://localhost:80",
+					Host: "http://localhost:80",
 				},
 			},
 			CustomFields: map[string]string{"field": "value"},
 		},
 		Discord: &v1alpha1.Config[v1alpha1.WebhookOptions]{
 			Config: &v1alpha1.WebhookOptions{
-				Webhook: "http://discord:80",
+				Host: "http://discord:80",
 			},
 			CustomFields: map[string]string{"field": "value"},
 		},
 		Teams: &v1alpha1.Config[v1alpha1.WebhookOptions]{
 			Config: &v1alpha1.WebhookOptions{
-				Webhook: "http://hook.teams:80",
+				Host: "http://hook.teams:80",
 			},
 			CustomFields: map[string]string{"field": "value"},
 		},
 		GoogleChat: &v1alpha1.Config[v1alpha1.WebhookOptions]{
 			Config: &v1alpha1.WebhookOptions{
-				Webhook: "http://localhost:900/webhook",
+				Host: "http://localhost:900/webhook",
 			},
 			CustomFields: map[string]string{"field": "value"},
 		},
 		Telegram: &v1alpha1.Config[v1alpha1.TelegramOptions]{
 			Config: &v1alpha1.TelegramOptions{
 				WebhookOptions: v1alpha1.WebhookOptions{
-					Webhook: "http://localhost:80",
+					Host: "http://localhost:80",
 				},
 				Token:  "XXX",
 				ChatID: "123456",
@@ -695,7 +695,7 @@ func Test_CustomFields(t *testing.T) {
 		},
 		Webhook: &v1alpha1.Config[v1alpha1.WebhookOptions]{
 			Config: &v1alpha1.WebhookOptions{
-				Webhook: "http://localhost:8080",
+				Host: "http://localhost:8080",
 			},
 			CustomFields: map[string]string{"field": "value"},
 		},

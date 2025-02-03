@@ -103,7 +103,7 @@ func (f *TargetFactory) CreateSingleClient(tc *v1alpha1.TargetConfig) (*target.T
 	var t *target.Target
 	switch tc.Spec.TargetType {
 	case "s3":
-		t = createClients(tc.Name, createConfig(tc, &tc.Spec.S3), f.CreateS3Target)[0] // todo: verify if using the name is the right thing to do
+		t = createClients(tc.Name, createConfig(tc, &tc.Spec.S3), f.CreateS3Target)[0]
 		return t, nil
 	case "webhook":
 		t = createClients(tc.Name, createConfig(tc, &tc.Spec.Webhook), f.CreateWebhookTarget)[0]
@@ -134,13 +134,13 @@ func (f *TargetFactory) CreateSlackTarget(config, parent *v1alpha1.Config[v1alph
 		f.mapSecretValues(config, config.SecretRef, config.MountedSecret)
 	}
 
-	if config.Config.Webhook == "" && config.Config.Channel == "" {
+	if config.Config.Host == "" && config.Config.Channel == "" {
 		return nil
 	}
 
-	setFallback(&config.Config.Webhook, parent.Config.Webhook)
+	setFallback(&config.Config.Host, parent.Config.Host)
 
-	if config.Config.Webhook == "" {
+	if config.Config.Host == "" {
 		return nil
 	}
 
@@ -161,7 +161,7 @@ func (f *TargetFactory) CreateSlackTarget(config, parent *v1alpha1.Config[v1alph
 				ReportFilter:          createReportFilter(config.Filter),
 			},
 			Channel:      config.Config.Channel,
-			Webhook:      config.Config.Webhook,
+			Webhook:      config.Config.Host,
 			CustomFields: config.CustomFields,
 			Headers:      config.Config.Headers,
 			HTTPClient:   http.NewClient("", false),
@@ -292,7 +292,7 @@ func (f *TargetFactory) CreateDiscordTarget(config, parent *v1alpha1.Config[v1al
 
 	mapWebhookTarget(config, parent)
 
-	if config.Config.Webhook == "" {
+	if config.Config.Host == "" {
 		return nil
 	}
 
@@ -310,7 +310,7 @@ func (f *TargetFactory) CreateDiscordTarget(config, parent *v1alpha1.Config[v1al
 				ResultFilter:          f.createResultFilter(config.Filter, config.MinimumSeverity, config.Sources),
 				ReportFilter:          createReportFilter(config.Filter),
 			},
-			Webhook:      config.Config.Webhook,
+			Webhook:      config.Config.Host,
 			CustomFields: config.CustomFields,
 			HTTPClient:   http.NewClient(config.Config.Certificate, config.Config.SkipTLS),
 		}),
@@ -332,7 +332,7 @@ func (f *TargetFactory) CreateTeamsTarget(config, parent *v1alpha1.Config[v1alph
 
 	mapWebhookTarget(config, parent)
 
-	if config.Config.Webhook == "" {
+	if config.Config.Host == "" {
 		return nil
 	}
 
@@ -350,7 +350,7 @@ func (f *TargetFactory) CreateTeamsTarget(config, parent *v1alpha1.Config[v1alph
 				ResultFilter:          f.createResultFilter(config.Filter, config.MinimumSeverity, config.Sources),
 				ReportFilter:          createReportFilter(config.Filter),
 			},
-			Webhook:      config.Config.Webhook,
+			Webhook:      config.Config.Host,
 			CustomFields: config.CustomFields,
 			Headers:      config.Config.Headers,
 			HTTPClient:   http.NewClient(config.Config.Certificate, config.Config.SkipTLS),
@@ -373,7 +373,7 @@ func (f *TargetFactory) CreateWebhookTarget(config, parent *v1alpha1.Config[v1al
 
 	mapWebhookTarget(config, parent)
 
-	if config.Config.Webhook == "" {
+	if config.Config.Host == "" {
 		return nil
 	}
 
@@ -391,7 +391,7 @@ func (f *TargetFactory) CreateWebhookTarget(config, parent *v1alpha1.Config[v1al
 				ResultFilter:          f.createResultFilter(config.Filter, config.MinimumSeverity, config.Sources),
 				ReportFilter:          createReportFilter(config.Filter),
 			},
-			Host:         config.Config.Webhook,
+			Host:         config.Config.Host,
 			Headers:      config.Config.Headers,
 			CustomFields: config.CustomFields,
 			HTTPClient:   http.NewClient(config.Config.Certificate, config.Config.SkipTLS),
@@ -418,7 +418,7 @@ func (f *TargetFactory) CreateTelegramTarget(config, parent *v1alpha1.Config[v1a
 		return nil
 	}
 
-	setFallback(&config.Config.Webhook, parent.Config.Webhook)
+	setFallback(&config.Config.Host, parent.Config.Host)
 	setFallback(&config.Config.Certificate, parent.Config.Certificate)
 	setBool(&config.Config.SkipTLS, parent.Config.SkipTLS)
 
@@ -437,8 +437,8 @@ func (f *TargetFactory) CreateTelegramTarget(config, parent *v1alpha1.Config[v1a
 	}
 
 	host := "https://api.telegram.org"
-	if config.Config.Webhook != "" {
-		host = strings.TrimSuffix(config.Config.Webhook, "/")
+	if config.Config.Host != "" {
+		host = strings.TrimSuffix(config.Config.Host, "/")
 	}
 
 	zap.S().Infof("%s configured", config.Name)
@@ -479,7 +479,7 @@ func (f *TargetFactory) CreateGoogleChatTarget(config, parent *v1alpha1.Config[v
 
 	mapWebhookTarget(config, parent)
 
-	if config.Config.Webhook == "" {
+	if config.Config.Host == "" {
 		return nil
 	}
 
@@ -497,7 +497,7 @@ func (f *TargetFactory) CreateGoogleChatTarget(config, parent *v1alpha1.Config[v
 				ResultFilter:          f.createResultFilter(config.Filter, config.MinimumSeverity, config.Sources),
 				ReportFilter:          createReportFilter(config.Filter),
 			},
-			Webhook:      config.Config.Webhook,
+			Webhook:      config.Config.Host,
 			Headers:      config.Config.Headers,
 			CustomFields: config.CustomFields,
 			HTTPClient:   http.NewClient(config.Config.Certificate, config.Config.SkipTLS),
@@ -818,16 +818,16 @@ func (f *TargetFactory) mapSecretValues(config any, ref, mountedSecret string) {
 		}
 
 	case *v1alpha1.Config[v1alpha1.SlackOptions]:
-		if values.Webhook != "" {
-			c.Config.Webhook = values.Webhook
+		if values.Host != "" {
+			c.Config.Host = values.Host
 		}
 		if values.Channel != "" {
 			c.Config.Channel = values.Channel
 		}
 
 	case *v1alpha1.Config[v1alpha1.WebhookOptions]:
-		if values.Webhook != "" {
-			c.Config.Webhook = values.Webhook
+		if values.Host != "" {
+			c.Config.Host = values.Host
 		}
 		if values.Token != "" {
 			if c.Config.Headers == nil {
@@ -891,7 +891,7 @@ func (f *TargetFactory) mapSecretValues(config any, ref, mountedSecret string) {
 			c.Config.Token = values.Token
 		}
 		if values.Host != "" {
-			c.Config.Webhook = values.Host
+			c.Config.Host = values.Host
 		}
 	}
 }
@@ -902,7 +902,7 @@ func NewFactory(secretClient secrets.Client, filterFactory *target.ResultFilterF
 }
 
 func mapWebhookTarget(config, parent *v1alpha1.Config[v1alpha1.WebhookOptions]) {
-	setFallback(&config.Config.Webhook, parent.Config.Webhook)
+	setFallback(&config.Config.Host, parent.Config.Host)
 	setFallback(&config.Config.Certificate, parent.Config.Certificate)
 	setBool(&config.Config.SkipTLS, parent.Config.SkipTLS)
 

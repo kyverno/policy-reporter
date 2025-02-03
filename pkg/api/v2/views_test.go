@@ -109,7 +109,7 @@ func TestV2Views(t *testing.T) {
 			Config: &v1alpha1.SlackOptions{
 				Channel: "general",
 				WebhookOptions: v1alpha1.WebhookOptions{
-					Webhook: "http://slack.com/xxxx",
+					Host: "http://slack.com/xxxx",
 				},
 			},
 			Valid: true,
@@ -185,7 +185,7 @@ func TestV2Views(t *testing.T) {
 			Name:            "Target",
 			MinimumSeverity: "medium",
 			Config: &v1alpha1.WebhookOptions{
-				Webhook:     "http://discord.com/12345/888XABC",
+				Host:        "http://discord.com/12345/888XABC",
 				Certificate: "cert",
 				SkipTLS:     true,
 				Headers: map[string]string{
@@ -213,7 +213,7 @@ func TestV2Views(t *testing.T) {
 				Token:  "ABCDE",
 				ChatID: "1234567",
 				WebhookOptions: v1alpha1.WebhookOptions{
-					Webhook:     "http://telegram.com",
+					Host:        "http://telegram.com",
 					Certificate: "cert",
 					SkipTLS:     true,
 				},

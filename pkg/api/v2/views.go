@@ -633,7 +633,7 @@ func MapWebhhokToTarget(typeName string) func(ta *v1alpha1.Config[v1alpha1.Webho
 		t.SkipTLS = ta.Config.SkipTLS
 		t.UseTLS = ta.Config.Certificate != ""
 
-		if u, err := url.Parse(ta.Config.Webhook); err == nil {
+		if u, err := url.Parse(ta.Config.Host); err == nil {
 			t.Host = fmt.Sprintf("%s://%s", u.Scheme, u.Host)
 			t.Auth = u.User != nil
 		}
@@ -649,7 +649,7 @@ func MapWebhhokToTarget(typeName string) func(ta *v1alpha1.Config[v1alpha1.Webho
 func MapTelegramToTarget(ta *v1alpha1.Config[v1alpha1.TelegramOptions]) *Target {
 	t := MapBaseToTarget(ta)
 	t.Type = "Telegram"
-	t.Host = ta.Config.Webhook
+	t.Host = ta.Config.Host
 	t.SkipTLS = ta.Config.SkipTLS
 	t.UseTLS = ta.Config.Certificate != ""
 	t.Properties["chatId"] = ta.Config.ChatID

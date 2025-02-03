@@ -31,7 +31,6 @@ func (c *client) Send(result v1alpha2.PolicyReportResult) {
 	c.Called = true
 }
 
-// todo: check if this breaks tests
 func (c *client) CreationTimestamp() time.Time {
 	return time.Now()
 }

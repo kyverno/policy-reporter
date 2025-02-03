@@ -67,12 +67,11 @@ func (k *k8sPolicyReportClient) Sync(stopper chan struct{}) error {
 
 func (k *k8sPolicyReportClient) Run(worker int, stopper chan struct{}, restartChan chan struct{}) error {
 	k.stopChan = stopper
-
 	if err := k.Sync(stopper); err != nil {
 		return err
 	}
 
-	// todo: clean this up
+	// todo: clean this up + the informer receives two restart signals
 	go func() {
 		for {
 			select {
@@ -91,7 +90,6 @@ func (k *k8sPolicyReportClient) Run(worker int, stopper chan struct{}, restartCh
 	}()
 
 	k.queue.Run(worker, stopper)
-
 	return nil
 }
 
