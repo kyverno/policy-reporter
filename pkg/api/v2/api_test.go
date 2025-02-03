@@ -85,7 +85,7 @@ func TestV2(t *testing.T) {
 			Name:            "Webhook",
 			MinimumSeverity: "warn",
 			Config: &v1alpha1.WebhookOptions{
-				Webhook: "http://localhost:8080",
+				Host: "http://localhost:8080",
 			},
 		},
 	}))
