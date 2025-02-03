@@ -46,8 +46,7 @@ type TargetConfigSpec struct {
 }
 
 // TargetConfigStatus defines the observed state of TargetConfig.
-type TargetConfigStatus struct {
-}
+type TargetConfigStatus struct{}
 
 // +kubebuilder:object:root=true
 // +kubebuilder:subresource:status
