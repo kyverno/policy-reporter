@@ -8,7 +8,7 @@ require (
 	github.com/aws/aws-sdk-go-v2 v1.36.0
 	github.com/aws/aws-sdk-go-v2/config v1.29.1
 	github.com/aws/aws-sdk-go-v2/credentials v1.17.58
-	github.com/aws/aws-sdk-go-v2/service/kinesis v1.32.14
+	github.com/aws/aws-sdk-go-v2/service/kinesis v1.32.17
 	github.com/aws/aws-sdk-go-v2/service/s3 v1.74.1
 	github.com/aws/aws-sdk-go-v2/service/securityhub v1.55.5
 	github.com/aws/aws-sdk-go-v2/service/sts v1.33.13
@@ -108,7 +108,6 @@ require (
 	github.com/hashicorp/hcl v1.0.0 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/jinzhu/inflection v1.0.0 // indirect
-	github.com/jmespath/go-jmespath v0.4.0 // indirect
 	github.com/josharian/intern v1.0.0 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
 	github.com/klauspost/compress v1.17.11 // indirect
