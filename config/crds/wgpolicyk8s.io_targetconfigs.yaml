@@ -83,16 +83,8 @@ spec:
                   username:
                     type: string
                 required:
-                - apiKey
-                - certificate
-                - headers
                 - host
                 - index
-                - password
-                - rotation
-                - skipTLS
-                - typelessApi
-                - username
                 type: object
               filter:
                 properties:
@@ -200,6 +192,44 @@ spec:
                 - credentials
                 - prefix
                 type: object
+              kinesis:
+                properties:
+                  accessKeyId:
+                    type: string
+                  endpoint:
+                    type: string
+                  region:
+                    type: string
+                  secretAccessKey:
+                    type: string
+                  streamName:
+                    type: string
+                required:
+                - accessKeyId
+                - secretAccessKey
+                - streamName
+                type: object
+              loki:
+                properties:
+                  certificate:
+                    type: string
+                  headers:
+                    additionalProperties:
+                      type: string
+                    type: object
+                  host:
+                    type: string
+                  password:
+                    type: string
+                  path:
+                    type: string
+                  skipTLS:
+                    type: boolean
+                  username:
+                    type: string
+                required:
+                - host
+                type: object
               minimumSeverity:
                 type: string
               mountedSecret:
@@ -235,6 +265,32 @@ spec:
                 type: object
               secretRef:
                 type: string
+              securityHub:
+                properties:
+                  accessKeyId:
+                    type: string
+                  accountId:
+                    type: string
+                  companyName:
+                    type: string
+                  delayInSeconds:
+                    type: integer
+                  endpoint:
+                    type: string
+                  productName:
+                    type: string
+                  region:
+                    type: string
+                  secretAccessKey:
+                    type: string
+                  synchronize:
+                    type: boolean
+                required:
+                - accessKeyId
+                - accountId
+                - productName
+                - secretAccessKey
+                type: object
               skipExistingOnStartup:
                 type: boolean
               slack:
@@ -289,6 +345,8 @@ spec:
                 - token
                 type: object
               webhook:
+                description: 'todo: why are there two structs with the exact same
+                  fields ?'
                 properties:
                   certificate:
                     type: string

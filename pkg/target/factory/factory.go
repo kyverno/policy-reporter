@@ -117,6 +117,15 @@ func (f *TargetFactory) CreateSingleClient(tc *v1alpha1.TargetConfig) (*target.T
 	case "telegram":
 		t = createClients(tc.Name, createConfig(tc, &tc.Spec.Telegram), f.CreateTelegramTarget)[0]
 		return t, nil
+	case "kinesis":
+		t = createClients(tc.Name, createConfig(tc, &tc.Spec.Kinesis), f.CreateKinesisTarget)[0]
+		return t, nil
+	case "securityHub":
+		t = createClients(tc.Name, createConfig(tc, &tc.Spec.SecurityHub), f.CreateSecurityHubTarget)[0]
+		return t, nil
+	case "loki":
+		t = createClients(tc.Name, createConfig(tc, &tc.Spec.Loki), f.CreateLokiTarget)[0]
+		return t, nil
 	}
 	return nil, fmt.Errorf("invalid target type passed")
 }

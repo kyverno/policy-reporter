@@ -48,6 +48,15 @@ type TargetConfigSpec struct {
 	// +optional
 	GCS GCSOptions `json:"gcs,omitempty"`
 
+	// +optional
+	Loki LokiOptions `json:"loki,omitempty"`
+
+	// +optional
+	SecurityHub SecurityHubOptions `json:"securityHub,omitempty"`
+
+	// +optional
+	Kinesis KinesisOptions `json:"kinesis,omitempty"`
+
 	TargetType string `json:"targetType,omitempty"`
 }
 

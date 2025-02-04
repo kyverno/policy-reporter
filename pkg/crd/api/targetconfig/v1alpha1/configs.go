@@ -11,6 +11,7 @@ type AWSConfig struct {
 	Endpoint string `mapstructure:"endpoint" json:"endpoint"`
 }
 
+// todo: why are there two structs with the exact same fields ?
 type WebhookOptions struct {
 	Host        string            `mapstructure:"host" json:"host"`
 	SkipTLS     bool              `mapstructure:"skipTLS" json:"skipTLS"`
@@ -19,10 +20,13 @@ type WebhookOptions struct {
 }
 
 type HostOptions struct {
-	Host        string            `mapstructure:"host" json:"host"`
-	SkipTLS     bool              `mapstructure:"skipTLS" json:"skipTLS"`
-	Certificate string            `mapstructure:"certificate" json:"certificate"`
-	Headers     map[string]string `mapstructure:"headers" json:"headers"`
+	Host string `mapstructure:"host" json:"host"`
+	// +optional
+	SkipTLS bool `mapstructure:"skipTLS" json:"skipTLS"`
+	// +optional
+	Certificate string `mapstructure:"certificate" json:"certificate"`
+	// +optional
+	Headers map[string]string `mapstructure:"headers" json:"headers"`
 }
 
 type TelegramOptions struct {
@@ -38,19 +42,27 @@ type SlackOptions struct {
 
 type LokiOptions struct {
 	HostOptions `mapstructure:",squash" json:",inline"`
-	Username    string `mapstructure:"username" json:"username"`
-	Password    string `mapstructure:"password" json:"password"`
-	Path        string `mapstructure:"path" json:"path"`
+	// +optional
+	Username string `mapstructure:"username" json:"username"`
+	// +optional
+	Password string `mapstructure:"password" json:"password"`
+	// +optional
+	Path string `mapstructure:"path" json:"path"`
 }
 
 type ElasticsearchOptions struct {
 	HostOptions `mapstructure:",squash" json:",inline"`
 	Index       string `mapstructure:"index" json:"index"`
-	Rotation    string `mapstructure:"rotation" json:"rotation"`
-	Username    string `mapstructure:"username" json:"username"`
-	Password    string `mapstructure:"password" json:"password"`
-	APIKey      string `mapstructure:"apiKey" json:"apiKey"`
-	TypelessAPI bool   `mapstructure:"typelessApi" json:"typelessApi"`
+	// +optional
+	Rotation string `mapstructure:"rotation" json:"rotation"`
+	// +optional
+	Username string `mapstructure:"username" json:"username"`
+	// +optional
+	Password string `mapstructure:"password" json:"password"`
+	// +optional
+	APIKey string `mapstructure:"apiKey" json:"apiKey"`
+	// +optional
+	TypelessAPI bool `mapstructure:"typelessApi" json:"typelessApi"`
 }
 
 type S3Options struct {
@@ -74,12 +86,15 @@ type KinesisOptions struct {
 }
 
 type SecurityHubOptions struct {
-	AWSConfig      `mapstructure:",squash" json:",inline"`
-	AccountID      string `mapstructure:"accountId" json:"accountId"`
-	ProductName    string `mapstructure:"productName" json:"productName"`
-	CompanyName    string `mapstructure:"companyName" json:"companyName"`
-	DelayInSeconds int    `mapstructure:"delayInSeconds" json:"delayInSeconds"`
-	Synchronize    bool   `mapstructure:"synchronize" json:"synchronize"`
+	AWSConfig   `mapstructure:",squash" json:",inline"`
+	AccountID   string `mapstructure:"accountId" json:"accountId"`
+	ProductName string `mapstructure:"productName" json:"productName"`
+	// +optional
+	CompanyName string `mapstructure:"companyName" json:"companyName"`
+	// +optional
+	DelayInSeconds int `mapstructure:"delayInSeconds" json:"delayInSeconds"`
+	// +optional
+	Synchronize bool `mapstructure:"synchronize" json:"synchronize"`
 }
 
 type GCSOptions struct {
