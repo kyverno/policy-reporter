@@ -174,6 +174,23 @@ func newRunCMD(version string) *cobra.Command {
 			g.Go(server.Start)
 
 			g.Go(func() error {
+				// call TargetClients to ensure targets passed from the config file are initialized
+				resolver.TargetClients()
+				stop := make(chan struct{})
+
+				_, err = resolver.TargetConfigClient(targetChan)
+				if err != nil {
+					return err
+				}
+
+				resolver.StartTargetConfigInformer(stop)
+
+				<-stop
+
+				return nil
+			})
+
+			g.Go(func() error {
 				logger.Info("wait policy informer")
 				readinessProbe.Wait()
 
@@ -201,22 +218,6 @@ func newRunCMD(version string) *cobra.Command {
 
 					zap.L().Debug("informer restarts")
 				}
-			})
-
-			g.Go(func() error {
-				resolver.TargetClients()
-				stop := make(chan struct{})
-
-				_, err = resolver.TargetConfigClient(targetChan)
-				if err != nil {
-					return err
-				}
-
-				resolver.StartTargetConfigInformer(stop)
-
-				<-stop
-
-				return nil
 			})
 
 			g.Go(func() error {

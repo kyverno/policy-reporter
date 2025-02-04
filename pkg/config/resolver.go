@@ -286,7 +286,10 @@ func (r *Resolver) RegisterSendResultListener(targetChan chan targetconfig.TcEve
 				r.resultListener.ResetListeners()
 				registerFunc(event.Targets)
 
-				if event.Type == targetconfig.CreateTcEvent {
+				if event.Type == targetconfig.CreateTcEvent && event.RestartPolrInformer {
+					if len(event.Targets.Clients()) > r.targetConfigClient.TargetConfigCount() && !r.targetConfigClient.HasSynced() {
+						continue
+					}
 					r.polrRestartCh <- struct{}{}
 					r.logger.Info("sent restart signal")
 				}
@@ -584,7 +587,11 @@ func (r *Resolver) TargetConfigClient(targetChan chan targetconfig.TcEvent) (*ta
 	}
 
 	tcc := targetconfig.NewTargetConfigClient(tcClient, r.TargetFactory(), r.TargetClients(), r.logger)
-	tcc.CreateInformer(targetChan)
+	err = tcc.CreateInformer(targetChan)
+	if err != nil {
+		return nil, err
+	}
+
 	r.targetConfigClient = tcc
 	return tcc, nil
 }

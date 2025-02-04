@@ -20,6 +20,12 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
+// +kubebuilder:oneOf:={required:{s3}}
+// +kubebuilder:oneOf:={required:{webhook}}
+// +kubebuilder:oneOf:={required:{telegram}}
+// +kubebuilder:oneOf:={required:{slack}}
+// +kubebuilder:oneOf:={required:{elasticSearch}}
+// +kubebuilder:oneOf:={required:{gcs}}
 // TargetConfigSpec defines the desired state of TargetConfig.
 type TargetConfigSpec struct {
 	ConfigStrict `json:",inline"`
@@ -50,7 +56,7 @@ type TargetConfigStatus struct{}
 
 // +kubebuilder:object:root=true
 // +kubebuilder:subresource:status
-// +kubebuilder:resource:path=targetconfigs,scope=Namespaced,shortName=tcfg
+// +kubebuilder:resource:path=targetconfigs,scope=Cluster,shortName=tcfg
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 // +genclient
 

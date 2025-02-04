@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"go.uber.org/zap"
+	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/client-go/tools/cache"
 
 	"github.com/kyverno/policy-reporter/pkg/crd/api/targetconfig/v1alpha1"
@@ -19,6 +20,8 @@ type TargetConfigClient struct {
 	targetClients *target.Collection
 	logger        *zap.Logger
 	informer      cache.SharedIndexInformer
+	tcCount       int
+	hasSynced     bool
 }
 
 type EventType string
@@ -29,51 +32,59 @@ const (
 )
 
 type TcEvent struct {
-	Type    EventType
-	Targets *target.Collection
+	Type                EventType
+	Targets             *target.Collection
+	RestartPolrInformer bool
+}
+
+func (c *TargetConfigClient) TargetConfigCount() int {
+	return c.tcCount
 }
 
 func (c *TargetConfigClient) configureInformer(targetChan chan TcEvent) {
-	f := func(tc *v1alpha1.TargetConfig) (*target.Target, error) {
-		t, err := c.targetFactory.CreateSingleClient(tc)
-		if err != nil {
-			return nil, err
-		}
-		return t, nil
-	}
-
 	c.informer.AddEventHandler(cache.ResourceEventHandlerFuncs{
 		AddFunc: func(obj interface{}) {
 			tc := obj.(*v1alpha1.TargetConfig)
-			targetKey := tc.Name + "," + tc.Namespace + "," + tc.Spec.TargetType
-			c.logger.Info(fmt.Sprintf("new target: %s, namespace: %s, type: %s", tc.Name, tc.Namespace, tc.Spec.TargetType))
+			c.logger.Info(fmt.Sprintf("new target: %s, type: %s", tc.Name, tc.Spec.TargetType))
 
-			target, err := f(tc)
+			t, err := c.targetFactory.CreateSingleClient(tc)
 			if err != nil {
 				c.logger.Error("unable to create target from TargetConfig: " + err.Error())
+				return
 			}
 
-			c.targetClients.AddTarget(targetKey, target)
-			targetChan <- TcEvent{Type: CreateTcEvent, Targets: c.targetClients}
+			c.targetClients.AddTarget(tc.Name, t)
+			targetChan <- TcEvent{Type: CreateTcEvent, Targets: c.targetClients, RestartPolrInformer: !tc.Spec.SkipExisting}
 		},
 		UpdateFunc: func(oldObj, newObj interface{}) {
 		},
 		DeleteFunc: func(obj interface{}) {
 			tc := obj.(*v1alpha1.TargetConfig)
-			targetKey := tc.Name + "," + tc.Namespace + "," + tc.Spec.TargetType
-			c.logger.Info(fmt.Sprintf("deleting target: %s, namespace: %s, type: %s", tc.Name, tc.Namespace, tc.Spec.TargetType))
-			c.targetClients.RemoveTarget(targetKey)
+			c.logger.Info(fmt.Sprintf("deleting target: %s, type: %s", tc.Name, tc.Spec.TargetType))
+
+			c.targetClients.RemoveTarget(tc.Name)
 			targetChan <- TcEvent{Type: DeleteTcEvent, Targets: c.targetClients}
 		},
 	})
 }
 
-func (c *TargetConfigClient) CreateInformer(targetChan chan TcEvent) {
+func (c *TargetConfigClient) CreateInformer(targetChan chan TcEvent) error {
 	tcInformer := tcinformer.NewSharedInformerFactory(c.tcClient, time.Second)
 	inf := tcInformer.Wgpolicyk8s().V1alpha1().TargetConfigs().Informer()
 	c.informer = inf
 
+	tcs, err := tcInformer.Wgpolicyk8s().V1alpha1().TargetConfigs().Lister().List(labels.Everything())
+	if err != nil {
+		return err
+	}
+
+	c.tcCount = len(tcs)
 	c.configureInformer(targetChan)
+	return nil
+}
+
+func (c *TargetConfigClient) HasSynced() bool {
+	return c.hasSynced
 }
 
 func (c *TargetConfigClient) Run(stopChan chan struct{}) {
@@ -83,6 +94,8 @@ func (c *TargetConfigClient) Run(stopChan chan struct{}) {
 		c.logger.Error("Failed to sync target config cache") // todo
 		return
 	}
+
+	c.hasSynced = true
 	c.logger.Info("target config cache synced")
 }
 

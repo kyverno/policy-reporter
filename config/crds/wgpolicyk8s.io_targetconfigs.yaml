@@ -14,7 +14,7 @@ spec:
     shortNames:
     - tcfg
     singular: targetconfig
-  scope: Namespaced
+  scope: Cluster
   versions:
   - name: v1alpha1
     schema:
@@ -40,6 +40,19 @@ spec:
             type: object
           spec:
             description: TargetConfigSpec defines the desired state of TargetConfig.
+            oneOf:
+            - required:
+              - s3
+            - required:
+              - webhook
+            - required:
+              - telegram
+            - required:
+              - slack
+            - required:
+              - elasticSearch
+            - required:
+              - gcs
             properties:
               customFields:
                 additionalProperties:

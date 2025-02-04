@@ -765,7 +765,6 @@ func (f *TargetFactory) CreateGCSTarget(config, parent *v1alpha1.Config[v1alpha1
 	}
 }
 
-// todo: not move filters
 func (f *TargetFactory) createResultFilter(filter filters.Filter, minimumSeverity string, sources []string) *report.ResultFilter {
 	sourceFilter := filter.Sources
 	if len(sources) > 0 {
@@ -776,7 +775,7 @@ func (f *TargetFactory) createResultFilter(filter filters.Filter, minimumSeverit
 		validate.RuleSets{
 			Include:  filter.Namespaces.Include,
 			Exclude:  filter.Namespaces.Exclude,
-			Selector: filter.Namespaces.Selector, // todo: i removed the helper convert map, what is the effect of this ?
+			Selector: filter.Namespaces.Selector,
 		},
 		ToRuleSet(filter.Severities),
 		ToRuleSet(filter.Status),
