@@ -91,7 +91,7 @@ func (c *TargetConfigClient) Run(stopChan chan struct{}) {
 	go c.informer.Run(stopChan)
 
 	if !cache.WaitForCacheSync(stopChan, c.informer.HasSynced) {
-		c.logger.Error("Failed to sync target config cache") // todo
+		c.logger.Error("Failed to sync target config cache")
 		return
 	}
 
