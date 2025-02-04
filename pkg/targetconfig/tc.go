@@ -1,17 +1,18 @@
 package targetconfig
 
 import (
+	"context"
 	"fmt"
 	"time"
 
 	"go.uber.org/zap"
-	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/client-go/tools/cache"
 
 	"github.com/kyverno/policy-reporter/pkg/crd/api/targetconfig/v1alpha1"
 	tcv1alpha1 "github.com/kyverno/policy-reporter/pkg/crd/client/targetconfig/clientset/versioned"
 	tcinformer "github.com/kyverno/policy-reporter/pkg/crd/client/targetconfig/informers/externalversions"
 	"github.com/kyverno/policy-reporter/pkg/target"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 type TargetConfigClient struct {
@@ -73,12 +74,12 @@ func (c *TargetConfigClient) CreateInformer(targetChan chan TcEvent) error {
 	inf := tcInformer.Wgpolicyk8s().V1alpha1().TargetConfigs().Informer()
 	c.informer = inf
 
-	tcs, err := tcInformer.Wgpolicyk8s().V1alpha1().TargetConfigs().Lister().List(labels.Everything())
+	tcs, err := c.tcClient.Wgpolicyk8sV1alpha1().TargetConfigs("").List(context.TODO(), metav1.ListOptions{})
 	if err != nil {
 		return err
 	}
 
-	c.tcCount = len(tcs)
+	c.tcCount = len(tcs.Items)
 	c.configureInformer(targetChan)
 	return nil
 }

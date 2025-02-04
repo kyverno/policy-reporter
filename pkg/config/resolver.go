@@ -287,7 +287,7 @@ func (r *Resolver) RegisterSendResultListener(targetChan chan targetconfig.TcEve
 				registerFunc(event.Targets)
 
 				if event.Type == targetconfig.CreateTcEvent && event.RestartPolrInformer {
-					if len(event.Targets.Clients()) > r.targetConfigClient.TargetConfigCount() && !r.targetConfigClient.HasSynced() {
+					if len(event.Targets.Clients()) < r.targetConfigClient.TargetConfigCount() && !r.targetConfigClient.HasSynced() {
 						continue
 					}
 					r.polrRestartCh <- struct{}{}
