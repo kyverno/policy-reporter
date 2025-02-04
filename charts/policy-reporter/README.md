@@ -3,7 +3,7 @@
 Policy Reporter watches for PolicyReport Resources.
 It creates Prometheus Metrics and can send rule validation events to different targets like Loki, Elasticsearch, Slack or Discord
 
-![Version: 3.0.0](https://img.shields.io/badge/Version-3.0.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 3.0.0](https://img.shields.io/badge/AppVersion-3.0.0-informational?style=flat-square)
+![Version: 3.0.1](https://img.shields.io/badge/Version-3.0.1-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 3.0.0](https://img.shields.io/badge/AppVersion-3.0.0-informational?style=flat-square)
 
 ## Documentation
 
@@ -482,11 +482,12 @@ Open `http://localhost:8082/` in your browser.
 | plugin.trivy.image.registry | string | `"ghcr.io"` | Image registry |
 | plugin.trivy.image.repository | string | `"kyverno/policy-reporter/trivy-plugin"` | Image repository |
 | plugin.trivy.image.pullPolicy | string | `"IfNotPresent"` | Image PullPolicy |
-| plugin.trivy.image.tag | string | `"0.3.1"` | Image tag Defaults to `Chart.AppVersion` if omitted |
+| plugin.trivy.image.tag | string | `"0.4.0"` | Image tag Defaults to `Chart.AppVersion` if omitted |
 | plugin.trivy.cli.image.registry | string | `"ghcr.io"` | Image registry |
 | plugin.trivy.cli.image.repository | string | `"aquasecurity/trivy"` | Image repository |
 | plugin.trivy.cli.image.pullPolicy | string | `"IfNotPresent"` | Image PullPolicy |
 | plugin.trivy.cli.image.tag | string | `"0.58.2"` | Image tag Defaults to `Chart.AppVersion` if omitted |
+| plugin.trivy.github.token | string | `""` | optional github token for authenticated GitHub API calls. |
 | plugin.trivy.dbVolume | object | `{}` | If set the volume for dbVolume is freely configurable below "- name: dbVolume". If no value is set an emptyDir is used. |
 | plugin.trivy.tmpVolume | object | `{}` | If set the volume for tmpVolume is freely configurable below "- name: tmpVolume". If no value is set an emptyDir is used. |
 | plugin.trivy.replicaCount | int | `1` | Deployment replica count |

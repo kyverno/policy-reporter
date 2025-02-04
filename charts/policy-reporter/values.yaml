@@ -1360,7 +1360,7 @@ plugin:
       pullPolicy: IfNotPresent
         # -- (string) Image tag
         # Defaults to `Chart.AppVersion` if omitted
-      tag: "0.3.1"
+      tag: "0.4.0"
 
     cli:
       image:
@@ -1373,6 +1373,10 @@ plugin:
           # -- (string) Image tag
           # Defaults to `Chart.AppVersion` if omitted
         tag: "0.58.2"
+
+    github:
+      # -- (string) optional github token for authenticated GitHub API calls.
+      token: ""
 
     # -- If set the volume for dbVolume is freely configurable below "- name: dbVolume". If no value is set an emptyDir is used.
     dbVolume: {}
