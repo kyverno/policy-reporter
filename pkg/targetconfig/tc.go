@@ -3,7 +3,6 @@ package targetconfig
 import (
 	"context"
 	"fmt"
-	"time"
 
 	"go.uber.org/zap"
 	"k8s.io/client-go/tools/cache"
@@ -58,6 +57,17 @@ func (c *TargetConfigClient) configureInformer(targetChan chan TcEvent) {
 			targetChan <- TcEvent{Type: CreateTcEvent, Targets: c.targetClients, RestartPolrInformer: !tc.Spec.SkipExisting}
 		},
 		UpdateFunc: func(oldObj, newObj interface{}) {
+			tc := newObj.(*v1alpha1.TargetConfig)
+			c.logger.Info(fmt.Sprintf("update target: %s, type: %s", tc.Name, tc.Spec.TargetType))
+
+			t, err := c.targetFactory.CreateSingleClient(tc)
+			if err != nil {
+				c.logger.Error("unable to create target from TargetConfig: " + err.Error())
+				return
+			}
+
+			c.targetClients.AddTarget(tc.Name, t)
+			targetChan <- TcEvent{Type: CreateTcEvent, Targets: c.targetClients, RestartPolrInformer: !tc.Spec.SkipExisting}
 		},
 		DeleteFunc: func(obj interface{}) {
 			tc := obj.(*v1alpha1.TargetConfig)
@@ -70,7 +80,7 @@ func (c *TargetConfigClient) configureInformer(targetChan chan TcEvent) {
 }
 
 func (c *TargetConfigClient) CreateInformer(targetChan chan TcEvent) error {
-	tcInformer := tcinformer.NewSharedInformerFactory(c.tcClient, time.Second)
+	tcInformer := tcinformer.NewSharedInformerFactory(c.tcClient, 0)
 	inf := tcInformer.Wgpolicyk8s().V1alpha1().TargetConfigs().Informer()
 	c.informer = inf
 
