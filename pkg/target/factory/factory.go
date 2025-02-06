@@ -42,7 +42,6 @@ type TargetFactory struct {
 }
 
 // LokiClients resolver method
-// Why does it return an array ?
 func createClients[T any](name string, config *v1alpha1.Config[T], mapper func(*v1alpha1.Config[T], *v1alpha1.Config[T]) *target.Target) []*target.Target {
 	clients := make([]*target.Target, 0)
 	if config == nil {
