@@ -63,6 +63,6 @@ func Test_SecretInformer(t *testing.T) {
 		secret.UpdateFake(&metav1.PartialObjectMetadata{ObjectMeta: metav1.ObjectMeta{Name: secretName, Namespace: "default"}}, metav1.UpdateOptions{})
 		time.Sleep(1 * time.Second)
 
-		assert.Equal(t, collection.Targets()[0].Config.(*v1alpha1.Config[v1alpha1.WebhookOptions]).Config.Host, "http://localhost:9200/webhook")
+		assert.Equal(t, collection.Targets()[0].Config.(*v1alpha1.Config[v1alpha1.WebhookOptions]).Config.Webhook, "http://localhost:9200/webhook")
 	})
 }

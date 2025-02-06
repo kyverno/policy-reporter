@@ -27,7 +27,7 @@ func TestV2Views(t *testing.T) {
 
 		assert.Equal(t, original.Include, filter.Include)
 		assert.Equal(t, original.Exclude, filter.Exclude)
-		assert.Equal(t, original.Selector, filter.Selector)
+		assert.Equal(t, map[string]interface{}{"team": "marketing"}, filter.Selector)
 	})
 
 	t.Run("MapResourceCategoryToSourceDetails", func(t *testing.T) {
@@ -109,7 +109,7 @@ func TestV2Views(t *testing.T) {
 			Config: &v1alpha1.SlackOptions{
 				Channel: "general",
 				WebhookOptions: v1alpha1.WebhookOptions{
-					Host: "http://slack.com/xxxx",
+					Webhook: "http://slack.com/xxxx",
 				},
 			},
 			Valid: true,
@@ -185,7 +185,7 @@ func TestV2Views(t *testing.T) {
 			Name:            "Target",
 			MinimumSeverity: "medium",
 			Config: &v1alpha1.WebhookOptions{
-				Host:        "http://discord.com/12345/888XABC",
+				Webhook:     "http://discord.com/12345/888XABC",
 				Certificate: "cert",
 				SkipTLS:     true,
 				Headers: map[string]string{
@@ -213,7 +213,7 @@ func TestV2Views(t *testing.T) {
 				Token:  "ABCDE",
 				ChatID: "1234567",
 				WebhookOptions: v1alpha1.WebhookOptions{
-					Host:        "http://telegram.com",
+					Webhook:     "http://telegram.com",
 					Certificate: "cert",
 					SkipTLS:     true,
 				},

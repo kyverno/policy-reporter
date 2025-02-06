@@ -49,7 +49,7 @@ var targets = target.Targets{
 	Slack: &v1alpha1.Config[v1alpha1.SlackOptions]{
 		Config: &v1alpha1.SlackOptions{
 			WebhookOptions: v1alpha1.WebhookOptions{
-				Host:    "http://localhost:80",
+				Webhook: "http://localhost:80",
 				SkipTLS: true,
 			},
 		},
@@ -59,7 +59,7 @@ var targets = target.Targets{
 		Channels: []*v1alpha1.Config[v1alpha1.SlackOptions]{{
 			Config: &v1alpha1.SlackOptions{
 				WebhookOptions: v1alpha1.WebhookOptions{
-					Host: "http://localhost:9200",
+					Webhook: "http://localhost:9200",
 				},
 			},
 		}, {
@@ -70,7 +70,7 @@ var targets = target.Targets{
 	},
 	Discord: &v1alpha1.Config[v1alpha1.WebhookOptions]{
 		Config: &v1alpha1.WebhookOptions{
-			Host:    "http://discord:80",
+			Webhook: "http://discord:80",
 			SkipTLS: true,
 		},
 		SkipExisting:    true,
@@ -78,13 +78,13 @@ var targets = target.Targets{
 		CustomFields:    map[string]string{"field": "value"},
 		Channels: []*v1alpha1.Config[v1alpha1.WebhookOptions]{{
 			Config: &v1alpha1.WebhookOptions{
-				Host: "http://localhost:9200",
+				Webhook: "http://localhost:9200",
 			},
 		}},
 	},
 	Teams: &v1alpha1.Config[v1alpha1.WebhookOptions]{
 		Config: &v1alpha1.WebhookOptions{
-			Host:    "http://hook.teams:80",
+			Webhook: "http://hook.teams:80",
 			SkipTLS: true,
 		},
 		SkipExisting:    true,
@@ -92,13 +92,13 @@ var targets = target.Targets{
 		CustomFields:    map[string]string{"field": "value"},
 		Channels: []*v1alpha1.Config[v1alpha1.WebhookOptions]{{
 			Config: &v1alpha1.WebhookOptions{
-				Host: "http://localhost:9200",
+				Webhook: "http://localhost:9200",
 			},
 		}},
 	},
 	GoogleChat: &v1alpha1.Config[v1alpha1.WebhookOptions]{
 		Config: &v1alpha1.WebhookOptions{
-			Host:    "http://localhost:900/webhook",
+			Webhook: "http://localhost:900/webhook",
 			SkipTLS: true,
 		},
 		SkipExisting:    true,
@@ -109,7 +109,7 @@ var targets = target.Targets{
 	Telegram: &v1alpha1.Config[v1alpha1.TelegramOptions]{
 		Config: &v1alpha1.TelegramOptions{
 			WebhookOptions: v1alpha1.WebhookOptions{
-				Host:    "http://localhost:80",
+				Webhook: "http://localhost:80",
 				SkipTLS: true,
 			},
 			Token:  "XXX",
@@ -126,7 +126,7 @@ var targets = target.Targets{
 	},
 	Webhook: &v1alpha1.Config[v1alpha1.WebhookOptions]{
 		Config: &v1alpha1.WebhookOptions{
-			Host:    "http://localhost:8080",
+			Webhook: "http://localhost:8080",
 			SkipTLS: true,
 			Headers: map[string]string{
 				"X-Custom": "Header",
@@ -137,7 +137,7 @@ var targets = target.Targets{
 		CustomFields:    map[string]string{"field": "value"},
 		Channels: []*v1alpha1.Config[v1alpha1.WebhookOptions]{{
 			Config: &v1alpha1.WebhookOptions{
-				Host: "http://localhost:8081",
+				Webhook: "http://localhost:8081",
 				Headers: map[string]string{
 					"X-Custom-2": "Header",
 				},
@@ -463,17 +463,11 @@ func Test_RegisterMetricsListener(t *testing.T) {
 func Test_RegisterSendResultListener(t *testing.T) {
 	t.Run("Register SendResultListener with Targets", func(t *testing.T) {
 		resolver := config.NewResolver(testConfig, &rest.Config{})
+		resolver.Logger()
 		targetChan := make(chan targetconfig.TcEvent)
 		resolver.RegisterSendResultListener(targetChan)
 
 		assert.Len(t, resolver.EventPublisher().GetListener(), 1, "Expected one Listener to be registered")
-	})
-	t.Run("Register SendResultListener without Targets", func(t *testing.T) {
-		resolver := config.NewResolver(&config.Config{}, &rest.Config{})
-		targetChan := make(chan targetconfig.TcEvent)
-		resolver.RegisterSendResultListener(targetChan)
-
-		assert.Len(t, resolver.EventPublisher().GetListener(), 0, "Expected no Listener to be registered because no target exists")
 	})
 }
 

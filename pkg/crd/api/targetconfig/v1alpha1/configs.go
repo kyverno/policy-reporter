@@ -13,7 +13,7 @@ type AWSConfig struct {
 
 // todo: why are there two structs with the exact same fields ?
 type WebhookOptions struct {
-	Host        string            `mapstructure:"host" json:"host"`
+	Webhook     string            `mapstructure:"webhook" json:"webhook"`
 	SkipTLS     bool              `mapstructure:"skipTLS" json:"skipTLS"`
 	Certificate string            `mapstructure:"certificate" json:"certificate"`
 	Headers     map[string]string `mapstructure:"headers" json:"headers"`

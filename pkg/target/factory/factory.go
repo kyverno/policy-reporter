@@ -142,13 +142,13 @@ func (f *TargetFactory) CreateSlackTarget(config, parent *v1alpha1.Config[v1alph
 		f.mapSecretValues(config, config.SecretRef, config.MountedSecret)
 	}
 
-	if config.Config.Host == "" && config.Config.Channel == "" {
+	if config.Config.Webhook == "" && config.Config.Channel == "" {
 		return nil
 	}
 
-	setFallback(&config.Config.Host, parent.Config.Host)
+	setFallback(&config.Config.Webhook, parent.Config.Webhook)
 
-	if config.Config.Host == "" {
+	if config.Config.Webhook == "" {
 		return nil
 	}
 
@@ -169,7 +169,7 @@ func (f *TargetFactory) CreateSlackTarget(config, parent *v1alpha1.Config[v1alph
 				ReportFilter:          createReportFilter(config.Filter),
 			},
 			Channel:      config.Config.Channel,
-			Webhook:      config.Config.Host,
+			Webhook:      config.Config.Webhook,
 			CustomFields: config.CustomFields,
 			Headers:      config.Config.Headers,
 			HTTPClient:   http.NewClient("", false),
@@ -300,7 +300,7 @@ func (f *TargetFactory) CreateDiscordTarget(config, parent *v1alpha1.Config[v1al
 
 	mapWebhookTarget(config, parent)
 
-	if config.Config.Host == "" {
+	if config.Config.Webhook == "" {
 		return nil
 	}
 
@@ -318,7 +318,7 @@ func (f *TargetFactory) CreateDiscordTarget(config, parent *v1alpha1.Config[v1al
 				ResultFilter:          f.createResultFilter(config.Filter, config.MinimumSeverity, config.Sources),
 				ReportFilter:          createReportFilter(config.Filter),
 			},
-			Webhook:      config.Config.Host,
+			Webhook:      config.Config.Webhook,
 			CustomFields: config.CustomFields,
 			HTTPClient:   http.NewClient(config.Config.Certificate, config.Config.SkipTLS),
 		}),
@@ -340,7 +340,7 @@ func (f *TargetFactory) CreateTeamsTarget(config, parent *v1alpha1.Config[v1alph
 
 	mapWebhookTarget(config, parent)
 
-	if config.Config.Host == "" {
+	if config.Config.Webhook == "" {
 		return nil
 	}
 
@@ -358,7 +358,7 @@ func (f *TargetFactory) CreateTeamsTarget(config, parent *v1alpha1.Config[v1alph
 				ResultFilter:          f.createResultFilter(config.Filter, config.MinimumSeverity, config.Sources),
 				ReportFilter:          createReportFilter(config.Filter),
 			},
-			Webhook:      config.Config.Host,
+			Webhook:      config.Config.Webhook,
 			CustomFields: config.CustomFields,
 			Headers:      config.Config.Headers,
 			HTTPClient:   http.NewClient(config.Config.Certificate, config.Config.SkipTLS),
@@ -381,7 +381,7 @@ func (f *TargetFactory) CreateWebhookTarget(config, parent *v1alpha1.Config[v1al
 
 	mapWebhookTarget(config, parent)
 
-	if config.Config.Host == "" {
+	if config.Config.Webhook == "" {
 		return nil
 	}
 
@@ -399,7 +399,7 @@ func (f *TargetFactory) CreateWebhookTarget(config, parent *v1alpha1.Config[v1al
 				ResultFilter:          f.createResultFilter(config.Filter, config.MinimumSeverity, config.Sources),
 				ReportFilter:          createReportFilter(config.Filter),
 			},
-			Host:         config.Config.Host,
+			Host:         config.Config.Webhook,
 			Headers:      config.Config.Headers,
 			CustomFields: config.CustomFields,
 			HTTPClient:   http.NewClient(config.Config.Certificate, config.Config.SkipTLS),
@@ -426,7 +426,7 @@ func (f *TargetFactory) CreateTelegramTarget(config, parent *v1alpha1.Config[v1a
 		return nil
 	}
 
-	setFallback(&config.Config.Host, parent.Config.Host)
+	setFallback(&config.Config.Webhook, parent.Config.Webhook)
 	setFallback(&config.Config.Certificate, parent.Config.Certificate)
 	setBool(&config.Config.SkipTLS, parent.Config.SkipTLS)
 
@@ -445,8 +445,8 @@ func (f *TargetFactory) CreateTelegramTarget(config, parent *v1alpha1.Config[v1a
 	}
 
 	host := "https://api.telegram.org"
-	if config.Config.Host != "" {
-		host = strings.TrimSuffix(config.Config.Host, "/")
+	if config.Config.Webhook != "" {
+		host = strings.TrimSuffix(config.Config.Webhook, "/")
 	}
 
 	zap.S().Infof("%s configured", config.Name)
@@ -487,7 +487,7 @@ func (f *TargetFactory) CreateGoogleChatTarget(config, parent *v1alpha1.Config[v
 
 	mapWebhookTarget(config, parent)
 
-	if config.Config.Host == "" {
+	if config.Config.Webhook == "" {
 		return nil
 	}
 
@@ -505,7 +505,7 @@ func (f *TargetFactory) CreateGoogleChatTarget(config, parent *v1alpha1.Config[v
 				ResultFilter:          f.createResultFilter(config.Filter, config.MinimumSeverity, config.Sources),
 				ReportFilter:          createReportFilter(config.Filter),
 			},
-			Webhook:      config.Config.Host,
+			Webhook:      config.Config.Webhook,
 			Headers:      config.Config.Headers,
 			CustomFields: config.CustomFields,
 			HTTPClient:   http.NewClient(config.Config.Certificate, config.Config.SkipTLS),
@@ -826,7 +826,7 @@ func (f *TargetFactory) mapSecretValues(config any, ref, mountedSecret string) {
 
 	case *v1alpha1.Config[v1alpha1.SlackOptions]:
 		if values.Host != "" {
-			c.Config.Host = values.Host
+			c.Config.Webhook = values.Webhook
 		}
 		if values.Channel != "" {
 			c.Config.Channel = values.Channel
@@ -834,7 +834,7 @@ func (f *TargetFactory) mapSecretValues(config any, ref, mountedSecret string) {
 
 	case *v1alpha1.Config[v1alpha1.WebhookOptions]:
 		if values.Host != "" {
-			c.Config.Host = values.Host
+			c.Config.Webhook = values.Webhook
 		}
 		if values.Token != "" {
 			if c.Config.Headers == nil {
@@ -898,7 +898,7 @@ func (f *TargetFactory) mapSecretValues(config any, ref, mountedSecret string) {
 			c.Config.Token = values.Token
 		}
 		if values.Host != "" {
-			c.Config.Host = values.Host
+			c.Config.Webhook = values.Host
 		}
 	}
 }
@@ -909,7 +909,7 @@ func NewFactory(secretClient secrets.Client, filterFactory *target.ResultFilterF
 }
 
 func mapWebhookTarget(config, parent *v1alpha1.Config[v1alpha1.WebhookOptions]) {
-	setFallback(&config.Config.Host, parent.Config.Host)
+	setFallback(&config.Config.Webhook, parent.Config.Webhook)
 	setFallback(&config.Config.Certificate, parent.Config.Certificate)
 	setBool(&config.Config.SkipTLS, parent.Config.SkipTLS)
 

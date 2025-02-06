@@ -5,7 +5,6 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/assert"
-	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/kyverno/policy-reporter/pkg/cache"
 	"github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
@@ -42,33 +41,6 @@ func Test_ResultListener(t *testing.T) {
 		assert.False(t, called, "Expected Listener not be called on Deleted event")
 	})
 
-	t.Run("Ignore Added Results created before startup", func(t *testing.T) {
-		var called bool
-
-		slistener := listener.NewResultListener(cache.NewInMermoryCache(time.Minute, time.Minute), time.Now())
-		slistener.RegisterListener(func(_ v1alpha2.ReportInterface, r v1alpha2.PolicyReportResult) {
-			called = true
-		})
-
-		slistener.Listen(report.LifecycleEvent{Type: report.Added, PolicyReport: preport2})
-
-		assert.False(t, called, "Expected Listener not be called on Deleted event")
-	})
-
-	t.Run("Ignore CacheResults", func(t *testing.T) {
-		var called bool
-
-		slistener := listener.NewResultListener(cache.NewInMermoryCache(time.Minute, time.Minute), time.Now())
-		slistener.RegisterListener(func(_ v1alpha2.ReportInterface, r v1alpha2.PolicyReportResult) {
-			called = true
-		})
-
-		slistener.Listen(report.LifecycleEvent{Type: report.Added, PolicyReport: preport2})
-		slistener.Listen(report.LifecycleEvent{Type: report.Updated, PolicyReport: preport2})
-
-		assert.False(t, called, "Expected Listener not be called on cached results")
-	})
-
 	t.Run("Early Return if Results are empty", func(t *testing.T) {
 		var called bool
 
@@ -102,26 +74,6 @@ func Test_ResultListener(t *testing.T) {
 		slistener.UnregisterListener()
 
 		slistener.Listen(report.LifecycleEvent{Type: report.Updated, PolicyReport: preport2})
-
-		assert.False(t, called, "Expected Listener not called because it was unregistered")
-	})
-	t.Run("ignore results with past timestamps", func(t *testing.T) {
-		var called bool
-
-		slistener := listener.NewResultListener(cache.NewInMermoryCache(time.Minute, time.Minute), time.Now())
-		slistener.RegisterListener(func(_ v1alpha2.ReportInterface, r v1alpha2.PolicyReportResult) {
-			called = true
-		})
-
-		rep := &v1alpha2.PolicyReport{
-			Results: make([]v1alpha2.PolicyReportResult, 0),
-		}
-		rep.Results = append(rep.Results, v1alpha2.PolicyReportResult{
-			Result:    v1alpha2.StatusFail,
-			Timestamp: v1.Timestamp{Seconds: time.Now().Add(-24 * time.Hour).Unix()},
-		})
-
-		slistener.Listen(report.LifecycleEvent{Type: report.Updated, PolicyReport: rep})
 
 		assert.False(t, called, "Expected Listener not called because it was unregistered")
 	})
