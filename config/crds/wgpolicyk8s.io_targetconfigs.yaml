@@ -303,16 +303,16 @@ spec:
                     additionalProperties:
                       type: string
                     type: object
-                  host:
-                    type: string
                   skipTLS:
                     type: boolean
+                  webhook:
+                    type: string
                 required:
                 - certificate
                 - channel
                 - headers
-                - host
                 - skipTLS
+                - webhook
                 type: object
               sources:
                 items:
@@ -330,19 +330,19 @@ spec:
                     additionalProperties:
                       type: string
                     type: object
-                  host:
-                    type: string
                   skipTLS:
                     type: boolean
                   token:
+                    type: string
+                  webhook:
                     type: string
                 required:
                 - certificate
                 - chatId
                 - headers
-                - host
                 - skipTLS
                 - token
+                - webhook
                 type: object
               webhook:
                 description: 'todo: why are there two structs with the exact same
@@ -354,15 +354,15 @@ spec:
                     additionalProperties:
                       type: string
                     type: object
-                  host:
-                    type: string
                   skipTLS:
                     type: boolean
+                  webhook:
+                    type: string
                 required:
                 - certificate
                 - headers
-                - host
                 - skipTLS
+                - webhook
                 type: object
             type: object
           status:
