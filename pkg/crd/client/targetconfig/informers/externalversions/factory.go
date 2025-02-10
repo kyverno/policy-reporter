@@ -23,14 +23,13 @@ import (
 	sync "sync"
 	time "time"
 
+	versioned "github.com/kyverno/policy-reporter/pkg/crd/client/targetconfig/clientset/versioned"
+	internalinterfaces "github.com/kyverno/policy-reporter/pkg/crd/client/targetconfig/informers/externalversions/internalinterfaces"
+	targetconfig "github.com/kyverno/policy-reporter/pkg/crd/client/targetconfig/informers/externalversions/targetconfig"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	runtime "k8s.io/apimachinery/pkg/runtime"
 	schema "k8s.io/apimachinery/pkg/runtime/schema"
 	cache "k8s.io/client-go/tools/cache"
-
-	versioned "github.com/kyverno/policy-reporter/pkg/crd/client/targetconfig/clientset/versioned"
-	internalinterfaces "github.com/kyverno/policy-reporter/pkg/crd/client/targetconfig/informers/externalversions/internalinterfaces"
-	targetconfig "github.com/kyverno/policy-reporter/pkg/crd/client/targetconfig/informers/externalversions/targetconfig"
 )
 
 // SharedInformerOption defines the functional option type for SharedInformerFactory.
@@ -244,9 +243,9 @@ type SharedInformerFactory interface {
 	// client.
 	InformerFor(obj runtime.Object, newFunc internalinterfaces.NewInformerFunc) cache.SharedIndexInformer
 
-	Wgpolicyk8s() targetconfig.Interface
+	Policyreporter() targetconfig.Interface
 }
 
-func (f *sharedInformerFactory) Wgpolicyk8s() targetconfig.Interface {
+func (f *sharedInformerFactory) Policyreporter() targetconfig.Interface {
 	return targetconfig.New(f, f.namespace, f.tweakListOptions)
 }

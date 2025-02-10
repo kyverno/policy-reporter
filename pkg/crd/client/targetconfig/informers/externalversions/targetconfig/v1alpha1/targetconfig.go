@@ -22,15 +22,14 @@ import (
 	"context"
 	time "time"
 
-	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	runtime "k8s.io/apimachinery/pkg/runtime"
-	watch "k8s.io/apimachinery/pkg/watch"
-	cache "k8s.io/client-go/tools/cache"
-
 	targetconfigv1alpha1 "github.com/kyverno/policy-reporter/pkg/crd/api/targetconfig/v1alpha1"
 	versioned "github.com/kyverno/policy-reporter/pkg/crd/client/targetconfig/clientset/versioned"
 	internalinterfaces "github.com/kyverno/policy-reporter/pkg/crd/client/targetconfig/informers/externalversions/internalinterfaces"
 	v1alpha1 "github.com/kyverno/policy-reporter/pkg/crd/client/targetconfig/listers/targetconfig/v1alpha1"
+	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	runtime "k8s.io/apimachinery/pkg/runtime"
+	watch "k8s.io/apimachinery/pkg/watch"
+	cache "k8s.io/client-go/tools/cache"
 )
 
 // TargetConfigInformer provides access to a shared informer and lister for
@@ -63,13 +62,13 @@ func NewFilteredTargetConfigInformer(client versioned.Interface, namespace strin
 				if tweakListOptions != nil {
 					tweakListOptions(&options)
 				}
-				return client.Wgpolicyk8sV1alpha1().TargetConfigs(namespace).List(context.TODO(), options)
+				return client.PolicyreporterV1alpha1().TargetConfigs(namespace).List(context.TODO(), options)
 			},
 			WatchFunc: func(options v1.ListOptions) (watch.Interface, error) {
 				if tweakListOptions != nil {
 					tweakListOptions(&options)
 				}
-				return client.Wgpolicyk8sV1alpha1().TargetConfigs(namespace).Watch(context.TODO(), options)
+				return client.PolicyreporterV1alpha1().TargetConfigs(namespace).Watch(context.TODO(), options)
 			},
 		},
 		&targetconfigv1alpha1.TargetConfig{},

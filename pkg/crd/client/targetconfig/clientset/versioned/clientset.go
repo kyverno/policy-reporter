@@ -22,27 +22,26 @@ import (
 	"fmt"
 	"net/http"
 
+	policyreporterv1alpha1 "github.com/kyverno/policy-reporter/pkg/crd/client/targetconfig/clientset/versioned/typed/targetconfig/v1alpha1"
 	discovery "k8s.io/client-go/discovery"
 	rest "k8s.io/client-go/rest"
 	flowcontrol "k8s.io/client-go/util/flowcontrol"
-
-	wgpolicyk8sv1alpha1 "github.com/kyverno/policy-reporter/pkg/crd/client/targetconfig/clientset/versioned/typed/targetconfig/v1alpha1"
 )
 
 type Interface interface {
 	Discovery() discovery.DiscoveryInterface
-	Wgpolicyk8sV1alpha1() wgpolicyk8sv1alpha1.Wgpolicyk8sV1alpha1Interface
+	PolicyreporterV1alpha1() policyreporterv1alpha1.PolicyreporterV1alpha1Interface
 }
 
 // Clientset contains the clients for groups.
 type Clientset struct {
 	*discovery.DiscoveryClient
-	wgpolicyk8sV1alpha1 *wgpolicyk8sv1alpha1.Wgpolicyk8sV1alpha1Client
+	policyreporterV1alpha1 *policyreporterv1alpha1.PolicyreporterV1alpha1Client
 }
 
-// Wgpolicyk8sV1alpha1 retrieves the Wgpolicyk8sV1alpha1Client
-func (c *Clientset) Wgpolicyk8sV1alpha1() wgpolicyk8sv1alpha1.Wgpolicyk8sV1alpha1Interface {
-	return c.wgpolicyk8sV1alpha1
+// PolicyreporterV1alpha1 retrieves the PolicyreporterV1alpha1Client
+func (c *Clientset) PolicyreporterV1alpha1() policyreporterv1alpha1.PolicyreporterV1alpha1Interface {
+	return c.policyreporterV1alpha1
 }
 
 // Discovery retrieves the DiscoveryClient
@@ -89,7 +88,7 @@ func NewForConfigAndClient(c *rest.Config, httpClient *http.Client) (*Clientset,
 
 	var cs Clientset
 	var err error
-	cs.wgpolicyk8sV1alpha1, err = wgpolicyk8sv1alpha1.NewForConfigAndClient(&configShallowCopy, httpClient)
+	cs.policyreporterV1alpha1, err = policyreporterv1alpha1.NewForConfigAndClient(&configShallowCopy, httpClient)
 	if err != nil {
 		return nil, err
 	}
@@ -114,7 +113,7 @@ func NewForConfigOrDie(c *rest.Config) *Clientset {
 // New creates a new Clientset for the given RESTClient.
 func New(c rest.Interface) *Clientset {
 	var cs Clientset
-	cs.wgpolicyk8sV1alpha1 = wgpolicyk8sv1alpha1.New(c)
+	cs.policyreporterV1alpha1 = policyreporterv1alpha1.New(c)
 
 	cs.DiscoveryClient = discovery.NewDiscoveryClient(c)
 	return &cs

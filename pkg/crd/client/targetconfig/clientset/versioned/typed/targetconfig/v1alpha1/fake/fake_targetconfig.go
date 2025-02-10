@@ -21,18 +21,17 @@ package fake
 import (
 	"context"
 
+	v1alpha1 "github.com/kyverno/policy-reporter/pkg/crd/api/targetconfig/v1alpha1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	labels "k8s.io/apimachinery/pkg/labels"
 	types "k8s.io/apimachinery/pkg/types"
 	watch "k8s.io/apimachinery/pkg/watch"
 	testing "k8s.io/client-go/testing"
-
-	v1alpha1 "github.com/kyverno/policy-reporter/pkg/crd/api/targetconfig/v1alpha1"
 )
 
 // FakeTargetConfigs implements TargetConfigInterface
 type FakeTargetConfigs struct {
-	Fake *FakeWgpolicyk8sV1alpha1
+	Fake *FakePolicyreporterV1alpha1
 	ns   string
 }
 

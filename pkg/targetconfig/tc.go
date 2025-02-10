@@ -45,7 +45,7 @@ func (c *TargetConfigClient) configureInformer(targetChan chan TcEvent) {
 	c.informer.AddEventHandler(cache.ResourceEventHandlerFuncs{
 		AddFunc: func(obj interface{}) {
 			tc := obj.(*v1alpha1.TargetConfig)
-			c.logger.Info(fmt.Sprintf("new target: %s, type: %s", tc.Name, tc.Spec.TargetType))
+			c.logger.Info(fmt.Sprintf("new target: %s", tc.Name))
 
 			t, err := c.targetFactory.CreateSingleClient(tc)
 			if err != nil {
@@ -58,7 +58,7 @@ func (c *TargetConfigClient) configureInformer(targetChan chan TcEvent) {
 		},
 		UpdateFunc: func(oldObj, newObj interface{}) {
 			tc := newObj.(*v1alpha1.TargetConfig)
-			c.logger.Info(fmt.Sprintf("update target: %s, type: %s", tc.Name, tc.Spec.TargetType))
+			c.logger.Info(fmt.Sprintf("update target: %s", tc.Name))
 
 			t, err := c.targetFactory.CreateSingleClient(tc)
 			if err != nil {
@@ -71,7 +71,7 @@ func (c *TargetConfigClient) configureInformer(targetChan chan TcEvent) {
 		},
 		DeleteFunc: func(obj interface{}) {
 			tc := obj.(*v1alpha1.TargetConfig)
-			c.logger.Info(fmt.Sprintf("deleting target: %s, type: %s", tc.Name, tc.Spec.TargetType))
+			c.logger.Info(fmt.Sprintf("deleting target: %s", tc.Name))
 
 			c.targetClients.RemoveTarget(tc.Name)
 			targetChan <- TcEvent{Type: DeleteTcEvent, Targets: c.targetClients}
@@ -81,10 +81,10 @@ func (c *TargetConfigClient) configureInformer(targetChan chan TcEvent) {
 
 func (c *TargetConfigClient) CreateInformer(targetChan chan TcEvent) error {
 	tcInformer := tcinformer.NewSharedInformerFactory(c.tcClient, 0)
-	inf := tcInformer.Wgpolicyk8s().V1alpha1().TargetConfigs().Informer()
+	inf := tcInformer.Policyreporter().V1alpha1().TargetConfigs().Informer()
 	c.informer = inf
 
-	tcs, err := c.tcClient.Wgpolicyk8sV1alpha1().TargetConfigs("").List(context.TODO(), metav1.ListOptions{})
+	tcs, err := c.tcClient.PolicyreporterV1alpha1().TargetConfigs("").List(context.TODO(), metav1.ListOptions{})
 	if err != nil {
 		return err
 	}

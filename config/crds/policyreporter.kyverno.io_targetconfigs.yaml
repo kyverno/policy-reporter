@@ -4,9 +4,9 @@ kind: CustomResourceDefinition
 metadata:
   annotations:
     controller-gen.kubebuilder.io/version: (devel)
-  name: targetconfigs.wgpolicyk8s.io
+  name: targetconfigs.policyreporter.kyverno.io
 spec:
-  group: wgpolicyk8s.io
+  group: policyreporter.kyverno.io
   names:
     kind: TargetConfig
     listKind: TargetConfigList
@@ -53,6 +53,14 @@ spec:
               - elasticSearch
             - required:
               - gcs
+            - required:
+              - loki
+            - required:
+              - securityHub
+            - required:
+              - kinesis
+            - required:
+              - teams
             properties:
               customFields:
                 additionalProperties:
@@ -318,8 +326,6 @@ spec:
                 items:
                   type: string
                 type: array
-              targetType:
-                type: string
               telegram:
                 properties:
                   certificate:

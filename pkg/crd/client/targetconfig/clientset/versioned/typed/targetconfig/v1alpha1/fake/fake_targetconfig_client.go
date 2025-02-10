@@ -19,23 +19,22 @@ limitations under the License.
 package fake
 
 import (
+	v1alpha1 "github.com/kyverno/policy-reporter/pkg/crd/client/targetconfig/clientset/versioned/typed/targetconfig/v1alpha1"
 	rest "k8s.io/client-go/rest"
 	testing "k8s.io/client-go/testing"
-
-	v1alpha1 "github.com/kyverno/policy-reporter/pkg/crd/client/targetconfig/clientset/versioned/typed/targetconfig/v1alpha1"
 )
 
-type FakeWgpolicyk8sV1alpha1 struct {
+type FakePolicyreporterV1alpha1 struct {
 	*testing.Fake
 }
 
-func (c *FakeWgpolicyk8sV1alpha1) TargetConfigs(namespace string) v1alpha1.TargetConfigInterface {
+func (c *FakePolicyreporterV1alpha1) TargetConfigs(namespace string) v1alpha1.TargetConfigInterface {
 	return &FakeTargetConfigs{c, namespace}
 }
 
 // RESTClient returns a RESTClient that is used to communicate
 // with API server by this client implementation.
-func (c *FakeWgpolicyk8sV1alpha1) RESTClient() rest.Interface {
+func (c *FakePolicyreporterV1alpha1) RESTClient() rest.Interface {
 	var ret *rest.RESTClient
 	return ret
 }

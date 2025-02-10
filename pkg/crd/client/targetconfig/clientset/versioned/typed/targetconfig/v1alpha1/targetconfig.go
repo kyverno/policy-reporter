@@ -22,13 +22,12 @@ import (
 	"context"
 	"time"
 
+	v1alpha1 "github.com/kyverno/policy-reporter/pkg/crd/api/targetconfig/v1alpha1"
+	scheme "github.com/kyverno/policy-reporter/pkg/crd/client/targetconfig/clientset/versioned/scheme"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	types "k8s.io/apimachinery/pkg/types"
 	watch "k8s.io/apimachinery/pkg/watch"
 	rest "k8s.io/client-go/rest"
-
-	v1alpha1 "github.com/kyverno/policy-reporter/pkg/crd/api/targetconfig/v1alpha1"
-	scheme "github.com/kyverno/policy-reporter/pkg/crd/client/targetconfig/clientset/versioned/scheme"
 )
 
 // TargetConfigsGetter has a method to return a TargetConfigInterface.
@@ -58,7 +57,7 @@ type targetConfigs struct {
 }
 
 // newTargetConfigs returns a TargetConfigs
-func newTargetConfigs(c *Wgpolicyk8sV1alpha1Client, namespace string) *targetConfigs {
+func newTargetConfigs(c *PolicyreporterV1alpha1Client, namespace string) *targetConfigs {
 	return &targetConfigs{
 		client: c.RESTClient(),
 		ns:     namespace,

@@ -100,30 +100,33 @@ func (f *TargetFactory) CreateClients(config *target.Targets) *target.Collection
 
 func (f *TargetFactory) CreateSingleClient(tc *v1alpha1.TargetConfig) (*target.Target, error) {
 	var t *target.Target
-	switch tc.Spec.TargetType {
-	case "s3":
-		t = createClients(tc.Name, createConfig(tc, &tc.Spec.S3), f.CreateS3Target)[0]
+
+	if tc.Spec.S3 != nil {
+		t = createClients(tc.Name, createConfig(tc, tc.Spec.S3), f.CreateS3Target)[0]
 		return t, nil
-	case "webhook":
-		t = createClients(tc.Name, createConfig(tc, &tc.Spec.Webhook), f.CreateWebhookTarget)[0]
+	} else if tc.Spec.Webhook != nil {
+		t = createClients(tc.Name, createConfig(tc, tc.Spec.Webhook), f.CreateWebhookTarget)[0]
 		return t, nil
-	case "gcs":
-		t = createClients(tc.Name, createConfig(tc, &tc.Spec.GCS), f.CreateGCSTarget)[0]
+	} else if tc.Spec.GCS != nil {
+		t = createClients(tc.Name, createConfig(tc, tc.Spec.GCS), f.CreateGCSTarget)[0]
 		return t, nil
-	case "elasticSearch":
-		t = createClients(tc.Name, createConfig(tc, &tc.Spec.ElasticSearch), f.CreateElasticsearchTarget)[0]
+	} else if tc.Spec.ElasticSearch != nil {
+		t = createClients(tc.Name, createConfig(tc, tc.Spec.ElasticSearch), f.CreateElasticsearchTarget)[0]
 		return t, nil
-	case "telegram":
-		t = createClients(tc.Name, createConfig(tc, &tc.Spec.Telegram), f.CreateTelegramTarget)[0]
+	} else if tc.Spec.Telegram != nil {
+		t = createClients(tc.Name, createConfig(tc, tc.Spec.Telegram), f.CreateTelegramTarget)[0]
 		return t, nil
-	case "kinesis":
-		t = createClients(tc.Name, createConfig(tc, &tc.Spec.Kinesis), f.CreateKinesisTarget)[0]
+	} else if tc.Spec.Kinesis != nil {
+		t = createClients(tc.Name, createConfig(tc, tc.Spec.Kinesis), f.CreateKinesisTarget)[0]
 		return t, nil
-	case "securityHub":
-		t = createClients(tc.Name, createConfig(tc, &tc.Spec.SecurityHub), f.CreateSecurityHubTarget)[0]
+	} else if tc.Spec.SecurityHub != nil {
+		t = createClients(tc.Name, createConfig(tc, tc.Spec.SecurityHub), f.CreateSecurityHubTarget)[0]
 		return t, nil
-	case "loki":
-		t = createClients(tc.Name, createConfig(tc, &tc.Spec.Loki), f.CreateLokiTarget)[0]
+	} else if tc.Spec.Loki != nil {
+		t = createClients(tc.Name, createConfig(tc, tc.Spec.Loki), f.CreateLokiTarget)[0]
+		return t, nil
+	} else if tc.Spec.Slack != nil {
+		t = createClients(tc.Name, createConfig(tc, tc.Spec.Slack), f.CreateSlackTarget)[0]
 		return t, nil
 	}
 	return nil, fmt.Errorf("invalid target type passed")

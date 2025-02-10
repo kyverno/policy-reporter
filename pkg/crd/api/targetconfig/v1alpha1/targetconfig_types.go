@@ -26,38 +26,40 @@ import (
 // +kubebuilder:oneOf:={required:{slack}}
 // +kubebuilder:oneOf:={required:{elasticSearch}}
 // +kubebuilder:oneOf:={required:{gcs}}
+// +kubebuilder:oneOf:={required:{loki}}
+// +kubebuilder:oneOf:={required:{securityHub}}
+// +kubebuilder:oneOf:={required:{kinesis}}
+// +kubebuilder:oneOf:={required:{teams}}
 // TargetConfigSpec defines the desired state of TargetConfig.
 type TargetConfigSpec struct {
 	ConfigStrict `json:",inline"`
 
 	//+optional
-	S3 S3Options `json:"s3,omitempty"`
+	S3 *S3Options `json:"s3,omitempty"`
 
 	// +optional
-	Webhook WebhookOptions `json:"webhook,omitempty"`
+	Webhook *WebhookOptions `json:"webhook,omitempty"`
 
 	// +optional
-	Telegram TelegramOptions `json:"telegram,omitempty"`
+	Telegram *TelegramOptions `json:"telegram,omitempty"`
 
 	// +optional
-	Slack SlackOptions `json:"slack,omitempty"`
+	Slack *SlackOptions `json:"slack,omitempty"`
 
 	// +optional
-	ElasticSearch ElasticsearchOptions `json:"elasticSearch,omitempty"`
+	ElasticSearch *ElasticsearchOptions `json:"elasticSearch,omitempty"`
 
 	// +optional
-	GCS GCSOptions `json:"gcs,omitempty"`
+	GCS *GCSOptions `json:"gcs,omitempty"`
 
 	// +optional
-	Loki LokiOptions `json:"loki,omitempty"`
+	Loki *LokiOptions `json:"loki,omitempty"`
 
 	// +optional
-	SecurityHub SecurityHubOptions `json:"securityHub,omitempty"`
+	SecurityHub *SecurityHubOptions `json:"securityHub,omitempty"`
 
 	// +optional
-	Kinesis KinesisOptions `json:"kinesis,omitempty"`
-
-	TargetType string `json:"targetType,omitempty"`
+	Kinesis *KinesisOptions `json:"kinesis,omitempty"`
 }
 
 // TargetConfigStatus defines the observed state of TargetConfig.
