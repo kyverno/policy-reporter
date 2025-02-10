@@ -37,12 +37,12 @@ func NewSendResultListener(targets *target.Collection) report.PolicyReportResult
 				existing := target.Cache().GetResults(re.GetID())
 				for _, r := range re.GetResults() {
 					if helper.Contains(r.GetID(), existing) {
-						return
+						continue
 					}
+					target.Send(result)
 				}
 
 				target.Cache().AddReport(re)
-				target.Send(result)
 			}(t, rep, r)
 		}
 
