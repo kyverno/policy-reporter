@@ -22,10 +22,11 @@ import (
 	"fmt"
 	"net/http"
 
-	policyreporterv1alpha1 "github.com/kyverno/policy-reporter/pkg/crd/client/targetconfig/clientset/versioned/typed/targetconfig/v1alpha1"
 	discovery "k8s.io/client-go/discovery"
 	rest "k8s.io/client-go/rest"
 	flowcontrol "k8s.io/client-go/util/flowcontrol"
+
+	policyreporterv1alpha1 "github.com/kyverno/policy-reporter/pkg/crd/client/targetconfig/clientset/versioned/typed/targetconfig/v1alpha1"
 )
 
 type Interface interface {
