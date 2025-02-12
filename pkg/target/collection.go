@@ -6,6 +6,7 @@ import (
 
 	"go.uber.org/zap"
 
+	"github.com/kyverno/policy-reporter/pkg/crd/api/targetconfig/v1alpha1"
 	"github.com/kyverno/policy-reporter/pkg/helper"
 )
 
@@ -25,6 +26,21 @@ const (
 	SecurityHub   TargetType = "SecurityHub"
 	GCS           TargetType = "GCS"
 )
+
+type Targets struct {
+	Loki          *v1alpha1.Config[v1alpha1.LokiOptions]          `mapstructure:"loki"`
+	Elasticsearch *v1alpha1.Config[v1alpha1.ElasticsearchOptions] `mapstructure:"elasticsearch"`
+	Slack         *v1alpha1.Config[v1alpha1.SlackOptions]         `mapstructure:"slack"`
+	Discord       *v1alpha1.Config[v1alpha1.WebhookOptions]       `mapstructure:"discord"`
+	Teams         *v1alpha1.Config[v1alpha1.WebhookOptions]       `mapstructure:"teams"`
+	Webhook       *v1alpha1.Config[v1alpha1.WebhookOptions]       `mapstructure:"webhook"`
+	GoogleChat    *v1alpha1.Config[v1alpha1.WebhookOptions]       `mapstructure:"googleChat"`
+	Telegram      *v1alpha1.Config[v1alpha1.TelegramOptions]      `mapstructure:"telegram"`
+	S3            *v1alpha1.Config[v1alpha1.S3Options]            `mapstructure:"s3"`
+	Kinesis       *v1alpha1.Config[v1alpha1.KinesisOptions]       `mapstructure:"kinesis"`
+	SecurityHub   *v1alpha1.Config[v1alpha1.SecurityHubOptions]   `mapstructure:"securityHub"`
+	GCS           *v1alpha1.Config[v1alpha1.GCSOptions]           `mapstructure:"gcs"`
+}
 
 type TargetConfig interface {
 	Secret() string
@@ -52,6 +68,18 @@ type Collection struct {
 	targets map[string]*Target
 }
 
+func (c *Collection) AddTarget(key string, t *Target) {
+	c.mx.Lock()
+	c.targets[key] = t
+	c.mx.Unlock()
+}
+
+func (c *Collection) RemoveTarget(key string) {
+	c.mx.Lock()
+	delete(c.targets, key)
+	c.mx.Unlock()
+}
+
 func (c *Collection) Update(t *Target) {
 	c.mx.Lock()
 	c.targets[t.ID] = t
@@ -76,13 +104,11 @@ func (c *Collection) Targets() []*Target {
 }
 
 func (c *Collection) Clients() []Client {
-	if len(c.clients) != 0 {
-		return c.clients
+	filterFunc := func(t *Target) Client {
+		return t.Client
 	}
 
-	c.clients = helper.MapSlice(c.targets, func(t *Target) Client {
-		return t.Client
-	})
+	c.clients = helper.MapSlice(c.targets, filterFunc)
 
 	return c.clients
 }

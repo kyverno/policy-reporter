@@ -3,10 +3,12 @@ package target
 import (
 	"context"
 	"strings"
+	"time"
 
 	"github.com/kyverno/go-wildcard"
 	"go.uber.org/zap"
 
+	"github.com/kyverno/policy-reporter/pkg/cache"
 	"github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
 	"github.com/kyverno/policy-reporter/pkg/kubernetes/namespaces"
 	"github.com/kyverno/policy-reporter/pkg/report"
@@ -43,6 +45,12 @@ type Client interface {
 	CleanUp(context.Context, v1alpha2.ReportInterface)
 	// Reset the current state in the related target
 	Reset(context.Context) error
+	// Get the time the client was created in
+	CreationTimestamp() time.Time
+	// Get the cache
+	Cache() cache.Cache
+	// Set the cache to an existing cache
+	SetCache(cache.Cache)
 }
 
 type ResultFilterFactory struct {
@@ -181,6 +189,8 @@ type BaseClient struct {
 	skipExistingOnStartup bool
 	resultFilter          *report.ResultFilter
 	reportFilter          *report.ReportFilter
+	creationTimestamp     time.Time
+	polrCache             cache.Cache
 }
 
 type ClientOptions struct {
@@ -222,6 +232,18 @@ func (c *BaseClient) Validate(rep v1alpha2.ReportInterface, result v1alpha2.Poli
 	return true
 }
 
+func (c *BaseClient) CreationTimestamp() time.Time {
+	return c.creationTimestamp
+}
+
+func (c *BaseClient) Cache() cache.Cache {
+	return c.polrCache
+}
+
+func (c *BaseClient) SetCache(rc cache.Cache) {
+	c.polrCache = rc
+}
+
 func (c *BaseClient) ValidateReport(rep v1alpha2.ReportInterface) bool {
 	if rep == nil {
 		return false
@@ -247,5 +269,5 @@ func (c *BaseClient) CleanUp(_ context.Context, _ v1alpha2.ReportInterface) {}
 func (c *BaseClient) BatchSend(_ v1alpha2.ReportInterface, _ []v1alpha2.PolicyReportResult) {}
 
 func NewBaseClient(options ClientOptions) BaseClient {
-	return BaseClient{options.Name, options.SkipExistingOnStartup, options.ResultFilter, options.ReportFilter}
+	return BaseClient{options.Name, options.SkipExistingOnStartup, options.ResultFilter, options.ReportFilter, time.Now(), cache.NewInMermoryCache(6*time.Hour, 10*time.Minute)}
 }

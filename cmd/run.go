@@ -4,11 +4,11 @@ import (
 	"context"
 	"errors"
 	"flag"
+	"time"
 
 	"github.com/spf13/cobra"
 	"go.uber.org/zap"
 	"golang.org/x/sync/errgroup"
-	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
 
 	"github.com/kyverno/policy-reporter/pkg/api"
@@ -17,6 +17,7 @@ import (
 	"github.com/kyverno/policy-reporter/pkg/config"
 	"github.com/kyverno/policy-reporter/pkg/database"
 	"github.com/kyverno/policy-reporter/pkg/listener"
+	"github.com/kyverno/policy-reporter/pkg/targetconfig"
 )
 
 func newRunCMD(version string) *cobra.Command {
@@ -30,14 +31,9 @@ func newRunCMD(version string) *cobra.Command {
 			}
 			c.Version = version
 
-			var k8sConfig *rest.Config
-			if c.K8sClient.Kubeconfig != "" {
-				k8sConfig, err = clientcmd.BuildConfigFromFlags("", c.K8sClient.Kubeconfig)
-			} else {
-				k8sConfig, err = rest.InClusterConfig()
-			}
+			k8sConfig, err := clientcmd.BuildConfigFromFlags("", "/Users/ammaryasser/Downloads/ips")
 			if err != nil {
-				return err
+				panic(err)
 			}
 
 			k8sConfig.QPS = c.K8sClient.QPS
@@ -62,6 +58,7 @@ func newRunCMD(version string) *cobra.Command {
 				return err
 			}
 
+			targetChan := make(chan targetconfig.TcEvent)
 			g := &errgroup.Group{}
 
 			var store *database.Store
@@ -140,7 +137,7 @@ func newRunCMD(version string) *cobra.Command {
 						}
 					}
 
-					resolver.RegisterSendResultListener()
+					resolver.RegisterSendResultListener(targetChan)
 
 					readinessProbe.Ready()
 				}).RegisterOnNew(func(currentID, lockID string) {
@@ -165,7 +162,7 @@ func newRunCMD(version string) *cobra.Command {
 					return elector.Run(cmd.Context())
 				})
 			} else {
-				resolver.RegisterSendResultListener()
+				resolver.RegisterSendResultListener(targetChan)
 				readinessProbe.Ready()
 			}
 
@@ -177,13 +174,44 @@ func newRunCMD(version string) *cobra.Command {
 			g.Go(server.Start)
 
 			g.Go(func() error {
+				// call TargetClients to ensure targets passed from the config file are initialized
+				resolver.TargetClients()
+				stop := make(chan struct{})
+
+				_, err = resolver.TargetConfigClient(targetChan)
+				if err != nil {
+					return err
+				}
+
+				resolver.StartTargetConfigInformer(stop)
+
+				<-stop
+
+				return nil
+			})
+
+			g.Go(func() error {
 				logger.Info("wait policy informer")
 				readinessProbe.Wait()
 
 				logger.Info("start client", zap.Int("worker", c.WorkerCount))
+				restart := make(chan struct{})
+				resolver.SetRestartCh(restart)
+
+				go func() {
+					for {
+						select {
+						case <-restart:
+							zap.L().Info("received restart signal")
+							client.Stop()
+						case <-time.After(time.Second * 3):
+						}
+					}
+				}()
 
 				for {
 					stop := make(chan struct{})
+
 					if err := client.Run(c.WorkerCount, stop); err != nil {
 						zap.L().Error("informer client error", zap.Error(err))
 					}

@@ -15,21 +15,21 @@ func Test_ScopeResultsListener(t *testing.T) {
 	t.Run("Send Results", func(t *testing.T) {
 		c := &client{validated: true, batchSend: true}
 		slistener := listener.NewSendScopeResultsListener(target.NewCollection(&target.Target{Client: c}))
-		slistener(preport1, []v1alpha2.PolicyReportResult{fixtures.FailResult}, false)
+		slistener(preport1, []v1alpha2.PolicyReportResult{fixtures.FailResult})
 
 		assert.True(t, c.Called, "Expected Send to be called")
 	})
 	t.Run("Don't Send Result when validation fails", func(t *testing.T) {
 		c := &client{validated: false, batchSend: true}
 		slistener := listener.NewSendScopeResultsListener(target.NewCollection(&target.Target{Client: c}))
-		slistener(preport1, []v1alpha2.PolicyReportResult{fixtures.FailResult}, false)
+		slistener(preport1, []v1alpha2.PolicyReportResult{fixtures.FailResult})
 
 		assert.False(t, c.Called, "Expected Send not to be called")
 	})
 	t.Run("Don't Send pre existing Result when skipExistingOnStartup is true", func(t *testing.T) {
 		c := &client{skipExistingOnStartup: true, batchSend: true}
 		slistener := listener.NewSendScopeResultsListener(target.NewCollection(&target.Target{Client: c}))
-		slistener(preport1, []v1alpha2.PolicyReportResult{fixtures.FailResult}, true)
+		slistener(preport1, []v1alpha2.PolicyReportResult{fixtures.FailResult})
 
 		if c.Called {
 			t.Error("Expected Send not to be called")
