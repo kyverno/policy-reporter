@@ -49,6 +49,8 @@ type Client interface {
 	CreationTimestamp() time.Time
 	// Get the cache
 	Cache() cache.Cache
+	// Set the cache to an existing cache
+	SetCache(cache.Cache)
 }
 
 type ResultFilterFactory struct {
@@ -236,6 +238,10 @@ func (c *BaseClient) CreationTimestamp() time.Time {
 
 func (c *BaseClient) Cache() cache.Cache {
 	return c.polrCache
+}
+
+func (c *BaseClient) SetCache(rc cache.Cache) {
+	c.polrCache = rc
 }
 
 func (c *BaseClient) ValidateReport(rep v1alpha2.ReportInterface) bool {

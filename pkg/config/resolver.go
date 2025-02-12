@@ -271,6 +271,13 @@ func (r *Resolver) RegisterNewResultsListener() {
 // RegisterSendResultListener resolver method
 func (r *Resolver) RegisterSendResultListener(targetChan chan targetconfig.TcEvent) {
 	registerFunc := func(targets *target.Collection) {
+		// if the client has skip existing preload its cache with the existing results
+		for _, client := range targets.Targets() {
+			if client.Client.SkipExistingOnStartup() {
+				client.Client.SetCache(r.resultCache.Clone())
+			}
+		}
+
 		r.resultListener.RegisterListener(listener.NewSendResultListener(targets))
 		r.resultListener.RegisterScopeListener(listener.NewSendScopeResultsListener(targets))
 		r.resultListener.RegisterSyncListener(listener.NewSendSyncResultsListener(targets))

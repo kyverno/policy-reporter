@@ -40,6 +40,11 @@ func (r *redisCache) AddReport(report v1alpha2.ReportInterface) {
 	}
 }
 
+// doesn't make sense in redis
+func (r *redisCache) Clone() Cache {
+	return r
+}
+
 func (r *redisCache) RemoveReport(id string) {
 	keys, err := r.rdb.Keys(context.Background(), r.generateKeyPattern(id)).Result()
 	if err != nil {

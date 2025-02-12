@@ -43,6 +43,10 @@ func (c *client) Name() string {
 	return "test"
 }
 
+func (c *client) SetCache(rc cache.Cache) {
+	// not needed for testing purposes
+}
+
 func (c *client) Sources() []string {
 	return []string{}
 }

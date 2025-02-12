@@ -2,7 +2,6 @@ package listener
 
 import (
 	"sync"
-	"time"
 
 	"github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
 	"github.com/kyverno/policy-reporter/pkg/helper"
@@ -33,12 +32,7 @@ func NewSendScopeResultsListener(targets *target.Collection) report.ScopeResults
 
 				var resultsToSend []v1alpha2.PolicyReportResult
 				existing := target.Cache().GetResults(re.GetID())
-
 				for _, r := range filtered {
-					preExisted := time.Unix(r.Timestamp.Seconds, int64(r.Timestamp.Nanos)).Before(target.CreationTimestamp())
-					if preExisted && target.SkipExistingOnStartup() {
-						continue
-					}
 					if helper.Contains(r.GetID(), existing) {
 						continue
 					}
