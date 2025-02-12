@@ -1360,7 +1360,7 @@ plugin:
       pullPolicy: IfNotPresent
         # -- (string) Image tag
         # Defaults to `Chart.AppVersion` if omitted
-      tag: "0.4.0"
+      tag: "0.4.3"
 
     cli:
       image:
@@ -1454,6 +1454,20 @@ plugin:
     podSecurityContext:
       runAsUser: 1234
       runAsGroup: 1234
+
+    # -- Deployment livenessProbe for policy-reporter-trivy-plugin
+    livenessProbe:
+      timeoutSeconds: 3
+      httpGet:
+        path: /vulnr/v1/policies
+        port: http
+
+    # -- Deployment readinessProbe for policy-reporter-trivy-plugin
+    readinessProbe:
+      timeoutSeconds: 3
+      httpGet:
+        path: /vulnr/v1/policies
+        port: http
 
     # -- Allow additional env variables to be added
     envVars: []
