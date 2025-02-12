@@ -88,14 +88,11 @@ func (c *inMemoryCache) Clone() Cache {
 	newCache := gocache.New(gocache.NoExpiration, 5*time.Minute)
 
 	for key, item := range oldItems {
-		// these ahe the items
-		// each time is 'result id' to empty stuct
 		c2 := item.Object.(*gocache.Cache).Items()
-		// you need to have the end cache be 'report id' : cache of result id
 		innerCache := gocache.New(gocache.NoExpiration, 5*time.Minute)
+
 		for innerKey := range c2 {
 			innerCache.Set(innerKey, struct{}{}, c.keepDuration)
-
 		}
 
 		newCache.Set(key, innerCache, c.keepDuration)
