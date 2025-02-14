@@ -922,6 +922,12 @@ ui:
   # uses the OS configured prefered color scheme as default
   displayMode: ""
 
+  # -- Configure access control for all default boards.
+  boards: {}
+  #  accessControl:
+  #    groups: []
+  #    emails: []
+
   # -- Additional customizable dashboards
   customBoards: []
   # - name: Team A
