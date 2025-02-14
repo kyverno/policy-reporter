@@ -38,6 +38,11 @@ customBoards:
   {{- toYaml . | nindent 2 }}
 {{- end }}
 
+{{- with .Values.ui.boards }}
+boards:
+  {{- toYaml . | nindent 2 }}
+{{- end }}
+
 {{- $kyverno := false -}}
 {{- range .Values.ui.sources }}
     {{- if eq .name "kyverno" -}}
