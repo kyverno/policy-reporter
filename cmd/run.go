@@ -9,6 +9,7 @@ import (
 	"github.com/spf13/cobra"
 	"go.uber.org/zap"
 	"golang.org/x/sync/errgroup"
+	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
 
 	"github.com/kyverno/policy-reporter/pkg/api"
@@ -31,9 +32,14 @@ func newRunCMD(version string) *cobra.Command {
 			}
 			c.Version = version
 
-			k8sConfig, err := clientcmd.BuildConfigFromFlags("", "/Users/ammaryasser/Downloads/ips")
+			var k8sConfig *rest.Config
+			if c.K8sClient.Kubeconfig != "" {
+				k8sConfig, err = clientcmd.BuildConfigFromFlags("", c.K8sClient.Kubeconfig)
+			} else {
+				k8sConfig, err = rest.InClusterConfig()
+			}
 			if err != nil {
-				panic(err)
+				return err
 			}
 
 			k8sConfig.QPS = c.K8sClient.QPS
