@@ -2,7 +2,6 @@ package listener
 
 import (
 	"sync"
-	"time"
 
 	corev1 "k8s.io/api/core/v1"
 
@@ -28,20 +27,23 @@ func NewSendResultListener(targets *target.Collection) report.PolicyReportResult
 					result.Resources = []corev1.ObjectReference{*re.GetScope()}
 				}
 
+				resultsToSend := []v1alpha2.PolicyReportResult{}
 				existing := target.Cache().GetResults(re.GetID())
-				for _, r := range re.GetResults() {
-					preExisted := time.Unix(r.Timestamp.Seconds, int64(r.Timestamp.Nanos)).Local().Before(target.CreationTimestamp())
-					if (preExisted && target.SkipExistingOnStartup()) || !target.Validate(re, result) {
-						continue
-					}
 
+				for _, r := range re.GetResults() {
 					if helper.Contains(r.GetID(), existing) {
 						continue
 					}
-					target.Send(result)
+
+					resultsToSend = append(resultsToSend, r)
 				}
 
 				target.Cache().AddReport(re)
+				if len(resultsToSend) > 0 {
+					for _, r := range resultsToSend {
+						target.Send(r)
+					}
+				}
 			}(t, rep, r)
 		}
 
