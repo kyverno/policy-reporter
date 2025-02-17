@@ -3,9 +3,11 @@ package listener_test
 import (
 	"context"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 
+	"github.com/kyverno/policy-reporter/pkg/cache"
 	"github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
 	"github.com/kyverno/policy-reporter/pkg/fixtures"
 	"github.com/kyverno/policy-reporter/pkg/listener"
@@ -21,8 +23,16 @@ type client struct {
 	cleanup               bool
 }
 
+func (c *client) Cache() cache.Cache {
+	return cache.NewInMermoryCache(time.Second, time.Second)
+}
+
 func (c *client) Send(result v1alpha2.PolicyReportResult) {
 	c.Called = true
+}
+
+func (c *client) CreationTimestamp() time.Time {
+	return time.Now()
 }
 
 func (c *client) MinimumSeverity() string {
@@ -31,6 +41,10 @@ func (c *client) MinimumSeverity() string {
 
 func (c *client) Name() string {
 	return "test"
+}
+
+func (c *client) SetCache(rc cache.Cache) {
+	// not needed for testing purposes
 }
 
 func (c *client) Sources() []string {
@@ -72,21 +86,21 @@ func Test_SendResultListener(t *testing.T) {
 	t.Run("Send Result", func(t *testing.T) {
 		c := &client{validated: true}
 		slistener := listener.NewSendResultListener(target.NewCollection(&target.Target{Client: c}))
-		slistener(preport1, fixtures.FailResult, false)
+		slistener(preport1, fixtures.FailResult)
 
 		assert.True(t, c.Called, "Expected Send to be called")
 	})
 	t.Run("Don't Send Result when validation fails", func(t *testing.T) {
 		c := &client{validated: false}
 		slistener := listener.NewSendResultListener(target.NewCollection(&target.Target{Client: c}))
-		slistener(preport1, fixtures.FailResult, false)
+		slistener(preport1, fixtures.FailResult)
 
 		assert.False(t, c.Called, "Expected Send not to be called")
 	})
 	t.Run("Don't Send pre existing Result when skipExistingOnStartup is true", func(t *testing.T) {
 		c := &client{skipExistingOnStartup: true}
 		slistener := listener.NewSendResultListener(target.NewCollection(&target.Target{Client: c}))
-		slistener(preport1, fixtures.FailResult, true)
+		slistener(preport1, fixtures.FailResult)
 
 		assert.False(t, c.Called, "Expected Send not to be called")
 	})

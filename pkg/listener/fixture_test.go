@@ -23,7 +23,7 @@ var preport2 = &v1alpha2.PolicyReport{
 		Namespace:         "test",
 		CreationTimestamp: v1.Now(),
 	},
-	Results: []v1alpha2.PolicyReportResult{fixtures.FailResult, fixtures.FailPodResult},
+	Results: []v1alpha2.PolicyReportResult{fixtures.FailPodResult},
 	Summary: v1alpha2.PolicyReportSummary{Fail: 1, Pass: 1},
 }
 

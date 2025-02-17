@@ -8,10 +8,10 @@ import (
 type PolicyReportListener = func(LifecycleEvent)
 
 // PolicyReportResultListener is called whenever a new PolicyResult comes in
-type PolicyReportResultListener = func(v1alpha2.ReportInterface, v1alpha2.PolicyReportResult, bool)
+type PolicyReportResultListener = func(v1alpha2.ReportInterface, v1alpha2.PolicyReportResult)
 
 // ScopeResultsListener is called whenever a new PolicyReport with a single resource scope and new results comes in
-type ScopeResultsListener = func(v1alpha2.ReportInterface, []v1alpha2.PolicyReportResult, bool)
+type ScopeResultsListener = func(v1alpha2.ReportInterface, []v1alpha2.PolicyReportResult)
 
 // SyncResultsListener is called whenever a PolicyReport event comes in
 type SyncResultsListener = func(v1alpha2.ReportInterface)
