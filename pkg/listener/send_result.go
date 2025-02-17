@@ -22,28 +22,17 @@ func NewSendResultListener(targets *target.Collection) report.PolicyReportResult
 		for _, t := range clients {
 			go func(target target.Client, re v1alpha2.ReportInterface, result v1alpha2.PolicyReportResult) {
 				defer wg.Done()
-
 				if !result.HasResource() && re.GetScope() != nil {
 					result.Resources = []corev1.ObjectReference{*re.GetScope()}
 				}
 
-				resultsToSend := []v1alpha2.PolicyReportResult{}
 				existing := target.Cache().GetResults(re.GetID())
-
-				for _, r := range re.GetResults() {
-					if helper.Contains(r.GetID(), existing) || !target.Validate(re, r) {
-						continue
-					}
-
-					resultsToSend = append(resultsToSend, r)
+				if helper.Contains(result.GetID(), existing) || !target.Validate(re, result) {
+					return
 				}
 
 				target.Cache().AddReport(re)
-				if len(resultsToSend) > 0 {
-					for _, r := range resultsToSend {
-						target.Send(r)
-					}
-				}
+				target.Send(result)
 			}(t, rep, r)
 		}
 
