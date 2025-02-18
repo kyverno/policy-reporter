@@ -80,6 +80,40 @@ spec:
           {{- with .Values.ui.envVars }}
           {{- . | toYaml | trim | nindent 10 }}
           {{- end }}
+          {{- if and .Values.ui.openIDConnect.enabled (hasKey .Values.ui.openIDConnect "secretRef") }}
+          - name: discoveryUrl
+            valueFrom:
+              secretKeyRef:
+                name: {{ .Values.ui.openIDConnect.secretRef }}
+                key: discoveryUrl
+          - name: clientId
+            valueFrom:
+              secretKeyRef:
+                name: {{ .Values.ui.openIDConnect.secretRef }}
+                key: clientId
+          - name: clientSecret
+            valueFrom:
+              secretKeyRef:
+                name: {{ .Values.ui.openIDConnect.secretRef }}
+                key: clientSecret
+          {{- end }}
+          {{- if and .Values.ui.oauth.enabled (hasKey .Values.ui.oauth "secretRef") }}
+          - name: provider
+            valueFrom:
+              secretKeyRef:
+                name: {{ .Values.ui.oauth.secretRef }}
+                key: provider
+          - name: clientId
+            valueFrom:
+              secretKeyRef:
+                name: {{ .Values.ui.oauth.secretRef }}
+                key: clientId
+          - name: clientSecret
+            valueFrom:
+              secretKeyRef:
+                name: {{ .Values.ui.oauth.secretRef }}
+                key: clientSecret
+          {{- end }}
       {{- if .Values.ui.sidecarContainers }}
         {{- range $name, $spec :=  .Values.ui.sidecarContainers }}
         - name: {{ $name }}
@@ -97,6 +131,16 @@ spec:
           optional: true
       - name: tmp
         emptyDir: {}
+      {{- if and .Values.ui.openIDConnect.enabled (hasKey .Values.ui.openIDConnect "secretRef") }}
+      - name: open-id-connect
+        secret:
+          secretName: {{ .Values.ui.openIDConnect.secretRef }}
+      {{- end }}
+      {{- if and .Values.ui.oauth.enabled (hasKey .Values.ui.oauth "secretRef") }}
+      - name: oauth
+        secret:
+          secretName: {{ .Values.ui.oauth.secretRef }}
+      {{- end }}
       {{- with .Values.ui.extraVolumes.volumes }}
       {{ toYaml . | nindent 6 | trim }}
       {{- end }}           
