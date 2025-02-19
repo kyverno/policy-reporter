@@ -29,11 +29,11 @@ require (
 	github.com/spf13/cobra v1.9.1
 	github.com/spf13/viper v1.19.0
 	github.com/stretchr/testify v1.10.0
-	github.com/uptrace/bun v1.2.9
+	github.com/uptrace/bun v1.2.10
 	github.com/uptrace/bun/dialect/mysqldialect v1.2.9
 	github.com/uptrace/bun/dialect/pgdialect v1.2.9
 	github.com/uptrace/bun/dialect/sqlitedialect v1.2.9
-	github.com/uptrace/bun/driver/pgdriver v1.2.9
+	github.com/uptrace/bun/driver/pgdriver v1.2.10
 	github.com/uptrace/bun/extra/bundebug v1.2.9
 	github.com/xhit/go-simple-mail/v2 v2.16.0
 	go.uber.org/zap v1.27.0
@@ -126,7 +126,7 @@ require (
 	github.com/planetscale/vtprotobuf v0.6.1-0.20240319094008-0393e58bdf10 // indirect
 	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect
 	github.com/prometheus/procfs v0.15.1 // indirect
-	github.com/puzpuzpuz/xsync/v3 v3.5.0 // indirect
+	github.com/puzpuzpuz/xsync/v3 v3.5.1 // indirect
 	github.com/sagikazarmark/locafero v0.6.0 // indirect
 	github.com/sagikazarmark/slog-shim v0.1.0 // indirect
 	github.com/sourcegraph/conc v0.3.0 // indirect
@@ -152,10 +152,10 @@ require (
 	go.opentelemetry.io/otel/trace v1.34.0 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
 	golang.org/x/arch v0.13.0 // indirect
-	golang.org/x/crypto v0.32.0 // indirect
+	golang.org/x/crypto v0.33.0 // indirect
 	golang.org/x/exp v0.0.0-20241108190413-2d47ceb2692f // indirect
 	golang.org/x/mod v0.23.0 // indirect
-	golang.org/x/sys v0.29.0 // indirect
+	golang.org/x/sys v0.30.0 // indirect
 	google.golang.org/genproto v0.0.0-20241118233622-e639e219e697 // indirect
 	google.golang.org/genproto/googleapis/api v0.0.0-20241209162323-e6fa225c2576 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20241223144023-3abc09e42ca8 // indirect
@@ -179,7 +179,7 @@ require (
 	github.com/subosito/gotenv v1.6.0 // indirect
 	golang.org/x/net v0.34.0 // indirect
 	golang.org/x/oauth2 v0.26.0
-	golang.org/x/term v0.28.0 // indirect
+	golang.org/x/term v0.29.0 // indirect
 	golang.org/x/time v0.8.0 // indirect
 	gopkg.in/ini.v1 v1.67.0 // indirect
 	k8s.io/api v0.32.2
