@@ -21,10 +21,11 @@ type client struct {
 	cleanupCalled         bool
 	batchSend             bool
 	cleanup               bool
+	cache                 cache.Cache
 }
 
 func (c *client) Cache() cache.Cache {
-	return cache.NewInMermoryCache(time.Second, time.Second)
+	return c.cache
 }
 
 func (c *client) Send(result v1alpha2.PolicyReportResult) {
@@ -44,7 +45,7 @@ func (c *client) Name() string {
 }
 
 func (c *client) SetCache(rc cache.Cache) {
-	// not needed for testing purposes
+	c.cache = rc
 }
 
 func (c *client) Sources() []string {
@@ -85,6 +86,9 @@ func (c *client) Type() target.ClientType {
 func Test_SendResultListener(t *testing.T) {
 	t.Run("Send Result", func(t *testing.T) {
 		c := &client{validated: true}
+		resultCache := cache.NewInMermoryCache(time.Hour, time.Hour)
+		c.SetCache(resultCache)
+
 		slistener := listener.NewSendResultListener(target.NewCollection(&target.Target{Client: c}))
 		slistener(preport1, fixtures.FailResult)
 
@@ -92,6 +96,9 @@ func Test_SendResultListener(t *testing.T) {
 	})
 	t.Run("Don't Send Result when validation fails", func(t *testing.T) {
 		c := &client{validated: false}
+		resultCache := cache.NewInMermoryCache(time.Hour, time.Hour)
+		c.SetCache(resultCache)
+
 		slistener := listener.NewSendResultListener(target.NewCollection(&target.Target{Client: c}))
 		slistener(preport1, fixtures.FailResult)
 
@@ -99,6 +106,10 @@ func Test_SendResultListener(t *testing.T) {
 	})
 	t.Run("Don't Send pre existing Result when skipExistingOnStartup is true", func(t *testing.T) {
 		c := &client{skipExistingOnStartup: true}
+		resultCache := cache.NewInMermoryCache(time.Hour, time.Hour)
+		resultCache.AddReport(preport1)
+		c.SetCache(resultCache)
+
 		slistener := listener.NewSendResultListener(target.NewCollection(&target.Target{Client: c}))
 		slistener(preport1, fixtures.FailResult)
 
