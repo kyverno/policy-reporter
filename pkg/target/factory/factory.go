@@ -128,6 +128,9 @@ func (f *TargetFactory) CreateSingleClient(tc *v1alpha1.TargetConfig) (*target.T
 	} else if tc.Spec.Slack != nil {
 		t = createClients(tc.Name, createConfig(tc, tc.Spec.Slack), f.CreateSlackTarget)[0]
 		return t, nil
+	} else if tc.Spec.Teams != nil {
+		t = createClients(tc.Name, createConfig(tc, tc.Spec.Teams), f.CreateTeamsTarget)[0]
+		return t, nil
 	}
 	return nil, fmt.Errorf("invalid target type passed")
 }

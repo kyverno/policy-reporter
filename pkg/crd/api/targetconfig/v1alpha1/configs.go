@@ -11,7 +11,6 @@ type AWSConfig struct {
 	Endpoint string `mapstructure:"endpoint" json:"endpoint"`
 }
 
-// todo: why are there two structs with the exact same fields ?
 type WebhookOptions struct {
 	Webhook     string            `mapstructure:"webhook" json:"webhook"`
 	SkipTLS     bool              `mapstructure:"skipTLS" json:"skipTLS"`

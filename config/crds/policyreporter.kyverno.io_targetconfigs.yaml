@@ -326,6 +326,24 @@ spec:
                 items:
                   type: string
                 type: array
+              teams:
+                properties:
+                  certificate:
+                    type: string
+                  headers:
+                    additionalProperties:
+                      type: string
+                    type: object
+                  skipTLS:
+                    type: boolean
+                  webhook:
+                    type: string
+                required:
+                - certificate
+                - headers
+                - skipTLS
+                - webhook
+                type: object
               telegram:
                 properties:
                   certificate:
@@ -351,8 +369,6 @@ spec:
                 - webhook
                 type: object
               webhook:
-                description: 'todo: why are there two structs with the exact same
-                  fields ?'
                 properties:
                   certificate:
                     type: string

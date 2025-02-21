@@ -60,6 +60,9 @@ type TargetConfigSpec struct {
 
 	// +optional
 	Kinesis *KinesisOptions `json:"kinesis,omitempty"`
+
+	// +optional
+	Teams *WebhookOptions `json:"teams,omitempty"`
 }
 
 // TargetConfigStatus defines the observed state of TargetConfig.
