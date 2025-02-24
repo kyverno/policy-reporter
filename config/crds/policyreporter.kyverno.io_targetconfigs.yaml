@@ -299,8 +299,6 @@ spec:
                 - productName
                 - secretAccessKey
                 type: object
-              skipExistingOnStartup:
-                type: boolean
               slack:
                 properties:
                   certificate:

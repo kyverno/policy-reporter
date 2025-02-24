@@ -1005,7 +1005,7 @@ func createConfig[T any](tc *v1alpha1.TargetConfig, config *T) *v1alpha1.Config[
 		MinimumSeverity: tc.Spec.MinimumSeverity,
 		Filter:          tc.Spec.Filter,
 		SecretRef:       tc.Spec.SecretRef,
-		SkipExisting:    tc.Spec.SkipExisting,
+		SkipExisting:    true, // todo: introduce the skip existing feature
 		CustomFields:    tc.Spec.CustomFields,
 		MountedSecret:   tc.Spec.MountedSecret,
 		Sources:         tc.Spec.Sources,

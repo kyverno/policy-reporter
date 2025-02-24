@@ -54,7 +54,7 @@ func (c *TargetConfigClient) configureInformer(targetChan chan TcEvent) {
 			}
 
 			c.targetClients.AddTarget(tc.Name, t)
-			targetChan <- TcEvent{Type: CreateTcEvent, Targets: c.targetClients, RestartPolrInformer: !tc.Spec.SkipExisting}
+			targetChan <- TcEvent{Type: CreateTcEvent, Targets: c.targetClients}
 		},
 		UpdateFunc: func(oldObj, newObj interface{}) {
 			tc := newObj.(*v1alpha1.TargetConfig)
@@ -67,7 +67,7 @@ func (c *TargetConfigClient) configureInformer(targetChan chan TcEvent) {
 			}
 
 			c.targetClients.AddTarget(tc.Name, t)
-			targetChan <- TcEvent{Type: CreateTcEvent, Targets: c.targetClients, RestartPolrInformer: !tc.Spec.SkipExisting}
+			targetChan <- TcEvent{Type: CreateTcEvent, Targets: c.targetClients}
 		},
 		DeleteFunc: func(obj interface{}) {
 			tc := obj.(*v1alpha1.TargetConfig)
