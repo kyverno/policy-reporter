@@ -79,7 +79,7 @@ func (k *informer) UpdateTarget(t *target.Target, secret string) *target.Target 
 	case target.Loki:
 		updatedTarget = createClients(t.Config, t.ParentConfig, k.factory.CreateLokiTarget)
 	case target.Elasticsearch:
-		updatedTarget = createClients(t.Config, t.ParentConfig, k.factory.CreateLokiTarget)
+		updatedTarget = createClients(t.Config, t.ParentConfig, k.factory.CreateElasticsearchTarget)
 	case target.Slack:
 		updatedTarget = createClients(t.Config, t.ParentConfig, k.factory.CreateSlackTarget)
 	case target.Discord:
