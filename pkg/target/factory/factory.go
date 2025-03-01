@@ -23,6 +23,7 @@ import (
 	"github.com/kyverno/policy-reporter/pkg/target/http"
 	"github.com/kyverno/policy-reporter/pkg/target/kinesis"
 	"github.com/kyverno/policy-reporter/pkg/target/loki"
+	"github.com/kyverno/policy-reporter/pkg/target/pagerduty"
 	"github.com/kyverno/policy-reporter/pkg/target/provider/aws"
 	gs "github.com/kyverno/policy-reporter/pkg/target/provider/gcs"
 	"github.com/kyverno/policy-reporter/pkg/target/s3"
@@ -93,6 +94,7 @@ func (f *TargetFactory) CreateClients(config *target.Targets) *target.Collection
 	targets = append(targets, createClients("Kinesis", config.Kinesis, f.CreateKinesisTarget)...)
 	targets = append(targets, createClients("SecurityHub", config.SecurityHub, f.CreateSecurityHubTarget)...)
 	targets = append(targets, createClients("GoogleCloudStorage", config.GCS, f.CreateGCSTarget)...)
+	targets = append(targets, createClients("PagerDuty", config.PagerDuty, f.CreatePagerDutyTarget)...)
 
 	return target.NewCollection(targets...)
 }
@@ -737,6 +739,49 @@ func (f *TargetFactory) CreateGCSTarget(config, parent *target.Config[target.GCS
 			Client:       gcsClient,
 			CustomFields: config.CustomFields,
 			Prefix:       config.Config.Prefix,
+		}),
+	}
+}
+
+func (f *TargetFactory) CreatePagerDutyTarget(config, parent *target.Config[target.PagerDutyOptions]) *target.Target {
+	if config == nil || config.Config == nil {
+		return nil
+	}
+
+	if (parent.SecretRef != "" && f.secretClient != nil) || parent.MountedSecret != "" {
+		f.mapSecretValues(parent, parent.SecretRef, parent.MountedSecret)
+	}
+
+	if (config.SecretRef != "" && f.secretClient != nil) || config.MountedSecret != "" {
+		f.mapSecretValues(config, config.SecretRef, config.MountedSecret)
+	}
+
+	if config.Config.APIToken == "" || config.Config.ServiceID == "" {
+		return nil
+	}
+
+	setFallback(&config.Config.APIToken, parent.Config.APIToken)
+	setFallback(&config.Config.ServiceID, parent.Config.ServiceID)
+
+	config.MapBaseParent(parent)
+
+	zap.S().Infof("%s configured", config.Name)
+
+	return &target.Target{
+		ID:           uuid.NewString(),
+		Type:         target.PagerDuty,
+		Config:       config,
+		ParentConfig: parent,
+		Client: pagerduty.NewClient(pagerduty.Options{
+			ClientOptions: target.ClientOptions{
+				Name:                  config.Name,
+				SkipExistingOnStartup: config.SkipExisting,
+				ResultFilter:          f.createResultFilter(config.Filter, config.MinimumSeverity, config.Sources),
+				ReportFilter:          createReportFilter(config.Filter),
+			},
+			APIToken:     config.Config.APIToken,
+			ServiceID:    config.Config.ServiceID,
+			CustomFields: config.CustomFields,
 		}),
 	}
 }

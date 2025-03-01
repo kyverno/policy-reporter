@@ -140,6 +140,11 @@ type GCSOptions struct {
 	Bucket      string `mapstructure:"bucket"`
 }
 
+type PagerDutyOptions struct {
+	APIToken  string `mapstructure:"apiToken"`
+	ServiceID string `mapstructure:"serviceId"`
+}
+
 type Targets struct {
 	Loki          *Config[LokiOptions]          `mapstructure:"loki"`
 	Elasticsearch *Config[ElasticsearchOptions] `mapstructure:"elasticsearch"`
@@ -153,6 +158,7 @@ type Targets struct {
 	Kinesis       *Config[KinesisOptions]       `mapstructure:"kinesis"`
 	SecurityHub   *Config[SecurityHubOptions]   `mapstructure:"securityHub"`
 	GCS           *Config[GCSOptions]           `mapstructure:"gcs"`
+	PagerDuty     *Config[PagerDutyOptions]    `mapstructure:"pagerduty"`
 }
 
 type Factory interface {
