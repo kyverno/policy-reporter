@@ -261,7 +261,7 @@ func (r *Resolver) Queue() (*kubernetes.Queue, error) {
 func (r *Resolver) RegisterNewResultsListener() {
 	targets := r.TargetClients()
 
-	newResultListener := listener.NewResultListener(r.ResultCache(), time.Now())
+	newResultListener := listener.NewResultListener(r.SkipExistingOnStartup(), r.ResultCache(), time.Now())
 	r.resultListener = newResultListener
 	r.EventPublisher().RegisterListener(listener.NewResults, newResultListener.Listen)
 

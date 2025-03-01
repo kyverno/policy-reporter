@@ -90,7 +90,7 @@ func Test_SendResultListener(t *testing.T) {
 		c.SetCache(resultCache)
 
 		slistener := listener.NewSendResultListener(target.NewCollection(&target.Target{Client: c}))
-		slistener(preport1, fixtures.FailResult)
+		slistener(preport1, fixtures.FailResult, false)
 
 		assert.True(t, c.Called, "Expected Send to be called")
 	})
@@ -100,7 +100,7 @@ func Test_SendResultListener(t *testing.T) {
 		c.SetCache(resultCache)
 
 		slistener := listener.NewSendResultListener(target.NewCollection(&target.Target{Client: c}))
-		slistener(preport1, fixtures.FailResult)
+		slistener(preport1, fixtures.FailResult, false)
 
 		assert.False(t, c.Called, "Expected Send not to be called")
 	})
@@ -111,7 +111,7 @@ func Test_SendResultListener(t *testing.T) {
 		c.SetCache(resultCache)
 
 		slistener := listener.NewSendResultListener(target.NewCollection(&target.Target{Client: c}))
-		slistener(preport1, fixtures.FailResult)
+		slistener(preport1, fixtures.FailResult, true)
 
 		assert.False(t, c.Called, "Expected Send not to be called")
 	})
