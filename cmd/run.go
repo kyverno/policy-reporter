@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"flag"
-	"time"
 
 	"github.com/spf13/cobra"
 	"go.uber.org/zap"
@@ -201,20 +200,6 @@ func newRunCMD(version string) *cobra.Command {
 				readinessProbe.Wait()
 
 				logger.Info("start client", zap.Int("worker", c.WorkerCount))
-				restart := make(chan struct{})
-				resolver.SetRestartCh(restart)
-
-				go func() {
-					for {
-						select {
-						case <-restart:
-							zap.L().Info("received restart signal")
-							client.Stop()
-						case <-time.After(time.Second * 3):
-						}
-					}
-				}()
-
 				for {
 					stop := make(chan struct{})
 

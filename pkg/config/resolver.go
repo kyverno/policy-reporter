@@ -271,13 +271,6 @@ func (r *Resolver) RegisterNewResultsListener() {
 // RegisterSendResultListener resolver method
 func (r *Resolver) RegisterSendResultListener(targetChan chan targetconfig.TcEvent) {
 	registerFunc := func(targets *target.Collection) {
-		// if the client has skip existing preload its cache with the existing results
-		for _, client := range targets.Targets() {
-			if client.Client.SkipExistingOnStartup() {
-				client.Client.SetCache(r.resultCache.Clone())
-			}
-		}
-
 		r.resultListener.RegisterListener(listener.NewSendResultListener(targets))
 		r.resultListener.RegisterScopeListener(listener.NewSendScopeResultsListener(targets))
 		r.resultListener.RegisterSyncListener(listener.NewSendSyncResultsListener(targets))
@@ -293,13 +286,6 @@ func (r *Resolver) RegisterSendResultListener(targetChan chan targetconfig.TcEve
 				r.resultListener.ResetListeners()
 				registerFunc(event.Targets)
 
-				if event.Type == targetconfig.CreateTcEvent && event.RestartPolrInformer {
-					if len(event.Targets.Clients()) < r.targetConfigClient.TargetConfigCount() && !r.targetConfigClient.HasSynced() {
-						continue
-					}
-					r.polrRestartCh <- struct{}{}
-					r.logger.Info("sent restart signal")
-				}
 			case <-time.After(5 * time.Second):
 			}
 		}
