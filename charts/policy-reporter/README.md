@@ -3,7 +3,7 @@
 Policy Reporter watches for PolicyReport Resources.
 It creates Prometheus Metrics and can send rule validation events to different targets like Loki, Elasticsearch, Slack or Discord
 
-![Version: 3.0.0](https://img.shields.io/badge/Version-3.0.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 3.0.0](https://img.shields.io/badge/AppVersion-3.0.0-informational?style=flat-square)
+![Version: 3.0.4](https://img.shields.io/badge/Version-3.0.4-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 3.0.1](https://img.shields.io/badge/AppVersion-3.0.1-informational?style=flat-square)
 
 ## Documentation
 
@@ -339,7 +339,7 @@ Open `http://localhost:8082/` in your browser.
 | ui.image.registry | string | `"ghcr.io"` | Image registry |
 | ui.image.repository | string | `"kyverno/policy-reporter-ui"` | Image repository |
 | ui.image.pullPolicy | string | `"IfNotPresent"` | Image PullPolicy |
-| ui.image.tag | string | `"2.0.1"` | Image tag |
+| ui.image.tag | string | `"2.1.0"` | Image tag |
 | ui.replicaCount | int | `1` | Deployment replica count |
 | ui.tempDir | string | `"/tmp"` | Temporary Directory to persist session data for authentication |
 | ui.logging.api | bool | `false` | Enables external api request logging |
@@ -365,7 +365,10 @@ Open `http://localhost:8082/` in your browser.
 | ui.oauth.scopes | list | `[]` | OpenID Connect allowed Scopes |
 | ui.oauth.secretRef | string | `""` | Provide OpenID Connect configuration via Secret supported keys: `provider`, `clientId`, `clientSecret` |
 | ui.banner | string | `""` | optional banner text |
+| ui.logo.path | string | `""` | custom logo path |
+| ui.logo.disabled | bool | `false` | disable logo entirely |
 | ui.displayMode | string | `""` | DisplayMode dark/light/colorblind/colorblinddark uses the OS configured prefered color scheme as default |
+| ui.boards | object | `{}` | Configure access control for all default boards. |
 | ui.customBoards | list | `[]` | Additional customizable dashboards |
 | ui.sources | list | `[]` | source specific configurations |
 | ui.name | string | `"Default"` |  |
@@ -482,11 +485,12 @@ Open `http://localhost:8082/` in your browser.
 | plugin.trivy.image.registry | string | `"ghcr.io"` | Image registry |
 | plugin.trivy.image.repository | string | `"kyverno/policy-reporter/trivy-plugin"` | Image repository |
 | plugin.trivy.image.pullPolicy | string | `"IfNotPresent"` | Image PullPolicy |
-| plugin.trivy.image.tag | string | `"0.3.1"` | Image tag Defaults to `Chart.AppVersion` if omitted |
+| plugin.trivy.image.tag | string | `"0.4.3"` | Image tag Defaults to `Chart.AppVersion` if omitted |
 | plugin.trivy.cli.image.registry | string | `"ghcr.io"` | Image registry |
 | plugin.trivy.cli.image.repository | string | `"aquasecurity/trivy"` | Image repository |
 | plugin.trivy.cli.image.pullPolicy | string | `"IfNotPresent"` | Image PullPolicy |
 | plugin.trivy.cli.image.tag | string | `"0.58.2"` | Image tag Defaults to `Chart.AppVersion` if omitted |
+| plugin.trivy.github.token | string | `""` | optional github token for authenticated GitHub API calls. |
 | plugin.trivy.dbVolume | object | `{}` | If set the volume for dbVolume is freely configurable below "- name: dbVolume". If no value is set an emptyDir is used. |
 | plugin.trivy.tmpVolume | object | `{}` | If set the volume for tmpVolume is freely configurable below "- name: tmpVolume". If no value is set an emptyDir is used. |
 | plugin.trivy.replicaCount | int | `1` | Deployment replica count |
@@ -508,6 +512,8 @@ Open `http://localhost:8082/` in your browser.
 | plugin.trivy.updateStrategy | object | `{}` | Deployment update strategy. Ref: https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#strategy |
 | plugin.trivy.revisionHistoryLimit | int | `10` | The number of revisions to keep |
 | plugin.trivy.podSecurityContext | object | `{"runAsGroup":1234,"runAsUser":1234}` | Security context for the pod |
+| plugin.trivy.livenessProbe | object | `{"httpGet":{"path":"/vulnr/v1/policies","port":"http"},"timeoutSeconds":3}` | Deployment livenessProbe for policy-reporter-trivy-plugin |
+| plugin.trivy.readinessProbe | object | `{"httpGet":{"path":"/vulnr/v1/policies","port":"http"},"timeoutSeconds":3}` | Deployment readinessProbe for policy-reporter-trivy-plugin |
 | plugin.trivy.envVars | list | `[]` | Allow additional env variables to be added |
 | plugin.trivy.rbac.enabled | bool | `true` | Create RBAC resources |
 | plugin.trivy.securityContext.runAsUser | int | `1234` |  |

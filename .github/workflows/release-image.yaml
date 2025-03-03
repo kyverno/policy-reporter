@@ -39,17 +39,17 @@ jobs:
           password: ${{ secrets.CR_PAT }}
 
       - name: Set up QEMU
-        uses: docker/setup-qemu-action@53851d14592bedcffcf25ea515637cff71ef929a # v3.3.0
+        uses: docker/setup-qemu-action@29109295f81e9208d7d86ff1c6c12d2833863392 # v3.6.0
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@6524bf65af31da8d45b59e8c27de4bd072b392f5 #v3.8.0
+        uses: docker/setup-buildx-action@b5ca514318bd6ebac0fb2aedd5d36ec1b5c232a2 #v3.10.0
         id: buildx
         with:
           install: true
           version: latest
 
       - name: Build image and push to GitHub Container Registry
-        uses: docker/build-push-action@ca877d9245402d1537745e0e356eab47c3520991 # v6.13.0
+        uses: docker/build-push-action@471d1dc4e07e5cdedd4c2171150001c434f0b7a4 # v6.15.0
         id: push
         with:
           push: true
@@ -61,7 +61,7 @@ jobs:
             ghcr.io/${{github.repository_owner}}/policy-reporter:${{ env.VERSION }}
 
       - name: Install Cosign
-        uses: sigstore/cosign-installer@dc72c7d5c4d10cd6bcb8cf6e3fd625a9e5e537da # v3.7.0
+        uses: sigstore/cosign-installer@d7d6bc7722e3daa8354c50bcb52f4837da5e9b6a # v3.8.1
 
       - name: Sign image
         shell: bash
@@ -87,7 +87,7 @@ jobs:
           version: v1
           args: app -licenses -json -output policy-reporter-bom.cdx.json -main .
 
-      - uses: actions/upload-artifact@65c4c4a1ddee5b72f698fdd19549f0f0fb45cf08 # v4.6.0
+      - uses: actions/upload-artifact@4cec3d8aa04e39d1a68397de0c4cd6fb9dce8ec1 # v4.6.1
         with:
           name: policy-reporter-bom-cdx
           path: policy-reporter-bom.cdx.json
@@ -100,7 +100,7 @@ jobs:
           cosign attach sbom --sbom ./policy-reporter-bom.cdx.json --type cyclonedx ghcr.io/${{github.repository_owner}}/policy-reporter@${{ steps.push.outputs.digest }}
 
       - name: Install the crane command
-        uses: kubewarden/github-actions/crane-installer@0c23eadfd96cc18828d477629a04cdfe7f2607ee # v3.4.5
+        uses: kubewarden/github-actions/crane-installer@ecd8041cd496045da7b999bd282b412f539eb174 # v3.4.7
 
       - name: Find platform digest
         shell: bash

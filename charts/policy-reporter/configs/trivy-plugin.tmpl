@@ -21,3 +21,6 @@ core:
 
 trivy:
   dbDir: /db
+
+github:
+  token: {{ .Values.plugin.trivy.github.token | quote }}

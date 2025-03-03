@@ -16,6 +16,9 @@ server:
 ui:
   displayMode: {{ .Values.ui.displayMode }}
   banner: {{ .Values.ui.banner }}
+  logo:
+    path: {{ .Values.ui.logo.path }}
+    disabled: {{ .Values.ui.logo.disabled }}
 
 {{- $default := false -}}
 {{- range .Values.ui.clusters }}
@@ -35,6 +38,11 @@ clusters:
 
 {{- with .Values.ui.customBoards }}
 customBoards:
+  {{- toYaml . | nindent 2 }}
+{{- end }}
+
+{{- with .Values.ui.boards }}
+boards:
   {{- toYaml . | nindent 2 }}
 {{- end }}
 

@@ -849,7 +849,7 @@ ui:
     # -- (string) Image PullPolicy
     pullPolicy: IfNotPresent
     # -- (string) Image tag
-    tag: "2.0.1"
+    tag: "2.1.0"
 
   # -- Deployment replica count
   replicaCount: 1
@@ -918,9 +918,21 @@ ui:
   # -- optional banner text
   banner: ""
 
+  logo:
+    # -- custom logo path
+    path: ""
+    # -- disable logo entirely
+    disabled: false
+
   # -- DisplayMode dark/light/colorblind/colorblinddark
   # uses the OS configured prefered color scheme as default
   displayMode: ""
+
+  # -- Configure access control for all default boards.
+  boards: {}
+  #  accessControl:
+  #    groups: []
+  #    emails: []
 
   # -- Additional customizable dashboards
   customBoards: []
@@ -1360,7 +1372,7 @@ plugin:
       pullPolicy: IfNotPresent
         # -- (string) Image tag
         # Defaults to `Chart.AppVersion` if omitted
-      tag: "0.3.1"
+      tag: "0.4.3"
 
     cli:
       image:
@@ -1373,6 +1385,10 @@ plugin:
           # -- (string) Image tag
           # Defaults to `Chart.AppVersion` if omitted
         tag: "0.58.2"
+
+    github:
+      # -- (string) optional github token for authenticated GitHub API calls.
+      token: ""
 
     # -- If set the volume for dbVolume is freely configurable below "- name: dbVolume". If no value is set an emptyDir is used.
     dbVolume: {}
@@ -1450,6 +1466,20 @@ plugin:
     podSecurityContext:
       runAsUser: 1234
       runAsGroup: 1234
+
+    # -- Deployment livenessProbe for policy-reporter-trivy-plugin
+    livenessProbe:
+      timeoutSeconds: 3
+      httpGet:
+        path: /vulnr/v1/policies
+        port: http
+
+    # -- Deployment readinessProbe for policy-reporter-trivy-plugin
+    readinessProbe:
+      timeoutSeconds: 3
+      httpGet:
+        path: /vulnr/v1/policies
+        port: http
 
     # -- Allow additional env variables to be added
     envVars: []
