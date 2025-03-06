@@ -47,6 +47,11 @@ spec:
           - /
           - image
           - --download-db-only
+          {{- range $key, $value := .Values.plugin.trivy.extraArgs }}
+          {{- if $value }}
+          - --{{ $key }}={{ $value }}
+          {{- end }}
+          {{- end }}
           securityContext:
           {{- if .Values.plugin.trivy.securityContext }}
             {{- toYaml .Values.plugin.trivy.securityContext | nindent 12 }}
