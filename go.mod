@@ -22,7 +22,7 @@ require (
 	github.com/kyverno/go-wildcard v1.0.5
 	github.com/mattn/go-sqlite3 v1.14.24
 	github.com/patrickmn/go-cache v2.1.0+incompatible
-	github.com/prometheus/client_golang v1.20.5
+	github.com/prometheus/client_golang v1.21.1
 	github.com/prometheus/client_model v0.6.1
 	github.com/segmentio/fasthash v1.0.3
 	github.com/slack-go/slack v0.16.0
@@ -175,7 +175,7 @@ require (
 require (
 	github.com/go-logr/logr v1.4.2 // indirect
 	github.com/go-openapi/jsonreference v0.21.0 // indirect
-	github.com/prometheus/common v0.60.1 // indirect
+	github.com/prometheus/common v0.62.0 // indirect
 	github.com/subosito/gotenv v1.6.0 // indirect
 	golang.org/x/net v0.34.0 // indirect
 	golang.org/x/oauth2 v0.26.0
