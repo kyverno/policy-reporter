@@ -1386,6 +1386,9 @@ plugin:
           # Defaults to `Chart.AppVersion` if omitted
         tag: "0.58.2"
 
+    # -- Additional container args.
+    extraArgs: {}
+
     github:
       # -- (string) optional github token for authenticated GitHub API calls.
       token: ""
