@@ -37,7 +37,7 @@ require (
 	github.com/uptrace/bun/extra/bundebug v1.2.11
 	github.com/xhit/go-simple-mail/v2 v2.16.0
 	go.uber.org/zap v1.27.0
-	golang.org/x/sync v0.11.0
+	golang.org/x/sync v0.12.0
 	golang.org/x/text v0.22.0
 	google.golang.org/api v0.215.0
 	k8s.io/apimachinery v0.32.2
