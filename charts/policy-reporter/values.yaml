@@ -849,7 +849,7 @@ ui:
     # -- (string) Image PullPolicy
     pullPolicy: IfNotPresent
     # -- (string) Image tag
-    tag: "2.1.2"
+    tag: "2.2.0"
 
   # -- Deployment replica count
   replicaCount: 1
@@ -952,6 +952,13 @@ ui:
   #   clusterScope:
   #     # -- disply cluster scoped resources and results
   #     enabled: false
+  #   display: ""
+  #   filter:
+  #     include:
+  #       results: []
+  #       severities: []
+  #       clusterKinds: []
+  #       namespaceKinds: []
 
   # -- source specific configurations
   sources: []
