@@ -375,7 +375,7 @@ func TestV2(t *testing.T) {
 			json.NewDecoder(w.Body).Decode(&resp)
 
 			assert.Equal(t, 1, resp.Count)
-			assert.Equal(t, resp.Items[0], v2.PolicyResult{ID: "14158407137220160684", ResourceID: "6274512523942114905", Severity: "high", Name: "nginx", Kind: "Deployment", APIVersion: "v1", Namespace: "kyverno", Message: "message", Category: "test", Policy: "required-limit", Rule: "resource-limit-required", Status: "pass", Timestamp: 1614093003})
+			assert.Equal(t, resp.Items[0], v2.PolicyResult{Source: "Kyverno", ID: "14158407137220160684", ResourceID: "6274512523942114905", Severity: "high", Name: "nginx", Kind: "Deployment", APIVersion: "v1", Namespace: "kyverno", Message: "message", Category: "test", Policy: "required-limit", Rule: "resource-limit-required", Status: "pass", Timestamp: 1614093003})
 		}
 	})
 
@@ -391,8 +391,8 @@ func TestV2(t *testing.T) {
 			json.NewDecoder(w.Body).Decode(&resp)
 
 			assert.Equal(t, 2, resp.Count)
-			assert.Equal(t, resp.Items[0], v2.PolicyResult{ID: "14158407137220160684", ResourceID: "6274512523942114905", Severity: "high", Name: "nginx", Kind: "Deployment", APIVersion: "v1", Namespace: "kyverno", Message: "message", Category: "test", Policy: "required-limit", Rule: "resource-limit-required", Status: "pass", Timestamp: 1614093003})
-			assert.Equal(t, resp.Items[1], v2.PolicyResult{ID: "2079631062832497014", ResourceID: "8277600851619588241", Severity: "high", Name: "nginx2", Kind: "Deployment", APIVersion: "v1", Namespace: "kyverno", Message: "message", Category: "test", Policy: "required-limit", Rule: "resource-limit-required", Status: "warn", Timestamp: 1614093003})
+			assert.Equal(t, resp.Items[0], v2.PolicyResult{Source: "Kyverno", ID: "14158407137220160684", ResourceID: "6274512523942114905", Severity: "high", Name: "nginx", Kind: "Deployment", APIVersion: "v1", Namespace: "kyverno", Message: "message", Category: "test", Policy: "required-limit", Rule: "resource-limit-required", Status: "pass", Timestamp: 1614093003})
+			assert.Equal(t, resp.Items[1], v2.PolicyResult{Source: "Kyverno", ID: "2079631062832497014", ResourceID: "8277600851619588241", Severity: "high", Name: "nginx2", Kind: "Deployment", APIVersion: "v1", Namespace: "kyverno", Message: "message", Category: "test", Policy: "required-limit", Rule: "resource-limit-required", Status: "warn", Timestamp: 1614093003})
 		}
 	})
 
@@ -408,7 +408,7 @@ func TestV2(t *testing.T) {
 			json.NewDecoder(w.Body).Decode(&resp)
 
 			assert.Equal(t, 1, resp.Count)
-			assert.Equal(t, resp.Items[0], v2.PolicyResult{ID: "16800058481201255747", ResourceID: "11786270724827677857", Severity: "high", Name: "kyverno", Kind: "Namespace", APIVersion: "v1", Namespace: "", Message: "message", Category: "test", Policy: "cluster-required-quota", Rule: "ns-quota-required", Status: "fail", Timestamp: 1614093000})
+			assert.Equal(t, resp.Items[0], v2.PolicyResult{ID: "16800058481201255747", ResourceID: "11786270724827677857", Severity: "high", Name: "kyverno", Source: "Kyverno", Kind: "Namespace", APIVersion: "v1", Namespace: "", Message: "message", Category: "test", Policy: "cluster-required-quota", Rule: "ns-quota-required", Status: "fail", Timestamp: 1614093000})
 		}
 	})
 
@@ -424,7 +424,7 @@ func TestV2(t *testing.T) {
 			json.NewDecoder(w.Body).Decode(&resp)
 
 			assert.Equal(t, 1, resp.Count)
-			assert.Equal(t, resp.Items[0], v2.PolicyResult{ID: "8115731892871392633", ResourceID: "18007334074686647077", Severity: "", Name: "", Kind: "", APIVersion: "", Namespace: "test", Message: "message 2", Category: "Other", Policy: "priority-test", Rule: "", Status: "fail", Timestamp: 1614093000})
+			assert.Equal(t, resp.Items[0], v2.PolicyResult{ID: "8115731892871392633", ResourceID: "18007334074686647077", Severity: "", Name: "", Source: "test", Kind: "", APIVersion: "", Namespace: "test", Message: "message 2", Category: "Other", Policy: "priority-test", Rule: "", Status: "fail", Timestamp: 1614093000})
 		}
 	})
 
