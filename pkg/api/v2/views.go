@@ -383,6 +383,7 @@ type PolicyResult struct {
 	Policy     string            `json:"policy"`
 	Rule       string            `json:"rule"`
 	Status     string            `json:"status"`
+	Source     string            `json:"source"`
 	Severity   string            `json:"severity,omitempty"`
 	Timestamp  int64             `json:"timestamp,omitempty"`
 	Properties map[string]string `json:"properties,omitempty"`
@@ -402,6 +403,7 @@ func MapPolicyResults(results []db.PolicyReportResult) []PolicyResult {
 			Policy:     res.Policy,
 			Rule:       res.Rule,
 			Status:     res.Result,
+			Source:     res.Source,
 			Severity:   res.Severity,
 			Timestamp:  res.Created,
 			Properties: res.Properties,
