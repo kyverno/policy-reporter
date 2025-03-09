@@ -45,6 +45,44 @@ var PassPodResult = v1alpha2.PolicyReportResult{
 	Properties: map[string]string{},
 }
 
+var WarnPodResult = v1alpha2.PolicyReportResult{
+	ID:       "124",
+	Message:  "validation error: requests and limits required. Rule autogen-check-for-requests-and-limits failed at path /spec/template/spec/containers/0/resources/requests/",
+	Policy:   "require-requests-and-limits-required",
+	Rule:     "autogen-check-for-requests-and-limits",
+	Result:   v1alpha2.StatusWarn,
+	Category: "Best Practices",
+	Scored:   true,
+	Source:   "Kyverno",
+	Resources: []corev1.ObjectReference{{
+		APIVersion: "v1",
+		Kind:       "Pod",
+		Name:       "nginx",
+		Namespace:  "test",
+		UID:        "536ab69f-1b3c-4bd9-9ba4-274a56188419",
+	}},
+	Properties: map[string]string{},
+}
+
+var ErrorPodResult = v1alpha2.PolicyReportResult{
+	ID:       "124",
+	Message:  "validation error: requests and limits required. Rule autogen-check-for-requests-and-limits failed at path /spec/template/spec/containers/0/resources/requests/",
+	Policy:   "require-requests-and-limits-required",
+	Rule:     "autogen-check-for-requests-and-limits",
+	Result:   v1alpha2.StatusError,
+	Category: "Best Practices",
+	Scored:   true,
+	Source:   "Kyverno",
+	Resources: []corev1.ObjectReference{{
+		APIVersion: "v1",
+		Kind:       "Pod",
+		Name:       "nginx",
+		Namespace:  "test",
+		UID:        "536ab69f-1b3c-4bd9-9ba4-274a56188419",
+	}},
+	Properties: map[string]string{},
+}
+
 var TrivyResult = v1alpha2.PolicyReportResult{
 	ID:       "124",
 	Message:  "validation error",
@@ -100,6 +138,23 @@ var FailPodResult = v1alpha2.PolicyReportResult{
 	Policy:   "require-requests-and-limits-required",
 	Rule:     "autogen-check-for-requests-and-limits",
 	Result:   v1alpha2.StatusFail,
+	Category: "Best Practices",
+	Scored:   true,
+	Source:   "Kyverno",
+	Resources: []corev1.ObjectReference{{
+		APIVersion: "v1",
+		Kind:       "Pod",
+		Name:       "nginx",
+		Namespace:  "test",
+		UID:        "536ab69f-1b3c-4bd9-9ba4-274a56188419",
+	}},
+}
+
+var SkipPodResult = v1alpha2.PolicyReportResult{
+	ID:       "124",
+	Policy:   "require-requests-and-limits-required",
+	Rule:     "autogen-check-for-requests-and-limits",
+	Result:   v1alpha2.StatusSkip,
 	Category: "Best Practices",
 	Scored:   true,
 	Source:   "Kyverno",

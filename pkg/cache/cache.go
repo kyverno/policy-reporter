@@ -8,5 +8,4 @@ type Cache interface {
 	GetResults(id string) []string
 	Shared() bool
 	Clear()
-	Clone() Cache
 }

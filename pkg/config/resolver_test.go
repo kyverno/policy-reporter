@@ -12,7 +12,6 @@ import (
 	"github.com/kyverno/policy-reporter/pkg/database"
 	"github.com/kyverno/policy-reporter/pkg/report"
 	"github.com/kyverno/policy-reporter/pkg/target"
-	"github.com/kyverno/policy-reporter/pkg/targetconfig"
 )
 
 var targets = target.Targets{
@@ -464,8 +463,7 @@ func Test_RegisterSendResultListener(t *testing.T) {
 	t.Run("Register SendResultListener with Targets", func(t *testing.T) {
 		resolver := config.NewResolver(testConfig, &rest.Config{})
 		resolver.Logger()
-		targetChan := make(chan targetconfig.TcEvent)
-		resolver.RegisterSendResultListener(targetChan)
+		resolver.RegisterSendResultListener()
 
 		assert.Len(t, resolver.EventPublisher().GetListener(), 1, "Expected one Listener to be registered")
 	})

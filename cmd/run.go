@@ -17,7 +17,6 @@ import (
 	"github.com/kyverno/policy-reporter/pkg/config"
 	"github.com/kyverno/policy-reporter/pkg/database"
 	"github.com/kyverno/policy-reporter/pkg/listener"
-	"github.com/kyverno/policy-reporter/pkg/targetconfig"
 )
 
 func newRunCMD(version string) *cobra.Command {
@@ -63,7 +62,6 @@ func newRunCMD(version string) *cobra.Command {
 				return err
 			}
 
-			targetChan := make(chan targetconfig.TcEvent)
 			g := &errgroup.Group{}
 
 			var store *database.Store
@@ -142,7 +140,7 @@ func newRunCMD(version string) *cobra.Command {
 						}
 					}
 
-					resolver.RegisterSendResultListener(targetChan)
+					resolver.RegisterSendResultListener()
 
 					readinessProbe.Ready()
 				}).RegisterOnNew(func(currentID, lockID string) {
@@ -167,7 +165,7 @@ func newRunCMD(version string) *cobra.Command {
 					return elector.Run(cmd.Context())
 				})
 			} else {
-				resolver.RegisterSendResultListener(targetChan)
+				resolver.RegisterSendResultListener()
 				readinessProbe.Ready()
 			}
 
@@ -183,7 +181,7 @@ func newRunCMD(version string) *cobra.Command {
 				resolver.TargetClients()
 				stop := make(chan struct{})
 
-				_, err = resolver.TargetConfigClient(targetChan)
+				_, err = resolver.TargetConfigClient()
 				if err != nil {
 					return err
 				}
