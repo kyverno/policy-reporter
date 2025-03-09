@@ -82,26 +82,6 @@ func (c *inMemoryCache) Shared() bool {
 	return false
 }
 
-func (c *inMemoryCache) Clone() Cache {
-	oldItems := c.caches.Items()
-	// this is the upper cache
-	newCache := gocache.New(gocache.NoExpiration, 5*time.Minute)
-
-	for key, item := range oldItems {
-		c2 := item.Object.(*gocache.Cache).Items()
-		innerCache := gocache.New(gocache.NoExpiration, 5*time.Minute)
-
-		for innerKey := range c2 {
-			innerCache.Set(innerKey, struct{}{}, c.keepDuration)
-		}
-
-		newCache.Set(key, innerCache, c.keepDuration)
-	}
-	return &inMemoryCache{
-		caches: newCache,
-	}
-}
-
 func NewInMermoryCache(keepDuration, keepReport time.Duration) Cache {
 	cache := gocache.New(gocache.NoExpiration, 5*time.Minute)
 	cache.OnEvicted(func(s string, i interface{}) {

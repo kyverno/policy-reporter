@@ -4,7 +4,6 @@ import (
 	"context"
 	"crypto/tls"
 	"crypto/x509"
-	"fmt"
 	"os"
 	"strings"
 	"time"
@@ -63,7 +62,7 @@ type Resolver struct {
 	targetClients      *target.Collection
 	targetsCreated     bool
 	targetFactory      target.Factory
-	targetConfigClient *targetconfig.TargetConfigClient
+	targetConfigClient *targetconfig.Client
 	logger             *zap.Logger
 	resultListener     *listener.ResultListener
 	polrRestartCh      chan struct{}
@@ -261,42 +260,22 @@ func (r *Resolver) Queue() (*kubernetes.Queue, error) {
 func (r *Resolver) RegisterNewResultsListener() {
 	targets := r.TargetClients()
 
-	newResultListener := listener.NewResultListener(r.SkipExistingOnStartup(), r.ResultCache(), time.Now())
-	r.resultListener = newResultListener
-	r.EventPublisher().RegisterListener(listener.NewResults, newResultListener.Listen)
+	r.resultListener = listener.NewResultListener(r.SkipExistingOnStartup(), r.ResultCache(), time.Now())
+	r.EventPublisher().RegisterListener(listener.NewResults, r.resultListener.Listen)
 
 	r.EventPublisher().RegisterPostListener(listener.CleanUpListener, listener.NewCleanupListener(context.Background(), targets))
 }
 
 // RegisterSendResultListener resolver method
-func (r *Resolver) RegisterSendResultListener(targetChan chan targetconfig.TcEvent) {
-	registerFunc := func(targets *target.Collection) {
-		r.resultListener.RegisterListener(listener.NewSendResultListener(targets))
-		r.resultListener.RegisterScopeListener(listener.NewSendScopeResultsListener(targets))
-		r.resultListener.RegisterSyncListener(listener.NewSendSyncResultsListener(targets))
-	}
-
-	go func() {
-		r.logger.Info("starting listener loop")
-		for {
-			select {
-			case event := <-targetChan:
-				// clear existing listeners and create new ones
-				r.logger.Info(fmt.Sprintf("received targetconfig event of type %s", event.Type))
-				r.resultListener.ResetListeners()
-				registerFunc(event.Targets)
-
-			case <-time.After(5 * time.Second):
-			}
-		}
-	}()
-
+func (r *Resolver) RegisterSendResultListener() {
 	targets := r.TargetClients()
 	if r.resultListener == nil {
 		r.RegisterNewResultsListener()
 	}
 
-	registerFunc(targets)
+	r.resultListener.RegisterListener(listener.NewSendResultListener(targets))
+	r.resultListener.RegisterScopeListener(listener.NewSendScopeResultsListener(targets))
+	r.resultListener.RegisterSyncListener(listener.NewSendSyncResultsListener(targets))
 }
 
 // UnregisterSendResultListener resolver method
@@ -569,7 +548,7 @@ func (r *Resolver) EmailClient() *email.Client {
 	return email.NewClient(r.config.EmailReports.SMTP.From, r.SMTPServer())
 }
 
-func (r *Resolver) TargetConfigClient(targetChan chan targetconfig.TcEvent) (*targetconfig.TargetConfigClient, error) {
+func (r *Resolver) TargetConfigClient() (*targetconfig.Client, error) {
 	if r.targetConfigClient != nil {
 		return r.targetConfigClient, nil
 	}
@@ -579,11 +558,8 @@ func (r *Resolver) TargetConfigClient(targetChan chan targetconfig.TcEvent) (*ta
 		return nil, err
 	}
 
-	tcc := targetconfig.NewTargetConfigClient(tcClient, r.TargetFactory(), r.TargetClients(), r.logger)
-	err = tcc.CreateInformer(targetChan)
-	if err != nil {
-		return nil, err
-	}
+	tcc := targetconfig.NewClient(tcClient, r.TargetFactory(), r.TargetClients(), r.logger)
+	tcc.ConfigureInformer()
 
 	r.targetConfigClient = tcc
 	return tcc, nil
