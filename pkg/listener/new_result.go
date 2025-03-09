@@ -12,6 +12,12 @@ import (
 
 const NewResults = "new_results_listener"
 
+func (l *ResultListener) ResetListeners() {
+	l.listener = make([]report.PolicyReportResultListener, 0)
+	l.scopeListener = make([]report.ScopeResultsListener, 0)
+	l.syncListener = make([]report.SyncResultsListener, 0)
+}
+
 type ResultListener struct {
 	skipExisting  bool
 	listener      []report.PolicyReportResultListener

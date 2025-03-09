@@ -29,6 +29,14 @@ rules:
   verbs:
   - list
 - apiGroups:
+  - policyreporter.kyverno.io
+  resources:
+  - targetconfigs
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
   - ''
   resources:
   - pods

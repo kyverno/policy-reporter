@@ -14,7 +14,7 @@ func Contains(source string, sources []string) bool {
 	return false
 }
 
-func ToList[T any, R comparable](mapping map[R]T) []T {
+func ToList[T any](mapping map[string]T) []T {
 	list := make([]T, 0, len(mapping))
 	for _, i := range mapping {
 		list = append(list, i)

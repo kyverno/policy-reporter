@@ -17,6 +17,7 @@ import (
 	"github.com/kyverno/policy-reporter/pkg/config"
 	"github.com/kyverno/policy-reporter/pkg/database"
 	"github.com/kyverno/policy-reporter/pkg/listener"
+	"github.com/kyverno/policy-reporter/pkg/targetconfig"
 )
 
 func newRunCMD(version string) *cobra.Command {
@@ -62,6 +63,7 @@ func newRunCMD(version string) *cobra.Command {
 				return err
 			}
 
+			targetChan := make(chan targetconfig.TcEvent)
 			g := &errgroup.Group{}
 
 			var store *database.Store
@@ -140,7 +142,7 @@ func newRunCMD(version string) *cobra.Command {
 						}
 					}
 
-					resolver.RegisterSendResultListener()
+					resolver.RegisterSendResultListener(targetChan)
 
 					readinessProbe.Ready()
 				}).RegisterOnNew(func(currentID, lockID string) {
@@ -165,7 +167,7 @@ func newRunCMD(version string) *cobra.Command {
 					return elector.Run(cmd.Context())
 				})
 			} else {
-				resolver.RegisterSendResultListener()
+				resolver.RegisterSendResultListener(targetChan)
 				readinessProbe.Ready()
 			}
 
@@ -177,13 +179,30 @@ func newRunCMD(version string) *cobra.Command {
 			g.Go(server.Start)
 
 			g.Go(func() error {
+				// call TargetClients to ensure targets passed from the config file are initialized
+				resolver.TargetClients()
+				stop := make(chan struct{})
+
+				_, err = resolver.TargetConfigClient(targetChan)
+				if err != nil {
+					return err
+				}
+
+				resolver.StartTargetConfigInformer(stop)
+
+				<-stop
+
+				return nil
+			})
+
+			g.Go(func() error {
 				logger.Info("wait policy informer")
 				readinessProbe.Wait()
 
 				logger.Info("start client", zap.Int("worker", c.WorkerCount))
-
 				for {
 					stop := make(chan struct{})
+
 					if err := client.Run(c.WorkerCount, stop); err != nil {
 						zap.L().Error("informer client error", zap.Error(err))
 					}

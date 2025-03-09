@@ -67,13 +67,11 @@ func (k *k8sPolicyReportClient) Sync(stopper chan struct{}) error {
 
 func (k *k8sPolicyReportClient) Run(worker int, stopper chan struct{}) error {
 	k.stopChan = stopper
-
 	if err := k.Sync(stopper); err != nil {
 		return err
 	}
 
 	k.queue.Run(worker, stopper)
-
 	return nil
 }
 

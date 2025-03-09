@@ -28,6 +28,7 @@ LOCAL_PLATFORM      := linux/$(GOARCH)
 PLATFORMS           := linux/arm64,linux/amd64,linux/s390x
 REPO                := $(REGISTRY)/$(OWNER)/$(IMAGE)
 COMMA               := ,
+PACKAGE             ?= github.com/kyverno/policy-reporter
 
 ifndef VERSION
 APP_VERSION         := $(GIT_SHA)
@@ -54,6 +55,19 @@ GOFUMPT                       := $(TOOLS_DIR)/gofumpt
 GOFUMPT_VERSION               := v0.4.0
 TOOLS                         := $(HELM) $(HELM_DOCS) $(GCI) $(GOFUMPT)
 
+
+CONTROLLER_GEN                     := $(TOOLS_DIR)/controller-gen
+CONTROLLER_GEN_VERSION             ?= v0.16.1
+CLIENT_GEN                         ?= $(TOOLS_DIR)/client-gen
+LISTER_GEN                         ?= $(TOOLS_DIR)/lister-gen
+INFORMER_GEN                       ?= $(TOOLS_DIR)/informer-gen
+OPENAPI_GEN                        ?= $(TOOLS_DIR)/openapi-gen
+REGISTER_GEN                       ?= $(TOOLS_DIR)/register-gen
+DEEPCOPY_GEN                       ?= $(TOOLS_DIR)/deepcopy-gen
+DEFAULTER_GEN                      ?= $(TOOLS_DIR)/defaulter-gen
+APPLYCONFIGURATION_GEN             ?= $(TOOLS_DIR)/applyconfiguration-gen
+CODE_GEN_VERSION                   ?= v0.28.0
+
 $(HELM):
 	@echo Install helm... >&2
 	@GOBIN=$(TOOLS_DIR) go install helm.sh/helm/v3/cmd/helm@$(HELM_VERSION)
@@ -77,6 +91,46 @@ $(KIND):
 $(KO):
 	@echo Install ko... >&2
 	@GOBIN=$(TOOLS_DIR) go install github.com/google/ko@$(KO_VERSION)
+
+$(CONTROLLER_GEN):
+	@echo Install controller-gen... >&2
+	@cd ./hack/controller-gen && GOBIN=$(TOOLS_DIR) go install
+
+$(CLIENT_GEN):
+	@echo Install client-gen... >&2
+	@GOBIN=$(TOOLS_DIR) go install k8s.io/code-generator/cmd/client-gen@$(CODE_GEN_VERSION)
+
+$(LISTER_GEN):
+	@echo Install lister-gen... >&2
+	@GOBIN=$(TOOLS_DIR) go install k8s.io/code-generator/cmd/lister-gen@$(CODE_GEN_VERSION)
+
+$(INFORMER_GEN):
+	@echo Install informer-gen... >&2
+	@GOBIN=$(TOOLS_DIR) go install k8s.io/code-generator/cmd/informer-gen@$(CODE_GEN_VERSION)
+
+$(OPENAPI_GEN):
+	@echo Install openapi-gen... >&2
+	@GOBIN=$(TOOLS_DIR) go install k8s.io/code-generator/cmd/openapi-gen@$(CODE_GEN_VERSION)
+
+$(REGISTER_GEN):
+	@echo Install register-gen... >&2
+	@GOBIN=$(TOOLS_DIR) go install k8s.io/code-generator/cmd/register-gen@$(CODE_GEN_VERSION)
+
+$(DEEPCOPY_GEN):
+	@echo Install deepcopy-gen... >&2
+	@GOBIN=$(TOOLS_DIR) go install k8s.io/code-generator/cmd/deepcopy-gen@$(CODE_GEN_VERSION)
+
+$(DEFAULTER_GEN):
+	@echo Install defaulter-gen... >&2
+	@GOBIN=$(TOOLS_DIR) go install k8s.io/code-generator/cmd/defaulter-gen@$(CODE_GEN_VERSION)
+
+$(APPLYCONFIGURATION_GEN):
+	@echo Install applyconfiguration-gen... >&2
+	@GOBIN=$(TOOLS_DIR) go install k8s.io/code-generator/cmd/applyconfiguration-gen@$(CODE_GEN_VERSION)
+
+$(GEN_CRD_API_REFERENCE_DOCS):
+	@echo Install gen-crd-api-reference-docs... >&2
+	@GOBIN=$(TOOLS_DIR) go install github.com/ahmetb/gen-crd-api-reference-docs@$(GEN_CRD_API_REFERENCE_DOCS_VERSION)
 
 .PHONY: gci
 gci: $(GCI)
@@ -205,4 +259,105 @@ docker-push:
 
 .PHONY: docker-push-dev
 docker-push-dev:
-	@docker buildx build --progress plain --platform $(PLATFORMS)  --tag $(REPO):dev . --build-arg LD_FLAGS='$(LD_FLAGS) -X main.Version=$(IMAGE_TAG)-dev' --push
+	@docker buildx build --progress plane --platform $(PLATFORMS)  --tag $(REPO):dev . --build-arg LD_FLAGS='$(LD_FLAGS) -X main.Version=$(IMAGE_TAG)-dev' --push
+
+
+
+###########
+# CODEGEN #
+###########
+
+GOPATH_SHIM                 := ${PWD}/.gopath
+PACKAGE_SHIM                := $(GOPATH_SHIM)/src/$(PACKAGE)
+OUT_PACKAGE                 := $(PACKAGE)/pkg/crd/client/targetconfig
+INPUT_DIRS                  := $(PACKAGE)/pkg/crd/api/targetconfig/v1alpha1
+CLIENT_INPUT_DIRS           := $(PACKAGE)/pkg/crd/api/targetconfig/v1alpha1
+CLIENTSET_PACKAGE           := $(OUT_PACKAGE)/clientset
+LISTERS_PACKAGE             := $(OUT_PACKAGE)/listers
+INFORMERS_PACKAGE           := $(OUT_PACKAGE)/informers
+APPLYCONFIGURATIONS_PACKAGE := $(OUT_PACKAGE)/applyconfigurations
+CRDS_PATH                   := ${PWD}/config/crds
+
+
+$(GOPATH_SHIM):
+	@echo Create gopath shim... >&2
+	@mkdir -p $(GOPATH_SHIM)
+
+.INTERMEDIATE: $(PACKAGE_SHIM)
+$(PACKAGE_SHIM): $(GOPATH_SHIM)
+	@echo Create package shim... >&2
+	@mkdir -p $(GOPATH_SHIM)/src/github.com/kyverno && ln -s -f ${PWD} $(PACKAGE_SHIM)
+
+.PHONY: codegen-client-clientset
+codegen-client-clientset: $(PACKAGE_SHIM) $(CLIENT_GEN) ## Generate clientset
+	@echo Generate clientset... >&2
+	@rm -rf $(CLIENTSET_PACKAGE) && mkdir -p $(CLIENTSET_PACKAGE)
+	GOPATH=$(GOPATH_SHIM) $(CLIENT_GEN) \
+		--go-header-file ./scripts/boilerplate.go.txt \
+		--clientset-name versioned \
+		--output-package $(CLIENTSET_PACKAGE) \
+		--input-base "" \
+		--input $(CLIENT_INPUT_DIRS)
+
+.PHONY: codegen-client-listers
+codegen-client-listers: $(PACKAGE_SHIM) $(LISTER_GEN) ## Generate listers
+	@echo Generate listers... >&2
+	@rm -rf $(LISTERS_PACKAGE) && mkdir -p $(LISTERS_PACKAGE)
+	GOPATH=$(GOPATH_SHIM) $(LISTER_GEN) \
+		--go-header-file ./scripts/boilerplate.go.txt \
+		--output-package $(LISTERS_PACKAGE) \
+		--input-dirs $(CLIENT_INPUT_DIRS)
+
+.PHONY: codegen-client-informers
+codegen-client-informers: $(PACKAGE_SHIM) $(INFORMER_GEN) ## Generate informers
+	GOPATH=$(GOPATH_SHIM) $(INFORMER_GEN) \
+		--go-header-file ./scripts/boilerplate.go.txt \
+		--output-package $(INFORMERS_PACKAGE) \
+		--input-dirs $(CLIENT_INPUT_DIRS) \
+		--versioned-clientset-package $(CLIENTSET_PACKAGE)/versioned \
+		--listers-package $(LISTERS_PACKAGE)
+
+.PHONY: codegen-client-wrappers
+codegen-client-wrappers: codegen-client-clientset $(GOIMPORTS) ## Generate client wrappers
+	@echo Generate client wrappers... >&2
+	@go run ./hack/main.go
+	@$(GOIMPORTS) -w ./pkg/clients
+	@go fmt ./pkg/clients/...
+
+.PHONY: codegen-register
+codegen-register: $(PACKAGE_SHIM) $(REGISTER_GEN) ## Generate types registrations
+	@echo Generate registration... >&2
+	@GOPATH=$(GOPATH_SHIM) $(REGISTER_GEN) \
+		--go-header-file=./scripts/boilerplate.go.txt \
+		--input-dirs=$(INPUT_DIRS)
+
+.PHONY: codegen-deepcopy
+codegen-deepcopy: $(PACKAGE_SHIM) $(DEEPCOPY_GEN) ## Generate deep copy functions
+	echo Generate deep copy functions... >&2
+	GOPATH=$(GOPATH_SHIM) $(DEEPCOPY_GEN) \
+		--go-header-file=./scripts/boilerplate.go.txt \
+		--input-dirs=$(INPUT_DIRS) \
+		--output-file-base=zz_generated.deepcopy
+
+.PHONY: codegen-defaulters
+codegen-defaulters: $(PACKAGE_SHIM) $(DEFAULTER_GEN) ## Generate defaulters
+	@echo Generate defaulters... >&2
+	@GOPATH=$(GOPATH_SHIM) $(DEFAULTER_GEN) --go-header-file=./scripts/boilerplate.go.txt --input-dirs=$(INPUT_DIRS)
+
+.PHONY: codegen-applyconfigurations
+codegen-applyconfigurations: $(PACKAGE_SHIM) $(APPLYCONFIGURATION_GEN) ## Generate apply configurations
+	@echo Generate applyconfigurations... >&2
+	@rm -rf $(APPLYCONFIGURATIONS_PACKAGE) && mkdir -p $(APPLYCONFIGURATIONS_PACKAGE)
+	@GOPATH=$(GOPATH_SHIM) $(APPLYCONFIGURATION_GEN) \
+		--go-header-file=./scripts/boilerplate.go.txt \
+		--input-dirs=$(INPUT_DIRS) \
+		--output-package $(APPLYCONFIGURATIONS_PACKAGE)
+
+.PHONY: codegen-crds
+codegen-crds: ## Generate policy reporter CRDs
+codegen-crds: $(PACKAGE_SHIM)
+codegen-crds: $(CONTROLLER_GEN)
+	@echo Generate policy reporter crds... >&2
+	@rm -rf $(CRDS_PATH) && mkdir -p $(CRDS_PATH)
+	@GOPATH=$(GOPATH_SHIM) $(CONTROLLER_GEN) paths=./pkg/crd/api/targetconfig/... crd:crdVersions=v1,ignoreUnexportedFields=true,generateEmbeddedObjectMeta=false output:dir=$(CRDS_PATH)
+

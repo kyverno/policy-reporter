@@ -21,6 +21,7 @@ var filter = report.NewMetaFilter(false, validate.RuleSets{})
 func Test_PolicyReportWatcher(t *testing.T) {
 	ctx := context.Background()
 	stop := make(chan struct{})
+
 	defer close(stop)
 
 	wg := sync.WaitGroup{}
@@ -74,6 +75,7 @@ func Test_PolicyReportWatcher(t *testing.T) {
 func Test_ClusterPolicyReportWatcher(t *testing.T) {
 	ctx := context.Background()
 	stop := make(chan struct{})
+
 	defer close(stop)
 	wg := sync.WaitGroup{}
 	wg.Add(3)

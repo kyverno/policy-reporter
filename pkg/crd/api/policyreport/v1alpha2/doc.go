@@ -15,6 +15,6 @@ limitations under the License.
 */
 
 // +k8s:deepcopy-gen=package
-// +groupName=wgpolicyk8s.io
+// +groupName=policyreporter.kyverno.io
 
 package v1alpha2

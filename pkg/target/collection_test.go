@@ -6,6 +6,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 
+	"github.com/kyverno/policy-reporter/pkg/crd/api/targetconfig/v1alpha1"
 	"github.com/kyverno/policy-reporter/pkg/target"
 	"github.com/kyverno/policy-reporter/pkg/target/discord"
 	"github.com/kyverno/policy-reporter/pkg/target/slack"
@@ -22,8 +23,8 @@ func TestCollection(t *testing.T) {
 					Name: "Webhook",
 				},
 			}),
-			Config:       &target.Config[target.WebhookOptions]{SecretRef: "webhook-secret"},
-			ParentConfig: &target.Config[target.WebhookOptions]{},
+			Config:       &v1alpha1.Config[v1alpha1.WebhookOptions]{SecretRef: "webhook-secret"},
+			ParentConfig: &v1alpha1.Config[v1alpha1.WebhookOptions]{},
 		},
 		&target.Target{
 			ID:   uuid.NewString(),
@@ -33,8 +34,8 @@ func TestCollection(t *testing.T) {
 					Name: "Slack",
 				},
 			}),
-			Config:       &target.Config[target.SlackOptions]{},
-			ParentConfig: &target.Config[target.SlackOptions]{SecretRef: "slack-secret"},
+			Config:       &v1alpha1.Config[v1alpha1.SlackOptions]{},
+			ParentConfig: &v1alpha1.Config[v1alpha1.SlackOptions]{SecretRef: "slack-secret"},
 		},
 		&target.Target{
 			ID:   uuid.NewString(),
@@ -44,8 +45,8 @@ func TestCollection(t *testing.T) {
 					Name: "Discord",
 				},
 			}),
-			Config:       &target.Config[target.WebhookOptions]{},
-			ParentConfig: &target.Config[target.WebhookOptions]{SecretRef: "slack-secret"},
+			Config:       &v1alpha1.Config[v1alpha1.WebhookOptions]{},
+			ParentConfig: &v1alpha1.Config[v1alpha1.WebhookOptions]{SecretRef: "slack-secret"},
 		},
 	)
 
