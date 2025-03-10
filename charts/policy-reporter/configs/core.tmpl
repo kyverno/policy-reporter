@@ -1,3 +1,6 @@
+crd:
+  targetConfig: {{ .Values.target.crd }}
+
 target:
   loki:
     {{- include "target.loki" .Values.target.loki | nindent 4 }}

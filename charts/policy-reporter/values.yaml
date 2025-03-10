@@ -320,6 +320,8 @@ existingTargetConfig:
   subPath: ""
 
 target:
+  # -- enable and install TargetConfig CRD
+  crd: false
   loki:
     # -- Host Address
     host: ""

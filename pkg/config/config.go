@@ -175,6 +175,10 @@ type SourceConfig struct {
 	CustomID `mapstructure:"customId"`
 }
 
+type CRD struct {
+	TargetConfig bool `mapstructure:"targetConfig"`
+}
+
 // Config of the PolicyReporter
 type Config struct {
 	Version        string
@@ -196,4 +200,5 @@ type Config struct {
 	Targets        target.Targets `mapstructure:"target"`
 	SourceConfig   []SourceConfig `mapstructure:"sourceConfig"`
 	Templates      Templates      `mapstructure:"templates"`
+	CRD            CRD            `mapstructure:"crd"`
 }
