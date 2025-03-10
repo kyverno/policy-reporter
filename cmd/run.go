@@ -176,19 +176,21 @@ func newRunCMD(version string) *cobra.Command {
 
 			g.Go(server.Start)
 
-			g.Go(func() error {
-				stop := make(chan struct{})
-				_, err = resolver.TargetConfigClient()
-				if err != nil {
-					return err
-				}
+			if c.CRD.TargetConfig {
+				g.Go(func() error {
+					stop := make(chan struct{})
+					client, err := resolver.TargetConfigClient()
+					if err != nil {
+						return err
+					}
 
-				resolver.StartTargetConfigInformer(stop)
+					client.Run(stop)
 
-				<-stop
+					<-stop
 
-				return nil
-			})
+					return nil
+				})
+			}
 
 			g.Go(func() error {
 				logger.Info("wait for policy informer")
@@ -199,20 +201,25 @@ func newRunCMD(version string) *cobra.Command {
 					stop := make(chan struct{})
 
 					if err := client.Run(c.WorkerCount, stop); err != nil {
-						zap.L().Error("informer client error", zap.Error(err))
+						logger.Error("informer client error", zap.Error(err))
 					}
 
-					zap.L().Debug("informer restarts")
+					logger.Debug("informer restarts")
 				}
 			})
 
 			g.Go(func() error {
+				collection := resolver.TargetClients()
+				if !c.CRD.TargetConfig && !collection.UsesSecrets() {
+					return nil
+				}
+
 				logger.Info("wait for secret informer")
 				readinessProbe.Wait()
 
 				stop := make(chan struct{})
-				if err := secretInformer.Sync(resolver.TargetClients(), stop); err != nil {
-					zap.L().Error("secret informer error", zap.Error(err))
+				if err := secretInformer.Sync(collection, stop); err != nil {
+					logger.Error("secret informer error", zap.Error(err))
 
 					return err
 				}

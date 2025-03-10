@@ -3,7 +3,7 @@
 Policy Reporter watches for PolicyReport Resources.
 It creates Prometheus Metrics and can send rule validation events to different targets like Loki, Elasticsearch, Slack or Discord
 
-![Version: 3.0.7](https://img.shields.io/badge/Version-3.0.7-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 3.0.3](https://img.shields.io/badge/AppVersion-3.0.3-informational?style=flat-square)
+![Version: 3.1.0](https://img.shields.io/badge/Version-3.1.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 3.1.0](https://img.shields.io/badge/AppVersion-3.1.0-informational?style=flat-square)
 
 ## Documentation
 
@@ -140,6 +140,7 @@ Open `http://localhost:8082/` in your browser.
 | existingTargetConfig.enabled | bool | `false` | Use an already existing configuration |
 | existingTargetConfig.name | string | `""` | Name of the secret with the config |
 | existingTargetConfig.subPath | string | `""` | SubPath within the secret (defaults to config.yaml) |
+| target.crd | bool | `false` | enable and install TargetConfig CRD |
 | target.loki.host | string | `""` | Host Address |
 | target.loki.path | string | `""` | Loki API, defaults to "/loki/api/v1/push" |
 | target.loki.certificate | string | `""` | Server Certificate file path Can be added under extraVolumes |

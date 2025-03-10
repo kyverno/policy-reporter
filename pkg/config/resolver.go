@@ -215,10 +215,6 @@ func (r *Resolver) CustomIDGenerators() map[string]result.IDGenerator {
 	return generators
 }
 
-func (r *Resolver) StartTargetConfigInformer(stopChan chan struct{}) {
-	r.targetConfigClient.Run(stopChan)
-}
-
 // EventPublisher resolver method
 func (r *Resolver) Queue() (*kubernetes.Queue, error) {
 	client, err := r.CRDClient()
@@ -427,7 +423,7 @@ func (r *Resolver) EnableLeaderElection() bool {
 		return false
 	}
 
-	if !r.HasTargets() && r.Database().Dialect().Name() == dialect.SQLite {
+	if !r.config.CRD.TargetConfig && !r.HasTargets() && r.Database().Dialect().Name() == dialect.SQLite {
 		return false
 	}
 
