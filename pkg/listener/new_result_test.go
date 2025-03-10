@@ -125,4 +125,70 @@ func Test_ResultListener(t *testing.T) {
 
 		assert.False(t, called, "Expected Listener not called because it was unregistered")
 	})
+
+	t.Run("Publish Scoped Report", func(t *testing.T) {
+		var called []v1alpha2.PolicyReportResult
+
+		slistener := listener.NewResultListener(true, cache.NewInMermoryCache(time.Minute, time.Minute), time.Now())
+		slistener.RegisterScopeListener(func(_ v1alpha2.ReportInterface, r []v1alpha2.PolicyReportResult, b bool) {
+			called = r
+		})
+
+		slistener.Listen(report.LifecycleEvent{Type: report.Added, PolicyReport: scopereport1})
+
+		assert.Equal(t, called[0].GetID(), fixtures.FailResult.GetID(), "Expected Listener to be called")
+	})
+
+	t.Run("Unregister Scope Listener", func(t *testing.T) {
+		var called []v1alpha2.PolicyReportResult
+
+		slistener := listener.NewResultListener(true, cache.NewInMermoryCache(time.Minute, time.Minute), time.Now())
+		slistener.RegisterScopeListener(func(_ v1alpha2.ReportInterface, r []v1alpha2.PolicyReportResult, b bool) {
+			called = r
+		})
+
+		slistener.UnregisterScopeListener()
+
+		slistener.Listen(report.LifecycleEvent{Type: report.Added, PolicyReport: scopereport1})
+
+		assert.Len(t, called, 0, "Expected listener was unregistered")
+	})
+
+	t.Run("Publish Scoped Report to Sync Target", func(t *testing.T) {
+		var called v1alpha2.ReportInterface
+
+		slistener := listener.NewResultListener(true, cache.NewInMermoryCache(time.Minute, time.Minute), time.Now())
+		slistener.RegisterSyncListener(func(r v1alpha2.ReportInterface) {
+			called = r
+		})
+
+		slistener.Listen(report.LifecycleEvent{Type: report.Added, PolicyReport: scopereport1})
+
+		assert.Equal(t, called.GetName(), scopereport1.Name, "Expected Listener to be called")
+	})
+
+	t.Run("Publish Scoped Report to Sync Target", func(t *testing.T) {
+		var called v1alpha2.ReportInterface
+
+		slistener := listener.NewResultListener(true, cache.NewInMermoryCache(time.Minute, time.Minute), time.Now())
+		slistener.RegisterSyncListener(func(r v1alpha2.ReportInterface) {
+			called = r
+		})
+
+		slistener.UnregisterSyncListener()
+
+		slistener.Listen(report.LifecycleEvent{Type: report.Added, PolicyReport: scopereport1})
+
+		assert.Nil(t, called, "Expected Listener was unregistered")
+	})
+
+	t.Run("Check Validation Logic", func(t *testing.T) {
+		slistener := listener.NewResultListener(true, cache.NewInMermoryCache(time.Minute, time.Minute), time.Now())
+
+		assert.True(t, slistener.Validate(fixtures.FailPodResult))
+		assert.True(t, slistener.Validate(fixtures.WarnPodResult))
+		assert.True(t, slistener.Validate(fixtures.ErrorPodResult))
+		assert.False(t, slistener.Validate(fixtures.PassPodResult))
+		assert.False(t, slistener.Validate(fixtures.SkipPodResult))
+	})
 }

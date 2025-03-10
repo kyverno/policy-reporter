@@ -241,7 +241,7 @@ test:
 .PHONY: coverage
 coverage:
 	go test -v ./... -covermode=count -coverprofile=coverage.out.tmp -timeout=30s
-	cat coverage.out.tmp | grep -v "github.com/kyverno/policy-reporter/cmd/" | grep -v "github.com/kyverno/policy-reporter/main.go" | grep -v "github.com/kyverno/policy-reporter/pkg/crd/" > coverage.out
+	cat coverage.out.tmp | grep -v "github.com/kyverno/policy-reporter/cmd/" | grep -v "github.com/kyverno/policy-reporter/main.go" | grep -v "github.com/kyverno/policy-reporter/pkg/crd/" | grep -v "github.com/kyverno/policy-reporter/hack/main.go" | grep -v "github.com/kyverno/policy-reporter/hack/controller-gen/" > coverage.out
 	rm coverage.out.tmp
 
 .PHONY: build

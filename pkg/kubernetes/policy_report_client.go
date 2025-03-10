@@ -60,7 +60,7 @@ func (k *k8sPolicyReportClient) Sync(stopper chan struct{}) error {
 
 	k.synced = true
 
-	zap.L().Info("informer sync completed")
+	zap.L().Info("policy report informer sync completed")
 
 	return nil
 }

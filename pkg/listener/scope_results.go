@@ -14,6 +14,9 @@ const SendScopeResults = "send_scope_results_listener"
 func NewSendScopeResultsListener(targets *target.Collection) report.ScopeResultsListener {
 	return func(rep v1alpha2.ReportInterface, r []v1alpha2.PolicyReportResult, e bool) {
 		clients := targets.BatchSendClients()
+		if len(clients) == 0 {
+			return
+		}
 
 		wg := &sync.WaitGroup{}
 		wg.Add(len(clients))
