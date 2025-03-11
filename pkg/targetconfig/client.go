@@ -27,7 +27,10 @@ func (c *Client) ConfigureInformer() {
 
 			t, err := c.targetFactory.CreateSingleClient(tc)
 			if err != nil {
-				c.logger.Error("unable to create target from TargetConfig: " + err.Error())
+				c.logger.Error("unable to create target from TargetConfig", zap.String("name", tc.Name), zap.Error(err))
+				return
+			} else if t == nil {
+				c.logger.Error("provided TargetConfig is invalid", zap.String("name", tc.Name))
 				return
 			}
 
@@ -35,11 +38,14 @@ func (c *Client) ConfigureInformer() {
 		},
 		UpdateFunc: func(oldObj, newObj interface{}) {
 			tc := newObj.(*v1alpha1.TargetConfig)
-			c.logger.Info(fmt.Sprintf("update target: %s", tc.Name))
+			c.logger.Info("update target", zap.String("name", tc.Name))
 
 			t, err := c.targetFactory.CreateSingleClient(tc)
 			if err != nil {
-				c.logger.Error("unable to create target from TargetConfig: " + err.Error())
+				c.logger.Error("unable to create target from TargetConfig", zap.String("name", tc.Name), zap.Error(err))
+				return
+			} else if t == nil {
+				c.logger.Error("provided TargetConfig is invalid", zap.String("name", tc.Name))
 				return
 			}
 
