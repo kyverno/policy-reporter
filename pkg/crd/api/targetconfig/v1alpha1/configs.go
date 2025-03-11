@@ -12,10 +12,13 @@ type AWSConfig struct {
 }
 
 type WebhookOptions struct {
-	Webhook     string            `mapstructure:"webhook" json:"webhook"`
-	SkipTLS     bool              `mapstructure:"skipTLS" json:"skipTLS"`
-	Certificate string            `mapstructure:"certificate" json:"certificate"`
-	Headers     map[string]string `mapstructure:"headers" json:"headers"`
+	Webhook string `mapstructure:"webhook" json:"webhook"`
+	// +optional
+	SkipTLS bool `mapstructure:"skipTLS" json:"skipTLS"`
+	// +optional
+	Certificate string `mapstructure:"certificate" json:"certificate"`
+	// +optional
+	Headers map[string]string `mapstructure:"headers" json:"headers"`
 }
 
 type HostOptions struct {

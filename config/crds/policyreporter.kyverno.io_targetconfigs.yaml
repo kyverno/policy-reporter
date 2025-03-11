@@ -314,10 +314,7 @@ spec:
                   webhook:
                     type: string
                 required:
-                - certificate
                 - channel
-                - headers
-                - skipTLS
                 - webhook
                 type: object
               sources:
@@ -337,9 +334,6 @@ spec:
                   webhook:
                     type: string
                 required:
-                - certificate
-                - headers
-                - skipTLS
                 - webhook
                 type: object
               telegram:
@@ -359,10 +353,7 @@ spec:
                   webhook:
                     type: string
                 required:
-                - certificate
                 - chatId
-                - headers
-                - skipTLS
                 - token
                 - webhook
                 type: object
@@ -379,9 +370,6 @@ spec:
                   webhook:
                     type: string
                 required:
-                - certificate
-                - headers
-                - skipTLS
                 - webhook
                 type: object
             type: object
