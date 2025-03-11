@@ -1,8 +1,6 @@
 package targetconfig
 
 import (
-	"fmt"
-
 	"go.uber.org/zap"
 	"k8s.io/client-go/tools/cache"
 
@@ -23,7 +21,7 @@ func (c *Client) ConfigureInformer() {
 	c.informer.AddEventHandler(cache.ResourceEventHandlerFuncs{
 		AddFunc: func(obj interface{}) {
 			tc := obj.(*v1alpha1.TargetConfig)
-			c.logger.Info(fmt.Sprintf("new target: %s", tc.Name))
+			c.logger.Info("new target", zap.String("name", tc.Name))
 
 			t, err := c.targetFactory.CreateSingleClient(tc)
 			if err != nil {
@@ -53,7 +51,7 @@ func (c *Client) ConfigureInformer() {
 		},
 		DeleteFunc: func(obj interface{}) {
 			tc := obj.(*v1alpha1.TargetConfig)
-			c.logger.Info(fmt.Sprintf("deleting target: %s", tc.Name))
+			c.logger.Info("delete target", zap.String("name", tc.Name))
 
 			c.collection.RemoveTarget(tc.Name)
 		},

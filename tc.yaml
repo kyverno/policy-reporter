@@ -1,0 +1,14 @@
+kind: TargetConfig
+apiVersion: policyreporter.kyverno.io/v1alpha1
+metadata:
+  name: slack-notifier
+spec:
+  slack:
+    webhook: ""
+    channel: "kyverno"
+  secretRef: "webhook-secret"
+  filter:
+    namespaces:
+      exclude: [trivy-system]
+    sources:
+      include: [kyverno]
