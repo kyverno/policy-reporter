@@ -178,6 +178,8 @@ func newRunCMD(version string) *cobra.Command {
 
 			if c.CRD.TargetConfig {
 				g.Go(func() error {
+					readinessProbe.Wait()
+
 					stop := make(chan struct{})
 					client, err := resolver.TargetConfigClient()
 					if err != nil {

@@ -14,6 +14,7 @@ import (
 
 	"github.com/kyverno/policy-reporter/pkg/crd/api/targetconfig/v1alpha1"
 	"github.com/kyverno/policy-reporter/pkg/filters"
+	"github.com/kyverno/policy-reporter/pkg/helper"
 	"github.com/kyverno/policy-reporter/pkg/kubernetes/secrets"
 	"github.com/kyverno/policy-reporter/pkg/report"
 	"github.com/kyverno/policy-reporter/pkg/target"
@@ -99,38 +100,26 @@ func (f *TargetFactory) CreateClients(config *target.Targets) *target.Collection
 }
 
 func (f *TargetFactory) CreateSingleClient(tc *v1alpha1.TargetConfig) (*target.Target, error) {
-	var t *target.Target
-
 	if tc.Spec.S3 != nil {
-		t = createClients(tc.Name, createConfig(tc, tc.Spec.S3), f.CreateS3Target)[0]
-		return t, nil
+		return helper.First(createClients(tc.Name, createConfig(tc, tc.Spec.S3), f.CreateS3Target)), nil
 	} else if tc.Spec.Webhook != nil {
-		t = createClients(tc.Name, createConfig(tc, tc.Spec.Webhook), f.CreateWebhookTarget)[0]
-		return t, nil
+		return helper.First(createClients(tc.Name, createConfig(tc, tc.Spec.Webhook), f.CreateWebhookTarget)), nil
 	} else if tc.Spec.GCS != nil {
-		t = createClients(tc.Name, createConfig(tc, tc.Spec.GCS), f.CreateGCSTarget)[0]
-		return t, nil
+		return helper.First(createClients(tc.Name, createConfig(tc, tc.Spec.GCS), f.CreateGCSTarget)), nil
 	} else if tc.Spec.ElasticSearch != nil {
-		t = createClients(tc.Name, createConfig(tc, tc.Spec.ElasticSearch), f.CreateElasticsearchTarget)[0]
-		return t, nil
+		return helper.First(createClients(tc.Name, createConfig(tc, tc.Spec.ElasticSearch), f.CreateElasticsearchTarget)), nil
 	} else if tc.Spec.Telegram != nil {
-		t = createClients(tc.Name, createConfig(tc, tc.Spec.Telegram), f.CreateTelegramTarget)[0]
-		return t, nil
+		return helper.First(createClients(tc.Name, createConfig(tc, tc.Spec.Telegram), f.CreateTelegramTarget)), nil
 	} else if tc.Spec.Kinesis != nil {
-		t = createClients(tc.Name, createConfig(tc, tc.Spec.Kinesis), f.CreateKinesisTarget)[0]
-		return t, nil
+		return helper.First(createClients(tc.Name, createConfig(tc, tc.Spec.Kinesis), f.CreateKinesisTarget)), nil
 	} else if tc.Spec.SecurityHub != nil {
-		t = createClients(tc.Name, createConfig(tc, tc.Spec.SecurityHub), f.CreateSecurityHubTarget)[0]
-		return t, nil
+		return helper.First(createClients(tc.Name, createConfig(tc, tc.Spec.SecurityHub), f.CreateSecurityHubTarget)), nil
 	} else if tc.Spec.Loki != nil {
-		t = createClients(tc.Name, createConfig(tc, tc.Spec.Loki), f.CreateLokiTarget)[0]
-		return t, nil
+		return helper.First(createClients(tc.Name, createConfig(tc, tc.Spec.Loki), f.CreateLokiTarget)), nil
 	} else if tc.Spec.Slack != nil {
-		t = createClients(tc.Name, createConfig(tc, tc.Spec.Slack), f.CreateSlackTarget)[0]
-		return t, nil
+		return helper.First(createClients(tc.Name, createConfig(tc, tc.Spec.Slack), f.CreateSlackTarget)), nil
 	} else if tc.Spec.Teams != nil {
-		t = createClients(tc.Name, createConfig(tc, tc.Spec.Teams), f.CreateTeamsTarget)[0]
-		return t, nil
+		return helper.First(createClients(tc.Name, createConfig(tc, tc.Spec.Teams), f.CreateTeamsTarget)), nil
 	}
 	return nil, fmt.Errorf("invalid target type passed")
 }
@@ -831,7 +820,7 @@ func (f *TargetFactory) mapSecretValues(config any, ref, mountedSecret string) {
 		}
 
 	case *v1alpha1.Config[v1alpha1.SlackOptions]:
-		if values.Host != "" {
+		if values.Webhook != "" {
 			c.Config.Webhook = values.Webhook
 		}
 		if values.Channel != "" {
@@ -839,7 +828,7 @@ func (f *TargetFactory) mapSecretValues(config any, ref, mountedSecret string) {
 		}
 
 	case *v1alpha1.Config[v1alpha1.WebhookOptions]:
-		if values.Host != "" {
+		if values.Webhook != "" {
 			c.Config.Webhook = values.Webhook
 		}
 		if values.Token != "" {
@@ -902,6 +891,9 @@ func (f *TargetFactory) mapSecretValues(config any, ref, mountedSecret string) {
 	case *v1alpha1.Config[v1alpha1.TelegramOptions]:
 		if values.Token != "" {
 			c.Config.Token = values.Token
+		}
+		if values.Webhook != "" {
+			c.Config.Webhook = values.Webhook
 		}
 		if values.Host != "" {
 			c.Config.Webhook = values.Host
