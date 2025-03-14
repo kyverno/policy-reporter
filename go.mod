@@ -1,6 +1,7 @@
 module github.com/kyverno/policy-reporter
 
 go 1.23.5
+toolchain go1.24.1
 
 require (
 	cloud.google.com/go/storage v1.50.0
@@ -40,7 +41,7 @@ require (
 	golang.org/x/sync v0.12.0
 	golang.org/x/text v0.23.0
 	google.golang.org/api v0.215.0
-	k8s.io/apiextensions-apiserver v0.32.2
+	k8s.io/apiextensions-apiserver v0.32.3
 	k8s.io/apimachinery v0.32.3
 	k8s.io/client-go v0.32.3
 	k8s.io/kube-aggregator v0.32.2
