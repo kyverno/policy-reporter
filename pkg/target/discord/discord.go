@@ -37,13 +37,16 @@ type embedField struct {
 var colors = map[v1alpha2.PolicySeverity]string{
 	v1alpha2.SeverityInfo:     "12370112",
 	v1alpha2.SeverityLow:      "3066993",
-	v1alpha2.StatusWarn:       "15105570",
+	v1alpha2.SeverityMedium:   "15105570",
 	v1alpha2.SeverityHigh:     "15158332",
 	v1alpha2.SeverityCritical: "15158332",
 }
 
 func newPayload(result v1alpha2.PolicyReportResult, customFields map[string]string) payload {
-	color := colors[result.Severity]
+	color, exists := colors[result.Severity]
+	if !exists {
+		color = "0"
+	}
 
 	embedFields := make([]embedField, 0)
 
