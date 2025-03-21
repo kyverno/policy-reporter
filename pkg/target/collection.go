@@ -29,6 +29,7 @@ const (
 	SecurityHub   TargetType = "SecurityHub"
 	GCS           TargetType = "GCS"
 	AlertManager  TargetType = "AlertManager"
+	Splunk        TargetType = "Splunk"
 )
 
 type Targets struct {
