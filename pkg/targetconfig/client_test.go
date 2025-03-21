@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/assert"
-	"go.uber.org/zap"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	corefake "k8s.io/client-go/kubernetes/fake"
@@ -64,7 +63,7 @@ func Test_TargetConfig_TargetCreation(t *testing.T) {
 	collection := target.NewCollection()
 	factory := factory.NewFactory(secrets.NewClient(newSecretClient()), target.NewResultFilterFactory(nil))
 
-	client := targetconfig.NewClient(kclient, factory, collection, zap.L())
+	client := targetconfig.NewClient(kclient, factory, collection)
 	client.ConfigureInformer()
 
 	go func() {
@@ -106,7 +105,7 @@ func Test_TargetConfig_TargetUpdates(t *testing.T) {
 	collection := target.NewCollection()
 	factory := factory.NewFactory(secrets.NewClient(newSecretClient()), target.NewResultFilterFactory(nil))
 
-	client := targetconfig.NewClient(kclient, factory, collection, zap.L())
+	client := targetconfig.NewClient(kclient, factory, collection)
 	client.ConfigureInformer()
 
 	go func() {
@@ -163,7 +162,7 @@ func Test_TargetConfig_TargetDeletion(t *testing.T) {
 	collection := target.NewCollection()
 	factory := factory.NewFactory(secrets.NewClient(newSecretClient()), target.NewResultFilterFactory(nil))
 
-	client := targetconfig.NewClient(kclient, factory, collection, zap.L())
+	client := targetconfig.NewClient(kclient, factory, collection)
 	client.ConfigureInformer()
 
 	go func() {

@@ -13,7 +13,6 @@ import (
 type Client struct {
 	targetFactory target.Factory
 	collection    *target.Collection
-	logger        *zap.Logger
 	informer      cache.SharedIndexInformer
 }
 
@@ -21,14 +20,14 @@ func (c *Client) ConfigureInformer() {
 	c.informer.AddEventHandler(cache.ResourceEventHandlerFuncs{
 		AddFunc: func(obj interface{}) {
 			tc := obj.(*v1alpha1.TargetConfig)
-			c.logger.Info("new target", zap.String("name", tc.Name))
+			zap.L().Info("new target", zap.String("name", tc.Name))
 
 			t, err := c.targetFactory.CreateSingleClient(tc)
 			if err != nil {
-				c.logger.Error("unable to create target from TargetConfig", zap.String("name", tc.Name), zap.Error(err))
+				zap.L().Error("unable to create target from TargetConfig", zap.String("name", tc.Name), zap.Error(err))
 				return
 			} else if t == nil {
-				c.logger.Error("provided TargetConfig is invalid", zap.String("name", tc.Name))
+				zap.L().Error("provided TargetConfig is invalid", zap.String("name", tc.Name))
 				return
 			}
 
@@ -36,14 +35,14 @@ func (c *Client) ConfigureInformer() {
 		},
 		UpdateFunc: func(oldObj, newObj interface{}) {
 			tc := newObj.(*v1alpha1.TargetConfig)
-			c.logger.Info("update target", zap.String("name", tc.Name))
+			zap.L().Info("update target", zap.String("name", tc.Name))
 
 			t, err := c.targetFactory.CreateSingleClient(tc)
 			if err != nil {
-				c.logger.Error("unable to create target from TargetConfig", zap.String("name", tc.Name), zap.Error(err))
+				zap.L().Error("unable to create target from TargetConfig", zap.String("name", tc.Name), zap.Error(err))
 				return
 			} else if t == nil {
-				c.logger.Error("provided TargetConfig is invalid", zap.String("name", tc.Name))
+				zap.L().Error("provided TargetConfig is invalid", zap.String("name", tc.Name))
 				return
 			}
 
@@ -51,7 +50,7 @@ func (c *Client) ConfigureInformer() {
 		},
 		DeleteFunc: func(obj interface{}) {
 			tc := obj.(*v1alpha1.TargetConfig)
-			c.logger.Info("delete target", zap.String("name", tc.Name))
+			zap.L().Info("delete target", zap.String("name", tc.Name))
 
 			c.collection.RemoveTarget(tc.Name)
 		},
@@ -62,20 +61,19 @@ func (c *Client) Run(stopChan chan struct{}) {
 	go c.informer.Run(stopChan)
 
 	if !cache.WaitForCacheSync(stopChan, c.informer.HasSynced) {
-		c.logger.Error("Failed to sync target config cache")
+		zap.L().Error("Failed to sync target config cache")
 		return
 	}
 
-	c.logger.Info("target config cache synced")
+	zap.L().Info("target config cache synced")
 }
 
-func NewClient(tcClient tcv1alpha1.Interface, f target.Factory, targets *target.Collection, logger *zap.Logger) *Client {
+func NewClient(tcClient tcv1alpha1.Interface, f target.Factory, targets *target.Collection) *Client {
 	tcInformer := tcinformer.NewSharedInformerFactory(tcClient, 0)
 
 	return &Client{
 		informer:      tcInformer.Policyreporter().V1alpha1().TargetConfigs().Informer(),
 		targetFactory: f,
 		collection:    targets,
-		logger:        logger,
 	}
 }

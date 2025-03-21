@@ -60,12 +60,10 @@ type Resolver struct {
 	leaderElector      *leaderelection.Client
 	resultCache        cache.Cache
 	targetClients      *target.Collection
-	targetsCreated     bool
 	targetFactory      target.Factory
 	targetConfigClient *targetconfig.Client
 	logger             *zap.Logger
 	resultListener     *listener.ResultListener
-	polrRestartCh      chan struct{}
 }
 
 // APIServer resolver method
@@ -143,14 +141,6 @@ func (r *Resolver) Database() *bun.DB {
 	zap.L().Info("sqlite connection created")
 	r.database = factory.NewSQLite(r.config.DBFile)
 	return r.database
-}
-
-func (r *Resolver) PolicyReportRestartCh() chan struct{} {
-	return r.polrRestartCh
-}
-
-func (r *Resolver) SetRestartCh(restart chan struct{}) {
-	r.polrRestartCh = restart
 }
 
 // PolicyReportStore resolver method
@@ -404,12 +394,11 @@ func (r *Resolver) DatabaseFactory() *DatabaseFactory {
 
 // TargetClients resolver method
 func (r *Resolver) TargetClients() *target.Collection {
-	if r.targetsCreated {
+	if r.targetClients != nil {
 		return r.targetClients
 	}
 
 	r.targetClients = r.TargetFactory().CreateClients(&r.config.Targets)
-	r.targetsCreated = true
 
 	return r.targetClients
 }
@@ -554,7 +543,7 @@ func (r *Resolver) TargetConfigClient() (*targetconfig.Client, error) {
 		return nil, err
 	}
 
-	tcc := targetconfig.NewClient(tcClient, r.TargetFactory(), r.TargetClients(), r.logger)
+	tcc := targetconfig.NewClient(tcClient, r.TargetFactory(), r.TargetClients())
 	tcc.ConfigureInformer()
 
 	r.targetConfigClient = tcc
