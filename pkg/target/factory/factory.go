@@ -30,6 +30,7 @@ import (
 	"github.com/kyverno/policy-reporter/pkg/target/s3"
 	"github.com/kyverno/policy-reporter/pkg/target/securityhub"
 	"github.com/kyverno/policy-reporter/pkg/target/slack"
+	"github.com/kyverno/policy-reporter/pkg/target/splunk"
 	"github.com/kyverno/policy-reporter/pkg/target/teams"
 	"github.com/kyverno/policy-reporter/pkg/target/telegram"
 	"github.com/kyverno/policy-reporter/pkg/target/webhook"
@@ -120,6 +121,8 @@ func (f *TargetFactory) CreateSingleClient(tc *v1alpha1.TargetConfig) (*target.T
 		return helper.First(createClients(tc.Name, createConfig(tc, tc.Spec.Slack), f.CreateSlackTarget)), nil
 	} else if tc.Spec.Teams != nil {
 		return helper.First(createClients(tc.Name, createConfig(tc, tc.Spec.Teams), f.CreateTeamsTarget)), nil
+	} else if tc.Spec.Splunk != nil {
+		return helper.First(createClients(tc.Name, createConfig(tc, tc.Spec.Splunk), f.CreateSplunkTarget)), nil
 	}
 	return nil, fmt.Errorf("invalid target type passed")
 }
@@ -168,6 +171,46 @@ func (f *TargetFactory) CreateSlackTarget(config, parent *v1alpha1.Config[v1alph
 			CustomFields: config.CustomFields,
 			Headers:      config.Config.Headers,
 			HTTPClient:   http.NewClient("", false),
+		}),
+	}
+}
+
+func (f *TargetFactory) CreateSplunkTarget(config, parent *v1alpha1.Config[v1alpha1.SplunkOptions]) *target.Target {
+	if config == nil {
+		return nil
+	}
+
+	if (parent.SecretRef != "" && f.secretClient != nil) || parent.MountedSecret != "" {
+		f.mapSecretValues(parent, parent.SecretRef, parent.MountedSecret)
+	}
+
+	if (config.SecretRef != "" && f.secretClient != nil) || config.MountedSecret != "" {
+		f.mapSecretValues(config, config.SecretRef, config.MountedSecret)
+	}
+
+	if config.Config.Token == "" && config.Config.Host == "" {
+		return nil
+	}
+
+	config.Config.Headers = make(map[string]string)
+	config.Config.Headers["Authorization"] = "Splunk " + config.Config.Token
+
+	return &target.Target{
+		ID:           uuid.NewString(),
+		Type:         target.Splunk,
+		Config:       config,
+		ParentConfig: parent,
+		Client: splunk.NewClient(splunk.Options{
+			ClientOptions: target.ClientOptions{
+				Name:                  config.Name,
+				SkipExistingOnStartup: config.SkipExisting,
+				ResultFilter:          f.createResultFilter(config.Filter, config.MinimumSeverity, config.Sources),
+				ReportFilter:          createReportFilter(config.Filter),
+			},
+			Headers:    config.Config.Headers,
+			HTTPClient: http.NewClient(config.Config.Certificate, config.Config.SkipTLS),
+			Host:       config.Config.Host,
+			Token:      config.Config.Token,
 		}),
 	}
 }

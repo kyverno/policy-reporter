@@ -25,6 +25,7 @@ const (
 	Kinesis       TargetType = "Kinesis"
 	SecurityHub   TargetType = "SecurityHub"
 	GCS           TargetType = "GCS"
+	Splunk        TargetType = "Splunk"
 )
 
 type Targets struct {
