@@ -1,10 +1,11 @@
 package splunk
 
 import (
+	"go.uber.org/zap"
+
 	"github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
 	"github.com/kyverno/policy-reporter/pkg/target"
 	"github.com/kyverno/policy-reporter/pkg/target/http"
-	"go.uber.org/zap"
 )
 
 const policyReporterSource = "Policy-Reporter"
