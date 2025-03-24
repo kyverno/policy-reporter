@@ -1008,6 +1008,14 @@ func (f *TargetFactory) mapSecretValues(config any, ref, mountedSecret string) {
 			c.Config.Channel = values.Channel
 		}
 
+	case *v1alpha1.Config[v1alpha1.SplunkOptions]:
+		if values.Webhook != "" {
+			c.Config.Host = values.Host
+		}
+		if values.Channel != "" {
+			c.Config.Token = values.Token
+		}
+
 	case *v1alpha1.Config[v1alpha1.WebhookOptions]:
 		if values.Webhook != "" {
 			c.Config.Webhook = values.Webhook
