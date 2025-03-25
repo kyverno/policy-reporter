@@ -20,4 +20,5 @@ type Factory interface {
 	CreateKinesisTarget(config, parent *v1alpha1.Config[v1alpha1.KinesisOptions]) *Target
 	CreateSecurityHubTarget(config, parent *v1alpha1.Config[v1alpha1.SecurityHubOptions]) *Target
 	CreateGCSTarget(config, parent *v1alpha1.Config[v1alpha1.GCSOptions]) *Target
+	CreateSplunkTarget(config, parent *v1alpha1.Config[v1alpha1.SplunkOptions]) *Target
 }

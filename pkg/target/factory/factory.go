@@ -100,6 +100,7 @@ func (f *TargetFactory) CreateClients(config *target.Targets) *target.Collection
 	targets = append(targets, createClients("SecurityHub", config.SecurityHub, f.CreateSecurityHubTarget)...)
 	targets = append(targets, createClients("GoogleCloudStorage", config.GCS, f.CreateGCSTarget)...)
 	targets = append(targets, createClients("AlertManager", config.AlertManager, f.CreateAlertManagerTarget)...)
+	targets = append(targets, createClients("Splunk", config.Splunk, f.CreateSplunkTarget)...)
 
 	collection := target.NewCollection(targets...)
 
@@ -1009,7 +1010,7 @@ func (f *TargetFactory) mapSecretValues(config any, ref, mountedSecret string) {
 		}
 
 	case *v1alpha1.Config[v1alpha1.SplunkOptions]:
-		if values.Webhook != "" {
+		if values.Host != "" {
 			c.Config.Host = values.Host
 		}
 		if values.Channel != "" {
