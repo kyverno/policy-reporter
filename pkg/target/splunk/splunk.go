@@ -34,12 +34,27 @@ type client struct {
 }
 
 func (c *client) Send(result v1alpha2.PolicyReportResult) {
-	sr := splunkRequest{
+	c.sendAndLogResult(splunkRequest{
 		Event:      http.NewJSONResult(result),
 		SourceType: policyReporterSource,
+	})
+}
+
+func (c *client) BatchSend(rep v1alpha2.ReportInterface, results []v1alpha2.PolicyReportResult) {
+	srs := []splunkRequest{}
+	for _, res := range results {
+		sr := splunkRequest{
+			Event:      http.NewJSONResult(res),
+			SourceType: policyReporterSource,
+		}
+		srs = append(srs, sr)
 	}
 
-	req, err := http.CreateJSONRequest("POST", c.host, sr)
+	c.sendAndLogResult(srs)
+}
+
+func (c *client) sendAndLogResult(payload interface{}) {
+	req, err := http.CreateJSONRequest("POST", c.host, payload)
 	if err != nil {
 		zap.L().Error(c.Name()+": PUSH FAILED", zap.Error(err))
 		return
@@ -56,7 +71,7 @@ func (c *client) Send(result v1alpha2.PolicyReportResult) {
 }
 
 func (c *client) Type() string {
-	return target.SingleSend
+	return target.BatchSend
 }
 
 func NewClient(options Options) target.Client {

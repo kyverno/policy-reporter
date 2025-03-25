@@ -41,6 +41,7 @@ type Targets struct {
 	Kinesis       *v1alpha1.Config[v1alpha1.KinesisOptions]       `mapstructure:"kinesis"`
 	SecurityHub   *v1alpha1.Config[v1alpha1.SecurityHubOptions]   `mapstructure:"securityHub"`
 	GCS           *v1alpha1.Config[v1alpha1.GCSOptions]           `mapstructure:"gcs"`
+	Splunk        *v1alpha1.Config[v1alpha1.SplunkOptions]        `mapstructure:"splunk"`
 }
 
 type TargetConfig interface {
