@@ -27,7 +27,7 @@ require (
 	github.com/segmentio/fasthash v1.0.3
 	github.com/slack-go/slack v0.16.0
 	github.com/spf13/cobra v1.9.1
-	github.com/spf13/viper v1.20.0
+	github.com/spf13/viper v1.20.1
 	github.com/stretchr/testify v1.10.0
 	github.com/uptrace/bun v1.2.11
 	github.com/uptrace/bun/dialect/mysqldialect v1.2.11
