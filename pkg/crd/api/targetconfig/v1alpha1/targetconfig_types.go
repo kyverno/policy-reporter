@@ -29,6 +29,7 @@ import (
 // +kubebuilder:oneOf:={required:{loki}}
 // +kubebuilder:oneOf:={required:{securityHub}}
 // +kubebuilder:oneOf:={required:{kinesis}}
+// +kubebuilder:oneOf:={required:{splunk}}
 // +kubebuilder:oneOf:={required:{teams}}
 // TargetConfigSpec defines the desired state of TargetConfig.
 type TargetConfigSpec struct {
@@ -63,6 +64,9 @@ type TargetConfigSpec struct {
 
 	// +optional
 	Teams *WebhookOptions `json:"teams,omitempty"`
+
+	// +optional
+	Splunk *SplunkOptions `json:"splunk,omitempty"`
 }
 
 // TargetConfigStatus defines the observed state of TargetConfig.

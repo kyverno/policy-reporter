@@ -281,6 +281,6 @@ func NewAPIHandler(store *db.Store, client namespaces.Client, targets map[string
 
 func WithAPI(store *db.Store, client namespaces.Client, targets target.Targets) api.ServerOption {
 	return func(s *api.Server) error {
-		return s.Register("v2", NewAPIHandler(store, client, MapConfigTagrgets(targets)))
+		return s.Register("v2", NewAPIHandler(store, client, MapConfigTargets(targets)))
 	}
 }
