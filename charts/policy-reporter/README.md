@@ -425,7 +425,7 @@ Open `http://localhost:8082/` in your browser.
 | plugin.kyverno.image.registry | string | `"ghcr.io"` | Image registry |
 | plugin.kyverno.image.repository | string | `"kyverno/policy-reporter/kyverno-plugin"` | Image repository |
 | plugin.kyverno.image.pullPolicy | string | `"IfNotPresent"` | Image PullPolicy |
-| plugin.kyverno.image.tag | string | `"0.4.1"` | Image tag |
+| plugin.kyverno.image.tag | string | `"0.4.2"` | Image tag |
 | plugin.kyverno.replicaCount | int | `1` | Deployment replica count |
 | plugin.kyverno.logging.api | bool | `false` | Enables external API request logging |
 | plugin.kyverno.logging.server | bool | `false` | Enables Server access logging |
