@@ -897,7 +897,7 @@ ui:
     scopes: []
     # -- Skip TLS Verification
     skipTLS: false
-    # -- TLS Certificate
+    # -- TLS Certificate file path
     certificate: ""
     # -- Secret to rea
     # -- Provide OpenID Connect configuration via Secret
@@ -1442,7 +1442,7 @@ plugin:
     policyReporter:
       # -- Skip TLS Verification
       skipTLS: false
-      # -- TLS Certificate
+      # -- TLS Certificate file path
       certificate: ""
       # -- Secret to read the API configuration from
       # supports `host`, `certificate`, `skipTLS`, `username`, `password` key
