@@ -340,7 +340,7 @@ Open `http://localhost:8082/` in your browser.
 | ui.image.registry | string | `"ghcr.io"` | Image registry |
 | ui.image.repository | string | `"kyverno/policy-reporter-ui"` | Image repository |
 | ui.image.pullPolicy | string | `"IfNotPresent"` | Image PullPolicy |
-| ui.image.tag | string | `"2.2.0"` | Image tag |
+| ui.image.tag | string | `"2.3.0"` | Image tag |
 | ui.replicaCount | int | `1` | Deployment replica count |
 | ui.tempDir | string | `"/tmp"` | Temporary Directory to persist session data for authentication |
 | ui.logging.api | bool | `false` | Enables external api request logging |
@@ -357,7 +357,9 @@ Open `http://localhost:8082/` in your browser.
 | ui.openIDConnect.clientSecret | string | `""` | OpenID Connect ClientSecret |
 | ui.openIDConnect.groupClaim | string | `""` | Optional Group Claim to map user groups to the profile groups can be used to define access control for clusters, boards and custom boards. |
 | ui.openIDConnect.scopes | list | `[]` | OpenID Connect allowed Scopes |
-| ui.openIDConnect.secretRef | string | `""` | Provide OpenID Connect configuration via Secret supported keys: `discoveryUrl`, `clientId`, `clientSecret` |
+| ui.openIDConnect.skipTLS | bool | `false` | Skip TLS Verification |
+| ui.openIDConnect.certificate | string | `""` | TLS Certificate file path |
+| ui.openIDConnect.secretRef | string | `""` | Provide OpenID Connect configuration via Secret supported keys: `discoveryUrl`, `clientId`, `clientSecret`, `certificate`, `skipTLS` |
 | ui.oauth.enabled | bool | `false` | Enable openID Connect authentication |
 | ui.oauth.provider | string | `""` | OAuth2 Provider supported: amazon, gitlab, github, apple, google, yandex, azuread |
 | ui.oauth.callbackUrl | string | `""` | OpenID Connect Callback URL |
@@ -502,7 +504,7 @@ Open `http://localhost:8082/` in your browser.
 | plugin.trivy.logging.logLevel | int | `0` | log level default info |
 | plugin.trivy.server.port | int | `8080` | Application port |
 | plugin.trivy.policyReporter.skipTLS | bool | `false` | Skip TLS Verification |
-| plugin.trivy.policyReporter.certificate | string | `""` | TLS Certificate |
+| plugin.trivy.policyReporter.certificate | string | `""` | TLS Certificate file path |
 | plugin.trivy.policyReporter.secretRef | string | `""` | Secret to read the API configuration from supports `host`, `certificate`, `skipTLS`, `username`, `password` key |
 | plugin.trivy.imagePullSecrets | list | `[]` | Image pull secrets for image verification policies, this will define the `--imagePullSecrets` argument |
 | plugin.trivy.serviceAccount.create | bool | `true` | Create ServiceAccount |
