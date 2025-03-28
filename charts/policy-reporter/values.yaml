@@ -1364,8 +1364,11 @@ plugin:
     # -- List of node taints to tolerate
     tolerations: []
 
-      # -- Affinity constraints.
+    # -- Affinity constraints.
     affinity: {}
+
+    # -- Pod Topology Spread Constraints for the kyverno plugin.
+    topologySpreadConstraints: {}
 
     extraVolumes:
       # -- Deployment volumeMounts
@@ -1587,8 +1590,11 @@ plugin:
     # -- List of node taints to tolerate
     tolerations: []
 
-      # -- Affinity constraints.
+    # -- Affinity constraints.
     affinity: {}
+
+    # -- Pod Topology Spread Constraints for the trivy plugin.
+    topologySpreadConstraints: {}
 
     extraVolumes:
       # -- Deployment volumeMounts

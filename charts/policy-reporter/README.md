@@ -482,6 +482,7 @@ Open `http://localhost:8082/` in your browser.
 | plugin.kyverno.nodeSelector | object | `{}` | Node labels for pod assignment |
 | plugin.kyverno.tolerations | list | `[]` | List of node taints to tolerate |
 | plugin.kyverno.affinity | object | `{}` | Affinity constraints. |
+| plugin.kyverno.topologySpreadConstraints | object | `{}` | Pod Topology Spread Constraints for the kyverno plugin. |
 | plugin.kyverno.extraVolumes.volumeMounts | list | `[]` | Deployment volumeMounts |
 | plugin.kyverno.extraVolumes.volumes | list | `[]` | Deployment values |
 | plugin.trivy.enabled | bool | `false` | Enable Trivy Operator Plugin |
@@ -546,6 +547,7 @@ Open `http://localhost:8082/` in your browser.
 | plugin.trivy.nodeSelector | object | `{}` | Node labels for pod assignment |
 | plugin.trivy.tolerations | list | `[]` | List of node taints to tolerate |
 | plugin.trivy.affinity | object | `{}` | Affinity constraints. |
+| plugin.trivy.topologySpreadConstraints | object | `{}` | Pod Topology Spread Constraints for the trivy plugin. |
 | plugin.trivy.extraVolumes.volumeMounts | list | `[]` | Deployment volumeMounts |
 | plugin.trivy.extraVolumes.volumes | list | `[]` | Deployment values |
 | monitoring.enabled | bool | `false` | Enables the Prometheus Operator integration |

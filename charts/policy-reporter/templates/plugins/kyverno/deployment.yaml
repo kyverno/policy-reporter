@@ -103,6 +103,10 @@ spec:
       affinity:
         {{- toYaml . | nindent 8 }}
       {{- end }}
+      {{- with .Values.plugin.kyverno.topologySpreadConstraints }}
+      topologySpreadConstraints:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
       {{- with .Values.plugin.kyverno.tolerations }}
       tolerations:
         {{- toYaml . | nindent 8 }}
