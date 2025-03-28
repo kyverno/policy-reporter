@@ -851,7 +851,7 @@ ui:
     # -- (string) Image PullPolicy
     pullPolicy: IfNotPresent
     # -- (string) Image tag
-    tag: "2.2.0"
+    tag: "2.3.0"
 
   # -- Deployment replica count
   replicaCount: 1
@@ -895,8 +895,13 @@ ui:
     groupClaim: ""
     # -- OpenID Connect allowed Scopes
     scopes: []
+    # -- Skip TLS Verification
+    skipTLS: false
+    # -- TLS Certificate
+    certificate: ""
+    # -- Secret to rea
     # -- Provide OpenID Connect configuration via Secret
-    # supported keys: `discoveryUrl`, `clientId`, `clientSecret`
+    # supported keys: `discoveryUrl`, `clientId`, `clientSecret`, `certificate`, `skipTLS`
     secretRef: ""
 
   oauth:
