@@ -264,14 +264,25 @@ var targets = target.Targets{
 		CustomFields:    map[string]string{"field": "value"},
 		Channels:        []*v1alpha1.Config[v1alpha1.GCSOptions]{{}},
 	},
+	Splunk: &v1alpha1.Config[v1alpha1.SplunkOptions]{
+		Config: &v1alpha1.SplunkOptions{
+			HostOptions: v1alpha1.HostOptions{
+				Host: "http://localhost:9200",
+			},
+			Token: "token",
+		},
+		SkipExisting:    true,
+		MinimumSeverity: v1alpha2.SeverityInfo,
+		CustomFields:    map[string]string{"field": "value"},
+	},
 }
 
 func Test_ResolveTarget(t *testing.T) {
 	factory := factory.NewFactory(nil, nil)
 
 	clients := factory.CreateClients(&targets)
-	if len(clients.Clients()) != 25 {
-		t.Errorf("Expected 25 Client, got %d clients", len(clients.Clients()))
+	if len(clients.Clients()) != 26 {
+		t.Errorf("Expected 26 Client, got %d clients", len(clients.Clients()))
 	}
 }
 
@@ -524,10 +535,13 @@ func Test_GetValuesFromSecret(t *testing.T) {
 				Bucket: "policy-reporter",
 			},
 		},
+		Splunk: &v1alpha1.Config[v1alpha1.SplunkOptions]{
+			SecretRef: secretName,
+		},
 	}
 
 	clients := factory.CreateClients(&targets)
-	if len(clients.Clients()) != 12 {
+	if len(clients.Clients()) != 13 {
 		t.Fatalf("expected 12 clients created, got %d", len(clients.Clients()))
 	}
 
@@ -587,6 +601,20 @@ func Test_GetValuesFromSecret(t *testing.T) {
 		webhook := client.FieldByName("webhook").String()
 		if webhook != "http://localhost:9200/webhook" {
 			t.Errorf("Expected webhook from secret, got %s", webhook)
+		}
+	})
+
+	t.Run("Get Splunk values from Secret", func(t *testing.T) {
+		client := reflect.ValueOf(clients.Client("Splunk")).Elem()
+
+		host := client.FieldByName("host").String()
+		if host != "http://localhost:9200" {
+			t.Errorf("Expected host from secret, got %s", host)
+		}
+
+		token := client.FieldByName("token").String()
+		if token != "token" {
+			t.Errorf("Expected token from secret, got %s", token)
 		}
 	})
 
