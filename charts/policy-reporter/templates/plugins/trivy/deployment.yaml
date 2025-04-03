@@ -56,6 +56,12 @@ spec:
           {{- if .Values.plugin.trivy.securityContext }}
             {{- toYaml .Values.plugin.trivy.securityContext | nindent 12 }}
           {{- end }}
+          resources:
+            {{- toYaml .Values.plugin.trivy.resources | nindent 12 }}
+          env:
+          {{- with .Values.plugin.trivy.envVars }}
+          {{- . | toYaml | trim | nindent 10 }}
+          {{- end }}
           volumeMounts:
           - name: db
             mountPath: /db
