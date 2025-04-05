@@ -1,6 +1,7 @@
 module github.com/kyverno/policy-reporter
 
 go 1.23.5
+toolchain go1.24.1
 
 require (
 	cloud.google.com/go/storage v1.50.0
@@ -10,7 +11,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/credentials v1.17.65
 	github.com/aws/aws-sdk-go-v2/service/kinesis v1.33.1
 	github.com/aws/aws-sdk-go-v2/service/s3 v1.78.2
-	github.com/aws/aws-sdk-go-v2/service/securityhub v1.57.0
+	github.com/aws/aws-sdk-go-v2/service/securityhub v1.57.1
 	github.com/aws/aws-sdk-go-v2/service/sts v1.33.17
 	github.com/gin-contrib/gzip v1.2.2
 	github.com/gin-contrib/pprof v1.5.2
