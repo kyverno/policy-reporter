@@ -856,6 +856,9 @@ ui:
   # -- Deployment replica count
   replicaCount: 1
 
+  # -- Deployment priorityClassName
+  priorityClassName: ""
+
   # -- Temporary Directory to persist session data for authentication
   tempDir: "/tmp"
 
@@ -1186,6 +1189,9 @@ plugin:
     # -- Deployment replica count
     replicaCount: 1
 
+    # -- Deployment priorityClassName
+    priorityClassName: ""
+
     logging:
       # -- Enables external API request logging
       api: false
@@ -1422,6 +1428,9 @@ plugin:
 
     # -- Deployment replica count
     replicaCount: 1
+
+    # -- Deployment priorityClassName
+    priorityClassName: ""
 
     logging:
       # -- Enables external API request logging
