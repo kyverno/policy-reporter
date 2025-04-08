@@ -30,6 +30,9 @@ spec:
         {{- toYaml . | nindent 8 }}
         {{- end }}
     spec:
+      {{- with .Values.ui.priorityClassName }}
+      priorityClassName: {{ . }}
+      {{- end }}
       {{- with .Values.ui.imagePullSecrets }}
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
@@ -99,7 +102,7 @@ spec:
         emptyDir: {}
       {{- with .Values.ui.extraVolumes.volumes }}
       {{ toYaml . | nindent 6 | trim }}
-      {{- end }}           
+      {{- end }}
       {{- with .Values.ui.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
