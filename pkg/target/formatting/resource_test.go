@@ -3,9 +3,10 @@ package formatting_test
 import (
 	"testing"
 
-	"github.com/kyverno/policy-reporter/pkg/target/formatting"
 	"github.com/stretchr/testify/assert"
 	corev1 "k8s.io/api/core/v1"
+
+	"github.com/kyverno/policy-reporter/pkg/target/formatting"
 )
 
 func TestResourceString(t *testing.T) {
