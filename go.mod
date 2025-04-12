@@ -25,7 +25,7 @@ require (
 	github.com/mattn/go-sqlite3 v1.14.27
 	github.com/patrickmn/go-cache v2.1.0+incompatible
 	github.com/prometheus/client_golang v1.22.0
-	github.com/prometheus/client_model v0.6.1
+	github.com/prometheus/client_model v0.6.2
 	github.com/segmentio/fasthash v1.0.3
 	github.com/slack-go/slack v0.16.0
 	github.com/spf13/cobra v1.9.1
