@@ -15,6 +15,7 @@ type Factory interface {
 	CreateWebhookTarget(config, parent *v1alpha1.Config[v1alpha1.WebhookOptions]) *Target
 	CreateTelegramTarget(config, parent *v1alpha1.Config[v1alpha1.TelegramOptions]) *Target
 	CreateGoogleChatTarget(config, parent *v1alpha1.Config[v1alpha1.WebhookOptions]) *Target
+	CreateJiraTarget(config, parent *v1alpha1.Config[v1alpha1.JiraOptions]) *Target
 	CreateS3Target(config, parent *v1alpha1.Config[v1alpha1.S3Options]) *Target
 	CreateKinesisTarget(config, parent *v1alpha1.Config[v1alpha1.KinesisOptions]) *Target
 	CreateSecurityHubTarget(config, parent *v1alpha1.Config[v1alpha1.SecurityHubOptions]) *Target

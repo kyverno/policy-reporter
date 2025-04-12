@@ -210,6 +210,19 @@ config:
 {{ include "target" . }}
 {{- end }}
 
+{{- define "target.jira" -}}
+config:
+  host: {{ .host | quote }}
+  username: {{ .username | quote }}
+  password: {{ .password | quote }}
+  apiToken: {{ .apiToken | quote }}
+  projectKey: {{ .projectKey | quote }}
+  issueType: {{ .issueType | quote }}
+  certificate: {{ .certificate | quote }}
+  skipTLS: {{ .skipTLS }}
+{{ include "target" . }}
+{{- end }}
+
 {{- define "target.telegram" -}}
 config:
   chatId: {{ .chatId | quote }}

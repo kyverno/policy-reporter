@@ -19,6 +19,7 @@ const (
 	Discord       TargetType = "Discord"
 	Teams         TargetType = "Teams"
 	GoogleChat    TargetType = "GoogleChat"
+	Jira          TargetType = "Jira"
 	Telegram      TargetType = "Telegram"
 	Webhook       TargetType = "Webhook"
 	S3            TargetType = "S3"
@@ -35,6 +36,7 @@ type Targets struct {
 	Teams         *v1alpha1.Config[v1alpha1.WebhookOptions]       `mapstructure:"teams"`
 	Webhook       *v1alpha1.Config[v1alpha1.WebhookOptions]       `mapstructure:"webhook"`
 	GoogleChat    *v1alpha1.Config[v1alpha1.WebhookOptions]       `mapstructure:"googleChat"`
+	Jira          *v1alpha1.Config[v1alpha1.JiraOptions]          `mapstructure:"jira"`
 	Telegram      *v1alpha1.Config[v1alpha1.TelegramOptions]      `mapstructure:"telegram"`
 	S3            *v1alpha1.Config[v1alpha1.S3Options]            `mapstructure:"s3"`
 	Kinesis       *v1alpha1.Config[v1alpha1.KinesisOptions]       `mapstructure:"kinesis"`

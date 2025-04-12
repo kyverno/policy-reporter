@@ -30,6 +30,7 @@ import (
 // +kubebuilder:oneOf:={required:{securityHub}}
 // +kubebuilder:oneOf:={required:{kinesis}}
 // +kubebuilder:oneOf:={required:{teams}}
+// +kubebuilder:oneOf:={required:{jira}}
 // TargetConfigSpec defines the desired state of TargetConfig.
 type TargetConfigSpec struct {
 	ConfigStrict `json:",inline"`
@@ -63,6 +64,9 @@ type TargetConfigSpec struct {
 
 	// +optional
 	Teams *WebhookOptions `json:"teams,omitempty"`
+
+	// +optional
+	Jira *JiraOptions `json:"jira,omitempty"`
 }
 
 // TargetConfigStatus defines the observed state of TargetConfig.

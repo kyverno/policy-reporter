@@ -21,6 +21,24 @@ type WebhookOptions struct {
 	Headers map[string]string `mapstructure:"headers" json:"headers"`
 }
 
+type JiraOptions struct {
+	Host string `mapstructure:"host" json:"host"`
+	// +optional
+	APIToken string `mapstructure:"apiToken" json:"apiToken"`
+	// +optional
+	Username string `mapstructure:"username" json:"username"`
+	// +optional
+	Password string `mapstructure:"password" json:"password"`
+	// +optional
+	ProjectKey string `mapstructure:"projectKey" json:"projectKey"`
+	// +optional
+	IssueType string `mapstructure:"issueType" json:"issueType"`
+	// +optional
+	SkipTLS bool `mapstructure:"skipTLS" json:"skipTLS"`
+	// +optional
+	Certificate string `mapstructure:"certificate" json:"certificate"`
+}
+
 type HostOptions struct {
 	Host string `mapstructure:"host" json:"host"`
 	// +optional
