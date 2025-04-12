@@ -100,7 +100,7 @@ jobs:
           cosign attach sbom --sbom ./policy-reporter-bom.cdx.json --type cyclonedx ghcr.io/${{github.repository_owner}}/policy-reporter@${{ steps.push.outputs.digest }}
 
       - name: Install the crane command
-        uses: kubewarden/github-actions/crane-installer@a856b31e3c8d62419e6c2fa325dbd346fec21af5 # v4.4.0
+        uses: kubewarden/github-actions/crane-installer@d570155468f2cc53a82588705ccb3be870483de1 # v4.4.1
 
       - name: Find platform digest
         shell: bash
