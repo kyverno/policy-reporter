@@ -23,6 +23,7 @@ import (
 	"github.com/kyverno/policy-reporter/pkg/target/gcs"
 	"github.com/kyverno/policy-reporter/pkg/target/googlechat"
 	"github.com/kyverno/policy-reporter/pkg/target/http"
+	"github.com/kyverno/policy-reporter/pkg/target/jira"
 	"github.com/kyverno/policy-reporter/pkg/target/kinesis"
 	"github.com/kyverno/policy-reporter/pkg/target/loki"
 	"github.com/kyverno/policy-reporter/pkg/target/provider/aws"
@@ -89,6 +90,7 @@ func (f *TargetFactory) CreateClients(config *target.Targets) *target.Collection
 	targets = append(targets, createClients("Discord", config.Discord, f.CreateDiscordTarget)...)
 	targets = append(targets, createClients("Teams", config.Teams, f.CreateTeamsTarget)...)
 	targets = append(targets, createClients("GoogleChat", config.GoogleChat, f.CreateGoogleChatTarget)...)
+	targets = append(targets, createClients("Jira", config.Jira, f.CreateJiraTarget)...)
 	targets = append(targets, createClients("Telegram", config.Telegram, f.CreateTelegramTarget)...)
 	targets = append(targets, createClients("Webhook", config.Webhook, f.CreateWebhookTarget)...)
 	targets = append(targets, createClients("S3", config.S3, f.CreateS3Target)...)
@@ -120,6 +122,8 @@ func (f *TargetFactory) CreateSingleClient(tc *v1alpha1.TargetConfig) (*target.T
 		return helper.First(createClients(tc.Name, createConfig(tc, tc.Spec.Slack), f.CreateSlackTarget)), nil
 	} else if tc.Spec.Teams != nil {
 		return helper.First(createClients(tc.Name, createConfig(tc, tc.Spec.Teams), f.CreateTeamsTarget)), nil
+	} else if tc.Spec.Jira != nil {
+		return helper.First(createClients(tc.Name, createConfig(tc, tc.Spec.Jira), f.CreateJiraTarget)), nil
 	}
 	return nil, fmt.Errorf("invalid target type passed")
 }
@@ -502,6 +506,61 @@ func (f *TargetFactory) CreateGoogleChatTarget(config, parent *v1alpha1.Config[v
 			},
 			Webhook:      config.Config.Webhook,
 			Headers:      config.Config.Headers,
+			CustomFields: config.CustomFields,
+			HTTPClient:   http.NewClient(config.Config.Certificate, config.Config.SkipTLS),
+		}),
+	}
+}
+
+func (f *TargetFactory) CreateJiraTarget(config, parent *v1alpha1.Config[v1alpha1.JiraOptions]) *target.Target {
+	if config == nil {
+		return nil
+	}
+
+	if (parent.SecretRef != "" && f.secretClient != nil) || parent.MountedSecret != "" {
+		f.mapSecretValues(parent, parent.SecretRef, parent.MountedSecret)
+	}
+
+	if (config.SecretRef != "" && f.secretClient != nil) || config.MountedSecret != "" {
+		f.mapSecretValues(config, config.SecretRef, config.MountedSecret)
+	}
+
+	if config.Config.Host == "" {
+		return nil
+	}
+
+	setFallback(&config.Config.Certificate, parent.Config.Certificate)
+	setBool(&config.Config.SkipTLS, parent.Config.SkipTLS)
+	setFallback(&config.Config.Username, parent.Config.Username)
+	setFallback(&config.Config.Password, parent.Config.Password)
+	setFallback(&config.Config.APIToken, parent.Config.APIToken)
+	setFallback(&config.Config.ProjectKey, parent.Config.ProjectKey)
+	setFallback(&config.Config.IssueType, parent.Config.IssueType)
+
+	config.MapBaseParent(parent)
+
+	zap.S().Infof("%s configured", config.Name)
+
+	return &target.Target{
+		ID:           uuid.NewString(),
+		Type:         target.Jira,
+		Config:       config,
+		ParentConfig: parent,
+		Client: jira.NewClient(jira.Options{
+			ClientOptions: target.ClientOptions{
+				Name:                  config.Name,
+				SkipExistingOnStartup: config.SkipExisting,
+				ResultFilter:          f.createResultFilter(config.Filter, config.MinimumSeverity, config.Sources),
+				ReportFilter:          createReportFilter(config.Filter),
+			},
+			Host:         config.Config.Host,
+			Username:     config.Config.Username,
+			Password:     config.Config.Password,
+			APIToken:     config.Config.APIToken,
+			ProjectKey:   config.Config.ProjectKey,
+			IssueType:    config.Config.IssueType,
+			SkipTLS:      config.Config.SkipTLS,
+			Certificate:  config.Config.Certificate,
 			CustomFields: config.CustomFields,
 			HTTPClient:   http.NewClient(config.Config.Certificate, config.Config.SkipTLS),
 		}),
