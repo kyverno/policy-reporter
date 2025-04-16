@@ -851,16 +851,13 @@ ui:
     # -- (string) Image PullPolicy
     pullPolicy: IfNotPresent
     # -- (string) Image tag
-    tag: "2.3.2"
+    tag: "2.3.5"
 
   # -- Deployment replica count
   replicaCount: 1
 
   # -- Deployment priorityClassName
   priorityClassName: ""
-
-  # -- Temporary Directory to persist session data for authentication
-  tempDir: "/tmp"
 
   logging:
     # -- Enables external api request logging
@@ -881,6 +878,10 @@ ui:
     cors: true
     # -- Overwrites Request Host with Proxy Host and adds `X-Forwarded-Host` and `X-Origin-Host` headers
     overwriteHost: true
+    # -- session configuration
+    sessions:
+      storage: filesystem
+      tempDir: /tmp
 
   openIDConnect:
     # -- Enable openID Connect authentication
@@ -1395,7 +1396,7 @@ plugin:
       pullPolicy: IfNotPresent
         # -- (string) Image tag
         # Defaults to `Chart.AppVersion` if omitted
-      tag: "0.4.3"
+      tag: "0.4.4"
 
     cli:
       image:
@@ -1412,7 +1413,13 @@ plugin:
     # -- Additional container args.
     extraArgs: {}
 
+    cveawg:
+      # -- (bool) disable external CVEAWG API calls.
+      disable: false
+
     github:
+      # -- (bool) disable GitHub API calls.
+      disable: false
       # -- (string) optional github token for authenticated GitHub API calls.
       token: ""
 

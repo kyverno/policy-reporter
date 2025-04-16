@@ -1,5 +1,3 @@
-tempDir: {{ .Values.ui.tempDir }}
-
 logging:
   api: {{ .Values.ui.logging.api }}
   server: {{ .Values.ui.logging.server }}
@@ -10,6 +8,10 @@ server:
   port: {{ .Values.ui.server.port }}
   cors: {{ .Values.ui.server.cors }}
   overwriteHost: {{ .Values.ui.server.overwriteHost }}
+  {{- with .Values.ui.server.sessions }}
+  sessions: 
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
 
 ui:
   displayMode: {{ .Values.ui.displayMode }}

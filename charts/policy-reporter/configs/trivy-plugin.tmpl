@@ -21,6 +21,8 @@ core:
 
 trivy:
   dbDir: /db
+  disable: {{ .Values.plugin.trivy.cveawg.disable }}
 
 github:
   token: {{ .Values.plugin.trivy.github.token | quote }}
+  disable: {{ .Values.plugin.trivy.github.disable }}
