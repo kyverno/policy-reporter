@@ -1,6 +1,6 @@
 module github.com/kyverno/policy-reporter
 
-go 1.23.5
+go 1.23.8
 
 toolchain go1.24.1
 

@@ -340,9 +340,9 @@ Open `http://localhost:8082/` in your browser.
 | ui.image.registry | string | `"ghcr.io"` | Image registry |
 | ui.image.repository | string | `"kyverno/policy-reporter-ui"` | Image repository |
 | ui.image.pullPolicy | string | `"IfNotPresent"` | Image PullPolicy |
-| ui.image.tag | string | `"2.3.2"` | Image tag |
+| ui.image.tag | string | `"2.3.5"` | Image tag |
 | ui.replicaCount | int | `1` | Deployment replica count |
-| ui.tempDir | string | `"/tmp"` | Temporary Directory to persist session data for authentication |
+| ui.priorityClassName | string | `""` | Deployment priorityClassName |
 | ui.logging.api | bool | `false` | Enables external api request logging |
 | ui.logging.server | bool | `false` | Enables server access logging |
 | ui.logging.encoding | string | `"console"` | Log encoding possible encodings are console and json |
@@ -350,6 +350,7 @@ Open `http://localhost:8082/` in your browser.
 | ui.server.port | int | `8080` | Application port |
 | ui.server.cors | bool | `true` | Enabled CORS header |
 | ui.server.overwriteHost | bool | `true` | Overwrites Request Host with Proxy Host and adds `X-Forwarded-Host` and `X-Origin-Host` headers |
+| ui.server.sessions | object | `{"storage":"filesystem","tempDir":"/tmp"}` | session configuration |
 | ui.openIDConnect.enabled | bool | `false` | Enable openID Connect authentication |
 | ui.openIDConnect.discoveryUrl | string | `""` | OpenID Connect Discovery URL |
 | ui.openIDConnect.callbackUrl | string | `""` | OpenID Connect Callback URL |
@@ -427,6 +428,7 @@ Open `http://localhost:8082/` in your browser.
 | plugin.kyverno.image.pullPolicy | string | `"IfNotPresent"` | Image PullPolicy |
 | plugin.kyverno.image.tag | string | `"0.4.2"` | Image tag |
 | plugin.kyverno.replicaCount | int | `1` | Deployment replica count |
+| plugin.kyverno.priorityClassName | string | `""` | Deployment priorityClassName |
 | plugin.kyverno.logging.api | bool | `false` | Enables external API request logging |
 | plugin.kyverno.logging.server | bool | `false` | Enables Server access logging |
 | plugin.kyverno.logging.encoding | string | `"console"` | log encoding possible encodings are console and json |
@@ -489,16 +491,19 @@ Open `http://localhost:8082/` in your browser.
 | plugin.trivy.image.registry | string | `"ghcr.io"` | Image registry |
 | plugin.trivy.image.repository | string | `"kyverno/policy-reporter/trivy-plugin"` | Image repository |
 | plugin.trivy.image.pullPolicy | string | `"IfNotPresent"` | Image PullPolicy |
-| plugin.trivy.image.tag | string | `"0.4.3"` | Image tag Defaults to `Chart.AppVersion` if omitted |
+| plugin.trivy.image.tag | string | `"0.4.4"` | Image tag Defaults to `Chart.AppVersion` if omitted |
 | plugin.trivy.cli.image.registry | string | `"ghcr.io"` | Image registry |
 | plugin.trivy.cli.image.repository | string | `"aquasecurity/trivy"` | Image repository |
 | plugin.trivy.cli.image.pullPolicy | string | `"IfNotPresent"` | Image PullPolicy |
 | plugin.trivy.cli.image.tag | string | `"0.58.2"` | Image tag Defaults to `Chart.AppVersion` if omitted |
 | plugin.trivy.extraArgs | object | `{}` | Additional container args. |
+| plugin.trivy.cveawg.disable | bool | `false` | disable external CVEAWG API calls. |
+| plugin.trivy.github.disable | bool | `false` | disable GitHub API calls. |
 | plugin.trivy.github.token | string | `""` | optional github token for authenticated GitHub API calls. |
 | plugin.trivy.dbVolume | object | `{}` | If set the volume for dbVolume is freely configurable below "- name: dbVolume". If no value is set an emptyDir is used. |
 | plugin.trivy.tmpVolume | object | `{}` | If set the volume for tmpVolume is freely configurable below "- name: tmpVolume". If no value is set an emptyDir is used. |
 | plugin.trivy.replicaCount | int | `1` | Deployment replica count |
+| plugin.trivy.priorityClassName | string | `""` | Deployment priorityClassName |
 | plugin.trivy.logging.api | bool | `false` | Enables external API request logging |
 | plugin.trivy.logging.server | bool | `false` | Enables Server access logging |
 | plugin.trivy.logging.encoding | string | `"console"` | log encoding possible encodings are console and json |
