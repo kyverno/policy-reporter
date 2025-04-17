@@ -3,7 +3,7 @@
 Policy Reporter watches for PolicyReport Resources.
 It creates Prometheus Metrics and can send rule validation events to different targets like Loki, Elasticsearch, Slack or Discord
 
-![Version: 3.1.1](https://img.shields.io/badge/Version-3.1.1-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 3.1.1](https://img.shields.io/badge/AppVersion-3.1.1-informational?style=flat-square)
+![Version: 3.1.2](https://img.shields.io/badge/Version-3.1.2-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 3.1.1](https://img.shields.io/badge/AppVersion-3.1.1-informational?style=flat-square)
 
 ## Documentation
 
@@ -246,6 +246,22 @@ Open `http://localhost:8082/` in your browser.
 | target.googleChat.customFields | object | `{}` | Added as additional labels |
 | target.googleChat.filter | object | `{}` | Filter Results which should send to this target Wildcars for namespaces and policies are supported, you can either define exclude or include values Filters are available for all targets except the UI |
 | target.googleChat.channels | list | `[]` | List of channels to route results to different configurations |
+| target.jira.host | string | `""` | JIRA server URL |
+| target.jira.username | string | `""` | JIRA username |
+| target.jira.password | string | `""` | JIRA password (use password or apiToken, not both) |
+| target.jira.apiToken | string | `""` | JIRA API token (use password or apiToken, not both) |
+| target.jira.projectKey | string | `""` | JIRA project key |
+| target.jira.issueType | string | `""` | JIRA issue type (default: "Bug") |
+| target.jira.certificate | string | `""` | Server Certificate file path Can be added under extraVolumes |
+| target.jira.skipTLS | bool | `false` | Skip TLS verification |
+| target.jira.secretRef | string | `""` | Read configuration from an already existing Secret |
+| target.jira.mountedSecret | string | `""` | Mounted secret path by Secrets Controller, secret should be in json format |
+| target.jira.minimumSeverity | string | `""` | Minimum severity: "" < info < low < medium < high < critical |
+| target.jira.sources | list | `[]` | List of sources which should send |
+| target.jira.skipExistingOnStartup | bool | `true` | Skip already existing PolicyReportResults on startup |
+| target.jira.customFields | object | `{}` | Added as additional labels |
+| target.jira.filter | object | `{}` | Filter Results which should send to this target Wildcars for namespaces and policies are supported, you can either define exclude or include values Filters are available for all targets except the UI |
+| target.jira.channels | list | `[]` | List of channels to route results to different configurations |
 | target.s3.accessKeyId | optional | `""` | S3 Access key |
 | target.s3.secretAccessKey | optional | `""` | S3 SecretAccess key |
 | target.s3.region | optional | `""` | S3 Storage region |
@@ -340,7 +356,7 @@ Open `http://localhost:8082/` in your browser.
 | ui.image.registry | string | `"ghcr.io"` | Image registry |
 | ui.image.repository | string | `"kyverno/policy-reporter-ui"` | Image repository |
 | ui.image.pullPolicy | string | `"IfNotPresent"` | Image PullPolicy |
-| ui.image.tag | string | `"2.3.5"` | Image tag |
+| ui.image.tag | string | `"2.3.6"` | Image tag |
 | ui.replicaCount | int | `1` | Deployment replica count |
 | ui.priorityClassName | string | `""` | Deployment priorityClassName |
 | ui.logging.api | bool | `false` | Enables external api request logging |
