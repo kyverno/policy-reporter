@@ -1,6 +1,8 @@
 package splunk
 
 import (
+	"encoding/json"
+
 	"go.uber.org/zap"
 
 	"github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
@@ -41,13 +43,17 @@ func (c *client) Send(result v1alpha2.PolicyReportResult) {
 }
 
 func (c *client) BatchSend(rep v1alpha2.ReportInterface, results []v1alpha2.PolicyReportResult) {
-	srs := []splunkRequest{}
+	srs := ""
 	for _, res := range results {
 		sr := splunkRequest{
 			Event:      http.NewJSONResult(res),
 			SourceType: policyReporterSource,
 		}
-		srs = append(srs, sr)
+		srString, err := json.Marshal(sr)
+		if err != nil {
+
+		}
+		srs = srs + string(srString)
 	}
 
 	c.sendAndLogResult(srs)
