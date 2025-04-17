@@ -1433,7 +1433,7 @@ plugin:
       pullPolicy: IfNotPresent
         # -- (string) Image tag
         # Defaults to `Chart.AppVersion` if omitted
-      tag: "0.4.4"
+      tag: "0.4.5"
 
     cli:
       image:
