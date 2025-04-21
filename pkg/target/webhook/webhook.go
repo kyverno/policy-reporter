@@ -1,9 +1,10 @@
 package webhook
 
 import (
-	"github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
+	"github.com/kyverno/policy-reporter/pkg/http"
+	"github.com/kyverno/policy-reporter/pkg/payload"
 	"github.com/kyverno/policy-reporter/pkg/target"
-	"github.com/kyverno/policy-reporter/pkg/target/http"
+	"go.uber.org/zap"
 )
 
 // Options to configure the Discord target
@@ -23,22 +24,17 @@ type client struct {
 	client       http.Client
 }
 
-func (e *client) Send(result v1alpha2.PolicyReportResult) {
+func (e *client) Send(result payload.Payload) {
 	if len(e.customFields) > 0 {
-		props := make(map[string]string, 0)
-
-		for property, value := range e.customFields {
-			props[property] = value
+		if err := result.AddCustomFields(e.customFields); err != nil {
+			zap.L().Error(e.Name()+": Error adding custom fields", zap.Error(err))
+			return
 		}
-
-		for property, value := range result.Properties {
-			props[property] = value
-		}
-
-		result.Properties = props
 	}
 
-	req, err := http.CreateJSONRequest("POST", e.host, http.NewJSONResult(result))
+	resultBody := result.Body()
+
+	req, err := http.CreateJSONRequest("POST", e.host, resultBody)
 	if err != nil {
 		return
 	}

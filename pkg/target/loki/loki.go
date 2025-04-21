@@ -1,19 +1,11 @@
 package loki
 
 import (
-	"fmt"
-	"strings"
-	"time"
-
 	"github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
-	"github.com/kyverno/policy-reporter/pkg/helper"
+	"github.com/kyverno/policy-reporter/pkg/http"
+	"github.com/kyverno/policy-reporter/pkg/payload"
 	"github.com/kyverno/policy-reporter/pkg/target"
-	"github.com/kyverno/policy-reporter/pkg/target/http"
-)
-
-var (
-	keyReplacer   = strings.NewReplacer(".", "_", "]", "", "[", "")
-	labelReplacer = strings.NewReplacer("/", "")
+	"go.uber.org/zap"
 )
 
 // Options to configure the Loki target
@@ -28,67 +20,7 @@ type Options struct {
 }
 
 type Payload struct {
-	Streams []Stream `json:"streams"`
-}
-
-type Stream struct {
-	Stream map[string]string `json:"stream"`
-	Values []Value           `json:"values"`
-}
-
-type Value = []string
-
-func newLokiStream(result v1alpha2.PolicyReportResult, customFields map[string]string) Stream {
-	timestamp := time.Now()
-	if result.Timestamp.Seconds != 0 {
-		timestamp = time.Unix(result.Timestamp.Seconds, int64(result.Timestamp.Nanos))
-	}
-
-	labels := map[string]string{
-		"status":    string(result.Result),
-		"policy":    result.Policy,
-		"createdBy": "policy-reporter",
-	}
-
-	if result.Rule != "" {
-		labels["rule"] = result.Rule
-	}
-	if result.Category != "" {
-		labels["category"] = result.Category
-	}
-	if result.Severity != "" {
-		labels["severity"] = string(result.Severity)
-	}
-	if result.Source != "" {
-		labels["source"] = result.Source
-	}
-	if result.HasResource() {
-		res := result.GetResource()
-		if res.APIVersion != "" {
-			labels["apiVersion"] = res.APIVersion
-			labels["kind"] = res.Kind
-			labels["name"] = res.Name
-		}
-		if res.UID != "" {
-			labels["uid"] = string(res.UID)
-		}
-		if res.Namespace != "" {
-			labels["namespace"] = res.Namespace
-		}
-	}
-
-	for property, value := range result.Properties {
-		labels[keyReplacer.Replace(property)] = labelReplacer.Replace(value)
-	}
-
-	for label, value := range customFields {
-		labels[keyReplacer.Replace(label)] = labelReplacer.Replace(value)
-	}
-
-	return Stream{
-		Values: []Value{[]string{fmt.Sprintf("%v", timestamp.UnixNano()), "[" + strings.ToUpper(string(result.Severity)) + "] " + result.Message}},
-		Stream: labels,
-	}
+	Streams []payload.Stream `json:"streams"`
 }
 
 type client struct {
@@ -101,18 +33,45 @@ type client struct {
 	password     string
 }
 
-func (l *client) Send(result v1alpha2.PolicyReportResult) {
+func (l *client) Send(result payload.Payload) {
+	if len(l.customFields) > 0 {
+		if err := result.AddCustomFields(l.customFields); err != nil {
+			zap.L().Error(l.Name()+": Error adding custom fields", zap.Error(err))
+			return
+		}
+	}
+	s, err := result.ToLoki()
+	if err != nil {
+		zap.L().Error(l.Name()+": Error converting to loki stream", zap.Error(err))
+		return
+	}
 	l.send(Payload{
-		Streams: []Stream{
-			newLokiStream(result, l.customFields),
+		Streams: []payload.Stream{
+			s,
 		},
 	})
 }
 
-func (l *client) BatchSend(_ v1alpha2.ReportInterface, results []v1alpha2.PolicyReportResult) {
-	l.send(Payload{Streams: helper.Map(results, func(result v1alpha2.PolicyReportResult) Stream {
-		return newLokiStream(result, l.customFields)
-	})})
+func (l *client) BatchSend(_ v1alpha2.ReportInterface, results []payload.Payload) {
+	lokiResults := []payload.Stream{}
+
+	for _, r := range results {
+		lokiRes, err := r.ToLoki()
+		if err != nil {
+			zap.L().Error(l.Name()+"Error converting to loki stream", zap.Error(err))
+			continue
+		}
+
+		if len(l.customFields) > 0 {
+			if err := r.AddCustomFields(l.customFields); err != nil {
+				zap.L().Error(l.Name()+": Error adding custom fields", zap.Error(err))
+				continue
+			}
+		}
+		lokiResults = append(lokiResults, lokiRes)
+	}
+
+	l.send(Payload{Streams: lokiResults})
 }
 
 func (l *client) send(payload Payload) {

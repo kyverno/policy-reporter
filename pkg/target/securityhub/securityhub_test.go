@@ -10,6 +10,7 @@ import (
 
 	"github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
 	"github.com/kyverno/policy-reporter/pkg/fixtures"
+	"github.com/kyverno/policy-reporter/pkg/payload"
 	"github.com/kyverno/policy-reporter/pkg/target/securityhub"
 )
 
@@ -82,7 +83,7 @@ func TestSecurityHub(t *testing.T) {
 			},
 		})
 
-		c.Send(fixtures.CompleteTargetSendResult)
+		c.Send(&payload.PolicyReportResultPayload{Result: fixtures.CompleteTargetSendResult})
 	})
 	t.Run("clean up disabled", func(t *testing.T) {
 		h := &client{}

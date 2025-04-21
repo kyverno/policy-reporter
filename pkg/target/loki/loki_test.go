@@ -10,6 +10,7 @@ import (
 	"github.com/stretchr/testify/assert"
 
 	"github.com/kyverno/policy-reporter/pkg/fixtures"
+	"github.com/kyverno/policy-reporter/pkg/payload"
 	"github.com/kyverno/policy-reporter/pkg/target"
 	"github.com/kyverno/policy-reporter/pkg/target/loki"
 )
@@ -67,7 +68,7 @@ func Test_LokiTarget(t *testing.T) {
 			Password:     "password",
 			Headers:      map[string]string{"X-Forward": "http://loki"},
 		})
-		client.Send(fixtures.CompleteTargetSendResult)
+		client.Send(&payload.PolicyReportResultPayload{Result: fixtures.CompleteTargetSendResult})
 	})
 
 	t.Run("Send Minimal Result", func(t *testing.T) {
@@ -97,7 +98,7 @@ func Test_LokiTarget(t *testing.T) {
 			CustomFields: map[string]string{"custom": "label"},
 			HTTPClient:   testClient{callback, 200},
 		})
-		client.Send(fixtures.MinimalTargetSendResult)
+		client.Send(&payload.PolicyReportResultPayload{Result: fixtures.MinimalTargetSendResult})
 	})
 	t.Run("Name", func(t *testing.T) {
 		client := loki.NewClient(loki.Options{
@@ -115,7 +116,7 @@ func Test_LokiTarget(t *testing.T) {
 	})
 }
 
-func convertAndValidateBody(req *http.Request, t *testing.T) loki.Stream {
+func convertAndValidateBody(req *http.Request, t *testing.T) payload.Stream {
 	payload := loki.Payload{}
 
 	err := json.NewDecoder(req.Body).Decode(&payload)

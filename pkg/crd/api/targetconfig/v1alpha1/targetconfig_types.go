@@ -31,9 +31,13 @@ import (
 // +kubebuilder:oneOf:={required:{kinesis}}
 // +kubebuilder:oneOf:={required:{teams}}
 // +kubebuilder:oneOf:={required:{jira}}
+// +kubebuilder:oneOf:={required:{mailgun}}
 // TargetConfigSpec defines the desired state of TargetConfig.
 type TargetConfigSpec struct {
 	ConfigStrict `json:",inline"`
+
+	//+optional
+	MailGun *MailgunOptions `json:"mailgun,omitempty"`
 
 	//+optional
 	S3 *S3Options `json:"s3,omitempty"`

@@ -3,14 +3,11 @@ package gcs
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
-	"time"
 
 	"go.uber.org/zap"
 
-	"github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
+	"github.com/kyverno/policy-reporter/pkg/payload"
 	"github.com/kyverno/policy-reporter/pkg/target"
-	"github.com/kyverno/policy-reporter/pkg/target/http"
 	"github.com/kyverno/policy-reporter/pkg/target/provider/gcs"
 )
 
@@ -29,29 +26,18 @@ type client struct {
 	prefix       string
 }
 
-func (c *client) Send(result v1alpha2.PolicyReportResult) {
+func (c *client) Send(result payload.Payload) {
 	if len(c.customFields) > 0 {
-		props := make(map[string]string, 0)
-
-		for property, value := range c.customFields {
-			props[property] = value
-		}
-
-		for property, value := range result.Properties {
-			props[property] = value
-		}
-
-		result.Properties = props
+		result.AddCustomFields(c.customFields)
 	}
-
+	resultBody := result.Body()
 	body := new(bytes.Buffer)
 
-	if err := json.NewEncoder(body).Encode(http.NewJSONResult(result)); err != nil {
+	if err := json.NewEncoder(body).Encode(resultBody); err != nil {
 		zap.L().Error(c.Name()+": encode error", zap.Error(err))
 		return
 	}
-	t := time.Unix(result.Timestamp.Seconds, int64(result.Timestamp.Nanos))
-	key := fmt.Sprintf("%s/%s/%s-%s-%s.json", c.prefix, t.Format("2006-01-02"), result.Policy, result.ID, t.Format(time.RFC3339Nano))
+	key := result.BlobStorageKey(c.prefix)
 
 	err := c.client.Upload(body, key)
 	if err != nil {

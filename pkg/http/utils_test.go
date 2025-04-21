@@ -11,7 +11,7 @@ import (
 	"go.uber.org/zap/zaptest/observer"
 
 	"github.com/kyverno/policy-reporter/pkg/fixtures"
-	"github.com/kyverno/policy-reporter/pkg/target/http"
+	"github.com/kyverno/policy-reporter/pkg/http"
 )
 
 func TestResultMapping(t *testing.T) {

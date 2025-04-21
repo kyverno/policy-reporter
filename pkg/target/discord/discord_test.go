@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/kyverno/policy-reporter/pkg/fixtures"
+	"github.com/kyverno/policy-reporter/pkg/payload"
 	"github.com/kyverno/policy-reporter/pkg/target"
 	"github.com/kyverno/policy-reporter/pkg/target/discord"
 )
@@ -45,7 +46,7 @@ func Test_LokiTarget(t *testing.T) {
 			Webhook:    "http://hook.discord:80",
 			HTTPClient: testClient{callback, 200},
 		})
-		client.Send(fixtures.CompleteTargetSendResult)
+		client.Send(&payload.PolicyReportResultPayload{Result: fixtures.CompleteTargetSendResult})
 	})
 
 	t.Run("Send Minimal Result", func(t *testing.T) {
@@ -70,7 +71,7 @@ func Test_LokiTarget(t *testing.T) {
 			Webhook:    "http://hook.discord:80",
 			HTTPClient: testClient{callback, 200},
 		})
-		client.Send(fixtures.MinimalTargetSendResult)
+		client.Send(&payload.PolicyReportResultPayload{Result: fixtures.MinimalTargetSendResult})
 	})
 	t.Run("Name", func(t *testing.T) {
 		client := discord.NewClient(discord.Options{

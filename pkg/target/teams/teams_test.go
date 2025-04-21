@@ -8,6 +8,7 @@ import (
 	"github.com/stretchr/testify/assert"
 
 	"github.com/kyverno/policy-reporter/pkg/fixtures"
+	"github.com/kyverno/policy-reporter/pkg/payload"
 	"github.com/kyverno/policy-reporter/pkg/target"
 	"github.com/kyverno/policy-reporter/pkg/target/teams"
 )
@@ -48,7 +49,7 @@ func Test_TeamsTarget(t *testing.T) {
 			CustomFields: map[string]string{"Cluster": "Name"},
 			HTTPClient:   testClient{callback, 200},
 		})
-		client.Send(fixtures.CompleteTargetSendResult)
+		client.Send(&payload.PolicyReportResultPayload{Result: fixtures.CompleteTargetSendResult})
 	})
 
 	t.Run("Send Minimal Result", func(t *testing.T) {
@@ -71,7 +72,7 @@ func Test_TeamsTarget(t *testing.T) {
 			CustomFields: map[string]string{"Cluster": "Name"},
 			HTTPClient:   testClient{callback, 200},
 		})
-		client.Send(fixtures.MinimalTargetSendResult)
+		client.Send(&payload.PolicyReportResultPayload{Result: fixtures.MinimalTargetSendResult})
 	})
 	t.Run("Send Minimal InfoResult", func(t *testing.T) {
 		callback := func(req *http.Request) {
@@ -89,7 +90,7 @@ func Test_TeamsTarget(t *testing.T) {
 			CustomFields: map[string]string{"Cluster": "Name"},
 			HTTPClient:   testClient{callback, 200},
 		})
-		client.Send(fixtures.InfoSendResult)
+		client.Send(&payload.PolicyReportResultPayload{Result: fixtures.InfoSendResult})
 	})
 	t.Run("Send Minimal ErrorResult", func(t *testing.T) {
 		callback := func(req *http.Request) {
@@ -107,7 +108,7 @@ func Test_TeamsTarget(t *testing.T) {
 			CustomFields: map[string]string{"Cluster": "Name"},
 			HTTPClient:   testClient{callback, 200},
 		})
-		client.Send(fixtures.ErrorSendResult)
+		client.Send(&payload.PolicyReportResultPayload{Result: fixtures.ErrorSendResult})
 	})
 	t.Run("Send Minimal Debug Result", func(t *testing.T) {
 		callback := func(req *http.Request) {
@@ -129,7 +130,7 @@ func Test_TeamsTarget(t *testing.T) {
 			CustomFields: map[string]string{"Cluster": "Name"},
 			HTTPClient:   testClient{callback, 200},
 		})
-		client.Send(fixtures.DebugSendResult)
+		client.Send(&payload.PolicyReportResultPayload{Result: fixtures.DebugSendResult})
 	})
 	t.Run("Name", func(t *testing.T) {
 		client := teams.NewClient(teams.Options{

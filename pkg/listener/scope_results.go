@@ -5,6 +5,7 @@ import (
 
 	"github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
 	"github.com/kyverno/policy-reporter/pkg/helper"
+	"github.com/kyverno/policy-reporter/pkg/payload"
 	"github.com/kyverno/policy-reporter/pkg/report"
 	"github.com/kyverno/policy-reporter/pkg/target"
 )
@@ -33,7 +34,11 @@ func NewSendScopeResultsListener(targets *target.Collection) report.ScopeResults
 					return
 				}
 
-				target.BatchSend(re, filtered)
+				payloads := helper.Map(filtered, func(result v1alpha2.PolicyReportResult) payload.Payload {
+					return &payload.PolicyReportResultPayload{Result: result}
+				})
+
+				target.BatchSend(re, payloads)
 			}(t, rep, r, e)
 		}
 

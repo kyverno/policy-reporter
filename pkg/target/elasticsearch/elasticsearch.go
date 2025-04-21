@@ -3,9 +3,10 @@ package elasticsearch
 import (
 	"time"
 
-	"github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
+	"github.com/kyverno/policy-reporter/pkg/http"
+	"github.com/kyverno/policy-reporter/pkg/payload"
 	"github.com/kyverno/policy-reporter/pkg/target"
-	"github.com/kyverno/policy-reporter/pkg/target/http"
+	"go.uber.org/zap"
 )
 
 // Options to configure elasticsearch target
@@ -50,7 +51,7 @@ type client struct {
 	typelessApi bool
 }
 
-func (e *client) Send(result v1alpha2.PolicyReportResult) {
+func (e *client) Send(result payload.Payload) {
 	var host string
 	var apiSuffix string
 	if e.typelessApi {
@@ -71,20 +72,14 @@ func (e *client) Send(result v1alpha2.PolicyReportResult) {
 	}
 
 	if len(e.customFields) > 0 {
-		props := make(map[string]string, 0)
-
-		for property, value := range e.customFields {
-			props[property] = value
+		if err := result.AddCustomFields(e.customFields); err != nil {
+			zap.L().Error(e.Name()+": Error adding custom fields", zap.Error(err))
+			return
 		}
-
-		for property, value := range result.Properties {
-			props[property] = value
-		}
-
-		result.Properties = props
 	}
+	resultBody := result.Body()
 
-	req, err := http.CreateJSONRequest("POST", host, http.NewJSONResult(result))
+	req, err := http.CreateJSONRequest("POST", host, resultBody)
 	if err != nil {
 		return
 	}
