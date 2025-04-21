@@ -1,11 +1,13 @@
 package discord
 
 import (
-	"strings"
+	"context"
 
 	"github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
+	"github.com/kyverno/policy-reporter/pkg/http"
+	"github.com/kyverno/policy-reporter/pkg/payload"
 	"github.com/kyverno/policy-reporter/pkg/target"
-	"github.com/kyverno/policy-reporter/pkg/target/http"
+	"go.uber.org/zap"
 )
 
 // Options to configure the Discord target
@@ -16,88 +18,6 @@ type Options struct {
 	HTTPClient   http.Client
 }
 
-type payload struct {
-	Content string  `json:"content"`
-	Embeds  []embed `json:"embeds"`
-}
-
-type embed struct {
-	Title       string       `json:"title"`
-	Description string       `json:"description"`
-	Color       string       `json:"color"`
-	Fields      []embedField `json:"fields"`
-}
-
-type embedField struct {
-	Name   string `json:"name"`
-	Value  string `json:"value"`
-	Inline bool   `json:"inline"`
-}
-
-var colors = map[v1alpha2.PolicySeverity]string{
-	v1alpha2.SeverityInfo:     "12370112",
-	v1alpha2.SeverityLow:      "3066993",
-	v1alpha2.SeverityMedium:   "15105570",
-	v1alpha2.SeverityHigh:     "15158332",
-	v1alpha2.SeverityCritical: "15158332",
-}
-
-func newPayload(result v1alpha2.PolicyReportResult, customFields map[string]string) payload {
-	color, exists := colors[result.Severity]
-	if !exists {
-		color = "0"
-	}
-
-	embedFields := make([]embedField, 0)
-
-	embedFields = append(embedFields, embedField{"Policy", result.Policy, true})
-
-	if result.Rule != "" {
-		embedFields = append(embedFields, embedField{"Rule", result.Rule, true})
-	}
-
-	if result.Category != "" {
-		embedFields = append(embedFields, embedField{"Category", result.Category, true})
-	}
-	if result.Severity != "" {
-		embedFields = append(embedFields, embedField{"Severity", string(result.Severity), true})
-	}
-
-	if result.HasResource() {
-		res := result.GetResource()
-
-		embedFields = append(embedFields, embedField{"Kind", res.Kind, true})
-		embedFields = append(embedFields, embedField{"Name", res.Name, true})
-		if res.Namespace != "" {
-			embedFields = append(embedFields, embedField{"Namespace", res.Namespace, true})
-		}
-		if res.APIVersion != "" {
-			embedFields = append(embedFields, embedField{"API Version", res.APIVersion, true})
-		}
-	}
-
-	for property, value := range result.Properties {
-		embedFields = append(embedFields, embedField{strings.Title(property), value, true})
-	}
-
-	for property, value := range customFields {
-		embedFields = append(embedFields, embedField{strings.Title(property), value, true})
-	}
-
-	embeds := make([]embed, 0, 1)
-	embeds = append(embeds, embed{
-		Title:       "New Policy Report Result",
-		Description: result.Message,
-		Color:       color,
-		Fields:      embedFields,
-	})
-
-	return payload{
-		Content: "",
-		Embeds:  embeds,
-	}
-}
-
 type client struct {
 	target.BaseClient
 	webhook      string
@@ -105,8 +25,14 @@ type client struct {
 	client       http.Client
 }
 
-func (d *client) Send(result v1alpha2.PolicyReportResult) {
-	req, err := http.CreateJSONRequest("POST", d.webhook, newPayload(result, d.customFields))
+func (d *client) Send(result payload.Payload) {
+	if len(d.customFields) > 0 {
+		if err := result.AddCustomFields(d.customFields); err != nil {
+			zap.L().Error(d.Name()+": Error adding custom fields", zap.Error(err))
+			return
+		}
+	}
+	req, err := http.CreateJSONRequest("POST", d.webhook, result.ToDiscord())
 	if err != nil {
 		return
 	}
@@ -114,6 +40,10 @@ func (d *client) Send(result v1alpha2.PolicyReportResult) {
 	resp, err := d.client.Do(req)
 	http.ProcessHTTPResponse(d.Name(), resp, err)
 }
+
+func (d *client) CleanUp(_ context.Context, _ v1alpha2.ReportInterface) {}
+
+func (d *client) BatchSend(_ v1alpha2.ReportInterface, _ []payload.Payload) {}
 
 func (d *client) Type() target.ClientType {
 	return target.SingleSend

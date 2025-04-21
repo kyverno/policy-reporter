@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/kyverno/policy-reporter/pkg/fixtures"
+	"github.com/kyverno/policy-reporter/pkg/payload"
 	"github.com/kyverno/policy-reporter/pkg/target"
 	"github.com/kyverno/policy-reporter/pkg/target/s3"
 )
@@ -42,7 +43,7 @@ func Test_S3Target(t *testing.T) {
 			CustomFields: map[string]string{"cluster": "name"},
 			S3:           &testClient{nil, callback},
 		})
-		client.Send(fixtures.CompleteTargetSendResult)
+		client.Send(&payload.PolicyReportResultPayload{Result: fixtures.CompleteTargetSendResult})
 
 		if len(fixtures.CompleteTargetSendResult.Properties) > 1 || fixtures.CompleteTargetSendResult.Properties["cluster"] != "" {
 			t.Error("expected customFields are not added to the actuel result")

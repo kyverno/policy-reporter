@@ -39,6 +39,12 @@ type JiraOptions struct {
 	Certificate string `mapstructure:"certificate" json:"certificate"`
 }
 
+type MailgunOptions struct {
+	Token  string `mapstructure:"token" json:"token"`
+	Domain string `mapstructure:"domain" json:"domain"`
+	Sender string `mapstructure:"sender" json:"sender"`
+}
+
 type HostOptions struct {
 	Host string `mapstructure:"host" json:"host"`
 	// +optional
@@ -152,8 +158,6 @@ type ConfigStrict struct {
 	Sources []string `mapstructure:"sources" json:"sources"`
 	// +optional
 	CustomFields map[string]string `mapstructure:"customFields" json:"customFields"`
-	// +optional
-	// SkipExisting bool `mapstructure:"skipExistingOnStartup" json:"skipExistingOnStartup"`
 }
 
 func (config *Config[T]) MapBaseParent(parent *Config[T]) {

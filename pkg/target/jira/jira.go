@@ -8,8 +8,8 @@ import (
 	"strings"
 
 	"github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
+	targethttp "github.com/kyverno/policy-reporter/pkg/http"
 	"github.com/kyverno/policy-reporter/pkg/target"
-	targethttp "github.com/kyverno/policy-reporter/pkg/target/http"
 )
 
 // Options to configure the JIRA target

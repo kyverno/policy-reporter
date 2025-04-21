@@ -6,6 +6,7 @@ import (
 
 	"github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
 	"github.com/kyverno/policy-reporter/pkg/helper"
+	"github.com/kyverno/policy-reporter/pkg/payload"
 	"github.com/kyverno/policy-reporter/pkg/report"
 	"github.com/kyverno/policy-reporter/pkg/target"
 )
@@ -43,7 +44,12 @@ func NewSendSyncResultsListener(targets *target.Collection) report.SyncResultsLi
 					return target.Validate(re, result)
 				})
 
-				target.BatchSend(re, filtered)
+				resultsToSend := []payload.Payload{}
+				for _, r := range filtered {
+					resultsToSend = append(resultsToSend, &payload.PolicyReportResultPayload{Result: r})
+				}
+
+				target.BatchSend(re, resultsToSend)
 			}(t, rep)
 		}
 

@@ -18,7 +18,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/sts"
 	"go.uber.org/zap"
 
-	"github.com/kyverno/policy-reporter/pkg/target/http"
+	"github.com/kyverno/policy-reporter/pkg/http"
 )
 
 var enable = true

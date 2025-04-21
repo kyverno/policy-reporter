@@ -6,6 +6,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 
 	"github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
+	"github.com/kyverno/policy-reporter/pkg/payload"
 	"github.com/kyverno/policy-reporter/pkg/report"
 	"github.com/kyverno/policy-reporter/pkg/target"
 )
@@ -34,7 +35,7 @@ func NewSendResultListener(targets *target.Collection) report.PolicyReportResult
 					return
 				}
 
-				target.Send(result)
+				target.Send(&payload.PolicyReportResultPayload{Result: result})
 			}(t, rep, r, e)
 		}
 

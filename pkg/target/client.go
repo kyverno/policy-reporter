@@ -3,12 +3,15 @@ package target
 import (
 	"context"
 	"strings"
+	"time"
 
 	"github.com/kyverno/go-wildcard"
 	"go.uber.org/zap"
 
+	"github.com/kyverno/policy-reporter/pkg/cache"
 	"github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
 	"github.com/kyverno/policy-reporter/pkg/kubernetes/namespaces"
+	"github.com/kyverno/policy-reporter/pkg/payload"
 	"github.com/kyverno/policy-reporter/pkg/report"
 	"github.com/kyverno/policy-reporter/pkg/validate"
 )
@@ -24,9 +27,9 @@ const (
 // Client for a provided Target
 type Client interface {
 	// Send the given Result to the configured Target
-	Send(result v1alpha2.PolicyReportResult)
+	Send(result payload.Payload)
 	// BatchSend the given Results of a single PolicyReport to the configured Target
-	BatchSend(report v1alpha2.ReportInterface, results []v1alpha2.PolicyReportResult)
+	BatchSend(report v1alpha2.ReportInterface, results []payload.Payload)
 	// SkipExistingOnStartup skips already existing PolicyReportResults on startup
 	SkipExistingOnStartup() bool
 	// Name is a unique identifier for each Target
@@ -181,6 +184,9 @@ type BaseClient struct {
 	skipExistingOnStartup bool
 	resultFilter          *report.ResultFilter
 	reportFilter          *report.ReportFilter
+	creationTimestamp     time.Time
+	polrCache             cache.Cache
+	tenant                string
 }
 
 type ClientOptions struct {
@@ -188,6 +194,7 @@ type ClientOptions struct {
 	SkipExistingOnStartup bool
 	ResultFilter          *report.ResultFilter
 	ReportFilter          *report.ReportFilter
+	Tenant                string
 }
 
 func (c *BaseClient) Name() string {
@@ -222,6 +229,18 @@ func (c *BaseClient) Validate(rep v1alpha2.ReportInterface, result v1alpha2.Poli
 	return true
 }
 
+func (c *BaseClient) CreationTimestamp() time.Time {
+	return c.creationTimestamp
+}
+
+func (c *BaseClient) Cache() cache.Cache {
+	return c.polrCache
+}
+
+func (c *BaseClient) SetCache(rc cache.Cache) {
+	c.polrCache = rc
+}
+
 func (c *BaseClient) ValidateReport(rep v1alpha2.ReportInterface) bool {
 	if rep == nil {
 		return false
@@ -242,10 +261,18 @@ func (c *BaseClient) Reset(_ context.Context) error {
 	return nil
 }
 
+func (c *BaseClient) Tenant() string {
+	return c.tenant
+}
+
+func (c *BaseClient) SetTenant(t string) {
+	c.tenant = t
+}
+
 func (c *BaseClient) CleanUp(_ context.Context, _ v1alpha2.ReportInterface) {}
 
-func (c *BaseClient) BatchSend(_ v1alpha2.ReportInterface, _ []v1alpha2.PolicyReportResult) {}
+func (c *BaseClient) BatchSend(_ v1alpha2.ReportInterface, _ []payload.Payload) {}
 
 func NewBaseClient(options ClientOptions) BaseClient {
-	return BaseClient{options.Name, options.SkipExistingOnStartup, options.ResultFilter, options.ReportFilter}
+	return BaseClient{options.Name, options.SkipExistingOnStartup, options.ResultFilter, options.ReportFilter, time.Now(), cache.NewInMermoryCache(6*time.Hour, 10*time.Minute), options.Tenant}
 }

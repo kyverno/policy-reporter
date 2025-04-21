@@ -9,7 +9,7 @@ import (
 	"go.uber.org/zap"
 	"go.uber.org/zap/zaptest/observer"
 
-	"github.com/kyverno/policy-reporter/pkg/target/http"
+	"github.com/kyverno/policy-reporter/pkg/http"
 )
 
 type mock struct{}
