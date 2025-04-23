@@ -43,7 +43,7 @@ require (
 	golang.org/x/text v0.24.0
 	google.golang.org/api v0.215.0
 	k8s.io/apiextensions-apiserver v0.32.2
-	k8s.io/apimachinery v0.32.3
+	k8s.io/apimachinery v0.32.4
 	k8s.io/client-go v0.32.3
 	k8s.io/kube-aggregator v0.32.2
 )
