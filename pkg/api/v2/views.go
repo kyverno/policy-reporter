@@ -703,6 +703,20 @@ func MapGCSToTarget(ta *v1alpha1.Config[v1alpha1.GCSOptions]) *Target {
 	return t
 }
 
+func MapAlertManagerToTarget(ta *v1alpha1.Config[v1alpha1.AlertManagerOptions]) *Target {
+	t := MapBaseToTarget(ta)
+	t.Type = "AlertManager"
+	t.Host = ta.Config.Host
+	t.SkipTLS = ta.Config.SkipTLS
+	t.UseTLS = ta.Config.Certificate != ""
+
+	if v, ok := ta.Config.Headers["Authorization"]; ok && v != "" {
+		t.Auth = true
+	}
+
+	return t
+}
+
 func MapTargets[T any](c *v1alpha1.Config[T], mapper func(*v1alpha1.Config[T]) *Target) []*Target {
 	targets := make([]*Target, 0)
 
@@ -738,6 +752,7 @@ func MapConfigTagrgets(c target.Targets) map[string][]*Target {
 	targets["kinesis"] = MapTargets(c.Kinesis, MapKinesisToTarget)
 	targets["securityHub"] = MapTargets(c.SecurityHub, MapSecurityHubToTarget)
 	targets["gcs"] = MapTargets(c.GCS, MapGCSToTarget)
+	targets["alertManager"] = MapTargets(c.AlertManager, MapAlertManagerToTarget)
 
 	for k, v := range targets {
 		if len(v) == 0 {

@@ -31,6 +31,8 @@ import (
 // +kubebuilder:oneOf:={required:{kinesis}}
 // +kubebuilder:oneOf:={required:{teams}}
 // +kubebuilder:oneOf:={required:{jira}}
+// +kubebuilder:oneOf:={required:{alertManager}}
+
 // TargetConfigSpec defines the desired state of TargetConfig.
 type TargetConfigSpec struct {
 	ConfigStrict `json:",inline"`
@@ -67,6 +69,9 @@ type TargetConfigSpec struct {
 
 	// +optional
 	Jira *JiraOptions `json:"jira,omitempty"`
+
+	// +optional
+	AlertManager *AlertManagerOptions `json:"alertManager,omitempty"`
 }
 
 // TargetConfigStatus defines the observed state of TargetConfig.
