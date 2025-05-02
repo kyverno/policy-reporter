@@ -228,7 +228,7 @@ func (c *client) CleanUp(ctx context.Context, report v1alpha2.ReportInterface) {
 	zap.L().Info(c.Name()+": start cleanup", zap.String("report", report.GetKey()))
 
 	if report.GetSource() != "" {
-		if !c.BaseClient.ValidateReport(report) {
+		if !c.ValidateReport(report) {
 			return
 		}
 	}
@@ -252,7 +252,7 @@ func (c *client) CleanUp(ctx context.Context, report v1alpha2.ReportInterface) {
 	}
 
 	for _, r := range report.GetResults() {
-		if !c.BaseClient.Validate(report, r) {
+		if !c.Validate(report, r) {
 			continue
 		}
 
