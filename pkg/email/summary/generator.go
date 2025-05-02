@@ -27,7 +27,7 @@ func (o *Generator) GenerateData(ctx context.Context) ([]Source, error) {
 	if o.clusterReports {
 		clusterReports, err := o.client.ClusterPolicyReports().List(ctx, v1.ListOptions{})
 		if err != nil {
-			return make([]Source, 0, 0), err
+			return make([]Source, 0), err
 		}
 
 		wg.Add(len(clusterReports.Items))
@@ -62,7 +62,7 @@ func (o *Generator) GenerateData(ctx context.Context) ([]Source, error) {
 
 	reports, err := o.client.PolicyReports(v1.NamespaceAll).List(ctx, v1.ListOptions{})
 	if err != nil {
-		return make([]Source, 0, 0), err
+		return make([]Source, 0), err
 	}
 
 	wg.Add(len(reports.Items))

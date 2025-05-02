@@ -476,7 +476,7 @@ type operation struct {
 }
 
 func (o operation) HasContext() bool {
-	return o.Method.Type.NumIn() > 0 && goType(o.Method.Type.In(0)) == "context.Context"
+	return o.Type.NumIn() > 0 && goType(o.Type.In(0)) == "context.Context"
 }
 
 func (o operation) HasError() bool {
@@ -494,7 +494,7 @@ type resource struct {
 }
 
 func (r resource) Kind() string {
-	return strings.ReplaceAll(r.Type.Name(), "Interface", "")
+	return strings.ReplaceAll(r.Name(), "Interface", "")
 }
 
 type resourceKey reflect.Method

@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/kyverno/policy-reporter/pkg/email"
+	"github.com/kyverno/policy-reporter/pkg/helper"
 )
 
 type Reporter struct {
@@ -19,7 +20,7 @@ func (o *Reporter) Report(sources []Source, format string) (email.Report, error)
 
 	vioTempl := template.New("violations.html").Funcs(template.FuncMap{
 		"color": email.ColorFromStatus,
-		"title": strings.Title,
+		"title": helper.Title,
 		"hasViolations": func(results map[string][]Result) bool {
 			return (len(results["warn"]) + len(results["fail"]) + len(results["error"])) > 0
 		},

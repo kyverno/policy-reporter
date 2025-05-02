@@ -30,7 +30,7 @@ func TestSendResponseSuccess(t *testing.T) {
 
 	assert := assert.New(t)
 	assert.Equal(http.StatusOK, w.Code)
-	assert.Equal(`"data"`, string(w.Body.Bytes()))
+	assert.Equal(`"data"`, w.Body.String())
 }
 
 func TestSendResponseError(t *testing.T) {
@@ -49,7 +49,7 @@ func TestSendResponseError(t *testing.T) {
 
 	assert := assert.New(t)
 	assert.Equal(http.StatusInternalServerError, w.Code)
-	assert.Equal("", string(w.Body.Bytes()))
+	assert.Equal("", w.Body.String())
 }
 
 func TestBuildFilter(t *testing.T) {

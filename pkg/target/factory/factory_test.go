@@ -325,21 +325,21 @@ func Test_S3Validation(t *testing.T) {
 		}
 	})
 
-	targets.S3.Config.AWSConfig.AccessKeyID = "access"
+	targets.S3.Config.AccessKeyID = "access"
 	t.Run("S3.SecretAccessKey", func(t *testing.T) {
 		if len(factory.CreateClients(&targets).Clients()) != 0 {
 			t.Error("Expected Client to be nil if no secretAccessKey is configured")
 		}
 	})
 
-	targets.S3.Config.AWSConfig.SecretAccessKey = "secret"
+	targets.S3.Config.SecretAccessKey = "secret"
 	t.Run("S3.Region", func(t *testing.T) {
 		if len(factory.CreateClients(&targets).Clients()) != 0 {
 			t.Error("Expected Client to be nil if no region is configured")
 		}
 	})
 
-	targets.S3.Config.AWSConfig.Region = "ru-central1"
+	targets.S3.Config.Region = "ru-central1"
 	t.Run("S3.Bucket", func(t *testing.T) {
 		if len(factory.CreateClients(&targets).Clients()) != 0 {
 			t.Error("Expected Client to be nil if no bucket is configured")
@@ -392,14 +392,14 @@ func Test_KinesisValidation(t *testing.T) {
 		}
 	})
 
-	targets.Kinesis.Config.AWSConfig.AccessKeyID = "access"
+	targets.Kinesis.Config.AccessKeyID = "access"
 	t.Run("Kinesis.SecretAccessKey", func(t *testing.T) {
 		if len(factory.CreateClients(&targets).Clients()) != 0 {
 			t.Error("Expected Client to be nil if no secretAccessKey is configured")
 		}
 	})
 
-	targets.Kinesis.Config.AWSConfig.SecretAccessKey = "secret"
+	targets.Kinesis.Config.SecretAccessKey = "secret"
 
 	t.Run("Kinesis.Region", func(t *testing.T) {
 		if len(factory.CreateClients(&targets).Clients()) != 0 {
@@ -407,7 +407,7 @@ func Test_KinesisValidation(t *testing.T) {
 		}
 	})
 
-	targets.Kinesis.Config.AWSConfig.Region = "ru-central1"
+	targets.Kinesis.Config.Region = "ru-central1"
 
 	t.Run("Kinesis.StreamName", func(t *testing.T) {
 		if len(factory.CreateClients(&targets).Clients()) != 0 {
@@ -440,14 +440,14 @@ func Test_SecurityHubValidation(t *testing.T) {
 		}
 	})
 
-	targets.SecurityHub.Config.AWSConfig.AccessKeyID = "access"
+	targets.SecurityHub.Config.AccessKeyID = "access"
 	t.Run("SecurityHub.SecretAccessKey", func(t *testing.T) {
 		if len(factory.CreateClients(&targets).Clients()) != 0 {
 			t.Error("Expected Client to be nil if no secretAccessKey is configured")
 		}
 	})
 
-	targets.SecurityHub.Config.AWSConfig.SecretAccessKey = "secret"
+	targets.SecurityHub.Config.SecretAccessKey = "secret"
 	t.Run("SecurityHub.Region", func(t *testing.T) {
 		if len(factory.CreateClients(&targets).Clients()) != 0 {
 			t.Error("Expected Client to be nil if no region is configured")

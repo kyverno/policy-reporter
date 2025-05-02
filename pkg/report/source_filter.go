@@ -141,7 +141,7 @@ func Uncontrolled(owner []metav1.OwnerReference) bool {
 			continue
 		}
 
-		if *isController == true && helper.Contains(o.Kind, controller) {
+		if *isController && helper.Contains(o.Kind, controller) {
 			return false
 		}
 	}
