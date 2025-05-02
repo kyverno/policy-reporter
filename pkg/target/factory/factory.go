@@ -1025,7 +1025,7 @@ func setFallback(config *string, parents ...string) {
 }
 
 func setBool(config *bool, parent bool) {
-	if *config == false {
+	if !*config {
 		*config = parent
 	}
 }
