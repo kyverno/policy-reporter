@@ -1,9 +1,8 @@
 package discord
 
 import (
-	"strings"
-
 	"github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
+	"github.com/kyverno/policy-reporter/pkg/helper"
 	"github.com/kyverno/policy-reporter/pkg/target"
 	"github.com/kyverno/policy-reporter/pkg/target/http"
 )
@@ -77,11 +76,11 @@ func newPayload(result v1alpha2.PolicyReportResult, customFields map[string]stri
 	}
 
 	for property, value := range result.Properties {
-		embedFields = append(embedFields, embedField{strings.Title(property), value, true})
+		embedFields = append(embedFields, embedField{helper.Title(property), value, true})
 	}
 
 	for property, value := range customFields {
-		embedFields = append(embedFields, embedField{strings.Title(property), value, true})
+		embedFields = append(embedFields, embedField{helper.Title(property), value, true})
 	}
 
 	embeds := make([]embed, 0, 1)
