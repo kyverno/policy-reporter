@@ -58,7 +58,7 @@ func (h *APIHandler) ListTargets(ctx *gin.Context) {
 func (h *APIHandler) ListPolicyReports(ctx *gin.Context) {
 	filter := api.BuildFilter(ctx)
 
-	count, err := h.store.CountPolicyReports(ctx, filter)
+	count, _ := h.store.CountPolicyReports(ctx, filter)
 	list, err := h.store.FetchPolicyReports(ctx, filter, api.BuildPagination(ctx, []string{"namespace", "name"}))
 
 	api.SendResponse(ctx, api.Paginated[PolicyReport]{Count: count, Items: MapPolicyReports(list)}, "failed to load policy reports", err)
@@ -67,7 +67,7 @@ func (h *APIHandler) ListPolicyReports(ctx *gin.Context) {
 func (h *APIHandler) ListClusterPolicyReports(ctx *gin.Context) {
 	filter := api.BuildFilter(ctx)
 
-	count, err := h.store.CountClusterPolicyReports(ctx, filter)
+	count, _ := h.store.CountClusterPolicyReports(ctx, filter)
 	list, err := h.store.FetchClusterPolicyReports(ctx, filter, api.BuildPagination(ctx, []string{"name"}))
 
 	api.SendResponse(ctx, api.Paginated[PolicyReport]{Count: count, Items: MapPolicyReports(list)}, "failed to load policy reports", err)
@@ -130,7 +130,7 @@ func (h *APIHandler) ListNamespacedStatusCounts(ctx *gin.Context) {
 func (h *APIHandler) ListClusterResults(ctx *gin.Context) {
 	filter := api.BuildFilter(ctx)
 
-	count, err := h.store.CountResults(ctx, false, filter)
+	count, _ := h.store.CountResults(ctx, false, filter)
 	list, err := h.store.FetchResults(ctx, false, filter, api.BuildPagination(ctx, defaultOrder))
 
 	api.SendResponse(ctx, api.Paginated[Result]{Count: count, Items: MapResults(list)}, "failed to load results", err)
@@ -139,7 +139,7 @@ func (h *APIHandler) ListClusterResults(ctx *gin.Context) {
 func (h *APIHandler) ListNamespacedResults(ctx *gin.Context) {
 	filter := api.BuildFilter(ctx)
 
-	count, err := h.store.CountResults(ctx, true, filter)
+	count, _ := h.store.CountResults(ctx, true, filter)
 	list, err := h.store.FetchResults(ctx, true, filter, api.BuildPagination(ctx, defaultOrder))
 
 	api.SendResponse(ctx, api.Paginated[Result]{Count: count, Items: MapResults(list)}, "failed to load results", err)

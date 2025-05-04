@@ -42,9 +42,7 @@ func (p *lifecycleEventPublisher) RegisterPostListener(name string, listener Pol
 }
 
 func (p *lifecycleEventPublisher) UnregisterPostListener(name string) {
-	if _, ok := p.postListeners[name]; ok {
-		delete(p.postListeners, name)
-	}
+	delete(p.postListeners, name)
 }
 
 func (p *lifecycleEventPublisher) GetListener() map[string]PolicyReportListener {
