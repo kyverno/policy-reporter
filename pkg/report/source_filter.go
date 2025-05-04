@@ -150,5 +150,5 @@ func Uncontrolled(owner []metav1.OwnerReference) bool {
 }
 
 func Match(polr v1alpha2.ReportInterface, selector ReportSelector) bool {
-	return selector.Source == "" || strings.ToLower(selector.Source) == strings.ToLower(polr.GetSource())
+	return selector.Source == "" || strings.EqualFold(selector.Source, polr.GetSource())
 }
