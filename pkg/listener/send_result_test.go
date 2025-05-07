@@ -49,6 +49,8 @@ func (c *client) Reset(_ context.Context) error {
 	return nil
 }
 
+func (c *client) SendHeartbeat() {}
+
 func (c *client) CleanUp(_ context.Context, _ v1alpha2.ReportInterface) {
 	c.cleanupCalled = true
 }

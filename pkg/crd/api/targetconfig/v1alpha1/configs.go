@@ -11,6 +11,13 @@ type AWSConfig struct {
 	Endpoint string `mapstructure:"endpoint" json:"endpoint"`
 }
 
+type KeepaliveConfig struct {
+	// +optional
+	Interval string `mapstructure:"interval" json:"interval"` // Duration string like "5m"
+	// +optional
+	Params map[string]string `mapstructure:"params" json:"params"`
+}
+
 type WebhookOptions struct {
 	Webhook string `mapstructure:"webhook" json:"webhook"`
 	// +optional
@@ -19,6 +26,8 @@ type WebhookOptions struct {
 	Certificate string `mapstructure:"certificate" json:"certificate"`
 	// +optional
 	Headers map[string]string `mapstructure:"headers" json:"headers"`
+	// +optional
+	Keepalive *KeepaliveConfig `mapstructure:"keepalive" json:"keepalive"`
 }
 
 type JiraOptions struct {
