@@ -3,6 +3,7 @@ package target
 import (
 	"context"
 	"sync"
+	"time"
 
 	"go.uber.org/zap"
 
@@ -54,6 +55,7 @@ type Target struct {
 	Client       Client
 	ParentConfig TargetConfig
 	Config       TargetConfig
+	Keepalive    time.Duration
 }
 
 func (t *Target) Secret() string {
@@ -62,6 +64,25 @@ func (t *Target) Secret() string {
 	}
 
 	return t.ParentConfig.Secret()
+}
+
+func (t *Target) startKeepalive() {
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	ticker := time.NewTicker(t.Keepalive)
+	defer ticker.Stop()
+
+	for {
+		select {
+		case <-ticker.C:
+			if sendClient, ok := t.Client.(interface{ SendHeartbeat() }); ok {
+				sendClient.SendHeartbeat()
+			}
+		case <-ctx.Done():
+			return
+		}
+	}
 }
 
 type Collection struct {
@@ -155,6 +176,7 @@ func (c *Collection) Length() int {
 	return len(c.targets)
 }
 
+// NewCollection creates a new target Collection.
 func NewCollection(targets ...*Target) *Collection {
 	collection := &Collection{
 		clients: make([]Client, 0),
@@ -164,6 +186,12 @@ func NewCollection(targets ...*Target) *Collection {
 
 	for _, t := range targets {
 		if t != nil {
+			if t.Keepalive > 0 {
+				zap.L().Info("starting keepalive for target",
+					zap.String("type", t.Type),
+					zap.String("name", t.Client.Name()))
+				go t.startKeepalive()
+			}
 			collection.Update(t)
 		}
 	}
