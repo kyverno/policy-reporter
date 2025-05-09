@@ -18,6 +18,7 @@ import (
 	"github.com/kyverno/policy-reporter/pkg/kubernetes/secrets"
 	"github.com/kyverno/policy-reporter/pkg/report"
 	"github.com/kyverno/policy-reporter/pkg/target"
+	"github.com/kyverno/policy-reporter/pkg/target/alertmanager"
 	"github.com/kyverno/policy-reporter/pkg/target/discord"
 	"github.com/kyverno/policy-reporter/pkg/target/elasticsearch"
 	"github.com/kyverno/policy-reporter/pkg/target/gcs"
@@ -34,7 +35,6 @@ import (
 	"github.com/kyverno/policy-reporter/pkg/target/teams"
 	"github.com/kyverno/policy-reporter/pkg/target/telegram"
 	"github.com/kyverno/policy-reporter/pkg/target/webhook"
-	"github.com/kyverno/policy-reporter/pkg/target/alertmanager"
 	"github.com/kyverno/policy-reporter/pkg/validate"
 )
 
@@ -1003,6 +1003,17 @@ func (f *TargetFactory) mapSecretValues(config any, ref, mountedSecret string) {
 		}
 		if values.Host != "" {
 			c.Config.Webhook = values.Host
+		}
+
+	case *v1alpha1.Config[v1alpha1.AlertManagerOptions]:
+		if values.Host != "" {
+			c.Config.Host = values.Host
+		}
+		if values.Token != "" {
+			if c.Config.Headers == nil {
+				c.Config.Headers = make(map[string]string)
+			}
+			c.Config.Headers["Authorization"] = values.Token
 		}
 	}
 }

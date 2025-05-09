@@ -4,8 +4,6 @@ import (
 	"encoding/json"
 	stdhttp "net/http"
 	"net/http/httptest"
-	"os"
-	"path/filepath"
 	"testing"
 	"time"
 
@@ -63,11 +61,12 @@ func Test_AlertManagerClient_Send(t *testing.T) {
 		alert := receivedAlerts[0]
 
 		assert.Equal(t, map[string]string{
-			"severity": "high",
-			"status":   "fail",
-			"source":   "test",
-			"policy":   "test-policy",
-			"rule":     "test-rule",
+			"alertname": "PolicyReporterViolation",
+			"severity":  "high",
+			"status":    "fail",
+			"source":    "test",
+			"policy":    "test-policy",
+			"rule":      "test-rule",
 		}, alert.Labels)
 
 		assert.Equal(t, map[string]string{
@@ -281,129 +280,6 @@ func Test_AlertManagerClient_Send(t *testing.T) {
 		assert.Equal(t, "test-pod", receivedAlerts[0].Annotations["resource_name"])
 		assert.Equal(t, "test-namespace", receivedAlerts[0].Annotations["resource_namespace"])
 		assert.Equal(t, "v1", receivedAlerts[0].Annotations["resource_apiversion"])
-	})
-}
-
-func Test_AlertManagerClient_SendTestAlert(t *testing.T) {
-	t.Run("Send Default Test Alert", func(t *testing.T) {
-		receivedAlerts := make([]Alert, 0)
-		server := httptest.NewServer(stdhttp.HandlerFunc(func(w stdhttp.ResponseWriter, r *stdhttp.Request) {
-			assert.Equal(t, "/api/v2/alerts", r.URL.Path)
-			assert.Equal(t, "POST", r.Method)
-			assert.Equal(t, "application/json; charset=utf-8", r.Header.Get("Content-Type"))
-
-			var alerts []Alert
-			err := json.NewDecoder(r.Body).Decode(&alerts)
-			require.NoError(t, err)
-			receivedAlerts = alerts
-
-			w.WriteHeader(stdhttp.StatusOK)
-		}))
-		defer server.Close()
-
-		client := NewClient(Options{
-			ClientOptions: target.ClientOptions{
-				Name: "test",
-			},
-			Host:       server.URL,
-			HTTPClient: http.NewClient("", false),
-		}).(*client)
-
-		err := client.SendTestAlert("")
-		require.NoError(t, err)
-
-		require.Len(t, receivedAlerts, 1)
-		alert := receivedAlerts[0]
-
-		assert.Equal(t, "PolicyReporterTest", alert.Labels["alertname"])
-		assert.Equal(t, "info", alert.Labels["severity"])
-		assert.Equal(t, "policy-reporter", alert.Labels["source"])
-		assert.Equal(t, "Policy Reporter Test Alert", alert.Annotations["summary"])
-	})
-
-	t.Run("Send Test Alert From File", func(t *testing.T) {
-		// Create test file
-		testFile := filepath.Join(t.TempDir(), "test-alert.json")
-		testAlert := []Alert{
-			{
-				Labels: map[string]string{
-					"alertname": "TestAlert",
-					"severity":  "warning",
-					"source":    "policy-reporter-test",
-				},
-				Annotations: map[string]string{
-					"summary":     "Test Alert From File",
-					"description": "This is a test alert loaded from a file",
-				},
-				StartsAt: time.Now(),
-				EndsAt:   time.Now().Add(time.Hour),
-			},
-		}
-
-		alertJSON, err := json.Marshal(testAlert)
-		require.NoError(t, err)
-
-		err = os.WriteFile(testFile, alertJSON, 0644)
-		require.NoError(t, err)
-
-		// Test with the file
-		receivedAlerts := make([]Alert, 0)
-		server := httptest.NewServer(stdhttp.HandlerFunc(func(w stdhttp.ResponseWriter, r *stdhttp.Request) {
-			var alerts []Alert
-			err := json.NewDecoder(r.Body).Decode(&alerts)
-			require.NoError(t, err)
-			receivedAlerts = alerts
-			w.WriteHeader(stdhttp.StatusOK)
-		}))
-		defer server.Close()
-
-		client := NewClient(Options{
-			ClientOptions: target.ClientOptions{
-				Name: "test",
-			},
-			Host:       server.URL,
-			HTTPClient: http.NewClient("", false),
-		}).(*client)
-
-		err = client.SendTestAlert(testFile)
-		require.NoError(t, err)
-
-		require.Len(t, receivedAlerts, 1)
-		assert.Equal(t, "TestAlert", receivedAlerts[0].Labels["alertname"])
-		assert.Equal(t, "warning", receivedAlerts[0].Labels["severity"])
-		assert.Equal(t, "policy-reporter-test", receivedAlerts[0].Labels["source"])
-		assert.Equal(t, "Test Alert From File", receivedAlerts[0].Annotations["summary"])
-	})
-
-	t.Run("Handle Invalid File Path", func(t *testing.T) {
-		client := NewClient(Options{
-			ClientOptions: target.ClientOptions{
-				Name: "test",
-			},
-			Host:       "http://example.com",
-			HTTPClient: http.NewClient("", false),
-		}).(*client)
-
-		err := client.SendTestAlert("/non/existent/file.json")
-		require.Error(t, err)
-	})
-
-	t.Run("Handle Invalid JSON in File", func(t *testing.T) {
-		// Create invalid JSON file
-		testFile := filepath.Join(t.TempDir(), "invalid.json")
-		err := os.WriteFile(testFile, []byte("{invalid-json"), 0644)
-		require.NoError(t, err)
-
-		client := NewClient(Options{
-			ClientOptions: target.ClientOptions{
-				Name: "test",
-			},
-			Host:       "http://example.com",
-			HTTPClient: http.NewClient("", false),
-		}).(*client)
-
-		err = client.SendTestAlert(testFile)
-		require.Error(t, err)
 	})
 }
 

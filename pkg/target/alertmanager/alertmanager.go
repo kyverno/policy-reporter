@@ -1,8 +1,6 @@
 package alertmanager
 
 import (
-	"encoding/json"
-	"os"
 	"time"
 
 	"go.uber.org/zap"
@@ -37,8 +35,11 @@ type client struct {
 	client       targethttp.Client
 }
 
+// Ensure the client type implements the Client interface
+var _ Client = (*client)(nil)
+
 func (a *client) Send(result v1alpha2.PolicyReportResult) {
-	zap.L().Info("Sending policy violation to AlertManager",
+	zap.L().Debug("Sending policy violation to AlertManager",
 		zap.String("policy", result.Policy),
 		zap.String("rule", result.Rule),
 		zap.String("severity", string(result.Severity)),
@@ -51,7 +52,7 @@ func (a *client) Send(result v1alpha2.PolicyReportResult) {
 }
 
 func (a *client) BatchSend(report v1alpha2.ReportInterface, results []v1alpha2.PolicyReportResult) {
-	zap.L().Info("Batch sending policy violations to AlertManager",
+	zap.L().Debug("Batch sending policy violations to AlertManager",
 		zap.Int("count", len(results)),
 		zap.String("reportName", report.GetName()),
 		zap.String("reportNamespace", report.GetNamespace()))
@@ -70,69 +71,14 @@ func (a *client) BatchSend(report v1alpha2.ReportInterface, results []v1alpha2.P
 	a.sendAlerts(alerts)
 }
 
-// SendTestAlert sends a test alert to the AlertManager to verify connectivity
-// File can be a path to a JSON file containing alerts or empty for a default test alert
-func (a *client) SendTestAlert(file string) error {
-	zap.L().Info("Sending test alert to AlertManager",
-		zap.String("host", a.host),
-		zap.String("file", file))
-
-	var alerts []Alert
-
-	// Use provided file or create a default test alert
-	if file != "" {
-		// Try to read the test file
-		data, err := os.ReadFile(file)
-		if err != nil {
-			zap.L().Error("Failed to read test alert file",
-				zap.String("file", file),
-				zap.Error(err))
-			return err
-		}
-
-		if err := json.Unmarshal(data, &alerts); err != nil {
-			zap.L().Error("Failed to parse test alert file",
-				zap.String("file", file),
-				zap.Error(err))
-			return err
-		}
-
-		zap.L().Info("Loaded test alert from file",
-			zap.String("file", file),
-			zap.Int("alertCount", len(alerts)))
-	} else {
-		// Create a default test alert
-		now := time.Now()
-		alerts = []Alert{
-			{
-				Labels: map[string]string{
-					"alertname": "PolicyReporterTest",
-					"severity":  "info",
-					"source":    "policy-reporter",
-				},
-				Annotations: map[string]string{
-					"summary":     "Policy Reporter Test Alert",
-					"description": "This is a test alert sent from Policy Reporter to verify AlertManager connectivity",
-				},
-				StartsAt: now,
-				EndsAt:   now.Add(1 * time.Hour),
-			},
-		}
-		zap.L().Info("Created default test alert")
-	}
-
-	// Send the test alert(s)
-	a.sendAlerts(alerts)
-	return nil
-}
-
 func (a *client) createAlert(result v1alpha2.PolicyReportResult) Alert {
 	labels := map[string]string{
-		"severity": string(result.Severity),
-		"status":   string(result.Result),
-		"source":   result.Source,
-		"policy":   result.Policy,
-		"rule":     result.Rule,
+		"alertname": "PolicyReporterViolation",
+		"severity":  string(result.Severity),
+		"status":    string(result.Result),
+		"source":    result.Source,
+		"policy":    result.Policy,
+		"rule":      result.Rule,
 	}
 
 	annotations := map[string]string{
@@ -186,7 +132,7 @@ func (a *client) createAlert(result v1alpha2.PolicyReportResult) Alert {
 }
 
 func (a *client) sendAlerts(alerts []Alert) {
-	zap.L().Info("Sending alerts to AlertManager",
+	zap.L().Debug("Sending alerts to AlertManager",
 		zap.Int("alertCount", len(alerts)),
 		zap.String("endpoint", a.host+"/api/v2/alerts"))
 
@@ -210,6 +156,10 @@ func (a *client) Type() target.ClientType {
 
 // NewClient creates a new AlertManager client to send policy violations
 func NewClient(options Options) Client {
+	zap.L().Debug("Creating AlertManager client",
+		zap.String("host", options.Host),
+		zap.Int("headers", len(options.Headers)))
+
 	return &client{
 		target.NewBaseClient(options.ClientOptions),
 		options.Host,
