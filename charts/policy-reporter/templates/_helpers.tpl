@@ -203,6 +203,14 @@ config:
   webhook: {{ .webhook | quote }}
   certificate: {{ .certificate | quote }}
   skipTLS: {{ .skipTLS }}
+  {{- if .keepalive }}
+  keepalive:
+    interval: {{ .keepalive.interval | quote }}
+    {{- if .keepalive.params }}
+    params:
+      {{- toYaml .keepalive.params | nindent 6 }}
+    {{- end }}
+  {{- end }}
   {{- with .headers }}
   headers:
   {{- toYaml . | nindent 4 }}

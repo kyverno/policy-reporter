@@ -384,6 +384,18 @@ func (f *TargetFactory) CreateWebhookTarget(config, parent *v1alpha1.Config[v1al
 		return nil
 	}
 
+	var keepalive time.Duration
+	if config.Config.Keepalive != nil && config.Config.Keepalive.Interval != "" {
+		var err error
+		keepalive, err = time.ParseDuration(config.Config.Keepalive.Interval)
+		if err != nil {
+			zap.L().Error("failed to parse keepalive duration",
+				zap.String("target", config.Name),
+				zap.String("keepalive", config.Config.Keepalive.Interval),
+				zap.Error(err))
+		}
+	}
+
 	zap.S().Infof("%s configured", config.Name)
 
 	return &target.Target{
@@ -391,6 +403,7 @@ func (f *TargetFactory) CreateWebhookTarget(config, parent *v1alpha1.Config[v1al
 		Type:         target.Webhook,
 		Config:       config,
 		ParentConfig: parent,
+		Keepalive:    keepalive,
 		Client: webhook.NewClient(webhook.Options{
 			ClientOptions: target.ClientOptions{
 				Name:                  config.Name,
@@ -402,6 +415,7 @@ func (f *TargetFactory) CreateWebhookTarget(config, parent *v1alpha1.Config[v1al
 			Headers:      config.Config.Headers,
 			CustomFields: config.CustomFields,
 			HTTPClient:   http.NewClient(config.Config.Certificate, config.Config.SkipTLS),
+			Keepalive:    config.Config.Keepalive,
 		}),
 	}
 }
