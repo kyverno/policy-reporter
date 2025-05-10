@@ -202,27 +202,6 @@ spec:
                 - credentials
                 - prefix
                 type: object
-              jira:
-                properties:
-                  apiToken:
-                    type: string
-                  certificate:
-                    type: string
-                  host:
-                    type: string
-                  issueType:
-                    type: string
-                  password:
-                    type: string
-                  projectKey:
-                    type: string
-                  skipTLS:
-                    type: boolean
-                  username:
-                    type: string
-                required:
-                - host
-                type: object
               kinesis:
                 properties:
                   accessKeyId:
