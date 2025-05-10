@@ -3,7 +3,7 @@ apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
-    controller-gen.kubebuilder.io/version: v0.0.0-20250310082807-ee11c57ea31a+dirty
+    controller-gen.kubebuilder.io/version: (devel)
   name: targetconfigs.policyreporter.kyverno.io
 spec:
   group: policyreporter.kyverno.io
@@ -61,6 +61,8 @@ spec:
               - kinesis
             - required:
               - teams
+            - required:
+              - jira
             properties:
               customFields:
                 additionalProperties:
@@ -200,6 +202,27 @@ spec:
                 - credentials
                 - prefix
                 type: object
+              jira:
+                properties:
+                  apiToken:
+                    type: string
+                  certificate:
+                    type: string
+                  host:
+                    type: string
+                  issueType:
+                    type: string
+                  password:
+                    type: string
+                  projectKey:
+                    type: string
+                  skipTLS:
+                    type: boolean
+                  username:
+                    type: string
+                required:
+                - host
+                type: object
               kinesis:
                 properties:
                   accessKeyId:
@@ -299,6 +322,9 @@ spec:
                 - productName
                 - secretAccessKey
                 type: object
+              skipExisting:
+                default: true
+                type: boolean
               slack:
                 properties:
                   certificate:

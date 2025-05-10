@@ -68,6 +68,7 @@ type TargetConfigSpec struct {
 	// +optional
 	Jira *JiraOptions `json:"jira,omitempty"`
 
+	// +kubebuilder:default=true
 	// +optional
 	SkipExisting bool `json:"skipExisting,omitempty"`
 }
