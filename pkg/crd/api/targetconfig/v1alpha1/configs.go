@@ -187,3 +187,15 @@ func (config *AWSConfig) MapAWSParent(parent AWSConfig) {
 		config.Region = parent.Region
 	}
 }
+
+// AlertManagerOptions defines the configuration for AlertManager target
+type AlertManagerOptions struct {
+	// Host of the AlertManager instance
+	Host string `json:"host"`
+	// Headers to add to each request
+	Headers map[string]string `json:"headers,omitempty"`
+	// Skip TLS verification
+	SkipTLS bool `json:"skipTLS,omitempty"`
+	// Certificate for TLS verification
+	Certificate string `json:"certificate,omitempty"`
+}

@@ -26,6 +26,7 @@ const (
 	Kinesis       TargetType = "Kinesis"
 	SecurityHub   TargetType = "SecurityHub"
 	GCS           TargetType = "GCS"
+	AlertManager  TargetType = "AlertManager"
 )
 
 type Targets struct {
@@ -42,6 +43,7 @@ type Targets struct {
 	Kinesis       *v1alpha1.Config[v1alpha1.KinesisOptions]       `mapstructure:"kinesis"`
 	SecurityHub   *v1alpha1.Config[v1alpha1.SecurityHubOptions]   `mapstructure:"securityHub"`
 	GCS           *v1alpha1.Config[v1alpha1.GCSOptions]           `mapstructure:"gcs"`
+	AlertManager  *v1alpha1.Config[v1alpha1.AlertManagerOptions]  `mapstructure:"alertManager"`
 }
 
 type TargetConfig interface {
