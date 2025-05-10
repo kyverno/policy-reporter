@@ -48,7 +48,7 @@ func (c *Client) ConfigureInformer() {
 				}
 				existingcPolrs, err := c.polrClient.ClusterPolicyReports().List(context.Background(), metav1.ListOptions{})
 				if err != nil {
-					zap.L().Error("Failed to sync existing policy reports for client", zap.String("name", tc.Name), zap.Error(err))
+					zap.L().Error("Failed to sync existing cluster policy reports for client", zap.String("name", tc.Name), zap.Error(err))
 				}
 
 				for _, p := range existingPolrs.Items {
