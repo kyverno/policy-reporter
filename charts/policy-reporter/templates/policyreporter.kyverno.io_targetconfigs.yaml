@@ -379,6 +379,16 @@ spec:
                     type: boolean
                   webhook:
                     type: string
+                  keepalive:
+                    type: object
+                    properties:
+                      interval:
+                        type: string
+                        pattern: '^\d+(s|m|h)$'
+                      params:
+                        type: object
+                        additionalProperties:
+                          type: string
                 required:
                 - certificate
                 - headers

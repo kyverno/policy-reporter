@@ -58,6 +58,7 @@ type Target struct {
 	Config           TargetConfig
 	Keepalive        time.Duration
 	keepaliveRunning uint32 // Simple atomic flag
+	cancelKeepalive  context.CancelFunc
 }
 
 func (t *Target) Secret() string {
@@ -75,9 +76,11 @@ func (t *Target) StartKeepalive() {
 		return
 	}
 	zap.L().Info("starting keepalive for target: ", zap.String("target", t.Type))
+
+	ctx, cancel := context.WithCancel(context.Background())
+	t.cancelKeepalive = cancel
+
 	go func() {
-		ctx, cancel := context.WithCancel(context.Background())
-		defer cancel()
 		defer atomic.StoreUint32(&t.keepaliveRunning, 0)
 
 		ticker := time.NewTicker(t.Keepalive)
@@ -94,6 +97,15 @@ func (t *Target) StartKeepalive() {
 	}()
 }
 
+func (t *Target) StopKeepalive() {
+	if t.cancelKeepalive != nil {
+		zap.L().Info("stopping keepalive for target: ", zap.String("target", t.Type))
+		t.cancelKeepalive()
+		t.cancelKeepalive = nil
+		atomic.StoreUint32(&t.keepaliveRunning, 0)
+	}
+}
+
 type Collection struct {
 	mx      *sync.Mutex
 	clients []Client
@@ -108,7 +120,10 @@ func (c *Collection) AddTarget(key string, t *Target) {
 
 func (c *Collection) RemoveTarget(key string) {
 	c.mx.Lock()
-	delete(c.targets, key)
+	if target, exists := c.targets[key]; exists {
+		target.StopKeepalive()
+		delete(c.targets, key)
+	}
 	c.mx.Unlock()
 }
 
