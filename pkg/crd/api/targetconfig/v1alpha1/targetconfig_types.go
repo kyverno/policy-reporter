@@ -67,6 +67,10 @@ type TargetConfigSpec struct {
 
 	// +optional
 	Jira *JiraOptions `json:"jira,omitempty"`
+
+	// +kubebuilder:default=true
+	// +optional
+	SkipExisting bool `json:"skipExisting,omitempty"`
 }
 
 // TargetConfigStatus defines the observed state of TargetConfig.

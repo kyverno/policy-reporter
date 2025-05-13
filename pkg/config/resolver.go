@@ -543,7 +543,12 @@ func (r *Resolver) TargetConfigClient() (*targetconfig.Client, error) {
 		return nil, err
 	}
 
-	tcc := targetconfig.NewClient(tcClient, r.TargetFactory(), r.TargetClients())
+	crdClient, err := r.CRDClient()
+	if err != nil {
+		return nil, err
+	}
+
+	tcc := targetconfig.NewClient(tcClient, r.TargetFactory(), r.TargetClients(), crdClient)
 	tcc.ConfigureInformer()
 
 	r.targetConfigClient = tcc
