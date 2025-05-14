@@ -536,6 +536,12 @@ target:
     skipExistingOnStartup: true
     # -- Added as additional labels
     customFields: {}
+    # -- Keepalive configuration
+    keepalive:
+      # -- Duration string like "30s" for heartbeat interval, '0' - disabled
+      interval: "0"
+      # -- Additional parameters to include in heartbeat payload
+      params: {}
     # -- Filter Results which should send to this target
     # Wildcars for namespaces and policies are supported, you can either define exclude or include values
     # Filters are available for all targets except the UI

@@ -100,34 +100,52 @@ func (f *TargetFactory) CreateClients(config *target.Targets) *target.Collection
 	targets = append(targets, createClients("GoogleCloudStorage", config.GCS, f.CreateGCSTarget)...)
 	targets = append(targets, createClients("AlertManager", config.AlertManager, f.CreateAlertManagerTarget)...)
 
-	return target.NewCollection(targets...)
+	collection := target.NewCollection(targets...)
+
+	for _, t := range targets {
+		if t != nil && t.Keepalive > 0 {
+			go t.StartKeepalive()
+		}
+	}
+
+	return collection
 }
 
 func (f *TargetFactory) CreateSingleClient(tc *v1alpha1.TargetConfig) (*target.Target, error) {
-	if tc.Spec.S3 != nil {
-		return helper.First(createClients(tc.Name, createConfig(tc, tc.Spec.S3), f.CreateS3Target)), nil
-	} else if tc.Spec.Webhook != nil {
-		return helper.First(createClients(tc.Name, createConfig(tc, tc.Spec.Webhook), f.CreateWebhookTarget)), nil
-	} else if tc.Spec.GCS != nil {
-		return helper.First(createClients(tc.Name, createConfig(tc, tc.Spec.GCS), f.CreateGCSTarget)), nil
-	} else if tc.Spec.ElasticSearch != nil {
-		return helper.First(createClients(tc.Name, createConfig(tc, tc.Spec.ElasticSearch), f.CreateElasticsearchTarget)), nil
-	} else if tc.Spec.Telegram != nil {
-		return helper.First(createClients(tc.Name, createConfig(tc, tc.Spec.Telegram), f.CreateTelegramTarget)), nil
-	} else if tc.Spec.Kinesis != nil {
-		return helper.First(createClients(tc.Name, createConfig(tc, tc.Spec.Kinesis), f.CreateKinesisTarget)), nil
-	} else if tc.Spec.SecurityHub != nil {
-		return helper.First(createClients(tc.Name, createConfig(tc, tc.Spec.SecurityHub), f.CreateSecurityHubTarget)), nil
-	} else if tc.Spec.Loki != nil {
-		return helper.First(createClients(tc.Name, createConfig(tc, tc.Spec.Loki), f.CreateLokiTarget)), nil
-	} else if tc.Spec.Slack != nil {
-		return helper.First(createClients(tc.Name, createConfig(tc, tc.Spec.Slack), f.CreateSlackTarget)), nil
-	} else if tc.Spec.Teams != nil {
-		return helper.First(createClients(tc.Name, createConfig(tc, tc.Spec.Teams), f.CreateTeamsTarget)), nil
-	} else if tc.Spec.Jira != nil {
-		return helper.First(createClients(tc.Name, createConfig(tc, tc.Spec.Jira), f.CreateJiraTarget)), nil
+	var target *target.Target
+
+	switch {
+	case tc.Spec.S3 != nil:
+		target = helper.First(createClients(tc.Name, createConfig(tc, tc.Spec.S3), f.CreateS3Target))
+	case tc.Spec.Webhook != nil:
+		target = helper.First(createClients(tc.Name, createConfig(tc, tc.Spec.Webhook), f.CreateWebhookTarget))
+	case tc.Spec.GCS != nil:
+		target = helper.First(createClients(tc.Name, createConfig(tc, tc.Spec.GCS), f.CreateGCSTarget))
+	case tc.Spec.ElasticSearch != nil:
+		target = helper.First(createClients(tc.Name, createConfig(tc, tc.Spec.ElasticSearch), f.CreateElasticsearchTarget))
+	case tc.Spec.Telegram != nil:
+		target = helper.First(createClients(tc.Name, createConfig(tc, tc.Spec.Telegram), f.CreateTelegramTarget))
+	case tc.Spec.Kinesis != nil:
+		target = helper.First(createClients(tc.Name, createConfig(tc, tc.Spec.Kinesis), f.CreateKinesisTarget))
+	case tc.Spec.SecurityHub != nil:
+		target = helper.First(createClients(tc.Name, createConfig(tc, tc.Spec.SecurityHub), f.CreateSecurityHubTarget))
+	case tc.Spec.Loki != nil:
+		target = helper.First(createClients(tc.Name, createConfig(tc, tc.Spec.Loki), f.CreateLokiTarget))
+	case tc.Spec.Slack != nil:
+		target = helper.First(createClients(tc.Name, createConfig(tc, tc.Spec.Slack), f.CreateSlackTarget))
+	case tc.Spec.Teams != nil:
+		target = helper.First(createClients(tc.Name, createConfig(tc, tc.Spec.Teams), f.CreateTeamsTarget))
+	case tc.Spec.Jira != nil:
+		target = helper.First(createClients(tc.Name, createConfig(tc, tc.Spec.Jira), f.CreateJiraTarget))
+	default:
+		return nil, fmt.Errorf("invalid target type passed")
 	}
-	return nil, fmt.Errorf("invalid target type passed")
+
+	if target != nil && target.Keepalive > 0 {
+		go target.StartKeepalive()
+	}
+
+	return target, nil
 }
 
 func (f *TargetFactory) CreateSlackTarget(config, parent *v1alpha1.Config[v1alpha1.SlackOptions]) *target.Target {
@@ -386,6 +404,18 @@ func (f *TargetFactory) CreateWebhookTarget(config, parent *v1alpha1.Config[v1al
 		return nil
 	}
 
+	var keepalive time.Duration
+	if config.Config.Keepalive != nil && config.Config.Keepalive.Interval != "" {
+		var err error
+		keepalive, err = time.ParseDuration(config.Config.Keepalive.Interval)
+		if err != nil {
+			zap.L().Error("failed to parse keepalive duration",
+				zap.String("target", config.Name),
+				zap.String("keepalive", config.Config.Keepalive.Interval),
+				zap.Error(err))
+		}
+	}
+
 	zap.S().Infof("%s configured", config.Name)
 
 	return &target.Target{
@@ -393,6 +423,7 @@ func (f *TargetFactory) CreateWebhookTarget(config, parent *v1alpha1.Config[v1al
 		Type:         target.Webhook,
 		Config:       config,
 		ParentConfig: parent,
+		Keepalive:    keepalive,
 		Client: webhook.NewClient(webhook.Options{
 			ClientOptions: target.ClientOptions{
 				Name:                  config.Name,
@@ -404,6 +435,7 @@ func (f *TargetFactory) CreateWebhookTarget(config, parent *v1alpha1.Config[v1al
 			Headers:      config.Config.Headers,
 			CustomFields: config.CustomFields,
 			HTTPClient:   http.NewClient(config.Config.Certificate, config.Config.SkipTLS),
+			Keepalive:    config.Config.Keepalive,
 		}),
 	}
 }
