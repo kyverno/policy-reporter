@@ -51,7 +51,8 @@ func (c *client) BatchSend(rep v1alpha2.ReportInterface, results []v1alpha2.Poli
 		}
 		srString, err := json.Marshal(sr)
 		if err != nil {
-
+			zap.L().Error(c.Name()+"Error marhsalling the JSON to a splunk request:", zap.Error(err))
+			return
 		}
 		srs = srs + string(srString)
 	}
