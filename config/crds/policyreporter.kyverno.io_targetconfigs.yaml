@@ -61,7 +61,30 @@ spec:
               - kinesis
             - required:
               - teams
+            - required:
+              - alertManager
             properties:
+              alertManager:
+                properties:
+                  host:
+                    type: string
+                  headers:
+                    additionalProperties:
+                      type: string
+                    type: object
+                  skipTLS:
+                    type: boolean
+                  certificate:
+                    type: string
+                  minimumSeverity:
+                    type: string
+                  sources:
+                    type: array
+                    items:
+                      type: string
+                required:
+                - host
+                type: object
               customFields:
                 additionalProperties:
                   type: string

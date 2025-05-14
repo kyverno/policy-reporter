@@ -18,6 +18,7 @@ import (
 	"github.com/kyverno/policy-reporter/pkg/kubernetes/secrets"
 	"github.com/kyverno/policy-reporter/pkg/report"
 	"github.com/kyverno/policy-reporter/pkg/target"
+	"github.com/kyverno/policy-reporter/pkg/target/alertmanager"
 	"github.com/kyverno/policy-reporter/pkg/target/discord"
 	"github.com/kyverno/policy-reporter/pkg/target/elasticsearch"
 	"github.com/kyverno/policy-reporter/pkg/target/gcs"
@@ -97,6 +98,7 @@ func (f *TargetFactory) CreateClients(config *target.Targets) *target.Collection
 	targets = append(targets, createClients("Kinesis", config.Kinesis, f.CreateKinesisTarget)...)
 	targets = append(targets, createClients("SecurityHub", config.SecurityHub, f.CreateSecurityHubTarget)...)
 	targets = append(targets, createClients("GoogleCloudStorage", config.GCS, f.CreateGCSTarget)...)
+	targets = append(targets, createClients("AlertManager", config.AlertManager, f.CreateAlertManagerTarget)...)
 
 	return target.NewCollection(targets...)
 }
@@ -827,6 +829,51 @@ func (f *TargetFactory) CreateGCSTarget(config, parent *v1alpha1.Config[v1alpha1
 	}
 }
 
+func (f *TargetFactory) CreateAlertManagerTarget(config, parent *v1alpha1.Config[v1alpha1.AlertManagerOptions]) *target.Target {
+	if config == nil || config.Config == nil {
+		return nil
+	}
+
+	if (parent.SecretRef != "" && f.secretClient != nil) || parent.MountedSecret != "" {
+		f.mapSecretValues(parent, parent.SecretRef, parent.MountedSecret)
+	}
+
+	if (config.SecretRef != "" && f.secretClient != nil) || config.MountedSecret != "" {
+		f.mapSecretValues(config, config.SecretRef, config.MountedSecret)
+	}
+
+	if config.Config.Host == "" && parent.Config.Host == "" {
+		return nil
+	}
+
+	setFallback(&config.Config.Host, parent.Config.Host)
+	setFallback(&config.Config.Certificate, parent.Config.Certificate)
+	setBool(&config.Config.SkipTLS, parent.Config.SkipTLS)
+
+	config.MapBaseParent(parent)
+
+	zap.S().Infof("%s configured", config.Name)
+
+	return &target.Target{
+		ID:           uuid.NewString(),
+		Type:         target.AlertManager,
+		Config:       config,
+		ParentConfig: parent,
+		Client: alertmanager.NewClient(alertmanager.Options{
+			ClientOptions: target.ClientOptions{
+				Name:                  config.Name,
+				SkipExistingOnStartup: config.SkipExisting,
+				ResultFilter:          f.createResultFilter(config.Filter, config.MinimumSeverity, config.Sources),
+				ReportFilter:          createReportFilter(config.Filter),
+			},
+			Host:         config.Config.Host,
+			Headers:      config.Config.Headers,
+			CustomFields: config.CustomFields,
+			HTTPClient:   http.NewClient(config.Config.Certificate, config.Config.SkipTLS),
+		}),
+	}
+}
+
 func (f *TargetFactory) createResultFilter(filter filters.Filter, minimumSeverity string, sources []string) *report.ResultFilter {
 	sourceFilter := filter.Sources
 	if len(sources) > 0 {
@@ -956,6 +1003,17 @@ func (f *TargetFactory) mapSecretValues(config any, ref, mountedSecret string) {
 		}
 		if values.Host != "" {
 			c.Config.Webhook = values.Host
+		}
+
+	case *v1alpha1.Config[v1alpha1.AlertManagerOptions]:
+		if values.Host != "" {
+			c.Config.Host = values.Host
+		}
+		if values.Token != "" {
+			if c.Config.Headers == nil {
+				c.Config.Headers = make(map[string]string)
+			}
+			c.Config.Headers["Authorization"] = values.Token
 		}
 	}
 }
