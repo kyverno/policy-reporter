@@ -301,7 +301,7 @@ spec:
                 - productName
                 - secretAccessKey
                 type: object
-              skipExisting:
+              skipExistingOnStartup:
                 default: true
                 type: boolean
               slack:

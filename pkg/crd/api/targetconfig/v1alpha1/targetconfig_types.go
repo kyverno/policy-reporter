@@ -70,7 +70,7 @@ type TargetConfigSpec struct {
 
 	// +kubebuilder:default=true
 	// +optional
-	SkipExisting bool `json:"skipExisting,omitempty"`
+	SkipExisting bool `json:"skipExistingOnStartup,omitempty"`
 }
 
 // TargetConfigStatus defines the observed state of TargetConfig.
