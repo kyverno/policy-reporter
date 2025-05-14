@@ -29,6 +29,7 @@ const (
 	SecurityHub   TargetType = "SecurityHub"
 	GCS           TargetType = "GCS"
 	AlertManager  TargetType = "AlertManager"
+	Splunk        TargetType = "Splunk"
 )
 
 type Targets struct {
@@ -46,6 +47,7 @@ type Targets struct {
 	SecurityHub   *v1alpha1.Config[v1alpha1.SecurityHubOptions]   `mapstructure:"securityHub"`
 	GCS           *v1alpha1.Config[v1alpha1.GCSOptions]           `mapstructure:"gcs"`
 	AlertManager  *v1alpha1.Config[v1alpha1.AlertManagerOptions]  `mapstructure:"alertManager"`
+	Splunk        *v1alpha1.Config[v1alpha1.SplunkOptions]        `mapstructure:"splunk"`
 }
 
 type TargetConfig interface {

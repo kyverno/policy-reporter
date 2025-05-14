@@ -29,6 +29,7 @@ import (
 // +kubebuilder:oneOf:={required:{loki}}
 // +kubebuilder:oneOf:={required:{securityHub}}
 // +kubebuilder:oneOf:={required:{kinesis}}
+// +kubebuilder:oneOf:={required:{splunk}}
 // +kubebuilder:oneOf:={required:{teams}}
 // +kubebuilder:oneOf:={required:{jira}}
 // +kubebuilder:oneOf:={required:{alertManager}}
@@ -72,6 +73,9 @@ type TargetConfigSpec struct {
 
 	// +optional
 	AlertManager *AlertManagerOptions `json:"alertManager,omitempty"`
+
+	// +optional
+	Splunk *SplunkOptions `json:"splunk,omitempty"`
 }
 
 // TargetConfigStatus defines the observed state of TargetConfig.

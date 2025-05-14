@@ -69,6 +69,12 @@ type SlackOptions struct {
 	Channel        string `mapstructure:"channel" json:"channel"`
 }
 
+type SplunkOptions struct {
+	HostOptions `mapstructure:",squash" json:",inline"`
+
+	Token string `mapstructure:"token" json:"token"`
+}
+
 type LokiOptions struct {
 	HostOptions `mapstructure:",squash" json:",inline"`
 	// +optional
