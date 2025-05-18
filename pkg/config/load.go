@@ -10,6 +10,8 @@ import (
 
 func Load(cmd *cobra.Command) (*Config, error) {
 	v := viper.New()
+	v.SetConfigType("yaml") // Set config type explicitly
+	v.SetConfigFile("")     // Don't watch for file changes
 
 	v.SetDefault("leaderElection.releaseOnCancel", true)
 	v.SetDefault("leaderElection.leaseDuration", 15)

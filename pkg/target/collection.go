@@ -3,6 +3,8 @@ package target
 import (
 	"context"
 	"sync"
+	"sync/atomic"
+	"time"
 
 	"go.uber.org/zap"
 
@@ -26,6 +28,8 @@ const (
 	Kinesis       TargetType = "Kinesis"
 	SecurityHub   TargetType = "SecurityHub"
 	GCS           TargetType = "GCS"
+	AlertManager  TargetType = "AlertManager"
+	Splunk        TargetType = "Splunk"
 )
 
 type Targets struct {
@@ -42,6 +46,8 @@ type Targets struct {
 	Kinesis       *v1alpha1.Config[v1alpha1.KinesisOptions]       `mapstructure:"kinesis"`
 	SecurityHub   *v1alpha1.Config[v1alpha1.SecurityHubOptions]   `mapstructure:"securityHub"`
 	GCS           *v1alpha1.Config[v1alpha1.GCSOptions]           `mapstructure:"gcs"`
+	AlertManager  *v1alpha1.Config[v1alpha1.AlertManagerOptions]  `mapstructure:"alertManager"`
+	Splunk        *v1alpha1.Config[v1alpha1.SplunkOptions]        `mapstructure:"splunk"`
 }
 
 type TargetConfig interface {
@@ -49,11 +55,14 @@ type TargetConfig interface {
 }
 
 type Target struct {
-	ID           string
-	Type         TargetType
-	Client       Client
-	ParentConfig TargetConfig
-	Config       TargetConfig
+	ID               string
+	Type             TargetType
+	Client           Client
+	ParentConfig     TargetConfig
+	Config           TargetConfig
+	Keepalive        time.Duration
+	keepaliveRunning uint32 // Simple atomic flag
+	cancelKeepalive  context.CancelFunc
 }
 
 func (t *Target) Secret() string {
@@ -62,6 +71,43 @@ func (t *Target) Secret() string {
 	}
 
 	return t.ParentConfig.Secret()
+}
+
+func (t *Target) StartKeepalive() {
+	// Simple atomic check to prevent duplicates
+	if !atomic.CompareAndSwapUint32(&t.keepaliveRunning, 0, 1) {
+		zap.L().Info("keepalive already started for target: ", zap.String("target", t.Type))
+		return
+	}
+	zap.L().Info("starting keepalive for target: ", zap.String("target", t.Type))
+
+	ctx, cancel := context.WithCancel(context.Background())
+	t.cancelKeepalive = cancel
+
+	go func() {
+		defer atomic.StoreUint32(&t.keepaliveRunning, 0)
+
+		ticker := time.NewTicker(t.Keepalive)
+		defer ticker.Stop()
+
+		for {
+			select {
+			case <-ticker.C:
+				t.Client.SendHeartbeat()
+			case <-ctx.Done():
+				return
+			}
+		}
+	}()
+}
+
+func (t *Target) StopKeepalive() {
+	if t.cancelKeepalive != nil {
+		zap.L().Info("stopping keepalive for target: ", zap.String("target", t.Type))
+		t.cancelKeepalive()
+		t.cancelKeepalive = nil
+		atomic.StoreUint32(&t.keepaliveRunning, 0)
+	}
 }
 
 type Collection struct {
@@ -78,7 +124,10 @@ func (c *Collection) AddTarget(key string, t *Target) {
 
 func (c *Collection) RemoveTarget(key string) {
 	c.mx.Lock()
-	delete(c.targets, key)
+	if target, exists := c.targets[key]; exists {
+		target.StopKeepalive()
+		delete(c.targets, key)
+	}
 	c.mx.Unlock()
 }
 
@@ -155,6 +204,7 @@ func (c *Collection) Length() int {
 	return len(c.targets)
 }
 
+// NewCollection creates a new target Collection.
 func NewCollection(targets ...*Target) *Collection {
 	collection := &Collection{
 		clients: make([]Client, 0),

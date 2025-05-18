@@ -60,10 +60,35 @@ spec:
             - required:
               - kinesis
             - required:
+              - splunk
+            - required:
               - teams
             - required:
               - jira
+            - required:
+              - alertManager
             properties:
+              alertManager:
+                properties:
+                  host:
+                    type: string
+                  headers:
+                    additionalProperties:
+                      type: string
+                    type: object
+                  skipTLS:
+                    type: boolean
+                  certificate:
+                    type: string
+                  minimumSeverity:
+                    type: string
+                  sources:
+                    type: array
+                    items:
+                      type: string
+                required:
+                - host
+                type: object
               customFields:
                 additionalProperties:
                   type: string
@@ -326,6 +351,24 @@ spec:
                 items:
                   type: string
                 type: array
+              splunk:
+                properties:
+                  certificate:
+                    type: string
+                  headers:
+                    additionalProperties:
+                      type: string
+                    type: object
+                  host:
+                    type: string
+                  skipTLS:
+                    type: boolean
+                  token:
+                    type: string
+                required:
+                - host
+                - token
+                type: object
               teams:
                 properties:
                   certificate:

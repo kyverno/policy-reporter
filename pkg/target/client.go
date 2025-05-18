@@ -43,6 +43,8 @@ type Client interface {
 	CleanUp(context.Context, v1alpha2.ReportInterface)
 	// Reset the current state in the related target
 	Reset(context.Context) error
+	// SendHeartbeat sends a periodic keepalive message
+	SendHeartbeat()
 }
 
 type ResultFilterFactory struct {
@@ -245,6 +247,8 @@ func (c *BaseClient) Reset(_ context.Context) error {
 func (c *BaseClient) CleanUp(_ context.Context, _ v1alpha2.ReportInterface) {}
 
 func (c *BaseClient) BatchSend(_ v1alpha2.ReportInterface, _ []v1alpha2.PolicyReportResult) {}
+
+func (c *BaseClient) SendHeartbeat() {} // Default no-op implementation
 
 func NewBaseClient(options ClientOptions) BaseClient {
 	return BaseClient{options.Name, options.SkipExistingOnStartup, options.ResultFilter, options.ReportFilter}

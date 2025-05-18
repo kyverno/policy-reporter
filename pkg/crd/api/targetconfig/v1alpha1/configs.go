@@ -11,6 +11,13 @@ type AWSConfig struct {
 	Endpoint string `mapstructure:"endpoint" json:"endpoint"`
 }
 
+type KeepaliveConfig struct {
+	// +optional
+	Interval string `mapstructure:"interval" json:"interval"` // Duration string like "5m"
+	// +optional
+	Params map[string]string `mapstructure:"params" json:"params"`
+}
+
 type WebhookOptions struct {
 	Webhook string `mapstructure:"webhook" json:"webhook"`
 	// +optional
@@ -19,6 +26,8 @@ type WebhookOptions struct {
 	Certificate string `mapstructure:"certificate" json:"certificate"`
 	// +optional
 	Headers map[string]string `mapstructure:"headers" json:"headers"`
+	// +optional
+	Keepalive *KeepaliveConfig `mapstructure:"keepalive" json:"keepalive"`
 }
 
 type JiraOptions struct {
@@ -58,6 +67,12 @@ type TelegramOptions struct {
 type SlackOptions struct {
 	WebhookOptions `mapstructure:",squash" json:",inline"`
 	Channel        string `mapstructure:"channel" json:"channel"`
+}
+
+type SplunkOptions struct {
+	HostOptions `mapstructure:",squash" json:",inline"`
+
+	Token string `mapstructure:"token" json:"token"`
 }
 
 type LokiOptions struct {
@@ -186,4 +201,16 @@ func (config *AWSConfig) MapAWSParent(parent AWSConfig) {
 	if config.Region == "" {
 		config.Region = parent.Region
 	}
+}
+
+// AlertManagerOptions defines the configuration for AlertManager target
+type AlertManagerOptions struct {
+	// Host of the AlertManager instance
+	Host string `json:"host"`
+	// Headers to add to each request
+	Headers map[string]string `json:"headers,omitempty"`
+	// Skip TLS verification
+	SkipTLS bool `json:"skipTLS,omitempty"`
+	// Certificate for TLS verification
+	Certificate string `json:"certificate,omitempty"`
 }
