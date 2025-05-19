@@ -894,7 +894,7 @@ ui:
     # -- (string) Image PullPolicy
     pullPolicy: IfNotPresent
     # -- (string) Image tag
-    tag: "2.3.6"
+    tag: "2.3.10"
 
   # -- Deployment replica count
   replicaCount: 1
@@ -1228,7 +1228,7 @@ plugin:
       # -- (string) Image PullPolicy
       pullPolicy: IfNotPresent
       # -- (string) Image tag
-      tag: "0.4.2"
+      tag: "0.4.4"
 
     # -- Deployment replica count
     replicaCount: 1
@@ -1439,7 +1439,7 @@ plugin:
       pullPolicy: IfNotPresent
         # -- (string) Image tag
         # Defaults to `Chart.AppVersion` if omitted
-      tag: "0.4.5"
+      tag: "0.4.6"
 
     cli:
       image:
