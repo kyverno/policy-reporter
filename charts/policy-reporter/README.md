@@ -3,7 +3,7 @@
 Policy Reporter watches for PolicyReport Resources.
 It creates Prometheus Metrics and can send rule validation events to different targets like Loki, Elasticsearch, Slack or Discord
 
-![Version: 3.1.3](https://img.shields.io/badge/Version-3.1.3-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 3.1.1](https://img.shields.io/badge/AppVersion-3.1.1-informational?style=flat-square)
+![Version: 3.1.4](https://img.shields.io/badge/Version-3.1.4-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 3.1.1](https://img.shields.io/badge/AppVersion-3.1.1-informational?style=flat-square)
 
 ## Documentation
 
@@ -218,6 +218,9 @@ Open `http://localhost:8082/` in your browser.
 | target.webhook.sources | list | `[]` | List of sources which should send |
 | target.webhook.skipExistingOnStartup | bool | `true` | Skip already existing PolicyReportResults on startup |
 | target.webhook.customFields | object | `{}` | Added as additional labels |
+| target.webhook.keepalive | object | `{"interval":"0","params":{}}` | Keepalive configuration |
+| target.webhook.keepalive.interval | string | `"0"` | Duration string like "30s" for heartbeat interval, '0' - disabled |
+| target.webhook.keepalive.params | object | `{}` | Additional parameters to include in heartbeat payload |
 | target.webhook.filter | object | `{}` | Filter Results which should send to this target Wildcars for namespaces and policies are supported, you can either define exclude or include values Filters are available for all targets except the UI |
 | target.webhook.channels | list | `[]` | List of channels to route results to different configurations |
 | target.telegram.token | string | `""` | Telegram bot token |
@@ -356,7 +359,7 @@ Open `http://localhost:8082/` in your browser.
 | ui.image.registry | string | `"ghcr.io"` | Image registry |
 | ui.image.repository | string | `"kyverno/policy-reporter-ui"` | Image repository |
 | ui.image.pullPolicy | string | `"IfNotPresent"` | Image PullPolicy |
-| ui.image.tag | string | `"2.3.6"` | Image tag |
+| ui.image.tag | string | `"2.3.10"` | Image tag |
 | ui.replicaCount | int | `1` | Deployment replica count |
 | ui.priorityClassName | string | `""` | Deployment priorityClassName |
 | ui.logging.api | bool | `false` | Enables external api request logging |
@@ -442,7 +445,7 @@ Open `http://localhost:8082/` in your browser.
 | plugin.kyverno.image.registry | string | `"ghcr.io"` | Image registry |
 | plugin.kyverno.image.repository | string | `"kyverno/policy-reporter/kyverno-plugin"` | Image repository |
 | plugin.kyverno.image.pullPolicy | string | `"IfNotPresent"` | Image PullPolicy |
-| plugin.kyverno.image.tag | string | `"0.4.2"` | Image tag |
+| plugin.kyverno.image.tag | string | `"0.4.4"` | Image tag |
 | plugin.kyverno.replicaCount | int | `1` | Deployment replica count |
 | plugin.kyverno.priorityClassName | string | `""` | Deployment priorityClassName |
 | plugin.kyverno.logging.api | bool | `false` | Enables external API request logging |
@@ -507,7 +510,7 @@ Open `http://localhost:8082/` in your browser.
 | plugin.trivy.image.registry | string | `"ghcr.io"` | Image registry |
 | plugin.trivy.image.repository | string | `"kyverno/policy-reporter/trivy-plugin"` | Image repository |
 | plugin.trivy.image.pullPolicy | string | `"IfNotPresent"` | Image PullPolicy |
-| plugin.trivy.image.tag | string | `"0.4.5"` | Image tag Defaults to `Chart.AppVersion` if omitted |
+| plugin.trivy.image.tag | string | `"0.4.6"` | Image tag Defaults to `Chart.AppVersion` if omitted |
 | plugin.trivy.cli.image.registry | string | `"ghcr.io"` | Image registry |
 | plugin.trivy.cli.image.repository | string | `"aquasecurity/trivy"` | Image repository |
 | plugin.trivy.cli.image.pullPolicy | string | `"IfNotPresent"` | Image PullPolicy |
