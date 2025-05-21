@@ -1,0 +1,13 @@
+# Areas of code where owners always wants to be a reviewer/notified.
+/charts                 @fjogeleit
+/docs                   @fjogeleit
+/pkg/api                @fjogeleit
+/pkg/config             @fjogeleit
+/pkg/cache              @fjogeleit
+/pkg/database           @fjogeleit
+/pkg/email              @fjogeleit
+/pkg/filters            @fjogeleit
+/pkg/report             @fjogeleit
+/pkg/target             @fjogeleit
+/test                   @fjogeleit
+/templates              @fjogeleit
