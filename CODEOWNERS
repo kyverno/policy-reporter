@@ -3,11 +3,15 @@
 /docs                   @fjogeleit @aerosouund
 /pkg/api                @fjogeleit @aerosouund
 /pkg/config             @fjogeleit @aerosouund
+/pkg/crd                @fjogeleit @aerosouund
 /pkg/cache              @fjogeleit @aerosouund
 /pkg/database           @fjogeleit @aerosouund
 /pkg/email              @fjogeleit @aerosouund
 /pkg/filters            @fjogeleit @aerosouund
 /pkg/report             @fjogeleit @aerosouund
 /pkg/target             @fjogeleit @aerosouund
+/pkg/targetconfig       @fjogeleit @aerosouund
+/pkg/listener           @fjogeleit @aerosouund
+/pkg/kubernetes         @fjogeleit @aerosouund
 /test                   @fjogeleit @aerosouund
 /templates              @fjogeleit @aerosouund
