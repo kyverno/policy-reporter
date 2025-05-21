@@ -64,6 +64,8 @@ spec:
             - required:
               - teams
             - required:
+              - jira
+            - required:
               - alertManager
             properties:
               alertManager:
@@ -324,6 +326,9 @@ spec:
                 - productName
                 - secretAccessKey
                 type: object
+              skipExistingOnStartup:
+                default: true
+                type: boolean
               slack:
                 properties:
                   certificate:

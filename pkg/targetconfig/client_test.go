@@ -63,7 +63,7 @@ func Test_TargetConfig_TargetCreation(t *testing.T) {
 	collection := target.NewCollection()
 	factory := factory.NewFactory(secrets.NewClient(newSecretClient()), target.NewResultFilterFactory(nil))
 
-	client := targetconfig.NewClient(kclient, factory, collection)
+	client := targetconfig.NewClient(kclient, factory, collection, nil)
 	client.ConfigureInformer()
 
 	go func() {
@@ -75,6 +75,7 @@ func Test_TargetConfig_TargetCreation(t *testing.T) {
 			Name: "test",
 		},
 		Spec: v1alpha1.TargetConfigSpec{
+			SkipExisting: true,
 			Slack: &v1alpha1.SlackOptions{
 				WebhookOptions: v1alpha1.WebhookOptions{
 					Webhook: "http://localhost:8080",
@@ -105,7 +106,7 @@ func Test_TargetConfig_TargetUpdates(t *testing.T) {
 	collection := target.NewCollection()
 	factory := factory.NewFactory(secrets.NewClient(newSecretClient()), target.NewResultFilterFactory(nil))
 
-	client := targetconfig.NewClient(kclient, factory, collection)
+	client := targetconfig.NewClient(kclient, factory, collection, nil)
 	client.ConfigureInformer()
 
 	go func() {
@@ -117,6 +118,7 @@ func Test_TargetConfig_TargetUpdates(t *testing.T) {
 			Name: "test",
 		},
 		Spec: v1alpha1.TargetConfigSpec{
+			SkipExisting: true,
 			Slack: &v1alpha1.SlackOptions{
 				WebhookOptions: v1alpha1.WebhookOptions{
 					Webhook: "http://localhost:8080",
@@ -162,7 +164,7 @@ func Test_TargetConfig_TargetDeletion(t *testing.T) {
 	collection := target.NewCollection()
 	factory := factory.NewFactory(secrets.NewClient(newSecretClient()), target.NewResultFilterFactory(nil))
 
-	client := targetconfig.NewClient(kclient, factory, collection)
+	client := targetconfig.NewClient(kclient, factory, collection, nil)
 	client.ConfigureInformer()
 
 	go func() {
@@ -174,6 +176,7 @@ func Test_TargetConfig_TargetDeletion(t *testing.T) {
 			Name: "test",
 		},
 		Spec: v1alpha1.TargetConfigSpec{
+			SkipExisting: true,
 			Slack: &v1alpha1.SlackOptions{
 				WebhookOptions: v1alpha1.WebhookOptions{
 					Webhook: "http://localhost:8080",
