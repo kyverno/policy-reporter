@@ -67,6 +67,9 @@ spec:
                 additionalProperties:
                   type: string
                 type: object
+              skipExistingOnStartup:
+                default: true
+                type: boolean
               elasticSearch:
                 properties:
                   apiKey:

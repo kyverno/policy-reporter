@@ -76,6 +76,10 @@ type TargetConfigSpec struct {
 
 	// +optional
 	Splunk *SplunkOptions `json:"splunk,omitempty"`
+
+	// +kubebuilder:default=true
+	// +optional
+	SkipExisting bool `json:"skipExistingOnStartup,omitempty"`
 }
 
 // TargetConfigStatus defines the observed state of TargetConfig.
