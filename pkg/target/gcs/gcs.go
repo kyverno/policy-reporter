@@ -7,8 +7,8 @@ import (
 	"time"
 
 	"go.uber.org/zap"
+	"openreports.io/apis/openreports.io/v1alpha1"
 
-	"github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
 	"github.com/kyverno/policy-reporter/pkg/target"
 	"github.com/kyverno/policy-reporter/pkg/target/http"
 	"github.com/kyverno/policy-reporter/pkg/target/provider/gcs"
@@ -29,7 +29,7 @@ type client struct {
 	prefix       string
 }
 
-func (c *client) Send(result v1alpha2.PolicyReportResult) {
+func (c *client) Send(result v1alpha1.ReportResult) {
 	if len(c.customFields) > 0 {
 		props := make(map[string]string, 0)
 

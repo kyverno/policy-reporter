@@ -5,6 +5,7 @@ import (
 
 	corev1 "k8s.io/api/core/v1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"openreports.io/apis/openreports.io/v1alpha1"
 
 	"github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
 	"github.com/kyverno/policy-reporter/pkg/report/result"
@@ -12,12 +13,12 @@ import (
 
 func TestReconditioner(t *testing.T) {
 	t.Run("prepare with default generator", func(t *testing.T) {
-		var report v1alpha2.ReportInterface = &v1alpha2.PolicyReport{
+		var report v1alpha2.ReportInterface = &v1alpha1.Report{
 			ObjectMeta: v1.ObjectMeta{
 				Name:      "policy-report",
 				Namespace: "test",
 			},
-			Summary: v1alpha2.PolicyReportSummary{
+			Summary: v1alpha1.ReportSummary{
 				Pass:  0,
 				Skip:  0,
 				Warn:  0,
@@ -31,19 +32,19 @@ func TestReconditioner(t *testing.T) {
 				Namespace:  "test",
 				UID:        "dfd57c50-f30c-4729-b63f-b1954d8988d1",
 			},
-			Results: []v1alpha2.PolicyReportResult{
+			Results: []v1alpha1.ReportResult{
 				{
-					ID:         "12348",
-					Message:    "message",
-					Result:     v1alpha2.StatusFail,
-					Scored:     true,
-					Policy:     "required-label",
-					Rule:       "app-label-required",
-					Timestamp:  v1.Timestamp{Seconds: 1614093000},
-					Source:     "test",
-					Category:   "",
-					Severity:   v1alpha2.SeverityHigh,
-					Properties: map[string]string{"version": "1.2.0"},
+					ID:          "12348",
+					Description: "message",
+					Result:      v1alpha2.StatusFail,
+					Scored:      true,
+					Policy:      "required-label",
+					Rule:        "app-label-required",
+					Timestamp:   v1.Timestamp{Seconds: 1614093000},
+					Source:      "test",
+					Category:    "",
+					Severity:    v1alpha2.SeverityHigh,
+					Properties:  map[string]string{"version": "1.2.0"},
 				},
 			},
 		}
@@ -59,18 +60,18 @@ func TestReconditioner(t *testing.T) {
 		if res.Category != "Other" {
 			t.Error("result category should default to Other")
 		}
-		if len(res.Resources) == 0 || res.Resources[0] != *report.GetScope() {
+		if len(res.Subjects) == 0 || res.Subjects[0] != *report.GetScope() {
 			t.Error("result resource should be mapped to scope")
 		}
 	})
 
 	t.Run("prepare with custom generator", func(t *testing.T) {
-		var report v1alpha2.ReportInterface = &v1alpha2.PolicyReport{
+		var report v1alpha2.ReportInterface = &v1alpha1.Report{
 			ObjectMeta: v1.ObjectMeta{
 				Name:      "policy-report",
 				Namespace: "test",
 			},
-			Summary: v1alpha2.PolicyReportSummary{
+			Summary: v1alpha1.ReportSummary{
 				Pass:  0,
 				Skip:  0,
 				Warn:  0,
@@ -84,19 +85,19 @@ func TestReconditioner(t *testing.T) {
 				Namespace:  "test",
 				UID:        "dfd57c50-f30c-4729-b63f-b1954d8988d1",
 			},
-			Results: []v1alpha2.PolicyReportResult{
+			Results: []v1alpha1.ReportResult{
 				{
-					ID:         "12348",
-					Message:    "message",
-					Result:     v1alpha2.StatusFail,
-					Scored:     true,
-					Policy:     "required-label",
-					Rule:       "app-label-required",
-					Timestamp:  v1.Timestamp{Seconds: 1614093000},
-					Source:     "test",
-					Category:   "",
-					Severity:   v1alpha2.SeverityHigh,
-					Properties: map[string]string{"version": "1.2.0"},
+					ID:          "12348",
+					Description: "message",
+					Result:      v1alpha2.StatusFail,
+					Scored:      true,
+					Policy:      "required-label",
+					Rule:        "app-label-required",
+					Timestamp:   v1.Timestamp{Seconds: 1614093000},
+					Source:      "test",
+					Category:    "",
+					Severity:    v1alpha2.SeverityHigh,
+					Properties:  map[string]string{"version": "1.2.0"},
 				},
 			},
 		}
@@ -114,7 +115,7 @@ func TestReconditioner(t *testing.T) {
 		if res.Category != "Other" {
 			t.Error("result category should default to Other")
 		}
-		if len(res.Resources) == 0 || res.Resources[0] != *report.GetScope() {
+		if len(res.Subjects) == 0 || res.Subjects[0] != *report.GetScope() {
 			t.Error("result resource should be mapped to scope")
 		}
 	})

@@ -36,7 +36,7 @@ func Test_LokiTarget(t *testing.T) {
 			assert.Equal(t, "http://localhost:3100/loki/api/v1/push", req.URL.String(), "unexpected Host")
 			assert.NotEqual(t, "", req.Header.Get("Authorization"), "unexpected auth header")
 
-			expectedLine := fmt.Sprintf("[%s] %s", strings.ToUpper(string(fixtures.CompleteTargetSendResult.Severity)), fixtures.CompleteTargetSendResult.Message)
+			expectedLine := fmt.Sprintf("[%s] %s", strings.ToUpper(string(fixtures.CompleteTargetSendResult.Severity)), fixtures.CompleteTargetSendResult.Description)
 
 			stream := convertAndValidateBody(req, t)
 
@@ -76,7 +76,7 @@ func Test_LokiTarget(t *testing.T) {
 			assert.Equal(t, "Policy-Reporter", req.Header.Get("User-Agent"), "unexpected Agent")
 			assert.Equal(t, "http://localhost:3100/loki/api/v1/push", req.URL.String(), "unexpected Host")
 
-			expectedLine := fmt.Sprintf("[%s] %s", strings.ToUpper(string(fixtures.MinimalTargetSendResult.Severity)), fixtures.MinimalTargetSendResult.Message)
+			expectedLine := fmt.Sprintf("[%s] %s", strings.ToUpper(string(fixtures.MinimalTargetSendResult.Severity)), fixtures.MinimalTargetSendResult.Description)
 			stream := convertAndValidateBody(req, t)
 
 			assert.Equal(t, expectedLine, stream.Values[0][1])

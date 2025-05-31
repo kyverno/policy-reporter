@@ -21,11 +21,11 @@ import (
 	"k8s.io/client-go/metadata"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/util/workqueue"
+	"openreports.io/pkg/client/clientset/versioned"
+	"openreports.io/pkg/client/clientset/versioned/typed/openreports.io/v1alpha1"
 
 	"github.com/kyverno/policy-reporter/pkg/api"
 	"github.com/kyverno/policy-reporter/pkg/cache"
-	"github.com/kyverno/policy-reporter/pkg/crd/client/policyreport/clientset/versioned"
-	wgpolicyk8sv1alpha2 "github.com/kyverno/policy-reporter/pkg/crd/client/policyreport/clientset/versioned/typed/policyreport/v1alpha2"
 	tcv1alpha1 "github.com/kyverno/policy-reporter/pkg/crd/client/targetconfig/clientset/versioned"
 	"github.com/kyverno/policy-reporter/pkg/database"
 	"github.com/kyverno/policy-reporter/pkg/email"
@@ -430,13 +430,13 @@ func (r *Resolver) SkipExistingOnStartup() bool {
 	return true
 }
 
-func (r *Resolver) CRDClient() (wgpolicyk8sv1alpha2.Wgpolicyk8sV1alpha2Interface, error) {
+func (r *Resolver) CRDClient() (v1alpha1.OpenreportsV1alpha1Interface, error) {
 	client, err := versioned.NewForConfig(r.k8sConfig)
 	if err != nil {
 		return nil, err
 	}
 
-	return client.Wgpolicyk8sV1alpha2(), nil
+	return client.OpenreportsV1alpha1(), nil
 }
 
 func (r *Resolver) CRDMetadataClient() (metadata.Interface, error) {
