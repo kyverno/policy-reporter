@@ -6,6 +6,7 @@ import (
 
 	"github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
 	"github.com/kyverno/policy-reporter/pkg/report"
+	"openreports.io/apis/openreports.io/v1alpha1"
 )
 
 func RegisterDetailedResultGauge(name string) *prometheus.GaugeVec {
@@ -58,7 +59,7 @@ func CreateDetailedResultMetricListener(filter *report.ResultFilter, gauge *prom
 	}
 }
 
-func generateResultLabels(report v1alpha2.ReportInterface, result v1alpha2.PolicyReportResult) map[string]string {
+func generateResultLabels(report v1alpha2.ReportInterface, result v1alpha1.ReportResult) map[string]string {
 	labels := prometheus.Labels{
 		"namespace": report.GetNamespace(),
 		"rule":      result.Rule,

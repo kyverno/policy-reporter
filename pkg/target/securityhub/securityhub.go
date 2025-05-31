@@ -13,6 +13,7 @@ import (
 	"github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
 	"github.com/kyverno/policy-reporter/pkg/helper"
 	"github.com/kyverno/policy-reporter/pkg/target"
+	"openreports.io/apis/openreports.io/v1alpha1"
 )
 
 var schema = toPointer("2018-10-08")
@@ -53,13 +54,13 @@ type client struct {
 	arn          *string
 }
 
-func (c *client) mapFindings(polr v1alpha2.ReportInterface, results []v1alpha2.PolicyReportResult) []types.AwsSecurityFinding {
+func (c *client) mapFindings(polr v1alpha2.ReportInterface, results []v1alpha1.ReportResult) []types.AwsSecurityFinding {
 	var accID *string
 	if c.accountID != "" {
 		accID = toPointer(c.accountID)
 	}
 
-	return helper.Map(results, func(result v1alpha2.PolicyReportResult) types.AwsSecurityFinding {
+	return helper.Map(results, func(result v1alpha1.ReportResult) types.AwsSecurityFinding {
 		generator := result.Policy
 		if generator == "" {
 			generator = result.Rule
@@ -85,7 +86,7 @@ func (c *client) mapFindings(polr v1alpha2.ReportInterface, results []v1alpha2.P
 				Label: MapSeverity(result.Severity),
 			},
 			Title:       &title,
-			Description: &result.Message,
+			Description: &result.Description,
 			ProductName: &c.productName,
 			CompanyName: &c.companyName,
 			Compliance: &types.Compliance{
@@ -110,12 +111,12 @@ func (c *client) mapFindings(polr v1alpha2.ReportInterface, results []v1alpha2.P
 	})
 }
 
-func (c *client) Send(result v1alpha2.PolicyReportResult) {
-	c.BatchSend(&v1alpha2.PolicyReport{}, []v1alpha2.PolicyReportResult{result})
+func (c *client) Send(result v1alpha1.ReportResult) {
+	c.BatchSend(&v1alpha1.Report{}, []v1alpha1.ReportResult{result})
 }
 
-func filterResults(results []v1alpha2.PolicyReportResult) []v1alpha2.PolicyReportResult {
-	return helper.Filter(results, func(r v1alpha2.PolicyReportResult) bool {
+func filterResults(results []v1alpha1.ReportResult) []v1alpha1.ReportResult {
+	return helper.Filter(results, func(r v1alpha1.ReportResult) bool {
 		if r.Result == v1alpha2.StatusFail {
 			return true
 		}
@@ -130,7 +131,7 @@ func filterResults(results []v1alpha2.PolicyReportResult) []v1alpha2.PolicyRepor
 	})
 }
 
-func (c *client) BatchSend(polr v1alpha2.ReportInterface, results []v1alpha2.PolicyReportResult) {
+func (c *client) BatchSend(polr v1alpha2.ReportInterface, results []v1alpha1.ReportResult) {
 	results = filterResults(results)
 	if len(results) == 0 {
 		return
@@ -164,7 +165,7 @@ func (c *client) BatchSend(polr v1alpha2.ReportInterface, results []v1alpha2.Pol
 			mapping[*f.Id] = true
 		}
 
-		results = helper.Filter(results, func(result v1alpha2.PolicyReportResult) bool {
+		results = helper.Filter(results, func(result v1alpha1.ReportResult) bool {
 			return !mapping[result.GetID()]
 		})
 	}
@@ -280,7 +281,7 @@ func (c *client) CleanUp(ctx context.Context, report v1alpha2.ReportInterface) {
 	zap.L().Info(c.Name()+": CLEANUP OK", zap.Int("count", count), zap.String("report", report.GetKey()))
 }
 
-func (c *client) mapOtherDetails(polr v1alpha2.ReportInterface, result v1alpha2.PolicyReportResult) map[string]string {
+func (c *client) mapOtherDetails(polr v1alpha2.ReportInterface, result v1alpha1.ReportResult) map[string]string {
 	details := map[string]string{
 		"Source":   result.Source,
 		"Category": result.Category,
@@ -512,7 +513,7 @@ func toPointer[T any](value T) *T {
 	return &value
 }
 
-func MapSeverity(s v1alpha2.PolicySeverity) types.SeverityLabel {
+func MapSeverity(s v1alpha1.ResultSeverity) types.SeverityLabel {
 	switch s {
 	case v1alpha2.SeverityInfo:
 		return types.SeverityLabelInformational
@@ -529,7 +530,7 @@ func MapSeverity(s v1alpha2.PolicySeverity) types.SeverityLabel {
 	}
 }
 
-func mapResourceID(result v1alpha2.PolicyReportResult) *string {
+func mapResourceID(result v1alpha1.ReportResult) *string {
 	if result.HasResource() {
 		res := result.GetResource()
 		if res.UID != "" {
@@ -550,7 +551,7 @@ func mapType(source string) string {
 	return "Software and Configuration Checks/Kubernetes Policies/" + source
 }
 
-func toResourceIDFilter(report v1alpha2.ReportInterface, results []v1alpha2.PolicyReportResult) []types.StringFilter {
+func toResourceIDFilter(report v1alpha2.ReportInterface, results []v1alpha1.ReportResult) []types.StringFilter {
 	res := report.GetScope()
 	if res != nil {
 		var value string
@@ -602,7 +603,7 @@ func splitPolrKey(key string) (string, string) {
 	return parts[1], parts[0]
 }
 
-func filterFindings(findings []types.AwsSecurityFinding, results []v1alpha2.PolicyReportResult) []types.AwsSecurityFinding {
+func filterFindings(findings []types.AwsSecurityFinding, results []v1alpha1.ReportResult) []types.AwsSecurityFinding {
 	filtered := make([]types.AwsSecurityFinding, 0, len(findings))
 
 	mapping := make(map[string]bool, len(results))

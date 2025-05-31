@@ -1,10 +1,10 @@
 package discord
 
 import (
-	"github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
 	"github.com/kyverno/policy-reporter/pkg/helper"
 	"github.com/kyverno/policy-reporter/pkg/target"
 	"github.com/kyverno/policy-reporter/pkg/target/http"
+	"openreports.io/apis/openreports.io/v1alpha1"
 )
 
 // Options to configure the Discord target
@@ -33,15 +33,15 @@ type embedField struct {
 	Inline bool   `json:"inline"`
 }
 
-var colors = map[v1alpha2.PolicySeverity]string{
-	v1alpha2.SeverityInfo:     "12370112",
-	v1alpha2.SeverityLow:      "3066993",
-	v1alpha2.SeverityMedium:   "15105570",
-	v1alpha2.SeverityHigh:     "15158332",
-	v1alpha2.SeverityCritical: "15158332",
+var colors = map[v1alpha1.ResultSeverity]string{
+	v1alpha1.SeverityInfo:     "12370112",
+	v1alpha1.SeverityLow:      "3066993",
+	v1alpha1.SeverityMedium:   "15105570",
+	v1alpha1.SeverityHigh:     "15158332",
+	v1alpha1.SeverityCritical: "15158332",
 }
 
-func newPayload(result v1alpha2.PolicyReportResult, customFields map[string]string) payload {
+func newPayload(result v1alpha1.ReportResult, customFields map[string]string) payload {
 	color, exists := colors[result.Severity]
 	if !exists {
 		color = "0"
@@ -86,7 +86,7 @@ func newPayload(result v1alpha2.PolicyReportResult, customFields map[string]stri
 	embeds := make([]embed, 0, 1)
 	embeds = append(embeds, embed{
 		Title:       "New Policy Report Result",
-		Description: result.Message,
+		Description: result.Description,
 		Color:       color,
 		Fields:      embedFields,
 	})
@@ -104,7 +104,7 @@ type client struct {
 	client       http.Client
 }
 
-func (d *client) Send(result v1alpha2.PolicyReportResult) {
+func (d *client) Send(result v1alpha1.ReportResult) {
 	req, err := http.CreateJSONRequest("POST", d.webhook, newPayload(result, d.customFields))
 	if err != nil {
 		return

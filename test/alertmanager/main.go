@@ -4,22 +4,22 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
 	"github.com/kyverno/policy-reporter/pkg/target"
 	"github.com/kyverno/policy-reporter/pkg/target/alertmanager"
 	"github.com/kyverno/policy-reporter/pkg/target/http"
+	"openreports.io/apis/openreports.io/v1alpha1"
 )
 
 func main() {
 	// Create a test result
-	result := v1alpha2.PolicyReportResult{
-		Message:  "Test policy violation from manual test",
-		Policy:   "test-policy",
-		Rule:     "test-rule",
-		Result:   "fail",
-		Source:   "policy-reporter",
-		Category: "test-category",
-		Severity: "warning",
+	result := v1alpha1.ReportResult{
+		Description: "Test policy violation from manual test",
+		Policy:      "test-policy",
+		Rule:        "test-rule",
+		Result:      "fail",
+		Source:      "policy-reporter",
+		Category:    "test-category",
+		Severity:    "warning",
 		Properties: map[string]string{
 			"test_property": "test_value",
 		},
@@ -49,22 +49,22 @@ func main() {
 	client.Send(result)
 
 	// Also test batch send
-	results := []v1alpha2.PolicyReportResult{
+	results := []v1alpha1.ReportResult{
 		{
-			Message:  "Batch test alert 1",
-			Policy:   "batch-policy-1",
-			Rule:     "batch-rule-1",
-			Result:   "fail",
-			Source:   "policy-reporter",
-			Severity: "warning",
+			Description: "Batch test alert 1",
+			Policy:      "batch-policy-1",
+			Rule:        "batch-rule-1",
+			Result:      "fail",
+			Source:      "policy-reporter",
+			Severity:    "warning",
 		},
 		{
-			Message:  "Batch test alert 2",
-			Policy:   "batch-policy-2",
-			Rule:     "batch-rule-2",
-			Result:   "fail",
-			Source:   "policy-reporter",
-			Severity: "warning",
+			Description: "Batch test alert 2",
+			Policy:      "batch-policy-2",
+			Rule:        "batch-rule-2",
+			Result:      "fail",
+			Source:      "policy-reporter",
+			Severity:    "warning",
 		},
 	}
 

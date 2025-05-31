@@ -2,6 +2,7 @@ package report
 
 import (
 	"github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
+	"openreports.io/apis/openreports.io/v1alpha1"
 )
 
 // Event Enum
@@ -50,12 +51,12 @@ func GetType(r v1alpha2.ReportInterface) ResourceType {
 	return PolicyReportType
 }
 
-func FindNewResults(nr, or v1alpha2.ReportInterface) []v1alpha2.PolicyReportResult {
+func FindNewResults(nr, or v1alpha2.ReportInterface) []v1alpha1.ReportResult {
 	if or == nil {
 		return nr.GetResults()
 	}
 
-	diff := make([]v1alpha2.PolicyReportResult, 0)
+	diff := make([]v1alpha1.ReportResult, 0)
 loop:
 	for _, r := range nr.GetResults() {
 		for _, o := range or.GetResults() {

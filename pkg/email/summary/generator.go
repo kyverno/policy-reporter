@@ -7,13 +7,13 @@ import (
 	"go.uber.org/zap"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	"github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
-	api "github.com/kyverno/policy-reporter/pkg/crd/client/policyreport/clientset/versioned/typed/policyreport/v1alpha2"
 	"github.com/kyverno/policy-reporter/pkg/email"
+	reportsv1alpha1 "openreports.io/apis/openreports.io/v1alpha1"
+	"openreports.io/pkg/client/clientset/versioned/typed/openreports.io/v1alpha1"
 )
 
 type Generator struct {
-	client         api.Wgpolicyk8sV1alpha2Interface
+	client         v1alpha1.OpenreportsV1alpha1Interface
 	filter         email.Filter
 	clusterReports bool
 }
@@ -25,7 +25,7 @@ func (o *Generator) GenerateData(ctx context.Context) ([]Source, error) {
 	wg := &sync.WaitGroup{}
 
 	if o.clusterReports {
-		clusterReports, err := o.client.ClusterPolicyReports().List(ctx, v1.ListOptions{})
+		clusterReports, err := o.client.ClusterReports().List(ctx, v1.ListOptions{})
 		if err != nil {
 			return make([]Source, 0), err
 		}
@@ -33,7 +33,7 @@ func (o *Generator) GenerateData(ctx context.Context) ([]Source, error) {
 		wg.Add(len(clusterReports.Items))
 
 		for _, rep := range clusterReports.Items {
-			go func(report v1alpha2.ClusterPolicyReport) {
+			go func(report reportsv1alpha1.ClusterReport) {
 				defer wg.Done()
 
 				if len(report.Results) == 0 {
@@ -60,7 +60,7 @@ func (o *Generator) GenerateData(ctx context.Context) ([]Source, error) {
 		}
 	}
 
-	reports, err := o.client.PolicyReports(v1.NamespaceAll).List(ctx, v1.ListOptions{})
+	reports, err := o.client.Reports(v1.NamespaceAll).List(ctx, v1.ListOptions{})
 	if err != nil {
 		return make([]Source, 0), err
 	}
@@ -68,7 +68,7 @@ func (o *Generator) GenerateData(ctx context.Context) ([]Source, error) {
 	wg.Add(len(reports.Items))
 
 	for _, rep := range reports.Items {
-		go func(report v1alpha2.PolicyReport) {
+		go func(report reportsv1alpha1.Report) {
 			defer wg.Done()
 
 			if len(report.Results) == 0 || !o.filter.ValidateNamespace(report.Namespace) {
@@ -104,7 +104,7 @@ func (o *Generator) GenerateData(ctx context.Context) ([]Source, error) {
 	return list, nil
 }
 
-func NewGenerator(client api.Wgpolicyk8sV1alpha2Interface, filter email.Filter, clusterReports bool) *Generator {
+func NewGenerator(client v1alpha1.OpenreportsV1alpha1Interface, filter email.Filter, clusterReports bool) *Generator {
 	return &Generator{client, filter, clusterReports}
 }
 

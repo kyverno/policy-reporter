@@ -9,36 +9,36 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	"github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
 	"github.com/kyverno/policy-reporter/pkg/fixtures"
 	"github.com/kyverno/policy-reporter/pkg/listener/metrics"
 	"github.com/kyverno/policy-reporter/pkg/report"
 	"github.com/kyverno/policy-reporter/pkg/validate"
+	"openreports.io/apis/openreports.io/v1alpha1"
 )
 
 func Test_CustomResultMetricGeneration(t *testing.T) {
 	gauge := metrics.RegisterCustomResultGauge("policy_report_custom_result", []string{"namespace", "policy", "status", "source", "app", "xyz"})
 
-	report1 := &v1alpha2.PolicyReport{
+	report1 := &v1alpha1.Report{
 		ObjectMeta: v1.ObjectMeta{
 			Labels:            map[string]string{"app": "policy-reporter"},
 			Name:              "polr-test",
 			Namespace:         "test",
 			CreationTimestamp: v1.Now(),
 		},
-		Summary: v1alpha2.PolicyReportSummary{Pass: 1, Fail: 1},
-		Results: []v1alpha2.PolicyReportResult{fixtures.PassResult, fixtures.PassResult, fixtures.FailPodResult, fixtures.FailDisallowRuleResult},
+		Summary: v1alpha1.ReportSummary{Pass: 1, Fail: 1},
+		Results: []v1alpha1.ReportResult{fixtures.PassResult, fixtures.PassResult, fixtures.FailPodResult, fixtures.FailDisallowRuleResult},
 	}
 
-	report2 := &v1alpha2.PolicyReport{
+	report2 := &v1alpha1.Report{
 		ObjectMeta: v1.ObjectMeta{
 			Labels:            map[string]string{"app": "policy-reporter"},
 			Name:              "polr-test",
 			Namespace:         "test",
 			CreationTimestamp: v1.Now(),
 		},
-		Summary: v1alpha2.PolicyReportSummary{Pass: 1, Fail: 1},
-		Results: []v1alpha2.PolicyReportResult{fixtures.FailResult, fixtures.FailPodResult, fixtures.FailDisallowRuleResult},
+		Summary: v1alpha1.ReportSummary{Pass: 1, Fail: 1},
+		Results: []v1alpha1.ReportResult{fixtures.FailResult, fixtures.FailPodResult, fixtures.FailDisallowRuleResult},
 	}
 
 	filter := metrics.NewResultFilter(validate.RuleSets{}, validate.RuleSets{}, validate.RuleSets{Exclude: []string{"disallow-policy"}}, validate.RuleSets{}, validate.RuleSets{}, validate.RuleSets{})
@@ -114,7 +114,7 @@ func Test_CustomResultMetricGeneration(t *testing.T) {
 	})
 }
 
-func testCustomResultMetricLabels(t *testing.T, metric *ioprometheusclient.Metric, result v1alpha2.PolicyReportResult, expVal float64) error {
+func testCustomResultMetricLabels(t *testing.T, metric *ioprometheusclient.Metric, result v1alpha1.ReportResult, expVal float64) error {
 	var index int
 
 	res := &corev1.ObjectReference{}

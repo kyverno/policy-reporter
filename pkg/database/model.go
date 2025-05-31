@@ -10,6 +10,7 @@ import (
 	"github.com/kyverno/policy-reporter/pkg/helper"
 	"github.com/kyverno/policy-reporter/pkg/report"
 	"github.com/kyverno/policy-reporter/pkg/report/result"
+	"openreports.io/apis/openreports.io/v1alpha1"
 )
 
 type Config struct {
@@ -166,7 +167,7 @@ func MapPolicyReportResults(polr v1alpha2.ReportInterface) []*PolicyReportResult
 			Rule:           r.Rule,
 			Source:         r.Source,
 			Scored:         r.Scored,
-			Message:        r.Message,
+			Message:        r.Description,
 			Result:         string(r.Result),
 			Severity:       string(r.Severity),
 			Category:       r.Category,
@@ -248,28 +249,28 @@ func MapPolicyReportResource(polr v1alpha2.ReportInterface) []*ResourceResult {
 		}
 
 		switch res.Result {
-		case v1alpha2.StatusPass:
+		case v1alpha1.StatusPass:
 			value.Pass = value.Pass + 1
-		case v1alpha2.StatusSkip:
+		case v1alpha1.StatusSkip:
 			value.Skip = value.Skip + 1
-		case v1alpha2.StatusWarn:
+		case v1alpha1.StatusWarn:
 			value.Warn = value.Warn + 1
-		case v1alpha2.StatusFail:
+		case v1alpha1.StatusFail:
 			value.Fail = value.Fail + 1
-		case v1alpha2.StatusError:
+		case v1alpha1.StatusError:
 			value.Error = value.Error + 1
 		}
 
 		switch res.Severity {
-		case v1alpha2.SeverityInfo:
+		case v1alpha1.SeverityInfo:
 			value.Info = value.Info + 1
-		case v1alpha2.SeverityLow:
+		case v1alpha1.SeverityLow:
 			value.Low = value.Low + 1
-		case v1alpha2.SeverityMedium:
+		case v1alpha1.SeverityMedium:
 			value.Medium = value.Medium + 1
-		case v1alpha2.SeverityHigh:
+		case v1alpha1.SeverityHigh:
 			value.High = value.High + 1
-		case v1alpha2.SeverityCritical:
+		case v1alpha1.SeverityCritical:
 			value.Critical = value.Critical + 1
 		default:
 			value.Unknown = value.Unknown + 1

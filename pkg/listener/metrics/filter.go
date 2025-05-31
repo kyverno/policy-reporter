@@ -4,12 +4,13 @@ import (
 	"github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
 	"github.com/kyverno/policy-reporter/pkg/report"
 	"github.com/kyverno/policy-reporter/pkg/validate"
+	"openreports.io/apis/openreports.io/v1alpha1"
 )
 
 func NewResultFilter(namespace, status, policy, source, severity, kind validate.RuleSets) *report.ResultFilter {
 	f := &report.ResultFilter{}
 	if namespace.Count() > 0 {
-		f.AddValidation(func(r v1alpha2.PolicyReportResult) bool {
+		f.AddValidation(func(r v1alpha1.ReportResult) bool {
 			if !r.HasResource() {
 				return true
 			}
@@ -19,31 +20,31 @@ func NewResultFilter(namespace, status, policy, source, severity, kind validate.
 	}
 
 	if status.Count() > 0 {
-		f.AddValidation(func(r v1alpha2.PolicyReportResult) bool {
+		f.AddValidation(func(r v1alpha1.ReportResult) bool {
 			return validate.MatchRuleSet(string(r.Result), status)
 		})
 	}
 
 	if policy.Count() > 0 {
-		f.AddValidation(func(r v1alpha2.PolicyReportResult) bool {
+		f.AddValidation(func(r v1alpha1.ReportResult) bool {
 			return validate.MatchRuleSet(r.Policy, policy)
 		})
 	}
 
 	if source.Count() > 0 {
-		f.AddValidation(func(r v1alpha2.PolicyReportResult) bool {
+		f.AddValidation(func(r v1alpha1.ReportResult) bool {
 			return validate.MatchRuleSet(r.Source, source)
 		})
 	}
 
 	if severity.Count() > 0 {
-		f.AddValidation(func(r v1alpha2.PolicyReportResult) bool {
+		f.AddValidation(func(r v1alpha1.ReportResult) bool {
 			return validate.MatchRuleSet(string(r.Severity), severity)
 		})
 	}
 
 	if kind.Count() > 0 {
-		f.AddValidation(func(r v1alpha2.PolicyReportResult) bool {
+		f.AddValidation(func(r v1alpha1.ReportResult) bool {
 			if !r.HasResource() {
 				return true
 			}

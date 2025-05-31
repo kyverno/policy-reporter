@@ -9,6 +9,7 @@ import (
 	"github.com/kyverno/policy-reporter/pkg/helper"
 	"github.com/kyverno/policy-reporter/pkg/target"
 	"github.com/kyverno/policy-reporter/pkg/target/http"
+	"openreports.io/apis/openreports.io/v1alpha1"
 )
 
 var (
@@ -38,7 +39,7 @@ type Stream struct {
 
 type Value = []string
 
-func newLokiStream(result v1alpha2.PolicyReportResult, customFields map[string]string) Stream {
+func newLokiStream(result v1alpha1.ReportResult, customFields map[string]string) Stream {
 	timestamp := time.Now()
 	if result.Timestamp.Seconds != 0 {
 		timestamp = time.Unix(result.Timestamp.Seconds, int64(result.Timestamp.Nanos))
@@ -86,7 +87,7 @@ func newLokiStream(result v1alpha2.PolicyReportResult, customFields map[string]s
 	}
 
 	return Stream{
-		Values: []Value{[]string{fmt.Sprintf("%v", timestamp.UnixNano()), "[" + strings.ToUpper(string(result.Severity)) + "] " + result.Message}},
+		Values: []Value{[]string{fmt.Sprintf("%v", timestamp.UnixNano()), "[" + strings.ToUpper(string(result.Severity)) + "] " + result.Description}},
 		Stream: labels,
 	}
 }
@@ -101,7 +102,7 @@ type client struct {
 	password     string
 }
 
-func (l *client) Send(result v1alpha2.PolicyReportResult) {
+func (l *client) Send(result v1alpha1.ReportResult) {
 	l.send(Payload{
 		Streams: []Stream{
 			newLokiStream(result, l.customFields),
@@ -109,8 +110,8 @@ func (l *client) Send(result v1alpha2.PolicyReportResult) {
 	})
 }
 
-func (l *client) BatchSend(_ v1alpha2.ReportInterface, results []v1alpha2.PolicyReportResult) {
-	l.send(Payload{Streams: helper.Map(results, func(result v1alpha2.PolicyReportResult) Stream {
+func (l *client) BatchSend(_ v1alpha2.ReportInterface, results []v1alpha1.ReportResult) {
+	l.send(Payload{Streams: helper.Map(results, func(result v1alpha1.ReportResult) Stream {
 		return newLokiStream(result, l.customFields)
 	})})
 }

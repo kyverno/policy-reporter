@@ -11,6 +11,7 @@ import (
 	"github.com/kyverno/policy-reporter/pkg/kubernetes/namespaces"
 	"github.com/kyverno/policy-reporter/pkg/report"
 	"github.com/kyverno/policy-reporter/pkg/validate"
+	"openreports.io/apis/openreports.io/v1alpha1"
 )
 
 type ClientType = string
@@ -24,15 +25,15 @@ const (
 // Client for a provided Target
 type Client interface {
 	// Send the given Result to the configured Target
-	Send(result v1alpha2.PolicyReportResult)
+	Send(result v1alpha1.ReportResult)
 	// BatchSend the given Results of a single PolicyReport to the configured Target
-	BatchSend(report v1alpha2.ReportInterface, results []v1alpha2.PolicyReportResult)
+	BatchSend(report v1alpha2.ReportInterface, results []v1alpha1.ReportResult)
 	// SkipExistingOnStartup skips already existing PolicyReportResults on startup
 	SkipExistingOnStartup() bool
 	// Name is a unique identifier for each Target
 	Name() string
 	// Validate if a result should send
-	Validate(rep v1alpha2.ReportInterface, result v1alpha2.PolicyReportResult) bool
+	Validate(rep v1alpha2.ReportInterface, result v1alpha1.ReportResult) bool
 	// MinimumSeverity for a triggered Result to send to this target
 	MinimumSeverity() string
 	// Sources of the Results which should send to this target, empty means all sources
@@ -57,7 +58,7 @@ func (rf *ResultFilterFactory) CreateFilter(namespace, severity, status, policy,
 	f.MinimumSeverity = minimumSeverity
 
 	if namespace.Count() > 0 {
-		f.AddValidation(func(r v1alpha2.PolicyReportResult) bool {
+		f.AddValidation(func(r v1alpha1.ReportResult) bool {
 			if r.GetResource() == nil {
 				return true
 			}
@@ -67,7 +68,7 @@ func (rf *ResultFilterFactory) CreateFilter(namespace, severity, status, policy,
 	}
 
 	if len(namespace.Selector) > 0 {
-		f.AddValidation(func(r v1alpha2.PolicyReportResult) bool {
+		f.AddValidation(func(r v1alpha1.ReportResult) bool {
 			if r.GetResource() == nil || r.GetResource().Namespace == "" {
 				return true
 			}
@@ -83,31 +84,31 @@ func (rf *ResultFilterFactory) CreateFilter(namespace, severity, status, policy,
 	}
 
 	if minimumSeverity != "" {
-		f.AddValidation(func(r v1alpha2.PolicyReportResult) bool {
-			return v1alpha2.SeverityLevel[r.Severity] >= v1alpha2.SeverityLevel[v1alpha2.PolicySeverity(f.MinimumSeverity)]
+		f.AddValidation(func(r v1alpha1.ReportResult) bool {
+			return v1alpha2.SeverityLevel[r.Severity] >= v1alpha2.SeverityLevel[v1alpha1.ResultSeverity(f.MinimumSeverity)]
 		})
 	}
 
 	if sources.Count() > 0 {
-		f.AddValidation(func(r v1alpha2.PolicyReportResult) bool {
+		f.AddValidation(func(r v1alpha1.ReportResult) bool {
 			return validate.MatchRuleSet(r.Source, sources)
 		})
 	}
 
 	if policy.Count() > 0 {
-		f.AddValidation(func(r v1alpha2.PolicyReportResult) bool {
+		f.AddValidation(func(r v1alpha1.ReportResult) bool {
 			return validate.MatchRuleSet(r.Policy, policy)
 		})
 	}
 
 	if severity.Count() > 0 {
-		f.AddValidation(func(r v1alpha2.PolicyReportResult) bool {
+		f.AddValidation(func(r v1alpha1.ReportResult) bool {
 			return validate.ContainsRuleSet(string(r.Severity), severity)
 		})
 	}
 
 	if status.Count() > 0 {
-		f.AddValidation(func(r v1alpha2.PolicyReportResult) bool {
+		f.AddValidation(func(r v1alpha1.ReportResult) bool {
 			return validate.ContainsRuleSet(string(r.Result), status)
 		})
 	}
@@ -212,7 +213,7 @@ func (c *BaseClient) Sources() []string {
 	return c.resultFilter.Sources
 }
 
-func (c *BaseClient) Validate(rep v1alpha2.ReportInterface, result v1alpha2.PolicyReportResult) bool {
+func (c *BaseClient) Validate(rep v1alpha2.ReportInterface, result v1alpha1.ReportResult) bool {
 	if !c.ValidateReport(rep) {
 		return false
 	}
@@ -246,7 +247,7 @@ func (c *BaseClient) Reset(_ context.Context) error {
 
 func (c *BaseClient) CleanUp(_ context.Context, _ v1alpha2.ReportInterface) {}
 
-func (c *BaseClient) BatchSend(_ v1alpha2.ReportInterface, _ []v1alpha2.PolicyReportResult) {}
+func (c *BaseClient) BatchSend(_ v1alpha2.ReportInterface, _ []v1alpha1.ReportResult) {}
 
 func (c *BaseClient) SendHeartbeat() {} // Default no-op implementation
 

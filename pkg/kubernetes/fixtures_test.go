@@ -6,10 +6,10 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	metafake "k8s.io/client-go/metadata/fake"
 
-	pr "github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
-	"github.com/kyverno/policy-reporter/pkg/crd/client/policyreport/clientset/versioned/fake"
-	v1alpha2client "github.com/kyverno/policy-reporter/pkg/crd/client/policyreport/clientset/versioned/typed/policyreport/v1alpha2"
 	"github.com/kyverno/policy-reporter/pkg/report"
+	pr "openreports.io/apis/openreports.io/v1alpha1"
+	"openreports.io/pkg/client/clientset/versioned/fake"
+	"openreports.io/pkg/client/clientset/versioned/typed/openreports.io/v1alpha1"
 )
 
 func NewFakeMetaClient() (*metafake.FakeMetadataClient, metafake.MetadataClient, metafake.MetadataClient) {
@@ -20,10 +20,10 @@ func NewFakeMetaClient() (*metafake.FakeMetadataClient, metafake.MetadataClient,
 	return client, client.Resource(pr.SchemeGroupVersion.WithResource("policyreports")).Namespace("test").(metafake.MetadataClient), client.Resource(pr.SchemeGroupVersion.WithResource("clusterpolicyreports")).(metafake.MetadataClient)
 }
 
-func NewFakeClient() (*fake.Clientset, v1alpha2client.PolicyReportInterface, v1alpha2client.ClusterPolicyReportInterface) {
+func NewFakeClient() (*fake.Clientset, v1alpha1.ReportInterface, v1alpha1.ClusterReportInterface) {
 	client := fake.NewSimpleClientset()
 
-	return client, client.Wgpolicyk8sV1alpha2().PolicyReports("test"), client.Wgpolicyk8sV1alpha2().ClusterPolicyReports()
+	return client, client.OpenreportsV1alpha1().Reports("test"), client.OpenreportsV1alpha1().ClusterReports()
 }
 
 type store struct {

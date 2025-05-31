@@ -8,6 +8,7 @@ import (
 	"github.com/kyverno/policy-reporter/pkg/helper"
 	"github.com/kyverno/policy-reporter/pkg/report"
 	"github.com/kyverno/policy-reporter/pkg/target"
+	"openreports.io/apis/openreports.io/v1alpha1"
 )
 
 const SendSyncResults = "send_sync_results_listener"
@@ -39,7 +40,7 @@ func NewSendSyncResultsListener(targets *target.Collection) report.SyncResultsLi
 			go func(target target.Client, re v1alpha2.ReportInterface) {
 				defer wg.Done()
 
-				filtered := helper.Filter(re.GetResults(), func(result v1alpha2.PolicyReportResult) bool {
+				filtered := helper.Filter(re.GetResults(), func(result v1alpha1.ReportResult) bool {
 					return target.Validate(re, result)
 				})
 

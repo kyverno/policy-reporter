@@ -15,14 +15,15 @@ import (
 	"k8s.io/client-go/util/workqueue"
 
 	pr "github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
-	"github.com/kyverno/policy-reporter/pkg/crd/client/policyreport/clientset/versioned/typed/policyreport/v1alpha2"
 	"github.com/kyverno/policy-reporter/pkg/report"
 	"github.com/kyverno/policy-reporter/pkg/report/result"
+	reportsv1alpha1 "openreports.io/apis/openreports.io/v1alpha1"
+	"openreports.io/pkg/client/clientset/versioned/typed/openreports.io/v1alpha1"
 )
 
 type Queue struct {
 	queue         workqueue.TypedRateLimitingInterface[string]
-	client        v1alpha2.Wgpolicyk8sV1alpha2Interface
+	client        v1alpha1.OpenreportsV1alpha1Interface
 	reconditioner *result.Reconditioner
 	debouncer     Debouncer
 	lock          *sync.Mutex
@@ -72,20 +73,20 @@ func (q *Queue) processNextItem() bool {
 	var polr pr.ReportInterface
 
 	if namespace == "" {
-		polr, err = q.client.ClusterPolicyReports().Get(context.Background(), name, v1.GetOptions{})
+		polr, err = q.client.Reports(namespace).Get(context.Background(), name, v1.GetOptions{})
 	} else {
-		polr, err = q.client.PolicyReports(namespace).Get(context.Background(), name, v1.GetOptions{})
+		polr, err = q.client.ClusterReports().Get(context.Background(), name, v1.GetOptions{})
 	}
 
 	if errors.IsNotFound(err) {
 		if namespace == "" {
-			polr = &pr.ClusterPolicyReport{
+			polr = &reportsv1alpha1.ClusterReport{
 				ObjectMeta: v1.ObjectMeta{
 					Name: name,
 				},
 			}
 		} else {
-			polr = &pr.PolicyReport{
+			polr = &reportsv1alpha1.Report{
 				ObjectMeta: v1.ObjectMeta{
 					Name:      name,
 					Namespace: namespace,
@@ -148,7 +149,7 @@ func (q *Queue) handleErr(err error, key string) {
 func NewQueue(
 	debouncer Debouncer,
 	queue workqueue.TypedRateLimitingInterface[string],
-	client v1alpha2.Wgpolicyk8sV1alpha2Interface,
+	client v1alpha1.OpenreportsV1alpha1Interface,
 	filter *report.SourceFilter,
 	reconditioner *result.Reconditioner,
 ) *Queue {

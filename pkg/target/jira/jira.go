@@ -7,9 +7,9 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
 	"github.com/kyverno/policy-reporter/pkg/target"
 	targethttp "github.com/kyverno/policy-reporter/pkg/target/http"
+	"openreports.io/apis/openreports.io/v1alpha1"
 )
 
 // Options to configure the JIRA target
@@ -57,7 +57,7 @@ type Issue struct {
 	} `json:"fields"`
 }
 
-func (e *client) Send(result v1alpha2.PolicyReportResult) {
+func (e *client) Send(result v1alpha1.ReportResult) {
 	issue := Issue{}
 	issue.Fields.Project.Key = e.projectKey
 	issue.Fields.IssueType.Name = e.issueType
@@ -80,8 +80,8 @@ func (e *client) Send(result v1alpha2.PolicyReportResult) {
 		description += fmt.Sprintf("**Source**: %s\n", result.Source)
 	}
 
-	if result.Message != "" {
-		description += fmt.Sprintf("\n**Message**:\n%s\n", result.Message)
+	if result.Description != "" {
+		description += fmt.Sprintf("\n**Message**:\n%s\n", result.Description)
 	}
 
 	if result.GetResource() != nil {

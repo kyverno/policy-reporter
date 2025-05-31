@@ -8,6 +8,7 @@ import (
 	"github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
 	"github.com/kyverno/policy-reporter/pkg/target"
 	"github.com/kyverno/policy-reporter/pkg/target/http"
+	"openreports.io/apis/openreports.io/v1alpha1"
 )
 
 const policyReporterSource = "Policy-Reporter"
@@ -35,14 +36,14 @@ type client struct {
 	token        string
 }
 
-func (c *client) Send(result v1alpha2.PolicyReportResult) {
+func (c *client) Send(result v1alpha1.ReportResult) {
 	c.sendAndLogResult(splunkRequest{
 		Event:      http.NewJSONResult(result),
 		SourceType: policyReporterSource,
 	})
 }
 
-func (c *client) BatchSend(rep v1alpha2.ReportInterface, results []v1alpha2.PolicyReportResult) {
+func (c *client) BatchSend(rep v1alpha2.ReportInterface, results []v1alpha1.ReportResult) {
 	srs := ""
 	for _, res := range results {
 		sr := splunkRequest{

@@ -5,10 +5,10 @@ import (
 
 	"go.uber.org/zap"
 
-	"github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
 	"github.com/kyverno/policy-reporter/pkg/crd/api/targetconfig/v1alpha1"
 	"github.com/kyverno/policy-reporter/pkg/target"
 	"github.com/kyverno/policy-reporter/pkg/target/http"
+	reportsv1alpha1 "openreports.io/apis/openreports.io/v1alpha1"
 )
 
 // Options to configure the Discord target
@@ -30,7 +30,7 @@ type client struct {
 	keepalive    *v1alpha1.KeepaliveConfig
 }
 
-func (e *client) Send(result v1alpha2.PolicyReportResult) {
+func (e *client) Send(result reportsv1alpha1.ReportResult) {
 	if len(e.customFields) > 0 {
 		props := make(map[string]string, 0)
 

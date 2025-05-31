@@ -14,6 +14,7 @@ import (
 	"github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
 	"github.com/kyverno/policy-reporter/pkg/target"
 	"github.com/kyverno/policy-reporter/pkg/target/http"
+	"openreports.io/apis/openreports.io/v1alpha1"
 )
 
 var replacer = strings.NewReplacer(
@@ -58,7 +59,7 @@ type Payload struct {
 }
 
 type values struct {
-	Result   v1alpha2.PolicyReportResult
+	Result   v1alpha1.ReportResult
 	Time     time.Time
 	Resource *corev1.ObjectReference
 	Props    map[string]string
@@ -84,7 +85,7 @@ type client struct {
 	client       http.Client
 }
 
-func (e *client) Send(result v1alpha2.PolicyReportResult) {
+func (e *client) Send(result v1alpha1.ReportResult) {
 	if len(e.customFields) > 0 {
 		props := make(map[string]string, 0)
 
@@ -150,7 +151,7 @@ func (e *client) Reset(_ context.Context) error {
 	return nil
 }
 
-func (e *client) BatchSend(_ v1alpha2.ReportInterface, _ []v1alpha2.PolicyReportResult) {}
+func (e *client) BatchSend(_ v1alpha2.ReportInterface, _ []v1alpha1.ReportResult) {}
 
 func (e *client) Type() target.ClientType {
 	return target.SingleSend

@@ -9,18 +9,18 @@ import (
 
 	report "github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
 	"github.com/kyverno/policy-reporter/pkg/crd/api/targetconfig/v1alpha1"
-	"github.com/kyverno/policy-reporter/pkg/crd/client/policyreport/clientset/versioned/typed/policyreport/v1alpha2"
 	tcv1alpha1 "github.com/kyverno/policy-reporter/pkg/crd/client/targetconfig/clientset/versioned"
 	tcinformer "github.com/kyverno/policy-reporter/pkg/crd/client/targetconfig/informers/externalversions"
 	"github.com/kyverno/policy-reporter/pkg/listener"
 	"github.com/kyverno/policy-reporter/pkg/target"
+	reports "openreports.io/pkg/client/clientset/versioned/typed/openreports.io/v1alpha1"
 )
 
 type Client struct {
 	targetFactory target.Factory
 	collection    *target.Collection
 	informer      cache.SharedIndexInformer
-	polrClient    v1alpha2.Wgpolicyk8sV1alpha2Interface
+	polrClient    reports.OpenreportsV1alpha1Interface
 }
 
 func (c *Client) ConfigureInformer() {
@@ -42,11 +42,11 @@ func (c *Client) ConfigureInformer() {
 
 			if !tc.Spec.SkipExisting {
 				reports := []report.ReportInterface{}
-				existingPolrs, err := c.polrClient.PolicyReports("").List(context.Background(), metav1.ListOptions{})
+				existingPolrs, err := c.polrClient.Reports("").List(context.Background(), metav1.ListOptions{})
 				if err != nil {
 					zap.L().Error("Failed to sync existing policy reports for client", zap.String("name", tc.Name), zap.Error(err))
 				}
-				existingcPolrs, err := c.polrClient.ClusterPolicyReports().List(context.Background(), metav1.ListOptions{})
+				existingcPolrs, err := c.polrClient.ClusterReports().List(context.Background(), metav1.ListOptions{})
 				if err != nil {
 					zap.L().Error("Failed to sync existing cluster policy reports for client", zap.String("name", tc.Name), zap.Error(err))
 				}
@@ -117,7 +117,7 @@ func (c *Client) Run(stopChan chan struct{}) {
 	zap.L().Info("target config cache synced")
 }
 
-func NewClient(tcClient tcv1alpha1.Interface, f target.Factory, targets *target.Collection, polrClient v1alpha2.Wgpolicyk8sV1alpha2Interface) *Client {
+func NewClient(tcClient tcv1alpha1.Interface, f target.Factory, targets *target.Collection, polrClient reports.OpenreportsV1alpha1Interface) *Client {
 	tcInformer := tcinformer.NewSharedInformerFactory(tcClient, 0)
 
 	return &Client{

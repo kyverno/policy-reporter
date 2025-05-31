@@ -3,9 +3,9 @@ package elasticsearch
 import (
 	"time"
 
-	"github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
 	"github.com/kyverno/policy-reporter/pkg/target"
 	"github.com/kyverno/policy-reporter/pkg/target/http"
+	"openreports.io/apis/openreports.io/v1alpha1"
 )
 
 // Options to configure elasticsearch target
@@ -50,7 +50,7 @@ type client struct {
 	typelessApi bool
 }
 
-func (e *client) Send(result v1alpha2.PolicyReportResult) {
+func (e *client) Send(result v1alpha1.ReportResult) {
 	var host string
 	var apiSuffix string
 	if e.typelessApi {

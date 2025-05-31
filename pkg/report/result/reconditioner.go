@@ -24,8 +24,8 @@ func (r *Reconditioner) Prepare(polr v1alpha2.ReportInterface) v1alpha2.ReportIn
 		r.Category = helper.Defaults(r.Category, "Other")
 
 		scope := polr.GetScope()
-		if len(r.Resources) == 0 && scope != nil {
-			r.Resources = append(r.Resources, *scope)
+		if len(r.Subjects) == 0 && scope != nil {
+			r.Subjects = append(r.Subjects, *scope)
 		}
 
 		results[i] = r

@@ -8,9 +8,9 @@ import (
 	"go.uber.org/zap"
 	corev1 "k8s.io/api/core/v1"
 
-	"github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
 	"github.com/kyverno/policy-reporter/pkg/target"
 	"github.com/kyverno/policy-reporter/pkg/target/http"
+	"openreports.io/apis/openreports.io/v1alpha1"
 )
 
 const (
@@ -19,7 +19,7 @@ const (
 )
 
 type values struct {
-	Result   v1alpha2.PolicyReportResult
+	Result   v1alpha1.ReportResult
 	Priority string
 	Resource *corev1.ObjectReference
 }
@@ -89,8 +89,8 @@ type client struct {
 	client       http.Client
 }
 
-func mapPayload(result v1alpha2.PolicyReportResult) (*Payload, error) {
-	widgets := []widget{{TextParagraph: &textParagraph{Text: result.Message}}}
+func mapPayload(result v1alpha1.ReportResult) (*Payload, error) {
+	widgets := []widget{{TextParagraph: &textParagraph{Text: result.Description}}}
 
 	ttmpl, err := template.New("googlechat").Parse(messageTempl)
 	if err != nil {
@@ -99,7 +99,7 @@ func mapPayload(result v1alpha2.PolicyReportResult) (*Payload, error) {
 
 	prio := result.Severity
 	if prio == "" {
-		prio = v1alpha2.SeverityInfo
+		prio = v1alpha1.SeverityInfo
 	}
 
 	var textBuffer bytes.Buffer
@@ -185,7 +185,7 @@ func mapPayload(result v1alpha2.PolicyReportResult) (*Payload, error) {
 	}, nil
 }
 
-func (e *client) Send(result v1alpha2.PolicyReportResult) {
+func (e *client) Send(result v1alpha1.ReportResult) {
 	if len(e.customFields) > 0 {
 		props := make(map[string]string, 0)
 

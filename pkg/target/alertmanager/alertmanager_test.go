@@ -12,9 +12,9 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	"github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
 	"github.com/kyverno/policy-reporter/pkg/target"
 	"github.com/kyverno/policy-reporter/pkg/target/http"
+	"openreports.io/apis/openreports.io/v1alpha1"
 )
 
 func Test_AlertManagerClient_Send(t *testing.T) {
@@ -42,14 +42,14 @@ func Test_AlertManagerClient_Send(t *testing.T) {
 			HTTPClient: http.NewClient("", false),
 		})
 
-		result := v1alpha2.PolicyReportResult{
-			Message:  "test message",
-			Policy:   "test-policy",
-			Rule:     "test-rule",
-			Result:   "fail",
-			Source:   "test",
-			Category: "test-category",
-			Severity: "high",
+		result := v1alpha1.ReportResult{
+			Description: "test message",
+			Policy:      "test-policy",
+			Rule:        "test-rule",
+			Result:      "fail",
+			Source:      "test",
+			Category:    "test-category",
+			Severity:    "high",
 			Properties: map[string]string{
 				"property1": "value1",
 			},
@@ -103,22 +103,22 @@ func Test_AlertManagerClient_Send(t *testing.T) {
 			HTTPClient: http.NewClient("", false),
 		}).(*client)
 
-		results := []v1alpha2.PolicyReportResult{
+		results := []v1alpha1.ReportResult{
 			{
-				Message:  "test message 1",
-				Policy:   "test-policy-1",
-				Rule:     "test-rule-1",
-				Result:   "fail",
-				Source:   "test",
-				Severity: "high",
+				Description: "test message 1",
+				Policy:      "test-policy-1",
+				Rule:        "test-rule-1",
+				Result:      "fail",
+				Source:      "test",
+				Severity:    "high",
 			},
 			{
-				Message:  "test message 2",
-				Policy:   "test-policy-2",
-				Rule:     "test-rule-2",
-				Result:   "fail",
-				Source:   "test",
-				Severity: "high",
+				Description: "test message 2",
+				Policy:      "test-policy-2",
+				Rule:        "test-rule-2",
+				Result:      "fail",
+				Source:      "test",
+				Severity:    "high",
 			},
 		}
 
@@ -148,13 +148,13 @@ func Test_AlertManagerClient_Send(t *testing.T) {
 			HTTPClient: http.NewClient("", false),
 		})
 
-		result := v1alpha2.PolicyReportResult{
-			Message:  "test message",
-			Policy:   "test-policy",
-			Rule:     "test-rule",
-			Result:   "fail",
-			Source:   "test",
-			Severity: "high",
+		result := v1alpha1.ReportResult{
+			Description: "test message",
+			Policy:      "test-policy",
+			Rule:        "test-rule",
+			Result:      "fail",
+			Source:      "test",
+			Severity:    "high",
 		}
 
 		// Should not panic
@@ -181,13 +181,13 @@ func Test_AlertManagerClient_Send(t *testing.T) {
 			HTTPClient: http.NewClient("", false),
 		})
 
-		result := v1alpha2.PolicyReportResult{
-			Message:  "test message",
-			Policy:   "test-policy",
-			Rule:     "test-rule",
-			Result:   "fail",
-			Source:   "test",
-			Severity: "high",
+		result := v1alpha1.ReportResult{
+			Description: "test message",
+			Policy:      "test-policy",
+			Rule:        "test-rule",
+			Result:      "fail",
+			Source:      "test",
+			Severity:    "high",
 		}
 
 		client.Send(result)
@@ -219,13 +219,13 @@ func Test_AlertManagerClient_Send(t *testing.T) {
 			HTTPClient: http.NewClient("", false),
 		})
 
-		result := v1alpha2.PolicyReportResult{
-			Message:  "test message",
-			Policy:   "test-policy",
-			Rule:     "test-rule",
-			Result:   "fail",
-			Source:   "test",
-			Severity: "high",
+		result := v1alpha1.ReportResult{
+			Description: "test message",
+			Policy:      "test-policy",
+			Rule:        "test-rule",
+			Result:      "fail",
+			Source:      "test",
+			Severity:    "high",
 		}
 
 		client.Send(result)
@@ -254,14 +254,14 @@ func Test_AlertManagerClient_Send(t *testing.T) {
 			HTTPClient: http.NewClient("", false),
 		})
 
-		result := v1alpha2.PolicyReportResult{
-			Message:  "test message",
-			Policy:   "test-policy",
-			Rule:     "test-rule",
-			Result:   "fail",
-			Source:   "test",
-			Severity: "high",
-			Resources: []corev1.ObjectReference{
+		result := v1alpha1.ReportResult{
+			Description: "test message",
+			Policy:      "test-policy",
+			Rule:        "test-rule",
+			Result:      "fail",
+			Source:      "test",
+			Severity:    "high",
+			Subjects: []corev1.ObjectReference{
 				{
 					APIVersion: "v1",
 					Kind:       "Pod",
@@ -299,7 +299,7 @@ type mockReportInterface struct {
 	name      string
 	namespace string
 	scope     *corev1.ObjectReference
-	results   []v1alpha2.PolicyReportResult
+	results   []v1alpha1.ReportResult
 }
 
 func (m *mockReportInterface) GetName() string {
@@ -310,7 +310,7 @@ func (m *mockReportInterface) GetNamespace() string {
 	return m.namespace
 }
 
-func (m *mockReportInterface) GetResults() []v1alpha2.PolicyReportResult {
+func (m *mockReportInterface) GetResults() []v1alpha1.ReportResult {
 	return m.results
 }
 
@@ -318,12 +318,12 @@ func (m *mockReportInterface) GetScope() *corev1.ObjectReference {
 	return m.scope
 }
 
-func (m *mockReportInterface) SetResults(results []v1alpha2.PolicyReportResult) {
+func (m *mockReportInterface) SetResults(results []v1alpha1.ReportResult) {
 	m.results = results
 }
 
-func (m *mockReportInterface) GetSummary() v1alpha2.PolicyReportSummary {
-	return v1alpha2.PolicyReportSummary{}
+func (m *mockReportInterface) GetSummary() v1alpha1.ReportSummary {
+	return v1alpha1.ReportSummary{}
 }
 
 func (m *mockReportInterface) GetSource() string {

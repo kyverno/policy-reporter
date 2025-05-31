@@ -3,25 +3,26 @@ package fixtures
 import (
 	"time"
 
+	"github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
 	corev1 "k8s.io/api/core/v1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	"github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
+	"openreports.io/apis/openreports.io/v1alpha1"
 )
 
 var seconds = time.Date(2021, time.February, 23, 15, 10, 0, 0, time.UTC).Unix()
 
-var CompleteTargetSendResult = v1alpha2.PolicyReportResult{
-	Message:   "validation error: requests and limits required. Rule autogen-check-for-requests-and-limits failed at path /spec/template/spec/containers/0/resources/requests/",
-	Policy:    "require-requests-and-limits-required",
-	Rule:      "autogen-check-for-requests-and-limits",
-	Timestamp: v1.Timestamp{Seconds: seconds},
-	Result:    v1alpha2.StatusFail,
-	Severity:  v1alpha2.SeverityHigh,
-	Category:  "resources",
-	Scored:    true,
-	Source:    "Kyverno",
-	Resources: []corev1.ObjectReference{{
+var CompleteTargetSendResult = v1alpha1.ReportResult{
+	Description: "validation error: requests and limits required. Rule autogen-check-for-requests-and-limits failed at path /spec/template/spec/containers/0/resources/requests/",
+	Policy:      "require-requests-and-limits-required",
+	Rule:        "autogen-check-for-requests-and-limits",
+	Timestamp:   v1.Timestamp{Seconds: seconds},
+	Result:      v1alpha2.StatusFail,
+	Severity:    v1alpha2.SeverityHigh,
+	Category:    "resources",
+	Scored:      true,
+	Source:      "Kyverno",
+	Subjects: []corev1.ObjectReference{{
 		APIVersion: "v1",
 		Kind:       "Deployment",
 		Name:       "nginx",
@@ -31,24 +32,24 @@ var CompleteTargetSendResult = v1alpha2.PolicyReportResult{
 	Properties: map[string]string{"version": "1.2.0"},
 }
 
-var MinimalTargetSendResult = v1alpha2.PolicyReportResult{
-	Message: "validation error: label required. Rule app-label-required failed at path /spec/template/spec/containers/0/resources/requests/",
-	Policy:  "app-label-requirement",
-	Result:  v1alpha2.StatusFail,
-	Scored:  true,
+var MinimalTargetSendResult = v1alpha1.ReportResult{
+	Description: "validation error: label required. Rule app-label-required failed at path /spec/template/spec/containers/0/resources/requests/",
+	Policy:      "app-label-requirement",
+	Result:      v1alpha2.StatusFail,
+	Scored:      true,
 }
 
-var EnforceTargetSendResult = v1alpha2.PolicyReportResult{
-	Message:   "validation error: requests and limits required. Rule autogen-check-for-requests-and-limits failed at path /spec/template/spec/containers/0/resources/requests/",
-	Policy:    "require-requests-and-limits-required",
-	Rule:      "check-for-requests-and-limits",
-	Timestamp: v1.Timestamp{Seconds: seconds},
-	Result:    v1alpha2.StatusFail,
-	Severity:  v1alpha2.SeverityHigh,
-	Category:  "resources",
-	Scored:    true,
-	Source:    "Kyverno",
-	Resources: []corev1.ObjectReference{{
+var EnforceTargetSendResult = v1alpha1.ReportResult{
+	Description: "validation error: requests and limits required. Rule autogen-check-for-requests-and-limits failed at path /spec/template/spec/containers/0/resources/requests/",
+	Policy:      "require-requests-and-limits-required",
+	Rule:        "check-for-requests-and-limits",
+	Timestamp:   v1.Timestamp{Seconds: seconds},
+	Result:      v1alpha2.StatusFail,
+	Severity:    v1alpha2.SeverityHigh,
+	Category:    "resources",
+	Scored:      true,
+	Source:      "Kyverno",
+	Subjects: []corev1.ObjectReference{{
 		APIVersion: "",
 		Kind:       "Pod",
 		Name:       "nginx",
@@ -58,17 +59,17 @@ var EnforceTargetSendResult = v1alpha2.PolicyReportResult{
 	Properties: map[string]string{"version": "1.2.0"},
 }
 
-var MissingUIDSendResult = v1alpha2.PolicyReportResult{
-	Message:   "validation error: requests and limits required. Rule autogen-check-for-requests-and-limits failed at path /spec/template/spec/containers/0/resources/requests/",
-	Policy:    "require-requests-and-limits-required",
-	Rule:      "check-for-requests-and-limits",
-	Timestamp: v1.Timestamp{Seconds: seconds},
-	Result:    v1alpha2.StatusFail,
-	Severity:  v1alpha2.SeverityHigh,
-	Category:  "resources",
-	Scored:    true,
-	Source:    "Kyverno",
-	Resources: []corev1.ObjectReference{{
+var MissingUIDSendResult = v1alpha1.ReportResult{
+	Description: "validation error: requests and limits required. Rule autogen-check-for-requests-and-limits failed at path /spec/template/spec/containers/0/resources/requests/",
+	Policy:      "require-requests-and-limits-required",
+	Rule:        "check-for-requests-and-limits",
+	Timestamp:   v1.Timestamp{Seconds: seconds},
+	Result:      v1alpha2.StatusFail,
+	Severity:    v1alpha2.SeverityHigh,
+	Category:    "resources",
+	Scored:      true,
+	Source:      "Kyverno",
+	Subjects: []corev1.ObjectReference{{
 		APIVersion: "v1",
 		Kind:       "Pod",
 		Name:       "nginx",
@@ -78,17 +79,17 @@ var MissingUIDSendResult = v1alpha2.PolicyReportResult{
 	Properties: map[string]string{"version": "1.2.0"},
 }
 
-var MissingAPIVersionSendResult = v1alpha2.PolicyReportResult{
-	Message:   "validation error: requests and limits required. Rule autogen-check-for-requests-and-limits failed at path /spec/template/spec/containers/0/resources/requests/",
-	Policy:    "require-requests-and-limits-required",
-	Rule:      "check-for-requests-and-limits",
-	Timestamp: v1.Timestamp{Seconds: seconds},
-	Result:    v1alpha2.StatusFail,
-	Severity:  v1alpha2.SeverityHigh,
-	Category:  "resources",
-	Scored:    true,
-	Source:    "Kyverno",
-	Resources: []corev1.ObjectReference{{
+var MissingAPIVersionSendResult = v1alpha1.ReportResult{
+	Description: "validation error: requests and limits required. Rule autogen-check-for-requests-and-limits failed at path /spec/template/spec/containers/0/resources/requests/",
+	Policy:      "require-requests-and-limits-required",
+	Rule:        "check-for-requests-and-limits",
+	Timestamp:   v1.Timestamp{Seconds: seconds},
+	Result:      v1alpha2.StatusFail,
+	Severity:    v1alpha2.SeverityHigh,
+	Category:    "resources",
+	Scored:      true,
+	Source:      "Kyverno",
+	Subjects: []corev1.ObjectReference{{
 		APIVersion: "",
 		Kind:       "Pod",
 		Name:       "nginx",
@@ -98,30 +99,30 @@ var MissingAPIVersionSendResult = v1alpha2.PolicyReportResult{
 	Properties: map[string]string{"version": "1.2.0"},
 }
 
-var ErrorSendResult = v1alpha2.PolicyReportResult{
-	Message: "validation error: label required. Rule app-label-required failed at path /spec/template/spec/containers/0/resources/requests/",
-	Policy:  "app-label-requirement",
-	Result:  v1alpha2.StatusFail,
-	Scored:  true,
+var ErrorSendResult = v1alpha1.ReportResult{
+	Description: "validation error: label required. Rule app-label-required failed at path /spec/template/spec/containers/0/resources/requests/",
+	Policy:      "app-label-requirement",
+	Result:      v1alpha2.StatusFail,
+	Scored:      true,
 }
 
-var CritcalSendResult = v1alpha2.PolicyReportResult{
-	Message: "validation error: label required. Rule app-label-required failed at path /spec/template/spec/containers/0/resources/requests/",
-	Policy:  "app-label-requirement",
-	Result:  v1alpha2.StatusFail,
-	Scored:  true,
+var CritcalSendResult = v1alpha1.ReportResult{
+	Description: "validation error: label required. Rule app-label-required failed at path /spec/template/spec/containers/0/resources/requests/",
+	Policy:      "app-label-requirement",
+	Result:      v1alpha2.StatusFail,
+	Scored:      true,
 }
 
-var InfoSendResult = v1alpha2.PolicyReportResult{
-	Message: "validation error: label required. Rule app-label-required failed at path /spec/template/spec/containers/0/resources/requests/",
-	Policy:  "app-label-requirement",
-	Result:  v1alpha2.StatusFail,
-	Scored:  true,
+var InfoSendResult = v1alpha1.ReportResult{
+	Description: "validation error: label required. Rule app-label-required failed at path /spec/template/spec/containers/0/resources/requests/",
+	Policy:      "app-label-requirement",
+	Result:      v1alpha2.StatusFail,
+	Scored:      true,
 }
 
-var DebugSendResult = v1alpha2.PolicyReportResult{
-	Message: "validation error: label required. Rule app-label-required failed at path /spec/template/spec/containers/0/resources/requests/",
-	Policy:  "app-label-requirement",
-	Result:  v1alpha2.StatusFail,
-	Scored:  true,
+var DebugSendResult = v1alpha1.ReportResult{
+	Description: "validation error: label required. Rule app-label-required failed at path /spec/template/spec/containers/0/resources/requests/",
+	Policy:      "app-label-requirement",
+	Result:      v1alpha2.StatusFail,
+	Scored:      true,
 }
