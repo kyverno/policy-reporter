@@ -10,9 +10,9 @@ import (
 	"k8s.io/client-go/metadata"
 	"k8s.io/client-go/metadata/metadatainformer"
 	"k8s.io/client-go/tools/cache"
+	pr "openreports.io/apis/openreports.io/v1alpha1"
 
 	"github.com/kyverno/policy-reporter/pkg/report"
-	pr "openreports.io/apis/openreports.io/v1alpha1"
 )
 
 var (

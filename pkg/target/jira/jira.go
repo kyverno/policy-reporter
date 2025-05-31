@@ -7,9 +7,10 @@ import (
 	"net/http"
 	"strings"
 
+	"openreports.io/apis/openreports.io/v1alpha1"
+
 	"github.com/kyverno/policy-reporter/pkg/target"
 	targethttp "github.com/kyverno/policy-reporter/pkg/target/http"
-	"openreports.io/apis/openreports.io/v1alpha1"
 )
 
 // Options to configure the JIRA target

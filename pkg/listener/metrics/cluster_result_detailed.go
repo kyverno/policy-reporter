@@ -3,10 +3,10 @@ package metrics
 import (
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
+	"openreports.io/apis/openreports.io/v1alpha1"
 
 	"github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
 	"github.com/kyverno/policy-reporter/pkg/report"
-	"openreports.io/apis/openreports.io/v1alpha1"
 )
 
 func RegisterDetailedClusterResultGauge(name string) *prometheus.GaugeVec {

@@ -4,10 +4,10 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
 	dto "github.com/prometheus/client_model/go"
+	"openreports.io/apis/openreports.io/v1alpha1"
 
 	"github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
 	"github.com/kyverno/policy-reporter/pkg/report"
-	"openreports.io/apis/openreports.io/v1alpha1"
 )
 
 func RegisterCustomResultGauge(name string, labelNames []string) *prometheus.GaugeVec {

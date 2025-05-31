@@ -5,12 +5,12 @@ import (
 
 	"github.com/segmentio/fasthash/fnv1a"
 	"github.com/uptrace/bun"
+	"openreports.io/apis/openreports.io/v1alpha1"
 
 	"github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
 	"github.com/kyverno/policy-reporter/pkg/helper"
 	"github.com/kyverno/policy-reporter/pkg/report"
 	"github.com/kyverno/policy-reporter/pkg/report/result"
-	"openreports.io/apis/openreports.io/v1alpha1"
 )
 
 type Config struct {

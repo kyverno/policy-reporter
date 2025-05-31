@@ -5,11 +5,11 @@ import (
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	metafake "k8s.io/client-go/metadata/fake"
-
-	"github.com/kyverno/policy-reporter/pkg/report"
 	pr "openreports.io/apis/openreports.io/v1alpha1"
 	"openreports.io/pkg/client/clientset/versioned/fake"
 	"openreports.io/pkg/client/clientset/versioned/typed/openreports.io/v1alpha1"
+
+	"github.com/kyverno/policy-reporter/pkg/report"
 )
 
 func NewFakeMetaClient() (*metafake.FakeMetadataClient, metafake.MetadataClient, metafake.MetadataClient) {

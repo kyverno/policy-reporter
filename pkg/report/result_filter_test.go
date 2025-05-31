@@ -3,9 +3,10 @@ package report_test
 import (
 	"testing"
 
+	"openreports.io/apis/openreports.io/v1alpha1"
+
 	"github.com/kyverno/policy-reporter/pkg/fixtures"
 	"github.com/kyverno/policy-reporter/pkg/report"
-	"openreports.io/apis/openreports.io/v1alpha1"
 )
 
 func Test_ResultFilter(t *testing.T) {

@@ -7,11 +7,11 @@ import (
 	"time"
 
 	"go.uber.org/zap"
+	"openreports.io/apis/openreports.io/v1alpha1"
 
 	"github.com/kyverno/policy-reporter/pkg/target"
 	"github.com/kyverno/policy-reporter/pkg/target/http"
 	"github.com/kyverno/policy-reporter/pkg/target/provider/aws"
-	"openreports.io/apis/openreports.io/v1alpha1"
 )
 
 // Options to configure the S3 target

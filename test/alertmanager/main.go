@@ -4,10 +4,11 @@ import (
 	"fmt"
 	"time"
 
+	"openreports.io/apis/openreports.io/v1alpha1"
+
 	"github.com/kyverno/policy-reporter/pkg/target"
 	"github.com/kyverno/policy-reporter/pkg/target/alertmanager"
 	"github.com/kyverno/policy-reporter/pkg/target/http"
-	"openreports.io/apis/openreports.io/v1alpha1"
 )
 
 func main() {

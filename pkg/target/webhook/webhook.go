@@ -4,11 +4,11 @@ import (
 	"time"
 
 	"go.uber.org/zap"
+	reportsv1alpha1 "openreports.io/apis/openreports.io/v1alpha1"
 
 	"github.com/kyverno/policy-reporter/pkg/crd/api/targetconfig/v1alpha1"
 	"github.com/kyverno/policy-reporter/pkg/target"
 	"github.com/kyverno/policy-reporter/pkg/target/http"
-	reportsv1alpha1 "openreports.io/apis/openreports.io/v1alpha1"
 )
 
 // Options to configure the Discord target

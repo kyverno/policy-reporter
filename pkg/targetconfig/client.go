@@ -6,6 +6,7 @@ import (
 	"go.uber.org/zap"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/tools/cache"
+	reports "openreports.io/pkg/client/clientset/versioned/typed/openreports.io/v1alpha1"
 
 	report "github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
 	"github.com/kyverno/policy-reporter/pkg/crd/api/targetconfig/v1alpha1"
@@ -13,7 +14,6 @@ import (
 	tcinformer "github.com/kyverno/policy-reporter/pkg/crd/client/targetconfig/informers/externalversions"
 	"github.com/kyverno/policy-reporter/pkg/listener"
 	"github.com/kyverno/policy-reporter/pkg/target"
-	reports "openreports.io/pkg/client/clientset/versioned/typed/openreports.io/v1alpha1"
 )
 
 type Client struct {

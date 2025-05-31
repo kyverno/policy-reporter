@@ -11,7 +11,6 @@ import (
 	"time"
 
 	"go.uber.org/zap"
-
 	"openreports.io/apis/openreports.io/v1alpha1"
 )
 

@@ -6,12 +6,12 @@ import (
 
 	"github.com/kyverno/go-wildcard"
 	"go.uber.org/zap"
+	"openreports.io/apis/openreports.io/v1alpha1"
 
 	"github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
 	"github.com/kyverno/policy-reporter/pkg/kubernetes/namespaces"
 	"github.com/kyverno/policy-reporter/pkg/report"
 	"github.com/kyverno/policy-reporter/pkg/validate"
-	"openreports.io/apis/openreports.io/v1alpha1"
 )
 
 type ClientType = string

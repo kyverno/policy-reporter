@@ -4,9 +4,9 @@ import (
 	"testing"
 
 	corev1 "k8s.io/api/core/v1"
+	"openreports.io/apis/openreports.io/v1alpha1"
 
 	"github.com/kyverno/policy-reporter/pkg/report/result"
-	"openreports.io/apis/openreports.io/v1alpha1"
 )
 
 func TestResource(t *testing.T) {

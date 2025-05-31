@@ -4,10 +4,11 @@ import (
 	"sync"
 	"time"
 
+	"openreports.io/apis/openreports.io/v1alpha1"
+
 	"github.com/kyverno/policy-reporter/pkg/cache"
 	"github.com/kyverno/policy-reporter/pkg/helper"
 	"github.com/kyverno/policy-reporter/pkg/report"
-	"openreports.io/apis/openreports.io/v1alpha1"
 )
 
 const NewResults = "new_results_listener"

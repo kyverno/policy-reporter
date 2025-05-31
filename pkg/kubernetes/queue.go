@@ -13,12 +13,12 @@ import (
 	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/client-go/tools/cache"
 	"k8s.io/client-go/util/workqueue"
+	reportsv1alpha1 "openreports.io/apis/openreports.io/v1alpha1"
+	"openreports.io/pkg/client/clientset/versioned/typed/openreports.io/v1alpha1"
 
 	pr "github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
 	"github.com/kyverno/policy-reporter/pkg/report"
 	"github.com/kyverno/policy-reporter/pkg/report/result"
-	reportsv1alpha1 "openreports.io/apis/openreports.io/v1alpha1"
-	"openreports.io/pkg/client/clientset/versioned/typed/openreports.io/v1alpha1"
 )
 
 type Queue struct {

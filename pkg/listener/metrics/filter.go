@@ -1,10 +1,11 @@
 package metrics
 
 import (
+	"openreports.io/apis/openreports.io/v1alpha1"
+
 	"github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
 	"github.com/kyverno/policy-reporter/pkg/report"
 	"github.com/kyverno/policy-reporter/pkg/validate"
-	"openreports.io/apis/openreports.io/v1alpha1"
 )
 
 func NewResultFilter(namespace, status, policy, source, severity, kind validate.RuleSets) *report.ResultFilter {

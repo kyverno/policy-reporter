@@ -3,8 +3,9 @@ package summary_test
 import (
 	"testing"
 
-	"github.com/kyverno/policy-reporter/pkg/email/summary"
 	"openreports.io/apis/openreports.io/v1alpha1"
+
+	"github.com/kyverno/policy-reporter/pkg/email/summary"
 )
 
 func Test_Source(t *testing.T) {

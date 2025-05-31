@@ -21,8 +21,8 @@ import (
 	"k8s.io/client-go/metadata"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/util/workqueue"
-
 	"openreports.io/pkg/client/clientset/versioned"
+	"openreports.io/pkg/client/clientset/versioned/typed/openreports.io/v1alpha1"
 
 	"github.com/kyverno/policy-reporter/pkg/api"
 	"github.com/kyverno/policy-reporter/pkg/cache"
@@ -46,7 +46,6 @@ import (
 	"github.com/kyverno/policy-reporter/pkg/target/factory"
 	"github.com/kyverno/policy-reporter/pkg/targetconfig"
 	"github.com/kyverno/policy-reporter/pkg/validate"
-	"openreports.io/pkg/client/clientset/versioned/typed/openreports.io/v1alpha1"
 )
 
 // Resolver manages dependencies

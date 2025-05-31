@@ -2,11 +2,11 @@ package summary_test
 
 import (
 	"go.uber.org/zap"
+	"openreports.io/pkg/client/clientset/versioned/fake"
 	"openreports.io/pkg/client/clientset/versioned/typed/openreports.io/v1alpha1"
 
 	"github.com/kyverno/policy-reporter/pkg/email"
 	"github.com/kyverno/policy-reporter/pkg/validate"
-	"openreports.io/pkg/client/clientset/versioned/fake"
 )
 
 var (

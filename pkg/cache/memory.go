@@ -3,8 +3,9 @@ package cache
 import (
 	"time"
 
-	"github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
 	gocache "github.com/patrickmn/go-cache"
+
+	"github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
 )
 
 type inMemoryCache struct {

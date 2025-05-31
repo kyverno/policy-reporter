@@ -3,10 +3,11 @@ package metrics_test
 import (
 	"testing"
 
+	"openreports.io/apis/openreports.io/v1alpha1"
+
 	"github.com/kyverno/policy-reporter/pkg/fixtures"
 	"github.com/kyverno/policy-reporter/pkg/listener/metrics"
 	"github.com/kyverno/policy-reporter/pkg/validate"
-	"openreports.io/apis/openreports.io/v1alpha1"
 )
 
 func Test_Vaildate(t *testing.T) {
