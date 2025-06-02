@@ -10,14 +10,14 @@ import (
 	"k8s.io/client-go/metadata"
 	"k8s.io/client-go/metadata/metadatainformer"
 	"k8s.io/client-go/tools/cache"
-	pr "openreports.io/apis/openreports.io/v1alpha1"
+	"openreports.io/apis/openreports.io/v1alpha1"
 
 	"github.com/kyverno/policy-reporter/pkg/report"
 )
 
 var (
-	polrResource  = pr.SchemeGroupVersion.WithResource("policyreports")
-	cpolrResource = pr.SchemeGroupVersion.WithResource("clusterpolicyreports")
+	openreportsReport  = v1alpha1.SchemeGroupVersion.WithResource("reports")
+	openreportsCReport = v1alpha1.SchemeGroupVersion.WithResource("clusterreports")
 )
 
 type k8sPolicyReportClient struct {
@@ -42,10 +42,10 @@ func (k *k8sPolicyReportClient) Sync(stopper chan struct{}) error {
 
 	var cpolrInformer cache.SharedIndexInformer
 
-	polrInformer := k.configureInformer(factory.ForResource(polrResource).Informer())
+	polrInformer := k.configureInformer(factory.ForResource(openreportsReport).Informer())
 
 	if !k.reportFilter.DisableClusterReports() {
-		cpolrInformer = k.configureInformer(factory.ForResource(cpolrResource).Informer())
+		cpolrInformer = k.configureInformer(factory.ForResource(openreportsCReport).Informer())
 	}
 
 	factory.Start(stopper)
