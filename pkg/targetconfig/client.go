@@ -6,9 +6,9 @@ import (
 	"go.uber.org/zap"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/tools/cache"
+	reportsv1alpha1 "openreports.io/apis/openreports.io/v1alpha1"
 	reports "openreports.io/pkg/client/clientset/versioned/typed/openreports.io/v1alpha1"
 
-	report "github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
 	"github.com/kyverno/policy-reporter/pkg/crd/api/targetconfig/v1alpha1"
 	tcv1alpha1 "github.com/kyverno/policy-reporter/pkg/crd/client/targetconfig/clientset/versioned"
 	tcinformer "github.com/kyverno/policy-reporter/pkg/crd/client/targetconfig/informers/externalversions"
@@ -40,8 +40,9 @@ func (c *Client) ConfigureInformer() {
 
 			c.collection.AddTarget(tc.Name, t)
 
+			// (ammar): handle open reports and v1alpha2 here as well
 			if !tc.Spec.SkipExisting {
-				reports := []report.ReportInterface{}
+				reports := []reportsv1alpha1.ReportInterface{}
 				existingPolrs, err := c.polrClient.Reports("").List(context.Background(), metav1.ListOptions{})
 				if err != nil {
 					zap.L().Error("Failed to sync existing policy reports for client", zap.String("name", tc.Name), zap.Error(err))

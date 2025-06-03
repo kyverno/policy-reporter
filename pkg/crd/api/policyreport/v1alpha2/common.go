@@ -19,7 +19,6 @@ import (
 
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"openreports.io/apis/openreports.io/v1alpha1"
 )
 
 const ResultIDKey = "resultID"
@@ -85,13 +84,13 @@ type PolicyResult string
 // - info
 type PolicySeverity string
 
-var SeverityLevel = map[v1alpha1.ResultSeverity]int{
-	"":                        -1,
-	v1alpha1.SeverityInfo:     0,
-	v1alpha1.SeverityLow:      1,
-	v1alpha1.SeverityMedium:   2,
-	v1alpha1.SeverityHigh:     3,
-	v1alpha1.SeverityCritical: 4,
+var SeverityLevel = map[PolicySeverity]int{
+	"":               -1,
+	SeverityInfo:     0,
+	SeverityLow:      1,
+	SeverityMedium:   2,
+	SeverityHigh:     3,
+	SeverityCritical: 4,
 }
 
 // PolicyReportResult provides the result for an individual policy
@@ -202,9 +201,9 @@ type ReportInterface interface {
 	GetID() string
 	GetKey() string
 	GetScope() *corev1.ObjectReference
-	GetResults() []v1alpha1.ReportResult
+	GetResults() []PolicyReportResult
 	HasResult(id string) bool
-	GetSummary() v1alpha1.ReportSummary
+	GetSummary() []PolicyReportSummary
 	GetSource() string
 	GetKinds() []string
 	GetSeverities() []string
