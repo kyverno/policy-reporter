@@ -120,7 +120,7 @@ func NewReportFilter(labels, sources validate.RuleSets) *report.ReportFilter {
 	f := report.NewReportFilter()
 
 	if labels.Count() > 0 {
-		f.AddValidation(func(r v1alpha2.ReportInterface) bool {
+		f.AddValidation(func(r v1alpha1.ReportInterface) bool {
 			if len(labels.Include) > 0 {
 				for _, label := range labels.Include {
 					parts := strings.Split(label, ":")
@@ -162,7 +162,7 @@ func NewReportFilter(labels, sources validate.RuleSets) *report.ReportFilter {
 	}
 
 	if sources.Count() > 0 {
-		f.AddValidation(func(r v1alpha2.ReportInterface) bool {
+		f.AddValidation(func(r v1alpha1.ReportInterface) bool {
 			source := r.GetSource()
 			if source == "" {
 				return true
