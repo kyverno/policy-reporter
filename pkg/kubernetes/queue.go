@@ -172,6 +172,7 @@ func NewQueue(
 	debouncer Debouncer,
 	queue workqueue.TypedRateLimitingInterface[*v1.PartialObjectMetadata],
 	client v1alpha1.OpenreportsV1alpha1Interface,
+	polrClient v1alpha2.Wgpolicyk8sV1alpha2Interface,
 	filter *report.SourceFilter,
 	reconditioner *result.Reconditioner,
 ) *Queue {
@@ -179,6 +180,7 @@ func NewQueue(
 		debouncer:         debouncer,
 		queue:             queue,
 		openreportsClient: client,
+		polrClient:        polrClient,
 		cache:             sets.New[*v1.PartialObjectMetadata](),
 		lock:              &sync.Mutex{},
 		filter:            filter,

@@ -411,7 +411,7 @@ func Test_ResolveLeaderElectionWithInvalidK8sConfig(t *testing.T) {
 func Test_ResolveCRDClient(t *testing.T) {
 	resolver := config.NewResolver(testConfig, &rest.Config{})
 
-	_, err := resolver.CRDClient()
+	_, _, err := resolver.CRDClient()
 	assert.Nil(t, err)
 }
 
@@ -421,7 +421,7 @@ func Test_ResolveCRDClientWithInvalidK8sConfig(t *testing.T) {
 
 	resolver := config.NewResolver(testConfig, k8sConfig)
 
-	_, err := resolver.CRDClient()
+	_, _, err := resolver.CRDClient()
 	assert.NotNil(t, err, "Error: 'host must be a URL or a host:port pair' was expected")
 }
 

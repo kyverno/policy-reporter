@@ -41,6 +41,7 @@ func Test_PolicyReportWatcher(t *testing.T) {
 		kubernetes.NewDebouncer(0, publisher),
 		workqueue.NewTypedRateLimitingQueue(workqueue.DefaultTypedControllerRateLimiter[*v1.PartialObjectMetadata]()),
 		restClient.OpenreportsV1alpha1(),
+		nil,
 		report.NewSourceFilter(nil, nil, []report.SourceValidation{}),
 		result.NewReconditioner(nil),
 	)
@@ -94,6 +95,7 @@ func Test_ClusterPolicyReportWatcher(t *testing.T) {
 		kubernetes.NewDebouncer(0, publisher),
 		workqueue.NewTypedRateLimitingQueue(workqueue.DefaultTypedControllerRateLimiter[*v1.PartialObjectMetadata]()),
 		restClient.OpenreportsV1alpha1(),
+		nil,
 		report.NewSourceFilter(nil, nil, []report.SourceValidation{}),
 		result.NewReconditioner(nil),
 	)
@@ -136,6 +138,7 @@ func Test_HasSynced(t *testing.T) {
 		kubernetes.NewDebouncer(0, report.NewEventPublisher()),
 		workqueue.NewTypedRateLimitingQueue(workqueue.DefaultTypedControllerRateLimiter[*v1.PartialObjectMetadata]()),
 		restClient.OpenreportsV1alpha1(),
+		nil,
 		report.NewSourceFilter(nil, nil, []report.SourceValidation{}),
 		result.NewReconditioner(nil),
 	)
