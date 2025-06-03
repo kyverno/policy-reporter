@@ -2,8 +2,6 @@ package report
 
 import (
 	"openreports.io/apis/openreports.io/v1alpha1"
-
-	"github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
 )
 
 // Event Enum
@@ -32,7 +30,7 @@ const (
 // LifecycleEvent of PolicyReports
 type LifecycleEvent struct {
 	Type         Event
-	PolicyReport v1alpha2.ReportInterface
+	PolicyReport v1alpha1.ReportInterface
 }
 
 // ResourceType Enum defined for PolicyReport
@@ -44,7 +42,7 @@ const (
 	ClusterPolicyReportType ResourceType = "ClusterPolicyReport"
 )
 
-func GetType(r v1alpha2.ReportInterface) ResourceType {
+func GetType(r v1alpha1.ReportInterface) ResourceType {
 	if r.GetNamespace() == "" {
 		return ClusterPolicyReportType
 	}
@@ -52,7 +50,7 @@ func GetType(r v1alpha2.ReportInterface) ResourceType {
 	return PolicyReportType
 }
 
-func FindNewResults(nr, or v1alpha2.ReportInterface) []v1alpha1.ReportResult {
+func FindNewResults(nr, or v1alpha1.ReportInterface) []v1alpha1.ReportResult {
 	if or == nil {
 		return nr.GetResults()
 	}

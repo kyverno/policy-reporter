@@ -12,7 +12,6 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	"openreports.io/apis/openreports.io/v1alpha1"
 
-	"github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
 	"github.com/kyverno/policy-reporter/pkg/target"
 	"github.com/kyverno/policy-reporter/pkg/target/http"
 )
@@ -145,13 +144,13 @@ func (e *client) Send(result v1alpha1.ReportResult) {
 	http.ProcessHTTPResponse(e.Name(), resp, err)
 }
 
-func (e *client) CleanUp(_ context.Context, _ v1alpha2.ReportInterface) {}
+func (e *client) CleanUp(_ context.Context, _ v1alpha1.ReportInterface) {}
 
 func (e *client) Reset(_ context.Context) error {
 	return nil
 }
 
-func (e *client) BatchSend(_ v1alpha2.ReportInterface, _ []v1alpha1.ReportResult) {}
+func (e *client) BatchSend(_ v1alpha1.ReportInterface, _ []v1alpha1.ReportResult) {}
 
 func (e *client) Type() target.ClientType {
 	return target.SingleSend

@@ -6,7 +6,6 @@ import (
 
 	"openreports.io/apis/openreports.io/v1alpha1"
 
-	"github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
 	"github.com/kyverno/policy-reporter/pkg/helper"
 	"github.com/kyverno/policy-reporter/pkg/report"
 	"github.com/kyverno/policy-reporter/pkg/target"
@@ -24,7 +23,7 @@ func NewSendSyncResultsListener(targets *target.Collection) report.SyncResultsLi
 		}
 	}()
 
-	return func(rep v1alpha2.ReportInterface) {
+	return func(rep v1alpha1.ReportInterface) {
 		clients := targets.SyncClients()
 		if len(clients) == 0 {
 			return
@@ -38,7 +37,7 @@ func NewSendSyncResultsListener(targets *target.Collection) report.SyncResultsLi
 		wg.Add(len(clients))
 
 		for _, t := range clients {
-			go func(target target.Client, re v1alpha2.ReportInterface) {
+			go func(target target.Client, re v1alpha1.ReportInterface) {
 				defer wg.Done()
 
 				filtered := helper.Filter(re.GetResults(), func(result v1alpha1.ReportResult) bool {

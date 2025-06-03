@@ -7,6 +7,7 @@ import (
 	"time"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/util/workqueue"
 
 	"github.com/kyverno/policy-reporter/pkg/fixtures"
@@ -38,7 +39,7 @@ func Test_PolicyReportWatcher(t *testing.T) {
 
 	queue := kubernetes.NewQueue(
 		kubernetes.NewDebouncer(0, publisher),
-		workqueue.NewTypedRateLimitingQueue(workqueue.DefaultTypedControllerRateLimiter[string]()),
+		workqueue.NewTypedRateLimitingQueue(workqueue.DefaultTypedControllerRateLimiter[*v1.PartialObjectMetadata]()),
 		restClient.OpenreportsV1alpha1(),
 		report.NewSourceFilter(nil, nil, []report.SourceValidation{}),
 		result.NewReconditioner(nil),
@@ -91,7 +92,7 @@ func Test_ClusterPolicyReportWatcher(t *testing.T) {
 
 	queue := kubernetes.NewQueue(
 		kubernetes.NewDebouncer(0, publisher),
-		workqueue.NewTypedRateLimitingQueue(workqueue.DefaultTypedControllerRateLimiter[string]()),
+		workqueue.NewTypedRateLimitingQueue(workqueue.DefaultTypedControllerRateLimiter[*v1.PartialObjectMetadata]()),
 		restClient.OpenreportsV1alpha1(),
 		report.NewSourceFilter(nil, nil, []report.SourceValidation{}),
 		result.NewReconditioner(nil),
@@ -133,7 +134,7 @@ func Test_HasSynced(t *testing.T) {
 
 	queue := kubernetes.NewQueue(
 		kubernetes.NewDebouncer(0, report.NewEventPublisher()),
-		workqueue.NewTypedRateLimitingQueue(workqueue.DefaultTypedControllerRateLimiter[string]()),
+		workqueue.NewTypedRateLimitingQueue(workqueue.DefaultTypedControllerRateLimiter[*v1.PartialObjectMetadata]()),
 		restClient.OpenreportsV1alpha1(),
 		report.NewSourceFilter(nil, nil, []report.SourceValidation{}),
 		result.NewReconditioner(nil),

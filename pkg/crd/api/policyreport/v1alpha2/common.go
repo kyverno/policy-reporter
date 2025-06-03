@@ -203,7 +203,7 @@ type ReportInterface interface {
 	GetScope() *corev1.ObjectReference
 	GetResults() []PolicyReportResult
 	HasResult(id string) bool
-	GetSummary() []PolicyReportSummary
+	GetSummary() PolicyReportSummary
 	GetSource() string
 	GetKinds() []string
 	GetSeverities() []string

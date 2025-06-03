@@ -7,8 +7,8 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/segmentio/fasthash/fnv1a"
 
-	"github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
 	"github.com/kyverno/policy-reporter/pkg/report"
+	reportsv1alpha1 "openreports.io/apis/openreports.io/v1alpha1"
 )
 
 type CacheItem struct {
@@ -22,7 +22,7 @@ type Cache struct {
 	labelGenerator LabelGenerator
 }
 
-func (c *Cache) AddReport(polr v1alpha2.ReportInterface) {
+func (c *Cache) AddReport(polr reportsv1alpha1.ReportInterface) {
 	labels := map[string]*CacheItem{}
 	for _, res := range polr.GetResults() {
 		if !c.filter.Validate(res) {

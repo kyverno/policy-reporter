@@ -30,8 +30,8 @@ github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/cloudmock v0
 github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/cloudmock v0.51.0/go.mod h1:SZiPHWGOOk3bl8tkevxkoiwPgsIl6CwrWcbwjfHZpdM=
 github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/resourcemapping v0.51.0 h1:6/0iUd0xrnX7qt+mLNRwg5c0PGv8wpE8K90ryANQwMI=
 github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/resourcemapping v0.51.0/go.mod h1:otE2jQekW/PqXk1Awf5lmfokJx4uwuqcj1ab5SpGeW0=
-github.com/aerosouund/reports-api v0.1.6-report h1:wO/KN35uBTTwh10LFkLBHNu8Fe/XWV7cL1xVu2VAGrc=
-github.com/aerosouund/reports-api v0.1.6-report/go.mod h1:z+vW20dWC9PpplJS3zPGRdn4cBJd0TkNn098OZ1m7jA=
+github.com/aerosouund/reports-api v0.1.7-report h1:uf/YS2EQJla58rv+OPRSVwRFgOoRTdYfpWooQoQOzqY=
+github.com/aerosouund/reports-api v0.1.7-report/go.mod h1:z+vW20dWC9PpplJS3zPGRdn4cBJd0TkNn098OZ1m7jA=
 github.com/atc0005/go-teams-notify/v2 v2.13.0 h1:nbDeHy89NjYlF/PEfLVF6lsserY9O5SnN1iOIw3AxXw=
 github.com/atc0005/go-teams-notify/v2 v2.13.0/go.mod h1:WSv9moolRsBcpZbwEf6gZxj7h0uJlJskJq5zkEWKO8Y=
 github.com/aws/aws-sdk-go-v2 v1.36.3 h1:mJoei2CxPutQVxaATCzDUjcZEjVRdpsiiXi2o38yqWM=

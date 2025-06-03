@@ -5,7 +5,7 @@ import (
 
 	gocache "github.com/patrickmn/go-cache"
 
-	"github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
+	"openreports.io/apis/openreports.io/v1alpha1"
 )
 
 type inMemoryCache struct {
@@ -14,7 +14,7 @@ type inMemoryCache struct {
 	keepReport   time.Duration
 }
 
-func (c *inMemoryCache) AddReport(report v1alpha2.ReportInterface) {
+func (c *inMemoryCache) AddReport(report v1alpha1.ReportInterface) {
 	cache, ok := c.getCache(report.GetID())
 
 	if !ok {

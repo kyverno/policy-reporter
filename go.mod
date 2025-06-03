@@ -179,4 +179,4 @@ require (
 	sigs.k8s.io/yaml v1.4.0 // indirect
 )
 
-replace openreports.io => github.com/aerosouund/reports-api v0.1.6-report
+replace openreports.io => github.com/aerosouund/reports-api v0.1.7-report

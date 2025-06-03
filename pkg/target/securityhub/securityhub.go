@@ -25,7 +25,7 @@ type HubClient interface {
 }
 
 type PolrClient interface {
-	Get(ctx context.Context, name, namespace string) (v1alpha2.ReportInterface, error)
+	Get(ctx context.Context, name, namespace string) (v1alpha1.ReportInterface, error)
 }
 
 // Options to configure the SecurityHub target
@@ -54,7 +54,7 @@ type client struct {
 	arn          *string
 }
 
-func (c *client) mapFindings(polr v1alpha2.ReportInterface, results []v1alpha1.ReportResult) []types.AwsSecurityFinding {
+func (c *client) mapFindings(polr v1alpha1.ReportInterface, results []v1alpha1.ReportResult) []types.AwsSecurityFinding {
 	var accID *string
 	if c.accountID != "" {
 		accID = toPointer(c.accountID)
@@ -131,7 +131,7 @@ func filterResults(results []v1alpha1.ReportResult) []v1alpha1.ReportResult {
 	})
 }
 
-func (c *client) BatchSend(polr v1alpha2.ReportInterface, results []v1alpha1.ReportResult) {
+func (c *client) BatchSend(polr v1alpha1.ReportInterface, results []v1alpha1.ReportResult) {
 	results = filterResults(results)
 	if len(results) == 0 {
 		return
@@ -221,7 +221,7 @@ func (c *client) Reset(ctx context.Context) error {
 	return nil
 }
 
-func (c *client) CleanUp(ctx context.Context, report v1alpha2.ReportInterface) {
+func (c *client) CleanUp(ctx context.Context, report v1alpha1.ReportInterface) {
 	if !c.synchronize {
 		return
 	}
@@ -281,7 +281,7 @@ func (c *client) CleanUp(ctx context.Context, report v1alpha2.ReportInterface) {
 	zap.L().Info(c.Name()+": CLEANUP OK", zap.Int("count", count), zap.String("report", report.GetKey()))
 }
 
-func (c *client) mapOtherDetails(polr v1alpha2.ReportInterface, result v1alpha1.ReportResult) map[string]string {
+func (c *client) mapOtherDetails(polr v1alpha1.ReportInterface, result v1alpha1.ReportResult) map[string]string {
 	details := map[string]string{
 		"Source":   result.Source,
 		"Category": result.Category,
@@ -376,7 +376,7 @@ func (c *client) batchUpdate(ctx context.Context, findings []types.AwsSecurityFi
 	return updated, nil
 }
 
-func (c *client) getFindingsByIDs(ctx context.Context, report v1alpha2.ReportInterface, resources []types.StringFilter, status string) ([]types.AwsSecurityFinding, error) {
+func (c *client) getFindingsByIDs(ctx context.Context, report v1alpha1.ReportInterface, resources []types.StringFilter, status string) ([]types.AwsSecurityFinding, error) {
 	list := make([]types.AwsSecurityFinding, 0)
 
 	chunks := helper.ChunkSlice(resources, 20)
@@ -423,7 +423,7 @@ func (c *client) getFindingsByIDs(ctx context.Context, report v1alpha2.ReportInt
 	return list, nil
 }
 
-func (c *client) BaseFilter(report v1alpha2.ReportInterface) *types.AwsSecurityFindingFilters {
+func (c *client) BaseFilter(report v1alpha1.ReportInterface) *types.AwsSecurityFindingFilters {
 	source := ""
 	if report != nil {
 		source = report.GetSource()
@@ -551,7 +551,7 @@ func mapType(source string) string {
 	return "Software and Configuration Checks/Kubernetes Policies/" + source
 }
 
-func toResourceIDFilter(report v1alpha2.ReportInterface, results []v1alpha1.ReportResult) []types.StringFilter {
+func toResourceIDFilter(report v1alpha1.ReportInterface, results []v1alpha1.ReportResult) []types.StringFilter {
 	res := report.GetScope()
 	if res != nil {
 		var value string

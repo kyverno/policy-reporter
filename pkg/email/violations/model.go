@@ -16,7 +16,7 @@ type Result struct {
 	Status string
 }
 
-func mapResult(polr v1alpha2.ReportInterface, res v1alpha1.ReportResult) []Result {
+func mapResult(polr v1alpha1.ReportInterface, res v1alpha1.ReportResult) []Result {
 	count := len(res.Subjects)
 	rule := res.Rule
 	if rule == "" {

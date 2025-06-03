@@ -4,8 +4,6 @@ import (
 	"strings"
 
 	"openreports.io/apis/openreports.io/v1alpha1"
-
-	"github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
 )
 
 type Mode = string
@@ -22,19 +20,19 @@ const (
 )
 
 var LabelGeneratorMapping = map[string]LabelCallback{
-	"namespace": func(m map[string]string, pr v1alpha2.ReportInterface, _ v1alpha1.ReportResult) {
+	"namespace": func(m map[string]string, pr v1alpha1.ReportInterface, _ v1alpha1.ReportResult) {
 		m["namespace"] = pr.GetNamespace()
 	},
-	"report": func(m map[string]string, pr v1alpha2.ReportInterface, _ v1alpha1.ReportResult) {
+	"report": func(m map[string]string, pr v1alpha1.ReportInterface, _ v1alpha1.ReportResult) {
 		m["report"] = pr.GetName()
 	},
-	"policy": func(m map[string]string, _ v1alpha2.ReportInterface, r v1alpha1.ReportResult) {
+	"policy": func(m map[string]string, _ v1alpha1.ReportInterface, r v1alpha1.ReportResult) {
 		m["policy"] = r.Policy
 	},
-	"rule": func(m map[string]string, _ v1alpha2.ReportInterface, r v1alpha1.ReportResult) {
+	"rule": func(m map[string]string, _ v1alpha1.ReportInterface, r v1alpha1.ReportResult) {
 		m["rule"] = r.Rule
 	},
-	"kind": func(m map[string]string, _ v1alpha2.ReportInterface, r v1alpha1.ReportResult) {
+	"kind": func(m map[string]string, _ v1alpha1.ReportInterface, r v1alpha1.ReportResult) {
 		if !r.HasResource() {
 			m["kind"] = ""
 			return
@@ -42,7 +40,7 @@ var LabelGeneratorMapping = map[string]LabelCallback{
 
 		m["kind"] = r.GetResource().Kind
 	},
-	"name": func(m map[string]string, _ v1alpha2.ReportInterface, r v1alpha1.ReportResult) {
+	"name": func(m map[string]string, _ v1alpha1.ReportInterface, r v1alpha1.ReportResult) {
 		if !r.HasResource() {
 			m["name"] = ""
 			return
@@ -50,19 +48,19 @@ var LabelGeneratorMapping = map[string]LabelCallback{
 
 		m["name"] = r.GetResource().Name
 	},
-	"severity": func(m map[string]string, _ v1alpha2.ReportInterface, r v1alpha1.ReportResult) {
+	"severity": func(m map[string]string, _ v1alpha1.ReportInterface, r v1alpha1.ReportResult) {
 		m["severity"] = string(r.Severity)
 	},
-	"category": func(m map[string]string, _ v1alpha2.ReportInterface, r v1alpha1.ReportResult) {
+	"category": func(m map[string]string, _ v1alpha1.ReportInterface, r v1alpha1.ReportResult) {
 		m["category"] = r.Category
 	},
-	"source": func(m map[string]string, _ v1alpha2.ReportInterface, r v1alpha1.ReportResult) {
+	"source": func(m map[string]string, _ v1alpha1.ReportInterface, r v1alpha1.ReportResult) {
 		m["source"] = r.Source
 	},
-	"status": func(m map[string]string, _ v1alpha2.ReportInterface, r v1alpha1.ReportResult) {
+	"status": func(m map[string]string, _ v1alpha1.ReportInterface, r v1alpha1.ReportResult) {
 		m["status"] = string(r.Result)
 	},
-	"message": func(m map[string]string, _ v1alpha2.ReportInterface, r v1alpha1.ReportResult) {
+	"message": func(m map[string]string, _ v1alpha1.ReportInterface, r v1alpha1.ReportResult) {
 		m["message"] = r.Description
 	},
 }
@@ -75,14 +73,14 @@ func CreateLabelGenerator(labels []string, names []string) LabelGenerator {
 			label := strings.TrimPrefix(label, ReportLabelPrefix)
 			lIndex := index
 
-			chains = append(chains, func(m map[string]string, pr v1alpha2.ReportInterface, _ v1alpha1.ReportResult) {
+			chains = append(chains, func(m map[string]string, pr v1alpha1.ReportInterface, _ v1alpha1.ReportResult) {
 				m[names[lIndex]] = pr.GetLabels()[label]
 			})
 		} else if strings.HasPrefix(label, ReportPropertyPrefix) {
 			label := strings.TrimPrefix(label, ReportPropertyPrefix)
 			pIndex := index
 
-			chains = append(chains, func(m map[string]string, _ v1alpha2.ReportInterface, r v1alpha1.ReportResult) {
+			chains = append(chains, func(m map[string]string, _ v1alpha1.ReportInterface, r v1alpha1.ReportResult) {
 				val := ""
 
 				if r.Properties != nil {
@@ -96,7 +94,7 @@ func CreateLabelGenerator(labels []string, names []string) LabelGenerator {
 		}
 	}
 
-	return func(pr v1alpha2.ReportInterface, r v1alpha1.ReportResult) map[string]string {
+	return func(pr v1alpha1.ReportInterface, r v1alpha1.ReportResult) map[string]string {
 		labels := map[string]string{}
 		for _, generate := range chains {
 			generate(labels, pr, r)

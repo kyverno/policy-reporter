@@ -20,7 +20,7 @@ func Test_ResultListener(t *testing.T) {
 		var called v1alpha1.ReportResult
 
 		slistener := listener.NewResultListener(true, cache.NewInMermoryCache(time.Minute, time.Minute), time.Now())
-		slistener.RegisterListener(func(_ v1alpha2.ReportInterface, r v1alpha1.ReportResult, b bool) {
+		slistener.RegisterListener(func(_ v1alpha1.ReportInterface, r v1alpha1.ReportResult, b bool) {
 			called = r
 		})
 
@@ -34,7 +34,7 @@ func Test_ResultListener(t *testing.T) {
 		var called bool
 
 		slistener := listener.NewResultListener(true, cache.NewInMermoryCache(time.Minute, time.Minute), time.Now())
-		slistener.RegisterListener(func(_ v1alpha2.ReportInterface, r v1alpha1.ReportResult, b bool) {
+		slistener.RegisterListener(func(_ v1alpha1.ReportInterface, r v1alpha1.ReportResult, b bool) {
 			called = true
 		})
 
@@ -47,7 +47,7 @@ func Test_ResultListener(t *testing.T) {
 		var called bool
 
 		slistener := listener.NewResultListener(true, cache.NewInMermoryCache(time.Minute, time.Minute), time.Now())
-		slistener.RegisterListener(func(_ v1alpha2.ReportInterface, r v1alpha1.ReportResult, b bool) {
+		slistener.RegisterListener(func(_ v1alpha1.ReportInterface, r v1alpha1.ReportResult, b bool) {
 			called = true
 		})
 
@@ -60,7 +60,7 @@ func Test_ResultListener(t *testing.T) {
 		var called bool
 
 		slistener := listener.NewResultListener(true, cache.NewInMermoryCache(time.Minute, time.Minute), time.Now())
-		slistener.RegisterListener(func(_ v1alpha2.ReportInterface, r v1alpha1.ReportResult, b bool) {
+		slistener.RegisterListener(func(_ v1alpha1.ReportInterface, r v1alpha1.ReportResult, b bool) {
 			called = true
 		})
 
@@ -74,7 +74,7 @@ func Test_ResultListener(t *testing.T) {
 		var called bool
 
 		slistener := listener.NewResultListener(true, cache.NewInMermoryCache(time.Minute, time.Minute), time.Now())
-		slistener.RegisterListener(func(_ v1alpha2.ReportInterface, r v1alpha1.ReportResult, b bool) {
+		slistener.RegisterListener(func(_ v1alpha1.ReportInterface, r v1alpha1.ReportResult, b bool) {
 			called = true
 		})
 
@@ -96,7 +96,7 @@ func Test_ResultListener(t *testing.T) {
 		var called bool
 
 		slistener := listener.NewResultListener(true, cache.NewInMermoryCache(time.Minute, time.Minute), time.Now())
-		slistener.RegisterListener(func(_ v1alpha2.ReportInterface, r v1alpha1.ReportResult, b bool) {
+		slistener.RegisterListener(func(_ v1alpha1.ReportInterface, r v1alpha1.ReportResult, b bool) {
 			called = true
 		})
 
@@ -110,7 +110,7 @@ func Test_ResultListener(t *testing.T) {
 		var called bool
 
 		slistener := listener.NewResultListener(true, cache.NewInMermoryCache(time.Minute, time.Minute), time.Now())
-		slistener.RegisterListener(func(_ v1alpha2.ReportInterface, r v1alpha1.ReportResult, b bool) {
+		slistener.RegisterListener(func(_ v1alpha1.ReportInterface, r v1alpha1.ReportResult, b bool) {
 			called = true
 		})
 
@@ -131,7 +131,7 @@ func Test_ResultListener(t *testing.T) {
 		var called []v1alpha1.ReportResult
 
 		slistener := listener.NewResultListener(true, cache.NewInMermoryCache(time.Minute, time.Minute), time.Now())
-		slistener.RegisterScopeListener(func(_ v1alpha2.ReportInterface, r []v1alpha1.ReportResult, b bool) {
+		slistener.RegisterScopeListener(func(_ v1alpha1.ReportInterface, r []v1alpha1.ReportResult, b bool) {
 			called = r
 		})
 
@@ -144,7 +144,7 @@ func Test_ResultListener(t *testing.T) {
 		var called []v1alpha1.ReportResult
 
 		slistener := listener.NewResultListener(true, cache.NewInMermoryCache(time.Minute, time.Minute), time.Now())
-		slistener.RegisterScopeListener(func(_ v1alpha2.ReportInterface, r []v1alpha1.ReportResult, b bool) {
+		slistener.RegisterScopeListener(func(_ v1alpha1.ReportInterface, r []v1alpha1.ReportResult, b bool) {
 			called = r
 		})
 
@@ -156,10 +156,10 @@ func Test_ResultListener(t *testing.T) {
 	})
 
 	t.Run("Publish Scoped Report to Sync Target", func(t *testing.T) {
-		var called v1alpha2.ReportInterface
+		var called v1alpha1.ReportInterface
 
 		slistener := listener.NewResultListener(true, cache.NewInMermoryCache(time.Minute, time.Minute), time.Now())
-		slistener.RegisterSyncListener(func(r v1alpha2.ReportInterface) {
+		slistener.RegisterSyncListener(func(r v1alpha1.ReportInterface) {
 			called = r
 		})
 
@@ -169,10 +169,10 @@ func Test_ResultListener(t *testing.T) {
 	})
 
 	t.Run("Publish Scoped Report to Sync Target", func(t *testing.T) {
-		var called v1alpha2.ReportInterface
+		var called v1alpha1.ReportInterface
 
 		slistener := listener.NewResultListener(true, cache.NewInMermoryCache(time.Minute, time.Minute), time.Now())
-		slistener.RegisterSyncListener(func(r v1alpha2.ReportInterface) {
+		slistener.RegisterSyncListener(func(r v1alpha1.ReportInterface) {
 			called = r
 		})
 

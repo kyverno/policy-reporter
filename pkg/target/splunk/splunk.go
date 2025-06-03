@@ -6,7 +6,6 @@ import (
 	"go.uber.org/zap"
 	"openreports.io/apis/openreports.io/v1alpha1"
 
-	"github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
 	"github.com/kyverno/policy-reporter/pkg/target"
 	"github.com/kyverno/policy-reporter/pkg/target/http"
 )
@@ -43,7 +42,7 @@ func (c *client) Send(result v1alpha1.ReportResult) {
 	})
 }
 
-func (c *client) BatchSend(rep v1alpha2.ReportInterface, results []v1alpha1.ReportResult) {
+func (c *client) BatchSend(rep v1alpha1.ReportInterface, results []v1alpha1.ReportResult) {
 	srs := ""
 	for _, res := range results {
 		sr := splunkRequest{

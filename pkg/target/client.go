@@ -27,13 +27,13 @@ type Client interface {
 	// Send the given Result to the configured Target
 	Send(result v1alpha1.ReportResult)
 	// BatchSend the given Results of a single PolicyReport to the configured Target
-	BatchSend(report v1alpha2.ReportInterface, results []v1alpha1.ReportResult)
+	BatchSend(report v1alpha1.ReportInterface, results []v1alpha1.ReportResult)
 	// SkipExistingOnStartup skips already existing PolicyReportResults on startup
 	SkipExistingOnStartup() bool
 	// Name is a unique identifier for each Target
 	Name() string
 	// Validate if a result should send
-	Validate(rep v1alpha2.ReportInterface, result v1alpha1.ReportResult) bool
+	Validate(rep v1alpha1.ReportInterface, result v1alpha1.ReportResult) bool
 	// MinimumSeverity for a triggered Result to send to this target
 	MinimumSeverity() string
 	// Sources of the Results which should send to this target, empty means all sources
@@ -41,7 +41,7 @@ type Client interface {
 	// Type for the given target
 	Type() ClientType
 	// CleanUp old results if supported by the target
-	CleanUp(context.Context, v1alpha2.ReportInterface)
+	CleanUp(context.Context, v1alpha1.ReportInterface)
 	// Reset the current state in the related target
 	Reset(context.Context) error
 	// SendHeartbeat sends a periodic keepalive message
@@ -85,7 +85,7 @@ func (rf *ResultFilterFactory) CreateFilter(namespace, severity, status, policy,
 
 	if minimumSeverity != "" {
 		f.AddValidation(func(r v1alpha1.ReportResult) bool {
-			return v1alpha2.SeverityLevel[r.Severity] >= v1alpha2.SeverityLevel[v1alpha1.ResultSeverity(f.MinimumSeverity)]
+			return v1alpha1.SeverityLevel[r.Severity] >= v1alpha1.SeverityLevel[v1alpha1.ResultSeverity(f.MinimumSeverity)]
 		})
 	}
 
@@ -213,7 +213,7 @@ func (c *BaseClient) Sources() []string {
 	return c.resultFilter.Sources
 }
 
-func (c *BaseClient) Validate(rep v1alpha2.ReportInterface, result v1alpha1.ReportResult) bool {
+func (c *BaseClient) Validate(rep v1alpha1.ReportInterface, result v1alpha1.ReportResult) bool {
 	if !c.ValidateReport(rep) {
 		return false
 	}
@@ -225,7 +225,7 @@ func (c *BaseClient) Validate(rep v1alpha2.ReportInterface, result v1alpha1.Repo
 	return true
 }
 
-func (c *BaseClient) ValidateReport(rep v1alpha2.ReportInterface) bool {
+func (c *BaseClient) ValidateReport(rep v1alpha1.ReportInterface) bool {
 	if rep == nil {
 		return false
 	}
@@ -245,9 +245,9 @@ func (c *BaseClient) Reset(_ context.Context) error {
 	return nil
 }
 
-func (c *BaseClient) CleanUp(_ context.Context, _ v1alpha2.ReportInterface) {}
+func (c *BaseClient) CleanUp(_ context.Context, _ v1alpha1.ReportInterface) {}
 
-func (c *BaseClient) BatchSend(_ v1alpha2.ReportInterface, _ []v1alpha1.ReportResult) {}
+func (c *BaseClient) BatchSend(_ v1alpha1.ReportInterface, _ []v1alpha1.ReportResult) {}
 
 func (c *BaseClient) SendHeartbeat() {} // Default no-op implementation
 

@@ -5,7 +5,6 @@ import (
 	"github.com/prometheus/client_golang/prometheus/promauto"
 	"openreports.io/apis/openreports.io/v1alpha1"
 
-	"github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
 	"github.com/kyverno/policy-reporter/pkg/report"
 )
 
@@ -59,7 +58,7 @@ func CreateDetailedResultMetricListener(filter *report.ResultFilter, gauge *prom
 	}
 }
 
-func generateResultLabels(report v1alpha2.ReportInterface, result v1alpha1.ReportResult) map[string]string {
+func generateResultLabels(report v1alpha1.ReportInterface, result v1alpha1.ReportResult) map[string]string {
 	labels := prometheus.Labels{
 		"namespace": report.GetNamespace(),
 		"rule":      result.Rule,

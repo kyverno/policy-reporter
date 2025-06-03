@@ -69,8 +69,10 @@ func (q *Queue) processNextItem() bool {
 	namespace := key.Namespace
 
 	var (
-		rep pr.ReportInterface
-		err error
+		rep   reportsv1alpha1.ReportInterface
+		err   error
+		polr  *pr.PolicyReport
+		cpolr *pr.ClusterPolicyReport
 	)
 
 	switch key.APIVersion {
@@ -87,9 +89,11 @@ func (q *Queue) processNextItem() bool {
 
 	case "wgpolicyk8s.io/v1alpha2":
 		if namespace == "" {
-			polr, err := q.polrClient.PolicyReports(namespace).Get(context.Background(), name, v1.GetOptions{})
+			polr, err = q.polrClient.PolicyReports(namespace).Get(context.Background(), name, v1.GetOptions{})
+			rep = polr.ToOpenReports()
 		} else {
-			polr, err := q.polrClient.ClusterPolicyReports().Get(context.Background(), name, v1.GetOptions{})
+			cpolr, err = q.polrClient.ClusterPolicyReports().Get(context.Background(), name, v1.GetOptions{})
+			rep = cpolr.ToOpenReports()
 		}
 		if errors.IsNotFound(err) {
 			q.handleNotFoundReport(key)
@@ -139,12 +143,8 @@ func (q *Queue) handleErr(err error, key *v1.PartialObjectMetadata) {
 	zap.L().Warn("dropping report out of queue", zap.Any("key", key), zap.Error(err))
 }
 
-func toReportInterface() pr.ReportInterface {
-	return &reportsv1alpha1.Report{}
-}
-
 func (q *Queue) handleNotFoundReport(key *v1.PartialObjectMetadata) {
-	var rep pr.ReportInterface
+	var rep reportsv1alpha1.ReportInterface
 	if key.GetNamespace() == "" {
 		rep = &reportsv1alpha1.ClusterReport{
 			ObjectMeta: v1.ObjectMeta{

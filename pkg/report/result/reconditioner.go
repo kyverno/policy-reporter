@@ -3,8 +3,8 @@ package result
 import (
 	"strings"
 
-	"github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
 	"github.com/kyverno/policy-reporter/pkg/helper"
+	"openreports.io/apis/openreports.io/v1alpha1"
 )
 
 type Reconditioner struct {
@@ -12,7 +12,7 @@ type Reconditioner struct {
 	customIDGenerators map[string]IDGenerator
 }
 
-func (r *Reconditioner) Prepare(polr v1alpha2.ReportInterface) v1alpha2.ReportInterface {
+func (r *Reconditioner) Prepare(polr v1alpha1.ReportInterface) v1alpha1.ReportInterface {
 	generator := r.defaultIDGenerator
 	if g, ok := r.customIDGenerators[strings.ToLower(polr.GetSource())]; ok {
 		generator = g
