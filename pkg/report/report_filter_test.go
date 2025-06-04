@@ -3,8 +3,9 @@ package report_test
 import (
 	"testing"
 
-	"github.com/kyverno/policy-reporter/pkg/report"
 	"openreports.io/apis/openreports.io/v1alpha1"
+
+	"github.com/kyverno/policy-reporter/pkg/report"
 )
 
 func Test_ReportFilter(t *testing.T) {

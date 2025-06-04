@@ -20,9 +20,9 @@ import (
 	"github.com/segmentio/fasthash/fnv1a"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	reportsv1alpha1 "openreports.io/apis/openreports.io/v1alpha1"
 
 	"github.com/kyverno/policy-reporter/pkg/helper"
-	reportsv1alpha1 "openreports.io/apis/openreports.io/v1alpha1"
 )
 
 // +genclient

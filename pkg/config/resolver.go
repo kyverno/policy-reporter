@@ -10,7 +10,6 @@ import (
 
 	"github.com/gin-gonic/gin"
 	goredis "github.com/go-redis/redis/v8"
-	polrversioned "github.com/kyverno/policy-reporter/pkg/crd/client/policyreport/clientset/versioned"
 	_ "github.com/mattn/go-sqlite3"
 	gocache "github.com/patrickmn/go-cache"
 	"github.com/uptrace/bun"
@@ -28,6 +27,7 @@ import (
 
 	"github.com/kyverno/policy-reporter/pkg/api"
 	"github.com/kyverno/policy-reporter/pkg/cache"
+	polrversioned "github.com/kyverno/policy-reporter/pkg/crd/client/policyreport/clientset/versioned"
 	"github.com/kyverno/policy-reporter/pkg/crd/client/policyreport/clientset/versioned/typed/policyreport/v1alpha2"
 	tcv1alpha1 "github.com/kyverno/policy-reporter/pkg/crd/client/targetconfig/clientset/versioned"
 	"github.com/kyverno/policy-reporter/pkg/database"

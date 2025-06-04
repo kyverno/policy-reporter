@@ -4,7 +4,6 @@ import (
 	"time"
 
 	gocache "github.com/patrickmn/go-cache"
-
 	"openreports.io/apis/openreports.io/v1alpha1"
 )
 

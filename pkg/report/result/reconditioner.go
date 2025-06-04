@@ -3,8 +3,9 @@ package result
 import (
 	"strings"
 
-	"github.com/kyverno/policy-reporter/pkg/helper"
 	"openreports.io/apis/openreports.io/v1alpha1"
+
+	"github.com/kyverno/policy-reporter/pkg/helper"
 )
 
 type Reconditioner struct {

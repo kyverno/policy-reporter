@@ -6,9 +6,9 @@ import (
 	gocache "github.com/patrickmn/go-cache"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/segmentio/fasthash/fnv1a"
+	reportsv1alpha1 "openreports.io/apis/openreports.io/v1alpha1"
 
 	"github.com/kyverno/policy-reporter/pkg/report"
-	reportsv1alpha1 "openreports.io/apis/openreports.io/v1alpha1"
 )
 
 type CacheItem struct {
