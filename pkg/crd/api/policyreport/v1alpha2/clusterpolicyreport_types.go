@@ -22,7 +22,6 @@ import (
 	"github.com/segmentio/fasthash/fnv1a"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	reportsv1alpha1 "openreports.io/apis/openreports.io/v1alpha1"
 
 	"github.com/kyverno/policy-reporter/pkg/helper"
@@ -177,10 +176,7 @@ func (polr *ClusterPolicyReport) ToOpenReports() *reportsv1alpha1.ClusterReport 
 		})
 	}
 	return &reportsv1alpha1.ClusterReport{
-		ObjectMeta: v1.ObjectMeta{
-			Name:      polr.Name,
-			Namespace: polr.Namespace,
-		},
+		ObjectMeta:    polr.ObjectMeta,
 		Source:        polr.GetSource(),
 		Scope:         polr.Scope,
 		ScopeSelector: polr.ScopeSelector,
