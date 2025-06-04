@@ -867,11 +867,6 @@ func (f *TargetFactory) CreateGCSTarget(config, parent *v1alpha1.Config[v1alpha1
 	sugar := zap.S()
 
 	setFallback(&config.Config.Credentials, parent.Config.Credentials)
-	if config.Config.Credentials == "" {
-		sugar.Errorf("%s.Credentials has not been declared", config.Name)
-		return nil
-	}
-
 	setFallback(&config.Config.Prefix, parent.Config.Prefix, "policy-reporter")
 
 	config.MapBaseParent(parent)
