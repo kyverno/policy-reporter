@@ -76,8 +76,8 @@ func (q *Queue) processNextItem() bool {
 	)
 
 	switch key.APIVersion {
-	case "openreports.io/v1alpha1":
-		if namespace == "" {
+	case openreportsAPIGroup:
+		if namespace != "" {
 			rep, err = q.openreportsClient.Reports(namespace).Get(context.Background(), name, v1.GetOptions{})
 		} else {
 			rep, err = q.openreportsClient.ClusterReports().Get(context.Background(), name, v1.GetOptions{})
@@ -87,8 +87,8 @@ func (q *Queue) processNextItem() bool {
 			return true
 		}
 
-	case "wgpolicyk8s.io/v1alpha2":
-		if namespace == "" {
+	case wgpolicyAPIGroup:
+		if namespace != "" {
 			polr, err = q.polrClient.PolicyReports(namespace).Get(context.Background(), name, v1.GetOptions{})
 			rep = polr.ToOpenReports()
 		} else {

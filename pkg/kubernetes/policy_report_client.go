@@ -23,6 +23,11 @@ var (
 	openreportsCReport = v1alpha1.SchemeGroupVersion.WithResource("clusterreports")
 )
 
+const (
+	wgpolicyAPIGroup    = "wgpolicyk8s.io/v1alpha2"
+	openreportsAPIGroup = "openreports.io/v1alpha1"
+)
+
 type k8sPolicyReportClient struct {
 	queue        *Queue
 	metaClient   metadata.Interface
@@ -41,22 +46,24 @@ func (k *k8sPolicyReportClient) Stop() {
 }
 
 func (k *k8sPolicyReportClient) Sync(stopper chan struct{}) error {
-	factory := metadatainformer.NewSharedInformerFactory(k.metaClient, 15*time.Minute)
+	polrFactory := metadatainformer.NewSharedInformerFactory(k.metaClient, 15*time.Minute)
+	orFactory := metadatainformer.NewSharedInformerFactory(k.metaClient, 15*time.Minute)
 
 	var (
 		cpolrInformer cache.SharedIndexInformer
 		orCInformer   cache.SharedIndexInformer
 	)
 
-	orInformer := k.configureInformer(factory.ForResource(openreportsReport).Informer())
-	polrInformer := k.configureInformer(factory.ForResource(polrResource).Informer())
+	orInformer := k.configureORInformer(orFactory.ForResource(openreportsReport).Informer())
+	polrInformer := k.configurePolrInformer(polrFactory.ForResource(polrResource).Informer())
 
 	if !k.reportFilter.DisableClusterReports() {
-		cpolrInformer = k.configureInformer(factory.ForResource(cpolrResource).Informer())
-		orCInformer = k.configureInformer(factory.ForResource(openreportsCReport).Informer())
+		cpolrInformer = k.configureORInformer(orFactory.ForResource(cpolrResource).Informer())
+		orCInformer = k.configurePolrInformer(polrFactory.ForResource(openreportsCReport).Informer())
 	}
 
-	factory.Start(stopper)
+	polrFactory.Start(stopper)
+	orFactory.Start(stopper)
 
 	if !cache.WaitForCacheSync(stopper, polrInformer.HasSynced) {
 		return fmt.Errorf("failed to sync policy reports")
@@ -89,18 +96,20 @@ func (k *k8sPolicyReportClient) Run(worker int, stopper chan struct{}) error {
 	return nil
 }
 
-func (k *k8sPolicyReportClient) configureInformer(informer cache.SharedIndexInformer) cache.SharedIndexInformer {
+func (k *k8sPolicyReportClient) configurePolrInformer(informer cache.SharedIndexInformer) cache.SharedIndexInformer {
 	informer.AddEventHandler(cache.ResourceEventHandlerFuncs{
 		AddFunc: func(obj interface{}) {
 			if item, ok := obj.(*v1.PartialObjectMetadata); ok {
 				if k.reportFilter.AllowReport(item) {
-					k.queue.queue.Add(item)
+					item.APIVersion = wgpolicyAPIGroup
+					k.queue.Add(item)
 				}
 			}
 		},
 		DeleteFunc: func(obj interface{}) {
 			if item, ok := obj.(*v1.PartialObjectMetadata); ok {
 				if k.reportFilter.AllowReport(item) {
+					item.APIVersion = wgpolicyAPIGroup
 					k.queue.Add(item)
 				}
 			}
@@ -108,6 +117,42 @@ func (k *k8sPolicyReportClient) configureInformer(informer cache.SharedIndexInfo
 		UpdateFunc: func(_, newObj interface{}) {
 			if item, ok := newObj.(*v1.PartialObjectMetadata); ok {
 				if k.reportFilter.AllowReport(item) {
+					item.APIVersion = wgpolicyAPIGroup
+					k.queue.Add(item)
+				}
+			}
+		},
+	})
+
+	informer.SetWatchErrorHandler(func(_ *cache.Reflector, _ error) {
+		k.synced = false
+	})
+
+	return informer
+}
+
+func (k *k8sPolicyReportClient) configureORInformer(informer cache.SharedIndexInformer) cache.SharedIndexInformer {
+	informer.AddEventHandler(cache.ResourceEventHandlerFuncs{
+		AddFunc: func(obj interface{}) {
+			if item, ok := obj.(*v1.PartialObjectMetadata); ok {
+				if k.reportFilter.AllowReport(item) {
+					item.APIVersion = openreportsAPIGroup
+					k.queue.Add(item)
+				}
+			}
+		},
+		DeleteFunc: func(obj interface{}) {
+			if item, ok := obj.(*v1.PartialObjectMetadata); ok {
+				if k.reportFilter.AllowReport(item) {
+					item.APIVersion = openreportsAPIGroup
+					k.queue.Add(item)
+				}
+			}
+		},
+		UpdateFunc: func(_, newObj interface{}) {
+			if item, ok := newObj.(*v1.PartialObjectMetadata); ok {
+				if k.reportFilter.AllowReport(item) {
+					item.APIVersion = openreportsAPIGroup
 					k.queue.Add(item)
 				}
 			}
