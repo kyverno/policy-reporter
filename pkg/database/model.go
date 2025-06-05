@@ -8,6 +8,7 @@ import (
 	"openreports.io/apis/openreports.io/v1alpha1"
 
 	"github.com/kyverno/policy-reporter/pkg/helper"
+	"github.com/kyverno/policy-reporter/pkg/openreports"
 	"github.com/kyverno/policy-reporter/pkg/report"
 	"github.com/kyverno/policy-reporter/pkg/report/result"
 )
@@ -122,7 +123,7 @@ func (r *PolicyReportFilter) Hash() string {
 	return strconv.FormatUint(h1, 10)
 }
 
-func MapPolicyReport(r v1alpha1.ReportInterface) *PolicyReport {
+func MapPolicyReport(r openreports.ReportInterface) *PolicyReport {
 	return &PolicyReport{
 		ID:        r.GetID(),
 		Type:      report.GetType(r),
@@ -139,7 +140,7 @@ func MapPolicyReport(r v1alpha1.ReportInterface) *PolicyReport {
 	}
 }
 
-func MapPolicyReportResults(polr v1alpha1.ReportInterface) []*PolicyReportResult {
+func MapPolicyReportResults(polr openreports.ReportInterface) []*PolicyReportResult {
 	list := make([]*PolicyReportResult, 0, len(polr.GetResults()))
 	for _, r := range polr.GetResults() {
 		res := result.Resource(polr, r)
@@ -178,7 +179,7 @@ func MapPolicyReportResults(polr v1alpha1.ReportInterface) []*PolicyReportResult
 	return list
 }
 
-func MapPolicyReportFilter(polr v1alpha1.ReportInterface) []*PolicyReportFilter {
+func MapPolicyReportFilter(polr openreports.ReportInterface) []*PolicyReportFilter {
 	mapping := make(map[string]*PolicyReportFilter)
 	for _, res := range polr.GetResults() {
 		kind := res.GetKind()
@@ -212,7 +213,7 @@ func MapPolicyReportFilter(polr v1alpha1.ReportInterface) []*PolicyReportFilter 
 	return list
 }
 
-func MapPolicyReportResource(polr v1alpha1.ReportInterface) []*ResourceResult {
+func MapPolicyReportResource(polr openreports.ReportInterface) []*ResourceResult {
 	mapping := make(map[string]*ResourceResult)
 	for _, res := range polr.GetResults() {
 		resource := polr.GetScope()

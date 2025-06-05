@@ -1,10 +1,10 @@
 package cache
 
-import "openreports.io/apis/openreports.io/v1alpha1"
+import "github.com/kyverno/policy-reporter/pkg/openreports"
 
 type Cache interface {
 	RemoveReport(id string)
-	AddReport(report v1alpha1.ReportInterface)
+	AddReport(report openreports.ReportInterface)
 	GetResults(id string) []string
 	Shared() bool
 	Clear()

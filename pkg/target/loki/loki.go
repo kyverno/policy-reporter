@@ -8,6 +8,7 @@ import (
 	"openreports.io/apis/openreports.io/v1alpha1"
 
 	"github.com/kyverno/policy-reporter/pkg/helper"
+	"github.com/kyverno/policy-reporter/pkg/openreports"
 	"github.com/kyverno/policy-reporter/pkg/target"
 	"github.com/kyverno/policy-reporter/pkg/target/http"
 )
@@ -110,7 +111,7 @@ func (l *client) Send(result v1alpha1.ReportResult) {
 	})
 }
 
-func (l *client) BatchSend(_ v1alpha1.ReportInterface, results []v1alpha1.ReportResult) {
+func (l *client) BatchSend(_ openreports.ReportInterface, results []v1alpha1.ReportResult) {
 	l.send(Payload{Streams: helper.Map(results, func(result v1alpha1.ReportResult) Stream {
 		return newLokiStream(result, l.customFields)
 	})})

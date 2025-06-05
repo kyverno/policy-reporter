@@ -1,6 +1,7 @@
 package report
 
 import (
+	"github.com/kyverno/policy-reporter/pkg/openreports"
 	"openreports.io/apis/openreports.io/v1alpha1"
 )
 
@@ -8,13 +9,13 @@ import (
 type PolicyReportListener = func(LifecycleEvent)
 
 // PolicyReportResultListener is called whenever a new PolicyResult comes in
-type PolicyReportResultListener = func(v1alpha1.ReportInterface, v1alpha1.ReportResult, bool)
+type PolicyReportResultListener = func(openreports.ReportInterface, v1alpha1.ReportResult, bool)
 
 // ScopeResultsListener is called whenever a new PolicyReport with a single resource scope and new results comes in
-type ScopeResultsListener = func(v1alpha1.ReportInterface, []v1alpha1.ReportResult, bool)
+type ScopeResultsListener = func(openreports.ReportInterface, []v1alpha1.ReportResult, bool)
 
 // SyncResultsListener is called whenever a PolicyReport event comes in
-type SyncResultsListener = func(v1alpha1.ReportInterface)
+type SyncResultsListener = func(openreports.ReportInterface)
 
 // PolicyReportClient watches for PolicyReport Events and executes registered callback
 type PolicyReportClient interface {

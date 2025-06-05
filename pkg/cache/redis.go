@@ -7,8 +7,8 @@ import (
 	"time"
 
 	goredis "github.com/go-redis/redis/v8"
+	"github.com/kyverno/policy-reporter/pkg/openreports"
 	"go.uber.org/zap"
-	"openreports.io/apis/openreports.io/v1alpha1"
 )
 
 type rdb interface {
@@ -24,7 +24,7 @@ type redisCache struct {
 	ttl    time.Duration
 }
 
-func (r *redisCache) AddReport(report v1alpha1.ReportInterface) {
+func (r *redisCache) AddReport(report openreports.ReportInterface) {
 	next := make(map[string]bool)
 
 	for _, result := range report.GetResults() {

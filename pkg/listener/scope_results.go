@@ -6,6 +6,7 @@ import (
 	"openreports.io/apis/openreports.io/v1alpha1"
 
 	"github.com/kyverno/policy-reporter/pkg/helper"
+	"github.com/kyverno/policy-reporter/pkg/openreports"
 	"github.com/kyverno/policy-reporter/pkg/report"
 	"github.com/kyverno/policy-reporter/pkg/target"
 )
@@ -13,7 +14,7 @@ import (
 const SendScopeResults = "send_scope_results_listener"
 
 func NewSendScopeResultsListener(targets *target.Collection) report.ScopeResultsListener {
-	return func(rep v1alpha1.ReportInterface, r []v1alpha1.ReportResult, e bool) {
+	return func(rep openreports.ReportInterface, r []v1alpha1.ReportResult, e bool) {
 		clients := targets.BatchSendClients()
 		if len(clients) == 0 {
 			return
@@ -23,7 +24,7 @@ func NewSendScopeResultsListener(targets *target.Collection) report.ScopeResults
 		wg.Add(len(clients))
 
 		for _, t := range clients {
-			go func(target target.Client, re v1alpha1.ReportInterface, results []v1alpha1.ReportResult, preExisted bool) {
+			go func(target target.Client, re openreports.ReportInterface, results []v1alpha1.ReportResult, preExisted bool) {
 				defer wg.Done()
 
 				filtered := helper.Filter(results, func(result v1alpha1.ReportResult) bool {

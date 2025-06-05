@@ -3,6 +3,7 @@ package metrics
 import (
 	"openreports.io/apis/openreports.io/v1alpha1"
 
+	"github.com/kyverno/policy-reporter/pkg/openreports"
 	"github.com/kyverno/policy-reporter/pkg/report"
 	"github.com/kyverno/policy-reporter/pkg/validate"
 )
@@ -59,13 +60,13 @@ func NewResultFilter(namespace, status, policy, source, severity, kind validate.
 func NewReportFilter(namespace, source validate.RuleSets) *report.ReportFilter {
 	f := &report.ReportFilter{}
 	if namespace.Count() > 0 {
-		f.AddValidation(func(r v1alpha1.ReportInterface) bool {
+		f.AddValidation(func(r openreports.ReportInterface) bool {
 			return validate.Namespace(r.GetNamespace(), namespace)
 		})
 	}
 
 	if source.Count() > 0 {
-		f.AddValidation(func(r v1alpha1.ReportInterface) bool {
+		f.AddValidation(func(r openreports.ReportInterface) bool {
 			if len(r.GetResults()) == 0 {
 				return true
 			}

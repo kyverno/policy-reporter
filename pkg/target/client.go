@@ -10,6 +10,7 @@ import (
 
 	"github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
 	"github.com/kyverno/policy-reporter/pkg/kubernetes/namespaces"
+	"github.com/kyverno/policy-reporter/pkg/openreports"
 	"github.com/kyverno/policy-reporter/pkg/report"
 	"github.com/kyverno/policy-reporter/pkg/validate"
 )
@@ -27,13 +28,13 @@ type Client interface {
 	// Send the given Result to the configured Target
 	Send(result v1alpha1.ReportResult)
 	// BatchSend the given Results of a single PolicyReport to the configured Target
-	BatchSend(report v1alpha1.ReportInterface, results []v1alpha1.ReportResult)
+	BatchSend(report openreports.ReportInterface, results []v1alpha1.ReportResult)
 	// SkipExistingOnStartup skips already existing PolicyReportResults on startup
 	SkipExistingOnStartup() bool
 	// Name is a unique identifier for each Target
 	Name() string
 	// Validate if a result should send
-	Validate(rep v1alpha1.ReportInterface, result v1alpha1.ReportResult) bool
+	Validate(rep openreports.ReportInterface, result v1alpha1.ReportResult) bool
 	// MinimumSeverity for a triggered Result to send to this target
 	MinimumSeverity() string
 	// Sources of the Results which should send to this target, empty means all sources
@@ -41,7 +42,7 @@ type Client interface {
 	// Type for the given target
 	Type() ClientType
 	// CleanUp old results if supported by the target
-	CleanUp(context.Context, v1alpha1.ReportInterface)
+	CleanUp(context.Context, openreports.ReportInterface)
 	// Reset the current state in the related target
 	Reset(context.Context) error
 	// SendHeartbeat sends a periodic keepalive message
@@ -120,7 +121,7 @@ func NewReportFilter(labels, sources validate.RuleSets) *report.ReportFilter {
 	f := report.NewReportFilter()
 
 	if labels.Count() > 0 {
-		f.AddValidation(func(r v1alpha1.ReportInterface) bool {
+		f.AddValidation(func(r openreports.ReportInterface) bool {
 			if len(labels.Include) > 0 {
 				for _, label := range labels.Include {
 					parts := strings.Split(label, ":")
@@ -162,7 +163,7 @@ func NewReportFilter(labels, sources validate.RuleSets) *report.ReportFilter {
 	}
 
 	if sources.Count() > 0 {
-		f.AddValidation(func(r v1alpha1.ReportInterface) bool {
+		f.AddValidation(func(r openreports.ReportInterface) bool {
 			source := r.GetSource()
 			if source == "" {
 				return true
@@ -213,7 +214,7 @@ func (c *BaseClient) Sources() []string {
 	return c.resultFilter.Sources
 }
 
-func (c *BaseClient) Validate(rep v1alpha1.ReportInterface, result v1alpha1.ReportResult) bool {
+func (c *BaseClient) Validate(rep openreports.ReportInterface, result v1alpha1.ReportResult) bool {
 	if !c.ValidateReport(rep) {
 		return false
 	}
@@ -225,7 +226,7 @@ func (c *BaseClient) Validate(rep v1alpha1.ReportInterface, result v1alpha1.Repo
 	return true
 }
 
-func (c *BaseClient) ValidateReport(rep v1alpha1.ReportInterface) bool {
+func (c *BaseClient) ValidateReport(rep openreports.ReportInterface) bool {
 	if rep == nil {
 		return false
 	}
@@ -245,9 +246,9 @@ func (c *BaseClient) Reset(_ context.Context) error {
 	return nil
 }
 
-func (c *BaseClient) CleanUp(_ context.Context, _ v1alpha1.ReportInterface) {}
+func (c *BaseClient) CleanUp(_ context.Context, _ openreports.ReportInterface) {}
 
-func (c *BaseClient) BatchSend(_ v1alpha1.ReportInterface, _ []v1alpha1.ReportResult) {}
+func (c *BaseClient) BatchSend(_ openreports.ReportInterface, _ []v1alpha1.ReportResult) {}
 
 func (c *BaseClient) SendHeartbeat() {} // Default no-op implementation
 

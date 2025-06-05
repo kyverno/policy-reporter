@@ -8,12 +8,13 @@ import (
 	"openreports.io/apis/openreports.io/v1alpha1"
 
 	"github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
+	"github.com/kyverno/policy-reporter/pkg/openreports"
 	"github.com/kyverno/policy-reporter/pkg/report/result"
 )
 
 func TestReconditioner(t *testing.T) {
 	t.Run("prepare with default generator", func(t *testing.T) {
-		var report v1alpha1.ReportInterface = &v1alpha1.Report{
+		var report openreports.ReportInterface = &v1alpha1.Report{
 			ObjectMeta: v1.ObjectMeta{
 				Name:      "policy-report",
 				Namespace: "test",
@@ -66,7 +67,7 @@ func TestReconditioner(t *testing.T) {
 	})
 
 	t.Run("prepare with custom generator", func(t *testing.T) {
-		var report v1alpha1.ReportInterface = &v1alpha1.Report{
+		var report openreports.ReportInterface = &v1alpha1.Report{
 			ObjectMeta: v1.ObjectMeta{
 				Name:      "policy-report",
 				Namespace: "test",

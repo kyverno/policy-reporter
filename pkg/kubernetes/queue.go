@@ -17,6 +17,7 @@ import (
 
 	pr "github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
 	"github.com/kyverno/policy-reporter/pkg/crd/client/policyreport/clientset/versioned/typed/policyreport/v1alpha2"
+	"github.com/kyverno/policy-reporter/pkg/openreports"
 	"github.com/kyverno/policy-reporter/pkg/report"
 	"github.com/kyverno/policy-reporter/pkg/report/result"
 )
@@ -69,7 +70,7 @@ func (q *Queue) processNextItem() bool {
 	namespace := key.Namespace
 
 	var (
-		rep   reportsv1alpha1.ReportInterface
+		rep   openreports.ReportInterface
 		err   error
 		polr  *pr.PolicyReport
 		cpolr *pr.ClusterPolicyReport
@@ -144,7 +145,7 @@ func (q *Queue) handleErr(err error, key *v1.PartialObjectMetadata) {
 }
 
 func (q *Queue) handleNotFoundReport(key *v1.PartialObjectMetadata) {
-	var rep reportsv1alpha1.ReportInterface
+	var rep openreports.ReportInterface
 	if key.GetNamespace() == "" {
 		rep = &reportsv1alpha1.ClusterReport{
 			ObjectMeta: v1.ObjectMeta{

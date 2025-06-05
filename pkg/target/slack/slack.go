@@ -8,6 +8,7 @@ import (
 	"openreports.io/apis/openreports.io/v1alpha1"
 
 	"github.com/kyverno/policy-reporter/pkg/helper"
+	"github.com/kyverno/policy-reporter/pkg/openreports"
 	"github.com/kyverno/policy-reporter/pkg/target"
 	"github.com/kyverno/policy-reporter/pkg/target/formatting"
 	"github.com/kyverno/policy-reporter/pkg/target/http"
@@ -171,7 +172,7 @@ func (s *client) message(result v1alpha1.ReportResult) *slack.WebhookMessage {
 	return p
 }
 
-func (s *client) batchMessage(polr v1alpha1.ReportInterface, results []v1alpha1.ReportResult) *slack.WebhookMessage {
+func (s *client) batchMessage(polr openreports.ReportInterface, results []v1alpha1.ReportResult) *slack.WebhookMessage {
 	scope := polr.GetScope()
 	resource := formatting.ResourceString(scope)
 
@@ -280,7 +281,7 @@ func (s *client) Send(result v1alpha1.ReportResult) {
 	s.PostMessage(s.message(result))
 }
 
-func (s *client) BatchSend(report v1alpha1.ReportInterface, results []v1alpha1.ReportResult) {
+func (s *client) BatchSend(report openreports.ReportInterface, results []v1alpha1.ReportResult) {
 	if report.GetScope() == nil {
 		for _, result := range results {
 			s.Send(result)

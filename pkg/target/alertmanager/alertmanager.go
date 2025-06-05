@@ -6,6 +6,7 @@ import (
 	"go.uber.org/zap"
 	reportsv1alpha1 "openreports.io/apis/openreports.io/v1alpha1"
 
+	"github.com/kyverno/policy-reporter/pkg/openreports"
 	"github.com/kyverno/policy-reporter/pkg/target"
 	targethttp "github.com/kyverno/policy-reporter/pkg/target/http"
 )
@@ -51,7 +52,7 @@ func (a *client) Send(result reportsv1alpha1.ReportResult) {
 	a.sendAlerts([]Alert{alert})
 }
 
-func (a *client) BatchSend(report reportsv1alpha1.ReportInterface, results []reportsv1alpha1.ReportResult) {
+func (a *client) BatchSend(report openreports.ReportInterface, results []reportsv1alpha1.ReportResult) {
 	zap.L().Debug("Batch sending policy violations to AlertManager",
 		zap.Int("count", len(results)),
 		zap.String("reportName", report.GetName()),

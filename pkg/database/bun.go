@@ -18,6 +18,7 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 	"openreports.io/apis/openreports.io/v1alpha1"
 
+	"github.com/kyverno/policy-reporter/pkg/openreports"
 	"github.com/kyverno/policy-reporter/pkg/report"
 )
 
@@ -941,7 +942,7 @@ func (s *Store) DropSchema(ctx context.Context) error {
 	return err
 }
 
-func (s *Store) Add(ctx context.Context, report v1alpha1.ReportInterface) error {
+func (s *Store) Add(ctx context.Context, report openreports.ReportInterface) error {
 	_, err := s.db.NewInsert().Model(MapPolicyReport(report)).Exec(ctx)
 	if err != nil {
 		zap.L().Error("failed to persist policy report", zap.Error(err))
@@ -977,7 +978,7 @@ func (s *Store) Add(ctx context.Context, report v1alpha1.ReportInterface) error 
 	return err
 }
 
-func (s *Store) Update(ctx context.Context, report v1alpha1.ReportInterface) error {
+func (s *Store) Update(ctx context.Context, report openreports.ReportInterface) error {
 	err := s.Remove(ctx, report.GetID())
 	if err != nil {
 		return err
@@ -1006,7 +1007,7 @@ func (s *Store) CleanUp(ctx context.Context) error {
 	return err
 }
 
-func (s *Store) Get(ctx context.Context, id string) (v1alpha1.ReportInterface, error) {
+func (s *Store) Get(ctx context.Context, id string) (openreports.ReportInterface, error) {
 	polr := &PolicyReport{}
 
 	err := s.db.NewSelect().Model(polr).Where("id = ?", id).Scan(ctx)

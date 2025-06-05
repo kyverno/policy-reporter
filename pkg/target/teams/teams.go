@@ -9,6 +9,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	"openreports.io/apis/openreports.io/v1alpha1"
 
+	"github.com/kyverno/policy-reporter/pkg/openreports"
 	"github.com/kyverno/policy-reporter/pkg/target"
 	"github.com/kyverno/policy-reporter/pkg/target/formatting"
 	"github.com/kyverno/policy-reporter/pkg/target/http"
@@ -35,9 +36,9 @@ func (s *client) Send(result v1alpha1.ReportResult) {
 	s.PostMessage(s.newMessage(result.GetResource(), []v1alpha1.ReportResult{result}))
 }
 
-func (s *client) CleanUp(_ context.Context, _ v1alpha1.ReportInterface) {}
+func (s *client) CleanUp(_ context.Context, _ openreports.ReportInterface) {}
 
-func (s *client) BatchSend(report v1alpha1.ReportInterface, results []v1alpha1.ReportResult) {
+func (s *client) BatchSend(report openreports.ReportInterface, results []v1alpha1.ReportResult) {
 	if report.GetScope() == nil {
 		for _, r := range results {
 			s.Send(r)

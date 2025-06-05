@@ -5,6 +5,7 @@ import (
 	"github.com/prometheus/client_golang/prometheus/promauto"
 	"openreports.io/apis/openreports.io/v1alpha1"
 
+	"github.com/kyverno/policy-reporter/pkg/openreports"
 	"github.com/kyverno/policy-reporter/pkg/report"
 )
 
@@ -58,7 +59,7 @@ func CreateDetailedClusterResultMetricListener(filter *report.ResultFilter, gaug
 	}
 }
 
-func generateClusterResultLabels(report v1alpha1.ReportInterface, result v1alpha1.ReportResult) map[string]string {
+func generateClusterResultLabels(report openreports.ReportInterface, result v1alpha1.ReportResult) map[string]string {
 	labels := prometheus.Labels{
 		"rule":     result.Rule,
 		"policy":   result.Policy,
