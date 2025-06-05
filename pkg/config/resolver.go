@@ -17,15 +17,18 @@ import (
 	mail "github.com/xhit/go-simple-mail/v2"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
+	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	k8s "k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/metadata"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/util/workqueue"
+	"openreports.io/pkg/client/clientset/versioned"
+	"openreports.io/pkg/client/clientset/versioned/typed/openreports.io/v1alpha1"
 
 	"github.com/kyverno/policy-reporter/pkg/api"
 	"github.com/kyverno/policy-reporter/pkg/cache"
-	"github.com/kyverno/policy-reporter/pkg/crd/client/policyreport/clientset/versioned"
-	wgpolicyk8sv1alpha2 "github.com/kyverno/policy-reporter/pkg/crd/client/policyreport/clientset/versioned/typed/policyreport/v1alpha2"
+	polrversioned "github.com/kyverno/policy-reporter/pkg/crd/client/policyreport/clientset/versioned"
+	"github.com/kyverno/policy-reporter/pkg/crd/client/policyreport/clientset/versioned/typed/policyreport/v1alpha2"
 	tcv1alpha1 "github.com/kyverno/policy-reporter/pkg/crd/client/targetconfig/clientset/versioned"
 	"github.com/kyverno/policy-reporter/pkg/database"
 	"github.com/kyverno/policy-reporter/pkg/email"
@@ -207,7 +210,7 @@ func (r *Resolver) CustomIDGenerators() map[string]result.IDGenerator {
 
 // EventPublisher resolver method
 func (r *Resolver) Queue() (*kubernetes.Queue, error) {
-	client, err := r.CRDClient()
+	orClient, polrClient, err := r.CRDClient()
 	if err != nil {
 		return nil, err
 	}
@@ -224,10 +227,11 @@ func (r *Resolver) Queue() (*kubernetes.Queue, error) {
 
 	return kubernetes.NewQueue(
 		kubernetes.NewDebouncer(1*time.Minute, r.EventPublisher()),
-		workqueue.NewTypedRateLimitingQueueWithConfig(workqueue.DefaultTypedControllerRateLimiter[string](), workqueue.TypedRateLimitingQueueConfig[string]{
+		workqueue.NewTypedRateLimitingQueueWithConfig(workqueue.DefaultTypedControllerRateLimiter[*v1.PartialObjectMetadata](), workqueue.TypedRateLimitingQueueConfig[*v1.PartialObjectMetadata]{
 			Name: "report-queue",
 		}),
-		client,
+		orClient,
+		polrClient,
 		report.NewSourceFilter(podsClient, jobsClient, helper.Map(r.config.SourceFilters, func(f SourceFilter) report.SourceValidation {
 			return report.SourceValidation{
 				Selector:              report.ReportSelector{Source: f.Selector.Source},
@@ -430,13 +434,18 @@ func (r *Resolver) SkipExistingOnStartup() bool {
 	return true
 }
 
-func (r *Resolver) CRDClient() (wgpolicyk8sv1alpha2.Wgpolicyk8sV1alpha2Interface, error) {
+func (r *Resolver) CRDClient() (v1alpha1.OpenreportsV1alpha1Interface, v1alpha2.Wgpolicyk8sV1alpha2Interface, error) {
 	client, err := versioned.NewForConfig(r.k8sConfig)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
-	return client.Wgpolicyk8sV1alpha2(), nil
+	polrclient, err := polrversioned.NewForConfig(r.k8sConfig)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	return client.OpenreportsV1alpha1(), polrclient.Wgpolicyk8sV1alpha2(), nil
 }
 
 func (r *Resolver) CRDMetadataClient() (metadata.Interface, error) {
@@ -449,7 +458,7 @@ func (r *Resolver) CRDMetadataClient() (metadata.Interface, error) {
 }
 
 func (r *Resolver) SummaryGenerator() (*summary.Generator, error) {
-	client, err := r.CRDClient()
+	orclient, _, err := r.CRDClient()
 	if err != nil {
 		return nil, err
 	}
@@ -460,7 +469,7 @@ func (r *Resolver) SummaryGenerator() (*summary.Generator, error) {
 	}
 
 	return summary.NewGenerator(
-		client,
+		orclient,
 		EmailReportFilterFromConfig(nsclient, r.config.EmailReports.Summary.Filter),
 		!r.config.EmailReports.Summary.Filter.DisableClusterReports,
 	), nil
@@ -475,7 +484,7 @@ func (r *Resolver) SummaryReporter() *summary.Reporter {
 }
 
 func (r *Resolver) ViolationsGenerator() (*violations.Generator, error) {
-	client, err := r.CRDClient()
+	client, _, err := r.CRDClient()
 	if err != nil {
 		return nil, err
 	}
@@ -543,7 +552,7 @@ func (r *Resolver) TargetConfigClient() (*targetconfig.Client, error) {
 		return nil, err
 	}
 
-	crdClient, err := r.CRDClient()
+	crdClient, _, err := r.CRDClient()
 	if err != nil {
 		return nil, err
 	}

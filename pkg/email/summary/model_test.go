@@ -3,7 +3,8 @@ package summary_test
 import (
 	"testing"
 
-	"github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
+	"openreports.io/apis/openreports.io/v1alpha1"
+
 	"github.com/kyverno/policy-reporter/pkg/email/summary"
 )
 
@@ -15,7 +16,7 @@ func Test_Source(t *testing.T) {
 		}
 	})
 	t.Run("Source.AddClusterSummary", func(t *testing.T) {
-		source.AddClusterSummary(v1alpha2.PolicyReportSummary{
+		source.AddClusterSummary(v1alpha1.ReportSummary{
 			Pass:  1,
 			Warn:  2,
 			Fail:  4,
@@ -36,7 +37,7 @@ func Test_Source(t *testing.T) {
 		}
 	})
 	t.Run("Source.AddNamespacedSummary", func(t *testing.T) {
-		source.AddNamespacedSummary("test", v1alpha2.PolicyReportSummary{
+		source.AddNamespacedSummary("test", v1alpha1.ReportSummary{
 			Pass:  5,
 			Warn:  6,
 			Fail:  7,
@@ -56,7 +57,7 @@ func Test_Source(t *testing.T) {
 			t.Errorf("Unexpected Errpr Summary: %d", source.ClusterScopeSummary.Error)
 		}
 
-		source.AddNamespacedSummary("test", v1alpha2.PolicyReportSummary{
+		source.AddNamespacedSummary("test", v1alpha1.ReportSummary{
 			Pass:  2,
 			Warn:  1,
 			Fail:  0,
