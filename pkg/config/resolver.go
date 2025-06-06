@@ -618,9 +618,9 @@ func (r *Resolver) Logger() (*zap.Logger, error) {
 		encoder.EncodeTime = zapcore.TimeEncoderOfLayout("2006-01-02 15:04:05")
 	}
 
-	ouput := "json"
+	output := "json"
 	if r.config.Logging.Encoding != "json" {
-		ouput = "console"
+		output = "console"
 		encoder.EncodeCaller = nil
 	}
 
@@ -636,7 +636,7 @@ func (r *Resolver) Logger() (*zap.Logger, error) {
 		Level:             zap.NewAtomicLevelAt(zapcore.Level(r.config.Logging.LogLevel)),
 		Development:       r.config.Logging.Development,
 		Sampling:          sampling,
-		Encoding:          ouput,
+		Encoding:          output,
 		EncoderConfig:     encoder,
 		DisableStacktrace: !r.config.Logging.Development,
 		OutputPaths:       []string{"stderr"},
