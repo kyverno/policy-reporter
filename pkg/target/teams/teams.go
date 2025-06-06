@@ -109,7 +109,7 @@ func (s *client) newMessage(resource *corev1.ObjectReference, results []v1alpha2
 			stats.Facts = append(stats.Facts, adaptivecard.Fact{Title: "Severity", Value: string(result.Severity)})
 		}
 
-		policy := fmt.Sprintf("Policy: %s", result.Policy)
+		policy := "Policy: " + result.Policy
 
 		if result.Rule != "" {
 			policy = fmt.Sprintf("%s/%s", policy, result.Rule)
