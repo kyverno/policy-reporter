@@ -30,7 +30,7 @@ kubectl apply -f https://raw.githubusercontent.com/kyverno/policy-reporter/main/
 
 ## Policy Reporter UI + Kyverno Plugin in HA Mode
 
-The `policy-reporter-kyverno-ui-ha` installs the same compoments as `policy-reporter-kyverno-ui` but runs all components in HA mode (2 replicas) and creates additional resources for leader elections.
+The `policy-reporter-kyverno-ui-ha` installs the same components as `policy-reporter-kyverno-ui` but runs all components in HA mode (2 replicas) and creates additional resources for leader elections.
 
 ```bash
 kubectl apply -f https://raw.githubusercontent.com/kyverno/policy-reporter/main/manifests/policy-reporter-kyverno-ui-ha/install.yaml

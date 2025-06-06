@@ -31,7 +31,7 @@
         * New HTML Report API `/v1/html-report/violations`
         * CleanUp Listener for AWS SecurityHub
         * SourcConfig enables a custom ID generation logic per source
-        * Deprecated PriorityMapping is removed, its recommanded to configure it via Severity
+        * Deprecated PriorityMapping is removed, its recommended to configure it via Severity
         * Support Workload Identity for GoogleCloudStorage target
 
 # 2.22.5
@@ -39,7 +39,7 @@
     * fix(helm): correct typo when using global.annotations [[#420](https://github.com/kyverno/policy-reporter/pull/420) by [ThomasLachaux](https://github.com/ThomasLachaux)]
     * Policy Reporter v2.18.2
         * Add support for custom headers for the Loki target
-        * Depdency Updates
+        * Dependency Updates
         * Upgrade to Go v1.22
 
 # 2.22.4
@@ -150,7 +150,7 @@
 # 2.19.3
 * Helm Chart
     * Fix Ingress TLS block [[#317](https://github.com/kyverno/policy-reporter/pull/317) by [rufusnufus](https://github.com/rufusnufus)]
-    * Make inverval and scrapeTimeout configurable on ServiceMonitors [[#318](https://github.com/kyverno/policy-reporter/pull/318) by [fhielpos](https://github.com/fhielpos)]
+    * Make interval and scrapeTimeout configurable on ServiceMonitors [[#318](https://github.com/kyverno/policy-reporter/pull/318) by [fhielpos](https://github.com/fhielpos)]
 
 # 2.19.2
 * Policy Reporter
@@ -160,7 +160,7 @@
 # 2.19.1
 * Policy Reporter
     * AWS IRSA Authentication Support
-    * Add `source` attribute to JSON ouput [[#311](https://github.com/kyverno/policy-reporter/pull/311) by [nikolay-o](https://github.com/nikolay-o)]
+    * Add `source` attribute to JSON output [[#311](https://github.com/kyverno/policy-reporter/pull/311) by [nikolay-o](https://github.com/nikolay-o)]
 
 # 2.19.0
 * Policy Reporter
@@ -210,7 +210,7 @@
     * Helm Ingress template
     * New Google Cloud Storage Target
         * Requires `credentials` as JSON String and the `bucket` name
-        * Added in the helm valus under `target.gcs`
+        * Added in the helm values under `target.gcs`
 * Policy Reporter KyvernoPlugin
     * Helm Ingress template
     * Improved logging configuration
@@ -367,7 +367,7 @@
 
 # 2.10.3
 * Policy Reporter
-    * Add new config `target.loki.path` to overwrite the deprected prom push API
+    * Add new config `target.loki.path` to overwrite the deprecated prom push API
 
 # 2.10.2
 * Policy Reporter UI
@@ -385,7 +385,7 @@
         * Send Summary Reports over SMTP to different E-Mails
         * Supports channels and filters to send different subsets of Namespaces or Sources to dedicated E-Mails
         * Reports are generated and send over dedicated CronJobs, this makes it easy to send the reports as often as needed
-        * Currently a basic summary and a more detailed violation report is available and can be separatly enabled and configured
+        * Currently a basic summary and a more detailed violation report is available and can be separately enabled and configured
     * Metrics
         * Add `metrics.mode` for less or custom metric values, to reduce cardinality
     * Monitoring
@@ -434,7 +434,7 @@
 # 2.8.0
 * Policy Reporter
     * New target filter and channels to define multiple configurations of the same target
-        * Filter target results by exclude and include rules for namesapces, priorities and policies
+        * Filter target results by exclude and include rules for namespaces, priorities and policies
         * Support wildcards for policies and namespaces
     * New __webhook__ target
         * this target is a simple way to send notifications to custom tools and APIs
@@ -634,12 +634,12 @@ See [Migration Docs](https://kyverno.github.io/policy-reporter/guide/05-migratio
 
 # 1.8.8
 * Optional Namespace Configuration for Monitoring ServiceMonitor
-* Separat Namespace Configuration for Monitoring ConfigMaps with `monitoring.grafana.namespace`
+* Separate Namespace Configuration for Monitoring ConfigMaps with `monitoring.grafana.namespace`
 
 # 1.8.7
 * Update Policy Reporter UI to 0.14.0
     * Colored Diagrams
-    * Suppport SubPath Configuration
+    * Support SubPath Configuration
 * Restart CRD Watches when no CRDs are found
 * Fix Ingress Resource in the UI Subchart
 * Allow to override namespace for serviceMonitor [[#57](https://github.com/kyverno/policy-reporter/pull/57) by [Issif](https://github.com/Issif)]
@@ -692,7 +692,7 @@ See [Migration Docs](https://kyverno.github.io/policy-reporter/guide/05-migratio
     * Add default labels on every resource
 
 # 1.6.2
-* Increase Result Caching Time to handle Kyverno issues with Policy reconcilation [Issue](https://github.com/kyverno/kyverno/issues/1921)
+* Increase Result Caching Time to handle Kyverno issues with Policy reconciliation [Issue](https://github.com/kyverno/kyverno/issues/1921)
 * Fix golint errors
 
 # 1.6.1
@@ -702,13 +702,13 @@ See [Migration Docs](https://kyverno.github.io/policy-reporter/guide/05-migratio
 # 1.6.0
 * Internal refactoring
     * Unification of PolicyReports and ClusterPolicyReports processing, APIs still stable
-    * DEPRECETED `crdVersion`, Policy Reporter handels now both versions by default
+    * DEPRECETED `crdVersion`, Policy Reporter handles now both versions by default
     * DEPRECETED `cleanupDebounceTime`, new internal caching replaced the debounce mechanism, debounce still exist with a fixed period to improve stable metric values.
 
 # 1.5.0
 * Support multiple Resources for a single Result
     * Mapping Result with multiple Resources in multiple Results with a single Resource
-    * Upate UI handling with Results without Resources
+    * Update UI handling with Results without Resources
 
 # 1.4.1
 * Update Kyverno Plugin
@@ -864,7 +864,7 @@ See [Migration Docs](https://kyverno.github.io/policy-reporter/guide/05-migratio
 ## 0.11.0
 
 * Helm Chart Value `metrics.serviceMonitor` changed to `metrics.serviceMonitor.enabled`
-* New Helm Chart Value `metrics.serviceMonitor.labels` can be used to add additional `labels` to the `SeriveMonitor`. This helps to fullfil the `serviceMonitorSelector` of the `Prometheus` Resource in the MonitoringStack.
+* New Helm Chart Value `metrics.serviceMonitor.labels` can be used to add additional `labels` to the `SeriveMonitor`. This helps to fulfill the `serviceMonitorSelector` of the `Prometheus` Resource in the MonitoringStack.
 
 ## 0.10.0
 

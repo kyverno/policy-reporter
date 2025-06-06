@@ -32,7 +32,7 @@ func Test_Source(t *testing.T) {
 			t.Errorf("Unexpected Fail Summary: %d", source.ClusterScopeSummary.Fail)
 		}
 		if source.ClusterScopeSummary.Error != 3 {
-			t.Errorf("Unexpected Errpr Summary: %d", source.ClusterScopeSummary.Error)
+			t.Errorf("Unexpected Error Summary: %d", source.ClusterScopeSummary.Error)
 		}
 	})
 	t.Run("Source.AddNamespacedSummary", func(t *testing.T) {
@@ -53,7 +53,7 @@ func Test_Source(t *testing.T) {
 			t.Errorf("Unexpected Fail Summary: %d", source.ClusterScopeSummary.Fail)
 		}
 		if source.NamespaceScopeSummary["test"].Error != 8 {
-			t.Errorf("Unexpected Errpr Summary: %d", source.ClusterScopeSummary.Error)
+			t.Errorf("Unexpected Error Summary: %d", source.ClusterScopeSummary.Error)
 		}
 
 		source.AddNamespacedSummary("test", v1alpha2.PolicyReportSummary{
@@ -73,7 +73,7 @@ func Test_Source(t *testing.T) {
 			t.Errorf("Unexpected Fail Summary: %d", source.ClusterScopeSummary.Fail)
 		}
 		if source.NamespaceScopeSummary["test"].Error != 11 {
-			t.Errorf("Unexpected Errpr Summary: %d", source.ClusterScopeSummary.Error)
+			t.Errorf("Unexpected Error Summary: %d", source.ClusterScopeSummary.Error)
 		}
 	})
 }

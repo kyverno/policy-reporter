@@ -511,21 +511,21 @@ func Test_GetValuesFromSecret(t *testing.T) {
 		S3: &v1alpha1.Config[v1alpha1.S3Options]{
 			SecretRef: secretName,
 			Config: &v1alpha1.S3Options{
-				AWSConfig: v1alpha1.AWSConfig{Endpoint: "endoint", Region: "region"},
+				AWSConfig: v1alpha1.AWSConfig{Endpoint: "endpoint", Region: "region"},
 				Bucket:    "bucket",
 			},
 		},
 		Kinesis: &v1alpha1.Config[v1alpha1.KinesisOptions]{
 			SecretRef: secretName,
 			Config: &v1alpha1.KinesisOptions{
-				AWSConfig:  v1alpha1.AWSConfig{Endpoint: "endoint", Region: "region"},
+				AWSConfig:  v1alpha1.AWSConfig{Endpoint: "endpoint", Region: "region"},
 				StreamName: "stream",
 			},
 		},
 		SecurityHub: &v1alpha1.Config[v1alpha1.SecurityHubOptions]{
 			SecretRef: secretName,
 			Config: &v1alpha1.SecurityHubOptions{
-				AWSConfig: v1alpha1.AWSConfig{Endpoint: "endoint", Region: "region"},
+				AWSConfig: v1alpha1.AWSConfig{Endpoint: "endpoint", Region: "region"},
 				AccountID: "accountId",
 			},
 		},
@@ -897,21 +897,21 @@ func Test_GetValuesFromMountedSecret(t *testing.T) {
 		S3: &v1alpha1.Config[v1alpha1.S3Options]{
 			MountedSecret: mountedSecret,
 			Config: &v1alpha1.S3Options{
-				AWSConfig: v1alpha1.AWSConfig{Endpoint: "endoint", Region: "region"},
+				AWSConfig: v1alpha1.AWSConfig{Endpoint: "endpoint", Region: "region"},
 				Bucket:    "bucket",
 			},
 		},
 		Kinesis: &v1alpha1.Config[v1alpha1.KinesisOptions]{
 			MountedSecret: mountedSecret,
 			Config: &v1alpha1.KinesisOptions{
-				AWSConfig:  v1alpha1.AWSConfig{Endpoint: "endoint", Region: "region"},
+				AWSConfig:  v1alpha1.AWSConfig{Endpoint: "endpoint", Region: "region"},
 				StreamName: "stream",
 			},
 		},
 		SecurityHub: &v1alpha1.Config[v1alpha1.SecurityHubOptions]{
 			MountedSecret: mountedSecret,
 			Config: &v1alpha1.SecurityHubOptions{
-				AWSConfig: v1alpha1.AWSConfig{Endpoint: "endoint", Region: "region"},
+				AWSConfig: v1alpha1.AWSConfig{Endpoint: "endpoint", Region: "region"},
 				AccountID: "accountId",
 			},
 		},

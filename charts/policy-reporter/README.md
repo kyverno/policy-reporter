@@ -79,7 +79,7 @@ Open `http://localhost:8082/` in your browser.
 | podLabels | object | `{}` | Additional labels to add to each pod |
 | resources | object | `{}` | Resource constraints |
 | networkPolicy.enabled | bool | `false` | Create NetworkPolicy |
-| networkPolicy.egress | list | `[{"ports":[{"port":6443,"protocol":"TCP"}],"to":null}]` | Egress rule to allowe Kubernetes API Server access |
+| networkPolicy.egress | list | `[{"ports":[{"port":6443,"protocol":"TCP"}],"to":null}]` | Egress rule to allow Kubernetes API Server access |
 | networkPolicy.ingress | list | `[]` |  |
 | ingress.enabled | bool | `false` | Create Ingress This ingress exposes the policy-reporter core app. |
 | ingress.className | string | `""` | Ingress className |
@@ -92,7 +92,7 @@ Open `http://localhost:8082/` in your browser.
 | logging.logLevel | int | `0` | Log level default info |
 | rest.enabled | bool | `false` | Enables the REST API |
 | metrics.enabled | bool | `false` | Enables Prometheus Metrics |
-| metrics.mode | string | `"detailed"` | Metric Mode allowes to customize labels Allowed values: detailed, simple, custom |
+| metrics.mode | string | `"detailed"` | Metric Mode allows to customize labels Allowed values: detailed, simple, custom |
 | metrics.customLabels | list | `[]` | List of used labels in custom mode Supported fields are: ["namespace", "rule", "policy", "report" // PolicyReport name, "kind" // resource kind, "name" // resource name, "status", "severity", "category", "source"] |
 | metrics.filter | object | `{}` | Filter results to reduce cardinality |
 | profiling.enabled | bool | `false` | Enable profiling with pprof |
@@ -313,7 +313,7 @@ Open `http://localhost:8082/` in your browser.
 | target.securityHub.customFields | object | `{}` | Added as additional labels |
 | target.securityHub.filter | object | `{}` | Filter Results which should send to this target Wildcars for namespaces and policies are supported, you can either define exclude or include values Filters are available for all targets except the UI |
 | target.securityHub.channels | list | `[]` | List of channels to route results to different configurations |
-| target.gcs.credentials | optional | `""` | GCS (Google Cloud Storage) Service Accout Credentials |
+| target.gcs.credentials | optional | `""` | GCS (Google Cloud Storage) Service Account Credentials |
 | target.gcs.bucket | required | `""` | GCS Bucket |
 | target.gcs.secretRef | string | `""` | Read configuration from an already existing Secret |
 | target.gcs.mountedSecret | string | `""` | Mounted secret path by Secrets Controller, secret should be in json format |
@@ -390,7 +390,7 @@ Open `http://localhost:8082/` in your browser.
 | ui.banner | string | `""` | optional banner text |
 | ui.logo.path | string | `""` | custom logo path |
 | ui.logo.disabled | bool | `false` | disable logo entirely |
-| ui.displayMode | string | `""` | DisplayMode dark/light/colorblind/colorblinddark uses the OS configured prefered color scheme as default |
+| ui.displayMode | string | `""` | DisplayMode dark/light/colorblind/colorblinddark uses the OS configured preferred color scheme as default |
 | ui.boards | object | `{}` | Configure access control for all default boards. |
 | ui.customBoards | list | `[]` | Additional customizable dashboards |
 | ui.sources | list | `[]` | source specific configurations |
