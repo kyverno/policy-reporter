@@ -39,8 +39,8 @@ func (s *client) CleanUp(_ context.Context, _ v1alpha2.ReportInterface) {}
 
 func (s *client) BatchSend(report v1alpha2.ReportInterface, results []v1alpha2.PolicyReportResult) {
 	if report.GetScope() == nil {
-		for _, r := range results {
-			s.Send(r)
+		for idx := range results {
+			s.Send(results[idx])
 		}
 	}
 
@@ -101,18 +101,18 @@ func (s *client) newMessage(resource *corev1.ObjectReference, results []v1alpha2
 		zap.L().Error(s.Name()+": error adding header to card", zap.Error(err))
 	}
 
-	for _, result := range results {
+	for idx := range results {
 		stats := newFactSet()
-		stats.Facts = append(stats.Facts, adaptivecard.Fact{Title: "Status", Value: string(result.Result)})
+		stats.Facts = append(stats.Facts, adaptivecard.Fact{Title: "Status", Value: string(results[idx].Result)})
 
-		if result.Severity != "" {
-			stats.Facts = append(stats.Facts, adaptivecard.Fact{Title: "Severity", Value: string(result.Severity)})
+		if results[idx].Severity != "" {
+			stats.Facts = append(stats.Facts, adaptivecard.Fact{Title: "Severity", Value: string(results[idx].Severity)})
 		}
 
-		policy := "Policy: " + result.Policy
+		policy := "Policy: " + results[idx].Policy
 
-		if result.Rule != "" {
-			policy = fmt.Sprintf("%s/%s", policy, result.Rule)
+		if results[idx].Rule != "" {
+			policy = fmt.Sprintf("%s/%s", policy, results[idx].Rule)
 		}
 
 		r := adaptivecard.NewContainer()
@@ -122,7 +122,7 @@ func (s *client) newMessage(resource *corev1.ObjectReference, results []v1alpha2
 			zap.L().Error(s.Name()+": error adding policy as subtitle to card", zap.Error(err))
 		}
 
-		if err := r.AddElement(false, adaptivecard.NewTextBlock(result.Category, true)); err != nil {
+		if err := r.AddElement(false, adaptivecard.NewTextBlock(results[idx].Category, true)); err != nil {
 			zap.L().Error(s.Name()+": error adding category to card", zap.Error(err))
 		}
 
@@ -130,12 +130,12 @@ func (s *client) newMessage(resource *corev1.ObjectReference, results []v1alpha2
 			zap.L().Error(s.Name()+": error adding facts to card", zap.Error(err))
 		}
 
-		if err := r.AddElement(false, adaptivecard.NewTextBlock(result.Message, true)); err != nil {
+		if err := r.AddElement(false, adaptivecard.NewTextBlock(results[idx].Message, true)); err != nil {
 			zap.L().Error(s.Name()+": error adding message to card", zap.Error(err))
 		}
 
-		if len(result.Properties) > 0 {
-			if err := r.AddElement(false, MapToColumnSet(result.Properties)); err != nil {
+		if len(results[idx].Properties) > 0 {
+			if err := r.AddElement(false, MapToColumnSet(results[idx].Properties)); err != nil {
 				zap.L().Error(s.Name()+": error adding properties to card", zap.Error(err))
 			}
 		}
