@@ -76,20 +76,30 @@ func (s *client) newMessage(resource *corev1.ObjectReference, results []v1alpha2
 	header := adaptivecard.NewContainer()
 
 	if resource != nil {
-		header.AddElement(false, adaptivecard.NewTitleTextBlock(formatting.ResourceString(resource), true))
+		if err := header.AddElement(false, adaptivecard.NewTitleTextBlock(formatting.ResourceString(resource), true)); err != nil {
+			zap.L().Error(s.Name()+": error adding resource title to header", zap.Error(err))
+		}
 	} else {
-		header.AddElement(false, adaptivecard.NewTitleTextBlock("New PolicyReport Results", true))
+		if err := header.AddElement(false, adaptivecard.NewTitleTextBlock("New PolicyReport Results", true)); err != nil {
+			zap.L().Error(s.Name()+": error adding title to header", zap.Error(err))
+		}
 	}
 
-	header.AddElement(false, adaptivecard.NewTextBlock(fmt.Sprintf("Received %d new Policy Report Results", len(results)), true))
+	if err := header.AddElement(false, adaptivecard.NewTextBlock(fmt.Sprintf("Received %d new Policy Report Results", len(results)), true)); err != nil {
+		zap.L().Error(s.Name()+": error adding text block to header", zap.Error(err))
+	}
 
 	if len(s.customFields) > 0 {
-		header.AddElement(false, MapToColumnSet(s.customFields))
+		if err := header.AddElement(false, MapToColumnSet(s.customFields)); err != nil {
+			zap.L().Error(s.Name()+": error adding custom fields to header", zap.Error(err))
+		}
 	}
 
 	card := adaptivecard.NewCard()
 	card.SetFullWidth()
-	card.AddContainer(true, header)
+	if err := card.AddContainer(true, header); err != nil {
+		zap.L().Error(s.Name()+": error adding header to card", zap.Error(err))
+	}
 
 	for _, result := range results {
 		stats := newFactSet()
@@ -108,20 +118,38 @@ func (s *client) newMessage(resource *corev1.ObjectReference, results []v1alpha2
 		r := adaptivecard.NewContainer()
 		r.Separator = true
 		r.Spacing = adaptivecard.SpacingLarge
-		r.AddElement(false, newSubTitle(policy))
-		r.AddElement(false, adaptivecard.NewTextBlock(result.Category, true))
-		r.AddElement(false, stats)
-		r.AddElement(false, adaptivecard.NewTextBlock(result.Message, true))
-
-		if len(result.Properties) > 0 {
-			r.AddElement(false, MapToColumnSet(result.Properties))
+		if err := r.AddElement(false, newSubTitle(policy)); err != nil {
+			zap.L().Error(s.Name()+": error adding policy as subtitle to card", zap.Error(err))
 		}
 
-		card.AddContainer(false, r)
+		if err := r.AddElement(false, adaptivecard.NewTextBlock(result.Category, true)); err != nil {
+			zap.L().Error(s.Name()+": error adding category to card", zap.Error(err))
+		}
+
+		if err := r.AddElement(false, stats); err != nil {
+			zap.L().Error(s.Name()+": error adding facts to card", zap.Error(err))
+		}
+
+		if err := r.AddElement(false, adaptivecard.NewTextBlock(result.Message, true)); err != nil {
+			zap.L().Error(s.Name()+": error adding message to card", zap.Error(err))
+		}
+
+		if len(result.Properties) > 0 {
+			if err := r.AddElement(false, MapToColumnSet(result.Properties)); err != nil {
+				zap.L().Error(s.Name()+": error adding properties to card", zap.Error(err))
+			}
+		}
+
+		if err := card.AddContainer(false, r); err != nil {
+			zap.L().Error(s.Name()+": error adding container element to card",
+				zap.Error(err))
+		}
 	}
 
 	msg := adaptivecard.NewMessage()
-	msg.Attach(card)
+	if err := msg.Attach(card); err != nil {
+		zap.L().Error(s.Name()+": error attaching card", zap.Error(err))
+	}
 
 	return msg
 }
