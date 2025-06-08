@@ -17,7 +17,7 @@ func NewFakeMetaClient() (*metafake.FakeMetadataClient, metafake.MetadataClient,
 	metav1.AddMetaToScheme(schema)
 
 	client := metafake.NewSimpleMetadataClient(schema)
-	return client, client.Resource(pr.SchemeGroupVersion.WithResource("policyreports")).Namespace("test").(metafake.MetadataClient), client.Resource(pr.SchemeGroupVersion.WithResource("clusterpolicyreports")).(metafake.MetadataClient)
+	return client, client.Resource(pr.SchemeGroupVersion.WithResource("reports")).Namespace("test").(metafake.MetadataClient), client.Resource(pr.SchemeGroupVersion.WithResource("clusterreports")).(metafake.MetadataClient)
 }
 
 func NewFakeClient() (*fake.Clientset, v1alpha1.ReportInterface, v1alpha1.ClusterReportInterface) {
