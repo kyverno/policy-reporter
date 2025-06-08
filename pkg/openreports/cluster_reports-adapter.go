@@ -2,12 +2,12 @@ package openreports
 
 import (
 	"fmt"
+	"slices"
 	"strconv"
 
 	"github.com/segmentio/fasthash/fnv1a"
 	corev1 "k8s.io/api/core/v1"
 	"openreports.io/apis/openreports.io/v1alpha1"
-	"slices"
 )
 
 func (r *ORClusterReportAdapter) GetResults() []v1alpha1.ReportResult {
