@@ -1,9 +1,10 @@
 package result
 
 import (
-	"github.com/kyverno/policy-reporter/pkg/openreports"
 	corev1 "k8s.io/api/core/v1"
 	"openreports.io/apis/openreports.io/v1alpha1"
+
+	"github.com/kyverno/policy-reporter/pkg/openreports"
 )
 
 func Resource(p openreports.ReportInterface, r v1alpha1.ReportResult) *corev1.ObjectReference {

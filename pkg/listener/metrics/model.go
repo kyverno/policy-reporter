@@ -3,8 +3,9 @@ package metrics
 import (
 	"strings"
 
-	"github.com/kyverno/policy-reporter/pkg/openreports"
 	"openreports.io/apis/openreports.io/v1alpha1"
+
+	"github.com/kyverno/policy-reporter/pkg/openreports"
 )
 
 type Mode = string
