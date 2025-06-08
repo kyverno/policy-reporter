@@ -14,8 +14,8 @@ var DefaultMeta = &v1.PartialObjectMetadata{
 		Namespace: "test",
 	},
 	TypeMeta: v1.TypeMeta{
-		Kind:       "PolicyReport",
-		APIVersion: "wgpolicyk8s.io/v1alpha2",
+		Kind:       "Report",
+		APIVersion: "openreports.io/v1alpha1",
 	},
 }
 
@@ -235,8 +235,8 @@ var DefaultClusterMeta = &v1.PartialObjectMetadata{
 		Name: "cluster-policy-report",
 	},
 	TypeMeta: v1.TypeMeta{
-		Kind:       "ClusterPolicyReport",
-		APIVersion: "wgpolicyk8s.io/v1alpha2",
+		Kind:       "ClusterReport",
+		APIVersion: "openreports.io/v1alpha1",
 	},
 }
 

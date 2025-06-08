@@ -58,8 +58,8 @@ func (k *k8sPolicyReportClient) Sync(stopper chan struct{}) error {
 	polrInformer := k.configurePolrInformer(polrFactory.ForResource(polrResource).Informer())
 
 	if !k.reportFilter.DisableClusterReports() {
-		cpolrInformer = k.configureORInformer(orFactory.ForResource(cpolrResource).Informer())
-		orCInformer = k.configurePolrInformer(polrFactory.ForResource(openreportsCReport).Informer())
+		orCInformer = k.configureORInformer(orFactory.ForResource(openreportsCReport).Informer())
+		cpolrInformer = k.configurePolrInformer(polrFactory.ForResource(cpolrResource).Informer())
 	}
 
 	polrFactory.Start(stopper)
