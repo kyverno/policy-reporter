@@ -104,7 +104,7 @@ resources: {}
 networkPolicy:
   # -- Create NetworkPolicy
   enabled: false
-  # -- Egress rule to allowe Kubernetes API Server access
+  # -- Egress rule to allow Kubernetes API Server access
   egress:
   - to:
     ports:
@@ -151,7 +151,7 @@ rest:
 metrics:
   # -- Enables Prometheus Metrics
   enabled: false
-  # -- Metric Mode allowes to customize labels
+  # -- Metric Mode allows to customize labels
   # Allowed values: detailed, simple, custom
   mode: detailed
   # -- List of used labels in custom mode
@@ -761,7 +761,7 @@ target:
 
   # Authentication via PodIdentity is also supported
   gcs:
-    # -- (optional) GCS (Google Cloud Storage) Service Accout Credentials
+    # -- (optional) GCS (Google Cloud Storage) Service Account Credentials
     credentials: ""
     # -- (required) GCS Bucket
     bucket: ""
@@ -979,7 +979,7 @@ ui:
     disabled: false
 
   # -- DisplayMode dark/light/colorblind/colorblinddark
-  # uses the OS configured prefered color scheme as default
+  # uses the OS configured preferred color scheme as default
   displayMode: ""
 
   # -- Configure access control for all default boards.
@@ -1004,7 +1004,7 @@ ui:
   #     # -- list of displayed sources
   #     list: []
   #   clusterScope:
-  #     # -- disply cluster scoped resources and results
+  #     # -- display cluster scoped resources and results
   #     enabled: false
   #   display: ""
   #   filter:
@@ -1016,7 +1016,7 @@ ui:
 
   # -- source specific configurations
   sources: []
-  # -- kyverno specific UI confiurations
+  # -- kyverno specific UI configurations
   # - name: kyverno
   # -- show results per category, other option: severity
   #  type: result
