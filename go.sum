@@ -303,10 +303,10 @@ github.com/twitchyliquid64/golang-asm v0.15.1 h1:SU5vSMR7hnwNxj24w34ZyCi/FmDZTkS
 github.com/twitchyliquid64/golang-asm v0.15.1/go.mod h1:a1lVb/DtPvCB8fslRZhAngC2+aY1QWCk3Cedj/Gdt08=
 github.com/ugorji/go/codec v1.2.12 h1:9LC83zGrHhuUA9l16C9AHXAqEV/2wBQ4nkvumAE65EE=
 github.com/ugorji/go/codec v1.2.12/go.mod h1:UNopzCgEMSXjBc6AOMqYvWC1ktqTAfzJZUZgYf6w6lg=
-github.com/uptrace/bun v1.2.11 h1:l9dTymsdZZAoSZ1+Qo3utms0RffgkDbIv+1UGk8N1wQ=
-github.com/uptrace/bun v1.2.11/go.mod h1:ww5G8h59UrOnCHmZ8O1I/4Djc7M/Z3E+EWFS2KLB6dQ=
-github.com/uptrace/bun/dialect/mysqldialect v1.2.11 h1:4WLBf2ajPv62PaiPj7nbWF0J+kcHK6+Ro1Fg152iIKA=
-github.com/uptrace/bun/dialect/mysqldialect v1.2.11/go.mod h1:KNAV8KsVAxzOJnAF4p8C47Ig+Ma11Is0iz8+cb9QUIQ=
+github.com/uptrace/bun v1.2.12 h1:XRvGko5tIZ5A3T0GkLsbFFnSR2Yd6knuML8eJVGTLM0=
+github.com/uptrace/bun v1.2.12/go.mod h1:ZS4nPaEv2Du3OFqAD/irk3WVP6xTB3/9TWqjJbgKYBU=
+github.com/uptrace/bun/dialect/mysqldialect v1.2.12 h1:3+pGxF70Yuve0IT9mqz21UiZXR8OAhZIKFSY7tUYqVc=
+github.com/uptrace/bun/dialect/mysqldialect v1.2.12/go.mod h1:/X32gQ392MafIB/2+Ig/WVz63lV8zGr41Oalr+c8CDs=
 github.com/uptrace/bun/dialect/pgdialect v1.2.11 h1:n0VKWm1fL1dwJK5TRxYYLaRKRe14BOg2+AQgpvqzG/M=
 github.com/uptrace/bun/dialect/pgdialect v1.2.11/go.mod h1:NvV1S/zwtwBnW8yhJ3XEKAQEw76SkeH7yUhfrx3W1Eo=
 github.com/uptrace/bun/dialect/sqlitedialect v1.2.11 h1:t4OIcbkWnRPshRj7ZnbHVwUENa3OHhCUruyFcl3P+TY=
