@@ -1,4 +1,4 @@
-package wgpolicyclient_test
+package orclient
 
 import (
 	"sync"
