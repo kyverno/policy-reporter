@@ -69,7 +69,7 @@ func (k *k8sPolicyReportClient) Sync(stopper chan struct{}) error {
 		return fmt.Errorf("failed to sync policy reports")
 	}
 	if !cache.WaitForCacheSync(stopper, orInformer.HasSynced) {
-		return fmt.Errorf("failed to openreports reports")
+		return fmt.Errorf("failed to sync openreports reports")
 	}
 
 	if cpolrInformer != nil && !cache.WaitForCacheSync(stopper, cpolrInformer.HasSynced) {
