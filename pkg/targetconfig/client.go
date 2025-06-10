@@ -138,7 +138,8 @@ func (c *Client) Run(stopChan chan struct{}) {
 }
 
 func NewClient(tcClient tcv1alpha1.Interface, f target.Factory, targets *target.Collection,
-	orClient reports.OpenreportsV1alpha1Interface, wgpolicyClient v1alpha2.Wgpolicyk8sV1alpha2Interface) *Client {
+	orClient reports.OpenreportsV1alpha1Interface, wgpolicyClient v1alpha2.Wgpolicyk8sV1alpha2Interface,
+) *Client {
 	tcInformer := tcinformer.NewSharedInformerFactory(tcClient, 0)
 	return &Client{
 		informer:       tcInformer.Policyreporter().V1alpha1().TargetConfigs().Informer(),
