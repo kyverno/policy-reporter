@@ -12,7 +12,6 @@ import (
 	"github.com/kyverno/policy-reporter/pkg/crd/client/policyreport/clientset/versioned/typed/policyreport/v1alpha2"
 	tcv1alpha1 "github.com/kyverno/policy-reporter/pkg/crd/client/targetconfig/clientset/versioned"
 	tcinformer "github.com/kyverno/policy-reporter/pkg/crd/client/targetconfig/informers/externalversions"
-
 	"github.com/kyverno/policy-reporter/pkg/listener"
 	"github.com/kyverno/policy-reporter/pkg/openreports"
 	"github.com/kyverno/policy-reporter/pkg/target"
