@@ -24,7 +24,7 @@ const (
 	wgpolicyAPIGroup = "wgpolicyk8s.io/v1alpha2"
 )
 
-type k8sPolicyReportClient struct {
+type wgpolicyReportClient struct {
 	queue        *WGPolicyQueue
 	metaClient   metadata.Interface
 	synced       bool
@@ -33,15 +33,15 @@ type k8sPolicyReportClient struct {
 	stopChan     chan struct{}
 }
 
-func (k *k8sPolicyReportClient) HasSynced() bool {
+func (k *wgpolicyReportClient) HasSynced() bool {
 	return k.synced
 }
 
-func (k *k8sPolicyReportClient) Stop() {
+func (k *wgpolicyReportClient) Stop() {
 	close(k.stopChan)
 }
 
-func (k *k8sPolicyReportClient) Sync(stopper chan struct{}) error {
+func (k *wgpolicyReportClient) Sync(stopper chan struct{}) error {
 	factory := metadatainformer.NewSharedInformerFactory(k.metaClient, 15*time.Minute)
 
 	var cpolrInformer cache.SharedIndexInformer
@@ -69,7 +69,7 @@ func (k *k8sPolicyReportClient) Sync(stopper chan struct{}) error {
 	return nil
 }
 
-func (k *k8sPolicyReportClient) Run(worker int, stopper chan struct{}) error {
+func (k *wgpolicyReportClient) Run(worker int, stopper chan struct{}) error {
 	k.stopChan = stopper
 	if err := k.Sync(stopper); err != nil {
 		return err
@@ -79,7 +79,7 @@ func (k *k8sPolicyReportClient) Run(worker int, stopper chan struct{}) error {
 	return nil
 }
 
-func (k *k8sPolicyReportClient) configureInformer(informer cache.SharedIndexInformer) cache.SharedIndexInformer {
+func (k *wgpolicyReportClient) configureInformer(informer cache.SharedIndexInformer) cache.SharedIndexInformer {
 	informer.AddEventHandler(cache.ResourceEventHandlerFuncs{
 		AddFunc: func(obj interface{}) {
 			if item, ok := obj.(*v1.PartialObjectMetadata); ok {
@@ -116,7 +116,7 @@ func (k *k8sPolicyReportClient) configureInformer(informer cache.SharedIndexInfo
 
 // NewPolicyReportClient new Client for Policy Report Kubernetes API
 func NewPolicyReportClient(metaClient metadata.Interface, reportFilter *report.MetaFilter, queue *WGPolicyQueue) report.PolicyReportClient {
-	return &k8sPolicyReportClient{
+	return &wgpolicyReportClient{
 		metaClient:   metaClient,
 		mx:           &sync.Mutex{},
 		queue:        queue,

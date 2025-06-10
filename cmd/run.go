@@ -89,7 +89,6 @@ func newRunCMD(version string) *cobra.Command {
 				return fmt.Errorf("no valid reporting API group found in the cluster")
 			}
 
-			// check if apis are available
 			secretInformer, err := resolver.SecretInformer()
 			if err != nil {
 				return err
@@ -215,7 +214,7 @@ func newRunCMD(version string) *cobra.Command {
 
 			g.Go(server.Start)
 
-			if c.CRD.TargetConfig {
+			if true {
 				g.Go(func() error {
 					readinessProbe.Wait()
 
@@ -234,25 +233,36 @@ func newRunCMD(version string) *cobra.Command {
 			}
 
 			g.Go(func() error {
-				logger.Info("wait for policy informer")
+				logger.Info("wait for wgpolicy informer")
 				readinessProbe.Wait()
 
-				logger.Info("start client", zap.Int("worker", c.WorkerCount))
+				logger.Info("start wgpolicy client", zap.Int("worker", c.WorkerCount))
 				for {
 					stop := make(chan struct{})
-					if orClient != nil {
-						if err := orClient.Run(c.WorkerCount, stop); err != nil {
-							logger.Error("openreports informer client error", zap.Error(err))
-						}
-					}
-
 					if wgClient != nil {
 						if err := wgClient.Run(c.WorkerCount, stop); err != nil {
 							logger.Error("wgpolicy informer client error", zap.Error(err))
 						}
 					}
 
-					logger.Debug("informer restarts")
+					logger.Debug("wgpolicy informer restarts")
+				}
+			})
+
+			g.Go(func() error {
+				logger.Info("wait for openreports informer")
+				readinessProbe.Wait()
+
+				logger.Info("start openreports client", zap.Int("worker", c.WorkerCount))
+				for {
+					stop := make(chan struct{})
+					if wgClient != nil {
+						if err := orClient.Run(c.WorkerCount, stop); err != nil {
+							logger.Error("openreports informer client error", zap.Error(err))
+						}
+					}
+
+					logger.Debug("openreports informer restarts")
 				}
 			})
 

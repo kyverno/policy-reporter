@@ -9,18 +9,21 @@ import (
 	reports "openreports.io/pkg/client/clientset/versioned/typed/openreports.io/v1alpha1"
 
 	"github.com/kyverno/policy-reporter/pkg/crd/api/targetconfig/v1alpha1"
+	"github.com/kyverno/policy-reporter/pkg/crd/client/policyreport/clientset/versioned/typed/policyreport/v1alpha2"
 	tcv1alpha1 "github.com/kyverno/policy-reporter/pkg/crd/client/targetconfig/clientset/versioned"
 	tcinformer "github.com/kyverno/policy-reporter/pkg/crd/client/targetconfig/informers/externalversions"
+
 	"github.com/kyverno/policy-reporter/pkg/listener"
 	"github.com/kyverno/policy-reporter/pkg/openreports"
 	"github.com/kyverno/policy-reporter/pkg/target"
 )
 
 type Client struct {
-	targetFactory target.Factory
-	collection    *target.Collection
-	informer      cache.SharedIndexInformer
-	polrClient    reports.OpenreportsV1alpha1Interface
+	targetFactory  target.Factory
+	collection     *target.Collection
+	informer       cache.SharedIndexInformer
+	orClient       reports.OpenreportsV1alpha1Interface
+	wgpolicyClient v1alpha2.Wgpolicyk8sV1alpha2Interface
 }
 
 func (c *Client) ConfigureInformer() {
@@ -43,20 +46,37 @@ func (c *Client) ConfigureInformer() {
 			// (ammar): handle open reports and v1alpha2 here as well
 			if !tc.Spec.SkipExisting {
 				reports := []openreports.ReportInterface{}
-				existingPolrs, err := c.polrClient.Reports("").List(context.Background(), metav1.ListOptions{})
+				existingPolrs, err := c.wgpolicyClient.PolicyReports("").List(context.Background(), metav1.ListOptions{})
 				if err != nil {
 					zap.L().Error("Failed to sync existing policy reports for client", zap.String("name", tc.Name), zap.Error(err))
 				}
-				existingcPolrs, err := c.polrClient.ClusterReports().List(context.Background(), metav1.ListOptions{})
+				existingcPolrs, err := c.wgpolicyClient.ClusterPolicyReports().List(context.Background(), metav1.ListOptions{})
 				if err != nil {
 					zap.L().Error("Failed to sync existing cluster policy reports for client", zap.String("name", tc.Name), zap.Error(err))
 				}
 
+				existingReports, err := c.orClient.Reports("").List(context.Background(), metav1.ListOptions{})
+				if err != nil {
+					zap.L().Error("Failed to sync existing openreports reports for client", zap.String("name", tc.Name), zap.Error(err))
+				}
+				existingCReports, err := c.orClient.ClusterReports().List(context.Background(), metav1.ListOptions{})
+				if err != nil {
+					zap.L().Error("Failed to sync existing openreports cluster reports for client", zap.String("name", tc.Name), zap.Error(err))
+				}
+
 				for _, p := range existingPolrs.Items {
-					reports = append(reports, &p)
+					reports = append(reports, p.ToOpenReports())
 				}
 
 				for _, cp := range existingcPolrs.Items {
+					reports = append(reports, cp.ToOpenReports())
+				}
+
+				for _, p := range existingReports.Items {
+					reports = append(reports, &p)
+				}
+
+				for _, cp := range existingCReports.Items {
 					reports = append(reports, &cp)
 				}
 
@@ -118,13 +138,14 @@ func (c *Client) Run(stopChan chan struct{}) {
 	zap.L().Info("target config cache synced")
 }
 
-func NewClient(tcClient tcv1alpha1.Interface, f target.Factory, targets *target.Collection, polrClient reports.OpenreportsV1alpha1Interface) *Client {
+func NewClient(tcClient tcv1alpha1.Interface, f target.Factory, targets *target.Collection,
+	orClient reports.OpenreportsV1alpha1Interface, wgpolicyClient v1alpha2.Wgpolicyk8sV1alpha2Interface) *Client {
 	tcInformer := tcinformer.NewSharedInformerFactory(tcClient, 0)
-
 	return &Client{
-		informer:      tcInformer.Policyreporter().V1alpha1().TargetConfigs().Informer(),
-		targetFactory: f,
-		collection:    targets,
-		polrClient:    polrClient,
+		informer:       tcInformer.Policyreporter().V1alpha1().TargetConfigs().Informer(),
+		targetFactory:  f,
+		collection:     targets,
+		orClient:       orClient,
+		wgpolicyClient: wgpolicyClient,
 	}
 }

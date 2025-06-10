@@ -1,4 +1,4 @@
-package openreportsclient
+package orclient
 
 import (
 	"fmt"
@@ -46,10 +46,10 @@ func (k *openreportsClient) Sync(stopper chan struct{}) error {
 
 	var orCInformer cache.SharedIndexInformer
 
-	orInformer := k.configureORInformer(factory.ForResource(OpenreportsReport).Informer())
+	orInformer := k.configureInformer(factory.ForResource(OpenreportsReport).Informer())
 
 	if !k.reportFilter.DisableClusterReports() {
-		orCInformer = k.configureORInformer(factory.ForResource(OpenreportsCReport).Informer())
+		orCInformer = k.configureInformer(factory.ForResource(OpenreportsCReport).Informer())
 	}
 
 	factory.Start(stopper)
@@ -67,7 +67,7 @@ func (k *openreportsClient) Sync(stopper chan struct{}) error {
 
 	k.synced = true
 
-	zap.L().Info("policy report informer sync completed")
+	zap.L().Info("openreports informer sync completed")
 
 	return nil
 }
@@ -82,7 +82,7 @@ func (k *openreportsClient) Run(worker int, stopper chan struct{}) error {
 	return nil
 }
 
-func (k *openreportsClient) configureORInformer(informer cache.SharedIndexInformer) cache.SharedIndexInformer {
+func (k *openreportsClient) configureInformer(informer cache.SharedIndexInformer) cache.SharedIndexInformer {
 	informer.AddEventHandler(cache.ResourceEventHandlerFuncs{
 		AddFunc: func(obj interface{}) {
 			if item, ok := obj.(*v1.PartialObjectMetadata); ok {

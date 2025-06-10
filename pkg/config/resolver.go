@@ -594,12 +594,16 @@ func (r *Resolver) TargetConfigClient() (*targetconfig.Client, error) {
 		return nil, err
 	}
 
-	crdClient, err := r.OpenreportsCRClient() // todo: wgpolicy
+	wgpolicyClient, err := r.WgPolicyCRClient()
+	if err != nil {
+		return nil, err
+	}
+	orClient, err := r.OpenreportsCRClient()
 	if err != nil {
 		return nil, err
 	}
 
-	tcc := targetconfig.NewClient(tcClient, r.TargetFactory(), r.TargetClients(), crdClient)
+	tcc := targetconfig.NewClient(tcClient, r.TargetFactory(), r.TargetClients(), orClient, wgpolicyClient)
 	tcc.ConfigureInformer()
 
 	r.targetConfigClient = tcc
