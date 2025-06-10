@@ -31,8 +31,8 @@ func newRunCMD(version string) *cobra.Command {
 			c.Version = version
 
 			var k8sConfig *rest.Config
-			if true {
-				k8sConfig, err = clientcmd.BuildConfigFromFlags("", "/Users/ammaryasser/Downloads/civo-polr-kubeconfig")
+			if c.K8sClient.Kubeconfig != "" {
+				k8sConfig, err = clientcmd.BuildConfigFromFlags("", c.K8sClient.Kubeconfig)
 			} else {
 				k8sConfig, err = rest.InClusterConfig()
 			}
@@ -176,7 +176,7 @@ func newRunCMD(version string) *cobra.Command {
 
 			g.Go(server.Start)
 
-			if true {
+			if c.CRD.TargetConfig {
 				g.Go(func() error {
 					readinessProbe.Wait()
 
