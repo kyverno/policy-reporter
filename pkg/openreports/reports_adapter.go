@@ -2,13 +2,13 @@ package openreports
 
 import (
 	"fmt"
+	"slices"
 	"strconv"
 
 	"github.com/segmentio/fasthash/fnv1a"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"openreports.io/apis/openreports.io/v1alpha1"
-	"slices"
 )
 
 type ORReportAdapter struct {
