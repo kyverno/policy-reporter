@@ -131,7 +131,7 @@ func (s *client) newMessage(resource *corev1.ObjectReference, results []v1alpha1
 			zap.L().Error(s.Name()+": error adding facts to card", zap.Error(err))
 		}
 
-		if err := r.AddElement(false, adaptivecard.NewTextBlock(results[idx].Message, true)); err != nil {
+		if err := r.AddElement(false, adaptivecard.NewTextBlock(results[idx].Description, true)); err != nil {
 			zap.L().Error(s.Name()+": error adding message to card", zap.Error(err))
 		}
 
