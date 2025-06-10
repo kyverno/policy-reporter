@@ -62,9 +62,7 @@ func newRunCMD(version string) *cobra.Command {
 				return err
 			}
 
-			var (
-				wgClient, orClient report.PolicyReportClient
-			)
+			var wgClient, orClient report.PolicyReportClient
 
 			_, err = discoveryClient.ServerResourcesForGroupVersion(orclient.OpenreportsReport.Group + "/" + orclient.OpenreportsReport.Version)
 			if err != nil {
@@ -162,7 +160,6 @@ func newRunCMD(version string) *cobra.Command {
 
 					if c.REST.Enabled && !store.IsSQLite() {
 						store.PrepareDatabase(cmd.Context())
-
 						logger.Debug("register database persistence")
 						resolver.RegisterStoreListener(ctx, store)
 
