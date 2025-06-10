@@ -15,36 +15,27 @@ import (
 	reportsv1alpha1 "openreports.io/apis/openreports.io/v1alpha1"
 	"openreports.io/pkg/client/clientset/versioned/typed/openreports.io/v1alpha1"
 
-	pr "github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
-	"github.com/kyverno/policy-reporter/pkg/crd/client/policyreport/clientset/versioned/typed/policyreport/v1alpha2"
 	"github.com/kyverno/policy-reporter/pkg/openreports"
 	"github.com/kyverno/policy-reporter/pkg/report"
 	"github.com/kyverno/policy-reporter/pkg/report/result"
 )
 
-type Queue struct {
-	queue             workqueue.TypedRateLimitingInterface[*v1.PartialObjectMetadata]
-	openreportsClient v1alpha1.OpenreportsV1alpha1Interface
-	polrClient        v1alpha2.Wgpolicyk8sV1alpha2Interface
-	reconditioner     *result.Reconditioner
-	debouncer         Debouncer
-	lock              *sync.Mutex
-	cache             sets.Set[*v1.PartialObjectMetadata]
-	filter            *report.SourceFilter
+type ORQueue struct {
+	queue         workqueue.TypedRateLimitingInterface[*v1.PartialObjectMetadata]
+	client        v1alpha1.OpenreportsV1alpha1Interface
+	reconditioner *result.Reconditioner
+	debouncer     Debouncer
+	lock          *sync.Mutex
+	cache         sets.Set[*v1.PartialObjectMetadata]
+	filter        *report.SourceFilter
 }
 
-func (q *Queue) Add(obj *v1.PartialObjectMetadata) error {
-	// key, err := cache.MetaNamespaceKeyFunc(obj)
-	// if err != nil {
-	// 	return err
-	// }
-
+func (q *ORQueue) Add(obj *v1.PartialObjectMetadata) error {
 	q.queue.Add(obj)
-
 	return nil
 }
 
-func (q *Queue) Run(workers int, stopCh chan struct{}) {
+func (q *ORQueue) Run(workers int, stopCh chan struct{}) {
 	defer runtime.HandleCrash()
 
 	for i := 0; i < workers; i++ {
@@ -54,12 +45,12 @@ func (q *Queue) Run(workers int, stopCh chan struct{}) {
 	<-stopCh
 }
 
-func (q *Queue) runWorker() {
+func (q *ORQueue) runWorker() {
 	for q.processNextItem() {
 	}
 }
 
-func (q *Queue) processNextItem() bool {
+func (q *ORQueue) processNextItem() bool {
 	key, quit := q.queue.Get()
 	if quit {
 		return false
@@ -70,36 +61,18 @@ func (q *Queue) processNextItem() bool {
 	namespace := key.Namespace
 
 	var (
-		rep   openreports.ReportInterface
-		err   error
-		polr  *pr.PolicyReport
-		cpolr *pr.ClusterPolicyReport
+		rep openreports.ReportInterface
+		err error
 	)
 
-	switch key.APIVersion {
-	case openreportsAPIGroup:
-		if namespace != "" {
-			rep, err = q.openreportsClient.Reports(namespace).Get(context.Background(), name, v1.GetOptions{})
-		} else {
-			rep, err = q.openreportsClient.ClusterReports().Get(context.Background(), name, v1.GetOptions{})
-		}
-		if errors.IsNotFound(err) {
-			q.handleNotFoundReport(key)
-			return true
-		}
-
-	case wgpolicyAPIGroup:
-		if namespace != "" {
-			polr, err = q.polrClient.PolicyReports(namespace).Get(context.Background(), name, v1.GetOptions{})
-			rep = polr.ToOpenReports()
-		} else {
-			cpolr, err = q.polrClient.ClusterPolicyReports().Get(context.Background(), name, v1.GetOptions{})
-			rep = cpolr.ToOpenReports()
-		}
-		if errors.IsNotFound(err) {
-			q.handleNotFoundReport(key)
-			return true
-		}
+	if namespace != "" {
+		rep, err = q.client.Reports(namespace).Get(context.Background(), name, v1.GetOptions{})
+	} else {
+		rep, err = q.client.ClusterReports().Get(context.Background(), name, v1.GetOptions{})
+	}
+	if errors.IsNotFound(err) {
+		q.handleNotFoundReport(key)
+		return true
 	}
 
 	if ok := q.filter.Validate(rep); !ok {
@@ -125,7 +98,7 @@ func (q *Queue) processNextItem() bool {
 	return true
 }
 
-func (q *Queue) handleErr(err error, key *v1.PartialObjectMetadata) {
+func (q *ORQueue) handleErr(err error, key *v1.PartialObjectMetadata) {
 	if err == nil {
 		q.queue.Forget(key)
 		return
@@ -144,7 +117,7 @@ func (q *Queue) handleErr(err error, key *v1.PartialObjectMetadata) {
 	zap.L().Warn("dropping report out of queue", zap.Any("key", key), zap.Error(err))
 }
 
-func (q *Queue) handleNotFoundReport(key *v1.PartialObjectMetadata) {
+func (q *ORQueue) handleNotFoundReport(key *v1.PartialObjectMetadata) {
 	var rep openreports.ReportInterface
 	if key.GetNamespace() == "" {
 		rep = &reportsv1alpha1.ClusterReport{
@@ -169,22 +142,20 @@ func (q *Queue) handleNotFoundReport(key *v1.PartialObjectMetadata) {
 	q.debouncer.Add(report.LifecycleEvent{Type: report.Deleted, PolicyReport: q.reconditioner.Prepare(rep)})
 }
 
-func NewQueue(
+func NewORQueue(
 	debouncer Debouncer,
 	queue workqueue.TypedRateLimitingInterface[*v1.PartialObjectMetadata],
 	client v1alpha1.OpenreportsV1alpha1Interface,
-	polrClient v1alpha2.Wgpolicyk8sV1alpha2Interface,
 	filter *report.SourceFilter,
 	reconditioner *result.Reconditioner,
-) *Queue {
-	return &Queue{
-		debouncer:         debouncer,
-		queue:             queue,
-		openreportsClient: client,
-		polrClient:        polrClient,
-		cache:             sets.New[*v1.PartialObjectMetadata](),
-		lock:              &sync.Mutex{},
-		filter:            filter,
-		reconditioner:     reconditioner,
+) *ORQueue {
+	return &ORQueue{
+		debouncer:     debouncer,
+		queue:         queue,
+		client:        client,
+		cache:         sets.New[*v1.PartialObjectMetadata](),
+		lock:          &sync.Mutex{},
+		filter:        filter,
+		reconditioner: reconditioner,
 	}
 }

@@ -1,4 +1,4 @@
-package kubernetes_test
+package wgpolicyclient_test
 
 import (
 	"sync"

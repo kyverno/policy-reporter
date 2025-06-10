@@ -38,8 +38,10 @@ import (
 	"github.com/kyverno/policy-reporter/pkg/kubernetes"
 	"github.com/kyverno/policy-reporter/pkg/kubernetes/jobs"
 	"github.com/kyverno/policy-reporter/pkg/kubernetes/namespaces"
+	orclient "github.com/kyverno/policy-reporter/pkg/kubernetes/openreports"
 	"github.com/kyverno/policy-reporter/pkg/kubernetes/pods"
 	"github.com/kyverno/policy-reporter/pkg/kubernetes/secrets"
+	wgpolicyclient "github.com/kyverno/policy-reporter/pkg/kubernetes/wgpolicy"
 	"github.com/kyverno/policy-reporter/pkg/leaderelection"
 	"github.com/kyverno/policy-reporter/pkg/listener"
 	"github.com/kyverno/policy-reporter/pkg/listener/metrics"
@@ -59,7 +61,8 @@ type Resolver struct {
 	publisher          report.EventPublisher
 	policyStore        *database.Store
 	database           *bun.DB
-	policyReportClient report.PolicyReportClient
+	wgpolicyClient     report.PolicyReportClient
+	openreportsClient  report.PolicyReportClient
 	leaderElector      *leaderelection.Client
 	resultCache        cache.Cache
 	targetClients      *target.Collection
@@ -209,8 +212,8 @@ func (r *Resolver) CustomIDGenerators() map[string]result.IDGenerator {
 }
 
 // EventPublisher resolver method
-func (r *Resolver) Queue() (*kubernetes.Queue, error) {
-	orClient, polrClient, err := r.CRDClient()
+func (r *Resolver) WGPolicyQueue() (*wgpolicyclient.WGPolicyQueue, error) {
+	polrClient, err := r.WgPolicyCRClient()
 	if err != nil {
 		return nil, err
 	}
@@ -225,12 +228,47 @@ func (r *Resolver) Queue() (*kubernetes.Queue, error) {
 		return nil, err
 	}
 
-	return kubernetes.NewQueue(
+	return wgpolicyclient.NewWGPolicyQueue(
 		kubernetes.NewDebouncer(1*time.Minute, r.EventPublisher()),
 		workqueue.NewTypedRateLimitingQueueWithConfig(workqueue.DefaultTypedControllerRateLimiter[*v1.PartialObjectMetadata](), workqueue.TypedRateLimitingQueueConfig[*v1.PartialObjectMetadata]{
 			Name: "report-queue",
 		}),
-		orClient,
+		polrClient,
+		report.NewSourceFilter(podsClient, jobsClient, helper.Map(r.config.SourceFilters, func(f SourceFilter) report.SourceValidation {
+			return report.SourceValidation{
+				Selector:              report.ReportSelector{Source: f.Selector.Source},
+				Kinds:                 ToRuleSet(f.Kinds),
+				Sources:               ToRuleSet(f.Sources),
+				Namespaces:            ToRuleSet(f.Namespaces),
+				UncontrolledOnly:      f.UncontrolledOnly,
+				DisableClusterReports: f.DisableClusterReports,
+			}
+		})),
+		result.NewReconditioner(r.CustomIDGenerators()),
+	), nil
+}
+
+func (r *Resolver) ORQueue() (*orclient.ORQueue, error) {
+	polrClient, err := r.OpenreportsCRClient()
+	if err != nil {
+		return nil, err
+	}
+
+	podsClient, err := r.PodClient()
+	if err != nil {
+		return nil, err
+	}
+
+	jobsClient, err := r.JobClient()
+	if err != nil {
+		return nil, err
+	}
+
+	return orclient.NewORQueue(
+		kubernetes.NewDebouncer(1*time.Minute, r.EventPublisher()),
+		workqueue.NewTypedRateLimitingQueueWithConfig(workqueue.DefaultTypedControllerRateLimiter[*v1.PartialObjectMetadata](), workqueue.TypedRateLimitingQueueConfig[*v1.PartialObjectMetadata]{
+			Name: "report-queue",
+		}),
 		polrClient,
 		report.NewSourceFilter(podsClient, jobsClient, helper.Map(r.config.SourceFilters, func(f SourceFilter) report.SourceValidation {
 			return report.SourceValidation{
@@ -434,18 +472,22 @@ func (r *Resolver) SkipExistingOnStartup() bool {
 	return true
 }
 
-func (r *Resolver) CRDClient() (v1alpha1.OpenreportsV1alpha1Interface, v1alpha2.Wgpolicyk8sV1alpha2Interface, error) {
-	client, err := versioned.NewForConfig(r.k8sConfig)
-	if err != nil {
-		return nil, nil, err
-	}
-
+func (r *Resolver) WgPolicyCRClient() (v1alpha2.Wgpolicyk8sV1alpha2Interface, error) {
 	polrclient, err := polrversioned.NewForConfig(r.k8sConfig)
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 
-	return client.OpenreportsV1alpha1(), polrclient.Wgpolicyk8sV1alpha2(), nil
+	return polrclient.Wgpolicyk8sV1alpha2(), nil
+}
+
+func (r *Resolver) OpenreportsCRClient() (v1alpha1.OpenreportsV1alpha1Interface, error) {
+	client, err := versioned.NewForConfig(r.k8sConfig)
+	if err != nil {
+		return nil, err
+	}
+
+	return client.OpenreportsV1alpha1(), nil
 }
 
 func (r *Resolver) CRDMetadataClient() (metadata.Interface, error) {
@@ -458,7 +500,7 @@ func (r *Resolver) CRDMetadataClient() (metadata.Interface, error) {
 }
 
 func (r *Resolver) SummaryGenerator() (*summary.Generator, error) {
-	orclient, _, err := r.CRDClient()
+	orclient, err := r.OpenreportsCRClient()
 	if err != nil {
 		return nil, err
 	}
@@ -484,7 +526,7 @@ func (r *Resolver) SummaryReporter() *summary.Reporter {
 }
 
 func (r *Resolver) ViolationsGenerator() (*violations.Generator, error) {
-	client, _, err := r.CRDClient()
+	client, err := r.OpenreportsCRClient() // todo: to same for wgpoliocy
 	if err != nil {
 		return nil, err
 	}
@@ -552,7 +594,7 @@ func (r *Resolver) TargetConfigClient() (*targetconfig.Client, error) {
 		return nil, err
 	}
 
-	crdClient, _, err := r.CRDClient()
+	crdClient, err := r.OpenreportsCRClient() // todo: wgpolicy
 	if err != nil {
 		return nil, err
 	}
@@ -564,9 +606,9 @@ func (r *Resolver) TargetConfigClient() (*targetconfig.Client, error) {
 	return tcc, nil
 }
 
-func (r *Resolver) PolicyReportClient() (report.PolicyReportClient, error) {
-	if r.policyReportClient != nil {
-		return r.policyReportClient, nil
+func (r *Resolver) WGPolicyReportClient() (report.PolicyReportClient, error) {
+	if r.wgpolicyClient != nil {
+		return r.wgpolicyClient, nil
 	}
 
 	client, err := r.CRDMetadataClient()
@@ -574,14 +616,34 @@ func (r *Resolver) PolicyReportClient() (report.PolicyReportClient, error) {
 		return nil, err
 	}
 
-	queue, err := r.Queue()
+	queue, err := r.WGPolicyQueue()
 	if err != nil {
 		return nil, err
 	}
 
-	r.policyReportClient = kubernetes.NewPolicyReportClient(client, r.ReportFilter(), queue)
+	r.wgpolicyClient = wgpolicyclient.NewPolicyReportClient(client, r.ReportFilter(), queue)
 
-	return r.policyReportClient, nil
+	return r.wgpolicyClient, nil
+}
+
+func (r *Resolver) OpenReportsClient() (report.PolicyReportClient, error) {
+	if r.openreportsClient != nil {
+		return r.openreportsClient, nil
+	}
+
+	client, err := r.CRDMetadataClient()
+	if err != nil {
+		return nil, err
+	}
+
+	queue, err := r.ORQueue()
+	if err != nil {
+		return nil, err
+	}
+
+	r.openreportsClient = orclient.NewOpenreportsClient(client, r.ReportFilter(), queue)
+
+	return r.openreportsClient, nil
 }
 
 func (r *Resolver) ReportFilter() *report.MetaFilter {

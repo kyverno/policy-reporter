@@ -4,10 +4,12 @@ import (
 	"context"
 	"errors"
 	"flag"
+	"fmt"
 
 	"github.com/spf13/cobra"
 	"go.uber.org/zap"
 	"golang.org/x/sync/errgroup"
+	"k8s.io/client-go/discovery"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
 
@@ -16,7 +18,10 @@ import (
 	v2 "github.com/kyverno/policy-reporter/pkg/api/v2"
 	"github.com/kyverno/policy-reporter/pkg/config"
 	"github.com/kyverno/policy-reporter/pkg/database"
+	orclient "github.com/kyverno/policy-reporter/pkg/kubernetes/openreports"
+	wgpolicyclient "github.com/kyverno/policy-reporter/pkg/kubernetes/wgpolicy"
 	"github.com/kyverno/policy-reporter/pkg/listener"
+	"github.com/kyverno/policy-reporter/pkg/report"
 )
 
 func newRunCMD(version string) *cobra.Command {
@@ -31,8 +36,8 @@ func newRunCMD(version string) *cobra.Command {
 			c.Version = version
 
 			var k8sConfig *rest.Config
-			if c.K8sClient.Kubeconfig != "" {
-				k8sConfig, err = clientcmd.BuildConfigFromFlags("", c.K8sClient.Kubeconfig)
+			if true {
+				k8sConfig, err = clientcmd.BuildConfigFromFlags("", "/Users/ammaryasser/Downloads/civo-polr-kubeconfig")
 			} else {
 				k8sConfig, err = rest.InClusterConfig()
 			}
@@ -52,11 +57,39 @@ func newRunCMD(version string) *cobra.Command {
 				return err
 			}
 
-			client, err := resolver.PolicyReportClient()
+			discoveryClient, err := discovery.NewDiscoveryClientForConfig(k8sConfig)
 			if err != nil {
 				return err
 			}
 
+			var (
+				wgClient, orClient report.PolicyReportClient
+			)
+
+			_, err = discoveryClient.ServerResourcesForGroupVersion(orclient.OpenreportsReport.Group + "/" + orclient.OpenreportsReport.Version)
+			if err != nil {
+				logger.Error("openreports group not found in the cluster")
+			} else {
+				orClient, err = resolver.OpenReportsClient()
+				if err != nil {
+					return err
+				}
+			}
+
+			_, err = discoveryClient.ServerResourcesForGroupVersion(wgpolicyclient.PolrResource.Group + "/" + wgpolicyclient.CpolrResource.Version)
+			if err != nil {
+				logger.Error("wgpolicy group not found in the cluster")
+			} else {
+				wgClient, err = resolver.WGPolicyReportClient()
+				if err != nil {
+					return err
+				}
+			}
+			if wgClient == nil && orClient == nil {
+				return fmt.Errorf("no valid reporting API group found in the cluster")
+			}
+
+			// check if apis are available
 			secretInformer, err := resolver.SecretInformer()
 			if err != nil {
 				return err
@@ -69,7 +102,7 @@ func newRunCMD(version string) *cobra.Command {
 				api.WithPort(c.API.Port),
 				api.WithHealthChecks([]api.HealthCheck{
 					func() error {
-						if !client.HasSynced() {
+						if !wgClient.HasSynced() {
 							return errors.New("informer not ready")
 						}
 						return nil
@@ -136,7 +169,13 @@ func newRunCMD(version string) *cobra.Command {
 
 						if readinessProbe.Running() {
 							logger.Debug("trigger informer restart")
-							client.Stop()
+							if orClient != nil {
+								orClient.Stop()
+							}
+
+							if wgClient != nil {
+								wgClient.Stop()
+							}
 						}
 					}
 
@@ -201,9 +240,16 @@ func newRunCMD(version string) *cobra.Command {
 				logger.Info("start client", zap.Int("worker", c.WorkerCount))
 				for {
 					stop := make(chan struct{})
+					if orClient != nil {
+						if err := orClient.Run(c.WorkerCount, stop); err != nil {
+							logger.Error("openreports informer client error", zap.Error(err))
+						}
+					}
 
-					if err := client.Run(c.WorkerCount, stop); err != nil {
-						logger.Error("informer client error", zap.Error(err))
+					if wgClient != nil {
+						if err := wgClient.Run(c.WorkerCount, stop); err != nil {
+							logger.Error("wgpolicy informer client error", zap.Error(err))
+						}
 					}
 
 					logger.Debug("informer restarts")

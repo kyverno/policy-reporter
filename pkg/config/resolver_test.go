@@ -298,10 +298,10 @@ func Test_ResolveSkipExistingOnStartup(t *testing.T) {
 func Test_ResolvePolicyClient(t *testing.T) {
 	resolver := config.NewResolver(&config.Config{DBFile: "test.db"}, &rest.Config{})
 
-	client1, err := resolver.PolicyReportClient()
+	client1, err := resolver.OpenReportsClient()
 	assert.Nil(t, err)
 
-	client2, _ := resolver.PolicyReportClient()
+	client2, _ := resolver.OpenReportsClient()
 
 	assert.Equal(t, client1, client2, "A second call resolver.PolicyReportClient() should return the cached first client")
 }
@@ -394,7 +394,7 @@ func Test_ResolveClientWithInvalidK8sConfig(t *testing.T) {
 
 	resolver := config.NewResolver(testConfig, k8sConfig)
 
-	_, err := resolver.PolicyReportClient()
+	_, err := resolver.OpenReportsClient()
 	assert.NotNil(t, err, "Error: 'host must be a URL or a host:port pair' was expected")
 }
 
@@ -411,7 +411,7 @@ func Test_ResolveLeaderElectionWithInvalidK8sConfig(t *testing.T) {
 func Test_ResolveCRDClient(t *testing.T) {
 	resolver := config.NewResolver(testConfig, &rest.Config{})
 
-	_, _, err := resolver.CRDClient()
+	_, err := resolver.OpenreportsCRClient()
 	assert.Nil(t, err)
 }
 
@@ -421,7 +421,7 @@ func Test_ResolveCRDClientWithInvalidK8sConfig(t *testing.T) {
 
 	resolver := config.NewResolver(testConfig, k8sConfig)
 
-	_, _, err := resolver.CRDClient()
+	_, err := resolver.OpenreportsCRClient()
 	assert.NotNil(t, err, "Error: 'host must be a URL or a host:port pair' was expected")
 }
 

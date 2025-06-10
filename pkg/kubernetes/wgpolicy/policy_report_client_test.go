@@ -1,4 +1,4 @@
-package kubernetes_test
+package wgpolicyclient_test
 
 import (
 	"context"
@@ -37,17 +37,16 @@ func Test_PolicyReportWatcher(t *testing.T) {
 
 	restClient, polrClient, _ := NewFakeClient()
 
-	queue := kubernetes.NewQueue(
+	queue := kubernetes.NewORQueue(
 		kubernetes.NewDebouncer(0, publisher),
 		workqueue.NewTypedRateLimitingQueue(workqueue.DefaultTypedControllerRateLimiter[*v1.PartialObjectMetadata]()),
 		restClient.OpenreportsV1alpha1(),
-		nil,
 		report.NewSourceFilter(nil, nil, []report.SourceValidation{}),
 		result.NewReconditioner(nil),
 	)
 
 	kclient, rclient, _ := NewFakeMetaClient()
-	client := kubernetes.NewPolicyReportClient(kclient, filter, queue)
+	client := kubernetes.NewOpenreportsClient(kclient, filter, queue)
 
 	go func() {
 		err := client.Run(1, stop)
@@ -91,17 +90,16 @@ func Test_ClusterPolicyReportWatcher(t *testing.T) {
 
 	restClient, _, polrClient := NewFakeClient()
 
-	queue := kubernetes.NewQueue(
+	queue := kubernetes.NewORQueue(
 		kubernetes.NewDebouncer(0, publisher),
 		workqueue.NewTypedRateLimitingQueue(workqueue.DefaultTypedControllerRateLimiter[*v1.PartialObjectMetadata]()),
 		restClient.OpenreportsV1alpha1(),
-		nil,
 		report.NewSourceFilter(nil, nil, []report.SourceValidation{}),
 		result.NewReconditioner(nil),
 	)
 
 	kclient, _, rclient := NewFakeMetaClient()
-	client := kubernetes.NewPolicyReportClient(kclient, filter, queue)
+	client := kubernetes.NewOpenreportsClient(kclient, filter, queue)
 
 	go func() {
 		err := client.Run(1, stop)
@@ -134,17 +132,16 @@ func Test_HasSynced(t *testing.T) {
 
 	restClient, _, _ := NewFakeClient()
 
-	queue := kubernetes.NewQueue(
+	queue := kubernetes.NewORQueue(
 		kubernetes.NewDebouncer(0, report.NewEventPublisher()),
 		workqueue.NewTypedRateLimitingQueue(workqueue.DefaultTypedControllerRateLimiter[*v1.PartialObjectMetadata]()),
 		restClient.OpenreportsV1alpha1(),
-		nil,
 		report.NewSourceFilter(nil, nil, []report.SourceValidation{}),
 		result.NewReconditioner(nil),
 	)
 
 	kclient, _, _ := NewFakeMetaClient()
-	client := kubernetes.NewPolicyReportClient(kclient, filter, queue)
+	client := kubernetes.NewOpenreportsClient(kclient, filter, queue)
 
 	err := client.Sync(stop)
 	if err != nil {
