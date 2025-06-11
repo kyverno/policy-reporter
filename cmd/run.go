@@ -9,7 +9,6 @@ import (
 	"github.com/spf13/cobra"
 	"go.uber.org/zap"
 	"golang.org/x/sync/errgroup"
-	"k8s.io/client-go/discovery"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
 
@@ -18,8 +17,6 @@ import (
 	v2 "github.com/kyverno/policy-reporter/pkg/api/v2"
 	"github.com/kyverno/policy-reporter/pkg/config"
 	"github.com/kyverno/policy-reporter/pkg/database"
-	orclient "github.com/kyverno/policy-reporter/pkg/kubernetes/openreports"
-	wgpolicyclient "github.com/kyverno/policy-reporter/pkg/kubernetes/wgpolicy"
 	"github.com/kyverno/policy-reporter/pkg/listener"
 	"github.com/kyverno/policy-reporter/pkg/report"
 )
@@ -57,32 +54,17 @@ func newRunCMD(version string) *cobra.Command {
 				return err
 			}
 
-			discoveryClient, err := discovery.NewDiscoveryClientForConfig(k8sConfig)
+			var wgClient, orClient report.PolicyReportClient
+
+			orClient, err = resolver.OpenReportsClient()
+			if err != nil {
+				return err
+			}
+			wgClient, err = resolver.WGPolicyReportClient()
 			if err != nil {
 				return err
 			}
 
-			var wgClient, orClient report.PolicyReportClient
-
-			_, err = discoveryClient.ServerResourcesForGroupVersion(orclient.OpenreportsReport.Group + "/" + orclient.OpenreportsReport.Version)
-			if err != nil {
-				logger.Error("openreports group not found in the cluster")
-			} else {
-				orClient, err = resolver.OpenReportsClient()
-				if err != nil {
-					return err
-				}
-			}
-
-			_, err = discoveryClient.ServerResourcesForGroupVersion(wgpolicyclient.PolrResource.Group + "/" + wgpolicyclient.CpolrResource.Version)
-			if err != nil {
-				logger.Error("wgpolicy group not found in the cluster")
-			} else {
-				wgClient, err = resolver.WGPolicyReportClient()
-				if err != nil {
-					return err
-				}
-			}
 			if wgClient == nil && orClient == nil {
 				return fmt.Errorf("no valid reporting API group found in the cluster")
 			}

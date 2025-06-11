@@ -33,7 +33,7 @@ func NewViolationsCMD() *cobra.Command {
 				return err
 			}
 
-			resolver := config.NewResolver(c, k8sConfig)
+			resolver := config.NewResolver(c, k8sConfig, nil)
 			logger, err := resolver.Logger()
 			if err != nil {
 				return err

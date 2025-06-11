@@ -70,7 +70,6 @@ type Resolver struct {
 	targetConfigClient *targetconfig.Client
 	logger             *zap.Logger
 	resultListener     *listener.ResultListener
-	discoveryClient    *discovery.DiscoveryClient
 }
 
 // APIServer resolver method
@@ -616,6 +615,17 @@ func (r *Resolver) WGPolicyReportClient() (report.PolicyReportClient, error) {
 		return r.wgpolicyClient, nil
 	}
 
+	discoveryClient, err := discovery.NewDiscoveryClientForConfig(r.k8sConfig)
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = discoveryClient.ServerResourcesForGroupVersion(orclient.OpenreportsReport.Group + "/" + orclient.OpenreportsReport.Version)
+	if err != nil {
+		r.logger.Info("wgpolicy api not available in the cluster")
+		return nil, nil
+	}
+
 	client, err := r.CRDMetadataClient()
 	if err != nil {
 		return nil, err
@@ -634,6 +644,17 @@ func (r *Resolver) WGPolicyReportClient() (report.PolicyReportClient, error) {
 func (r *Resolver) OpenReportsClient() (report.PolicyReportClient, error) {
 	if r.openreportsClient != nil {
 		return r.openreportsClient, nil
+	}
+
+	discoveryClient, err := discovery.NewDiscoveryClientForConfig(r.k8sConfig)
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = discoveryClient.ServerResourcesForGroupVersion(orclient.OpenreportsReport.Group + "/" + orclient.OpenreportsReport.Version)
+	if err != nil {
+		r.logger.Info("openreports api not available in the cluster")
+		return nil, nil
 	}
 
 	client, err := r.CRDMetadataClient()
