@@ -235,11 +235,12 @@ func newRunCMD(version string) *cobra.Command {
 
 				logger.Info("start wgpolicy client", zap.Int("worker", c.WorkerCount))
 				for {
+					if wgClient == nil {
+						return nil
+					}
 					stop := make(chan struct{})
-					if wgClient != nil {
-						if err := wgClient.Run(c.WorkerCount, stop); err != nil {
-							logger.Error("wgpolicy informer client error", zap.Error(err))
-						}
+					if err := wgClient.Run(c.WorkerCount, stop); err != nil {
+						logger.Error("wgpolicy informer client error", zap.Error(err))
 					}
 
 					logger.Debug("wgpolicy informer restarts")
@@ -252,11 +253,12 @@ func newRunCMD(version string) *cobra.Command {
 
 				logger.Info("start openreports client", zap.Int("worker", c.WorkerCount))
 				for {
+					if orClient == nil {
+						return nil
+					}
 					stop := make(chan struct{})
-					if wgClient != nil {
-						if err := orClient.Run(c.WorkerCount, stop); err != nil {
-							logger.Error("openreports informer client error", zap.Error(err))
-						}
+					if err := orClient.Run(c.WorkerCount, stop); err != nil {
+						logger.Error("openreports informer client error", zap.Error(err))
 					}
 
 					logger.Debug("openreports informer restarts")

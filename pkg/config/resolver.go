@@ -18,6 +18,7 @@ import (
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/client-go/discovery"
 	k8s "k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/metadata"
 	"k8s.io/client-go/rest"
@@ -70,6 +71,7 @@ type Resolver struct {
 	targetConfigClient *targetconfig.Client
 	logger             *zap.Logger
 	resultListener     *listener.ResultListener
+	discoveryClient    *discovery.DiscoveryClient
 }
 
 // APIServer resolver method
@@ -230,7 +232,7 @@ func (r *Resolver) WGPolicyQueue() (*wgpolicyclient.WGPolicyQueue, error) {
 
 	return wgpolicyclient.NewWGPolicyQueue(
 		kubernetes.NewDebouncer(1*time.Minute, r.EventPublisher()),
-		workqueue.NewTypedRateLimitingQueueWithConfig(workqueue.DefaultTypedControllerRateLimiter[*v1.PartialObjectMetadata](), workqueue.TypedRateLimitingQueueConfig[*v1.PartialObjectMetadata]{
+		workqueue.NewTypedRateLimitingQueueWithConfig(workqueue.DefaultTypedControllerRateLimiter[string](), workqueue.TypedRateLimitingQueueConfig[string]{
 			Name: "report-queue",
 		}),
 		polrClient,
