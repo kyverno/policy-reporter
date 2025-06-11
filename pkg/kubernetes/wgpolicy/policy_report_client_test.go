@@ -39,7 +39,7 @@ func Test_PolicyReportWatcher(t *testing.T) {
 	queue := NewWGPolicyQueue(
 		kubernetes.NewDebouncer(0, publisher),
 		workqueue.NewTypedRateLimitingQueue(workqueue.DefaultTypedControllerRateLimiter[string]()),
-		restClient.OpenreportsV1alpha1(),
+		restClient.Wgpolicyk8sV1alpha2(),
 		report.NewSourceFilter(nil, nil, []report.SourceValidation{}),
 		result.NewReconditioner(nil),
 	)
@@ -54,7 +54,7 @@ func Test_PolicyReportWatcher(t *testing.T) {
 		}
 	}()
 
-	polrClient.Create(ctx, fixtures.DefaultPolicyReport, metav1.CreateOptions{})
+	polrClient.Create(ctx, fixtures.WGPolicyReport, metav1.CreateOptions{})
 
 	rclient.CreateFake(fixtures.DefaultMeta, metav1.CreateOptions{})
 	time.Sleep(1 * time.Second)
@@ -92,7 +92,7 @@ func Test_ClusterPolicyReportWatcher(t *testing.T) {
 	queue := NewWGPolicyQueue(
 		kubernetes.NewDebouncer(0, publisher),
 		workqueue.NewTypedRateLimitingQueue(workqueue.DefaultTypedControllerRateLimiter[string]()),
-		restClient.OpenreportsV1alpha1(),
+		restClient.Wgpolicyk8sV1alpha2(),
 		report.NewSourceFilter(nil, nil, []report.SourceValidation{}),
 		result.NewReconditioner(nil),
 	)
@@ -107,7 +107,7 @@ func Test_ClusterPolicyReportWatcher(t *testing.T) {
 		}
 	}()
 
-	polrClient.Create(ctx, fixtures.ClusterPolicyReport, metav1.CreateOptions{})
+	polrClient.Create(ctx, fixtures.WGClusterPolicyReport, metav1.CreateOptions{})
 
 	rclient.CreateFake(fixtures.DefaultClusterMeta, metav1.CreateOptions{})
 	time.Sleep(1 * time.Second)
@@ -134,7 +134,7 @@ func Test_HasSynced(t *testing.T) {
 	queue := NewWGPolicyQueue(
 		kubernetes.NewDebouncer(0, report.NewEventPublisher()),
 		workqueue.NewTypedRateLimitingQueue(workqueue.DefaultTypedControllerRateLimiter[string]()),
-		restClient.OpenreportsV1alpha1(),
+		restClient.Wgpolicyk8sV1alpha2(),
 		report.NewSourceFilter(nil, nil, []report.SourceValidation{}),
 		result.NewReconditioner(nil),
 	)

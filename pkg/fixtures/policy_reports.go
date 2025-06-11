@@ -455,3 +455,141 @@ var KyvernoClusterPolicyReport = &v1alpha1.ClusterReport{
 		},
 	},
 }
+
+var WGPolicyReport = &v1alpha2.PolicyReport{
+	ObjectMeta: v1.ObjectMeta{
+		Name:      "policy-report",
+		Namespace: "test",
+	},
+	Summary: v1alpha2.PolicyReportSummary{
+		Pass:  0,
+		Skip:  0,
+		Warn:  0,
+		Fail:  3,
+		Error: 0,
+	},
+	Results: []v1alpha2.PolicyReportResult{
+		{
+			ID:        "12348",
+			Message:   "message",
+			Result:    v1alpha2.StatusFail,
+			Scored:    true,
+			Policy:    "required-label",
+			Rule:      "app-label-required",
+			Timestamp: v1.Timestamp{Seconds: 1614093000},
+			Source:    "test",
+			Category:  "test",
+			Severity:  v1alpha2.SeverityHigh,
+			Resources: []corev1.ObjectReference{
+				{
+					APIVersion: "v1",
+					Kind:       "Deployment",
+					Name:       "nginx",
+					Namespace:  "test",
+					UID:        "dfd57c50-f30c-4729-b63f-b1954d8988d1",
+				},
+			},
+			Properties: map[string]string{"version": "1.2.0"},
+		},
+		{
+			ID:        "12346",
+			Message:   "message 2",
+			Result:    v1alpha2.StatusFail,
+			Scored:    true,
+			Policy:    "priority-test",
+			Timestamp: v1.Timestamp{Seconds: 1614093000},
+			Source:    "test",
+		},
+		{
+			ID:        "12347",
+			Message:   "message 3",
+			Result:    v1alpha2.StatusFail,
+			Scored:    true,
+			Policy:    "required-label",
+			Rule:      "app-label-required",
+			Timestamp: v1.Timestamp{Seconds: 1614093000},
+			Source:    "test",
+			Category:  "test",
+			Severity:  v1alpha2.SeverityHigh,
+			Resources: []corev1.ObjectReference{
+				{
+					APIVersion: "v1",
+					Kind:       "Deployment",
+					Name:       "name",
+					Namespace:  "test",
+					UID:        "dfd57c50-f30c-4729-b63f-b1954d8988b3",
+				},
+			},
+			Properties: map[string]string{"version": "1.2.0", v1alpha2.ResultIDKey: "123456"},
+		},
+	},
+}
+
+var WGClusterPolicyReport = &v1alpha2.ClusterPolicyReport{
+	ObjectMeta: v1.ObjectMeta{
+		Name:      "policy-report",
+		Namespace: "test",
+	},
+	Summary: v1alpha2.PolicyReportSummary{
+		Pass:  0,
+		Skip:  0,
+		Warn:  0,
+		Fail:  3,
+		Error: 0,
+	},
+	Results: []v1alpha2.PolicyReportResult{
+		{
+			ID:        "12348",
+			Message:   "message",
+			Result:    v1alpha2.StatusFail,
+			Scored:    true,
+			Policy:    "required-label",
+			Rule:      "app-label-required",
+			Timestamp: v1.Timestamp{Seconds: 1614093000},
+			Source:    "test",
+			Category:  "test",
+			Severity:  v1alpha2.SeverityHigh,
+			Resources: []corev1.ObjectReference{
+				{
+					APIVersion: "v1",
+					Kind:       "Deployment",
+					Name:       "nginx",
+					Namespace:  "test",
+					UID:        "dfd57c50-f30c-4729-b63f-b1954d8988d1",
+				},
+			},
+			Properties: map[string]string{"version": "1.2.0"},
+		},
+		{
+			ID:        "12346",
+			Message:   "message 2",
+			Result:    v1alpha2.StatusFail,
+			Scored:    true,
+			Policy:    "priority-test",
+			Timestamp: v1.Timestamp{Seconds: 1614093000},
+			Source:    "test",
+		},
+		{
+			ID:        "12347",
+			Message:   "message 3",
+			Result:    v1alpha2.StatusFail,
+			Scored:    true,
+			Policy:    "required-label",
+			Rule:      "app-label-required",
+			Timestamp: v1.Timestamp{Seconds: 1614093000},
+			Source:    "test",
+			Category:  "test",
+			Severity:  v1alpha2.SeverityHigh,
+			Resources: []corev1.ObjectReference{
+				{
+					APIVersion: "v1",
+					Kind:       "Deployment",
+					Name:       "name",
+					Namespace:  "test",
+					UID:        "dfd57c50-f30c-4729-b63f-b1954d8988b3",
+				},
+			},
+			Properties: map[string]string{"version": "1.2.0", v1alpha2.ResultIDKey: "123456"},
+		},
+	},
+}
