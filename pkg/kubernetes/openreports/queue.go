@@ -11,6 +11,7 @@ import (
 	"k8s.io/apimachinery/pkg/util/runtime"
 	"k8s.io/apimachinery/pkg/util/sets"
 	"k8s.io/apimachinery/pkg/util/wait"
+	"k8s.io/client-go/tools/cache"
 	"k8s.io/client-go/util/workqueue"
 	reportsv1alpha1 "openreports.io/apis/openreports.io/v1alpha1"
 	"openreports.io/pkg/client/clientset/versioned/typed/openreports.io/v1alpha1"
@@ -22,17 +23,22 @@ import (
 )
 
 type ORQueue struct {
-	queue         workqueue.TypedRateLimitingInterface[*v1.PartialObjectMetadata]
+	queue         workqueue.TypedRateLimitingInterface[string]
 	client        v1alpha1.OpenreportsV1alpha1Interface
 	reconditioner *result.Reconditioner
 	debouncer     kubernetes.Debouncer
 	lock          *sync.Mutex
-	cache         sets.Set[*v1.PartialObjectMetadata]
+	cache         sets.Set[string]
 	filter        *report.SourceFilter
 }
 
 func (q *ORQueue) Add(obj *v1.PartialObjectMetadata) error {
-	q.queue.Add(obj)
+	key, err := cache.MetaNamespaceKeyFunc(obj)
+	if err != nil {
+		return err
+	}
+
+	q.queue.Add(key)
 	return nil
 }
 
@@ -99,7 +105,7 @@ func (q *ORQueue) processNextItem() bool {
 	return true
 }
 
-func (q *ORQueue) handleErr(err error, key *v1.PartialObjectMetadata) {
+func (q *ORQueue) handleErr(err error, key string) {
 	if err == nil {
 		q.queue.Forget(key)
 		return
@@ -118,7 +124,7 @@ func (q *ORQueue) handleErr(err error, key *v1.PartialObjectMetadata) {
 	zap.L().Warn("dropping report out of queue", zap.Any("key", key), zap.Error(err))
 }
 
-func (q *ORQueue) handleNotFoundReport(key *v1.PartialObjectMetadata) {
+func (q *ORQueue) handleNotFoundReport(key *string) {
 	var rep openreports.ReportInterface
 	if key.GetNamespace() == "" {
 		rep = &reportsv1alpha1.ClusterReport{
@@ -145,7 +151,7 @@ func (q *ORQueue) handleNotFoundReport(key *v1.PartialObjectMetadata) {
 
 func NewORQueue(
 	debouncer kubernetes.Debouncer,
-	queue workqueue.TypedRateLimitingInterface[*v1.PartialObjectMetadata],
+	queue workqueue.TypedRateLimitingInterface[string],
 	client v1alpha1.OpenreportsV1alpha1Interface,
 	filter *report.SourceFilter,
 	reconditioner *result.Reconditioner,
@@ -154,7 +160,7 @@ func NewORQueue(
 		debouncer:     debouncer,
 		queue:         queue,
 		client:        client,
-		cache:         sets.New[*v1.PartialObjectMetadata](),
+		cache:         sets.New[string](),
 		lock:          &sync.Mutex{},
 		filter:        filter,
 		reconditioner: reconditioner,

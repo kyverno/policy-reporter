@@ -34,7 +34,12 @@ type WGPolicyQueue struct {
 }
 
 func (q *WGPolicyQueue) Add(obj *v1.PartialObjectMetadata) error {
-	q.queue.Add(obj)
+	key, err := cache.MetaNamespaceKeyFunc(obj)
+	if err != nil {
+		return err
+	}
+
+	q.queue.Add(key)
 	return nil
 }
 
