@@ -99,8 +99,20 @@ func newRunCMD(version string) *cobra.Command {
 				api.WithPort(c.API.Port),
 				api.WithHealthChecks([]api.HealthCheck{
 					func() error {
+						if wgClient == nil {
+							return nil
+						}
 						if !wgClient.HasSynced() {
-							return errors.New("informer not ready")
+							return errors.New("wginformer not ready")
+						}
+						return nil
+					},
+					func() error {
+						if orClient == nil {
+							return nil
+						}
+						if !orClient.HasSynced() {
+							return errors.New("orinformer not ready")
 						}
 						return nil
 					},
