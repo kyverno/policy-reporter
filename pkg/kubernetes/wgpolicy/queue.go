@@ -11,6 +11,7 @@ import (
 	"k8s.io/apimachinery/pkg/util/runtime"
 	"k8s.io/apimachinery/pkg/util/sets"
 	"k8s.io/apimachinery/pkg/util/wait"
+	"k8s.io/client-go/tools/cache"
 	"k8s.io/client-go/util/workqueue"
 	reportsv1alpha1 "openreports.io/apis/openreports.io/v1alpha1"
 
@@ -23,12 +24,12 @@ import (
 )
 
 type WGPolicyQueue struct {
-	queue         workqueue.TypedRateLimitingInterface[*v1.PartialObjectMetadata]
+	queue         workqueue.TypedRateLimitingInterface[string]
 	client        v1alpha2.Wgpolicyk8sV1alpha2Interface
 	reconditioner *result.Reconditioner
 	debouncer     kubernetes.Debouncer
 	lock          *sync.Mutex
-	cache         sets.Set[*v1.PartialObjectMetadata]
+	cache         sets.Set[string]
 	filter        *report.SourceFilter
 }
 
@@ -59,12 +60,14 @@ func (q *WGPolicyQueue) processNextItem() bool {
 	}
 	defer q.queue.Done(key)
 
-	name := key.Name
-	namespace := key.Namespace
+	namespace, name, err := cache.SplitMetaNamespaceKey(key)
+	if err != nil {
+		q.queue.Forget(key)
+		return true
+	}
 
 	var (
 		rep   openreports.ReportInterface
-		err   error
 		polr  *pr.PolicyReport
 		cpolr *pr.ClusterPolicyReport
 	)
@@ -104,7 +107,7 @@ func (q *WGPolicyQueue) processNextItem() bool {
 	return true
 }
 
-func (q *WGPolicyQueue) handleErr(err error, key *v1.PartialObjectMetadata) {
+func (q *WGPolicyQueue) handleErr(err error, key string) {
 	if err == nil {
 		q.queue.Forget(key)
 		return
@@ -123,19 +126,21 @@ func (q *WGPolicyQueue) handleErr(err error, key *v1.PartialObjectMetadata) {
 	zap.L().Warn("dropping report out of queue", zap.Any("key", key), zap.Error(err))
 }
 
-func (q *WGPolicyQueue) handleNotFoundReport(key *v1.PartialObjectMetadata) {
+func (q *WGPolicyQueue) handleNotFoundReport(key string) {
 	var rep openreports.ReportInterface
-	if key.GetNamespace() == "" {
+	namespace, name, _ := cache.SplitMetaNamespaceKey(key) // todo: check this
+
+	if namespace == "" {
 		rep = &reportsv1alpha1.ClusterReport{
 			ObjectMeta: v1.ObjectMeta{
-				Name: key.GetName(),
+				Name: name,
 			},
 		}
 	} else {
 		rep = &reportsv1alpha1.Report{
 			ObjectMeta: v1.ObjectMeta{
-				Name:      key.GetName(),
-				Namespace: key.GetNamespace(),
+				Name:      name,
+				Namespace: namespace,
 			},
 		}
 	}
@@ -150,7 +155,7 @@ func (q *WGPolicyQueue) handleNotFoundReport(key *v1.PartialObjectMetadata) {
 
 func NewWGPolicyQueue(
 	debouncer kubernetes.Debouncer,
-	queue workqueue.TypedRateLimitingInterface[*v1.PartialObjectMetadata],
+	queue workqueue.TypedRateLimitingInterface[string],
 	client v1alpha2.Wgpolicyk8sV1alpha2Interface,
 	filter *report.SourceFilter,
 	reconditioner *result.Reconditioner,
@@ -159,7 +164,7 @@ func NewWGPolicyQueue(
 		debouncer:     debouncer,
 		queue:         queue,
 		client:        client,
-		cache:         sets.New[*v1.PartialObjectMetadata](),
+		cache:         sets.New[string](),
 		lock:          &sync.Mutex{},
 		filter:        filter,
 		reconditioner: reconditioner,
