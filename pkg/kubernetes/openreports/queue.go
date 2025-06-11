@@ -64,13 +64,13 @@ func (q *ORQueue) processNextItem() bool {
 	}
 	defer q.queue.Done(key)
 
-	name := key.Name
-	namespace := key.Namespace
+	namespace, name, err := cache.SplitMetaNamespaceKey(key)
+	if err != nil {
+		q.queue.Forget(key)
+		return true
+	}
 
-	var (
-		rep openreports.ReportInterface
-		err error
-	)
+	var rep openreports.ReportInterface
 
 	if namespace != "" {
 		rep, err = q.client.Reports(namespace).Get(context.Background(), name, v1.GetOptions{})
@@ -124,19 +124,20 @@ func (q *ORQueue) handleErr(err error, key string) {
 	zap.L().Warn("dropping report out of queue", zap.Any("key", key), zap.Error(err))
 }
 
-func (q *ORQueue) handleNotFoundReport(key *string) {
+func (q *ORQueue) handleNotFoundReport(key string) {
 	var rep openreports.ReportInterface
-	if key.GetNamespace() == "" {
+	namespace, name, _ := cache.SplitMetaNamespaceKey(key)
+	if namespace == "" {
 		rep = &reportsv1alpha1.ClusterReport{
 			ObjectMeta: v1.ObjectMeta{
-				Name: key.GetName(),
+				Name: name,
 			},
 		}
 	} else {
 		rep = &reportsv1alpha1.Report{
 			ObjectMeta: v1.ObjectMeta{
-				Name:      key.GetName(),
-				Namespace: key.GetNamespace(),
+				Name:      name,
+				Namespace: namespace,
 			},
 		}
 	}
