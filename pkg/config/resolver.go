@@ -17,7 +17,6 @@ import (
 	mail "github.com/xhit/go-simple-mail/v2"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
-	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/discovery"
 	k8s "k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/metadata"
@@ -233,7 +232,7 @@ func (r *Resolver) WGPolicyQueue() (*wgpolicyclient.WGPolicyQueue, error) {
 	return wgpolicyclient.NewWGPolicyQueue(
 		kubernetes.NewDebouncer(1*time.Minute, r.EventPublisher()),
 		workqueue.NewTypedRateLimitingQueueWithConfig(workqueue.DefaultTypedControllerRateLimiter[string](), workqueue.TypedRateLimitingQueueConfig[string]{
-			Name: "report-queue",
+			Name: "wgreport-queue",
 		}),
 		polrClient,
 		report.NewSourceFilter(podsClient, jobsClient, helper.Map(r.config.SourceFilters, func(f SourceFilter) report.SourceValidation {
@@ -268,8 +267,8 @@ func (r *Resolver) ORQueue() (*orclient.ORQueue, error) {
 
 	return orclient.NewORQueue(
 		kubernetes.NewDebouncer(1*time.Minute, r.EventPublisher()),
-		workqueue.NewTypedRateLimitingQueueWithConfig(workqueue.DefaultTypedControllerRateLimiter[*v1.PartialObjectMetadata](), workqueue.TypedRateLimitingQueueConfig[*v1.PartialObjectMetadata]{
-			Name: "report-queue",
+		workqueue.NewTypedRateLimitingQueueWithConfig(workqueue.DefaultTypedControllerRateLimiter[string](), workqueue.TypedRateLimitingQueueConfig[string]{
+			Name: "orreport-queue",
 		}),
 		polrClient,
 		report.NewSourceFilter(podsClient, jobsClient, helper.Map(r.config.SourceFilters, func(f SourceFilter) report.SourceValidation {
