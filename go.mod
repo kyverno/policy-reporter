@@ -29,7 +29,7 @@ require (
 	github.com/spf13/cobra v1.9.1
 	github.com/spf13/viper v1.20.1
 	github.com/stretchr/testify v1.10.0
-	github.com/uptrace/bun v1.2.12
+	github.com/uptrace/bun v1.2.13
 	github.com/uptrace/bun/dialect/mysqldialect v1.2.12
 	github.com/uptrace/bun/dialect/pgdialect v1.2.12
 	github.com/uptrace/bun/dialect/sqlitedialect v1.2.12
