@@ -5,10 +5,11 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"openreports.io/apis/openreports.io/v1alpha1"
 
-	"github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
 	"github.com/kyverno/policy-reporter/pkg/fixtures"
 	"github.com/kyverno/policy-reporter/pkg/listener"
+	"github.com/kyverno/policy-reporter/pkg/openreports"
 	"github.com/kyverno/policy-reporter/pkg/target"
 )
 
@@ -21,12 +22,12 @@ type client struct {
 	cleanup               bool
 }
 
-func (c *client) Send(result v1alpha2.PolicyReportResult) {
+func (c *client) Send(result v1alpha1.ReportResult) {
 	c.Called = true
 }
 
 func (c *client) MinimumSeverity() string {
-	return v1alpha2.SeverityInfo
+	return v1alpha1.SeverityInfo
 }
 
 func (c *client) Name() string {
@@ -41,7 +42,7 @@ func (c *client) SkipExistingOnStartup() bool {
 	return c.skipExistingOnStartup
 }
 
-func (c client) Validate(rep v1alpha2.ReportInterface, result v1alpha2.PolicyReportResult) bool {
+func (c client) Validate(rep openreports.ReportInterface, result v1alpha1.ReportResult) bool {
 	return c.validated
 }
 
@@ -51,11 +52,11 @@ func (c *client) Reset(_ context.Context) error {
 
 func (c *client) SendHeartbeat() {}
 
-func (c *client) CleanUp(_ context.Context, _ v1alpha2.ReportInterface) {
+func (c *client) CleanUp(_ context.Context, _ openreports.ReportInterface) {
 	c.cleanupCalled = true
 }
 
-func (c *client) BatchSend(_ v1alpha2.ReportInterface, _ []v1alpha2.PolicyReportResult) {
+func (c *client) BatchSend(_ openreports.ReportInterface, _ []v1alpha1.ReportResult) {
 	c.Called = true
 }
 

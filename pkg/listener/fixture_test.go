@@ -5,12 +5,12 @@ import (
 
 	corev1 "k8s.io/api/core/v1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"openreports.io/apis/openreports.io/v1alpha1"
 
-	"github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
 	"github.com/kyverno/policy-reporter/pkg/fixtures"
 )
 
-var scopereport1 = &v1alpha2.PolicyReport{
+var scopereport1 = &v1alpha1.Report{
 	ObjectMeta: v1.ObjectMeta{
 		Name:              "polr-test",
 		Namespace:         "test",
@@ -22,43 +22,43 @@ var scopereport1 = &v1alpha2.PolicyReport{
 		Name:       "test",
 		Namespace:  "test",
 	},
-	Results: []v1alpha2.PolicyReportResult{fixtures.FailResult},
-	Summary: v1alpha2.PolicyReportSummary{Fail: 1},
+	Results: []v1alpha1.ReportResult{fixtures.FailResult},
+	Summary: v1alpha1.ReportSummary{Fail: 1},
 }
 
-var preport1 = &v1alpha2.PolicyReport{
+var preport1 = &v1alpha1.Report{
 	ObjectMeta: v1.ObjectMeta{
 		Name:              "polr-test",
 		Namespace:         "test",
 		CreationTimestamp: v1.Now(),
 	},
-	Results: []v1alpha2.PolicyReportResult{fixtures.FailResult},
-	Summary: v1alpha2.PolicyReportSummary{Fail: 1},
+	Results: []v1alpha1.ReportResult{fixtures.FailResult},
+	Summary: v1alpha1.ReportSummary{Fail: 1},
 }
 
-var preport2 = &v1alpha2.PolicyReport{
+var preport2 = &v1alpha1.Report{
 	ObjectMeta: v1.ObjectMeta{
 		Name:              "polr-test",
 		Namespace:         "test",
 		CreationTimestamp: v1.Now(),
 	},
-	Results: []v1alpha2.PolicyReportResult{fixtures.FailPodResult},
-	Summary: v1alpha2.PolicyReportSummary{Fail: 1, Pass: 1},
+	Results: []v1alpha1.ReportResult{fixtures.FailPodResult},
+	Summary: v1alpha1.ReportSummary{Fail: 1, Pass: 1},
 }
 
-var preport3 = &v1alpha2.PolicyReport{
+var preport3 = &v1alpha1.Report{
 	ObjectMeta: v1.ObjectMeta{
 		Name:              "polr-test",
 		Namespace:         "test",
 		CreationTimestamp: v1.Now(),
 	},
-	Results: []v1alpha2.PolicyReportResult{},
+	Results: []v1alpha1.ReportResult{},
 }
 
-var creport = &v1alpha2.ClusterPolicyReport{
+var creport = &v1alpha1.ClusterReport{
 	ObjectMeta: v1.ObjectMeta{
 		Name:              "cpolr-test",
 		CreationTimestamp: v1.Now(),
 	},
-	Results: []v1alpha2.PolicyReportResult{fixtures.FailResult, fixtures.FailPodResult},
+	Results: []v1alpha1.ReportResult{fixtures.FailResult, fixtures.FailPodResult},
 }

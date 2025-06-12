@@ -5,29 +5,29 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"openreports.io/apis/openreports.io/v1alpha1"
 
-	"github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
 	"github.com/kyverno/policy-reporter/pkg/fixtures"
 	"github.com/kyverno/policy-reporter/pkg/report"
 )
 
-var preport = &v1alpha2.PolicyReport{
+var preport = &v1alpha1.Report{
 	ObjectMeta: v1.ObjectMeta{
 		Name:              "polr-test",
 		Namespace:         "test",
 		CreationTimestamp: v1.Now(),
 	},
-	Results: make([]v1alpha2.PolicyReportResult, 0),
-	Summary: v1alpha2.PolicyReportSummary{},
+	Results: make([]v1alpha1.ReportResult, 0),
+	Summary: v1alpha1.ReportSummary{},
 }
 
-var creport = &v1alpha2.ClusterPolicyReport{
+var creport = &v1alpha1.ClusterReport{
 	ObjectMeta: v1.ObjectMeta{
 		Name:              "cpolr-test",
 		CreationTimestamp: v1.Now(),
 	},
-	Results: make([]v1alpha2.PolicyReportResult, 0),
-	Summary: v1alpha2.PolicyReportSummary{},
+	Results: make([]v1alpha1.ReportResult, 0),
+	Summary: v1alpha1.ReportSummary{},
 }
 
 func Test_Events(t *testing.T) {
@@ -45,23 +45,23 @@ func Test_GetType(t *testing.T) {
 }
 
 func Test_FindNewEvents(t *testing.T) {
-	preport1 := &v1alpha2.PolicyReport{
+	preport1 := &v1alpha1.Report{
 		ObjectMeta: v1.ObjectMeta{
 			Name:              "polr-test",
 			Namespace:         "test",
 			CreationTimestamp: v1.Now(),
 		},
-		Results: []v1alpha2.PolicyReportResult{fixtures.FailResult},
-		Summary: v1alpha2.PolicyReportSummary{},
+		Results: []v1alpha1.ReportResult{fixtures.FailResult},
+		Summary: v1alpha1.ReportSummary{},
 	}
-	preport2 := &v1alpha2.PolicyReport{
+	preport2 := &v1alpha1.Report{
 		ObjectMeta: v1.ObjectMeta{
 			Name:              "polr-test",
 			Namespace:         "test",
 			CreationTimestamp: v1.Now(),
 		},
-		Results: []v1alpha2.PolicyReportResult{fixtures.FailResult, fixtures.FailPodResult},
-		Summary: v1alpha2.PolicyReportSummary{},
+		Results: []v1alpha1.ReportResult{fixtures.FailResult, fixtures.FailPodResult},
+		Summary: v1alpha1.ReportSummary{},
 	}
 
 	diff := report.FindNewResults(preport2, preport1)
