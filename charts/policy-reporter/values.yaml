@@ -1216,6 +1216,9 @@ ui:
     # -- Deployment values
     volumes: []
 
+  # -- Extra configuration options appended to UI settings
+  extraConfig: {}
+
 plugin:
   kyverno:
     # -- (bool) Enable Kyverno Plugin
@@ -1426,6 +1429,9 @@ plugin:
 
       # -- Deployment values
       volumes: []
+
+    # -- Extra configuration options appended to kyverno plugin settings
+    extraConfig: {}
 
   trivy:
     # -- (bool) Enable Trivy Operator Plugin
@@ -1662,6 +1668,9 @@ plugin:
       # -- Deployment values
       volumes: []
 
+    # -- Extra configuration options appended to trivy plugin settings
+    extraConfig: {}
+
 monitoring:
   # -- Enables the Prometheus Operator integration
   enabled: false
@@ -1794,3 +1803,6 @@ monitoring:
 
 # -- list of extra manifests
 extraManifests: []
+
+# -- Extra configuration options appended to core policy reporter
+extraConfig: {}
