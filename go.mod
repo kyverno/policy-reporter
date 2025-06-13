@@ -17,7 +17,7 @@ require (
 	github.com/gin-contrib/zap v1.1.5
 	github.com/gin-gonic/gin v1.10.1
 	github.com/go-redis/redis/v8 v8.11.5
-	github.com/go-sql-driver/mysql v1.9.2
+	github.com/go-sql-driver/mysql v1.9.3
 	github.com/google/uuid v1.6.0
 	github.com/kyverno/go-wildcard v1.0.5
 	github.com/mattn/go-sqlite3 v1.14.28
@@ -29,18 +29,18 @@ require (
 	github.com/spf13/cobra v1.9.1
 	github.com/spf13/viper v1.20.1
 	github.com/stretchr/testify v1.10.0
-	github.com/uptrace/bun v1.2.12
-	github.com/uptrace/bun/dialect/mysqldialect v1.2.12
-	github.com/uptrace/bun/dialect/pgdialect v1.2.12
-	github.com/uptrace/bun/dialect/sqlitedialect v1.2.12
-	github.com/uptrace/bun/driver/pgdriver v1.2.12
-	github.com/uptrace/bun/extra/bundebug v1.2.12
+	github.com/uptrace/bun v1.2.13
+	github.com/uptrace/bun/dialect/mysqldialect v1.2.13
+	github.com/uptrace/bun/dialect/pgdialect v1.2.13
+	github.com/uptrace/bun/dialect/sqlitedialect v1.2.13
+	github.com/uptrace/bun/driver/pgdriver v1.2.13
+	github.com/uptrace/bun/extra/bundebug v1.2.13
 	github.com/xhit/go-simple-mail/v2 v2.16.0
 	go.uber.org/zap v1.27.0
 	golang.org/x/oauth2 v0.30.0
 	golang.org/x/sync v0.15.0
 	golang.org/x/text v0.26.0
-	google.golang.org/api v0.236.0
+	google.golang.org/api v0.237.0
 	k8s.io/api v0.33.1
 	k8s.io/apiextensions-apiserver v0.33.1
 	k8s.io/apimachinery v0.33.1
