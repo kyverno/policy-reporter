@@ -92,3 +92,7 @@ openIDConnect:
 oauth:
   {{- toYaml . | nindent 4 }}
 {{- end }}
+
+{{- with .Values.plugin.ui.extraConfig }}
+{{- toYaml . | nindent 0 }}
+{{- end }}

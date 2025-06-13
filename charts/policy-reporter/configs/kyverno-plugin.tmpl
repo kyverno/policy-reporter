@@ -25,3 +25,7 @@ core:
 blockReports:
   {{- toYaml . | nindent 4 }}
 {{- end }}
+
+{{- with .Values.plugin.kyverno.extraConfig }}
+{{- toYaml . | nindent 0 }}
+{{- end }}

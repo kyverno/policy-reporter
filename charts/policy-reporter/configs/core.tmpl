@@ -187,3 +187,7 @@ database:
   dsn: {{ .Values.database.dsn }}
   secretRef: {{ .Values.database.secretRef }}
   mountedSecret: {{ .Values.database.mountedSecret }}
+
+{{- with .Values.extraConfig }}
+{{- toYaml . | nindent 0 }}
+{{- end }}
