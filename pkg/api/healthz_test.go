@@ -21,7 +21,7 @@ func TestHealthCheckSuccess(t *testing.T) {
 
 	server := api.NewServer(gin.New(), api.WithHealthChecks([]api.HealthCheck{check}))
 
-	req, _ := http.NewRequest("GET", "/healthz", nil)
+	req, _ := http.NewRequest("GET", "/healthz", http.NoBody)
 	w := httptest.NewRecorder()
 
 	server.Serve(w, req)
@@ -43,7 +43,7 @@ func TestHealthCheckError(t *testing.T) {
 
 	server := api.NewServer(gin.New(), api.WithHealthChecks([]api.HealthCheck{check, err}))
 
-	req, _ := http.NewRequest("GET", "/healthz", nil)
+	req, _ := http.NewRequest("GET", "/healthz", http.NoBody)
 	w := httptest.NewRecorder()
 
 	server.Serve(w, req)
@@ -61,7 +61,7 @@ func TestReadyCheckSuccess(t *testing.T) {
 
 	server := api.NewServer(gin.New(), api.WithHealthChecks([]api.HealthCheck{check}))
 
-	req, _ := http.NewRequest("GET", "/ready", nil)
+	req, _ := http.NewRequest("GET", "/ready", http.NoBody)
 	w := httptest.NewRecorder()
 
 	server.Serve(w, req)

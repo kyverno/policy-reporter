@@ -91,7 +91,7 @@ func TestV2(t *testing.T) {
 	}))
 
 	t.Run("TargetResponse", func(t *testing.T) {
-		req, _ := http.NewRequest("GET", "/v2/targets", nil)
+		req, _ := http.NewRequest("GET", "/v2/targets", http.NoBody)
 		w := httptest.NewRecorder()
 
 		server.Serve(w, req)
@@ -118,7 +118,7 @@ func TestV2(t *testing.T) {
 	})
 
 	t.Run("ListNamespaces", func(t *testing.T) {
-		req, _ := http.NewRequest("GET", "/v2/namespaces", nil)
+		req, _ := http.NewRequest("GET", "/v2/namespaces", http.NoBody)
 		w := httptest.NewRecorder()
 
 		server.Serve(w, req)
@@ -135,7 +135,7 @@ func TestV2(t *testing.T) {
 	})
 
 	t.Run("ListSources", func(t *testing.T) {
-		req, _ := http.NewRequest("GET", "/v2/sources", nil)
+		req, _ := http.NewRequest("GET", "/v2/sources", http.NoBody)
 		w := httptest.NewRecorder()
 
 		server.Serve(w, req)
@@ -152,7 +152,7 @@ func TestV2(t *testing.T) {
 	})
 
 	t.Run("ListPolicies", func(t *testing.T) {
-		req, _ := http.NewRequest("GET", "/v2/policies", nil)
+		req, _ := http.NewRequest("GET", "/v2/policies", http.NoBody)
 		w := httptest.NewRecorder()
 
 		server.Serve(w, req)
@@ -171,7 +171,7 @@ func TestV2(t *testing.T) {
 	})
 
 	t.Run("UseResources", func(t *testing.T) {
-		req, _ := http.NewRequest("GET", "/v2/sources/Kyverno/use-resources", nil)
+		req, _ := http.NewRequest("GET", "/v2/sources/Kyverno/use-resources", http.NoBody)
 		w := httptest.NewRecorder()
 
 		server.Serve(w, req)
@@ -186,7 +186,7 @@ func TestV2(t *testing.T) {
 	})
 
 	t.Run("ListSourceWithCategories", func(t *testing.T) {
-		req, _ := http.NewRequest("GET", "/v2/sources/categories", nil)
+		req, _ := http.NewRequest("GET", "/v2/sources/categories", http.NoBody)
 		w := httptest.NewRecorder()
 
 		server.Serve(w, req)
@@ -202,7 +202,7 @@ func TestV2(t *testing.T) {
 	})
 
 	t.Run("ListResourceCategories", func(t *testing.T) {
-		req, _ := http.NewRequest("GET", "/v2/resource/17962226559046503697/source-categories", nil)
+		req, _ := http.NewRequest("GET", "/v2/resource/17962226559046503697/source-categories", http.NoBody)
 		w := httptest.NewRecorder()
 
 		server.Serve(w, req)
@@ -217,7 +217,7 @@ func TestV2(t *testing.T) {
 	})
 
 	t.Run("GetResource", func(t *testing.T) {
-		req, _ := http.NewRequest("GET", "/v2/resource/17962226559046503697", nil)
+		req, _ := http.NewRequest("GET", "/v2/resource/17962226559046503697", http.NoBody)
 		w := httptest.NewRecorder()
 
 		server.Serve(w, req)
@@ -232,7 +232,7 @@ func TestV2(t *testing.T) {
 	})
 
 	t.Run("GetResourceStatusCounts", func(t *testing.T) {
-		req, _ := http.NewRequest("GET", "/v2/resource/17962226559046503697/status-counts", nil)
+		req, _ := http.NewRequest("GET", "/v2/resource/17962226559046503697/status-counts", http.NoBody)
 		w := httptest.NewRecorder()
 
 		server.Serve(w, req)
@@ -247,7 +247,7 @@ func TestV2(t *testing.T) {
 	})
 
 	t.Run("ListNamespaceResourceResults", func(t *testing.T) {
-		req, _ := http.NewRequest("GET", "/v2/namespace-scoped/resource-results?namespaces=kyverno", nil)
+		req, _ := http.NewRequest("GET", "/v2/namespace-scoped/resource-results?namespaces=kyverno", http.NoBody)
 		w := httptest.NewRecorder()
 
 		server.Serve(w, req)
@@ -264,7 +264,7 @@ func TestV2(t *testing.T) {
 	})
 
 	t.Run("ListClusterResourceResults", func(t *testing.T) {
-		req, _ := http.NewRequest("GET", "/v2/cluster-scoped/resource-results", nil)
+		req, _ := http.NewRequest("GET", "/v2/cluster-scoped/resource-results", http.NoBody)
 		w := httptest.NewRecorder()
 
 		server.Serve(w, req)
@@ -280,7 +280,7 @@ func TestV2(t *testing.T) {
 	})
 
 	t.Run("GetClusterStatusCounts", func(t *testing.T) {
-		req, _ := http.NewRequest("GET", "/v2/cluster-scoped/Kyverno/status-counts", nil)
+		req, _ := http.NewRequest("GET", "/v2/cluster-scoped/Kyverno/status-counts", http.NoBody)
 		w := httptest.NewRecorder()
 
 		server.Serve(w, req)
@@ -296,7 +296,7 @@ func TestV2(t *testing.T) {
 	})
 
 	t.Run("GetNamespaceStatusCounts", func(t *testing.T) {
-		req, _ := http.NewRequest("GET", "/v2/namespace-scoped/Kyverno/status-counts", nil)
+		req, _ := http.NewRequest("GET", "/v2/namespace-scoped/Kyverno/status-counts", http.NoBody)
 		w := httptest.NewRecorder()
 
 		server.Serve(w, req)
@@ -317,7 +317,7 @@ func TestV2(t *testing.T) {
 	})
 
 	t.Run("ListClusterKinds", func(t *testing.T) {
-		req, _ := http.NewRequest("GET", "/v2/cluster-scoped/kinds", nil)
+		req, _ := http.NewRequest("GET", "/v2/cluster-scoped/kinds", http.NoBody)
 		w := httptest.NewRecorder()
 
 		server.Serve(w, req)
@@ -333,7 +333,7 @@ func TestV2(t *testing.T) {
 	})
 
 	t.Run("ListNamespaceKinds", func(t *testing.T) {
-		req, _ := http.NewRequest("GET", "/v2/namespace-scoped/kinds", nil)
+		req, _ := http.NewRequest("GET", "/v2/namespace-scoped/kinds", http.NoBody)
 		w := httptest.NewRecorder()
 
 		server.Serve(w, req)
@@ -349,7 +349,7 @@ func TestV2(t *testing.T) {
 	})
 
 	t.Run("ListResourceResults", func(t *testing.T) {
-		req, _ := http.NewRequest("GET", "/v2/resource/6274512523942114905/resource-results", nil)
+		req, _ := http.NewRequest("GET", "/v2/resource/6274512523942114905/resource-results", http.NoBody)
 		w := httptest.NewRecorder()
 
 		server.Serve(w, req)
@@ -365,7 +365,7 @@ func TestV2(t *testing.T) {
 	})
 
 	t.Run("ListResourcePolilcyResults", func(t *testing.T) {
-		req, _ := http.NewRequest("GET", "/v2/resource/6274512523942114905/results", nil)
+		req, _ := http.NewRequest("GET", "/v2/resource/6274512523942114905/results", http.NoBody)
 		w := httptest.NewRecorder()
 
 		server.Serve(w, req)
@@ -381,7 +381,7 @@ func TestV2(t *testing.T) {
 	})
 
 	t.Run("ListPolicyResults Namespaced", func(t *testing.T) {
-		req, _ := http.NewRequest("GET", "/v2/namespace-scoped/results?namespaces=kyverno", nil)
+		req, _ := http.NewRequest("GET", "/v2/namespace-scoped/results?namespaces=kyverno", http.NoBody)
 		w := httptest.NewRecorder()
 
 		server.Serve(w, req)
@@ -398,7 +398,7 @@ func TestV2(t *testing.T) {
 	})
 
 	t.Run("ListPolicyResults", func(t *testing.T) {
-		req, _ := http.NewRequest("GET", "/v2/cluster-scoped/results", nil)
+		req, _ := http.NewRequest("GET", "/v2/cluster-scoped/results", http.NoBody)
 		w := httptest.NewRecorder()
 
 		server.Serve(w, req)
@@ -414,7 +414,7 @@ func TestV2(t *testing.T) {
 	})
 
 	t.Run("ListResultsWithoutResource", func(t *testing.T) {
-		req, _ := http.NewRequest("GET", "/v2/results-without-resources", nil)
+		req, _ := http.NewRequest("GET", "/v2/results-without-resources", http.NoBody)
 		w := httptest.NewRecorder()
 
 		server.Serve(w, req)
@@ -430,7 +430,7 @@ func TestV2(t *testing.T) {
 	})
 
 	t.Run("UseResources", func(t *testing.T) {
-		req, _ := http.NewRequest("GET", "/v2/sources/Kyverno/use-resources", nil)
+		req, _ := http.NewRequest("GET", "/v2/sources/Kyverno/use-resources", http.NoBody)
 		w := httptest.NewRecorder()
 
 		server.Serve(w, req)
@@ -446,7 +446,7 @@ func TestV2(t *testing.T) {
 	})
 
 	t.Run("ListFindings", func(t *testing.T) {
-		req, _ := http.NewRequest("GET", "/v2/findings", nil)
+		req, _ := http.NewRequest("GET", "/v2/findings", http.NoBody)
 		w := httptest.NewRecorder()
 
 		server.Serve(w, req)

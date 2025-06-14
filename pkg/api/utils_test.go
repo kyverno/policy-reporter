@@ -23,7 +23,7 @@ func TestSendResponseSuccess(t *testing.T) {
 		api.SendResponse(ctx, "data", "", nil)
 	})
 
-	req, _ := http.NewRequest("GET", "/send", nil)
+	req, _ := http.NewRequest("GET", "/send", http.NoBody)
 	w := httptest.NewRecorder()
 
 	server.Serve(w, req)
@@ -42,7 +42,7 @@ func TestSendResponseError(t *testing.T) {
 		api.SendResponse(ctx, nil, "errorMsg", errors.New("error"))
 	})
 
-	req, _ := http.NewRequest("GET", "/send", nil)
+	req, _ := http.NewRequest("GET", "/send", http.NoBody)
 	w := httptest.NewRecorder()
 
 	server.Serve(w, req)

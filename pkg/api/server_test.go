@@ -23,7 +23,7 @@ func TestWithoutGZIP(t *testing.T) {
 
 	server := api.NewServer(engine, api.WithHealthChecks([]api.HealthCheck{check}))
 
-	req, _ := http.NewRequest("GET", "/healthz", nil)
+	req, _ := http.NewRequest("GET", "/healthz", http.NoBody)
 	req.Header.Add("Accept-Encoding", "gzip")
 	w := httptest.NewRecorder()
 
@@ -39,7 +39,7 @@ func TestWithGZIP(t *testing.T) {
 
 	server := api.NewServer(gin.New(), api.WithGZIP(), api.WithHealthChecks([]api.HealthCheck{check}))
 
-	req, _ := http.NewRequest("GET", "/healthz", nil)
+	req, _ := http.NewRequest("GET", "/healthz", http.NoBody)
 	req.Header.Add("Accept-Encoding", "gzip")
 	w := httptest.NewRecorder()
 
@@ -55,7 +55,7 @@ func TestWithProfiling(t *testing.T) {
 
 	server := api.NewServer(gin.New(), api.WithProfiling())
 
-	req, _ := http.NewRequest("GET", "/debug/pprof/", nil)
+	req, _ := http.NewRequest("GET", "/debug/pprof/", http.NoBody)
 	w := httptest.NewRecorder()
 
 	server.Serve(w, req)
@@ -80,7 +80,7 @@ func TestWithCustomHandler(t *testing.T) {
 	server := api.NewServer(gin.New(), api.WithProfiling())
 	server.Register("/test", &testHandler{})
 
-	req, _ := http.NewRequest("GET", "/test", nil)
+	req, _ := http.NewRequest("GET", "/test", http.NoBody)
 	w := httptest.NewRecorder()
 
 	server.Serve(w, req)
@@ -98,7 +98,7 @@ func TestWithRecover(t *testing.T) {
 		panic("recover")
 	})
 
-	req, _ := http.NewRequest("GET", "/recover", nil)
+	req, _ := http.NewRequest("GET", "/recover", http.NoBody)
 	w := httptest.NewRecorder()
 
 	server.Serve(w, req)
@@ -116,7 +116,7 @@ func TestWithZapLoggingRecover(t *testing.T) {
 		panic("recover")
 	})
 
-	req, _ := http.NewRequest("GET", "/recover", nil)
+	req, _ := http.NewRequest("GET", "/recover", http.NoBody)
 	w := httptest.NewRecorder()
 
 	server.Serve(w, req)
@@ -129,7 +129,7 @@ func TestWithPort(t *testing.T) {
 	gin.SetMode(gin.ReleaseMode)
 
 	server := api.NewServer(gin.New(), api.WithProfiling(), api.WithPort(8082))
-	req, _ := http.NewRequest("GET", "/debug/pprof/", nil)
+	req, _ := http.NewRequest("GET", "/debug/pprof/", http.NoBody)
 	w := httptest.NewRecorder()
 
 	server.Serve(w, req)
