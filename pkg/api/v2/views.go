@@ -433,7 +433,7 @@ func MapFindings(results []db.StatusCount) Findings {
 	for _, count := range results {
 		if finding, ok := findings[count.Source]; ok {
 			finding.Counts[count.Status] = count.Count
-			finding.Total = finding.Total + count.Count
+			finding.Total += count.Count
 		} else {
 			findings[count.Source] = &FindingCounts{
 				Source: count.Source,
@@ -459,7 +459,7 @@ func MapSeverityFindings(results []db.SeverityCount) Findings {
 	for _, count := range results {
 		if finding, ok := findings[count.Source]; ok {
 			finding.Counts[count.Severity] = count.Count
-			finding.Total = finding.Total + count.Count
+			finding.Total += count.Count
 		} else {
 			findings[count.Source] = &FindingCounts{
 				Source: count.Source,
