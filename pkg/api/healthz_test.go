@@ -26,8 +26,7 @@ func TestHealthCheckSuccess(t *testing.T) {
 
 	server.Serve(w, req)
 
-	assert := assert.New(t)
-	assert.Equal(http.StatusOK, w.Code)
+	assert.Equal(t, http.StatusOK, w.Code)
 }
 
 func TestHealthCheckError(t *testing.T) {
@@ -48,8 +47,7 @@ func TestHealthCheckError(t *testing.T) {
 
 	server.Serve(w, req)
 
-	assert := assert.New(t)
-	assert.Equal(http.StatusServiceUnavailable, w.Code)
+	assert.Equal(t, http.StatusServiceUnavailable, w.Code)
 }
 
 func TestReadyCheckSuccess(t *testing.T) {
@@ -66,6 +64,5 @@ func TestReadyCheckSuccess(t *testing.T) {
 
 	server.Serve(w, req)
 
-	assert := assert.New(t)
-	assert.Equal(http.StatusOK, w.Code)
+	assert.Equal(t, http.StatusOK, w.Code)
 }

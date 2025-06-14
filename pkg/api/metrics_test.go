@@ -21,8 +21,7 @@ func TestMetrics(t *testing.T) {
 
 	server.Serve(w, req)
 
-	assert := assert.New(t)
-	assert.Equal(http.StatusOK, w.Code)
+	assert.Equal(t, http.StatusOK, w.Code)
 }
 
 func TestMetricsWithBasicAuthError(t *testing.T) {
@@ -38,8 +37,7 @@ func TestMetricsWithBasicAuthError(t *testing.T) {
 
 	server.Serve(w, req)
 
-	assert := assert.New(t)
-	assert.Equal(http.StatusUnauthorized, w.Code)
+	assert.Equal(t, http.StatusUnauthorized, w.Code)
 }
 
 func TestMetricsWithBasicAuthSuccess(t *testing.T) {
@@ -56,6 +54,5 @@ func TestMetricsWithBasicAuthSuccess(t *testing.T) {
 
 	server.Serve(w, req)
 
-	assert := assert.New(t)
-	assert.Equal(http.StatusOK, w.Code)
+	assert.Equal(t, http.StatusOK, w.Code)
 }

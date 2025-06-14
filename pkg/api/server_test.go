@@ -29,9 +29,8 @@ func TestWithoutGZIP(t *testing.T) {
 
 	server.Serve(w, req)
 
-	assert := assert.New(t)
-	assert.Equal(http.StatusOK, w.Code)
-	assert.Equal("", w.Header().Get("Content-Encoding"))
+	assert.Equal(t, http.StatusOK, w.Code)
+	assert.Equal(t, "", w.Header().Get("Content-Encoding"))
 }
 
 func TestWithGZIP(t *testing.T) {
@@ -45,9 +44,8 @@ func TestWithGZIP(t *testing.T) {
 
 	server.Serve(w, req)
 
-	assert := assert.New(t)
-	assert.Equal(http.StatusOK, w.Code)
-	assert.Equal("gzip", w.Header().Get("Content-Encoding"))
+	assert.Equal(t, http.StatusOK, w.Code)
+	assert.Equal(t, "gzip", w.Header().Get("Content-Encoding"))
 }
 
 func TestWithProfiling(t *testing.T) {
@@ -60,8 +58,7 @@ func TestWithProfiling(t *testing.T) {
 
 	server.Serve(w, req)
 
-	assert := assert.New(t)
-	assert.Equal(http.StatusOK, w.Code)
+	assert.Equal(t, http.StatusOK, w.Code)
 }
 
 type testHandler struct{}
@@ -85,8 +82,7 @@ func TestWithCustomHandler(t *testing.T) {
 
 	server.Serve(w, req)
 
-	assert := assert.New(t)
-	assert.Equal(http.StatusOK, w.Code)
+	assert.Equal(t, http.StatusOK, w.Code)
 }
 
 func TestWithRecover(t *testing.T) {
@@ -103,8 +99,7 @@ func TestWithRecover(t *testing.T) {
 
 	server.Serve(w, req)
 
-	assert := assert.New(t)
-	assert.Equal(http.StatusInternalServerError, w.Code)
+	assert.Equal(t, http.StatusInternalServerError, w.Code)
 }
 
 func TestWithZapLoggingRecover(t *testing.T) {
@@ -121,8 +116,7 @@ func TestWithZapLoggingRecover(t *testing.T) {
 
 	server.Serve(w, req)
 
-	assert := assert.New(t)
-	assert.Equal(http.StatusInternalServerError, w.Code)
+	assert.Equal(t, http.StatusInternalServerError, w.Code)
 }
 
 func TestWithPort(t *testing.T) {
@@ -134,6 +128,5 @@ func TestWithPort(t *testing.T) {
 
 	server.Serve(w, req)
 
-	assert := assert.New(t)
-	assert.Equal(http.StatusOK, w.Code)
+	assert.Equal(t, http.StatusOK, w.Code)
 }
