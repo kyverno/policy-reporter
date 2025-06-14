@@ -114,42 +114,42 @@ func (f *TargetFactory) CreateClients(config *target.Targets) *target.Collection
 }
 
 func (f *TargetFactory) CreateSingleClient(tc *v1alpha1.TargetConfig) (*target.Target, error) {
-	var target *target.Target
+	var clientTarget *target.Target
 
 	switch {
 	case tc.Spec.S3 != nil:
-		target = helper.First(createClients(tc.Name, createConfig(tc, tc.Spec.S3), f.CreateS3Target))
+		clientTarget = helper.First(createClients(tc.Name, createConfig(tc, tc.Spec.S3), f.CreateS3Target))
 	case tc.Spec.Webhook != nil:
-		target = helper.First(createClients(tc.Name, createConfig(tc, tc.Spec.Webhook), f.CreateWebhookTarget))
+		clientTarget = helper.First(createClients(tc.Name, createConfig(tc, tc.Spec.Webhook), f.CreateWebhookTarget))
 	case tc.Spec.GCS != nil:
-		target = helper.First(createClients(tc.Name, createConfig(tc, tc.Spec.GCS), f.CreateGCSTarget))
+		clientTarget = helper.First(createClients(tc.Name, createConfig(tc, tc.Spec.GCS), f.CreateGCSTarget))
 	case tc.Spec.ElasticSearch != nil:
-		target = helper.First(createClients(tc.Name, createConfig(tc, tc.Spec.ElasticSearch), f.CreateElasticsearchTarget))
+		clientTarget = helper.First(createClients(tc.Name, createConfig(tc, tc.Spec.ElasticSearch), f.CreateElasticsearchTarget))
 	case tc.Spec.Telegram != nil:
-		target = helper.First(createClients(tc.Name, createConfig(tc, tc.Spec.Telegram), f.CreateTelegramTarget))
+		clientTarget = helper.First(createClients(tc.Name, createConfig(tc, tc.Spec.Telegram), f.CreateTelegramTarget))
 	case tc.Spec.Kinesis != nil:
-		target = helper.First(createClients(tc.Name, createConfig(tc, tc.Spec.Kinesis), f.CreateKinesisTarget))
+		clientTarget = helper.First(createClients(tc.Name, createConfig(tc, tc.Spec.Kinesis), f.CreateKinesisTarget))
 	case tc.Spec.SecurityHub != nil:
-		target = helper.First(createClients(tc.Name, createConfig(tc, tc.Spec.SecurityHub), f.CreateSecurityHubTarget))
+		clientTarget = helper.First(createClients(tc.Name, createConfig(tc, tc.Spec.SecurityHub), f.CreateSecurityHubTarget))
 	case tc.Spec.Loki != nil:
-		target = helper.First(createClients(tc.Name, createConfig(tc, tc.Spec.Loki), f.CreateLokiTarget))
+		clientTarget = helper.First(createClients(tc.Name, createConfig(tc, tc.Spec.Loki), f.CreateLokiTarget))
 	case tc.Spec.Slack != nil:
-		target = helper.First(createClients(tc.Name, createConfig(tc, tc.Spec.Slack), f.CreateSlackTarget))
+		clientTarget = helper.First(createClients(tc.Name, createConfig(tc, tc.Spec.Slack), f.CreateSlackTarget))
 	case tc.Spec.Teams != nil:
-		target = helper.First(createClients(tc.Name, createConfig(tc, tc.Spec.Teams), f.CreateTeamsTarget))
+		clientTarget = helper.First(createClients(tc.Name, createConfig(tc, tc.Spec.Teams), f.CreateTeamsTarget))
 	case tc.Spec.Jira != nil:
-		target = helper.First(createClients(tc.Name, createConfig(tc, tc.Spec.Jira), f.CreateJiraTarget))
+		clientTarget = helper.First(createClients(tc.Name, createConfig(tc, tc.Spec.Jira), f.CreateJiraTarget))
 	case tc.Spec.Splunk != nil:
-		target = helper.First(createClients(tc.Name, createConfig(tc, tc.Spec.Splunk), f.CreateSplunkTarget))
+		clientTarget = helper.First(createClients(tc.Name, createConfig(tc, tc.Spec.Splunk), f.CreateSplunkTarget))
 	default:
 		return nil, fmt.Errorf("invalid target type passed")
 	}
 
-	if target != nil && target.Keepalive > 0 {
-		go target.StartKeepalive()
+	if clientTarget != nil && clientTarget.Keepalive > 0 {
+		go clientTarget.StartKeepalive()
 	}
 
-	return target, nil
+	return clientTarget, nil
 }
 
 func (f *TargetFactory) CreateSlackTarget(config, parent *v1alpha1.Config[v1alpha1.SlackOptions]) *target.Target {
@@ -1132,7 +1132,7 @@ func hasAWSIdentity() bool {
 	return (irsaARN != "" && irsaFile != "") || (podIdentityFile != "" && podIdentityURI != "")
 }
 
-func checkAWSConfig(name string, config v1alpha1.AWSConfig, parent v1alpha1.AWSConfig) error {
+func checkAWSConfig(name string, config, parent v1alpha1.AWSConfig) error {
 	noEnvConfig := !hasAWSIdentity()
 
 	if noEnvConfig && (config.AccessKeyID == "" && parent.AccessKeyID == "") {

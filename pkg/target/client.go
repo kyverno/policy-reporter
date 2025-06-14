@@ -72,13 +72,13 @@ func (rf *ResultFilterFactory) CreateFilter(namespace, severity, status, policy,
 				return true
 			}
 
-			namespaces, err := rf.client.List(context.Background(), namespace.Selector)
+			includedNamespaces, err := rf.client.List(context.Background(), namespace.Selector)
 			if err != nil {
 				zap.L().Error("failed to resolve namespace selector", zap.Error(err))
 				return false
 			}
 
-			return validate.Namespace(r.GetResource().Namespace, validate.RuleSets{Include: namespaces})
+			return validate.Namespace(r.GetResource().Namespace, validate.RuleSets{Include: includedNamespaces})
 		})
 	}
 
