@@ -51,6 +51,7 @@ func (a *client) Send(result v1alpha2.PolicyReportResult) {
 	a.sendAlerts([]Alert{alert})
 }
 
+// BatchSend sends a batch of policy violations to AlertManager
 func (a *client) BatchSend(report v1alpha2.ReportInterface, results []v1alpha2.PolicyReportResult) {
 	zap.L().Debug("Batch sending policy violations to AlertManager",
 		zap.Int("count", len(results)),
@@ -58,19 +59,20 @@ func (a *client) BatchSend(report v1alpha2.ReportInterface, results []v1alpha2.P
 		zap.String("reportNamespace", report.GetNamespace()))
 
 	alerts := make([]Alert, 0, len(results))
-	for _, result := range results {
+	for idx := range results {
 		zap.L().Debug("Processing policy violation for AlertManager",
-			zap.String("policy", result.Policy),
-			zap.String("rule", result.Rule),
-			zap.String("severity", string(result.Severity)),
-			zap.String("status", string(result.Result)),
-			zap.String("source", result.Source))
+			zap.String("policy", results[idx].Policy),
+			zap.String("rule", results[idx].Rule),
+			zap.String("severity", string(results[idx].Severity)),
+			zap.String("status", string(results[idx].Result)),
+			zap.String("source", results[idx].Source))
 
-		alerts = append(alerts, a.createAlert(result))
+		alerts = append(alerts, a.createAlert(results[idx]))
 	}
 	a.sendAlerts(alerts)
 }
 
+// createAlert constructs an Alert from a PolicyReportResult
 func (a *client) createAlert(result v1alpha2.PolicyReportResult) Alert {
 	labels := map[string]string{
 		"alertname": "PolicyReporterViolation",
@@ -131,6 +133,7 @@ func (a *client) createAlert(result v1alpha2.PolicyReportResult) Alert {
 	}
 }
 
+// SendAlerts sends a slice of alerts to AlertManager
 func (a *client) sendAlerts(alerts []Alert) {
 	zap.L().Debug("Sending alerts to AlertManager",
 		zap.Int("alertCount", len(alerts)),

@@ -44,9 +44,9 @@ func (c *client) Send(result v1alpha2.PolicyReportResult) {
 
 func (c *client) BatchSend(rep v1alpha2.ReportInterface, results []v1alpha2.PolicyReportResult) {
 	srs := ""
-	for _, res := range results {
+	for idx := range results {
 		sr := splunkRequest{
-			Event:      http.NewJSONResult(res),
+			Event:      http.NewJSONResult(results[idx]),
 			SourceType: policyReporterSource,
 		}
 		srString, err := json.Marshal(sr)
@@ -54,7 +54,7 @@ func (c *client) BatchSend(rep v1alpha2.ReportInterface, results []v1alpha2.Poli
 			zap.L().Error(c.Name()+"Error marhsalling the JSON to a splunk request:", zap.Error(err))
 			return
 		}
-		srs = srs + string(srString)
+		srs += string(srString)
 	}
 
 	c.sendAndLogResult(srs)
