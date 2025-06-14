@@ -101,7 +101,7 @@ func TestV2(t *testing.T) {
 
 	t.Run("ResolveNamespaces", func(t *testing.T) {
 		body := new(bytes.Buffer)
-		body.Write([]byte(`{"team":"team-a"}`))
+		body.WriteString(`{"team":"team-a"}`)
 
 		req, _ := http.NewRequest("POST", "/v2/namespaces/resolve-selector", body)
 		w := httptest.NewRecorder()
