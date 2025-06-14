@@ -278,16 +278,16 @@ var targets = target.Targets{
 }
 
 func Test_ResolveTarget(t *testing.T) {
-	factory := factory.NewFactory(nil, nil)
+	newFactory := factory.NewFactory(nil, nil)
 
-	clients := factory.CreateClients(&targets)
+	clients := newFactory.CreateClients(&targets)
 	if len(clients.Clients()) != 26 {
 		t.Errorf("Expected 26 Client, got %d clients", len(clients.Clients()))
 	}
 }
 
 func Test_ResolveTargetsWithoutRequiredConfiguration(t *testing.T) {
-	factory := factory.NewFactory(nil, nil)
+	newFactory := factory.NewFactory(nil, nil)
 
 	targets := target.Targets{
 		Loki:          &v1alpha1.Config[v1alpha1.LokiOptions]{},
@@ -303,12 +303,12 @@ func Test_ResolveTargetsWithoutRequiredConfiguration(t *testing.T) {
 		SecurityHub:   &v1alpha1.Config[v1alpha1.SecurityHubOptions]{},
 	}
 
-	if len(factory.CreateClients(&targets).Clients()) != 0 {
+	if len(newFactory.CreateClients(&targets).Clients()) != 0 {
 		t.Error("Expected Client to be nil if no required fields are configured")
 	}
 
 	targets = target.Targets{}
-	if len(factory.CreateClients(&targets).Clients()) != 0 {
+	if len(newFactory.CreateClients(&targets).Clients()) != 0 {
 		t.Error("Expected Client to be nil if no target is configured")
 	}
 
@@ -320,7 +320,7 @@ func Test_ResolveTargetsWithoutRequiredConfiguration(t *testing.T) {
 }
 
 func Test_S3Validation(t *testing.T) {
-	factory := factory.NewFactory(nil, nil)
+	newFactory := factory.NewFactory(nil, nil)
 
 	targets := target.Targets{
 		S3: &v1alpha1.Config[v1alpha1.S3Options]{
@@ -331,63 +331,63 @@ func Test_S3Validation(t *testing.T) {
 	}
 
 	t.Run("S3.AccessKey", func(t *testing.T) {
-		if len(factory.CreateClients(&targets).Clients()) != 0 {
+		if len(newFactory.CreateClients(&targets).Clients()) != 0 {
 			t.Error("Expected Client to be nil if no accessKey is configured")
 		}
 	})
 
 	targets.S3.Config.AccessKeyID = "access"
 	t.Run("S3.SecretAccessKey", func(t *testing.T) {
-		if len(factory.CreateClients(&targets).Clients()) != 0 {
+		if len(newFactory.CreateClients(&targets).Clients()) != 0 {
 			t.Error("Expected Client to be nil if no secretAccessKey is configured")
 		}
 	})
 
 	targets.S3.Config.SecretAccessKey = "secret"
 	t.Run("S3.Region", func(t *testing.T) {
-		if len(factory.CreateClients(&targets).Clients()) != 0 {
+		if len(newFactory.CreateClients(&targets).Clients()) != 0 {
 			t.Error("Expected Client to be nil if no region is configured")
 		}
 	})
 
 	targets.S3.Config.Region = "ru-central1"
 	t.Run("S3.Bucket", func(t *testing.T) {
-		if len(factory.CreateClients(&targets).Clients()) != 0 {
+		if len(newFactory.CreateClients(&targets).Clients()) != 0 {
 			t.Error("Expected Client to be nil if no bucket is configured")
 		}
 	})
 
 	targets.S3.Config.ServerSideEncryption = "AES256"
 	t.Run("S3.SSE-S3", func(t *testing.T) {
-		if len(factory.CreateClients(&targets).Clients()) != 0 {
+		if len(newFactory.CreateClients(&targets).Clients()) != 0 {
 			t.Error("Expected Client to be nil if server side encryption is not configured")
 		}
 	})
 
 	targets.S3.Config.ServerSideEncryption = "aws:kms"
 	t.Run("S3.SSE-KMS", func(t *testing.T) {
-		if len(factory.CreateClients(&targets).Clients()) != 0 {
+		if len(newFactory.CreateClients(&targets).Clients()) != 0 {
 			t.Error("Expected Client to be nil if server side encryption is not configured")
 		}
 	})
 
 	targets.S3.Config.BucketKeyEnabled = true
 	t.Run("S3.SSE-KMS-S3-KEY", func(t *testing.T) {
-		if len(factory.CreateClients(&targets).Clients()) != 0 {
+		if len(newFactory.CreateClients(&targets).Clients()) != 0 {
 			t.Error("Expected Client to be nil if server side encryption is not configured")
 		}
 	})
 
 	targets.S3.Config.KmsKeyID = "kmsKeyId"
 	t.Run("S3.SSE-KMS-KEY-ID", func(t *testing.T) {
-		if len(factory.CreateClients(&targets).Clients()) != 0 {
+		if len(newFactory.CreateClients(&targets).Clients()) != 0 {
 			t.Error("Expected Client to be nil if server side encryption is not configured")
 		}
 	})
 }
 
 func Test_KinesisValidation(t *testing.T) {
-	factory := factory.NewFactory(nil, nil)
+	newFactory := factory.NewFactory(nil, nil)
 
 	targets := target.Targets{
 		Kinesis: &v1alpha1.Config[v1alpha1.KinesisOptions]{
@@ -398,14 +398,14 @@ func Test_KinesisValidation(t *testing.T) {
 	}
 
 	t.Run("Kinesis.AccessKey", func(t *testing.T) {
-		if len(factory.CreateClients(&targets).Clients()) != 0 {
+		if len(newFactory.CreateClients(&targets).Clients()) != 0 {
 			t.Error("Expected Client to be nil if no accessKey is configured")
 		}
 	})
 
 	targets.Kinesis.Config.AccessKeyID = "access"
 	t.Run("Kinesis.SecretAccessKey", func(t *testing.T) {
-		if len(factory.CreateClients(&targets).Clients()) != 0 {
+		if len(newFactory.CreateClients(&targets).Clients()) != 0 {
 			t.Error("Expected Client to be nil if no secretAccessKey is configured")
 		}
 	})
@@ -413,7 +413,7 @@ func Test_KinesisValidation(t *testing.T) {
 	targets.Kinesis.Config.SecretAccessKey = "secret"
 
 	t.Run("Kinesis.Region", func(t *testing.T) {
-		if len(factory.CreateClients(&targets).Clients()) != 0 {
+		if len(newFactory.CreateClients(&targets).Clients()) != 0 {
 			t.Error("Expected Client to be nil if no region is configured")
 		}
 	})
@@ -421,14 +421,14 @@ func Test_KinesisValidation(t *testing.T) {
 	targets.Kinesis.Config.Region = "ru-central1"
 
 	t.Run("Kinesis.StreamName", func(t *testing.T) {
-		if len(factory.CreateClients(&targets).Clients()) != 0 {
+		if len(newFactory.CreateClients(&targets).Clients()) != 0 {
 			t.Error("Expected Client to be nil if no stream name is configured")
 		}
 	})
 }
 
 func Test_SecurityHubValidation(t *testing.T) {
-	factory := factory.NewFactory(nil, nil)
+	newFactory := factory.NewFactory(nil, nil)
 
 	targets := target.Targets{
 		SecurityHub: &v1alpha1.Config[v1alpha1.SecurityHubOptions]{
@@ -439,35 +439,35 @@ func Test_SecurityHubValidation(t *testing.T) {
 	}
 
 	t.Run("SecurityHub.AccountId", func(t *testing.T) {
-		if len(factory.CreateClients(&targets).Clients()) != 0 {
+		if len(newFactory.CreateClients(&targets).Clients()) != 0 {
 			t.Error("Expected Client to be nil if no accountId is configured")
 		}
 	})
 
 	targets.SecurityHub.Config.AccountID = "accountId"
 	t.Run("SecurityHub.AccessKey", func(t *testing.T) {
-		if len(factory.CreateClients(&targets).Clients()) != 0 {
+		if len(newFactory.CreateClients(&targets).Clients()) != 0 {
 			t.Error("Expected Client to be nil if no accessKey is configured")
 		}
 	})
 
 	targets.SecurityHub.Config.AccessKeyID = "access"
 	t.Run("SecurityHub.SecretAccessKey", func(t *testing.T) {
-		if len(factory.CreateClients(&targets).Clients()) != 0 {
+		if len(newFactory.CreateClients(&targets).Clients()) != 0 {
 			t.Error("Expected Client to be nil if no secretAccessKey is configured")
 		}
 	})
 
 	targets.SecurityHub.Config.SecretAccessKey = "secret"
 	t.Run("SecurityHub.Region", func(t *testing.T) {
-		if len(factory.CreateClients(&targets).Clients()) != 0 {
+		if len(newFactory.CreateClients(&targets).Clients()) != 0 {
 			t.Error("Expected Client to be nil if no region is configured")
 		}
 	})
 }
 
 func Test_GCSValidation(t *testing.T) {
-	factory := factory.NewFactory(nil, nil)
+	newFactory := factory.NewFactory(nil, nil)
 
 	targets := target.Targets{
 		GCS: &v1alpha1.Config[v1alpha1.GCSOptions]{
@@ -478,21 +478,21 @@ func Test_GCSValidation(t *testing.T) {
 	}
 
 	t.Run("GCS.Bucket", func(t *testing.T) {
-		if len(factory.CreateClients(&targets).Clients()) != 0 {
+		if len(newFactory.CreateClients(&targets).Clients()) != 0 {
 			t.Error("Expected Client to be nil if no bucket is configured")
 		}
 	})
 
 	targets.GCS.Config.Bucket = "policy-reporter"
 	t.Run("GCS.Credentials", func(t *testing.T) {
-		if len(factory.CreateClients(&targets).Clients()) != 0 {
+		if len(newFactory.CreateClients(&targets).Clients()) != 0 {
 			t.Error("Expected Client to be nil if no accessKey is configured")
 		}
 	})
 }
 
 func Test_GetValuesFromSecret(t *testing.T) {
-	factory := factory.NewFactory(secrets.NewClient(newFakeClient()), nil)
+	newFactory := factory.NewFactory(secrets.NewClient(newFakeClient()), nil)
 
 	targets := target.Targets{
 		Loki:          &v1alpha1.Config[v1alpha1.LokiOptions]{SecretRef: secretName},
@@ -540,7 +540,7 @@ func Test_GetValuesFromSecret(t *testing.T) {
 		},
 	}
 
-	clients := factory.CreateClients(&targets)
+	clients := newFactory.CreateClients(&targets)
 	if len(clients.Clients()) != 13 {
 		t.Fatalf("expected 12 clients created, got %d", len(clients.Clients()))
 	}
@@ -655,7 +655,7 @@ func Test_GetValuesFromSecret(t *testing.T) {
 	})
 
 	t.Run("Get none existing secret skips target", func(t *testing.T) {
-		clients := factory.CreateClients(&target.Targets{
+		clients := newFactory.CreateClients(&target.Targets{
 			Loki: &v1alpha1.Config[v1alpha1.LokiOptions]{SecretRef: "not-exist"},
 		})
 
@@ -666,7 +666,7 @@ func Test_GetValuesFromSecret(t *testing.T) {
 }
 
 func Test_CustomFields(t *testing.T) {
-	factory := factory.NewFactory(nil, nil)
+	newFactory := factory.NewFactory(nil, nil)
 
 	targets := &target.Targets{
 		Loki: &v1alpha1.Config[v1alpha1.LokiOptions]{
@@ -773,7 +773,7 @@ func Test_CustomFields(t *testing.T) {
 		},
 	}
 
-	clients := factory.CreateClients(targets)
+	clients := newFactory.CreateClients(targets)
 
 	if len(clients.Clients()) != 12 {
 		t.Fatalf("expected 12 client created, got %d", len(clients.Clients()))
@@ -875,7 +875,7 @@ func Test_CustomFields(t *testing.T) {
 }
 
 func Test_GetValuesFromMountedSecret(t *testing.T) {
-	factory := factory.NewFactory(secrets.NewClient(newFakeClient()), nil)
+	newFactory := factory.NewFactory(secrets.NewClient(newFakeClient()), nil)
 
 	mountSecret()
 	defer os.Remove(mountedSecret)
@@ -923,7 +923,7 @@ func Test_GetValuesFromMountedSecret(t *testing.T) {
 		},
 	}
 
-	clients := factory.CreateClients(&targets)
+	clients := newFactory.CreateClients(&targets)
 	if len(clients.Clients()) != 12 {
 		t.Fatalf("expected 12 client created, got %d", len(clients.Clients()))
 	}
@@ -1024,7 +1024,7 @@ func Test_GetValuesFromMountedSecret(t *testing.T) {
 	})
 
 	t.Run("Get none existing secret skips target", func(t *testing.T) {
-		clients := factory.CreateClients(&target.Targets{
+		clients := newFactory.CreateClients(&target.Targets{
 			Loki: &v1alpha1.Config[v1alpha1.LokiOptions]{SecretRef: "not-exist"},
 		})
 

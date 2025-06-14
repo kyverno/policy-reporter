@@ -41,14 +41,18 @@ func ProcessHTTPResponse(target string, resp *http.Response, err error) {
 		}
 	}()
 
-	if err != nil {
+	switch {
+	case err != nil:
 		zap.L().Error(target+": PUSH FAILED", zap.Error(err))
-	} else if resp.StatusCode >= 400 {
+
+	case resp.StatusCode >= 400:
 		buf := new(bytes.Buffer)
 		buf.ReadFrom(resp.Body)
+		zap.L().Error(target+": PUSH FAILED",
+			zap.Int("statusCode", resp.StatusCode),
+			zap.String("body", buf.String()))
 
-		zap.L().Error(target+": PUSH FAILED", zap.Int("statusCode", resp.StatusCode), zap.String("body", buf.String()))
-	} else {
+	default:
 		zap.L().Info(target + ": PUSH OK")
 	}
 }

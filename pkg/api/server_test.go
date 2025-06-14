@@ -23,15 +23,14 @@ func TestWithoutGZIP(t *testing.T) {
 
 	server := api.NewServer(engine, api.WithHealthChecks([]api.HealthCheck{check}))
 
-	req, _ := http.NewRequest("GET", "/healthz", nil)
+	req, _ := http.NewRequest("GET", "/healthz", http.NoBody)
 	req.Header.Add("Accept-Encoding", "gzip")
 	w := httptest.NewRecorder()
 
 	server.Serve(w, req)
 
-	assert := assert.New(t)
-	assert.Equal(http.StatusOK, w.Code)
-	assert.Equal("", w.Header().Get("Content-Encoding"))
+	assert.Equal(t, http.StatusOK, w.Code)
+	assert.Equal(t, "", w.Header().Get("Content-Encoding"))
 }
 
 func TestWithGZIP(t *testing.T) {
@@ -39,15 +38,14 @@ func TestWithGZIP(t *testing.T) {
 
 	server := api.NewServer(gin.New(), api.WithGZIP(), api.WithHealthChecks([]api.HealthCheck{check}))
 
-	req, _ := http.NewRequest("GET", "/healthz", nil)
+	req, _ := http.NewRequest("GET", "/healthz", http.NoBody)
 	req.Header.Add("Accept-Encoding", "gzip")
 	w := httptest.NewRecorder()
 
 	server.Serve(w, req)
 
-	assert := assert.New(t)
-	assert.Equal(http.StatusOK, w.Code)
-	assert.Equal("gzip", w.Header().Get("Content-Encoding"))
+	assert.Equal(t, http.StatusOK, w.Code)
+	assert.Equal(t, "gzip", w.Header().Get("Content-Encoding"))
 }
 
 func TestWithProfiling(t *testing.T) {
@@ -55,13 +53,12 @@ func TestWithProfiling(t *testing.T) {
 
 	server := api.NewServer(gin.New(), api.WithProfiling())
 
-	req, _ := http.NewRequest("GET", "/debug/pprof/", nil)
+	req, _ := http.NewRequest("GET", "/debug/pprof/", http.NoBody)
 	w := httptest.NewRecorder()
 
 	server.Serve(w, req)
 
-	assert := assert.New(t)
-	assert.Equal(http.StatusOK, w.Code)
+	assert.Equal(t, http.StatusOK, w.Code)
 }
 
 type testHandler struct{}
@@ -80,13 +77,12 @@ func TestWithCustomHandler(t *testing.T) {
 	server := api.NewServer(gin.New(), api.WithProfiling())
 	server.Register("/test", &testHandler{})
 
-	req, _ := http.NewRequest("GET", "/test", nil)
+	req, _ := http.NewRequest("GET", "/test", http.NoBody)
 	w := httptest.NewRecorder()
 
 	server.Serve(w, req)
 
-	assert := assert.New(t)
-	assert.Equal(http.StatusOK, w.Code)
+	assert.Equal(t, http.StatusOK, w.Code)
 }
 
 func TestWithRecover(t *testing.T) {
@@ -98,13 +94,12 @@ func TestWithRecover(t *testing.T) {
 		panic("recover")
 	})
 
-	req, _ := http.NewRequest("GET", "/recover", nil)
+	req, _ := http.NewRequest("GET", "/recover", http.NoBody)
 	w := httptest.NewRecorder()
 
 	server.Serve(w, req)
 
-	assert := assert.New(t)
-	assert.Equal(http.StatusInternalServerError, w.Code)
+	assert.Equal(t, http.StatusInternalServerError, w.Code)
 }
 
 func TestWithZapLoggingRecover(t *testing.T) {
@@ -116,24 +111,22 @@ func TestWithZapLoggingRecover(t *testing.T) {
 		panic("recover")
 	})
 
-	req, _ := http.NewRequest("GET", "/recover", nil)
+	req, _ := http.NewRequest("GET", "/recover", http.NoBody)
 	w := httptest.NewRecorder()
 
 	server.Serve(w, req)
 
-	assert := assert.New(t)
-	assert.Equal(http.StatusInternalServerError, w.Code)
+	assert.Equal(t, http.StatusInternalServerError, w.Code)
 }
 
 func TestWithPort(t *testing.T) {
 	gin.SetMode(gin.ReleaseMode)
 
 	server := api.NewServer(gin.New(), api.WithProfiling(), api.WithPort(8082))
-	req, _ := http.NewRequest("GET", "/debug/pprof/", nil)
+	req, _ := http.NewRequest("GET", "/debug/pprof/", http.NoBody)
 	w := httptest.NewRecorder()
 
 	server.Serve(w, req)
 
-	assert := assert.New(t)
-	assert.Equal(http.StatusOK, w.Code)
+	assert.Equal(t, http.StatusOK, w.Code)
 }

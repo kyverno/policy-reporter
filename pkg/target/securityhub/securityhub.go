@@ -160,8 +160,8 @@ func (c *client) BatchSend(polr v1alpha2.ReportInterface, results []v1alpha2.Pol
 		}
 
 		mapping := make(map[string]bool, len(list))
-		for _, f := range list {
-			mapping[*f.Id] = true
+		for idx := range list {
+			mapping[*list[idx].Id] = true
 		}
 
 		results = helper.Filter(results, func(result v1alpha2.PolicyReportResult) bool {
@@ -247,16 +247,16 @@ func (c *client) CleanUp(ctx context.Context, report v1alpha2.ReportInterface) {
 	}
 
 	mapping := make(map[string]types.AwsSecurityFinding, len(findings))
-	for _, f := range findings {
-		mapping[*f.Id] = f
+	for idx := range findings {
+		mapping[*findings[idx].Id] = findings[idx]
 	}
 
-	for _, r := range report.GetResults() {
-		if !c.Validate(report, r) {
+	for idx := range report.GetResults() {
+		if !c.Validate(report, report.GetResults()[idx]) {
 			continue
 		}
 
-		delete(mapping, r.GetID())
+		delete(mapping, report.GetResults()[idx].GetID())
 	}
 
 	if len(mapping) == 0 {
@@ -264,10 +264,10 @@ func (c *client) CleanUp(ctx context.Context, report v1alpha2.ReportInterface) {
 	}
 
 	list := make([]types.AwsSecurityFindingIdentifier, 0, len(mapping))
-	for _, f := range mapping {
+	for idx := range mapping {
 		list = append(list, types.AwsSecurityFindingIdentifier{
-			Id:         f.Id,
-			ProductArn: f.ProductArn,
+			Id:         mapping[idx].Id,
+			ProductArn: mapping[idx].ProductArn,
 		})
 	}
 
@@ -578,8 +578,8 @@ func toResourceIDFilter(report v1alpha2.ReportInterface, results []v1alpha2.Poli
 	}
 
 	list := map[string]bool{}
-	for _, result := range results {
-		list[*mapResourceID(result)] = true
+	for idx := range results {
+		list[*mapResourceID(results[idx])] = true
 	}
 
 	filter := make([]types.StringFilter, 0, len(list))
@@ -593,7 +593,7 @@ func toResourceIDFilter(report v1alpha2.ReportInterface, results []v1alpha2.Poli
 	return filter
 }
 
-func splitPolrKey(key string) (string, string) {
+func splitPolrKey(key string) (reportName, namespace string) {
 	parts := strings.Split(key, "/")
 	if len(parts) == 1 {
 		return parts[0], ""
@@ -606,13 +606,13 @@ func filterFindings(findings []types.AwsSecurityFinding, results []v1alpha2.Poli
 	filtered := make([]types.AwsSecurityFinding, 0, len(findings))
 
 	mapping := make(map[string]bool, len(results))
-	for _, r := range results {
-		mapping[r.GetID()] = true
+	for idx := range results {
+		mapping[results[idx].GetID()] = true
 	}
 
-	for _, finding := range findings {
-		if _, ok := mapping[*finding.Id]; ok {
-			filtered = append(filtered, finding)
+	for idx := range findings {
+		if _, ok := mapping[*findings[idx].Id]; ok {
+			filtered = append(filtered, findings[idx])
 		}
 	}
 

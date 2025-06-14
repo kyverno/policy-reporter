@@ -16,13 +16,12 @@ func TestMetrics(t *testing.T) {
 
 	server := api.NewServer(gin.New(), api.WithMetrics())
 
-	req, _ := http.NewRequest("GET", "/metrics", nil)
+	req, _ := http.NewRequest("GET", "/metrics", http.NoBody)
 	w := httptest.NewRecorder()
 
 	server.Serve(w, req)
 
-	assert := assert.New(t)
-	assert.Equal(http.StatusOK, w.Code)
+	assert.Equal(t, http.StatusOK, w.Code)
 }
 
 func TestMetricsWithBasicAuthError(t *testing.T) {
@@ -33,13 +32,12 @@ func TestMetricsWithBasicAuthError(t *testing.T) {
 		Password: "password",
 	}), api.WithMetrics())
 
-	req, _ := http.NewRequest("GET", "/metrics", nil)
+	req, _ := http.NewRequest("GET", "/metrics", http.NoBody)
 	w := httptest.NewRecorder()
 
 	server.Serve(w, req)
 
-	assert := assert.New(t)
-	assert.Equal(http.StatusUnauthorized, w.Code)
+	assert.Equal(t, http.StatusUnauthorized, w.Code)
 }
 
 func TestMetricsWithBasicAuthSuccess(t *testing.T) {
@@ -50,12 +48,11 @@ func TestMetricsWithBasicAuthSuccess(t *testing.T) {
 		Password: "password",
 	}), api.WithMetrics())
 
-	req, _ := http.NewRequest("GET", "/metrics", nil)
+	req, _ := http.NewRequest("GET", "/metrics", http.NoBody)
 	req.SetBasicAuth("user", "password")
 	w := httptest.NewRecorder()
 
 	server.Serve(w, req)
 
-	assert := assert.New(t)
-	assert.Equal(http.StatusOK, w.Code)
+	assert.Equal(t, http.StatusOK, w.Code)
 }

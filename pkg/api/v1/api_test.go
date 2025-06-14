@@ -60,7 +60,7 @@ func TestV1(t *testing.T) {
 	}), violations.NewReporter("../../../templates", "Cluster", "Report")))
 
 	t.Run("TargetResponse", func(t *testing.T) {
-		req, _ := http.NewRequest("GET", "/v1/targets", nil)
+		req, _ := http.NewRequest("GET", "/v1/targets", http.NoBody)
 		w := httptest.NewRecorder()
 
 		server.Serve(w, req)
@@ -83,7 +83,7 @@ func TestV1(t *testing.T) {
 	})
 
 	t.Run("ListPolicyReports", func(t *testing.T) {
-		req, _ := http.NewRequest("GET", "/v1/policy-reports", nil)
+		req, _ := http.NewRequest("GET", "/v1/policy-reports", http.NoBody)
 		w := httptest.NewRecorder()
 
 		server.Serve(w, req)
@@ -100,7 +100,7 @@ func TestV1(t *testing.T) {
 	})
 
 	t.Run("ListClusterPolicyReports", func(t *testing.T) {
-		req, _ := http.NewRequest("GET", "/v1/cluster-policy-reports", nil)
+		req, _ := http.NewRequest("GET", "/v1/cluster-policy-reports", http.NoBody)
 		w := httptest.NewRecorder()
 
 		server.Serve(w, req)
@@ -117,7 +117,7 @@ func TestV1(t *testing.T) {
 	})
 
 	t.Run("ListNamespaces", func(t *testing.T) {
-		req, _ := http.NewRequest("GET", "/v1/namespaces", nil)
+		req, _ := http.NewRequest("GET", "/v1/namespaces", http.NoBody)
 		w := httptest.NewRecorder()
 
 		server.Serve(w, req)
@@ -134,7 +134,7 @@ func TestV1(t *testing.T) {
 	})
 
 	t.Run("RuleStatusCounts", func(t *testing.T) {
-		req, _ := http.NewRequest("GET", "/v1/rule-status-count?policy=required-limit&rule=resource-limit-required", nil)
+		req, _ := http.NewRequest("GET", "/v1/rule-status-count?policy=required-limit&rule=resource-limit-required", http.NoBody)
 		w := httptest.NewRecorder()
 
 		server.Serve(w, req)
@@ -153,7 +153,7 @@ func TestV1(t *testing.T) {
 	})
 
 	t.Run("ListClusterFilter(Source)", func(t *testing.T) {
-		req, _ := http.NewRequest("GET", "/v1/cluster-resources/sources", nil)
+		req, _ := http.NewRequest("GET", "/v1/cluster-resources/sources", http.NoBody)
 		w := httptest.NewRecorder()
 
 		server.Serve(w, req)
@@ -171,7 +171,7 @@ func TestV1(t *testing.T) {
 	})
 
 	t.Run("ListNamespacedFilter(Source)", func(t *testing.T) {
-		req, _ := http.NewRequest("GET", "/v1/namespaced-resources/sources", nil)
+		req, _ := http.NewRequest("GET", "/v1/namespaced-resources/sources", http.NoBody)
 		w := httptest.NewRecorder()
 
 		server.Serve(w, req)
@@ -189,7 +189,7 @@ func TestV1(t *testing.T) {
 	})
 
 	t.Run("ListClusterResources", func(t *testing.T) {
-		req, _ := http.NewRequest("GET", "/v1/cluster-resources/resources", nil)
+		req, _ := http.NewRequest("GET", "/v1/cluster-resources/resources", http.NoBody)
 		w := httptest.NewRecorder()
 
 		server.Serve(w, req)
@@ -206,7 +206,7 @@ func TestV1(t *testing.T) {
 	})
 
 	t.Run("ListNamespacedResources", func(t *testing.T) {
-		req, _ := http.NewRequest("GET", "/v1/namespaced-resources/resources", nil)
+		req, _ := http.NewRequest("GET", "/v1/namespaced-resources/resources", http.NoBody)
 		w := httptest.NewRecorder()
 
 		server.Serve(w, req)
@@ -223,7 +223,7 @@ func TestV1(t *testing.T) {
 	})
 
 	t.Run("ListClusterStatusCounts", func(t *testing.T) {
-		req, _ := http.NewRequest("GET", "/v1/cluster-resources/status-counts", nil)
+		req, _ := http.NewRequest("GET", "/v1/cluster-resources/status-counts", http.NoBody)
 		w := httptest.NewRecorder()
 
 		server.Serve(w, req)
@@ -240,7 +240,7 @@ func TestV1(t *testing.T) {
 	})
 
 	t.Run("ListNamespacedStatusCounts", func(t *testing.T) {
-		req, _ := http.NewRequest("GET", "/v1/namespaced-resources/status-counts", nil)
+		req, _ := http.NewRequest("GET", "/v1/namespaced-resources/status-counts", http.NoBody)
 		w := httptest.NewRecorder()
 
 		server.Serve(w, req)
@@ -257,7 +257,7 @@ func TestV1(t *testing.T) {
 	})
 
 	t.Run("ListClusterResults", func(t *testing.T) {
-		req, _ := http.NewRequest("GET", "/v1/cluster-resources/results", nil)
+		req, _ := http.NewRequest("GET", "/v1/cluster-resources/results", http.NoBody)
 		w := httptest.NewRecorder()
 
 		server.Serve(w, req)
@@ -274,7 +274,7 @@ func TestV1(t *testing.T) {
 	})
 
 	t.Run("ListNamespacedResults", func(t *testing.T) {
-		req, _ := http.NewRequest("GET", "/v1/namespaced-resources/results", nil)
+		req, _ := http.NewRequest("GET", "/v1/namespaced-resources/results", http.NoBody)
 		w := httptest.NewRecorder()
 
 		server.Serve(w, req)
@@ -291,7 +291,7 @@ func TestV1(t *testing.T) {
 	})
 
 	t.Run("HTMLViolationsReport", func(t *testing.T) {
-		req, _ := http.NewRequest("GET", "/v1/html-report/violations", nil)
+		req, _ := http.NewRequest("GET", "/v1/html-report/violations", http.NoBody)
 		w := httptest.NewRecorder()
 
 		server.Serve(w, req)

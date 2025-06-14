@@ -67,10 +67,6 @@ func (s *client) message(result v1alpha2.PolicyReportResult) *slack.WebhookMessa
 		att.Blocks.BlockSet,
 		slack.NewHeaderBlock(slack.NewTextBlockObject(slack.PlainTextType, "New Policy Report Result", false, false)),
 		policyBlock,
-	)
-
-	att.Blocks.BlockSet = append(
-		att.Blocks.BlockSet,
 		slack.NewSectionBlock(slack.NewTextBlockObject(slack.MarkdownType, "*Message*\n"+result.Message, false, false), nil, nil),
 		slack.NewSectionBlock(nil, []*slack.TextBlockObject{
 			slack.NewTextBlockObject(slack.MarkdownType, "*Status*\n"+string(result.Result), false, false),
@@ -217,18 +213,18 @@ func (s *client) batchMessage(polr v1alpha2.ReportInterface, results []v1alpha2.
 
 	p.Attachments = append(p.Attachments, att)
 
-	for _, result := range results {
+	for idx := range results {
 		resultAttachment := slack.Attachment{
-			Color: colors[result.Severity],
+			Color: colors[results[idx].Severity],
 			Blocks: slack.Blocks{
 				BlockSet: make([]slack.Block, 0),
 			},
 		}
 
-		policy := fmt.Sprintf("Policy: %s", result.Policy)
+		policy := fmt.Sprintf("Policy: %s", results[idx].Policy)
 
-		if result.Rule != "" {
-			policy = fmt.Sprintf("%s/%s", policy, result.Rule)
+		if results[idx].Rule != "" {
+			policy = fmt.Sprintf("%s/%s", policy, results[idx].Rule)
 		}
 
 		resultAttachment.Blocks.BlockSet = append(
@@ -236,34 +232,33 @@ func (s *client) batchMessage(polr v1alpha2.ReportInterface, results []v1alpha2.
 			slack.NewHeaderBlock(slack.NewTextBlockObject(slack.PlainTextType, policy, false, false)),
 		)
 
-		if result.Category != "" {
+		if results[idx].Category != "" {
 			resultAttachment.Blocks.BlockSet = append(
 				resultAttachment.Blocks.BlockSet,
-				slack.NewContextBlock("", slack.NewTextBlockObject(slack.MarkdownType, "*"+result.Category+"*", false, false)),
+				slack.NewContextBlock("", slack.NewTextBlockObject(slack.MarkdownType, "*"+results[idx].Category+"*", false, false)),
 			)
 		}
 
 		b := slack.NewSectionBlock(nil, []*slack.TextBlockObject{
-			slack.NewTextBlockObject(slack.MarkdownType, "*Status*\n"+string(result.Result), false, false),
+			slack.NewTextBlockObject(slack.MarkdownType, "*Status*\n"+string(results[idx].Result), false, false),
 		}, nil)
 
-		if result.Severity != "" {
-			b.Fields = append(b.Fields, slack.NewTextBlockObject(slack.MarkdownType, "*Severity*\n"+string(result.Severity), false, false))
+		if results[idx].Severity != "" {
+			b.Fields = append(b.Fields, slack.NewTextBlockObject(slack.MarkdownType, "*Severity*\n"+string(results[idx].Severity), false, false))
 		}
-
-		resultAttachment.Blocks.BlockSet = append(resultAttachment.Blocks.BlockSet, b)
 
 		resultAttachment.Blocks.BlockSet = append(
 			resultAttachment.Blocks.BlockSet,
-			slack.NewSectionBlock(slack.NewTextBlockObject(slack.MarkdownType, "*Message*\n"+result.Message, false, false), nil, nil),
+			b,
+			slack.NewSectionBlock(slack.NewTextBlockObject(slack.MarkdownType, "*Message*\n"+results[idx].Message, false, false), nil, nil),
 		)
 
-		if len(result.Properties) > 0 {
+		if len(results[idx].Properties) > 0 {
 			resultAttachment.Blocks.BlockSet = append(resultAttachment.Blocks.BlockSet, slack.NewSectionBlock(slack.NewTextBlockObject(slack.MarkdownType, "*Properties*", false, false), nil, nil))
 
 			propBlock := slack.NewSectionBlock(nil, make([]*slack.TextBlockObject, 0), nil)
 
-			for property, value := range result.Properties {
+			for property, value := range results[idx].Properties {
 				propBlock.Fields = append(propBlock.Fields, slack.NewTextBlockObject(slack.MarkdownType, "*"+helper.Title(property)+"*\n"+value, false, false))
 			}
 
@@ -282,8 +277,8 @@ func (s *client) Send(result v1alpha2.PolicyReportResult) {
 
 func (s *client) BatchSend(report v1alpha2.ReportInterface, results []v1alpha2.PolicyReportResult) {
 	if report.GetScope() == nil {
-		for _, result := range results {
-			s.Send(result)
+		for idx := range results {
+			s.Send(results[idx])
 		}
 
 		return

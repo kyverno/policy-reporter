@@ -186,17 +186,17 @@ func (h *APIHandler) HTMLViolationsReport(ctx *gin.Context) {
 		}
 
 		cResults := make(map[string][]violations.Result)
-		for _, r := range clusterResults {
-			if _, ok := cResults[r.Result]; !ok {
-				cResults[r.Result] = make([]violations.Result, 0)
+		for idx := range clusterResults {
+			if _, ok := cResults[clusterResults[idx].Result]; !ok {
+				cResults[clusterResults[idx].Result] = make([]violations.Result, 0)
 			}
 
-			cResults[r.Result] = append(cResults[r.Result], violations.Result{
-				Kind:   r.Resource.Kind,
-				Name:   r.Resource.Name,
-				Policy: r.Policy,
-				Rule:   r.Rule,
-				Status: r.Result,
+			cResults[clusterResults[idx].Result] = append(cResults[clusterResults[idx].Result], violations.Result{
+				Kind:   clusterResults[idx].Resource.Kind,
+				Name:   clusterResults[idx].Resource.Name,
+				Policy: clusterResults[idx].Policy,
+				Rule:   clusterResults[idx].Rule,
+				Status: clusterResults[idx].Result,
 			})
 		}
 
@@ -223,13 +223,13 @@ func (h *APIHandler) HTMLViolationsReport(ctx *gin.Context) {
 			mapping["fail"] = make([]violations.Result, 0)
 			mapping["error"] = make([]violations.Result, 0)
 
-			for _, r := range results {
-				mapping[r.Result] = append(mapping[r.Result], violations.Result{
-					Kind:   r.Resource.Kind,
-					Name:   r.Resource.Name,
-					Policy: r.Policy,
-					Rule:   r.Rule,
-					Status: r.Result,
+			for idx := range results {
+				mapping[results[idx].Result] = append(mapping[results[idx].Result], violations.Result{
+					Kind:   results[idx].Resource.Kind,
+					Name:   results[idx].Resource.Name,
+					Policy: results[idx].Policy,
+					Rule:   results[idx].Rule,
+					Status: results[idx].Result,
 				})
 			}
 

@@ -348,24 +348,24 @@ type Policy struct {
 func MapPolicies(results []db.PolicyReportFilter) []*Policy {
 	list := make(map[string]*Policy)
 
-	for _, r := range results {
-		category := r.Category
+	for idx := range results {
+		category := results[idx].Category
 		if category == "" {
 			category = "Other"
 		}
 
-		if _, ok := list[r.Policy]; ok {
-			list[r.Policy].Results[r.Result] = r.Count
+		if _, ok := list[results[idx].Policy]; ok {
+			list[results[idx].Policy].Results[results[idx].Result] = results[idx].Count
 			continue
 		}
 
-		list[r.Policy] = &Policy{
-			Source:   r.Source,
+		list[results[idx].Policy] = &Policy{
+			Source:   results[idx].Source,
 			Category: category,
-			Name:     r.Policy,
-			Severity: r.Severity,
+			Name:     results[idx].Policy,
+			Severity: results[idx].Severity,
 			Results: map[string]int{
-				r.Result: r.Count,
+				results[idx].Result: results[idx].Count,
 			},
 		}
 	}
@@ -433,7 +433,7 @@ func MapFindings(results []db.StatusCount) Findings {
 	for _, count := range results {
 		if finding, ok := findings[count.Source]; ok {
 			finding.Counts[count.Status] = count.Count
-			finding.Total = finding.Total + count.Count
+			finding.Total += count.Count
 		} else {
 			findings[count.Source] = &FindingCounts{
 				Source: count.Source,
@@ -459,7 +459,7 @@ func MapSeverityFindings(results []db.SeverityCount) Findings {
 	for _, count := range results {
 		if finding, ok := findings[count.Source]; ok {
 			finding.Counts[count.Severity] = count.Count
-			finding.Total = finding.Total + count.Count
+			finding.Total += count.Count
 		} else {
 			findings[count.Source] = &FindingCounts{
 				Source: count.Source,

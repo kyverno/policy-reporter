@@ -65,13 +65,13 @@ func (s *s3Client) Upload(body *bytes.Buffer, key string) error {
 
 // NewS3Client creates a new S3.client to send Results to S3
 func NewS3Client(accessKeyID, secretAccessKey, region, endpoint, bucket string, pathStyle bool, opts ...Options) Client {
-	config, err := createConfig(accessKeyID, secretAccessKey, region)
+	awsConfig, err := createConfig(accessKeyID, secretAccessKey, region)
 	if err != nil {
 		zap.L().Error("error while creating config", zap.Error(err))
 		return nil
 	}
 
-	client := s3.NewFromConfig(config, func(o *s3.Options) {
+	client := s3.NewFromConfig(awsConfig, func(o *s3.Options) {
 		o.UsePathStyle = pathStyle
 
 		if endpoint != "" {
@@ -114,7 +114,7 @@ func (k *kinesisClient) Upload(body *bytes.Buffer, key string) error {
 
 // NewKinesisClient creates a new S3.client to send Results to S3
 func NewKinesisClient(accessKeyID, secretAccessKey, region, endpoint, streamName string) Client {
-	config, err := createConfig(accessKeyID, secretAccessKey, region)
+	awsConfig, err := createConfig(accessKeyID, secretAccessKey, region)
 	if err != nil {
 		zap.L().Error("error while creating config", zap.Error(err))
 		return nil
@@ -122,7 +122,7 @@ func NewKinesisClient(accessKeyID, secretAccessKey, region, endpoint, streamName
 
 	return &kinesisClient{
 		streamName,
-		kinesis.NewFromConfig(config, func(o *kinesis.Options) {
+		kinesis.NewFromConfig(awsConfig, func(o *kinesis.Options) {
 			if endpoint != "" {
 				o.BaseEndpoint = &endpoint
 			}
@@ -132,13 +132,13 @@ func NewKinesisClient(accessKeyID, secretAccessKey, region, endpoint, streamName
 
 // NewHubClient creates a new SecurityHub client to send finding events
 func NewHubClient(accessKeyID, secretAccessKey, region, endpoint string) *securityhub.Client {
-	config, err := createConfig(accessKeyID, secretAccessKey, region)
+	awsConfig, err := createConfig(accessKeyID, secretAccessKey, region)
 	if err != nil {
 		zap.L().Error("error while creating config", zap.Error(err))
 		return nil
 	}
 
-	return securityhub.NewFromConfig(config, func(o *securityhub.Options) {
+	return securityhub.NewFromConfig(awsConfig, func(o *securityhub.Options) {
 		if endpoint != "" {
 			o.BaseEndpoint = &endpoint
 		}
@@ -162,13 +162,14 @@ func createConfig(accessKeyID, secretAccessKey, region string) (aws.Config, erro
 		return aws.Config{}, err
 	}
 
-	if accessKeyID != "" && secretAccessKey != "" {
-		zap.L().Debug("configure AWS credentals provider", zap.String("provider", "StaticCredentialsProvider"))
+	switch {
+	case accessKeyID != "" && secretAccessKey != "":
+		zap.L().Debug("configure AWS credentials provider", zap.String("provider", "StaticCredentialsProvider"))
 		cfg.Credentials = credentials.NewStaticCredentialsProvider(accessKeyID, secretAccessKey, "")
-	} else if webIdentity != "" && roleARN != "" {
-		zap.L().Debug("configure AWS credentals provider", zap.String("provider", "WebIdentityRoleProvider"), zap.String("WebIdentidyFile", webIdentity))
+	case webIdentity != "" && roleARN != "":
+		zap.L().Debug("configure AWS credentials provider", zap.String("provider", "WebIdentityRoleProvider"), zap.String("WebIdentityFile", webIdentity))
 		cfg.Credentials = stscreds.NewWebIdentityRoleProvider(sts.NewFromConfig(cfg), roleARN, stscreds.IdentityTokenFile(webIdentity))
-	} else {
+	default:
 		zap.L().Debug("used AWS credentials provider", zap.String("provider", fmt.Sprintf("%T", cfg.Credentials)))
 	}
 
