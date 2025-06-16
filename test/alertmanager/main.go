@@ -6,6 +6,7 @@ import (
 
 	"openreports.io/apis/openreports.io/v1alpha1"
 
+	"github.com/kyverno/policy-reporter/pkg/openreports"
 	"github.com/kyverno/policy-reporter/pkg/target"
 	"github.com/kyverno/policy-reporter/pkg/target/alertmanager"
 	"github.com/kyverno/policy-reporter/pkg/target/http"
@@ -47,25 +48,29 @@ func main() {
 
 	// Send the test alert
 	fmt.Println("Sending test alert to", alertManagerURL)
-	client.Send(result)
+	client.Send(&openreports.ORResultAdapter{ReportResult: &result})
 
 	// Also test batch send
-	results := []v1alpha1.ReportResult{
+	results := []*openreports.ORResultAdapter{
 		{
-			Description: "Batch test alert 1",
-			Policy:      "batch-policy-1",
-			Rule:        "batch-rule-1",
-			Result:      "fail",
-			Source:      "policy-reporter",
-			Severity:    "warning",
+			ReportResult: &v1alpha1.ReportResult{
+				Description: "Batch test alert 1",
+				Policy:      "batch-policy-1",
+				Rule:        "batch-rule-1",
+				Result:      "fail",
+				Source:      "policy-reporter",
+				Severity:    "warning",
+			},
 		},
 		{
-			Description: "Batch test alert 2",
-			Policy:      "batch-policy-2",
-			Rule:        "batch-rule-2",
-			Result:      "fail",
-			Source:      "policy-reporter",
-			Severity:    "warning",
+			ReportResult: &v1alpha1.ReportResult{
+				Description: "Batch test alert 2",
+				Policy:      "batch-policy-2",
+				Rule:        "batch-rule-2",
+				Result:      "fail",
+				Source:      "policy-reporter",
+				Severity:    "warning",
+			},
 		},
 	}
 

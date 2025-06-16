@@ -1,8 +1,6 @@
 package report
 
 import (
-	"openreports.io/apis/openreports.io/v1alpha1"
-
 	"github.com/kyverno/policy-reporter/pkg/openreports"
 )
 
@@ -52,12 +50,12 @@ func GetType(r openreports.ReportInterface) ResourceType {
 	return PolicyReportType
 }
 
-func FindNewResults(nr, or openreports.ReportInterface) []v1alpha1.ReportResult {
+func FindNewResults(nr, or openreports.ReportInterface) []*openreports.ORResultAdapter {
 	if or == nil {
 		return nr.GetResults()
 	}
 
-	diff := make([]v1alpha1.ReportResult, 0)
+	diff := make([]*openreports.ORResultAdapter, 0)
 loop:
 	for _, r := range nr.GetResults() {
 		for _, o := range or.GetResults() {

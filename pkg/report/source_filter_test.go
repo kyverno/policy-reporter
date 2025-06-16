@@ -10,6 +10,7 @@ import (
 	"openreports.io/apis/openreports.io/v1alpha1"
 
 	"github.com/kyverno/policy-reporter/pkg/fixtures"
+	"github.com/kyverno/policy-reporter/pkg/openreports"
 	"github.com/kyverno/policy-reporter/pkg/report"
 	"github.com/kyverno/policy-reporter/pkg/validate"
 )
@@ -50,7 +51,7 @@ func TestSourceFilter(t *testing.T) {
 		result := filter.Validate(&v1alpha1.Report{
 			ObjectMeta: v1.ObjectMeta{Name: "polr", Namespace: "test"},
 			Scope:      &corev1.ObjectReference{APIVersion: "v1", Kind: "Pod", Name: "nginx", Namespace: "test"},
-			Results:    []v1alpha1.ReportResult{fixtures.FailPodResult},
+			Results:    []*openreports.ORResultAdapter{fixtures.FailPodResult},
 		})
 
 		assert.True(t, result)
@@ -71,7 +72,7 @@ func TestSourceFilter(t *testing.T) {
 		result := filter.Validate(&v1alpha1.Report{
 			ObjectMeta: v1.ObjectMeta{Name: "polr", Namespace: "test"},
 			Scope:      &corev1.ObjectReference{APIVersion: "v1", Kind: "Pod", Name: "nginx", Namespace: "test"},
-			Results:    []v1alpha1.ReportResult{fixtures.FailPodResult},
+			Results:    []*openreports.ORResultAdapter{fixtures.FailPodResult},
 		})
 
 		assert.False(t, result)
@@ -92,7 +93,7 @@ func TestSourceFilter(t *testing.T) {
 		result := filter.Validate(&v1alpha1.Report{
 			ObjectMeta: v1.ObjectMeta{Name: "polr", Namespace: "test"},
 			Scope:      &corev1.ObjectReference{APIVersion: "v1", Kind: "Pod", Name: "nginx", Namespace: "test"},
-			Results:    []v1alpha1.ReportResult{fixtures.FailPodResult},
+			Results:    []*openreports.ORResultAdapter{fixtures.FailPodResult},
 		})
 
 		assert.True(t, result)
@@ -113,7 +114,7 @@ func TestSourceFilter(t *testing.T) {
 		result := filter.Validate(&v1alpha1.Report{
 			ObjectMeta: v1.ObjectMeta{Name: "polr", Namespace: "test"},
 			Scope:      &corev1.ObjectReference{APIVersion: "v1", Kind: "Pod", Name: "nginx", Namespace: "test"},
-			Results:    []v1alpha1.ReportResult{fixtures.FailPodResult},
+			Results:    []*openreports.ORResultAdapter{fixtures.FailPodResult},
 		})
 
 		assert.False(t, result)
@@ -131,12 +132,12 @@ func TestSourceFilter(t *testing.T) {
 
 		assert.False(t, filter.Validate(&v1alpha1.ClusterReport{
 			ObjectMeta: v1.ObjectMeta{Name: "polr", Namespace: ""},
-			Results:    []v1alpha1.ReportResult{fixtures.FailNamespaceResult},
+			Results:    []*openreports.ORResultAdapter{fixtures.FailNamespaceResult},
 		}))
 
 		assert.True(t, filter.Validate(&v1alpha1.Report{
 			ObjectMeta: v1.ObjectMeta{Name: "polr", Namespace: "test"},
-			Results:    []v1alpha1.ReportResult{fixtures.FailNamespaceResult},
+			Results:    []*openreports.ORResultAdapter{fixtures.FailNamespaceResult},
 		}))
 	})
 
@@ -155,7 +156,7 @@ func TestSourceFilter(t *testing.T) {
 		result := filter.Validate(&v1alpha1.Report{
 			ObjectMeta: v1.ObjectMeta{Name: "polr", Namespace: "test"},
 			Scope:      &corev1.ObjectReference{APIVersion: "v1", Kind: "Pod", Name: "nginx", Namespace: "test"},
-			Results:    []v1alpha1.ReportResult{fixtures.FailPodResult},
+			Results:    []*openreports.ORResultAdapter{fixtures.FailPodResult},
 		})
 
 		assert.True(t, result)
@@ -180,7 +181,7 @@ func TestSourceFilter(t *testing.T) {
 		assert.False(t, filter.Validate(&v1alpha1.Report{
 			ObjectMeta: v1.ObjectMeta{Name: "polr", Namespace: "test"},
 			Scope:      &corev1.ObjectReference{APIVersion: "v1", Kind: "Pod", Name: "nginx", Namespace: "test"},
-			Results:    []v1alpha1.ReportResult{fixtures.FailPodResult},
+			Results:    []*openreports.ORResultAdapter{fixtures.FailPodResult},
 		}))
 
 		c.pod = &corev1.Pod{ObjectMeta: v1.ObjectMeta{Name: "nginx", Namespace: "test"}}
@@ -188,7 +189,7 @@ func TestSourceFilter(t *testing.T) {
 		assert.True(t, filter.Validate(&v1alpha1.Report{
 			ObjectMeta: v1.ObjectMeta{Name: "polr", Namespace: "test"},
 			Scope:      &corev1.ObjectReference{APIVersion: "v1", Kind: "Pod", Name: "nginx", Namespace: "test"},
-			Results:    []v1alpha1.ReportResult{fixtures.FailPodResult},
+			Results:    []*openreports.ORResultAdapter{fixtures.FailPodResult},
 		}))
 	})
 
@@ -211,7 +212,7 @@ func TestSourceFilter(t *testing.T) {
 		assert.False(t, filter.Validate(&v1alpha1.Report{
 			ObjectMeta: v1.ObjectMeta{Name: "polr", Namespace: "test"},
 			Scope:      &corev1.ObjectReference{APIVersion: "v1", Kind: "Job", Name: "nginx", Namespace: "test"},
-			Results:    []v1alpha1.ReportResult{fixtures.FailPodResult},
+			Results:    []*openreports.ORResultAdapter{fixtures.FailPodResult},
 		}))
 
 		c.job = &batchv1.Job{ObjectMeta: v1.ObjectMeta{Name: "nginx", Namespace: "test"}}
@@ -219,7 +220,7 @@ func TestSourceFilter(t *testing.T) {
 		assert.True(t, filter.Validate(&v1alpha1.Report{
 			ObjectMeta: v1.ObjectMeta{Name: "polr", Namespace: "test"},
 			Scope:      &corev1.ObjectReference{APIVersion: "v1", Kind: "Job", Name: "nginx", Namespace: "test"},
-			Results:    []v1alpha1.ReportResult{fixtures.FailPodResult},
+			Results:    []*openreports.ORResultAdapter{fixtures.FailPodResult},
 		}))
 	})
 }

@@ -6,20 +6,19 @@ import (
 
 	"github.com/segmentio/fasthash/fnv1a"
 	corev1 "k8s.io/api/core/v1"
-	"openreports.io/apis/openreports.io/v1alpha1"
 
 	"github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
 	"github.com/kyverno/policy-reporter/pkg/openreports"
 )
 
-type FieldMapperFunc = func(h1 uint64, polr openreports.ReportInterface, res v1alpha1.ReportResult) uint64
+type FieldMapperFunc = func(h1 uint64, polr openreports.ReportInterface, res *openreports.ORResultAdapter) uint64
 
 type IDGenerator interface {
-	Generate(polr openreports.ReportInterface, res v1alpha1.ReportResult) string
+	Generate(polr openreports.ReportInterface, res *openreports.ORResultAdapter) string
 }
 
 var fieldMapper = map[string]FieldMapperFunc{
-	"resource": func(h1 uint64, polr openreports.ReportInterface, res v1alpha1.ReportResult) uint64 {
+	"resource": func(h1 uint64, polr openreports.ReportInterface, res *openreports.ORResultAdapter) uint64 {
 		var resource *corev1.ObjectReference
 
 		if res.HasResource() {
@@ -35,25 +34,25 @@ var fieldMapper = map[string]FieldMapperFunc{
 
 		return h1
 	},
-	"namespace": func(h1 uint64, polr openreports.ReportInterface, res v1alpha1.ReportResult) uint64 {
+	"namespace": func(h1 uint64, polr openreports.ReportInterface, res *openreports.ORResultAdapter) uint64 {
 		return fnv1a.AddString64(h1, polr.GetNamespace())
 	},
-	"policy": func(h1 uint64, polr openreports.ReportInterface, res v1alpha1.ReportResult) uint64 {
+	"policy": func(h1 uint64, polr openreports.ReportInterface, res *openreports.ORResultAdapter) uint64 {
 		return fnv1a.AddString64(h1, res.Policy)
 	},
-	"rule": func(h1 uint64, polr openreports.ReportInterface, res v1alpha1.ReportResult) uint64 {
+	"rule": func(h1 uint64, polr openreports.ReportInterface, res *openreports.ORResultAdapter) uint64 {
 		return fnv1a.AddString64(h1, res.Rule)
 	},
-	"result": func(h1 uint64, polr openreports.ReportInterface, res v1alpha1.ReportResult) uint64 {
+	"result": func(h1 uint64, polr openreports.ReportInterface, res *openreports.ORResultAdapter) uint64 {
 		return fnv1a.AddString64(h1, string(res.Result))
 	},
-	"category": func(h1 uint64, polr openreports.ReportInterface, res v1alpha1.ReportResult) uint64 {
+	"category": func(h1 uint64, polr openreports.ReportInterface, res *openreports.ORResultAdapter) uint64 {
 		return fnv1a.AddString64(h1, res.Category)
 	},
-	"message": func(h1 uint64, polr openreports.ReportInterface, res v1alpha1.ReportResult) uint64 {
+	"message": func(h1 uint64, polr openreports.ReportInterface, res *openreports.ORResultAdapter) uint64 {
 		return fnv1a.AddString64(h1, res.Description)
 	},
-	"created": func(h1 uint64, polr openreports.ReportInterface, res v1alpha1.ReportResult) uint64 {
+	"created": func(h1 uint64, polr openreports.ReportInterface, res *openreports.ORResultAdapter) uint64 {
 		return fnv1a.AddString64(h1, res.Timestamp.String())
 	},
 }
@@ -62,7 +61,7 @@ var (
 	propertyResolver = func(field string) FieldMapperFunc {
 		name := strings.TrimPrefix(field, "property:")
 
-		return func(h1 uint64, polr openreports.ReportInterface, res v1alpha1.ReportResult) uint64 {
+		return func(h1 uint64, polr openreports.ReportInterface, res *openreports.ORResultAdapter) uint64 {
 			if prop, ok := res.Properties[name]; ok {
 				h1 = fnv1a.AddString64(h1, prop)
 			}
@@ -74,7 +73,7 @@ var (
 	labelResolver = func(field string) FieldMapperFunc {
 		name := strings.TrimPrefix(field, "label:")
 
-		return func(h1 uint64, polr openreports.ReportInterface, res v1alpha1.ReportResult) uint64 {
+		return func(h1 uint64, polr openreports.ReportInterface, res *openreports.ORResultAdapter) uint64 {
 			if prop, ok := polr.GetLabels()[name]; ok {
 				h1 = fnv1a.AddString64(h1, prop)
 			}
@@ -86,7 +85,7 @@ var (
 	annotationResolver = func(field string) FieldMapperFunc {
 		name := strings.TrimPrefix(field, "annotation:")
 
-		return func(h1 uint64, polr openreports.ReportInterface, res v1alpha1.ReportResult) uint64 {
+		return func(h1 uint64, polr openreports.ReportInterface, res *openreports.ORResultAdapter) uint64 {
 			if prop, ok := polr.GetAnnotations()[name]; ok {
 				h1 = fnv1a.AddString64(h1, prop)
 			}
@@ -100,7 +99,7 @@ type customIDGenerator struct {
 	mappings []FieldMapperFunc
 }
 
-func (g *customIDGenerator) Generate(polr openreports.ReportInterface, res v1alpha1.ReportResult) string {
+func (g *customIDGenerator) Generate(polr openreports.ReportInterface, res *openreports.ORResultAdapter) string {
 	if id, ok := res.Properties[v1alpha2.ResultIDKey]; ok {
 		return id
 	}
@@ -115,7 +114,7 @@ func (g *customIDGenerator) Generate(polr openreports.ReportInterface, res v1alp
 
 type defaultIDGenerator struct{}
 
-func (g *defaultIDGenerator) Generate(polr openreports.ReportInterface, res v1alpha1.ReportResult) string {
+func (g *defaultIDGenerator) Generate(polr openreports.ReportInterface, res *openreports.ORResultAdapter) string {
 	if id, ok := res.Properties[v1alpha2.ResultIDKey]; ok {
 		return id
 	}

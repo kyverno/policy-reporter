@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/kyverno/policy-reporter/pkg/fixtures"
+	"github.com/kyverno/policy-reporter/pkg/openreports"
 	"github.com/kyverno/policy-reporter/pkg/target"
 	"github.com/kyverno/policy-reporter/pkg/target/kinesis"
 )
@@ -46,7 +47,7 @@ func Test_KinesisTarget(t *testing.T) {
 			CustomFields: map[string]string{"cluster": "name"},
 			Kinesis:      &testClient{nil, callback},
 		})
-		client.Send(fixtures.CompleteTargetSendResult)
+		client.Send(&openreports.ORResultAdapter{ReportResult: &fixtures.CompleteTargetSendResult})
 
 		if len(fixtures.CompleteTargetSendResult.Properties) > 1 || fixtures.CompleteTargetSendResult.Properties["cluster"] != "" {
 			t.Error("expected customFields are not added to the actuel result")

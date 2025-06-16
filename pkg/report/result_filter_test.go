@@ -3,9 +3,8 @@ package report_test
 import (
 	"testing"
 
-	"openreports.io/apis/openreports.io/v1alpha1"
-
 	"github.com/kyverno/policy-reporter/pkg/fixtures"
+	"github.com/kyverno/policy-reporter/pkg/openreports"
 	"github.com/kyverno/policy-reporter/pkg/report"
 )
 
@@ -18,7 +17,7 @@ func Test_ResultFilter(t *testing.T) {
 	})
 	t.Run("filter result with a false validation", func(t *testing.T) {
 		filter := report.NewResultFilter()
-		filter.AddValidation(func(r v1alpha1.ReportResult) bool { return false })
+		filter.AddValidation(func(r *openreports.ORResultAdapter) bool { return false })
 		if filter.Validate(fixtures.FailResult) {
 			t.Error("Expected result validates to false")
 		}

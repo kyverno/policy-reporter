@@ -10,7 +10,6 @@ import (
 
 	"go.uber.org/zap"
 	corev1 "k8s.io/api/core/v1"
-	"openreports.io/apis/openreports.io/v1alpha1"
 
 	"github.com/kyverno/policy-reporter/pkg/openreports"
 	"github.com/kyverno/policy-reporter/pkg/target"
@@ -59,7 +58,7 @@ type Payload struct {
 }
 
 type values struct {
-	Result   v1alpha1.ReportResult
+	Result   *openreports.ORResultAdapter
 	Time     time.Time
 	Resource *corev1.ObjectReference
 	Props    map[string]string
@@ -85,7 +84,7 @@ type client struct {
 	client       http.Client
 }
 
-func (e *client) Send(result v1alpha1.ReportResult) {
+func (e *client) Send(result *openreports.ORResultAdapter) {
 	if len(e.customFields) > 0 {
 		props := make(map[string]string, 0)
 
@@ -151,7 +150,7 @@ func (e *client) Reset(_ context.Context) error {
 	return nil
 }
 
-func (e *client) BatchSend(_ openreports.ReportInterface, _ []v1alpha1.ReportResult) {}
+func (e *client) BatchSend(_ openreports.ReportInterface, _ []*openreports.ORResultAdapter) {}
 
 func (e *client) Type() target.ClientType {
 	return target.SingleSend

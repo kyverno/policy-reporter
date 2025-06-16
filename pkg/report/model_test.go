@@ -8,6 +8,7 @@ import (
 	"openreports.io/apis/openreports.io/v1alpha1"
 
 	"github.com/kyverno/policy-reporter/pkg/fixtures"
+	"github.com/kyverno/policy-reporter/pkg/openreports"
 	"github.com/kyverno/policy-reporter/pkg/report"
 )
 
@@ -17,7 +18,7 @@ var preport = &v1alpha1.Report{
 		Namespace:         "test",
 		CreationTimestamp: v1.Now(),
 	},
-	Results: make([]v1alpha1.ReportResult, 0),
+	Results: make([]*openreports.ORResultAdapter, 0),
 	Summary: v1alpha1.ReportSummary{},
 }
 
@@ -26,7 +27,7 @@ var creport = &v1alpha1.ClusterReport{
 		Name:              "cpolr-test",
 		CreationTimestamp: v1.Now(),
 	},
-	Results: make([]v1alpha1.ReportResult, 0),
+	Results: make([]*openreports.ORResultAdapter, 0),
 	Summary: v1alpha1.ReportSummary{},
 }
 
@@ -51,7 +52,7 @@ func Test_FindNewEvents(t *testing.T) {
 			Namespace:         "test",
 			CreationTimestamp: v1.Now(),
 		},
-		Results: []v1alpha1.ReportResult{fixtures.FailResult},
+		Results: []*openreports.ORResultAdapter{fixtures.FailResult},
 		Summary: v1alpha1.ReportSummary{},
 	}
 	preport2 := &v1alpha1.Report{
@@ -60,7 +61,7 @@ func Test_FindNewEvents(t *testing.T) {
 			Namespace:         "test",
 			CreationTimestamp: v1.Now(),
 		},
-		Results: []v1alpha1.ReportResult{fixtures.FailResult, fixtures.FailPodResult},
+		Results: []*openreports.ORResultAdapter{fixtures.FailResult, fixtures.FailPodResult},
 		Summary: v1alpha1.ReportSummary{},
 	}
 

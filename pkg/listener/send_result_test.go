@@ -5,7 +5,6 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"openreports.io/apis/openreports.io/v1alpha1"
 
 	"github.com/kyverno/policy-reporter/pkg/fixtures"
 	"github.com/kyverno/policy-reporter/pkg/listener"
@@ -22,12 +21,12 @@ type client struct {
 	cleanup               bool
 }
 
-func (c *client) Send(result v1alpha1.ReportResult) {
+func (c *client) Send(result *openreports.ORResultAdapter) {
 	c.Called = true
 }
 
 func (c *client) MinimumSeverity() string {
-	return v1alpha1.SeverityInfo
+	return openreports.SeverityInfo
 }
 
 func (c *client) Name() string {
@@ -42,7 +41,7 @@ func (c *client) SkipExistingOnStartup() bool {
 	return c.skipExistingOnStartup
 }
 
-func (c client) Validate(rep openreports.ReportInterface, result v1alpha1.ReportResult) bool {
+func (c client) Validate(rep openreports.ReportInterface, result *openreports.ORResultAdapter) bool {
 	return c.validated
 }
 
@@ -56,7 +55,7 @@ func (c *client) CleanUp(_ context.Context, _ openreports.ReportInterface) {
 	c.cleanupCalled = true
 }
 
-func (c *client) BatchSend(_ openreports.ReportInterface, _ []v1alpha1.ReportResult) {
+func (c *client) BatchSend(_ openreports.ReportInterface, _ []*openreports.ORResultAdapter) {
 	c.Called = true
 }
 
@@ -75,21 +74,21 @@ func Test_SendResultListener(t *testing.T) {
 	t.Run("Send Result", func(t *testing.T) {
 		c := &client{validated: true}
 		slistener := listener.NewSendResultListener(target.NewCollection(&target.Target{Client: c}))
-		slistener(preport1, fixtures.FailResult, false)
+		slistener(&openreports.ORReportAdapter{Report: preport1}, fixtures.FailResult, false)
 
 		assert.True(t, c.Called, "Expected Send to be called")
 	})
 	t.Run("Don't Send Result when validation fails", func(t *testing.T) {
 		c := &client{validated: false}
 		slistener := listener.NewSendResultListener(target.NewCollection(&target.Target{Client: c}))
-		slistener(preport1, fixtures.FailResult, false)
+		slistener(&openreports.ORReportAdapter{Report: preport1}, fixtures.FailResult, false)
 
 		assert.False(t, c.Called, "Expected Send not to be called")
 	})
 	t.Run("Don't Send pre existing Result when skipExistingOnStartup is true", func(t *testing.T) {
 		c := &client{skipExistingOnStartup: true}
 		slistener := listener.NewSendResultListener(target.NewCollection(&target.Target{Client: c}))
-		slistener(preport1, fixtures.FailResult, true)
+		slistener(&openreports.ORReportAdapter{Report: preport1}, fixtures.FailResult, true)
 
 		assert.False(t, c.Called, "Expected Send not to be called")
 	})

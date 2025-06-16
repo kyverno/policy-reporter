@@ -7,8 +7,7 @@ import (
 	"net/http"
 	"strings"
 
-	"openreports.io/apis/openreports.io/v1alpha1"
-
+	"github.com/kyverno/policy-reporter/pkg/openreports"
 	"github.com/kyverno/policy-reporter/pkg/target"
 	targethttp "github.com/kyverno/policy-reporter/pkg/target/http"
 )
@@ -58,7 +57,7 @@ type Issue struct {
 	} `json:"fields"`
 }
 
-func (e *client) Send(result v1alpha1.ReportResult) {
+func (e *client) Send(result *openreports.ORResultAdapter) {
 	issue := Issue{}
 	issue.Fields.Project.Key = e.projectKey
 	issue.Fields.IssueType.Name = e.issueType

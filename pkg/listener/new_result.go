@@ -4,8 +4,6 @@ import (
 	"sync"
 	"time"
 
-	"openreports.io/apis/openreports.io/v1alpha1"
-
 	"github.com/kyverno/policy-reporter/pkg/cache"
 	"github.com/kyverno/policy-reporter/pkg/helper"
 	"github.com/kyverno/policy-reporter/pkg/openreports"
@@ -47,7 +45,7 @@ func (l *ResultListener) UnregisterSyncListener() {
 	l.syncListener = make([]report.SyncResultsListener, 0)
 }
 
-func (l *ResultListener) Validate(r v1alpha1.ReportResult) bool {
+func (l *ResultListener) Validate(r *openreports.ORResultAdapter) bool {
 	if r.Result == openreports.StatusSkip || r.Result == openreports.StatusPass {
 		return false
 	}
@@ -102,7 +100,7 @@ func (l *ResultListener) Listen(event report.LifecycleEvent) {
 	}
 
 	existing := l.cache.GetResults(event.PolicyReport.GetID())
-	newResults := make([]v1alpha1.ReportResult, 0)
+	newResults := make([]*openreports.ORResultAdapter, 0)
 
 	for _, r := range event.PolicyReport.GetResults() {
 		if helper.Contains(r.GetID(), existing) || !l.Validate(r) {
@@ -129,7 +127,7 @@ func (l *ResultListener) Listen(event report.LifecycleEvent) {
 		wg.Add(scopeListenerCount)
 
 		for _, cb := range l.scopeListener {
-			go func(callback report.ScopeResultsListener, results []v1alpha1.ReportResult) {
+			go func(callback report.ScopeResultsListener, results []*openreports.ORResultAdapter) {
 				defer wg.Done()
 
 				callback(event.PolicyReport, results, preExisted)
@@ -146,14 +144,14 @@ func (l *ResultListener) Listen(event report.LifecycleEvent) {
 	grp := sync.WaitGroup{}
 	grp.Add(len(newResults))
 	for _, res := range newResults {
-		go func(r v1alpha1.ReportResult) {
+		go func(r *openreports.ORResultAdapter) {
 			defer grp.Done()
 
 			wg := sync.WaitGroup{}
 			wg.Add(listenerCount)
 
 			for _, cb := range l.listener {
-				go func(callback report.PolicyReportResultListener, result v1alpha1.ReportResult) {
+				go func(callback report.PolicyReportResultListener, result *openreports.ORResultAdapter) {
 					defer wg.Done()
 
 					callback(event.PolicyReport, result, preExisted)

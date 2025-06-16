@@ -7,7 +7,6 @@ import (
 	"github.com/atc0005/go-teams-notify/v2/adaptivecard"
 	"go.uber.org/zap"
 	corev1 "k8s.io/api/core/v1"
-	"openreports.io/apis/openreports.io/v1alpha1"
 
 	"github.com/kyverno/policy-reporter/pkg/openreports"
 	"github.com/kyverno/policy-reporter/pkg/target"
@@ -32,13 +31,13 @@ type client struct {
 	client       http.Client
 }
 
-func (s *client) Send(result v1alpha1.ReportResult) {
-	s.PostMessage(s.newMessage(result.GetResource(), []v1alpha1.ReportResult{result}))
+func (s *client) Send(result *openreports.ORResultAdapter) {
+	s.PostMessage(s.newMessage(result.GetResource(), []*openreports.ORResultAdapter{result}))
 }
 
 func (s *client) CleanUp(_ context.Context, _ openreports.ReportInterface) {}
 
-func (s *client) BatchSend(report openreports.ReportInterface, results []v1alpha1.ReportResult) {
+func (s *client) BatchSend(report openreports.ReportInterface, results []*openreports.ORResultAdapter) {
 	if report.GetScope() == nil {
 		for idx := range results {
 			s.Send(results[idx])
@@ -73,7 +72,7 @@ func (s *client) Type() target.ClientType {
 	return target.BatchSend
 }
 
-func (s *client) newMessage(resource *corev1.ObjectReference, results []v1alpha1.ReportResult) *adaptivecard.Message {
+func (s *client) newMessage(resource *corev1.ObjectReference, results []*openreports.ORResultAdapter) *adaptivecard.Message {
 	header := adaptivecard.NewContainer()
 
 	if resource != nil {

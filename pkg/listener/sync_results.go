@@ -4,8 +4,6 @@ import (
 	"context"
 	"sync"
 
-	"openreports.io/apis/openreports.io/v1alpha1"
-
 	"github.com/kyverno/policy-reporter/pkg/helper"
 	"github.com/kyverno/policy-reporter/pkg/openreports"
 	"github.com/kyverno/policy-reporter/pkg/report"
@@ -41,7 +39,7 @@ func NewSendSyncResultsListener(targets *target.Collection) report.SyncResultsLi
 			go func(target target.Client, re openreports.ReportInterface) {
 				defer wg.Done()
 
-				filtered := helper.Filter(re.GetResults(), func(result v1alpha1.ReportResult) bool {
+				filtered := helper.Filter(re.GetResults(), func(result *openreports.ORResultAdapter) bool {
 					return target.Validate(re, result)
 				})
 

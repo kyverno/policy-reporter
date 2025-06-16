@@ -3,8 +3,7 @@ package elasticsearch
 import (
 	"time"
 
-	"openreports.io/apis/openreports.io/v1alpha1"
-
+	"github.com/kyverno/policy-reporter/pkg/openreports"
 	"github.com/kyverno/policy-reporter/pkg/target"
 	"github.com/kyverno/policy-reporter/pkg/target/http"
 )
@@ -51,7 +50,7 @@ type client struct {
 	typelessApi bool
 }
 
-func (e *client) Send(result v1alpha1.ReportResult) {
+func (e *client) Send(result *openreports.ORResultAdapter) {
 	var host string
 	var apiSuffix string
 	if e.typelessApi {

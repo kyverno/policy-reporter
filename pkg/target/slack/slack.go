@@ -34,14 +34,14 @@ type client struct {
 }
 
 var colors = map[v1alpha1.ResultSeverity]string{
-	v1alpha1.SeverityInfo:     "#68c2ff",
-	v1alpha1.SeverityLow:      "#36a64f",
-	v1alpha1.SeverityMedium:   "#f2c744",
-	v1alpha1.SeverityHigh:     "#b80707",
-	v1alpha1.SeverityCritical: "#e20b0b",
+	openreports.SeverityInfo:     "#68c2ff",
+	openreports.SeverityLow:      "#36a64f",
+	openreports.SeverityMedium:   "#f2c744",
+	openreports.SeverityHigh:     "#b80707",
+	openreports.SeverityCritical: "#e20b0b",
 }
 
-func (s *client) message(result v1alpha1.ReportResult) *slack.WebhookMessage {
+func (s *client) message(result *openreports.ORResultAdapter) *slack.WebhookMessage {
 	p := &slack.WebhookMessage{
 		Attachments: make([]slack.Attachment, 0, 1),
 		Channel:     s.channel,
@@ -172,7 +172,7 @@ func (s *client) message(result v1alpha1.ReportResult) *slack.WebhookMessage {
 	return p
 }
 
-func (s *client) batchMessage(polr openreports.ReportInterface, results []v1alpha1.ReportResult) *slack.WebhookMessage {
+func (s *client) batchMessage(polr openreports.ReportInterface, results []*openreports.ORResultAdapter) *slack.WebhookMessage {
 	scope := polr.GetScope()
 	resource := formatting.ResourceString(scope)
 
@@ -186,7 +186,7 @@ func (s *client) batchMessage(polr openreports.ReportInterface, results []v1alph
 	}
 
 	att := slack.Attachment{
-		Color: colors[v1alpha1.SeverityInfo],
+		Color: colors[openreports.SeverityInfo],
 		Blocks: slack.Blocks{
 			BlockSet: make([]slack.Block, 0),
 		},
@@ -277,11 +277,11 @@ func (s *client) batchMessage(polr openreports.ReportInterface, results []v1alph
 	return p
 }
 
-func (s *client) Send(result v1alpha1.ReportResult) {
+func (s *client) Send(result *openreports.ORResultAdapter) {
 	s.PostMessage(s.message(result))
 }
 
-func (s *client) BatchSend(report openreports.ReportInterface, results []v1alpha1.ReportResult) {
+func (s *client) BatchSend(report openreports.ReportInterface, results []*openreports.ORResultAdapter) {
 	if report.GetScope() == nil {
 		for _, result := range results {
 			s.Send(result)

@@ -33,7 +33,7 @@ func TestReconditioner(t *testing.T) {
 				Namespace:  "test",
 				UID:        "dfd57c50-f30c-4729-b63f-b1954d8988d1",
 			},
-			Results: []v1alpha1.ReportResult{
+			Results: []*openreports.ORResultAdapter{
 				{
 					ID:          "12348",
 					Description: "message",
@@ -86,7 +86,7 @@ func TestReconditioner(t *testing.T) {
 				Namespace:  "test",
 				UID:        "dfd57c50-f30c-4729-b63f-b1954d8988d1",
 			},
-			Results: []v1alpha1.ReportResult{
+			Results: []*openreports.ORResultAdapter{
 				{
 					ID:          "12348",
 					Description: "message",

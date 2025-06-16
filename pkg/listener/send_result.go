@@ -4,7 +4,6 @@ import (
 	"sync"
 
 	corev1 "k8s.io/api/core/v1"
-	"openreports.io/apis/openreports.io/v1alpha1"
 
 	"github.com/kyverno/policy-reporter/pkg/openreports"
 	"github.com/kyverno/policy-reporter/pkg/report"
@@ -14,7 +13,7 @@ import (
 const SendResults = "send_results_listener"
 
 func NewSendResultListener(targets *target.Collection) report.PolicyReportResultListener {
-	return func(rep openreports.ReportInterface, r v1alpha1.ReportResult, e bool) {
+	return func(rep openreports.ReportInterface, r *openreports.ORResultAdapter, e bool) {
 		clients := targets.SingleSendClients()
 		if len(clients) == 0 {
 			return
@@ -24,7 +23,7 @@ func NewSendResultListener(targets *target.Collection) report.PolicyReportResult
 		wg.Add(len(clients))
 
 		for _, t := range clients {
-			go func(target target.Client, re openreports.ReportInterface, result v1alpha1.ReportResult, preExisted bool) {
+			go func(target target.Client, re openreports.ReportInterface, result *openreports.ORResultAdapter, preExisted bool) {
 				defer wg.Done()
 
 				if !result.HasResource() && re.GetScope() != nil {

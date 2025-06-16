@@ -8,6 +8,7 @@ import (
 	"openreports.io/apis/openreports.io/v1alpha1"
 
 	"github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
+	"github.com/kyverno/policy-reporter/pkg/openreports"
 )
 
 var preport = &v1alpha1.Report{
@@ -16,7 +17,7 @@ var preport = &v1alpha1.Report{
 		Namespace:         "test",
 		CreationTimestamp: v1.Now(),
 	},
-	Results: make([]v1alpha1.ReportResult, 0),
+	Results: make([]*openreports.ORResultAdapter, 0),
 	Summary: v1alpha1.ReportSummary{},
 }
 

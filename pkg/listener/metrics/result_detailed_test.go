@@ -12,6 +12,7 @@ import (
 
 	"github.com/kyverno/policy-reporter/pkg/fixtures"
 	"github.com/kyverno/policy-reporter/pkg/listener/metrics"
+	"github.com/kyverno/policy-reporter/pkg/openreports"
 	"github.com/kyverno/policy-reporter/pkg/report"
 	"github.com/kyverno/policy-reporter/pkg/validate"
 )
@@ -26,7 +27,7 @@ func Test_DetailedResultMetricGeneration(t *testing.T) {
 			CreationTimestamp: v1.Now(),
 		},
 		Summary: v1alpha1.ReportSummary{Pass: 2, Fail: 1},
-		Results: []v1alpha1.ReportResult{fixtures.PassResult, fixtures.PassPodResult, fixtures.FailDisallowRuleResult},
+		Results: []*openreports.ORResultAdapter{fixtures.PassResult, fixtures.PassPodResult, fixtures.FailDisallowRuleResult},
 	}
 
 	report2 := &v1alpha1.Report{
@@ -36,7 +37,7 @@ func Test_DetailedResultMetricGeneration(t *testing.T) {
 			CreationTimestamp: v1.Now(),
 		},
 		Summary: v1alpha1.ReportSummary{Pass: 0, Fail: 1},
-		Results: []v1alpha1.ReportResult{fixtures.PassResult, fixtures.FailDisallowRuleResult},
+		Results: []*openreports.ORResultAdapter{fixtures.PassResult, fixtures.FailDisallowRuleResult},
 	}
 
 	filter := metrics.NewResultFilter(validate.RuleSets{}, validate.RuleSets{}, validate.RuleSets{Exclude: []string{"disallow-policy"}}, validate.RuleSets{}, validate.RuleSets{}, validate.RuleSets{})
@@ -84,7 +85,7 @@ func Test_DetailedResultMetricGeneration(t *testing.T) {
 	})
 }
 
-func testResultMetricLabels(t *testing.T, metric *ioprometheusclient.Metric, result v1alpha1.ReportResult) error {
+func testResultMetricLabels(t *testing.T, metric *ioprometheusclient.Metric, result *openreports.ORResultAdapter) error {
 	res := &corev1.ObjectReference{}
 	if result.HasResource() {
 		res = result.GetResource()

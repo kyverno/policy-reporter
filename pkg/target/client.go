@@ -26,15 +26,15 @@ const (
 // Client for a provided Target
 type Client interface {
 	// Send the given Result to the configured Target
-	Send(result v1alpha1.ReportResult)
+	Send(result *openreports.ORResultAdapter)
 	// BatchSend the given Results of a single PolicyReport to the configured Target
-	BatchSend(report openreports.ReportInterface, results []v1alpha1.ReportResult)
+	BatchSend(report openreports.ReportInterface, results []*openreports.ORResultAdapter)
 	// SkipExistingOnStartup skips already existing PolicyReportResults on startup
 	SkipExistingOnStartup() bool
 	// Name is a unique identifier for each Target
 	Name() string
 	// Validate if a result should send
-	Validate(rep openreports.ReportInterface, result v1alpha1.ReportResult) bool
+	Validate(rep openreports.ReportInterface, result *openreports.ORResultAdapter) bool
 	// MinimumSeverity for a triggered Result to send to this target
 	MinimumSeverity() string
 	// Sources of the Results which should send to this target, empty means all sources
@@ -69,7 +69,7 @@ func (rf *ResultFilterFactory) CreateFilter(namespace, severity, status, policy,
 	}
 
 	if len(namespace.Selector) > 0 {
-		f.AddValidation(func(r v1alpha1.ReportResult) bool {
+		f.AddValidation(func(r *openreports.ORResultAdapter) bool {
 			if r.GetResource() == nil || r.GetResource().Namespace == "" {
 				return true
 			}
@@ -85,31 +85,31 @@ func (rf *ResultFilterFactory) CreateFilter(namespace, severity, status, policy,
 	}
 
 	if minimumSeverity != "" {
-		f.AddValidation(func(r v1alpha1.ReportResult) bool {
+		f.AddValidation(func(r *openreports.ORResultAdapter) bool {
 			return openreports.SeverityLevel[r.Severity] >= openreports.SeverityLevel[v1alpha1.ResultSeverity(f.MinimumSeverity)]
 		})
 	}
 
 	if sources.Count() > 0 {
-		f.AddValidation(func(r v1alpha1.ReportResult) bool {
+		f.AddValidation(func(r *openreports.ORResultAdapter) bool {
 			return validate.MatchRuleSet(r.Source, sources)
 		})
 	}
 
 	if policy.Count() > 0 {
-		f.AddValidation(func(r v1alpha1.ReportResult) bool {
+		f.AddValidation(func(r *openreports.ORResultAdapter) bool {
 			return validate.MatchRuleSet(r.Policy, policy)
 		})
 	}
 
 	if severity.Count() > 0 {
-		f.AddValidation(func(r v1alpha1.ReportResult) bool {
+		f.AddValidation(func(r *openreports.ORResultAdapter) bool {
 			return validate.ContainsRuleSet(string(r.Severity), severity)
 		})
 	}
 
 	if status.Count() > 0 {
-		f.AddValidation(func(r v1alpha1.ReportResult) bool {
+		f.AddValidation(func(r *openreports.ORResultAdapter) bool {
 			return validate.ContainsRuleSet(string(r.Result), status)
 		})
 	}
@@ -214,7 +214,7 @@ func (c *BaseClient) Sources() []string {
 	return c.resultFilter.Sources
 }
 
-func (c *BaseClient) Validate(rep openreports.ReportInterface, result v1alpha1.ReportResult) bool {
+func (c *BaseClient) Validate(rep openreports.ReportInterface, result *openreports.ORResultAdapter) bool {
 	if !c.ValidateReport(rep) {
 		return false
 	}
@@ -248,7 +248,7 @@ func (c *BaseClient) Reset(_ context.Context) error {
 
 func (c *BaseClient) CleanUp(_ context.Context, _ openreports.ReportInterface) {}
 
-func (c *BaseClient) BatchSend(_ openreports.ReportInterface, _ []v1alpha1.ReportResult) {}
+func (c *BaseClient) BatchSend(_ openreports.ReportInterface, _ []*openreports.ORResultAdapter) {}
 
 func (c *BaseClient) SendHeartbeat() {} // Default no-op implementation
 

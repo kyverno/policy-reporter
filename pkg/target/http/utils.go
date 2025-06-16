@@ -10,8 +10,8 @@ import (
 	"os"
 	"time"
 
+	"github.com/kyverno/policy-reporter/pkg/openreports"
 	"go.uber.org/zap"
-	"openreports.io/apis/openreports.io/v1alpha1"
 )
 
 // CreateJSONRequest for the given configuration
@@ -52,7 +52,7 @@ func ProcessHTTPResponse(target string, resp *http.Response, err error) {
 	}
 }
 
-func NewJSONResult(r v1alpha1.ReportResult) Result {
+func NewJSONResult(r *openreports.ORResultAdapter) Result {
 	res := Resource{}
 	if r.HasResource() {
 		resOb := r.GetResource()

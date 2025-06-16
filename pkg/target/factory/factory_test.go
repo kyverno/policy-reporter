@@ -11,10 +11,10 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes/fake"
 	v1 "k8s.io/client-go/kubernetes/typed/core/v1"
-	reportsv1alpha1 "openreports.io/apis/openreports.io/v1alpha1"
 
 	"github.com/kyverno/policy-reporter/pkg/crd/api/targetconfig/v1alpha1"
 	"github.com/kyverno/policy-reporter/pkg/kubernetes/secrets"
+	"github.com/kyverno/policy-reporter/pkg/openreports"
 	"github.com/kyverno/policy-reporter/pkg/target"
 	"github.com/kyverno/policy-reporter/pkg/target/factory"
 )
@@ -83,7 +83,7 @@ var targets = target.Targets{
 			},
 		},
 		SkipExisting:    true,
-		MinimumSeverity: reportsv1alpha1.SeverityInfo,
+		MinimumSeverity: openreports.SeverityInfo,
 		CustomFields:    map[string]string{"field": "value"},
 		Channels: []*v1alpha1.Config[v1alpha1.LokiOptions]{
 			{
@@ -101,7 +101,7 @@ var targets = target.Targets{
 			Rotation: "daily",
 		},
 		SkipExisting:    true,
-		MinimumSeverity: reportsv1alpha1.SeverityInfo,
+		MinimumSeverity: openreports.SeverityInfo,
 		CustomFields:    map[string]string{"field": "value"},
 		Channels:        []*v1alpha1.Config[v1alpha1.ElasticsearchOptions]{{}},
 	},
@@ -113,7 +113,7 @@ var targets = target.Targets{
 			},
 		},
 		SkipExisting:    true,
-		MinimumSeverity: reportsv1alpha1.SeverityInfo,
+		MinimumSeverity: openreports.SeverityInfo,
 		CustomFields:    map[string]string{"field": "value"},
 		Channels: []*v1alpha1.Config[v1alpha1.SlackOptions]{{
 			Config: &v1alpha1.SlackOptions{
@@ -133,7 +133,7 @@ var targets = target.Targets{
 			SkipTLS: true,
 		},
 		SkipExisting:    true,
-		MinimumSeverity: reportsv1alpha1.SeverityInfo,
+		MinimumSeverity: openreports.SeverityInfo,
 		CustomFields:    map[string]string{"field": "value"},
 		Channels: []*v1alpha1.Config[v1alpha1.WebhookOptions]{{
 			Config: &v1alpha1.WebhookOptions{
@@ -147,7 +147,7 @@ var targets = target.Targets{
 			SkipTLS: true,
 		},
 		SkipExisting:    true,
-		MinimumSeverity: reportsv1alpha1.SeverityInfo,
+		MinimumSeverity: openreports.SeverityInfo,
 		CustomFields:    map[string]string{"field": "value"},
 		Channels: []*v1alpha1.Config[v1alpha1.WebhookOptions]{{
 			Config: &v1alpha1.WebhookOptions{
@@ -161,7 +161,7 @@ var targets = target.Targets{
 			SkipTLS: true,
 		},
 		SkipExisting:    true,
-		MinimumSeverity: reportsv1alpha1.SeverityInfo,
+		MinimumSeverity: openreports.SeverityInfo,
 		CustomFields:    map[string]string{"field": "value"},
 		Channels:        []*v1alpha1.Config[v1alpha1.WebhookOptions]{{}},
 	},
@@ -175,7 +175,7 @@ var targets = target.Targets{
 			ChatID: "123456",
 		},
 		SkipExisting:    true,
-		MinimumSeverity: reportsv1alpha1.SeverityInfo,
+		MinimumSeverity: openreports.SeverityInfo,
 		CustomFields:    map[string]string{"field": "value"},
 		Channels: []*v1alpha1.Config[v1alpha1.TelegramOptions]{{
 			Config: &v1alpha1.TelegramOptions{
@@ -192,7 +192,7 @@ var targets = target.Targets{
 			},
 		},
 		SkipExisting:    true,
-		MinimumSeverity: reportsv1alpha1.SeverityInfo,
+		MinimumSeverity: openreports.SeverityInfo,
 		CustomFields:    map[string]string{"field": "value"},
 		Channels: []*v1alpha1.Config[v1alpha1.WebhookOptions]{{
 			Config: &v1alpha1.WebhookOptions{
@@ -219,7 +219,7 @@ var targets = target.Targets{
 			Prefix:               "prefix",
 		},
 		SkipExisting:    true,
-		MinimumSeverity: reportsv1alpha1.SeverityInfo,
+		MinimumSeverity: openreports.SeverityInfo,
 		CustomFields:    map[string]string{"field": "value"},
 		Channels:        []*v1alpha1.Config[v1alpha1.S3Options]{{}},
 	},
@@ -234,7 +234,7 @@ var targets = target.Targets{
 			StreamName: "policy-reporter",
 		},
 		SkipExisting:    true,
-		MinimumSeverity: reportsv1alpha1.SeverityInfo,
+		MinimumSeverity: openreports.SeverityInfo,
 		CustomFields:    map[string]string{"field": "value"},
 		Channels:        []*v1alpha1.Config[v1alpha1.KinesisOptions]{{}},
 	},
@@ -249,7 +249,7 @@ var targets = target.Targets{
 			AccountID: "AccountID",
 		},
 		SkipExisting:    true,
-		MinimumSeverity: reportsv1alpha1.SeverityInfo,
+		MinimumSeverity: openreports.SeverityInfo,
 		CustomFields:    map[string]string{"field": "value"},
 		Channels:        []*v1alpha1.Config[v1alpha1.SecurityHubOptions]{{}},
 	},
@@ -260,7 +260,7 @@ var targets = target.Targets{
 			Prefix:      "prefix",
 		},
 		SkipExisting:    true,
-		MinimumSeverity: reportsv1alpha1.SeverityInfo,
+		MinimumSeverity: openreports.SeverityInfo,
 		CustomFields:    map[string]string{"field": "value"},
 		Channels:        []*v1alpha1.Config[v1alpha1.GCSOptions]{{}},
 	},
@@ -272,7 +272,7 @@ var targets = target.Targets{
 			Token: "token",
 		},
 		SkipExisting:    true,
-		MinimumSeverity: reportsv1alpha1.SeverityInfo,
+		MinimumSeverity: openreports.SeverityInfo,
 		CustomFields:    map[string]string{"field": "value"},
 	},
 }

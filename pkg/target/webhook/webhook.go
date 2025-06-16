@@ -30,7 +30,7 @@ type client struct {
 	keepalive    *v1alpha1.KeepaliveConfig
 }
 
-func (e *client) Send(result reportsv1alpha1.ReportResult) {
+func (e *client) Send(result reports*openreports.ORResultAdapter) {
 	if len(e.customFields) > 0 {
 		props := make(map[string]string, 0)
 

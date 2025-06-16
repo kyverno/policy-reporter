@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/kyverno/policy-reporter/pkg/fixtures"
+	"github.com/kyverno/policy-reporter/pkg/openreports"
 	"github.com/kyverno/policy-reporter/pkg/target"
 	"github.com/kyverno/policy-reporter/pkg/target/slack"
 )
@@ -46,7 +47,7 @@ func Test_SlackTarget(t *testing.T) {
 			CustomFields: map[string]string{"Cluster": "Name"},
 			HTTPClient:   testClient{callback, 200},
 		})
-		client.Send(fixtures.CompleteTargetSendResult)
+		client.Send(&openreports.ORResultAdapter{ReportResult: &fixtures.CompleteTargetSendResult})
 	})
 
 	t.Run("Send Minimal Result", func(t *testing.T) {
@@ -71,7 +72,7 @@ func Test_SlackTarget(t *testing.T) {
 			Webhook:    "http://hook.slack:80",
 			HTTPClient: testClient{callback, 200},
 		})
-		client.Send(fixtures.MinimalTargetSendResult)
+		client.Send(&openreports.ORResultAdapter{ReportResult: &fixtures.MinimalTargetSendResult})
 	})
 
 	t.Run("Send enforce Result", func(t *testing.T) {
@@ -96,7 +97,7 @@ func Test_SlackTarget(t *testing.T) {
 			Webhook:    "http://hook.slack:80",
 			HTTPClient: testClient{callback, 200},
 		})
-		client.Send(fixtures.EnforceTargetSendResult)
+		client.Send(&openreports.ORResultAdapter{ReportResult: &fixtures.EnforceTargetSendResult})
 	})
 
 	t.Run("Send incomplete Result", func(t *testing.T) {
@@ -122,7 +123,7 @@ func Test_SlackTarget(t *testing.T) {
 			CustomFields: map[string]string{"Cluster": "Name"},
 			HTTPClient:   testClient{callback, 200},
 		})
-		client.Send(fixtures.MissingUIDSendResult)
+		client.Send(&openreports.ORResultAdapter{ReportResult: &fixtures.MissingUIDSendResult})
 	})
 
 	t.Run("Send incomplete Result2", func(t *testing.T) {
@@ -148,7 +149,7 @@ func Test_SlackTarget(t *testing.T) {
 			CustomFields: map[string]string{"Cluster": "Name"},
 			HTTPClient:   testClient{callback, 200},
 		})
-		client.Send(fixtures.MissingAPIVersionSendResult)
+		client.Send(&openreports.ORResultAdapter{ReportResult: &fixtures.MissingAPIVersionSendResult})
 	})
 
 	t.Run("Name", func(t *testing.T) {
