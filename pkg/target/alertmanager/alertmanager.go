@@ -38,7 +38,7 @@ type client struct {
 // Ensure the client type implements the Client interface
 var _ Client = (*client)(nil)
 
-func (a *client) Send(result *openreports.ORResultAdapter) {
+func (a *client) Send(result openreports.ORResultAdapter) {
 	zap.L().Debug("Sending policy violation to AlertManager",
 		zap.String("policy", result.Policy),
 		zap.String("rule", result.Rule),

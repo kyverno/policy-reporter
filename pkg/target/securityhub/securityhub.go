@@ -112,7 +112,7 @@ func (c *client) mapFindings(polr openreports.ReportInterface, results []*openre
 	})
 }
 
-func (c *client) Send(result *openreports.ORResultAdapter) {
+func (c *client) Send(result openreports.ORResultAdapter) {
 	c.BatchSend(&openreports.ORReportAdapter{Report: &v1alpha1.Report{}}, []*openreports.ORResultAdapter{result})
 }
 

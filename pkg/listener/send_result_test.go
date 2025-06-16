@@ -21,7 +21,7 @@ type client struct {
 	cleanup               bool
 }
 
-func (c *client) Send(result *openreports.ORResultAdapter) {
+func (c *client) Send(result openreports.ORResultAdapter) {
 	c.Called = true
 }
 

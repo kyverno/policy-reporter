@@ -31,7 +31,7 @@ type client struct {
 	client       http.Client
 }
 
-func (s *client) Send(result *openreports.ORResultAdapter) {
+func (s *client) Send(result openreports.ORResultAdapter) {
 	s.PostMessage(s.newMessage(result.GetResource(), []*openreports.ORResultAdapter{result}))
 }
 

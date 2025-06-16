@@ -50,7 +50,7 @@ type client struct {
 	typelessApi bool
 }
 
-func (e *client) Send(result *openreports.ORResultAdapter) {
+func (e *client) Send(result openreports.ORResultAdapter) {
 	var host string
 	var apiSuffix string
 	if e.typelessApi {

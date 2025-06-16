@@ -277,7 +277,7 @@ func (s *client) batchMessage(polr openreports.ReportInterface, results []*openr
 	return p
 }
 
-func (s *client) Send(result *openreports.ORResultAdapter) {
+func (s *client) Send(result openreports.ORResultAdapter) {
 	s.PostMessage(s.message(result))
 }
 

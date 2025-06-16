@@ -13,7 +13,7 @@ import (
 
 var seconds = time.Date(2021, time.February, 23, 15, 10, 0, 0, time.UTC).Unix()
 
-var CompleteTargetSendResult = &openreports.ORResultAdapter{
+var CompleteTargetSendResult = openreports.ORResultAdapter{
 	ReportResult: &v1alpha1.ReportResult{
 		Description: "validation error: requests and limits required. Rule autogen-check-for-requests-and-limits failed at path /spec/template/spec/containers/0/resources/requests/",
 		Policy:      "require-requests-and-limits-required",
@@ -35,7 +35,7 @@ var CompleteTargetSendResult = &openreports.ORResultAdapter{
 	},
 }
 
-var MinimalTargetSendResult = &openreports.ORResultAdapter{
+var MinimalTargetSendResult = openreports.ORResultAdapter{
 	ReportResult: &v1alpha1.ReportResult{
 		Description: "validation error: label required. Rule app-label-required failed at path /spec/template/spec/containers/0/resources/requests/",
 		Policy:      "app-label-requirement",
@@ -44,7 +44,7 @@ var MinimalTargetSendResult = &openreports.ORResultAdapter{
 	},
 }
 
-var EnforceTargetSendResult = &openreports.ORResultAdapter{
+var EnforceTargetSendResult = openreports.ORResultAdapter{
 	ReportResult: &v1alpha1.ReportResult{
 		Description: "validation error: requests and limits required. Rule autogen-check-for-requests-and-limits failed at path /spec/template/spec/containers/0/resources/requests/",
 		Policy:      "require-requests-and-limits-required",
@@ -66,7 +66,7 @@ var EnforceTargetSendResult = &openreports.ORResultAdapter{
 	},
 }
 
-var MissingUIDSendResult = &openreports.ORResultAdapter{
+var MissingUIDSendResult = openreports.ORResultAdapter{
 	ReportResult: &v1alpha1.ReportResult{
 		Description: "validation error: requests and limits required. Rule autogen-check-for-requests-and-limits failed at path /spec/template/spec/containers/0/resources/requests/",
 		Policy:      "require-requests-and-limits-required",
@@ -88,7 +88,7 @@ var MissingUIDSendResult = &openreports.ORResultAdapter{
 	},
 }
 
-var MissingAPIVersionSendResult = &openreports.ORResultAdapter{
+var MissingAPIVersionSendResult = openreports.ORResultAdapter{
 	ReportResult: &v1alpha1.ReportResult{
 		Description: "validation error: requests and limits required. Rule autogen-check-for-requests-and-limits failed at path /spec/template/spec/containers/0/resources/requests/",
 		Policy:      "require-requests-and-limits-required",
@@ -110,7 +110,7 @@ var MissingAPIVersionSendResult = &openreports.ORResultAdapter{
 	},
 }
 
-var ErrorSendResult = &openreports.ORResultAdapter{
+var ErrorSendResult = openreports.ORResultAdapter{
 	ReportResult: &v1alpha1.ReportResult{
 		Description: "validation error: label required. Rule app-label-required failed at path /spec/template/spec/containers/0/resources/requests/",
 		Policy:      "app-label-requirement",
@@ -119,7 +119,7 @@ var ErrorSendResult = &openreports.ORResultAdapter{
 	},
 }
 
-var CritcalSendResult = &openreports.ORResultAdapter{
+var CritcalSendResult = openreports.ORResultAdapter{
 	ReportResult: &v1alpha1.ReportResult{
 		Description: "validation error: label required. Rule app-label-required failed at path /spec/template/spec/containers/0/resources/requests/",
 		Policy:      "app-label-requirement",
@@ -128,7 +128,7 @@ var CritcalSendResult = &openreports.ORResultAdapter{
 	},
 }
 
-var InfoSendResult = &openreports.ORResultAdapter{
+var InfoSendResult = openreports.ORResultAdapter{
 	ReportResult: &v1alpha1.ReportResult{
 		Description: "validation error: label required. Rule app-label-required failed at path /spec/template/spec/containers/0/resources/requests/",
 		Policy:      "app-label-requirement",
@@ -137,7 +137,7 @@ var InfoSendResult = &openreports.ORResultAdapter{
 	},
 }
 
-var DebugSendResult = &openreports.ORResultAdapter{
+var DebugSendResult = openreports.ORResultAdapter{
 	ReportResult: &v1alpha1.ReportResult{
 		Description: "validation error: label required. Rule app-label-required failed at path /spec/template/spec/containers/0/resources/requests/",
 		Policy:      "app-label-requirement",
