@@ -36,7 +36,6 @@ func TestReconditioner(t *testing.T) {
 				},
 				Results: []v1alpha1.ReportResult{
 					{
-						ID:          "12348",
 						Description: "message",
 						Result:      v1alpha2.StatusFail,
 						Scored:      true,
@@ -91,7 +90,6 @@ func TestReconditioner(t *testing.T) {
 				},
 				Results: []v1alpha1.ReportResult{
 					{
-						ID:          "12348",
 						Description: "message",
 						Result:      v1alpha2.StatusFail,
 						Scored:      true,

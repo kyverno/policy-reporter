@@ -1064,7 +1064,6 @@ func (s *Store) fetchResults(ctx context.Context, id string) ([]v1alpha1.ReportR
 	list := make([]v1alpha1.ReportResult, 0, len(polr))
 	for _, result := range polr {
 		list = append(list, v1alpha1.ReportResult{
-			ID:          result.ID,
 			Result:      v1alpha1.Result(result.Result),
 			Severity:    v1alpha1.ResultSeverity(result.Severity),
 			Policy:      result.Policy,

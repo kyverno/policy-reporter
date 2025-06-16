@@ -33,7 +33,6 @@ var DefaultPolicyReport = &v1alpha1.Report{
 	},
 	Results: []v1alpha1.ReportResult{
 		{
-			ID:          "12348",
 			Description: "message",
 			Result:      v1alpha2.StatusFail,
 			Scored:      true,
@@ -55,7 +54,6 @@ var DefaultPolicyReport = &v1alpha1.Report{
 			Properties: map[string]string{"version": "1.2.0"},
 		},
 		{
-			ID:          "12346",
 			Description: "message 2",
 			Result:      v1alpha2.StatusFail,
 			Scored:      true,
@@ -64,7 +62,7 @@ var DefaultPolicyReport = &v1alpha1.Report{
 			Source:      "test",
 		},
 		{
-			ID:          "12347",
+
 			Description: "message 3",
 			Result:      v1alpha2.StatusFail,
 			Scored:      true,
@@ -109,7 +107,6 @@ var ScopePolicyReport = &v1alpha1.Report{
 	},
 	Results: []v1alpha1.ReportResult{
 		{
-			ID:          "12348",
 			Description: "message",
 			Result:      v1alpha2.StatusFail,
 			Scored:      true,
