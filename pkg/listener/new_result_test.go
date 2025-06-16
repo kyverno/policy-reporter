@@ -18,7 +18,7 @@ import (
 
 func Test_ResultListener(t *testing.T) {
 	t.Run("Publish Result", func(t *testing.T) {
-		var called *openreports.ORResultAdapter
+		called := &openreports.ORResultAdapter{ReportResult: &v1alpha1.ReportResult{}}
 
 		slistener := listener.NewResultListener(true, cache.NewInMermoryCache(time.Minute, time.Minute), time.Now())
 		slistener.RegisterListener(func(_ openreports.ReportInterface, r *openreports.ORResultAdapter, b bool) {
