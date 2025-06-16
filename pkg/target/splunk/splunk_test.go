@@ -5,7 +5,6 @@ import (
 	"testing"
 
 	"github.com/kyverno/policy-reporter/pkg/fixtures"
-	"github.com/kyverno/policy-reporter/pkg/openreports"
 	"github.com/kyverno/policy-reporter/pkg/target"
 )
 
@@ -48,6 +47,6 @@ func TestSplunkTarget(t *testing.T) {
 			Headers:    map[string]string{"Authorization": "Splunk my-token"},
 			HTTPClient: testClient{callback, 200},
 		})
-		client.Send(&openreports.ORResultAdapter{ReportResult: &fixtures.CompleteTargetSendResult})
+		client.Send(fixtures.CompleteTargetSendResult)
 	})
 }

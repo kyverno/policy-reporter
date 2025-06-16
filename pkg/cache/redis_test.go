@@ -10,6 +10,7 @@ import (
 
 	"github.com/kyverno/policy-reporter/pkg/cache"
 	"github.com/kyverno/policy-reporter/pkg/fixtures"
+	"github.com/kyverno/policy-reporter/pkg/openreports"
 )
 
 type redis struct {
@@ -66,14 +67,14 @@ func TestRedisCache(t *testing.T) {
 
 		c := cache.NewRedisCache("cache", newRedis(), -1)
 
-		c.AddReport(fixtures.DefaultPolicyReport)
+		c.AddReport(&openreports.ORReportAdapter{Report: fixtures.DefaultPolicyReport})
 
 		results := c.GetResults(id)
 		if len(results) != len(fixtures.DefaultPolicyReport.Results) {
 			t.Error("expected all results were cached")
 		}
 
-		c.AddReport(fixtures.MinPolicyReport)
+		c.AddReport(&openreports.ORReportAdapter{Report: fixtures.MinPolicyReport})
 
 		changed := c.GetResults(id)
 		if len(changed) != len(fixtures.MinPolicyReport.Results) {
@@ -85,8 +86,7 @@ func TestRedisCache(t *testing.T) {
 
 		c := cache.NewRedisCache("cache", newRedis(), -1)
 
-		c.AddReport(fixtures.DefaultPolicyReport)
-
+		c.AddReport(&openreports.ORReportAdapter{Report: fixtures.DefaultPolicyReport})
 		c.RemoveReport(id)
 
 		results := c.GetResults(id)
@@ -99,8 +99,7 @@ func TestRedisCache(t *testing.T) {
 
 		c := cache.NewRedisCache("cache", newRedis(), -1)
 
-		c.AddReport(fixtures.DefaultPolicyReport)
-
+		c.AddReport(&openreports.ORReportAdapter{Report: fixtures.DefaultPolicyReport})
 		c.Clear()
 
 		results := c.GetResults(id)

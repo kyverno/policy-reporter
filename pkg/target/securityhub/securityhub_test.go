@@ -83,7 +83,7 @@ func TestSecurityHub(t *testing.T) {
 			},
 		})
 
-		c.Send(&openreports.ORResultAdapter{ReportResult: &fixtures.CompleteTargetSendResult})
+		c.Send(fixtures.CompleteTargetSendResult)
 	})
 	t.Run("clean up disabled", func(t *testing.T) {
 		h := &client{}
@@ -97,7 +97,7 @@ func TestSecurityHub(t *testing.T) {
 			Synchronize: false,
 		})
 
-		c.CleanUp(context.TODO(), fixtures.DefaultPolicyReport)
+		c.CleanUp(context.TODO(), &openreports.ORReportAdapter{Report: fixtures.DefaultPolicyReport})
 
 		if h.fetched {
 			t.Error("expected fetch was not called")
@@ -118,7 +118,7 @@ func TestSecurityHub(t *testing.T) {
 			Synchronize: true,
 		})
 
-		c.CleanUp(context.TODO(), fixtures.DefaultPolicyReport)
+		c.CleanUp(context.TODO(), &openreports.ORReportAdapter{Report: fixtures.DefaultPolicyReport})
 
 		if !h.fetched {
 			t.Error("expected fetch was called")
@@ -128,10 +128,11 @@ func TestSecurityHub(t *testing.T) {
 		}
 	})
 	t.Run("findings with existing result", func(t *testing.T) {
+		or := &openreports.ORReportAdapter{Report: fixtures.DefaultPolicyReport}
 		h := &client{
 			findings: []types.AwsSecurityFinding{
 				{
-					Id: aws.String(fixtures.DefaultPolicyReport.GetResults()[0].GetID()),
+					Id: aws.String(or.GetResults()[0].GetID()),
 				},
 			},
 		}
@@ -145,7 +146,7 @@ func TestSecurityHub(t *testing.T) {
 			Synchronize: true,
 		})
 
-		c.CleanUp(context.TODO(), fixtures.DefaultPolicyReport)
+		c.CleanUp(context.TODO(), &openreports.ORReportAdapter{Report: fixtures.DefaultPolicyReport})
 
 		if !h.fetched {
 			t.Error("expected fetch was called")
@@ -172,7 +173,7 @@ func TestSecurityHub(t *testing.T) {
 			Synchronize: true,
 		})
 
-		c.CleanUp(context.TODO(), fixtures.DefaultPolicyReport)
+		c.CleanUp(context.TODO(), &openreports.ORReportAdapter{Report: fixtures.DefaultPolicyReport})
 
 		if !h.fetched {
 			t.Error("expected fetch was called")

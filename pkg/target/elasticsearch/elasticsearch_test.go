@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"github.com/kyverno/policy-reporter/pkg/fixtures"
-	"github.com/kyverno/policy-reporter/pkg/openreports"
 	"github.com/kyverno/policy-reporter/pkg/target"
 	"github.com/kyverno/policy-reporter/pkg/target/elasticsearch"
 )
@@ -57,7 +56,7 @@ func Test_ElasticsearchTarget(t *testing.T) {
 			HTTPClient:   testClient{callback, 200},
 			CustomFields: map[string]string{"cluster": "name"},
 		})
-		client.Send(&openreports.ORResultAdapter{ReportResult: &fixtures.CompleteTargetSendResult})
+		client.Send(fixtures.CompleteTargetSendResult)
 
 		if len(fixtures.CompleteTargetSendResult.Properties) > 1 {
 			t.Error("expected customFields are not added to the actuel result")
@@ -83,7 +82,7 @@ func Test_ElasticsearchTarget(t *testing.T) {
 			Rotation:   elasticsearch.Monthly,
 			HTTPClient: testClient{callback, 200},
 		})
-		client.Send(&openreports.ORResultAdapter{ReportResult: &fixtures.CompleteTargetSendResult})
+		client.Send(fixtures.CompleteTargetSendResult)
 	})
 	t.Run("Send with Monthly Result", func(t *testing.T) {
 		callback := func(req *http.Request) {
@@ -101,7 +100,7 @@ func Test_ElasticsearchTarget(t *testing.T) {
 			Rotation:   elasticsearch.Daily,
 			HTTPClient: testClient{callback, 200},
 		})
-		client.Send(&openreports.ORResultAdapter{ReportResult: &fixtures.CompleteTargetSendResult})
+		client.Send(fixtures.CompleteTargetSendResult)
 	})
 	t.Run("Send with None Result", func(t *testing.T) {
 		callback := func(req *http.Request) {
@@ -119,7 +118,7 @@ func Test_ElasticsearchTarget(t *testing.T) {
 			Rotation:   elasticsearch.None,
 			HTTPClient: testClient{callback, 200},
 		})
-		client.Send(&openreports.ORResultAdapter{ReportResult: &fixtures.CompleteTargetSendResult})
+		client.Send(fixtures.CompleteTargetSendResult)
 	})
 	t.Run("Name", func(t *testing.T) {
 		client := elasticsearch.NewClient(elasticsearch.Options{

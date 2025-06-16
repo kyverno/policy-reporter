@@ -20,24 +20,28 @@ import (
 func Test_DetailedResultMetricGeneration(t *testing.T) {
 	gauge := metrics.RegisterDetailedResultGauge("policy_report_result")
 
-	report1 := &v1alpha1.Report{
-		ObjectMeta: v1.ObjectMeta{
-			Name:              "polr-test",
-			Namespace:         "test",
-			CreationTimestamp: v1.Now(),
+	report1 := &openreports.ORReportAdapter{
+		Report: &v1alpha1.Report{
+			ObjectMeta: v1.ObjectMeta{
+				Name:              "polr-test",
+				Namespace:         "test",
+				CreationTimestamp: v1.Now(),
+			},
+			Summary: v1alpha1.ReportSummary{Pass: 2, Fail: 1},
+			Results: []v1alpha1.ReportResult{*fixtures.PassResult.ReportResult, *fixtures.PassPodResult.ReportResult, *fixtures.FailDisallowRuleResult.ReportResult},
 		},
-		Summary: v1alpha1.ReportSummary{Pass: 2, Fail: 1},
-		Results: []*openreports.ORResultAdapter{fixtures.PassResult, fixtures.PassPodResult, fixtures.FailDisallowRuleResult},
 	}
 
-	report2 := &v1alpha1.Report{
-		ObjectMeta: v1.ObjectMeta{
-			Name:              "polr-test",
-			Namespace:         "test",
-			CreationTimestamp: v1.Now(),
+	report2 := &openreports.ORReportAdapter{
+		Report: &v1alpha1.Report{
+			ObjectMeta: v1.ObjectMeta{
+				Name:              "polr-test",
+				Namespace:         "test",
+				CreationTimestamp: v1.Now(),
+			},
+			Summary: v1alpha1.ReportSummary{Pass: 0, Fail: 1},
+			Results: []v1alpha1.ReportResult{*fixtures.PassResult.ReportResult, *fixtures.FailDisallowRuleResult.ReportResult},
 		},
-		Summary: v1alpha1.ReportSummary{Pass: 0, Fail: 1},
-		Results: []*openreports.ORResultAdapter{fixtures.PassResult, fixtures.FailDisallowRuleResult},
 	}
 
 	filter := metrics.NewResultFilter(validate.RuleSets{}, validate.RuleSets{}, validate.RuleSets{Exclude: []string{"disallow-policy"}}, validate.RuleSets{}, validate.RuleSets{}, validate.RuleSets{})

@@ -6,6 +6,7 @@ import (
 
 	"github.com/kyverno/policy-reporter/pkg/cache"
 	"github.com/kyverno/policy-reporter/pkg/fixtures"
+	"github.com/kyverno/policy-reporter/pkg/openreports"
 )
 
 func TestInMemory(t *testing.T) {
@@ -14,14 +15,14 @@ func TestInMemory(t *testing.T) {
 
 		c := cache.NewInMermoryCache(time.Millisecond, time.Millisecond)
 
-		c.AddReport(fixtures.DefaultPolicyReport)
+		c.AddReport(&openreports.ORReportAdapter{Report: fixtures.DefaultPolicyReport})
 
 		results := c.GetResults(id)
 		if len(results) != len(fixtures.DefaultPolicyReport.Results) {
 			t.Error("expected all results were cached")
 		}
 
-		c.AddReport(fixtures.MinPolicyReport)
+		c.AddReport(&openreports.ORReportAdapter{Report: fixtures.MinPolicyReport})
 
 		time.Sleep(3 * time.Millisecond)
 
@@ -35,7 +36,7 @@ func TestInMemory(t *testing.T) {
 
 		c := cache.NewInMermoryCache(time.Millisecond, time.Millisecond)
 
-		c.AddReport(fixtures.DefaultPolicyReport)
+		c.AddReport(&openreports.ORReportAdapter{Report: fixtures.DefaultPolicyReport})
 
 		c.RemoveReport(id)
 
@@ -51,7 +52,7 @@ func TestInMemory(t *testing.T) {
 
 		c := cache.NewInMermoryCache(time.Millisecond, time.Millisecond)
 
-		c.AddReport(fixtures.DefaultPolicyReport)
+		c.AddReport(&openreports.ORReportAdapter{Report: fixtures.DefaultPolicyReport})
 
 		c.Clear()
 

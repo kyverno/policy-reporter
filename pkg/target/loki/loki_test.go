@@ -10,7 +10,6 @@ import (
 	"github.com/stretchr/testify/assert"
 
 	"github.com/kyverno/policy-reporter/pkg/fixtures"
-	"github.com/kyverno/policy-reporter/pkg/openreports"
 	"github.com/kyverno/policy-reporter/pkg/target"
 	"github.com/kyverno/policy-reporter/pkg/target/loki"
 )
@@ -47,7 +46,7 @@ func Test_LokiTarget(t *testing.T) {
 			assert.Equal(t, fixtures.CompleteTargetSendResult.Category, stream.Stream["category"])
 			assert.Equal(t, string(fixtures.CompleteTargetSendResult.Result), stream.Stream["status"])
 			assert.Equal(t, string(fixtures.CompleteTargetSendResult.Severity), stream.Stream["severity"])
-			or := &openreports.ORResultAdapter{ReportResult: &fixtures.CompleteTargetSendResult}
+			or := fixtures.CompleteTargetSendResult
 			res := or.GetResource()
 			assert.Equal(t, res.Kind, stream.Stream["kind"])
 			assert.Equal(t, res.Name, stream.Stream["name"])
@@ -68,7 +67,7 @@ func Test_LokiTarget(t *testing.T) {
 			Password:     "password",
 			Headers:      map[string]string{"X-Forward": "http://loki"},
 		})
-		client.Send(&openreports.ORResultAdapter{ReportResult: &fixtures.CompleteTargetSendResult})
+		client.Send(fixtures.CompleteTargetSendResult)
 	})
 
 	t.Run("Send Minimal Result", func(t *testing.T) {
@@ -98,7 +97,7 @@ func Test_LokiTarget(t *testing.T) {
 			CustomFields: map[string]string{"custom": "label"},
 			HTTPClient:   testClient{callback, 200},
 		})
-		client.Send(&openreports.ORResultAdapter{ReportResult: &fixtures.CompleteTargetSendResult})
+		client.Send(fixtures.CompleteTargetSendResult)
 	})
 	t.Run("Name", func(t *testing.T) {
 		client := loki.NewClient(loki.Options{

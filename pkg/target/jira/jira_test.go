@@ -9,7 +9,6 @@ import (
 	"github.com/stretchr/testify/assert"
 
 	"github.com/kyverno/policy-reporter/pkg/fixtures"
-	"github.com/kyverno/policy-reporter/pkg/openreports"
 	"github.com/kyverno/policy-reporter/pkg/target"
 	"github.com/kyverno/policy-reporter/pkg/target/jira"
 )
@@ -89,7 +88,7 @@ func Test_JiraTarget(t *testing.T) {
 			CustomFields: map[string]string{"customfield_10001": "PolicyReporter"},
 			HTTPClient:   testClient{callback, 200},
 		})
-		client.Send(&openreports.ORResultAdapter{ReportResult: &fixtures.CompleteTargetSendResult})
+		client.Send(fixtures.CompleteTargetSendResult)
 	})
 
 	t.Run("Send Minimal Result", func(t *testing.T) {
@@ -140,7 +139,7 @@ func Test_JiraTarget(t *testing.T) {
 			IssueType:  "Bug",
 			HTTPClient: testClient{callback, 200},
 		})
-		client.Send(&openreports.ORResultAdapter{ReportResult: &fixtures.CompleteTargetSendResult})
+		client.Send(fixtures.CompleteTargetSendResult)
 	})
 
 	t.Run("Default IssueType", func(t *testing.T) {
@@ -171,7 +170,7 @@ func Test_JiraTarget(t *testing.T) {
 			IssueType:  "", // Empty to test default
 			HTTPClient: testClient{callback, 200},
 		})
-		client.Send(&openreports.ORResultAdapter{ReportResult: &fixtures.CompleteTargetSendResult})
+		client.Send(fixtures.CompleteTargetSendResult)
 	})
 
 	t.Run("Custom Fields", func(t *testing.T) {
@@ -206,7 +205,7 @@ func Test_JiraTarget(t *testing.T) {
 			},
 			HTTPClient: testClient{callback, 200},
 		})
-		client.Send(&openreports.ORResultAdapter{ReportResult: &fixtures.CompleteTargetSendResult})
+		client.Send(fixtures.CompleteTargetSendResult)
 	})
 
 	t.Run("Name", func(t *testing.T) {

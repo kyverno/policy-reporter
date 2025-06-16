@@ -4,7 +4,6 @@ import (
 	"time"
 
 	"go.uber.org/zap"
-	reportsv1alpha1 "openreports.io/apis/openreports.io/v1alpha1"
 
 	"github.com/kyverno/policy-reporter/pkg/openreports"
 	"github.com/kyverno/policy-reporter/pkg/target"
@@ -39,7 +38,7 @@ type client struct {
 // Ensure the client type implements the Client interface
 var _ Client = (*client)(nil)
 
-func (a *client) Send(result reports*openreports.ORResultAdapter) {
+func (a *client) Send(result *openreports.ORResultAdapter) {
 	zap.L().Debug("Sending policy violation to AlertManager",
 		zap.String("policy", result.Policy),
 		zap.String("rule", result.Rule),
@@ -52,7 +51,7 @@ func (a *client) Send(result reports*openreports.ORResultAdapter) {
 	a.sendAlerts([]Alert{alert})
 }
 
-func (a *client) BatchSend(report openreports.ReportInterface, results []reports*openreports.ORResultAdapter) {
+func (a *client) BatchSend(report openreports.ReportInterface, results []*openreports.ORResultAdapter) {
 	zap.L().Debug("Batch sending policy violations to AlertManager",
 		zap.Int("count", len(results)),
 		zap.String("reportName", report.GetName()),
@@ -72,7 +71,7 @@ func (a *client) BatchSend(report openreports.ReportInterface, results []reports
 	a.sendAlerts(alerts)
 }
 
-func (a *client) createAlert(result reports*openreports.ORResultAdapter) Alert {
+func (a *client) createAlert(result *openreports.ORResultAdapter) Alert {
 	labels := map[string]string{
 		"alertname": "PolicyReporterViolation",
 		"severity":  string(result.Severity),

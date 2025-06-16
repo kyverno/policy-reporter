@@ -25,8 +25,8 @@ func Test_ResultListener(t *testing.T) {
 			called = r
 		})
 
-		slistener.Listen(report.LifecycleEvent{Type: report.Added, PolicyReport: &openreports.ORReportAdapter{Report: preport1}})
-		slistener.Listen(report.LifecycleEvent{Type: report.Updated, PolicyReport: &openreports.ORReportAdapter{Report: preport2}})
+		slistener.Listen(report.LifecycleEvent{Type: report.Added, PolicyReport: preport1})
+		slistener.Listen(report.LifecycleEvent{Type: report.Updated, PolicyReport: preport2})
 
 		assert.Equal(t, called.GetID(), fixtures.FailPodResult.GetID(), "Expected Listener to be called with FailPodResult")
 	})
@@ -39,7 +39,7 @@ func Test_ResultListener(t *testing.T) {
 			called = true
 		})
 
-		slistener.Listen(report.LifecycleEvent{Type: report.Deleted, PolicyReport: &openreports.ORReportAdapter{Report: preport2}})
+		slistener.Listen(report.LifecycleEvent{Type: report.Deleted, PolicyReport: preport2})
 
 		assert.False(t, called, "Expected Listener not be called on Deleted event")
 	})
@@ -52,7 +52,7 @@ func Test_ResultListener(t *testing.T) {
 			called = true
 		})
 
-		slistener.Listen(report.LifecycleEvent{Type: report.Added, PolicyReport: &openreports.ORReportAdapter{Report: preport2}})
+		slistener.Listen(report.LifecycleEvent{Type: report.Added, PolicyReport: preport2})
 
 		assert.False(t, called, "Expected Listener not be called on Deleted event")
 	})
@@ -65,8 +65,8 @@ func Test_ResultListener(t *testing.T) {
 			called = true
 		})
 
-		slistener.Listen(report.LifecycleEvent{Type: report.Added, PolicyReport: &openreports.ORReportAdapter{Report: preport2}})
-		slistener.Listen(report.LifecycleEvent{Type: report.Updated, PolicyReport: &openreports.ORReportAdapter{Report: preport2}})
+		slistener.Listen(report.LifecycleEvent{Type: report.Added, PolicyReport: preport2})
+		slistener.Listen(report.LifecycleEvent{Type: report.Updated, PolicyReport: preport2})
 
 		assert.False(t, called, "Expected Listener not be called on cached results")
 	})
@@ -79,14 +79,14 @@ func Test_ResultListener(t *testing.T) {
 			called = true
 		})
 
-		slistener.Listen(report.LifecycleEvent{Type: report.Updated, PolicyReport: &openreports.ORReportAdapter{Report: preport3}})
+		slistener.Listen(report.LifecycleEvent{Type: report.Updated, PolicyReport: preport3})
 
 		assert.False(t, called, "Expected Listener not be called with empty results")
 	})
 
 	t.Run("Skip process events when no listeners registered", func(t *testing.T) {
 		c := cache.NewInMermoryCache(time.Minute, time.Minute)
-		or := &openreports.ORReportAdapter{Report: preport2}
+		or := preport2
 
 		slistener := listener.NewResultListener(true, c, time.Now())
 		slistener.Listen(report.LifecycleEvent{Type: report.Added, PolicyReport: or})
@@ -104,7 +104,7 @@ func Test_ResultListener(t *testing.T) {
 
 		slistener.UnregisterListener()
 
-		slistener.Listen(report.LifecycleEvent{Type: report.Updated, PolicyReport: &openreports.ORReportAdapter{Report: preport2}})
+		slistener.Listen(report.LifecycleEvent{Type: report.Updated, PolicyReport: preport2})
 
 		assert.False(t, called, "Expected Listener not called because it was unregistered")
 	})
@@ -124,7 +124,7 @@ func Test_ResultListener(t *testing.T) {
 			Timestamp: v1.Timestamp{Seconds: time.Now().Add(-24 * time.Hour).Unix()},
 		})
 
-		slistener.Listen(report.LifecycleEvent{Type: report.Updated, PolicyReport: rep})
+		slistener.Listen(report.LifecycleEvent{Type: report.Updated, PolicyReport: &openreports.ORReportAdapter{Report: rep}})
 
 		assert.False(t, called, "Expected Listener not called because it was unregistered")
 	})
@@ -137,7 +137,7 @@ func Test_ResultListener(t *testing.T) {
 			called = r
 		})
 
-		slistener.Listen(report.LifecycleEvent{Type: report.Added, PolicyReport: &openreports.ORReportAdapter{Report: scopereport1}})
+		slistener.Listen(report.LifecycleEvent{Type: report.Added, PolicyReport: scopereport1})
 
 		assert.Equal(t, called[0].GetID(), fixtures.FailResult.GetID(), "Expected Listener to be called")
 	})
@@ -152,7 +152,7 @@ func Test_ResultListener(t *testing.T) {
 
 		slistener.UnregisterScopeListener()
 
-		slistener.Listen(report.LifecycleEvent{Type: report.Added, PolicyReport: &openreports.ORReportAdapter{Report: scopereport1}})
+		slistener.Listen(report.LifecycleEvent{Type: report.Added, PolicyReport: scopereport1})
 
 		assert.Len(t, called, 0, "Expected listener was unregistered")
 	})
@@ -165,9 +165,9 @@ func Test_ResultListener(t *testing.T) {
 			called = r
 		})
 
-		slistener.Listen(report.LifecycleEvent{Type: report.Added, PolicyReport: &openreports.ORReportAdapter{Report: scopereport1}})
+		slistener.Listen(report.LifecycleEvent{Type: report.Added, PolicyReport: scopereport1})
 
-		assert.Equal(t, called.GetName(), &openreports.ORReportAdapter{Report: scopereport1}.Name, "Expected Listener to be called")
+		assert.Equal(t, called.GetName(), scopereport1.Name, "Expected Listener to be called")
 	})
 
 	t.Run("Publish Scoped Report to Sync Target", func(t *testing.T) {
@@ -180,7 +180,7 @@ func Test_ResultListener(t *testing.T) {
 
 		slistener.UnregisterSyncListener()
 
-		slistener.Listen(report.LifecycleEvent{Type: report.Added, PolicyReport: &openreports.ORReportAdapter{Report: scopereport1}})
+		slistener.Listen(report.LifecycleEvent{Type: report.Added, PolicyReport: scopereport1})
 
 		assert.Nil(t, called, "Expected Listener was unregistered")
 	})

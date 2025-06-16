@@ -11,14 +11,16 @@ import (
 	"github.com/kyverno/policy-reporter/pkg/openreports"
 )
 
-var preport = &v1alpha1.Report{
-	ObjectMeta: v1.ObjectMeta{
-		Name:              "polr-test",
-		Namespace:         "test",
-		CreationTimestamp: v1.Now(),
+var preport = &openreports.ORReportAdapter{
+	Report: &v1alpha1.Report{
+		ObjectMeta: v1.ObjectMeta{
+			Name:              "polr-test",
+			Namespace:         "test",
+			CreationTimestamp: v1.Now(),
+		},
+		Results: make([]v1alpha1.ReportResult, 0),
+		Summary: v1alpha1.ReportSummary{},
 	},
-	Results: make([]*openreports.ORResultAdapter, 0),
-	Summary: v1alpha1.ReportSummary{},
 }
 
 func testSummaryMetricLabels(

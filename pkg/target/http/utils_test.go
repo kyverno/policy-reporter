@@ -11,12 +11,11 @@ import (
 	"go.uber.org/zap/zaptest/observer"
 
 	"github.com/kyverno/policy-reporter/pkg/fixtures"
-	"github.com/kyverno/policy-reporter/pkg/openreports"
 	"github.com/kyverno/policy-reporter/pkg/target/http"
 )
 
 func TestResultMapping(t *testing.T) {
-	result := http.NewJSONResult(&openreports.ORResultAdapter{ReportResult: &fixtures.CompleteTargetSendResult})
+	result := http.NewJSONResult(fixtures.CompleteTargetSendResult)
 
 	assert.Equal(t, result.Message, fixtures.CompleteTargetSendResult.Description)
 	assert.Equal(t, result.Policy, fixtures.CompleteTargetSendResult.Policy)

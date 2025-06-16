@@ -14,38 +14,40 @@ import (
 
 func TestReconditioner(t *testing.T) {
 	t.Run("prepare with default generator", func(t *testing.T) {
-		var report openreports.ReportInterface = &v1alpha1.Report{
-			ObjectMeta: v1.ObjectMeta{
-				Name:      "policy-report",
-				Namespace: "test",
-			},
-			Summary: v1alpha1.ReportSummary{
-				Pass:  0,
-				Skip:  0,
-				Warn:  0,
-				Fail:  1,
-				Error: 0,
-			},
-			Scope: &corev1.ObjectReference{
-				APIVersion: "v1",
-				Kind:       "Deployment",
-				Name:       "nginx",
-				Namespace:  "test",
-				UID:        "dfd57c50-f30c-4729-b63f-b1954d8988d1",
-			},
-			Results: []*openreports.ORResultAdapter{
-				{
-					ID:          "12348",
-					Description: "message",
-					Result:      v1alpha2.StatusFail,
-					Scored:      true,
-					Policy:      "required-label",
-					Rule:        "app-label-required",
-					Timestamp:   v1.Timestamp{Seconds: 1614093000},
-					Source:      "test",
-					Category:    "",
-					Severity:    v1alpha2.SeverityHigh,
-					Properties:  map[string]string{"version": "1.2.0"},
+		var report openreports.ReportInterface = &openreports.ORReportAdapter{
+			Report: &v1alpha1.Report{
+				ObjectMeta: v1.ObjectMeta{
+					Name:      "policy-report",
+					Namespace: "test",
+				},
+				Summary: v1alpha1.ReportSummary{
+					Pass:  0,
+					Skip:  0,
+					Warn:  0,
+					Fail:  1,
+					Error: 0,
+				},
+				Scope: &corev1.ObjectReference{
+					APIVersion: "v1",
+					Kind:       "Deployment",
+					Name:       "nginx",
+					Namespace:  "test",
+					UID:        "dfd57c50-f30c-4729-b63f-b1954d8988d1",
+				},
+				Results: []v1alpha1.ReportResult{
+					{
+						ID:          "12348",
+						Description: "message",
+						Result:      v1alpha2.StatusFail,
+						Scored:      true,
+						Policy:      "required-label",
+						Rule:        "app-label-required",
+						Timestamp:   v1.Timestamp{Seconds: 1614093000},
+						Source:      "test",
+						Category:    "",
+						Severity:    v1alpha2.SeverityHigh,
+						Properties:  map[string]string{"version": "1.2.0"},
+					},
 				},
 			},
 		}
@@ -67,38 +69,40 @@ func TestReconditioner(t *testing.T) {
 	})
 
 	t.Run("prepare with custom generator", func(t *testing.T) {
-		var report openreports.ReportInterface = &v1alpha1.Report{
-			ObjectMeta: v1.ObjectMeta{
-				Name:      "policy-report",
-				Namespace: "test",
-			},
-			Summary: v1alpha1.ReportSummary{
-				Pass:  0,
-				Skip:  0,
-				Warn:  0,
-				Fail:  1,
-				Error: 0,
-			},
-			Scope: &corev1.ObjectReference{
-				APIVersion: "v1",
-				Kind:       "Deployment",
-				Name:       "nginx",
-				Namespace:  "test",
-				UID:        "dfd57c50-f30c-4729-b63f-b1954d8988d1",
-			},
-			Results: []*openreports.ORResultAdapter{
-				{
-					ID:          "12348",
-					Description: "message",
-					Result:      v1alpha2.StatusFail,
-					Scored:      true,
-					Policy:      "required-label",
-					Rule:        "app-label-required",
-					Timestamp:   v1.Timestamp{Seconds: 1614093000},
-					Source:      "test",
-					Category:    "",
-					Severity:    v1alpha2.SeverityHigh,
-					Properties:  map[string]string{"version": "1.2.0"},
+		var report openreports.ReportInterface = &openreports.ORReportAdapter{
+			Report: &v1alpha1.Report{
+				ObjectMeta: v1.ObjectMeta{
+					Name:      "policy-report",
+					Namespace: "test",
+				},
+				Summary: v1alpha1.ReportSummary{
+					Pass:  0,
+					Skip:  0,
+					Warn:  0,
+					Fail:  1,
+					Error: 0,
+				},
+				Scope: &corev1.ObjectReference{
+					APIVersion: "v1",
+					Kind:       "Deployment",
+					Name:       "nginx",
+					Namespace:  "test",
+					UID:        "dfd57c50-f30c-4729-b63f-b1954d8988d1",
+				},
+				Results: []v1alpha1.ReportResult{
+					{
+						ID:          "12348",
+						Description: "message",
+						Result:      v1alpha2.StatusFail,
+						Scored:      true,
+						Policy:      "required-label",
+						Rule:        "app-label-required",
+						Timestamp:   v1.Timestamp{Seconds: 1614093000},
+						Source:      "test",
+						Category:    "",
+						Severity:    v1alpha2.SeverityHigh,
+						Properties:  map[string]string{"version": "1.2.0"},
+					},
 				},
 			},
 		}

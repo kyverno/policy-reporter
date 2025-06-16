@@ -12,23 +12,27 @@ import (
 	"github.com/kyverno/policy-reporter/pkg/report"
 )
 
-var preport = &v1alpha1.Report{
-	ObjectMeta: v1.ObjectMeta{
-		Name:              "polr-test",
-		Namespace:         "test",
-		CreationTimestamp: v1.Now(),
+var preport = &openreports.ORReportAdapter{
+	Report: &v1alpha1.Report{
+		ObjectMeta: v1.ObjectMeta{
+			Name:              "polr-test",
+			Namespace:         "test",
+			CreationTimestamp: v1.Now(),
+		},
+		Results: make([]v1alpha1.ReportResult, 0),
+		Summary: v1alpha1.ReportSummary{},
 	},
-	Results: make([]*openreports.ORResultAdapter, 0),
-	Summary: v1alpha1.ReportSummary{},
 }
 
-var creport = &v1alpha1.ClusterReport{
-	ObjectMeta: v1.ObjectMeta{
-		Name:              "cpolr-test",
-		CreationTimestamp: v1.Now(),
+var creport = &openreports.ORClusterReportAdapter{
+	ClusterReport: &v1alpha1.ClusterReport{
+		ObjectMeta: v1.ObjectMeta{
+			Name:              "cpolr-test",
+			CreationTimestamp: v1.Now(),
+		},
+		Results: make([]v1alpha1.ReportResult, 0),
+		Summary: v1alpha1.ReportSummary{},
 	},
-	Results: make([]*openreports.ORResultAdapter, 0),
-	Summary: v1alpha1.ReportSummary{},
 }
 
 func Test_Events(t *testing.T) {
@@ -46,23 +50,27 @@ func Test_GetType(t *testing.T) {
 }
 
 func Test_FindNewEvents(t *testing.T) {
-	preport1 := &v1alpha1.Report{
-		ObjectMeta: v1.ObjectMeta{
-			Name:              "polr-test",
-			Namespace:         "test",
-			CreationTimestamp: v1.Now(),
+	preport1 := &openreports.ORReportAdapter{
+		Report: &v1alpha1.Report{
+			ObjectMeta: v1.ObjectMeta{
+				Name:              "polr-test",
+				Namespace:         "test",
+				CreationTimestamp: v1.Now(),
+			},
+			Results: []v1alpha1.ReportResult{*fixtures.FailResult.ReportResult},
+			Summary: v1alpha1.ReportSummary{},
 		},
-		Results: []*openreports.ORResultAdapter{fixtures.FailResult},
-		Summary: v1alpha1.ReportSummary{},
 	}
-	preport2 := &v1alpha1.Report{
-		ObjectMeta: v1.ObjectMeta{
-			Name:              "polr-test",
-			Namespace:         "test",
-			CreationTimestamp: v1.Now(),
+	preport2 := &openreports.ORReportAdapter{
+		Report: &v1alpha1.Report{
+			ObjectMeta: v1.ObjectMeta{
+				Name:              "polr-test",
+				Namespace:         "test",
+				CreationTimestamp: v1.Now(),
+			},
+			Results: []v1alpha1.ReportResult{*fixtures.FailResult.ReportResult, *fixtures.FailPodResult.ReportResult},
+			Summary: v1alpha1.ReportSummary{},
 		},
-		Results: []*openreports.ORResultAdapter{fixtures.FailResult, fixtures.FailPodResult},
-		Summary: v1alpha1.ReportSummary{},
 	}
 
 	diff := report.FindNewResults(preport2, preport1)

@@ -13,6 +13,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"openreports.io/apis/openreports.io/v1alpha1"
 
+	"github.com/kyverno/policy-reporter/pkg/openreports"
 	"github.com/kyverno/policy-reporter/pkg/target"
 	"github.com/kyverno/policy-reporter/pkg/target/http"
 )
@@ -55,7 +56,7 @@ func Test_AlertManagerClient_Send(t *testing.T) {
 			},
 		}
 
-		client.Send(result)
+		client.Send(&openreports.ORResultAdapter{ReportResult: &result})
 
 		require.Len(t, receivedAlerts, 1)
 		alert := receivedAlerts[0]
@@ -125,7 +126,7 @@ func Test_AlertManagerClient_Send(t *testing.T) {
 		// Create alerts directly instead of using BatchSend
 		alerts := make([]Alert, 0, len(results))
 		for _, result := range results {
-			alerts = append(alerts, client.createAlert(result))
+			alerts = append(alerts, client.createAlert(&openreports.ORResultAdapter{ReportResult: &result}))
 		}
 		client.sendAlerts(alerts)
 
@@ -158,7 +159,7 @@ func Test_AlertManagerClient_Send(t *testing.T) {
 		}
 
 		// Should not panic
-		client.Send(result)
+		client.Send(&openreports.ORResultAdapter{ReportResult: &result})
 	})
 
 	t.Run("With Custom Headers", func(t *testing.T) {
@@ -190,7 +191,7 @@ func Test_AlertManagerClient_Send(t *testing.T) {
 			Severity:    "high",
 		}
 
-		client.Send(result)
+		client.Send(&openreports.ORResultAdapter{ReportResult: &result})
 
 		assert.Equal(t, "Bearer test-token", receivedHeaders.Get("Authorization"))
 		assert.Equal(t, "custom-value", receivedHeaders.Get("X-Custom"))
@@ -228,7 +229,7 @@ func Test_AlertManagerClient_Send(t *testing.T) {
 			Severity:    "high",
 		}
 
-		client.Send(result)
+		client.Send(&openreports.ORResultAdapter{ReportResult: &result})
 
 		require.Len(t, receivedAlerts, 1)
 		assert.Equal(t, "production", receivedAlerts[0].Annotations["environment"])
@@ -272,7 +273,7 @@ func Test_AlertManagerClient_Send(t *testing.T) {
 			},
 		}
 
-		client.Send(result)
+		client.Send(&openreports.ORResultAdapter{ReportResult: &result})
 
 		require.Len(t, receivedAlerts, 1)
 		assert.Equal(t, "test-namespace/pod/test-pod", receivedAlerts[0].Annotations["resource"])

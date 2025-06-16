@@ -20,26 +20,30 @@ import (
 func Test_CustomResultMetricGeneration(t *testing.T) {
 	gauge := metrics.RegisterCustomResultGauge("policy_report_custom_result", []string{"namespace", "policy", "status", "source", "app", "xyz"})
 
-	report1 := &v1alpha1.Report{
-		ObjectMeta: v1.ObjectMeta{
-			Labels:            map[string]string{"app": "policy-reporter"},
-			Name:              "polr-test",
-			Namespace:         "test",
-			CreationTimestamp: v1.Now(),
+	report1 := &openreports.ORReportAdapter{
+		Report: &v1alpha1.Report{
+			ObjectMeta: v1.ObjectMeta{
+				Labels:            map[string]string{"app": "policy-reporter"},
+				Name:              "polr-test",
+				Namespace:         "test",
+				CreationTimestamp: v1.Now(),
+			},
+			Summary: v1alpha1.ReportSummary{Pass: 1, Fail: 1},
+			Results: []v1alpha1.ReportResult{*fixtures.PassResult.ReportResult, *fixtures.PassResult.ReportResult, *fixtures.FailPodResult.ReportResult, *fixtures.FailDisallowRuleResult.ReportResult},
 		},
-		Summary: v1alpha1.ReportSummary{Pass: 1, Fail: 1},
-		Results: []*openreports.ORResultAdapter{fixtures.PassResult, fixtures.PassResult, fixtures.FailPodResult, fixtures.FailDisallowRuleResult},
 	}
 
-	report2 := &v1alpha1.Report{
-		ObjectMeta: v1.ObjectMeta{
-			Labels:            map[string]string{"app": "policy-reporter"},
-			Name:              "polr-test",
-			Namespace:         "test",
-			CreationTimestamp: v1.Now(),
+	report2 := &openreports.ORReportAdapter{
+		Report: &v1alpha1.Report{
+			ObjectMeta: v1.ObjectMeta{
+				Labels:            map[string]string{"app": "policy-reporter"},
+				Name:              "polr-test",
+				Namespace:         "test",
+				CreationTimestamp: v1.Now(),
+			},
+			Summary: v1alpha1.ReportSummary{Pass: 1, Fail: 1},
+			Results: []v1alpha1.ReportResult{*fixtures.FailResult.ReportResult, *fixtures.FailPodResult.ReportResult, *fixtures.FailDisallowRuleResult.ReportResult},
 		},
-		Summary: v1alpha1.ReportSummary{Pass: 1, Fail: 1},
-		Results: []*openreports.ORResultAdapter{fixtures.FailResult, fixtures.FailPodResult, fixtures.FailDisallowRuleResult},
 	}
 
 	filter := metrics.NewResultFilter(validate.RuleSets{}, validate.RuleSets{}, validate.RuleSets{Exclude: []string{"disallow-policy"}}, validate.RuleSets{}, validate.RuleSets{}, validate.RuleSets{})

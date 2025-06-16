@@ -74,21 +74,21 @@ func Test_SendResultListener(t *testing.T) {
 	t.Run("Send Result", func(t *testing.T) {
 		c := &client{validated: true}
 		slistener := listener.NewSendResultListener(target.NewCollection(&target.Target{Client: c}))
-		slistener(&openreports.ORReportAdapter{Report: preport1}, fixtures.FailResult, false)
+		slistener(preport1, fixtures.FailResult, false)
 
 		assert.True(t, c.Called, "Expected Send to be called")
 	})
 	t.Run("Don't Send Result when validation fails", func(t *testing.T) {
 		c := &client{validated: false}
 		slistener := listener.NewSendResultListener(target.NewCollection(&target.Target{Client: c}))
-		slistener(&openreports.ORReportAdapter{Report: preport1}, fixtures.FailResult, false)
+		slistener(preport1, fixtures.FailResult, false)
 
 		assert.False(t, c.Called, "Expected Send not to be called")
 	})
 	t.Run("Don't Send pre existing Result when skipExistingOnStartup is true", func(t *testing.T) {
 		c := &client{skipExistingOnStartup: true}
 		slistener := listener.NewSendResultListener(target.NewCollection(&target.Target{Client: c}))
-		slistener(&openreports.ORReportAdapter{Report: preport1}, fixtures.FailResult, true)
+		slistener(preport1, fixtures.FailResult, true)
 
 		assert.False(t, c.Called, "Expected Send not to be called")
 	})

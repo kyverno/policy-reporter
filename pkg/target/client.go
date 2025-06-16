@@ -59,7 +59,7 @@ func (rf *ResultFilterFactory) CreateFilter(namespace, severity, status, policy,
 	f.MinimumSeverity = minimumSeverity
 
 	if namespace.Count() > 0 {
-		f.AddValidation(func(r openreports.ReportResult) bool {
+		f.AddValidation(func(r *openreports.ORResultAdapter) bool {
 			if r.GetResource() == nil {
 				return true
 			}

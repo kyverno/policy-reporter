@@ -31,14 +31,16 @@ func Test_PolicyReportStore(t *testing.T) {
 	})
 
 	t.Run("Update/Get", func(t *testing.T) {
-		ureport := &v1alpha1.Report{
-			ObjectMeta: v1.ObjectMeta{
-				Name:              "polr-test",
-				Namespace:         "test",
-				CreationTimestamp: v1.Now(),
+		ureport := &openreports.ORReportAdapter{
+			Report: &v1alpha1.Report{
+				ObjectMeta: v1.ObjectMeta{
+					Name:              "polr-test",
+					Namespace:         "test",
+					CreationTimestamp: v1.Now(),
+				},
+				Results: make([]v1alpha1.ReportResult, 0),
+				Summary: v1alpha1.ReportSummary{Skip: 1},
 			},
-			Results: make([]*openreports.ORResultAdapter, 0),
-			Summary: v1alpha1.ReportSummary{Skip: 1},
 		}
 
 		store.Add(ctx, preport)
