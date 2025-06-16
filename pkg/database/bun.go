@@ -1024,21 +1024,23 @@ func (s *Store) Get(ctx context.Context, id string) (openreports.ReportInterface
 		return nil, err
 	}
 
-	return &v1alpha1.Report{
-		ObjectMeta: v1.ObjectMeta{
-			Name:              polr.Name,
-			Namespace:         polr.Namespace,
-			CreationTimestamp: v1.NewTime(time.Unix(polr.Created, 0)),
-			Labels:            polr.Labels,
+	return &openreports.ORReportAdapter{
+		Report: &v1alpha1.Report{
+			ObjectMeta: v1.ObjectMeta{
+				Name:              polr.Name,
+				Namespace:         polr.Namespace,
+				CreationTimestamp: v1.NewTime(time.Unix(polr.Created, 0)),
+				Labels:            polr.Labels,
+			},
+			Summary: v1alpha1.ReportSummary{
+				Skip:  polr.Skip,
+				Pass:  polr.Pass,
+				Warn:  polr.Warn,
+				Fail:  polr.Fail,
+				Error: polr.Error,
+			},
+			Results: results,
 		},
-		Summary: v1alpha1.ReportSummary{
-			Skip:  polr.Skip,
-			Pass:  polr.Pass,
-			Warn:  polr.Warn,
-			Fail:  polr.Fail,
-			Error: polr.Error,
-		},
-		Results: results,
 	}, nil
 }
 

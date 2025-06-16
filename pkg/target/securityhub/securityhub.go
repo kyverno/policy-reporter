@@ -514,17 +514,17 @@ func toPointer[T any](value T) *T {
 	return &value
 }
 
-func MapSeverity(s v1alpha1.ResultSeverity) types.SeverityLabel {
+func MapSeverity(s openreports.Severity) types.SeverityLabel {
 	switch s {
-	case v1alpha2.SeverityInfo:
+	case openreports.SeverityInfo:
 		return types.SeverityLabelInformational
-	case v1alpha2.SeverityLow:
+	case openreports.SeverityLow:
 		return types.SeverityLabelLow
-	case v1alpha2.SeverityMedium:
+	case openreports.SeverityMedium:
 		return types.SeverityLabelMedium
-	case v1alpha2.SeverityHigh:
+	case openreports.SeverityHigh:
 		return types.SeverityLabelHigh
-	case v1alpha2.SeverityCritical:
+	case openreports.SeverityCritical:
 		return types.SeverityLabelCritical
 	default:
 		return types.SeverityLabelInformational

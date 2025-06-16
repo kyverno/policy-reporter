@@ -64,19 +64,19 @@ func (c *Client) ConfigureInformer() {
 				}
 
 				for _, p := range existingPolrs.Items {
-					reports = append(reports, p.ToOpenReports())
+					reports = append(reports, &openreports.ORReportAdapter{Report: p.ToOpenReports()})
 				}
 
 				for _, cp := range existingcPolrs.Items {
-					reports = append(reports, cp.ToOpenReports())
+					reports = append(reports, &openreports.ORClusterReportAdapter{ClusterReport: cp.ToOpenReports()})
 				}
 
 				for _, p := range existingReports.Items {
-					reports = append(reports, &p)
+					reports = append(reports, &openreports.ORReportAdapter{Report: &p})
 				}
 
 				for _, cp := range existingCReports.Items {
-					reports = append(reports, &cp)
+					reports = append(reports, &openreports.ORClusterReportAdapter{ClusterReport: &cp})
 				}
 
 				switch t.Client.Type() {

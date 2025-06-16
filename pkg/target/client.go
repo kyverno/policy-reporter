@@ -59,7 +59,7 @@ func (rf *ResultFilterFactory) CreateFilter(namespace, severity, status, policy,
 	f.MinimumSeverity = minimumSeverity
 
 	if namespace.Count() > 0 {
-		f.AddValidation(func(r v1alpha1.ReportResult) bool {
+		f.AddValidation(func(r openreports.ReportResult) bool {
 			if r.GetResource() == nil {
 				return true
 			}
@@ -86,7 +86,7 @@ func (rf *ResultFilterFactory) CreateFilter(namespace, severity, status, policy,
 
 	if minimumSeverity != "" {
 		f.AddValidation(func(r v1alpha1.ReportResult) bool {
-			return v1alpha1.SeverityLevel[r.Severity] >= v1alpha1.SeverityLevel[v1alpha1.ResultSeverity(f.MinimumSeverity)]
+			return openreports.SeverityLevel[r.Severity] >= openreports.SeverityLevel[v1alpha1.ResultSeverity(f.MinimumSeverity)]
 		})
 	}
 

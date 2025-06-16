@@ -79,10 +79,10 @@ func (q *WGPolicyQueue) processNextItem() bool {
 
 	if namespace != "" {
 		polr, err = q.client.PolicyReports(namespace).Get(context.Background(), name, v1.GetOptions{})
-		rep = polr.ToOpenReports()
+		rep = &openreports.ORReportAdapter{Report: polr.ToOpenReports()}
 	} else {
 		cpolr, err = q.client.ClusterPolicyReports().Get(context.Background(), name, v1.GetOptions{})
-		rep = cpolr.ToOpenReports()
+		rep = &openreports.ORClusterReportAdapter{ClusterReport: cpolr.ToOpenReports()}
 	}
 	if errors.IsNotFound(err) {
 		q.handleNotFoundReport(key)
@@ -133,19 +133,23 @@ func (q *WGPolicyQueue) handleErr(err error, key string) {
 
 func (q *WGPolicyQueue) handleNotFoundReport(key string) {
 	var rep openreports.ReportInterface
-	namespace, name, _ := cache.SplitMetaNamespaceKey(key) // todo: check this
+	namespace, name, _ := cache.SplitMetaNamespaceKey(key)
 
 	if namespace == "" {
-		rep = &reportsv1alpha1.ClusterReport{
-			ObjectMeta: v1.ObjectMeta{
-				Name: name,
+		rep = &openreports.ORClusterReportAdapter{
+			ClusterReport: &reportsv1alpha1.ClusterReport{
+				ObjectMeta: v1.ObjectMeta{
+					Name: name,
+				},
 			},
 		}
 	} else {
-		rep = &reportsv1alpha1.Report{
-			ObjectMeta: v1.ObjectMeta{
-				Name:      name,
-				Namespace: namespace,
+		rep = &openreports.ORReportAdapter{
+			Report: &reportsv1alpha1.Report{
+				ObjectMeta: v1.ObjectMeta{
+					Name:      name,
+					Namespace: namespace,
+				},
 			},
 		}
 	}

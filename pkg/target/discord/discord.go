@@ -4,6 +4,7 @@ import (
 	"openreports.io/apis/openreports.io/v1alpha1"
 
 	"github.com/kyverno/policy-reporter/pkg/helper"
+	"github.com/kyverno/policy-reporter/pkg/openreports"
 	"github.com/kyverno/policy-reporter/pkg/target"
 	"github.com/kyverno/policy-reporter/pkg/target/http"
 )
@@ -35,11 +36,11 @@ type embedField struct {
 }
 
 var colors = map[v1alpha1.ResultSeverity]string{
-	v1alpha1.SeverityInfo:     "12370112",
-	v1alpha1.SeverityLow:      "3066993",
-	v1alpha1.SeverityMedium:   "15105570",
-	v1alpha1.SeverityHigh:     "15158332",
-	v1alpha1.SeverityCritical: "15158332",
+	openreports.SeverityInfo:     "12370112",
+	openreports.SeverityLow:      "3066993",
+	openreports.SeverityMedium:   "15105570",
+	openreports.SeverityHigh:     "15158332",
+	openreports.SeverityCritical: "15158332",
 }
 
 func newPayload(result v1alpha1.ReportResult, customFields map[string]string) payload {

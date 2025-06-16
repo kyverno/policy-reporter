@@ -4,7 +4,6 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
 	dto "github.com/prometheus/client_model/go"
-	"openreports.io/apis/openreports.io/v1alpha1"
 
 	"github.com/kyverno/policy-reporter/pkg/openreports"
 	"github.com/kyverno/policy-reporter/pkg/report"
@@ -18,8 +17,8 @@ func RegisterCustomResultGauge(name string, labelNames []string) *prometheus.Gau
 }
 
 type (
-	LabelGenerator = func(openreports.ReportInterface, v1alpha1.ReportResult) map[string]string
-	LabelCallback  = func(map[string]string, openreports.ReportInterface, v1alpha1.ReportResult)
+	LabelGenerator = func(openreports.ReportInterface, *openreports.ORResultAdapter) map[string]string
+	LabelCallback  = func(map[string]string, openreports.ReportInterface, *openreports.ORResultAdapter)
 )
 
 func CreateCustomResultMetricsListener(

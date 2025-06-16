@@ -16,6 +16,7 @@ import (
 	"github.com/kyverno/policy-reporter/pkg/database"
 	"github.com/kyverno/policy-reporter/pkg/email/violations"
 	"github.com/kyverno/policy-reporter/pkg/fixtures"
+	"github.com/kyverno/policy-reporter/pkg/openreports"
 	"github.com/kyverno/policy-reporter/pkg/report"
 	"github.com/kyverno/policy-reporter/pkg/report/result"
 	"github.com/kyverno/policy-reporter/pkg/target"
@@ -39,9 +40,9 @@ func TestV1(t *testing.T) {
 		assert.Fail(t, "failed to prepare Store")
 	}
 
-	store.Add(context.Background(), reconditioner.Prepare(fixtures.DefaultPolicyReport))
-	store.Add(context.Background(), reconditioner.Prepare(fixtures.KyvernoPolicyReport))
-	store.Add(context.Background(), reconditioner.Prepare(fixtures.KyvernoClusterPolicyReport))
+	store.Add(context.Background(), reconditioner.Prepare(&openreports.ORReportAdapter{Report: fixtures.DefaultPolicyReport}))
+	store.Add(context.Background(), reconditioner.Prepare(&openreports.ORReportAdapter{Report: fixtures.KyvernoPolicyReport}))
+	store.Add(context.Background(), reconditioner.Prepare(&openreports.ORClusterReportAdapter{ClusterReport: fixtures.KyvernoClusterPolicyReport}))
 
 	gin.SetMode(gin.ReleaseMode)
 

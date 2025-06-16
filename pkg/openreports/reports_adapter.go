@@ -12,20 +12,25 @@ import (
 )
 
 type ORReportAdapter struct {
-	v1alpha1.Report
+	*v1alpha1.Report
 }
 
 type ORClusterReportAdapter struct {
-	v1alpha1.ClusterReport
+	*v1alpha1.ClusterReport
 }
 
-func (r *ORReportAdapter) GetResults() []v1alpha1.ReportResult {
-	return r.Results
+func (r *ORReportAdapter) GetResults() []*ORResultAdapter {
+	ors := []*ORResultAdapter{}
+	for _, r := range r.Results {
+		ors = append(ors, &ORResultAdapter{ReportResult: &r})
+	}
+	return ors
 }
 
 func (r *ORReportAdapter) HasResult(id string) bool {
 	for _, r := range r.Results {
-		if r.GetID() == id {
+		or := &ORResultAdapter{ReportResult: &r}
+		if or.GetID() == id {
 			return true
 		}
 	}
@@ -56,11 +61,12 @@ func (r *ORReportAdapter) GetKinds() []string {
 
 	list := make([]string, 0)
 	for _, k := range r.Results {
-		if !k.HasResource() {
+		or := &ORResultAdapter{ReportResult: &k}
+		if !or.HasResource() {
 			continue
 		}
 
-		kind := k.GetResource().Kind
+		kind := or.GetResource().Kind
 
 		if kind == "" || slices.Contains(list, kind) {
 			continue
@@ -107,7 +113,7 @@ type ReportInterface interface {
 	GetID() string
 	GetKey() string
 	GetScope() *corev1.ObjectReference
-	GetResults() []v1alpha1.ReportResult
+	GetResults() []*ORResultAdapter
 	HasResult(id string) bool
 	GetSummary() v1alpha1.ReportSummary
 	GetSource() string

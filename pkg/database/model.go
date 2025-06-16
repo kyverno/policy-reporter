@@ -5,7 +5,6 @@ import (
 
 	"github.com/segmentio/fasthash/fnv1a"
 	"github.com/uptrace/bun"
-	"openreports.io/apis/openreports.io/v1alpha1"
 
 	"github.com/kyverno/policy-reporter/pkg/helper"
 	"github.com/kyverno/policy-reporter/pkg/openreports"
@@ -249,28 +248,28 @@ func MapPolicyReportResource(polr openreports.ReportInterface) []*ResourceResult
 		}
 
 		switch res.Result {
-		case v1alpha1.StatusPass:
+		case openreports.StatusPass:
 			value.Pass = value.Pass + 1
-		case v1alpha1.StatusSkip:
+		case openreports.StatusSkip:
 			value.Skip = value.Skip + 1
-		case v1alpha1.StatusWarn:
+		case openreports.StatusWarn:
 			value.Warn = value.Warn + 1
-		case v1alpha1.StatusFail:
+		case openreports.StatusFail:
 			value.Fail = value.Fail + 1
-		case v1alpha1.StatusError:
+		case openreports.StatusError:
 			value.Error = value.Error + 1
 		}
 
 		switch res.Severity {
-		case v1alpha1.SeverityInfo:
+		case openreports.SeverityInfo:
 			value.Info = value.Info + 1
-		case v1alpha1.SeverityLow:
+		case openreports.SeverityLow:
 			value.Low = value.Low + 1
-		case v1alpha1.SeverityMedium:
+		case openreports.SeverityMedium:
 			value.Medium = value.Medium + 1
-		case v1alpha1.SeverityHigh:
+		case openreports.SeverityHigh:
 			value.High = value.High + 1
-		case v1alpha1.SeverityCritical:
+		case openreports.SeverityCritical:
 			value.Critical = value.Critical + 1
 		default:
 			value.Unknown = value.Unknown + 1

@@ -70,12 +70,22 @@ func (q *ORQueue) processNextItem() bool {
 		return true
 	}
 
-	var rep openreports.ReportInterface
+	var (
+		rep openreports.ReportInterface
+		cr  *reportsv1alpha1.ClusterReport
+		r   *reportsv1alpha1.Report
+	)
 
 	if namespace != "" {
-		rep, err = q.client.Reports(namespace).Get(context.Background(), name, v1.GetOptions{})
+		r, err = q.client.Reports(namespace).Get(context.Background(), name, v1.GetOptions{})
+		rep = &openreports.ORReportAdapter{
+			Report: r,
+		}
 	} else {
-		rep, err = q.client.ClusterReports().Get(context.Background(), name, v1.GetOptions{})
+		cr, err = q.client.ClusterReports().Get(context.Background(), name, v1.GetOptions{})
+		rep = &openreports.ORClusterReportAdapter{
+			ClusterReport: cr,
+		}
 	}
 	if errors.IsNotFound(err) {
 		q.handleNotFoundReport(key)
@@ -128,16 +138,20 @@ func (q *ORQueue) handleNotFoundReport(key string) {
 	var rep openreports.ReportInterface
 	namespace, name, _ := cache.SplitMetaNamespaceKey(key)
 	if namespace == "" {
-		rep = &reportsv1alpha1.ClusterReport{
-			ObjectMeta: v1.ObjectMeta{
-				Name: name,
+		rep = &openreports.ORClusterReportAdapter{
+			ClusterReport: &reportsv1alpha1.ClusterReport{
+				ObjectMeta: v1.ObjectMeta{
+					Name: name,
+				},
 			},
 		}
 	} else {
-		rep = &reportsv1alpha1.Report{
-			ObjectMeta: v1.ObjectMeta{
-				Name:      name,
-				Namespace: namespace,
+		rep = &openreports.ORReportAdapter{
+			Report: &reportsv1alpha1.Report{
+				ObjectMeta: v1.ObjectMeta{
+					Name:      name,
+					Namespace: namespace,
+				},
 			},
 		}
 	}

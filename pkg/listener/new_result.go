@@ -8,6 +8,7 @@ import (
 
 	"github.com/kyverno/policy-reporter/pkg/cache"
 	"github.com/kyverno/policy-reporter/pkg/helper"
+	"github.com/kyverno/policy-reporter/pkg/openreports"
 	"github.com/kyverno/policy-reporter/pkg/report"
 )
 
@@ -47,7 +48,7 @@ func (l *ResultListener) UnregisterSyncListener() {
 }
 
 func (l *ResultListener) Validate(r v1alpha1.ReportResult) bool {
-	if r.Result == v1alpha1.StatusSkip || r.Result == v1alpha1.StatusPass {
+	if r.Result == openreports.StatusSkip || r.Result == openreports.StatusPass {
 		return false
 	}
 

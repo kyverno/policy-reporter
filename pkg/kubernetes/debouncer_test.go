@@ -7,6 +7,7 @@ import (
 
 	"github.com/kyverno/policy-reporter/pkg/fixtures"
 	"github.com/kyverno/policy-reporter/pkg/kubernetes"
+	"github.com/kyverno/policy-reporter/pkg/openreports"
 	"github.com/kyverno/policy-reporter/pkg/report"
 )
 
@@ -26,19 +27,19 @@ func Test_Debouncer(t *testing.T) {
 
 		debouncer.Add(report.LifecycleEvent{
 			Type:         report.Added,
-			PolicyReport: fixtures.DefaultPolicyReport,
+			PolicyReport: &openreports.ORReportAdapter{Report: fixtures.DefaultPolicyReport},
 		})
 
 		debouncer.Add(report.LifecycleEvent{
 			Type:         report.Updated,
-			PolicyReport: fixtures.MinPolicyReport,
+			PolicyReport: &openreports.ORReportAdapter{Report: fixtures.MinPolicyReport},
 		})
 
 		time.Sleep(10 * time.Millisecond)
 
 		debouncer.Add(report.LifecycleEvent{
 			Type:         report.Updated,
-			PolicyReport: fixtures.DefaultPolicyReport,
+			PolicyReport: &openreports.ORReportAdapter{Report: fixtures.DefaultPolicyReport},
 		})
 
 		wg.Wait()
@@ -63,12 +64,12 @@ func Test_Debouncer(t *testing.T) {
 
 		debouncer.Add(report.LifecycleEvent{
 			Type:         report.Added,
-			PolicyReport: fixtures.DefaultPolicyReport,
+			PolicyReport: &openreports.ORReportAdapter{Report: fixtures.DefaultPolicyReport},
 		})
 
 		debouncer.Add(report.LifecycleEvent{
 			Type:         report.Updated,
-			PolicyReport: fixtures.MinPolicyReport,
+			PolicyReport: &openreports.ORReportAdapter{Report: fixtures.MinPolicyReport},
 		})
 
 		time.Sleep(5 * time.Millisecond)
@@ -95,19 +96,19 @@ func Test_Debouncer(t *testing.T) {
 
 		debouncer.Add(report.LifecycleEvent{
 			Type:         report.Added,
-			PolicyReport: fixtures.DefaultPolicyReport,
+			PolicyReport: &openreports.ORReportAdapter{Report: fixtures.DefaultPolicyReport},
 		})
 
 		debouncer.Add(report.LifecycleEvent{
 			Type:         report.Updated,
-			PolicyReport: fixtures.MinPolicyReport,
+			PolicyReport: &openreports.ORReportAdapter{Report: fixtures.MinPolicyReport},
 		})
 
 		time.Sleep(10 * time.Millisecond)
 
 		debouncer.Add(report.LifecycleEvent{
 			Type:         report.Deleted,
-			PolicyReport: fixtures.DefaultPolicyReport,
+			PolicyReport: &openreports.ORReportAdapter{Report: fixtures.DefaultPolicyReport},
 		})
 
 		wg.Wait()

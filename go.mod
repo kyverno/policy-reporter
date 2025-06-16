@@ -46,7 +46,7 @@ require (
 	k8s.io/apimachinery v0.33.1
 	k8s.io/client-go v0.33.1
 	k8s.io/kube-aggregator v0.33.1
-	openreports.io v0.1.2-report
+	openreports.io v0.0.0-20250321064407-5081e5b516e8
 )
 
 require (
@@ -179,4 +179,5 @@ require (
 	sigs.k8s.io/yaml v1.4.0 // indirect
 )
 
-replace openreports.io => github.com/aerosouund/reports-api v0.1.7-report
+
+replace openreports.io => github.com/openreports/reports-api v0.0.0-20250321064407-5081e5b516e8

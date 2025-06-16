@@ -8,14 +8,17 @@ import (
 	"openreports.io/apis/openreports.io/v1alpha1"
 
 	"github.com/kyverno/policy-reporter/pkg/fixtures"
+	"github.com/kyverno/policy-reporter/pkg/openreports"
 	"github.com/kyverno/policy-reporter/pkg/report"
 	"github.com/kyverno/policy-reporter/pkg/target"
 	"github.com/kyverno/policy-reporter/pkg/validate"
 )
 
-var preport = &v1alpha1.Report{
-	ObjectMeta: v1.ObjectMeta{
-		Labels: map[string]string{"app": "policy-reporter"},
+var preport = &openreports.ORReportAdapter{
+	Report: &v1alpha1.Report{
+		ObjectMeta: v1.ObjectMeta{
+			Labels: map[string]string{"app": "policy-reporter"},
+		},
 	},
 }
 
@@ -29,7 +32,7 @@ func Test_BaseClient(t *testing.T) {
 			validate.RuleSets{},
 			validate.RuleSets{},
 			validate.RuleSets{},
-			v1alpha1.SeverityCritical,
+			openreports.SeverityCritical,
 		)
 
 		assert.False(t, filter.Validate(fixtures.FailResult), "Unexpected Validation Result")
@@ -113,7 +116,7 @@ func Test_BaseClient(t *testing.T) {
 		filter := factory.CreateFilter(
 			validate.RuleSets{},
 			validate.RuleSets{},
-			validate.RuleSets{Exclude: []string{v1alpha1.StatusFail}},
+			validate.RuleSets{Exclude: []string{openreports.StatusFail}},
 			validate.RuleSets{},
 			validate.RuleSets{},
 			"",
@@ -125,7 +128,7 @@ func Test_BaseClient(t *testing.T) {
 		filter := factory.CreateFilter(
 			validate.RuleSets{},
 			validate.RuleSets{},
-			validate.RuleSets{Exclude: []string{v1alpha1.StatusSkip}},
+			validate.RuleSets{Exclude: []string{openreports.StatusSkip}},
 			validate.RuleSets{},
 			validate.RuleSets{},
 			"",
@@ -137,7 +140,7 @@ func Test_BaseClient(t *testing.T) {
 		filter := factory.CreateFilter(
 			validate.RuleSets{},
 			validate.RuleSets{},
-			validate.RuleSets{Include: []string{v1alpha1.StatusFail}},
+			validate.RuleSets{Include: []string{openreports.StatusFail}},
 			validate.RuleSets{},
 			validate.RuleSets{},
 			"",
@@ -149,7 +152,7 @@ func Test_BaseClient(t *testing.T) {
 		filter := factory.CreateFilter(
 			validate.RuleSets{},
 			validate.RuleSets{},
-			validate.RuleSets{Exclude: []string{v1alpha1.StatusFail}},
+			validate.RuleSets{Exclude: []string{openreports.StatusFail}},
 			validate.RuleSets{},
 			validate.RuleSets{},
 			"",
@@ -161,7 +164,7 @@ func Test_BaseClient(t *testing.T) {
 	t.Run("Validate Exclude Severity match", func(t *testing.T) {
 		filter := factory.CreateFilter(
 			validate.RuleSets{},
-			validate.RuleSets{Exclude: []string{v1alpha1.SeverityHigh}},
+			validate.RuleSets{Exclude: []string{openreports.SeverityHigh}},
 			validate.RuleSets{},
 			validate.RuleSets{},
 			validate.RuleSets{},
@@ -173,7 +176,7 @@ func Test_BaseClient(t *testing.T) {
 	t.Run("Validate Exclude Severity mismatch", func(t *testing.T) {
 		filter := factory.CreateFilter(
 			validate.RuleSets{},
-			validate.RuleSets{Exclude: []string{v1alpha1.SeverityCritical}},
+			validate.RuleSets{Exclude: []string{openreports.SeverityCritical}},
 			validate.RuleSets{},
 			validate.RuleSets{},
 			validate.RuleSets{},
@@ -185,7 +188,7 @@ func Test_BaseClient(t *testing.T) {
 	t.Run("Validate Include Severity match", func(t *testing.T) {
 		filter := factory.CreateFilter(
 			validate.RuleSets{},
-			validate.RuleSets{Include: []string{v1alpha1.SeverityHigh}},
+			validate.RuleSets{Include: []string{openreports.SeverityHigh}},
 			validate.RuleSets{},
 			validate.RuleSets{},
 			validate.RuleSets{},
@@ -197,7 +200,7 @@ func Test_BaseClient(t *testing.T) {
 	t.Run("Validate Exclude Severity mismatch", func(t *testing.T) {
 		filter := factory.CreateFilter(
 			validate.RuleSets{},
-			validate.RuleSets{Include: []string{v1alpha1.SeverityCritical}},
+			validate.RuleSets{Include: []string{openreports.SeverityCritical}},
 			validate.RuleSets{},
 			validate.RuleSets{},
 			validate.RuleSets{},
@@ -338,7 +341,7 @@ func Test_BaseClient(t *testing.T) {
 			SkipExistingOnStartup: true,
 		})
 
-		assert.False(t, client.Validate(&v1alpha1.Report{}, fixtures.FailResult), "Unexpected Validation Result")
+		assert.False(t, client.Validate(&openreports.ORReportAdapter{Report: &v1alpha1.Report{}}, fixtures.FailResult), "Unexpected Validation Result")
 	})
 
 	t.Run("Client Report Validation", func(t *testing.T) {
@@ -351,7 +354,7 @@ func Test_BaseClient(t *testing.T) {
 			SkipExistingOnStartup: true,
 		})
 
-		assert.False(t, client.Validate(&v1alpha1.Report{}, fixtures.FailResult), "Unexpected Validation Result")
+		assert.False(t, client.Validate(&openreports.ORReportAdapter{Report: &v1alpha1.Report{}}, fixtures.FailResult), "Unexpected Validation Result")
 	})
 
 	t.Run("Client nil Validation", func(t *testing.T) {
@@ -373,8 +376,8 @@ func Test_BaseClient(t *testing.T) {
 			SkipExistingOnStartup: true,
 		})
 
-		assert.True(t, client.Validate(&v1alpha1.Report{}, fixtures.FailResult), "Should fallback to true")
-		assert.Equal(t, client.MinimumSeverity(), v1alpha1.SeverityInfo, "Should fallback to severity info")
+		assert.True(t, client.Validate(&openreports.ORReportAdapter{Report: &v1alpha1.Report{}}, fixtures.FailResult), "Should fallback to true")
+		assert.Equal(t, client.MinimumSeverity(), openreports.SeverityInfo, "Should fallback to severity info")
 		assert.NotNil(t, client.Sources(), "Should fallback to empty list")
 	})
 
@@ -390,11 +393,11 @@ func Test_BaseClient(t *testing.T) {
 	t.Run("MinimumSeverity", func(t *testing.T) {
 		client := target.NewBaseClient(target.ClientOptions{
 			Name:                  "Client",
-			ResultFilter:          &report.ResultFilter{MinimumSeverity: v1alpha1.SeverityHigh},
+			ResultFilter:          &report.ResultFilter{MinimumSeverity: openreports.SeverityHigh},
 			SkipExistingOnStartup: true,
 		})
 
-		assert.Equal(t, client.MinimumSeverity(), v1alpha1.SeverityHigh, "Should return configured MinimumSeverity")
+		assert.Equal(t, client.MinimumSeverity(), openreports.SeverityHigh, "Should return configured MinimumSeverity")
 	})
 	t.Run("Name", func(t *testing.T) {
 		client := target.NewBaseClient(target.ClientOptions{

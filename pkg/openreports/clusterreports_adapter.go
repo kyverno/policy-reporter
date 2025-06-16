@@ -10,13 +10,18 @@ import (
 	"openreports.io/apis/openreports.io/v1alpha1"
 )
 
-func (r *ORClusterReportAdapter) GetResults() []v1alpha1.ReportResult {
-	return r.Results
+func (r *ORClusterReportAdapter) GetResults() []*ORResultAdapter {
+	ors := []*ORResultAdapter{}
+	for _, r := range r.Results {
+		ors = append(ors, &ORResultAdapter{ReportResult: &r})
+	}
+	return ors
 }
 
 func (r *ORClusterReportAdapter) HasResult(id string) bool {
 	for _, r := range r.Results {
-		if r.GetID() == id {
+		or := &ORResultAdapter{ReportResult: &r}
+		if or.GetID() == id {
 			return true
 		}
 	}
@@ -47,11 +52,12 @@ func (r *ORClusterReportAdapter) GetKinds() []string {
 
 	list := make([]string, 0)
 	for _, k := range r.Results {
-		if !k.HasResource() {
+		or := &ORResultAdapter{ReportResult: &k}
+		if !or.HasResource() {
 			continue
 		}
 
-		kind := k.GetResource().Kind
+		kind := or.GetResource().Kind
 
 		if kind == "" || slices.Contains(list, kind) {
 			continue

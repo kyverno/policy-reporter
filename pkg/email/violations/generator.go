@@ -10,6 +10,7 @@ import (
 	"openreports.io/pkg/client/clientset/versioned/typed/openreports.io/v1alpha1"
 
 	"github.com/kyverno/policy-reporter/pkg/email"
+	"github.com/kyverno/policy-reporter/pkg/openreports"
 )
 
 type Generator struct {
@@ -64,11 +65,11 @@ func (o *Generator) GenerateData(ctx context.Context) ([]Source, error) {
 				}
 
 				for _, result := range report.Results {
-					if result.Result == reportsv1alpha1.StatusPass || result.Result == reportsv1alpha1.StatusSkip {
+					if result.Result == openreports.StatusPass || result.Result == openreports.StatusSkip {
 						continue
 					}
 
-					s.AddClusterResults(mapResult(&report, result))
+					s.AddClusterResults(mapResult(&openreports.ORClusterReportAdapter{ClusterReport: &report}, result))
 				}
 			}(rep)
 		}
@@ -114,10 +115,10 @@ func (o *Generator) GenerateData(ctx context.Context) ([]Source, error) {
 			}
 
 			for _, result := range report.Results {
-				if result.Result == reportsv1alpha1.StatusPass || result.Result == reportsv1alpha1.StatusSkip {
+				if result.Result == openreports.StatusPass || result.Result == openreports.StatusSkip {
 					continue
 				}
-				s.AddNamespacedResults(report.Namespace, mapResult(&report, result))
+				s.AddNamespacedResults(report.Namespace, mapResult(&openreports.ORReportAdapter{Report: &report}, result))
 			}
 		}(rep)
 	}

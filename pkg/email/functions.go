@@ -1,6 +1,8 @@
 package email
 
-import "openreports.io/apis/openreports.io/v1alpha1"
+import (
+	"github.com/kyverno/policy-reporter/pkg/openreports"
+)
 
 const (
 	PassColor    = "#198754"
@@ -12,13 +14,13 @@ const (
 
 func ColorFromStatus(status string) string {
 	switch status {
-	case v1alpha1.StatusPass:
+	case openreports.StatusPass:
 		return PassColor
-	case v1alpha1.StatusWarn:
+	case openreports.StatusWarn:
 		return WarnColor
-	case v1alpha1.StatusFail:
+	case openreports.StatusFail:
 		return FailColor
-	case v1alpha1.StatusError:
+	case openreports.StatusError:
 		return ErrorColor
 	default:
 		return DefaultColor
