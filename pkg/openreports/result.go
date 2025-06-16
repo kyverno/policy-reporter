@@ -10,7 +10,7 @@ import (
 
 type ORResultAdapter struct {
 	ID string
-	*v1alpha1.ReportResult
+	v1alpha1.ReportResult
 }
 
 func (r *ORResultAdapter) GetResource() *corev1.ObjectReference {

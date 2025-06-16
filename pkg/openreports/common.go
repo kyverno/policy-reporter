@@ -1,6 +1,8 @@
 package openreports
 
 import (
+	corev1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"openreports.io/apis/openreports.io/v1alpha1"
 )
 
@@ -49,4 +51,17 @@ var SeverityLevel = map[v1alpha1.ResultSeverity]int{
 	SeverityMedium:   2,
 	SeverityHigh:     3,
 	SeverityCritical: 4,
+}
+
+type ReportInterface interface {
+	metav1.Object
+	GetID() string
+	GetKey() string
+	GetScope() *corev1.ObjectReference
+	GetResults() []ORResultAdapter
+	HasResult(id string) bool
+	GetSummary() v1alpha1.ReportSummary
+	GetSource() string
+	GetKinds() []string
+	GetSeverities() []string
 }

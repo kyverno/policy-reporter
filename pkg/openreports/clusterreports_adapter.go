@@ -4,23 +4,24 @@ import (
 	"fmt"
 	"strconv"
 
+	"slices"
+
 	"github.com/segmentio/fasthash/fnv1a"
 	corev1 "k8s.io/api/core/v1"
 	"openreports.io/apis/openreports.io/v1alpha1"
-	"slices"
 )
 
-func (r *ORClusterReportAdapter) GetResults() []*ORResultAdapter {
-	ors := []*ORResultAdapter{}
+func (r *ORClusterReportAdapter) GetResults() []ORResultAdapter {
+	ors := []ORResultAdapter{}
 	for _, r := range r.Results {
-		ors = append(ors, &ORResultAdapter{ReportResult: &r})
+		ors = append(ors, ORResultAdapter{ReportResult: r})
 	}
 	return ors
 }
 
 func (r *ORClusterReportAdapter) HasResult(id string) bool {
 	for _, r := range r.Results {
-		or := &ORResultAdapter{ReportResult: &r}
+		or := &ORResultAdapter{ReportResult: r}
 		if or.GetID() == id {
 			return true
 		}
@@ -52,7 +53,7 @@ func (r *ORClusterReportAdapter) GetKinds() []string {
 
 	list := make([]string, 0)
 	for _, k := range r.Results {
-		or := &ORResultAdapter{ReportResult: &k}
+		or := &ORResultAdapter{ReportResult: k}
 		if !or.HasResource() {
 			continue
 		}

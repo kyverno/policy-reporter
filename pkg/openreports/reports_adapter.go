@@ -8,7 +8,6 @@ import (
 
 	"github.com/segmentio/fasthash/fnv1a"
 	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"openreports.io/apis/openreports.io/v1alpha1"
 )
 
@@ -20,17 +19,17 @@ type ORClusterReportAdapter struct {
 	*v1alpha1.ClusterReport
 }
 
-func (r *ORReportAdapter) GetResults() []*ORResultAdapter {
-	ors := []*ORResultAdapter{}
+func (r *ORReportAdapter) GetResults() []ORResultAdapter {
+	ors := []ORResultAdapter{}
 	for _, r := range r.Results {
-		ors = append(ors, &ORResultAdapter{ReportResult: &r})
+		ors = append(ors, ORResultAdapter{ReportResult: r})
 	}
 	return ors
 }
 
 func (r *ORReportAdapter) HasResult(id string) bool {
 	for _, r := range r.Results {
-		or := &ORResultAdapter{ReportResult: &r}
+		or := &ORResultAdapter{ReportResult: r}
 		if or.GetID() == id {
 			return true
 		}
@@ -62,7 +61,7 @@ func (r *ORReportAdapter) GetKinds() []string {
 
 	list := make([]string, 0)
 	for _, k := range r.Results {
-		or := &ORResultAdapter{ReportResult: &k}
+		or := &ORResultAdapter{ReportResult: k}
 		if !or.HasResource() {
 			continue
 		}
@@ -107,17 +106,4 @@ func (r *ORReportAdapter) GetKey() string {
 
 func (r *ORReportAdapter) GetScope() *corev1.ObjectReference {
 	return r.Scope
-}
-
-type ReportInterface interface {
-	metav1.Object
-	GetID() string
-	GetKey() string
-	GetScope() *corev1.ObjectReference
-	GetResults() []*ORResultAdapter
-	HasResult(id string) bool
-	GetSummary() v1alpha1.ReportSummary
-	GetSource() string
-	GetKinds() []string
-	GetSeverities() []string
 }
