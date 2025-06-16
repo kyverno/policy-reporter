@@ -179,5 +179,4 @@ require (
 	sigs.k8s.io/yaml v1.4.0 // indirect
 )
 
-
 replace openreports.io => github.com/openreports/reports-api v0.0.0-20250321064407-5081e5b516e8

@@ -10,8 +10,9 @@ import (
 	"os"
 	"time"
 
-	"github.com/kyverno/policy-reporter/pkg/openreports"
 	"go.uber.org/zap"
+
+	"github.com/kyverno/policy-reporter/pkg/openreports"
 )
 
 // CreateJSONRequest for the given configuration
