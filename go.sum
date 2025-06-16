@@ -300,8 +300,8 @@ github.com/twitchyliquid64/golang-asm v0.15.1 h1:SU5vSMR7hnwNxj24w34ZyCi/FmDZTkS
 github.com/twitchyliquid64/golang-asm v0.15.1/go.mod h1:a1lVb/DtPvCB8fslRZhAngC2+aY1QWCk3Cedj/Gdt08=
 github.com/ugorji/go/codec v1.2.14 h1:yOQvXCBc3Ij46LRkRoh4Yd5qK6LVOgi0bYOXfb7ifjw=
 github.com/ugorji/go/codec v1.2.14/go.mod h1:UNopzCgEMSXjBc6AOMqYvWC1ktqTAfzJZUZgYf6w6lg=
-github.com/uptrace/bun v1.2.13 h1:tFJjT+mIrogD/mgwwS3lUJmd8Z7M63oZYS1dl6f+23w=
-github.com/uptrace/bun v1.2.13/go.mod h1:ZS4nPaEv2Du3OFqAD/irk3WVP6xTB3/9TWqjJbgKYBU=
+github.com/uptrace/bun v1.2.14 h1:5yFSfi/yVWEzQ2lAaHz+JfWN9AHmqYtNmlbaUbAp3rU=
+github.com/uptrace/bun v1.2.14/go.mod h1:ZS4nPaEv2Du3OFqAD/irk3WVP6xTB3/9TWqjJbgKYBU=
 github.com/uptrace/bun/dialect/mysqldialect v1.2.13 h1:wRLSCF0Y3V9yEdm/H14DZ2aJ/aVsTYG9u/E8d/hjqV4=
 github.com/uptrace/bun/dialect/mysqldialect v1.2.13/go.mod h1:7MNlP7n2nA2ZhJ8/Ibdu6MHNNh7VMdOuR0IP37hyrBI=
 github.com/uptrace/bun/dialect/pgdialect v1.2.13 h1:vSNZaPf4bHLgELCXjKtE8OoVL5z1UbWKJ2YbAMXm0qM=
