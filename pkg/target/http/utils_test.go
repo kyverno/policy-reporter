@@ -15,7 +15,7 @@ import (
 )
 
 func TestResultMapping(t *testing.T) {
-	result := http.NewJSONResult(fixtures.CompleteTargetSendResult)
+	result := http.NewJSONResult(&fixtures.CompleteTargetSendResult)
 
 	assert.Equal(t, result.Message, fixtures.CompleteTargetSendResult.Description)
 	assert.Equal(t, result.Policy, fixtures.CompleteTargetSendResult.Policy)

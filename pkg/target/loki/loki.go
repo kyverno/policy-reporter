@@ -104,7 +104,7 @@ type client struct {
 func (l *client) Send(result openreports.ORResultAdapter) {
 	l.send(Payload{
 		Streams: []Stream{
-			newLokiStream(result, l.customFields),
+			newLokiStream(&result, l.customFields),
 		},
 	})
 }

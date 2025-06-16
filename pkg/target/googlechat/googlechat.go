@@ -200,7 +200,7 @@ func (e *client) Send(result openreports.ORResultAdapter) {
 		result.Properties = props
 	}
 
-	payload, err := mapPayload(result)
+	payload, err := mapPayload(&result)
 	if err != nil {
 		zap.L().Error(e.Name()+": PUSH FAILED", zap.Error(err))
 		return

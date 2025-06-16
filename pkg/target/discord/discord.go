@@ -107,7 +107,7 @@ type client struct {
 }
 
 func (d *client) Send(result openreports.ORResultAdapter) {
-	req, err := http.CreateJSONRequest("POST", d.webhook, newPayload(result, d.customFields))
+	req, err := http.CreateJSONRequest("POST", d.webhook, newPayload(&result, d.customFields))
 	if err != nil {
 		return
 	}

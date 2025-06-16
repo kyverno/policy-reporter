@@ -37,7 +37,7 @@ type client struct {
 
 func (c *client) Send(result openreports.ORResultAdapter) {
 	c.sendAndLogResult(splunkRequest{
-		Event:      http.NewJSONResult(result),
+		Event:      http.NewJSONResult(&result),
 		SourceType: policyReporterSource,
 	})
 }

@@ -34,7 +34,7 @@ func NewSendResultListener(targets *target.Collection) report.PolicyReportResult
 					return
 				}
 
-				target.Send(result)
+				target.Send(*result)
 			}(t, rep, r, e)
 		}
 

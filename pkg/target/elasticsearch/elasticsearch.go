@@ -84,7 +84,7 @@ func (e *client) Send(result openreports.ORResultAdapter) {
 		result.Properties = props
 	}
 
-	req, err := http.CreateJSONRequest("POST", host, http.NewJSONResult(result))
+	req, err := http.CreateJSONRequest("POST", host, http.NewJSONResult(&result))
 	if err != nil {
 		return
 	}

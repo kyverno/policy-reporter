@@ -66,12 +66,12 @@ func (a *client) BatchSend(report openreports.ReportInterface, results []*openre
 			zap.String("status", string(result.Result)),
 			zap.String("source", result.Source))
 
-		alerts = append(alerts, a.createAlert(result))
+		alerts = append(alerts, a.createAlert(*result))
 	}
 	a.sendAlerts(alerts)
 }
 
-func (a *client) createAlert(result *openreports.ORResultAdapter) Alert {
+func (a *client) createAlert(result openreports.ORResultAdapter) Alert {
 	labels := map[string]string{
 		"alertname": "PolicyReporterViolation",
 		"severity":  string(result.Severity),

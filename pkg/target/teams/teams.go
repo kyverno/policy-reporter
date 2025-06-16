@@ -32,7 +32,7 @@ type client struct {
 }
 
 func (s *client) Send(result openreports.ORResultAdapter) {
-	s.PostMessage(s.newMessage(result.GetResource(), []*openreports.ORResultAdapter{result}))
+	s.PostMessage(s.newMessage(result.GetResource(), []*openreports.ORResultAdapter{&result}))
 }
 
 func (s *client) CleanUp(_ context.Context, _ openreports.ReportInterface) {}
@@ -40,7 +40,7 @@ func (s *client) CleanUp(_ context.Context, _ openreports.ReportInterface) {}
 func (s *client) BatchSend(report openreports.ReportInterface, results []*openreports.ORResultAdapter) {
 	if report.GetScope() == nil {
 		for idx := range results {
-			s.Send(results[idx])
+			s.Send(*results[idx])
 		}
 	}
 

@@ -48,7 +48,7 @@ func main() {
 
 	// Send the test alert
 	fmt.Println("Sending test alert to", alertManagerURL)
-	client.Send(&openreports.ORResultAdapter{ReportResult: &result})
+	client.Send(openreports.ORResultAdapter{ReportResult: &result})
 
 	// Also test batch send
 	results := []*openreports.ORResultAdapter{

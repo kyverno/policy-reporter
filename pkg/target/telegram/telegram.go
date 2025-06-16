@@ -119,7 +119,7 @@ func (e *client) Send(result openreports.ORResultAdapter) {
 	}
 
 	err = ttmpl.Execute(&textBuffer, values{
-		Result:   result,
+		Result:   &result,
 		Time:     time.Now(),
 		Resource: res,
 	})
