@@ -2,9 +2,8 @@ package openreports
 
 import (
 	"fmt"
-	"strconv"
-
 	"slices"
+	"strconv"
 
 	"github.com/segmentio/fasthash/fnv1a"
 	corev1 "k8s.io/api/core/v1"
