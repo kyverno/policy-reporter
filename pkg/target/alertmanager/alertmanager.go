@@ -51,7 +51,7 @@ func (a *client) Send(result openreports.ORResultAdapter) {
 	a.sendAlerts([]Alert{alert})
 }
 
-func (a *client) BatchSend(report openreports.ReportInterface, results []*openreports.ORResultAdapter) {
+func (a *client) BatchSend(report openreports.ReportInterface, results []openreports.ORResultAdapter) {
 	zap.L().Debug("Batch sending policy violations to AlertManager",
 		zap.Int("count", len(results)),
 		zap.String("reportName", report.GetName()),
@@ -66,7 +66,7 @@ func (a *client) BatchSend(report openreports.ReportInterface, results []*openre
 			zap.String("status", string(result.Result)),
 			zap.String("source", result.Source))
 
-		alerts = append(alerts, a.createAlert(*result))
+		alerts = append(alerts, a.createAlert(result))
 	}
 	a.sendAlerts(alerts)
 }

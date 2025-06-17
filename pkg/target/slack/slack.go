@@ -41,7 +41,7 @@ var colors = map[v1alpha1.ResultSeverity]string{
 	openreports.SeverityCritical: "#e20b0b",
 }
 
-func (s *client) message(result *openreports.ORResultAdapter) *slack.WebhookMessage {
+func (s *client) message(result openreports.ORResultAdapter) *slack.WebhookMessage {
 	p := &slack.WebhookMessage{
 		Attachments: make([]slack.Attachment, 0, 1),
 		Channel:     s.channel,
@@ -172,7 +172,7 @@ func (s *client) message(result *openreports.ORResultAdapter) *slack.WebhookMess
 	return p
 }
 
-func (s *client) batchMessage(polr openreports.ReportInterface, results []*openreports.ORResultAdapter) *slack.WebhookMessage {
+func (s *client) batchMessage(polr openreports.ReportInterface, results []openreports.ORResultAdapter) *slack.WebhookMessage {
 	scope := polr.GetScope()
 	resource := formatting.ResourceString(scope)
 
@@ -278,13 +278,13 @@ func (s *client) batchMessage(polr openreports.ReportInterface, results []*openr
 }
 
 func (s *client) Send(result openreports.ORResultAdapter) {
-	s.PostMessage(s.message(&result))
+	s.PostMessage(s.message(result))
 }
 
-func (s *client) BatchSend(report openreports.ReportInterface, results []*openreports.ORResultAdapter) {
+func (s *client) BatchSend(report openreports.ReportInterface, results []openreports.ORResultAdapter) {
 	if report.GetScope() == nil {
 		for _, result := range results {
-			s.Send(*result)
+			s.Send(result)
 		}
 
 		return

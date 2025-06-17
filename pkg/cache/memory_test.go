@@ -6,24 +6,23 @@ import (
 
 	"github.com/kyverno/policy-reporter/pkg/cache"
 	"github.com/kyverno/policy-reporter/pkg/fixtures"
-	"github.com/kyverno/policy-reporter/pkg/openreports"
 )
 
 func TestInMemory(t *testing.T) {
 	t.Run("add report", func(t *testing.T) {
-		or := &openreports.ORReportAdapter{Report: fixtures.DefaultPolicyReport}
+		or := fixtures.DefaultPolicyReport
 		id := or.GetID()
 
 		c := cache.NewInMermoryCache(time.Millisecond, time.Millisecond)
 
-		c.AddReport(&openreports.ORReportAdapter{Report: fixtures.DefaultPolicyReport})
+		c.AddReport(fixtures.DefaultPolicyReport)
 
 		results := c.GetResults(id)
 		if len(results) != len(fixtures.DefaultPolicyReport.Results) {
 			t.Error("expected all results were cached")
 		}
 
-		c.AddReport(&openreports.ORReportAdapter{Report: fixtures.MinPolicyReport})
+		c.AddReport(fixtures.MinPolicyReport)
 
 		time.Sleep(3 * time.Millisecond)
 
@@ -33,12 +32,12 @@ func TestInMemory(t *testing.T) {
 		}
 	})
 	t.Run("remove report", func(t *testing.T) {
-		or := &openreports.ORReportAdapter{Report: fixtures.DefaultPolicyReport}
+		or := fixtures.DefaultPolicyReport
 		id := or.GetID()
 
 		c := cache.NewInMermoryCache(time.Millisecond, time.Millisecond)
 
-		c.AddReport(&openreports.ORReportAdapter{Report: fixtures.DefaultPolicyReport})
+		c.AddReport(fixtures.DefaultPolicyReport)
 
 		c.RemoveReport(id)
 
@@ -50,12 +49,12 @@ func TestInMemory(t *testing.T) {
 		}
 	})
 	t.Run("ceanup report", func(t *testing.T) {
-		or := &openreports.ORReportAdapter{Report: fixtures.DefaultPolicyReport}
+		or := fixtures.DefaultPolicyReport
 		id := or.GetID()
 
 		c := cache.NewInMermoryCache(time.Millisecond, time.Millisecond)
 
-		c.AddReport(&openreports.ORReportAdapter{Report: fixtures.DefaultPolicyReport})
+		c.AddReport(fixtures.DefaultPolicyReport)
 
 		c.Clear()
 

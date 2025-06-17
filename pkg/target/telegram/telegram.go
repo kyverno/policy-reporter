@@ -58,7 +58,7 @@ type Payload struct {
 }
 
 type values struct {
-	Result   *openreports.ORResultAdapter
+	Result   openreports.ORResultAdapter
 	Time     time.Time
 	Resource *corev1.ObjectReference
 	Props    map[string]string
@@ -119,7 +119,7 @@ func (e *client) Send(result openreports.ORResultAdapter) {
 	}
 
 	err = ttmpl.Execute(&textBuffer, values{
-		Result:   &result,
+		Result:   result,
 		Time:     time.Now(),
 		Resource: res,
 	})
@@ -150,7 +150,7 @@ func (e *client) Reset(_ context.Context) error {
 	return nil
 }
 
-func (e *client) BatchSend(_ openreports.ReportInterface, _ []*openreports.ORResultAdapter) {}
+func (e *client) BatchSend(_ openreports.ReportInterface, _ []openreports.ORResultAdapter) {}
 
 func (e *client) Type() target.ClientType {
 	return target.SingleSend

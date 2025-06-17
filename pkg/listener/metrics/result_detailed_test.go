@@ -28,7 +28,7 @@ func Test_DetailedResultMetricGeneration(t *testing.T) {
 				CreationTimestamp: v1.Now(),
 			},
 			Summary: v1alpha1.ReportSummary{Pass: 2, Fail: 1},
-			Results: []v1alpha1.ReportResult{*fixtures.PassResult.ReportResult, *fixtures.PassPodResult.ReportResult, *fixtures.FailDisallowRuleResult.ReportResult},
+			Results: []v1alpha1.ReportResult{fixtures.PassResult.ReportResult, fixtures.PassPodResult.ReportResult, fixtures.FailDisallowRuleResult.ReportResult},
 		},
 	}
 
@@ -40,7 +40,7 @@ func Test_DetailedResultMetricGeneration(t *testing.T) {
 				CreationTimestamp: v1.Now(),
 			},
 			Summary: v1alpha1.ReportSummary{Pass: 0, Fail: 1},
-			Results: []v1alpha1.ReportResult{*fixtures.PassResult.ReportResult, *fixtures.FailDisallowRuleResult.ReportResult},
+			Results: []v1alpha1.ReportResult{fixtures.PassResult.ReportResult, fixtures.FailDisallowRuleResult.ReportResult},
 		},
 	}
 
@@ -89,7 +89,7 @@ func Test_DetailedResultMetricGeneration(t *testing.T) {
 	})
 }
 
-func testResultMetricLabels(t *testing.T, metric *ioprometheusclient.Metric, result *openreports.ORResultAdapter) error {
+func testResultMetricLabels(t *testing.T, metric *ioprometheusclient.Metric, result openreports.ORResultAdapter) error {
 	res := &corev1.ObjectReference{}
 	if result.HasResource() {
 		res = result.GetResource()

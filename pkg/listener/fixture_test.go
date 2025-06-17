@@ -24,9 +24,10 @@ var scopereport1 = &openreports.ORReportAdapter{
 			Name:       "test",
 			Namespace:  "test",
 		},
-		Results: []v1alpha1.ReportResult{*fixtures.FailResult.ReportResult},
+		Results: []v1alpha1.ReportResult{fixtures.FailResult.ReportResult},
 		Summary: v1alpha1.ReportSummary{Fail: 1},
 	},
+	Results: []openreports.ORResultAdapter{fixtures.FailResult},
 }
 
 var preport1 = &openreports.ORReportAdapter{
@@ -36,9 +37,10 @@ var preport1 = &openreports.ORReportAdapter{
 			Namespace:         "test",
 			CreationTimestamp: v1.Now(),
 		},
-		Results: []v1alpha1.ReportResult{*fixtures.FailResult.ReportResult},
+		Results: []v1alpha1.ReportResult{fixtures.FailResult.ReportResult},
 		Summary: v1alpha1.ReportSummary{Fail: 1},
 	},
+	Results: []openreports.ORResultAdapter{fixtures.FailResult},
 }
 
 var preport2 = &openreports.ORReportAdapter{
@@ -48,9 +50,10 @@ var preport2 = &openreports.ORReportAdapter{
 			Namespace:         "test",
 			CreationTimestamp: v1.Now(),
 		},
-		Results: []v1alpha1.ReportResult{*fixtures.FailPodResult.ReportResult},
+		Results: []v1alpha1.ReportResult{fixtures.FailPodResult.ReportResult},
 		Summary: v1alpha1.ReportSummary{Fail: 1, Pass: 1},
 	},
+	Results: []openreports.ORResultAdapter{fixtures.FailPodResult},
 }
 
 var preport3 = &openreports.ORReportAdapter{
@@ -70,6 +73,7 @@ var creport = &openreports.ORClusterReportAdapter{
 			Name:              "cpolr-test",
 			CreationTimestamp: v1.Now(),
 		},
-		Results: []v1alpha1.ReportResult{*fixtures.FailResult.ReportResult, *fixtures.FailPodResult.ReportResult},
+		Results: []v1alpha1.ReportResult{fixtures.FailResult.ReportResult, fixtures.FailPodResult.ReportResult},
 	},
+	Results: []openreports.ORResultAdapter{fixtures.FailResult, fixtures.FailPodResult},
 }

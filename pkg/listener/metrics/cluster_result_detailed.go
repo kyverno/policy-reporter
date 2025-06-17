@@ -58,7 +58,7 @@ func CreateDetailedClusterResultMetricListener(filter *report.ResultFilter, gaug
 	}
 }
 
-func generateClusterResultLabels(report openreports.ReportInterface, result *openreports.ORResultAdapter) map[string]string {
+func generateClusterResultLabels(report openreports.ReportInterface, result openreports.ORResultAdapter) map[string]string {
 	labels := prometheus.Labels{
 		"rule":     result.Rule,
 		"policy":   result.Policy,

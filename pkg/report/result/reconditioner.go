@@ -19,7 +19,8 @@ func (r *Reconditioner) Prepare(polr openreports.ReportInterface) openreports.Re
 	}
 
 	results := polr.GetResults()
-	for i, r := range results {
+	newResults := []openreports.ORResultAdapter{}
+	for _, r := range results {
 		r.ID = generator.Generate(polr, r)
 		r.Category = helper.Defaults(r.Category, "Other")
 
@@ -28,9 +29,9 @@ func (r *Reconditioner) Prepare(polr openreports.ReportInterface) openreports.Re
 			r.Subjects = append(r.Subjects, *scope)
 		}
 
-		results[i] = r
+		newResults = append(newResults, r)
 	}
-
+	polr.SetResults(newResults)
 	return polr
 }
 

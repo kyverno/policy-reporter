@@ -18,11 +18,11 @@ func Test_CreateReport(t *testing.T) {
 
 	client, pClient, cClient := NewFakeClient()
 
-	_, _ = pClient.Create(ctx, fixtures.DefaultPolicyReport, v1.CreateOptions{})
-	_, _ = pClient.Create(ctx, fixtures.EmptyPolicyReport, v1.CreateOptions{})
+	_, _ = pClient.Create(ctx, fixtures.DefaultPolicyReport.Report, v1.CreateOptions{})
+	_, _ = pClient.Create(ctx, fixtures.EmptyPolicyReport.Report, v1.CreateOptions{})
 	_, _ = client.Reports("kyverno").Create(ctx, fixtures.KyvernoPolicyReport, v1.CreateOptions{})
 
-	_, _ = cClient.Create(ctx, fixtures.ClusterPolicyReport, v1.CreateOptions{})
+	_, _ = cClient.Create(ctx, fixtures.ClusterPolicyReport.ClusterReport, v1.CreateOptions{})
 	_, _ = cClient.Create(ctx, fixtures.EmptyClusterPolicyReport, v1.CreateOptions{})
 	_, _ = cClient.Create(ctx, fixtures.KyvernoClusterPolicyReport, v1.CreateOptions{})
 

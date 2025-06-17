@@ -10,7 +10,6 @@ import (
 
 	"github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
 	"github.com/kyverno/policy-reporter/pkg/fixtures"
-	"github.com/kyverno/policy-reporter/pkg/openreports"
 	"github.com/kyverno/policy-reporter/pkg/target/securityhub"
 )
 
@@ -97,7 +96,7 @@ func TestSecurityHub(t *testing.T) {
 			Synchronize: false,
 		})
 
-		c.CleanUp(context.TODO(), &openreports.ORReportAdapter{Report: fixtures.DefaultPolicyReport})
+		c.CleanUp(context.TODO(), fixtures.DefaultPolicyReport)
 
 		if h.fetched {
 			t.Error("expected fetch was not called")
@@ -118,7 +117,7 @@ func TestSecurityHub(t *testing.T) {
 			Synchronize: true,
 		})
 
-		c.CleanUp(context.TODO(), &openreports.ORReportAdapter{Report: fixtures.DefaultPolicyReport})
+		c.CleanUp(context.TODO(), fixtures.DefaultPolicyReport)
 
 		if !h.fetched {
 			t.Error("expected fetch was called")
@@ -128,11 +127,10 @@ func TestSecurityHub(t *testing.T) {
 		}
 	})
 	t.Run("findings with existing result", func(t *testing.T) {
-		or := &openreports.ORReportAdapter{Report: fixtures.DefaultPolicyReport}
 		h := &client{
 			findings: []types.AwsSecurityFinding{
 				{
-					Id: aws.String(or.GetResults()[0].GetID()),
+					Id: aws.String(fixtures.DefaultPolicyReport.GetResults()[0].GetID()),
 				},
 			},
 		}
@@ -146,7 +144,7 @@ func TestSecurityHub(t *testing.T) {
 			Synchronize: true,
 		})
 
-		c.CleanUp(context.TODO(), &openreports.ORReportAdapter{Report: fixtures.DefaultPolicyReport})
+		c.CleanUp(context.TODO(), fixtures.DefaultPolicyReport)
 
 		if !h.fetched {
 			t.Error("expected fetch was called")
@@ -173,7 +171,7 @@ func TestSecurityHub(t *testing.T) {
 			Synchronize: true,
 		})
 
-		c.CleanUp(context.TODO(), &openreports.ORReportAdapter{Report: fixtures.DefaultPolicyReport})
+		c.CleanUp(context.TODO(), fixtures.DefaultPolicyReport)
 
 		if !h.fetched {
 			t.Error("expected fetch was called")

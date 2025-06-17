@@ -27,19 +27,19 @@ func Test_Debouncer(t *testing.T) {
 
 		debouncer.Add(report.LifecycleEvent{
 			Type:         report.Added,
-			PolicyReport: &openreports.ORReportAdapter{Report: fixtures.DefaultPolicyReport},
+			PolicyReport: fixtures.DefaultPolicyReport,
 		})
 
 		debouncer.Add(report.LifecycleEvent{
 			Type:         report.Updated,
-			PolicyReport: &openreports.ORReportAdapter{Report: fixtures.MinPolicyReport},
+			PolicyReport: &openreports.ORReportAdapter{Report: fixtures.MinPolicyReport.Report},
 		})
 
 		time.Sleep(10 * time.Millisecond)
 
 		debouncer.Add(report.LifecycleEvent{
 			Type:         report.Updated,
-			PolicyReport: &openreports.ORReportAdapter{Report: fixtures.DefaultPolicyReport},
+			PolicyReport: fixtures.DefaultPolicyReport,
 		})
 
 		wg.Wait()
@@ -64,12 +64,12 @@ func Test_Debouncer(t *testing.T) {
 
 		debouncer.Add(report.LifecycleEvent{
 			Type:         report.Added,
-			PolicyReport: &openreports.ORReportAdapter{Report: fixtures.DefaultPolicyReport},
+			PolicyReport: fixtures.DefaultPolicyReport,
 		})
 
 		debouncer.Add(report.LifecycleEvent{
 			Type:         report.Updated,
-			PolicyReport: &openreports.ORReportAdapter{Report: fixtures.MinPolicyReport},
+			PolicyReport: &openreports.ORReportAdapter{Report: fixtures.MinPolicyReport.Report},
 		})
 
 		time.Sleep(5 * time.Millisecond)
@@ -96,19 +96,19 @@ func Test_Debouncer(t *testing.T) {
 
 		debouncer.Add(report.LifecycleEvent{
 			Type:         report.Added,
-			PolicyReport: &openreports.ORReportAdapter{Report: fixtures.DefaultPolicyReport},
+			PolicyReport: fixtures.DefaultPolicyReport,
 		})
 
 		debouncer.Add(report.LifecycleEvent{
 			Type:         report.Updated,
-			PolicyReport: &openreports.ORReportAdapter{Report: fixtures.MinPolicyReport},
+			PolicyReport: &openreports.ORReportAdapter{Report: fixtures.MinPolicyReport.Report},
 		})
 
 		time.Sleep(10 * time.Millisecond)
 
 		debouncer.Add(report.LifecycleEvent{
 			Type:         report.Deleted,
-			PolicyReport: &openreports.ORReportAdapter{Report: fixtures.DefaultPolicyReport},
+			PolicyReport: fixtures.DefaultPolicyReport,
 		})
 
 		wg.Wait()

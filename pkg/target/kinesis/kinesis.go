@@ -44,7 +44,7 @@ func (c *client) Send(result openreports.ORResultAdapter) {
 
 	body := new(bytes.Buffer)
 
-	if err := json.NewEncoder(body).Encode(http.NewJSONResult(&result)); err != nil {
+	if err := json.NewEncoder(body).Encode(http.NewJSONResult(result)); err != nil {
 		zap.L().Error("failed to encode result", zap.String("name", c.Name()), zap.Error(err))
 		return
 	}

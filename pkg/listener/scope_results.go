@@ -12,7 +12,7 @@ import (
 const SendScopeResults = "send_scope_results_listener"
 
 func NewSendScopeResultsListener(targets *target.Collection) report.ScopeResultsListener {
-	return func(rep openreports.ReportInterface, r []*openreports.ORResultAdapter, e bool) {
+	return func(rep openreports.ReportInterface, r []openreports.ORResultAdapter, e bool) {
 		clients := targets.BatchSendClients()
 		if len(clients) == 0 {
 			return
@@ -22,10 +22,10 @@ func NewSendScopeResultsListener(targets *target.Collection) report.ScopeResults
 		wg.Add(len(clients))
 
 		for _, t := range clients {
-			go func(target target.Client, re openreports.ReportInterface, results []*openreports.ORResultAdapter, preExisted bool) {
+			go func(target target.Client, re openreports.ReportInterface, results []openreports.ORResultAdapter, preExisted bool) {
 				defer wg.Done()
 
-				filtered := helper.Filter(results, func(result *openreports.ORResultAdapter) bool {
+				filtered := helper.Filter(results, func(result openreports.ORResultAdapter) bool {
 					return target.Validate(re, result)
 				})
 

@@ -13,22 +13,22 @@ import (
 
 type ORReportAdapter struct {
 	*v1alpha1.Report
-}
-
-type ORClusterReportAdapter struct {
-	*v1alpha1.ClusterReport
+	Results []ORResultAdapter
 }
 
 func (r *ORReportAdapter) GetResults() []ORResultAdapter {
+	if len(r.Results) > 0 {
+		return r.Results
+	}
 	ors := []ORResultAdapter{}
-	for _, r := range r.Results {
+	for _, r := range r.Report.Results {
 		ors = append(ors, ORResultAdapter{ReportResult: r})
 	}
 	return ors
 }
 
 func (r *ORReportAdapter) HasResult(id string) bool {
-	for _, r := range r.Results {
+	for _, r := range r.Report.Results {
 		or := &ORResultAdapter{ReportResult: r}
 		if or.GetID() == id {
 			return true
@@ -38,7 +38,7 @@ func (r *ORReportAdapter) HasResult(id string) bool {
 	return false
 }
 
-func (r *ORReportAdapter) SetResults(results []v1alpha1.ReportResult) {
+func (r *ORReportAdapter) SetResults(results []ORResultAdapter) {
 	r.Results = results
 }
 
@@ -47,11 +47,11 @@ func (r *ORReportAdapter) GetSummary() v1alpha1.ReportSummary {
 }
 
 func (r *ORReportAdapter) GetSource() string {
-	if len(r.Results) == 0 {
+	if len(r.Report.Results) == 0 {
 		return ""
 	}
 
-	return r.Results[0].Source
+	return r.Report.Results[0].Source
 }
 
 func (r *ORReportAdapter) GetKinds() []string {
@@ -60,7 +60,7 @@ func (r *ORReportAdapter) GetKinds() []string {
 	}
 
 	list := make([]string, 0)
-	for _, k := range r.Results {
+	for _, k := range r.Report.Results {
 		or := &ORResultAdapter{ReportResult: k}
 		if !or.HasResource() {
 			continue
@@ -80,8 +80,7 @@ func (r *ORReportAdapter) GetKinds() []string {
 
 func (r *ORReportAdapter) GetSeverities() []string {
 	list := make([]string, 0)
-	for _, k := range r.Results {
-
+	for _, k := range r.Report.Results {
 		if k.Severity == "" || slices.Contains(list, string(k.Severity)) {
 			continue
 		}

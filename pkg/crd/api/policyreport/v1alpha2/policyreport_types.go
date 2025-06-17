@@ -118,7 +118,6 @@ func (r *PolicyReport) GetKinds() []string {
 func (r *PolicyReport) GetSeverities() []string {
 	list := make([]string, 0)
 	for _, k := range r.Results {
-
 		if k.Severity == "" || helper.Contains(string(k.Severity), list) {
 			continue
 		}

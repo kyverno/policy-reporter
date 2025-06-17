@@ -29,7 +29,7 @@ func Test_CustomResultMetricGeneration(t *testing.T) {
 				CreationTimestamp: v1.Now(),
 			},
 			Summary: v1alpha1.ReportSummary{Pass: 1, Fail: 1},
-			Results: []v1alpha1.ReportResult{*fixtures.PassResult.ReportResult, *fixtures.PassResult.ReportResult, *fixtures.FailPodResult.ReportResult, *fixtures.FailDisallowRuleResult.ReportResult},
+			Results: []v1alpha1.ReportResult{fixtures.PassResult.ReportResult, fixtures.PassResult.ReportResult, fixtures.FailPodResult.ReportResult, fixtures.FailDisallowRuleResult.ReportResult},
 		},
 	}
 
@@ -42,7 +42,7 @@ func Test_CustomResultMetricGeneration(t *testing.T) {
 				CreationTimestamp: v1.Now(),
 			},
 			Summary: v1alpha1.ReportSummary{Pass: 1, Fail: 1},
-			Results: []v1alpha1.ReportResult{*fixtures.FailResult.ReportResult, *fixtures.FailPodResult.ReportResult, *fixtures.FailDisallowRuleResult.ReportResult},
+			Results: []v1alpha1.ReportResult{fixtures.FailResult.ReportResult, fixtures.FailPodResult.ReportResult, fixtures.FailDisallowRuleResult.ReportResult},
 		},
 	}
 
@@ -119,7 +119,7 @@ func Test_CustomResultMetricGeneration(t *testing.T) {
 	})
 }
 
-func testCustomResultMetricLabels(t *testing.T, metric *ioprometheusclient.Metric, result *openreports.ORResultAdapter, expVal float64) error {
+func testCustomResultMetricLabels(t *testing.T, metric *ioprometheusclient.Metric, result openreports.ORResultAdapter, expVal float64) error {
 	var index int
 
 	res := &corev1.ObjectReference{}

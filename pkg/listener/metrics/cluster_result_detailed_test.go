@@ -27,7 +27,7 @@ func Test_DetailedClusterResultMetricGeneration(t *testing.T) {
 				CreationTimestamp: v1.Now(),
 			},
 			Summary: v1alpha1.ReportSummary{Pass: 1, Fail: 2},
-			Results: []v1alpha1.ReportResult{*fixtures.PassResult.ReportResult, *fixtures.FailResultWithoutResource.ReportResult, *fixtures.FailDisallowRuleResult.ReportResult},
+			Results: []v1alpha1.ReportResult{fixtures.PassResult.ReportResult, fixtures.FailResultWithoutResource.ReportResult, fixtures.FailDisallowRuleResult.ReportResult},
 		},
 	}
 
@@ -38,7 +38,7 @@ func Test_DetailedClusterResultMetricGeneration(t *testing.T) {
 				CreationTimestamp: v1.Now(),
 			},
 			Summary: v1alpha1.ReportSummary{Pass: 0, Fail: 2},
-			Results: []v1alpha1.ReportResult{*fixtures.FailResult.ReportResult, *fixtures.FailDisallowRuleResult.ReportResult},
+			Results: []v1alpha1.ReportResult{fixtures.FailResult.ReportResult, fixtures.FailDisallowRuleResult.ReportResult},
 		},
 	}
 
@@ -87,7 +87,7 @@ func Test_DetailedClusterResultMetricGeneration(t *testing.T) {
 	})
 }
 
-func testClusterResultMetricLabels(t *testing.T, metric *ioprometheusclient.Metric, result *openreports.ORResultAdapter) error {
+func testClusterResultMetricLabels(t *testing.T, metric *ioprometheusclient.Metric, result openreports.ORResultAdapter) error {
 	res := &corev1.ObjectReference{}
 	if result.HasResource() {
 		res = result.GetResource()

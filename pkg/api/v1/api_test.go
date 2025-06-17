@@ -40,7 +40,7 @@ func TestV1(t *testing.T) {
 		assert.Fail(t, "failed to prepare Store")
 	}
 
-	store.Add(context.Background(), reconditioner.Prepare(&openreports.ORReportAdapter{Report: fixtures.DefaultPolicyReport}))
+	store.Add(context.Background(), reconditioner.Prepare(fixtures.DefaultPolicyReport))
 	store.Add(context.Background(), reconditioner.Prepare(&openreports.ORReportAdapter{Report: fixtures.KyvernoPolicyReport}))
 	store.Add(context.Background(), reconditioner.Prepare(&openreports.ORClusterReportAdapter{ClusterReport: fixtures.KyvernoClusterPolicyReport}))
 

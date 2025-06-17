@@ -18,10 +18,10 @@ import (
 
 func Test_ResultListener(t *testing.T) {
 	t.Run("Publish Result", func(t *testing.T) {
-		called := &openreports.ORResultAdapter{ReportResult: &v1alpha1.ReportResult{}}
+		called := openreports.ORResultAdapter{ReportResult: v1alpha1.ReportResult{}}
 
 		slistener := listener.NewResultListener(true, cache.NewInMermoryCache(time.Minute, time.Minute), time.Now())
-		slistener.RegisterListener(func(_ openreports.ReportInterface, r *openreports.ORResultAdapter, b bool) {
+		slistener.RegisterListener(func(_ openreports.ReportInterface, r openreports.ORResultAdapter, b bool) {
 			called = r
 		})
 
@@ -35,7 +35,7 @@ func Test_ResultListener(t *testing.T) {
 		var called bool
 
 		slistener := listener.NewResultListener(true, cache.NewInMermoryCache(time.Minute, time.Minute), time.Now())
-		slistener.RegisterListener(func(_ openreports.ReportInterface, r *openreports.ORResultAdapter, b bool) {
+		slistener.RegisterListener(func(_ openreports.ReportInterface, r openreports.ORResultAdapter, b bool) {
 			called = true
 		})
 
@@ -48,7 +48,7 @@ func Test_ResultListener(t *testing.T) {
 		var called bool
 
 		slistener := listener.NewResultListener(true, cache.NewInMermoryCache(time.Minute, time.Minute), time.Now())
-		slistener.RegisterListener(func(_ openreports.ReportInterface, r *openreports.ORResultAdapter, b bool) {
+		slistener.RegisterListener(func(_ openreports.ReportInterface, r openreports.ORResultAdapter, b bool) {
 			called = true
 		})
 
@@ -61,7 +61,7 @@ func Test_ResultListener(t *testing.T) {
 		var called bool
 
 		slistener := listener.NewResultListener(true, cache.NewInMermoryCache(time.Minute, time.Minute), time.Now())
-		slistener.RegisterListener(func(_ openreports.ReportInterface, r *openreports.ORResultAdapter, b bool) {
+		slistener.RegisterListener(func(_ openreports.ReportInterface, r openreports.ORResultAdapter, b bool) {
 			called = true
 		})
 
@@ -75,7 +75,7 @@ func Test_ResultListener(t *testing.T) {
 		var called bool
 
 		slistener := listener.NewResultListener(true, cache.NewInMermoryCache(time.Minute, time.Minute), time.Now())
-		slistener.RegisterListener(func(_ openreports.ReportInterface, r *openreports.ORResultAdapter, b bool) {
+		slistener.RegisterListener(func(_ openreports.ReportInterface, r openreports.ORResultAdapter, b bool) {
 			called = true
 		})
 
@@ -98,7 +98,7 @@ func Test_ResultListener(t *testing.T) {
 		var called bool
 
 		slistener := listener.NewResultListener(true, cache.NewInMermoryCache(time.Minute, time.Minute), time.Now())
-		slistener.RegisterListener(func(_ openreports.ReportInterface, r *openreports.ORResultAdapter, b bool) {
+		slistener.RegisterListener(func(_ openreports.ReportInterface, r openreports.ORResultAdapter, b bool) {
 			called = true
 		})
 
@@ -112,7 +112,7 @@ func Test_ResultListener(t *testing.T) {
 		var called bool
 
 		slistener := listener.NewResultListener(true, cache.NewInMermoryCache(time.Minute, time.Minute), time.Now())
-		slistener.RegisterListener(func(_ openreports.ReportInterface, r *openreports.ORResultAdapter, b bool) {
+		slistener.RegisterListener(func(_ openreports.ReportInterface, r openreports.ORResultAdapter, b bool) {
 			called = true
 		})
 
@@ -130,10 +130,10 @@ func Test_ResultListener(t *testing.T) {
 	})
 
 	t.Run("Publish Scoped Report", func(t *testing.T) {
-		var called []*openreports.ORResultAdapter
+		var called []openreports.ORResultAdapter
 
 		slistener := listener.NewResultListener(true, cache.NewInMermoryCache(time.Minute, time.Minute), time.Now())
-		slistener.RegisterScopeListener(func(_ openreports.ReportInterface, r []*openreports.ORResultAdapter, b bool) {
+		slistener.RegisterScopeListener(func(_ openreports.ReportInterface, r []openreports.ORResultAdapter, b bool) {
 			called = r
 		})
 
@@ -143,10 +143,10 @@ func Test_ResultListener(t *testing.T) {
 	})
 
 	t.Run("Unregister Scope Listener", func(t *testing.T) {
-		var called []*openreports.ORResultAdapter
+		var called []openreports.ORResultAdapter
 
 		slistener := listener.NewResultListener(true, cache.NewInMermoryCache(time.Minute, time.Minute), time.Now())
-		slistener.RegisterScopeListener(func(_ openreports.ReportInterface, r []*openreports.ORResultAdapter, b bool) {
+		slistener.RegisterScopeListener(func(_ openreports.ReportInterface, r []openreports.ORResultAdapter, b bool) {
 			called = r
 		})
 

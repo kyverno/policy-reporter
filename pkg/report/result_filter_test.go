@@ -17,7 +17,7 @@ func Test_ResultFilter(t *testing.T) {
 	})
 	t.Run("filter result with a false validation", func(t *testing.T) {
 		filter := report.NewResultFilter()
-		filter.AddValidation(func(r *openreports.ORResultAdapter) bool { return false })
+		filter.AddValidation(func(r openreports.ORResultAdapter) bool { return false })
 		if filter.Validate(fixtures.FailResult) {
 			t.Error("Expected result validates to false")
 		}

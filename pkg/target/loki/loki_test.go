@@ -97,7 +97,7 @@ func Test_LokiTarget(t *testing.T) {
 			CustomFields: map[string]string{"custom": "label"},
 			HTTPClient:   testClient{callback, 200},
 		})
-		client.Send(fixtures.CompleteTargetSendResult)
+		client.Send(fixtures.MinimalTargetSendResult)
 	})
 	t.Run("Name", func(t *testing.T) {
 		client := loki.NewClient(loki.Options{

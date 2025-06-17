@@ -39,7 +39,7 @@ var MinimalTargetSendResult = openreports.ORResultAdapter{
 	ReportResult: v1alpha1.ReportResult{
 		Description: "validation error: label required. Rule app-label-required failed at path /spec/template/spec/containers/0/resources/requests/",
 		Policy:      "app-label-requirement",
-		Result:      v1alpha2.StatusFail,
+		Result:      openreports.StatusFail,
 		Scored:      true,
 	},
 }

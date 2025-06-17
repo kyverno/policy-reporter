@@ -37,12 +37,12 @@ type client struct {
 
 func (c *client) Send(result openreports.ORResultAdapter) {
 	c.sendAndLogResult(splunkRequest{
-		Event:      http.NewJSONResult(&result),
+		Event:      http.NewJSONResult(result),
 		SourceType: policyReporterSource,
 	})
 }
 
-func (c *client) BatchSend(rep openreports.ReportInterface, results []*openreports.ORResultAdapter) {
+func (c *client) BatchSend(rep openreports.ReportInterface, results []openreports.ORResultAdapter) {
 	srs := ""
 	for _, res := range results {
 		sr := splunkRequest{

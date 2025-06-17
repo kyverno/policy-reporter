@@ -9,7 +9,7 @@ import (
 func NewResultFilter(namespace, status, policy, source, severity, kind validate.RuleSets) *report.ResultFilter {
 	f := &report.ResultFilter{}
 	if namespace.Count() > 0 {
-		f.AddValidation(func(r *openreports.ORResultAdapter) bool {
+		f.AddValidation(func(r openreports.ORResultAdapter) bool {
 			if !r.HasResource() {
 				return true
 			}
@@ -19,31 +19,31 @@ func NewResultFilter(namespace, status, policy, source, severity, kind validate.
 	}
 
 	if status.Count() > 0 {
-		f.AddValidation(func(r *openreports.ORResultAdapter) bool {
+		f.AddValidation(func(r openreports.ORResultAdapter) bool {
 			return validate.MatchRuleSet(string(r.Result), status)
 		})
 	}
 
 	if policy.Count() > 0 {
-		f.AddValidation(func(r *openreports.ORResultAdapter) bool {
+		f.AddValidation(func(r openreports.ORResultAdapter) bool {
 			return validate.MatchRuleSet(r.Policy, policy)
 		})
 	}
 
 	if source.Count() > 0 {
-		f.AddValidation(func(r *openreports.ORResultAdapter) bool {
+		f.AddValidation(func(r openreports.ORResultAdapter) bool {
 			return validate.MatchRuleSet(r.Source, source)
 		})
 	}
 
 	if severity.Count() > 0 {
-		f.AddValidation(func(r *openreports.ORResultAdapter) bool {
+		f.AddValidation(func(r openreports.ORResultAdapter) bool {
 			return validate.MatchRuleSet(string(r.Severity), severity)
 		})
 	}
 
 	if kind.Count() > 0 {
-		f.AddValidation(func(r *openreports.ORResultAdapter) bool {
+		f.AddValidation(func(r openreports.ORResultAdapter) bool {
 			if !r.HasResource() {
 				return true
 			}

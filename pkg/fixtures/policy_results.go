@@ -4,16 +4,18 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	"openreports.io/apis/openreports.io/v1alpha1"
 
+	"github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
 	"github.com/kyverno/policy-reporter/pkg/openreports"
 )
 
 var PassResult = openreports.ORResultAdapter{
+	ID: "123",
 	ReportResult: v1alpha1.ReportResult{
 		Description: "validation error: requests and limits required. Rule autogen-check-for-requests-and-limits failed at path /spec/template/spec/containers/0/resources/requests/",
 		Policy:      "require-requests-and-limits-required",
 		Rule:        "autogen-check-for-requests-and-limits",
-		Result:      openreports.StatusPass,
-		Severity:    openreports.SeverityHigh,
+		Result:      v1alpha2.StatusPass,
+		Severity:    v1alpha2.SeverityHigh,
 		Category:    "resources",
 		Scored:      true,
 		Source:      "Kyverno",
@@ -29,11 +31,12 @@ var PassResult = openreports.ORResultAdapter{
 }
 
 var PassPodResult = openreports.ORResultAdapter{
+	ID: "124",
 	ReportResult: v1alpha1.ReportResult{
 		Description: "validation error: requests and limits required. Rule autogen-check-for-requests-and-limits failed at path /spec/template/spec/containers/0/resources/requests/",
 		Policy:      "require-requests-and-limits-required",
 		Rule:        "autogen-check-for-requests-and-limits",
-		Result:      openreports.StatusPass,
+		Result:      v1alpha2.StatusPass,
 		Category:    "Best Practices",
 		Scored:      true,
 		Source:      "Kyverno",
@@ -47,12 +50,14 @@ var PassPodResult = openreports.ORResultAdapter{
 		Properties: map[string]string{},
 	},
 }
+
 var WarnPodResult = openreports.ORResultAdapter{
+	ID: "124",
 	ReportResult: v1alpha1.ReportResult{
 		Description: "validation error: requests and limits required. Rule autogen-check-for-requests-and-limits failed at path /spec/template/spec/containers/0/resources/requests/",
 		Policy:      "require-requests-and-limits-required",
 		Rule:        "autogen-check-for-requests-and-limits",
-		Result:      openreports.StatusWarn,
+		Result:      v1alpha2.StatusWarn,
 		Category:    "Best Practices",
 		Scored:      true,
 		Source:      "Kyverno",
@@ -68,11 +73,12 @@ var WarnPodResult = openreports.ORResultAdapter{
 }
 
 var ErrorPodResult = openreports.ORResultAdapter{
+	ID: "124",
 	ReportResult: v1alpha1.ReportResult{
 		Description: "validation error: requests and limits required. Rule autogen-check-for-requests-and-limits failed at path /spec/template/spec/containers/0/resources/requests/",
 		Policy:      "require-requests-and-limits-required",
 		Rule:        "autogen-check-for-requests-and-limits",
-		Result:      openreports.StatusError,
+		Result:      v1alpha2.StatusError,
 		Category:    "Best Practices",
 		Scored:      true,
 		Source:      "Kyverno",
@@ -88,11 +94,12 @@ var ErrorPodResult = openreports.ORResultAdapter{
 }
 
 var TrivyResult = openreports.ORResultAdapter{
+	ID: "124",
 	ReportResult: v1alpha1.ReportResult{
 		Description: "validation error",
 		Policy:      "policy",
 		Rule:        "rule",
-		Result:      openreports.StatusFail,
+		Result:      v1alpha2.StatusFail,
 		Category:    "Best Practices",
 		Scored:      true,
 		Source:      "Trivy",
@@ -100,12 +107,13 @@ var TrivyResult = openreports.ORResultAdapter{
 }
 
 var FailResult = openreports.ORResultAdapter{
+	ID: "123",
 	ReportResult: v1alpha1.ReportResult{
 		Description: "validation error: requests and limits required. Rule autogen-check-for-requests-and-limits failed at path /spec/template/spec/containers/0/resources/requests/",
 		Policy:      "require-requests-and-limits-required",
 		Rule:        "autogen-check-for-requests-and-limits",
-		Result:      openreports.StatusFail,
-		Severity:    openreports.SeverityHigh,
+		Result:      v1alpha2.StatusFail,
+		Severity:    v1alpha2.SeverityHigh,
 		Category:    "resources",
 		Scored:      true,
 		Source:      "Kyverno",
@@ -120,12 +128,13 @@ var FailResult = openreports.ORResultAdapter{
 }
 
 var FailDisallowRuleResult = openreports.ORResultAdapter{
+	ID: "123",
 	ReportResult: v1alpha1.ReportResult{
 		Description: "validation error: requests and limits required. Rule autogen-check-for-requests-and-limits failed at path /spec/template/spec/containers/0/resources/requests/",
 		Policy:      "disallow-policy",
 		Rule:        "disallow-policy",
-		Result:      openreports.StatusFail,
-		Severity:    openreports.SeverityHigh,
+		Result:      v1alpha2.StatusFail,
+		Severity:    v1alpha2.SeverityHigh,
 		Category:    "resources",
 		Scored:      true,
 		Source:      "Kyverno",
@@ -140,11 +149,12 @@ var FailDisallowRuleResult = openreports.ORResultAdapter{
 }
 
 var FailPodResult = openreports.ORResultAdapter{
+	ID: "124",
 	ReportResult: v1alpha1.ReportResult{
 		Description: "validation error: requests and limits required. Rule autogen-check-for-requests-and-limits failed at path /spec/template/spec/containers/0/resources/requests/",
 		Policy:      "require-requests-and-limits-required",
 		Rule:        "autogen-check-for-requests-and-limits",
-		Result:      openreports.StatusFail,
+		Result:      v1alpha2.StatusFail,
 		Category:    "Best Practices",
 		Scored:      true,
 		Source:      "Kyverno",
@@ -159,10 +169,11 @@ var FailPodResult = openreports.ORResultAdapter{
 }
 
 var SkipPodResult = openreports.ORResultAdapter{
+	ID: "124",
 	ReportResult: v1alpha1.ReportResult{
 		Policy:   "require-requests-and-limits-required",
 		Rule:     "autogen-check-for-requests-and-limits",
-		Result:   openreports.StatusSkip,
+		Result:   v1alpha2.StatusSkip,
 		Category: "Best Practices",
 		Scored:   true,
 		Source:   "Kyverno",
@@ -181,8 +192,8 @@ var FailResultWithoutResource = openreports.ORResultAdapter{
 		Description: "validation error: requests and limits required. Rule autogen-check-for-requests-and-limits failed at path /spec/template/spec/containers/0/resources/requests/",
 		Policy:      "require-requests-and-limits-required",
 		Rule:        "autogen-check-for-requests-and-limits",
-		Result:      openreports.StatusFail,
-		Severity:    openreports.SeverityHigh,
+		Result:      v1alpha2.StatusFail,
+		Severity:    v1alpha2.SeverityHigh,
 		Category:    "resources",
 		Scored:      true,
 		Source:      "Kyverno",
@@ -190,13 +201,14 @@ var FailResultWithoutResource = openreports.ORResultAdapter{
 }
 
 var PassNamespaceResult = openreports.ORResultAdapter{
+	ID: "125",
 	ReportResult: v1alpha1.ReportResult{
 		Description: "validation error: The label `test` is required. Rule check-for-GetLabels()-on-namespace",
 		Policy:      "require-ns-GetLabels()",
 		Rule:        "check-for-GetLabels()-on-namespace",
-		Result:      openreports.StatusPass,
+		Result:      v1alpha2.StatusPass,
 		Category:    "namespaces",
-		Severity:    openreports.SeverityMedium,
+		Severity:    v1alpha2.SeverityMedium,
 		Scored:      true,
 		Source:      "Kyverno",
 		Subjects: []corev1.ObjectReference{{
@@ -209,13 +221,14 @@ var PassNamespaceResult = openreports.ORResultAdapter{
 }
 
 var FailNamespaceResult = openreports.ORResultAdapter{
+	ID: "126",
 	ReportResult: v1alpha1.ReportResult{
 		Description: "validation error: The label `test` is required. Rule check-for-GetLabels()-on-namespace",
 		Policy:      "require-ns-GetLabels()",
 		Rule:        "check-for-GetLabels()-on-namespace",
-		Result:      openreports.StatusFail,
+		Result:      v1alpha2.StatusFail,
 		Category:    "namespaces",
-		Severity:    openreports.SeverityHigh,
+		Severity:    v1alpha2.SeverityHigh,
 		Scored:      true,
 		Source:      "Kyverno",
 		Subjects: []corev1.ObjectReference{{
@@ -232,8 +245,8 @@ var ScopeResult = openreports.ORResultAdapter{
 		Description: "validation error: requests and limits required. Rule autogen-check-for-requests-and-limits failed at path /spec/template/spec/containers/0/resources/requests/",
 		Policy:      "require-requests-and-limits-required",
 		Rule:        "autogen-check-for-requests-and-limits",
-		Result:      openreports.StatusFail,
-		Severity:    openreports.SeverityHigh,
+		Result:      v1alpha2.StatusFail,
+		Severity:    v1alpha2.SeverityHigh,
 		Category:    "resources",
 		Scored:      true,
 		Source:      "Kyverno",

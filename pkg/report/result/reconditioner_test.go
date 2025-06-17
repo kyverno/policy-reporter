@@ -49,6 +49,23 @@ func TestReconditioner(t *testing.T) {
 					},
 				},
 			},
+			// Results: []openreports.ORResultAdapter{
+			// 	{
+			// 		ID: "12348",
+			// 		ReportResult: v1alpha1.ReportResult{
+			// 			Description: "message",
+			// 			Result:      v1alpha2.StatusFail,
+			// 			Scored:      true,
+			// 			Policy:      "required-label",
+			// 			Rule:        "app-label-required",
+			// 			Timestamp:   v1.Timestamp{Seconds: 1614093000},
+			// 			Source:      "test",
+			// 			Category:    "",
+			// 			Severity:    v1alpha2.SeverityHigh,
+			// 			Properties:  map[string]string{"version": "1.2.0"},
+			// 		},
+			// 	},
+			// },
 		}
 
 		rec := result.NewReconditioner(nil)
@@ -90,6 +107,24 @@ func TestReconditioner(t *testing.T) {
 				},
 				Results: []v1alpha1.ReportResult{
 					{
+						Description: "message",
+						Result:      v1alpha2.StatusFail,
+						Scored:      true,
+						Policy:      "required-label",
+						Rule:        "app-label-required",
+						Timestamp:   v1.Timestamp{Seconds: 1614093000},
+						Source:      "test",
+						Category:    "",
+						Severity:    v1alpha2.SeverityHigh,
+						Properties:  map[string]string{"version": "1.2.0"},
+					},
+				},
+			},
+
+			Results: []openreports.ORResultAdapter{
+				{
+					ID: "12348",
+					ReportResult: v1alpha1.ReportResult{
 						Description: "message",
 						Result:      v1alpha2.StatusFail,
 						Scored:      true,

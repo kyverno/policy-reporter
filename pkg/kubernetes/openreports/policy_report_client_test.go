@@ -54,7 +54,7 @@ func Test_PolicyReportWatcher(t *testing.T) {
 		}
 	}()
 
-	polrClient.Create(ctx, fixtures.DefaultPolicyReport, metav1.CreateOptions{})
+	polrClient.Create(ctx, fixtures.DefaultPolicyReport.Report, metav1.CreateOptions{})
 
 	rclient.CreateFake(fixtures.DefaultMeta, metav1.CreateOptions{})
 	time.Sleep(1 * time.Second)
@@ -107,7 +107,7 @@ func Test_ClusterPolicyReportWatcher(t *testing.T) {
 		}
 	}()
 
-	polrClient.Create(ctx, fixtures.ClusterPolicyReport, metav1.CreateOptions{})
+	polrClient.Create(ctx, fixtures.ClusterPolicyReport.ClusterReport, metav1.CreateOptions{})
 
 	rclient.CreateFake(fixtures.DefaultClusterMeta, metav1.CreateOptions{})
 	time.Sleep(1 * time.Second)

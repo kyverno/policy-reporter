@@ -43,7 +43,7 @@ var colors = map[v1alpha1.ResultSeverity]string{
 	openreports.SeverityCritical: "15158332",
 }
 
-func newPayload(result *openreports.ORResultAdapter, customFields map[string]string) payload {
+func newPayload(result openreports.ORResultAdapter, customFields map[string]string) payload {
 	color, exists := colors[result.Severity]
 	if !exists {
 		color = "0"
@@ -107,7 +107,7 @@ type client struct {
 }
 
 func (d *client) Send(result openreports.ORResultAdapter) {
-	req, err := http.CreateJSONRequest("POST", d.webhook, newPayload(&result, d.customFields))
+	req, err := http.CreateJSONRequest("POST", d.webhook, newPayload(result, d.customFields))
 	if err != nil {
 		return
 	}

@@ -48,12 +48,12 @@ func main() {
 
 	// Send the test alert
 	fmt.Println("Sending test alert to", alertManagerURL)
-	client.Send(openreports.ORResultAdapter{ReportResult: &result})
+	client.Send(openreports.ORResultAdapter{ReportResult: result})
 
 	// Also test batch send
-	results := []*openreports.ORResultAdapter{
+	results := []openreports.ORResultAdapter{
 		{
-			ReportResult: &v1alpha1.ReportResult{
+			ReportResult: v1alpha1.ReportResult{
 				Description: "Batch test alert 1",
 				Policy:      "batch-policy-1",
 				Rule:        "batch-rule-1",
@@ -63,7 +63,7 @@ func main() {
 			},
 		},
 		{
-			ReportResult: &v1alpha1.ReportResult{
+			ReportResult: v1alpha1.ReportResult{
 				Description: "Batch test alert 2",
 				Policy:      "batch-policy-2",
 				Rule:        "batch-rule-2",

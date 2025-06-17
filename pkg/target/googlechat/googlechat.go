@@ -19,7 +19,7 @@ const (
 )
 
 type values struct {
-	Result   *openreports.ORResultAdapter
+	Result   openreports.ORResultAdapter
 	Priority string
 	Resource *corev1.ObjectReference
 }
@@ -89,7 +89,7 @@ type client struct {
 	client       http.Client
 }
 
-func mapPayload(result *openreports.ORResultAdapter) (*Payload, error) {
+func mapPayload(result openreports.ORResultAdapter) (*Payload, error) {
 	widgets := []widget{{TextParagraph: &textParagraph{Text: result.Description}}}
 
 	ttmpl, err := template.New("googlechat").Parse(messageTempl)
@@ -200,7 +200,7 @@ func (e *client) Send(result openreports.ORResultAdapter) {
 		result.Properties = props
 	}
 
-	payload, err := mapPayload(&result)
+	payload, err := mapPayload(result)
 	if err != nil {
 		zap.L().Error(e.Name()+": PUSH FAILED", zap.Error(err))
 		return
