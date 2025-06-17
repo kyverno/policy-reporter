@@ -1,0 +1,66 @@
+diff --git a/pkg/report/publisher_test.go b/pkg/report/publisher_test.go
+index c2a13f0..4f1446f 100644
+--- a/pkg/report/publisher_test.go
++++ b/pkg/report/publisher_test.go
+@@ -23,18 +23,22 @@ func Test_PublishLifecycleEvents(t *testing.T) {
+ 		wg.Done()
+ 	})
+ 
+-	publisher.Publish(report.LifecycleEvent{Type: report.Added, PolicyReport: &openreports.ORReportAdapter{Report: &v1alpha1.Report{
+-		ObjectMeta: v1.ObjectMeta{
+-			Name:      "polr-test",
+-			Namespace: "test",
+-		}},
++	publisher.Publish(report.LifecycleEvent{Type: report.Added, PolicyReport: &openreports.ORReportAdapter{
++		Report: &v1alpha1.Report{
++			ObjectMeta: v1.ObjectMeta{
++				Name:      "polr-test",
++				Namespace: "test",
++			},
++		},
+ 	}})
+ 
+-	publisher.Publish(report.LifecycleEvent{Type: report.Updated, PolicyReport: &openreports.ORReportAdapter{Report: &v1alpha1.Report{
+-		ObjectMeta: v1.ObjectMeta{
+-			Name:      "polr-test",
+-			Namespace: "test",
+-		}},
++	publisher.Publish(report.LifecycleEvent{Type: report.Updated, PolicyReport: &openreports.ORReportAdapter{
++		Report: &v1alpha1.Report{
++			ObjectMeta: v1.ObjectMeta{
++				Name:      "polr-test",
++				Namespace: "test",
++			},
++		},
+ 	}})
+ 
+ 	wg.Wait()
+@@ -56,17 +60,21 @@ func Test_PublishDeleteLifecycleEvents(t *testing.T) {
+ 		wg.Done()
+ 	})
+ 
+-	publisher.Publish(report.LifecycleEvent{Type: report.Added, PolicyReport: &openreports.ORReportAdapter{Report: &v1alpha1.Report{
+-		ObjectMeta: v1.ObjectMeta{
+-			Name:      "polr-test",
+-			Namespace: "test",
+-		}},
++	publisher.Publish(report.LifecycleEvent{Type: report.Added, PolicyReport: &openreports.ORReportAdapter{
++		Report: &v1alpha1.Report{
++			ObjectMeta: v1.ObjectMeta{
++				Name:      "polr-test",
++				Namespace: "test",
++			},
++		},
+ 	}})
+-	publisher.Publish(report.LifecycleEvent{Type: report.Deleted, PolicyReport: &openreports.ORReportAdapter{Report: &v1alpha1.Report{
+-		ObjectMeta: v1.ObjectMeta{
+-			Name:      "polr-test",
+-			Namespace: "test",
+-		}},
++	publisher.Publish(report.LifecycleEvent{Type: report.Deleted, PolicyReport: &openreports.ORReportAdapter{
++		Report: &v1alpha1.Report{
++			ObjectMeta: v1.ObjectMeta{
++				Name:      "polr-test",
++				Namespace: "test",
++			},
++		},
