@@ -23,6 +23,7 @@ func (r *ORClusterReportAdapter) GetResults() []ORResultAdapter {
 	for _, r := range r.ClusterReport.Results {
 		ors = append(ors, ORResultAdapter{ReportResult: r})
 	}
+	r.Results = ors
 	return ors
 }
 

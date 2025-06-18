@@ -23,6 +23,7 @@ func (r *ORReportAdapter) GetResults() []ORResultAdapter {
 	for _, r := range r.Report.Results {
 		ors = append(ors, ORResultAdapter{ReportResult: r})
 	}
+	r.Results = ors
 	return ors
 }
 
