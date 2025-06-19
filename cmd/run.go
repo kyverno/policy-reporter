@@ -222,42 +222,39 @@ func newRunCMD(version string) *cobra.Command {
 					return nil
 				})
 			}
+			if wgClient != nil {
+				g.Go(func() error {
+					logger.Info("wait for wgpolicy informer")
+					readinessProbe.Wait()
 
-			g.Go(func() error {
-				logger.Info("wait for wgpolicy informer")
-				readinessProbe.Wait()
+					logger.Info("start wgpolicy client", zap.Int("worker", c.WorkerCount))
+					for {
+						stop := make(chan struct{})
+						if err := wgClient.Run(c.WorkerCount, stop); err != nil {
+							logger.Error("wgpolicy informer client error", zap.Error(err))
+						}
 
-				logger.Info("start wgpolicy client", zap.Int("worker", c.WorkerCount))
-				for {
-					if wgClient == nil {
-						return nil
+						logger.Debug("wgpolicy informer restarts")
 					}
-					stop := make(chan struct{})
-					if err := wgClient.Run(c.WorkerCount, stop); err != nil {
-						logger.Error("wgpolicy informer client error", zap.Error(err))
+				})
+			}
+
+			if orClient != nil {
+				g.Go(func() error {
+					logger.Info("wait for openreports informer")
+					readinessProbe.Wait()
+
+					logger.Info("start openreports client", zap.Int("worker", c.WorkerCount))
+					for {
+						stop := make(chan struct{})
+						if err := orClient.Run(c.WorkerCount, stop); err != nil {
+							logger.Error("openreports informer client error", zap.Error(err))
+						}
+
+						logger.Debug("openreports informer restarts")
 					}
-
-					logger.Debug("wgpolicy informer restarts")
-				}
-			})
-
-			g.Go(func() error {
-				logger.Info("wait for openreports informer")
-				readinessProbe.Wait()
-
-				logger.Info("start openreports client", zap.Int("worker", c.WorkerCount))
-				for {
-					if orClient == nil {
-						return nil
-					}
-					stop := make(chan struct{})
-					if err := orClient.Run(c.WorkerCount, stop); err != nil {
-						logger.Error("openreports informer client error", zap.Error(err))
-					}
-
-					logger.Debug("openreports informer restarts")
-				}
-			})
+				})
+			}
 
 			g.Go(func() error {
 				collection := resolver.TargetClients()
