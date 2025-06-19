@@ -3,9 +3,11 @@ package summary_test
 import (
 	"testing"
 
+	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"openreports.io/apis/openreports.io/v1alpha1"
 
 	"github.com/kyverno/policy-reporter/pkg/email/summary"
+	"github.com/kyverno/policy-reporter/pkg/openreports"
 )
 
 func Test_Source(t *testing.T) {
@@ -16,11 +18,18 @@ func Test_Source(t *testing.T) {
 		}
 	})
 	t.Run("Source.AddClusterSummary", func(t *testing.T) {
-		source.AddClusterSummary(v1alpha1.ReportSummary{
-			Pass:  1,
-			Warn:  2,
-			Fail:  4,
-			Error: 3,
+		source.AddClusterSummary(&openreports.ReportAdapter{
+			Report: &v1alpha1.Report{
+				ObjectMeta: v1.ObjectMeta{
+					Name: "some-report",
+				},
+				Summary: v1alpha1.ReportSummary{
+					Pass:  1,
+					Warn:  2,
+					Fail:  4,
+					Error: 3,
+				},
+			},
 		})
 
 		if source.ClusterScopeSummary.Pass != 1 {

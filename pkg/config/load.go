@@ -87,6 +87,10 @@ func Load(cmd *cobra.Command) (*Config, error) {
 		v.BindPFlag("leaderElection.podName", flag)
 	}
 
+	if flag := cmd.Flags().Lookup("openreports"); flag != nil {
+		v.BindPFlag("openreports", flag)
+	}
+
 	if err := v.BindEnv("leaderElection.podName", "POD_NAME"); err != nil {
 		log.Printf("[WARNING] failed to bind env POD_NAME")
 	}

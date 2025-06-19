@@ -499,8 +499,12 @@ func (r *Resolver) CRDMetadataClient() (metadata.Interface, error) {
 	return client, nil
 }
 
-func (r *Resolver) SummaryGenerator() (*summary.Generator, error) {
+func (r *Resolver) SummaryGenerator(openreports bool) (*summary.Generator, error) {
 	orclient, err := r.OpenreportsCRClient()
+	if err != nil {
+		return nil, err
+	}
+	wgpolicyclient, err := r.WgPolicyCRClient()
 	if err != nil {
 		return nil, err
 	}
@@ -512,8 +516,10 @@ func (r *Resolver) SummaryGenerator() (*summary.Generator, error) {
 
 	return summary.NewGenerator(
 		orclient,
+		wgpolicyclient,
 		EmailReportFilterFromConfig(nsclient, r.config.EmailReports.Summary.Filter),
 		!r.config.EmailReports.Summary.Filter.DisableClusterReports,
+		openreports,
 	), nil
 }
 

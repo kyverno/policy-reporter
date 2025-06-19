@@ -6,16 +6,19 @@ import (
 
 	"go.uber.org/zap"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	reportsv1alpha1 "openreports.io/apis/openreports.io/v1alpha1"
 	"openreports.io/pkg/client/clientset/versioned/typed/openreports.io/v1alpha1"
 
+	"github.com/kyverno/policy-reporter/pkg/crd/client/policyreport/clientset/versioned/typed/policyreport/v1alpha2"
 	"github.com/kyverno/policy-reporter/pkg/email"
+	"github.com/kyverno/policy-reporter/pkg/openreports"
 )
 
 type Generator struct {
-	client         v1alpha1.OpenreportsV1alpha1Interface
-	filter         email.Filter
-	clusterReports bool
+	openreportsClient v1alpha1.OpenreportsV1alpha1Interface
+	wgpolicyClient    v1alpha2.Wgpolicyk8sV1alpha2Interface
+	filter            email.Filter
+	clusterReports    bool
+	openreports       bool
 }
 
 func (o *Generator) GenerateData(ctx context.Context) ([]Source, error) {
@@ -25,22 +28,36 @@ func (o *Generator) GenerateData(ctx context.Context) ([]Source, error) {
 	wg := &sync.WaitGroup{}
 
 	if o.clusterReports {
-		clusterReports, err := o.client.ClusterReports().List(ctx, v1.ListOptions{})
-		if err != nil {
-			return make([]Source, 0), err
+		clusterReports := []openreports.ReportInterface{}
+		if o.openreports {
+			crs, err := o.openreportsClient.ClusterReports().List(ctx, v1.ListOptions{})
+			if err != nil {
+				return make([]Source, 0), err
+			}
+			for _, cr := range crs.Items {
+				clusterReports = append(clusterReports, &openreports.ClusterReportAdapter{ClusterReport: &cr})
+			}
+		} else {
+			crs, err := o.wgpolicyClient.ClusterPolicyReports().List(ctx, v1.ListOptions{})
+			if err != nil {
+				return make([]Source, 0), err
+			}
+			for _, cr := range crs.Items {
+				clusterReports = append(clusterReports, &openreports.ClusterReportAdapter{ClusterReport: cr.ToOpenReports()})
+			}
 		}
 
-		wg.Add(len(clusterReports.Items))
+		wg.Add(len(clusterReports))
 
-		for _, rep := range clusterReports.Items {
-			go func(report reportsv1alpha1.ClusterReport) {
+		for _, rep := range clusterReports {
+			go func(report openreports.ReportInterface) {
 				defer wg.Done()
 
-				if len(report.Results) == 0 {
+				if len(report.GetResults()) == 0 {
 					return
 				}
 
-				rs := report.Results[0].Source
+				rs := report.GetResults()[0].Source
 				if !o.filter.ValidateSource(rs) {
 					return
 				}
@@ -53,29 +70,42 @@ func (o *Generator) GenerateData(ctx context.Context) ([]Source, error) {
 				}
 				mx.Unlock()
 
-				s.AddClusterSummary(report.Summary)
+				s.AddClusterSummary(report)
 
-				zap.L().Info("Processed ClusterPolicyRepor", zap.String("name", report.Name))
+				zap.L().Info("Processed ClusterPolicyReport", zap.String("name", report.GetName()))
 			}(rep)
 		}
 	}
+	reports := []openreports.ReportInterface{}
 
-	reports, err := o.client.Reports(v1.NamespaceAll).List(ctx, v1.ListOptions{})
-	if err != nil {
-		return make([]Source, 0), err
+	if o.openreports {
+		rs, err := o.openreportsClient.Reports(v1.NamespaceAll).List(ctx, v1.ListOptions{})
+		if err != nil {
+			return make([]Source, 0), err
+		}
+		for _, r := range rs.Items {
+			reports = append(reports, &openreports.ReportAdapter{Report: &r})
+		}
+	} else {
+		crs, err := o.wgpolicyClient.PolicyReports(v1.NamespaceAll).List(ctx, v1.ListOptions{})
+		if err != nil {
+			return make([]Source, 0), err
+		}
+		for _, r := range crs.Items {
+			reports = append(reports, &openreports.ReportAdapter{Report: r.ToOpenReports()})
+		}
 	}
 
-	wg.Add(len(reports.Items))
-
-	for _, rep := range reports.Items {
-		go func(report reportsv1alpha1.Report) {
+	wg.Add(len(reports))
+	for _, rep := range reports {
+		go func(report openreports.ReportInterface) {
 			defer wg.Done()
 
-			if len(report.Results) == 0 || !o.filter.ValidateNamespace(report.Namespace) {
+			if len(report.GetResults()) == 0 || !o.filter.ValidateNamespace(report.GetNamespace()) {
 				return
 			}
 
-			rs := report.Results[0].Source
+			rs := report.GetResults()[0].Source
 			if !o.filter.ValidateSource(rs) {
 				return
 			}
@@ -88,9 +118,8 @@ func (o *Generator) GenerateData(ctx context.Context) ([]Source, error) {
 			}
 			mx.Unlock()
 
-			s.AddNamespacedSummary(report.Namespace, report.Summary)
-
-			zap.L().Info("Processed PolicyRepor", zap.String("name", report.Name))
+			s.AddNamespacedSummary(report.GetNamespace(), report.GetSummary())
+			zap.L().Info("Processed PolicyRepor", zap.String("name", report.GetName()))
 		}(rep)
 	}
 
@@ -104,8 +133,8 @@ func (o *Generator) GenerateData(ctx context.Context) ([]Source, error) {
 	return list, nil
 }
 
-func NewGenerator(client v1alpha1.OpenreportsV1alpha1Interface, filter email.Filter, clusterReports bool) *Generator {
-	return &Generator{client, filter, clusterReports}
+func NewGenerator(orclient v1alpha1.OpenreportsV1alpha1Interface, wgpolicyclient v1alpha2.Wgpolicyk8sV1alpha2Interface, filter email.Filter, clusterReports bool, openreports bool) *Generator {
+	return &Generator{orclient, wgpolicyclient, filter, clusterReports, openreports}
 }
 
 func FilterSources(sources []Source, filter email.Filter, clusterReports bool) []Source {
