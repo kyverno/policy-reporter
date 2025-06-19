@@ -89,7 +89,7 @@ func Test_DetailedResultMetricGeneration(t *testing.T) {
 	})
 }
 
-func testResultMetricLabels(t *testing.T, metric *ioprometheusclient.Metric, result openreports.ORResultAdapter) error {
+func testResultMetricLabels(t *testing.T, metric *ioprometheusclient.Metric, result openreports.ResultAdapter) error {
 	res := &corev1.ObjectReference{}
 	if result.HasResource() {
 		res = result.GetResource()

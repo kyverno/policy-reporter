@@ -27,7 +27,7 @@ type client struct {
 	kinesis      aws.Client
 }
 
-func (c *client) Send(result openreports.ORResultAdapter) {
+func (c *client) Send(result openreports.ResultAdapter) {
 	if len(c.customFields) > 0 {
 		props := make(map[string]string, 0)
 

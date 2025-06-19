@@ -6,7 +6,7 @@ import (
 	"github.com/kyverno/policy-reporter/pkg/openreports"
 )
 
-func Resource(p openreports.ReportInterface, r openreports.ORResultAdapter) *corev1.ObjectReference {
+func Resource(p openreports.ReportInterface, r openreports.ResultAdapter) *corev1.ObjectReference {
 	if r.HasResource() {
 		return r.GetResource()
 	} else if p.GetScope() != nil {

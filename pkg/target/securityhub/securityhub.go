@@ -55,13 +55,13 @@ type client struct {
 	arn          *string
 }
 
-func (c *client) mapFindings(polr openreports.ReportInterface, results []openreports.ORResultAdapter) []types.AwsSecurityFinding {
+func (c *client) mapFindings(polr openreports.ReportInterface, results []openreports.ResultAdapter) []types.AwsSecurityFinding {
 	var accID *string
 	if c.accountID != "" {
 		accID = toPointer(c.accountID)
 	}
 
-	return helper.Map(results, func(result openreports.ORResultAdapter) types.AwsSecurityFinding {
+	return helper.Map(results, func(result openreports.ResultAdapter) types.AwsSecurityFinding {
 		generator := result.Policy
 		if generator == "" {
 			generator = result.Rule
@@ -112,12 +112,12 @@ func (c *client) mapFindings(polr openreports.ReportInterface, results []openrep
 	})
 }
 
-func (c *client) Send(result openreports.ORResultAdapter) {
-	c.BatchSend(&openreports.ReportAdapter{Report: &v1alpha1.Report{}}, []openreports.ORResultAdapter{result})
+func (c *client) Send(result openreports.ResultAdapter) {
+	c.BatchSend(&openreports.ReportAdapter{Report: &v1alpha1.Report{}}, []openreports.ResultAdapter{result})
 }
 
-func filterResults(results []openreports.ORResultAdapter) []openreports.ORResultAdapter {
-	return helper.Filter(results, func(r openreports.ORResultAdapter) bool {
+func filterResults(results []openreports.ResultAdapter) []openreports.ResultAdapter {
+	return helper.Filter(results, func(r openreports.ResultAdapter) bool {
 		if r.Result == v1alpha2.StatusFail {
 			return true
 		}
@@ -132,7 +132,7 @@ func filterResults(results []openreports.ORResultAdapter) []openreports.ORResult
 	})
 }
 
-func (c *client) BatchSend(polr openreports.ReportInterface, results []openreports.ORResultAdapter) {
+func (c *client) BatchSend(polr openreports.ReportInterface, results []openreports.ResultAdapter) {
 	results = filterResults(results)
 	if len(results) == 0 {
 		return
@@ -166,7 +166,7 @@ func (c *client) BatchSend(polr openreports.ReportInterface, results []openrepor
 			mapping[*f.Id] = true
 		}
 
-		results = helper.Filter(results, func(result openreports.ORResultAdapter) bool {
+		results = helper.Filter(results, func(result openreports.ResultAdapter) bool {
 			return !mapping[result.GetID()]
 		})
 	}
@@ -282,7 +282,7 @@ func (c *client) CleanUp(ctx context.Context, report openreports.ReportInterface
 	zap.L().Info(c.Name()+": CLEANUP OK", zap.Int("count", count), zap.String("report", report.GetKey()))
 }
 
-func (c *client) mapOtherDetails(polr openreports.ReportInterface, result openreports.ORResultAdapter) map[string]string {
+func (c *client) mapOtherDetails(polr openreports.ReportInterface, result openreports.ResultAdapter) map[string]string {
 	details := map[string]string{
 		"Source":   result.Source,
 		"Category": result.Category,
@@ -531,7 +531,7 @@ func MapSeverity(s v1alpha1.ResultSeverity) types.SeverityLabel {
 	}
 }
 
-func mapResourceID(result openreports.ORResultAdapter) *string {
+func mapResourceID(result openreports.ResultAdapter) *string {
 	if result.HasResource() {
 		res := result.GetResource()
 		if res.UID != "" {
@@ -552,7 +552,7 @@ func mapType(source string) string {
 	return "Software and Configuration Checks/Kubernetes Policies/" + source
 }
 
-func toResourceIDFilter(report openreports.ReportInterface, results []openreports.ORResultAdapter) []types.StringFilter {
+func toResourceIDFilter(report openreports.ReportInterface, results []openreports.ResultAdapter) []types.StringFilter {
 	res := report.GetScope()
 	if res != nil {
 		var value string
@@ -604,7 +604,7 @@ func splitPolrKey(key string) (string, string) {
 	return parts[1], parts[0]
 }
 
-func filterFindings(findings []types.AwsSecurityFinding, results []openreports.ORResultAdapter) []types.AwsSecurityFinding {
+func filterFindings(findings []types.AwsSecurityFinding, results []openreports.ResultAdapter) []types.AwsSecurityFinding {
 	filtered := make([]types.AwsSecurityFinding, 0, len(findings))
 
 	mapping := make(map[string]bool, len(results))

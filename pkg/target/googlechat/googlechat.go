@@ -19,7 +19,7 @@ const (
 )
 
 type values struct {
-	Result   openreports.ORResultAdapter
+	Result   openreports.ResultAdapter
 	Priority string
 	Resource *corev1.ObjectReference
 }
@@ -89,7 +89,7 @@ type client struct {
 	client       http.Client
 }
 
-func mapPayload(result openreports.ORResultAdapter) (*Payload, error) {
+func mapPayload(result openreports.ResultAdapter) (*Payload, error) {
 	widgets := []widget{{TextParagraph: &textParagraph{Text: result.Description}}}
 
 	ttmpl, err := template.New("googlechat").Parse(messageTempl)
@@ -185,7 +185,7 @@ func mapPayload(result openreports.ORResultAdapter) (*Payload, error) {
 	}, nil
 }
 
-func (e *client) Send(result openreports.ORResultAdapter) {
+func (e *client) Send(result openreports.ResultAdapter) {
 	if len(e.customFields) > 0 {
 		props := make(map[string]string, 0)
 

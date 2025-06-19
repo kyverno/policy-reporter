@@ -8,7 +8,7 @@ import (
 	"github.com/kyverno/policy-reporter/pkg/openreports"
 )
 
-var PassResult = openreports.ORResultAdapter{
+var PassResult = openreports.ResultAdapter{
 	ID: "123",
 	ReportResult: v1alpha1.ReportResult{
 		Description: "validation error: requests and limits required. Rule autogen-check-for-requests-and-limits failed at path /spec/template/spec/containers/0/resources/requests/",
@@ -30,7 +30,7 @@ var PassResult = openreports.ORResultAdapter{
 	},
 }
 
-var PassPodResult = openreports.ORResultAdapter{
+var PassPodResult = openreports.ResultAdapter{
 	ID: "124",
 	ReportResult: v1alpha1.ReportResult{
 		Description: "validation error: requests and limits required. Rule autogen-check-for-requests-and-limits failed at path /spec/template/spec/containers/0/resources/requests/",
@@ -51,7 +51,7 @@ var PassPodResult = openreports.ORResultAdapter{
 	},
 }
 
-var WarnPodResult = openreports.ORResultAdapter{
+var WarnPodResult = openreports.ResultAdapter{
 	ID: "124",
 	ReportResult: v1alpha1.ReportResult{
 		Description: "validation error: requests and limits required. Rule autogen-check-for-requests-and-limits failed at path /spec/template/spec/containers/0/resources/requests/",
@@ -72,7 +72,7 @@ var WarnPodResult = openreports.ORResultAdapter{
 	},
 }
 
-var ErrorPodResult = openreports.ORResultAdapter{
+var ErrorPodResult = openreports.ResultAdapter{
 	ID: "124",
 	ReportResult: v1alpha1.ReportResult{
 		Description: "validation error: requests and limits required. Rule autogen-check-for-requests-and-limits failed at path /spec/template/spec/containers/0/resources/requests/",
@@ -93,7 +93,7 @@ var ErrorPodResult = openreports.ORResultAdapter{
 	},
 }
 
-var TrivyResult = openreports.ORResultAdapter{
+var TrivyResult = openreports.ResultAdapter{
 	ID: "124",
 	ReportResult: v1alpha1.ReportResult{
 		Description: "validation error",
@@ -106,7 +106,7 @@ var TrivyResult = openreports.ORResultAdapter{
 	},
 }
 
-var FailResult = openreports.ORResultAdapter{
+var FailResult = openreports.ResultAdapter{
 	ID: "123",
 	ReportResult: v1alpha1.ReportResult{
 		Description: "validation error: requests and limits required. Rule autogen-check-for-requests-and-limits failed at path /spec/template/spec/containers/0/resources/requests/",
@@ -127,7 +127,7 @@ var FailResult = openreports.ORResultAdapter{
 	},
 }
 
-var FailDisallowRuleResult = openreports.ORResultAdapter{
+var FailDisallowRuleResult = openreports.ResultAdapter{
 	ID: "123",
 	ReportResult: v1alpha1.ReportResult{
 		Description: "validation error: requests and limits required. Rule autogen-check-for-requests-and-limits failed at path /spec/template/spec/containers/0/resources/requests/",
@@ -148,7 +148,7 @@ var FailDisallowRuleResult = openreports.ORResultAdapter{
 	},
 }
 
-var FailPodResult = openreports.ORResultAdapter{
+var FailPodResult = openreports.ResultAdapter{
 	ID: "124",
 	ReportResult: v1alpha1.ReportResult{
 		Description: "validation error: requests and limits required. Rule autogen-check-for-requests-and-limits failed at path /spec/template/spec/containers/0/resources/requests/",
@@ -168,7 +168,7 @@ var FailPodResult = openreports.ORResultAdapter{
 	},
 }
 
-var SkipPodResult = openreports.ORResultAdapter{
+var SkipPodResult = openreports.ResultAdapter{
 	ID: "124",
 	ReportResult: v1alpha1.ReportResult{
 		Policy:   "require-requests-and-limits-required",
@@ -187,7 +187,7 @@ var SkipPodResult = openreports.ORResultAdapter{
 	},
 }
 
-var FailResultWithoutResource = openreports.ORResultAdapter{
+var FailResultWithoutResource = openreports.ResultAdapter{
 	ReportResult: v1alpha1.ReportResult{
 		Description: "validation error: requests and limits required. Rule autogen-check-for-requests-and-limits failed at path /spec/template/spec/containers/0/resources/requests/",
 		Policy:      "require-requests-and-limits-required",
@@ -200,7 +200,7 @@ var FailResultWithoutResource = openreports.ORResultAdapter{
 	},
 }
 
-var PassNamespaceResult = openreports.ORResultAdapter{
+var PassNamespaceResult = openreports.ResultAdapter{
 	ID: "125",
 	ReportResult: v1alpha1.ReportResult{
 		Description: "validation error: The label `test` is required. Rule check-for-GetLabels()-on-namespace",
@@ -220,7 +220,7 @@ var PassNamespaceResult = openreports.ORResultAdapter{
 	},
 }
 
-var FailNamespaceResult = openreports.ORResultAdapter{
+var FailNamespaceResult = openreports.ResultAdapter{
 	ID: "126",
 	ReportResult: v1alpha1.ReportResult{
 		Description: "validation error: The label `test` is required. Rule check-for-GetLabels()-on-namespace",
@@ -240,7 +240,7 @@ var FailNamespaceResult = openreports.ORResultAdapter{
 	},
 }
 
-var ScopeResult = openreports.ORResultAdapter{
+var ScopeResult = openreports.ResultAdapter{
 	ReportResult: v1alpha1.ReportResult{
 		Description: "validation error: requests and limits required. Rule autogen-check-for-requests-and-limits failed at path /spec/template/spec/containers/0/resources/requests/",
 		Policy:      "require-requests-and-limits-required",

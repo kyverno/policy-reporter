@@ -17,8 +17,8 @@ func RegisterCustomResultGauge(name string, labelNames []string) *prometheus.Gau
 }
 
 type (
-	LabelGenerator = func(openreports.ReportInterface, openreports.ORResultAdapter) map[string]string
-	LabelCallback  = func(map[string]string, openreports.ReportInterface, openreports.ORResultAdapter)
+	LabelGenerator = func(openreports.ReportInterface, openreports.ResultAdapter) map[string]string
+	LabelCallback  = func(map[string]string, openreports.ReportInterface, openreports.ResultAdapter)
 )
 
 func CreateCustomResultMetricsListener(

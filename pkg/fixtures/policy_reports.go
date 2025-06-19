@@ -86,7 +86,7 @@ var DefaultPolicyReport = &openreports.ReportAdapter{
 			},
 		},
 	},
-	Results: []openreports.ORResultAdapter{
+	Results: []openreports.ResultAdapter{
 		{
 			ID: "12348",
 			ReportResult: v1alpha1.ReportResult{
@@ -171,7 +171,7 @@ var ScopePolicyReport = &openreports.ReportAdapter{
 		},
 	},
 
-	Results: []openreports.ORResultAdapter{
+	Results: []openreports.ResultAdapter{
 		{
 			ID: "12348",
 			ReportResult: v1alpha1.ReportResult{

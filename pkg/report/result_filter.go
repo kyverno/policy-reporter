@@ -4,7 +4,7 @@ import (
 	"github.com/kyverno/policy-reporter/pkg/openreports"
 )
 
-type ResultValidation = func(openreports.ORResultAdapter) bool
+type ResultValidation = func(openreports.ResultAdapter) bool
 
 type ResultFilter struct {
 	validations     []ResultValidation
@@ -16,7 +16,7 @@ func (rf *ResultFilter) AddValidation(v ResultValidation) {
 	rf.validations = append(rf.validations, v)
 }
 
-func (rf *ResultFilter) Validate(result openreports.ORResultAdapter) bool {
+func (rf *ResultFilter) Validate(result openreports.ResultAdapter) bool {
 	for _, validation := range rf.validations {
 		if !validation(result) {
 			return false

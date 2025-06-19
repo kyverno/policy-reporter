@@ -56,7 +56,7 @@ func Test_AlertManagerClient_Send(t *testing.T) {
 			},
 		}
 
-		client.Send(openreports.ORResultAdapter{ReportResult: result})
+		client.Send(openreports.ResultAdapter{ReportResult: result})
 
 		require.Len(t, receivedAlerts, 1)
 		alert := receivedAlerts[0]
@@ -126,7 +126,7 @@ func Test_AlertManagerClient_Send(t *testing.T) {
 		// Create alerts directly instead of using BatchSend
 		alerts := make([]Alert, 0, len(results))
 		for _, result := range results {
-			alerts = append(alerts, client.createAlert(openreports.ORResultAdapter{ReportResult: result}))
+			alerts = append(alerts, client.createAlert(openreports.ResultAdapter{ReportResult: result}))
 		}
 		client.sendAlerts(alerts)
 
@@ -159,7 +159,7 @@ func Test_AlertManagerClient_Send(t *testing.T) {
 		}
 
 		// Should not panic
-		client.Send(openreports.ORResultAdapter{ReportResult: result})
+		client.Send(openreports.ResultAdapter{ReportResult: result})
 	})
 
 	t.Run("With Custom Headers", func(t *testing.T) {
@@ -191,7 +191,7 @@ func Test_AlertManagerClient_Send(t *testing.T) {
 			Severity:    "high",
 		}
 
-		client.Send(openreports.ORResultAdapter{ReportResult: result})
+		client.Send(openreports.ResultAdapter{ReportResult: result})
 
 		assert.Equal(t, "Bearer test-token", receivedHeaders.Get("Authorization"))
 		assert.Equal(t, "custom-value", receivedHeaders.Get("X-Custom"))
@@ -229,7 +229,7 @@ func Test_AlertManagerClient_Send(t *testing.T) {
 			Severity:    "high",
 		}
 
-		client.Send(openreports.ORResultAdapter{ReportResult: result})
+		client.Send(openreports.ResultAdapter{ReportResult: result})
 
 		require.Len(t, receivedAlerts, 1)
 		assert.Equal(t, "production", receivedAlerts[0].Annotations["environment"])
@@ -273,7 +273,7 @@ func Test_AlertManagerClient_Send(t *testing.T) {
 			},
 		}
 
-		client.Send(openreports.ORResultAdapter{ReportResult: result})
+		client.Send(openreports.ResultAdapter{ReportResult: result})
 
 		require.Len(t, receivedAlerts, 1)
 		assert.Equal(t, "test-namespace/pod/test-pod", receivedAlerts[0].Annotations["resource"])

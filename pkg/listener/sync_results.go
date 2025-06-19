@@ -39,7 +39,7 @@ func NewSendSyncResultsListener(targets *target.Collection) report.SyncResultsLi
 			go func(target target.Client, re openreports.ReportInterface) {
 				defer wg.Done()
 
-				filtered := helper.Filter(re.GetResults(), func(result openreports.ORResultAdapter) bool {
+				filtered := helper.Filter(re.GetResults(), func(result openreports.ResultAdapter) bool {
 					return target.Validate(re, result)
 				})
 

@@ -8,12 +8,12 @@ import (
 	"openreports.io/apis/openreports.io/v1alpha1"
 )
 
-type ORResultAdapter struct {
+type ResultAdapter struct {
 	ID string
 	v1alpha1.ReportResult
 }
 
-func (r *ORResultAdapter) GetResource() *corev1.ObjectReference {
+func (r *ResultAdapter) GetResource() *corev1.ObjectReference {
 	if len(r.Subjects) == 0 {
 		return nil
 	}
@@ -21,11 +21,11 @@ func (r *ORResultAdapter) GetResource() *corev1.ObjectReference {
 	return &r.Subjects[0]
 }
 
-func (r *ORResultAdapter) HasResource() bool {
+func (r *ResultAdapter) HasResource() bool {
 	return len(r.Subjects) > 0
 }
 
-func (r *ORResultAdapter) GetKind() string {
+func (r *ResultAdapter) GetKind() string {
 	if !r.HasResource() {
 		return ""
 	}
@@ -33,7 +33,7 @@ func (r *ORResultAdapter) GetKind() string {
 	return r.GetResource().Kind
 }
 
-func (r *ORResultAdapter) GetID() string {
+func (r *ResultAdapter) GetID() string {
 	return r.ID
 }
 
@@ -59,7 +59,7 @@ func ToResourceString(res *corev1.ObjectReference) string {
 	return resource
 }
 
-func (r *ORResultAdapter) ResourceString() string {
+func (r *ResultAdapter) ResourceString() string {
 	if !r.HasResource() {
 		return ""
 	}

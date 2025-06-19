@@ -27,7 +27,7 @@ var scopereport1 = &openreports.ReportAdapter{
 		Results: []v1alpha1.ReportResult{fixtures.FailResult.ReportResult},
 		Summary: v1alpha1.ReportSummary{Fail: 1},
 	},
-	Results: []openreports.ORResultAdapter{fixtures.FailResult},
+	Results: []openreports.ResultAdapter{fixtures.FailResult},
 }
 
 var preport1 = &openreports.ReportAdapter{
@@ -40,7 +40,7 @@ var preport1 = &openreports.ReportAdapter{
 		Results: []v1alpha1.ReportResult{fixtures.FailResult.ReportResult},
 		Summary: v1alpha1.ReportSummary{Fail: 1},
 	},
-	Results: []openreports.ORResultAdapter{fixtures.FailResult},
+	Results: []openreports.ResultAdapter{fixtures.FailResult},
 }
 
 var preport2 = &openreports.ReportAdapter{
@@ -53,7 +53,7 @@ var preport2 = &openreports.ReportAdapter{
 		Results: []v1alpha1.ReportResult{fixtures.FailPodResult.ReportResult},
 		Summary: v1alpha1.ReportSummary{Fail: 1, Pass: 1},
 	},
-	Results: []openreports.ORResultAdapter{fixtures.FailPodResult},
+	Results: []openreports.ResultAdapter{fixtures.FailPodResult},
 }
 
 var preport3 = &openreports.ReportAdapter{
@@ -75,5 +75,5 @@ var creport = &openreports.ClusterReportAdapter{
 		},
 		Results: []v1alpha1.ReportResult{fixtures.FailResult.ReportResult, fixtures.FailPodResult.ReportResult},
 	},
-	Results: []openreports.ORResultAdapter{fixtures.FailResult, fixtures.FailPodResult},
+	Results: []openreports.ResultAdapter{fixtures.FailResult, fixtures.FailPodResult},
 }

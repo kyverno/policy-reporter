@@ -13,7 +13,7 @@ import (
 const SendResults = "send_results_listener"
 
 func NewSendResultListener(targets *target.Collection) report.PolicyReportResultListener {
-	return func(rep openreports.ReportInterface, r openreports.ORResultAdapter, e bool) {
+	return func(rep openreports.ReportInterface, r openreports.ResultAdapter, e bool) {
 		clients := targets.SingleSendClients()
 		if len(clients) == 0 {
 			return
@@ -23,7 +23,7 @@ func NewSendResultListener(targets *target.Collection) report.PolicyReportResult
 		wg.Add(len(clients))
 
 		for _, t := range clients {
-			go func(target target.Client, re openreports.ReportInterface, result openreports.ORResultAdapter, preExisted bool) {
+			go func(target target.Client, re openreports.ReportInterface, result openreports.ResultAdapter, preExisted bool) {
 				defer wg.Done()
 
 				if !result.HasResource() && re.GetScope() != nil {

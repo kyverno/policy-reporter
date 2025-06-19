@@ -57,7 +57,7 @@ type Issue struct {
 	} `json:"fields"`
 }
 
-func (e *client) Send(result openreports.ORResultAdapter) {
+func (e *client) Send(result openreports.ResultAdapter) {
 	issue := Issue{}
 	issue.Fields.Project.Key = e.projectKey
 	issue.Fields.IssueType.Name = e.issueType

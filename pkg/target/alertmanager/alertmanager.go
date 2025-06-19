@@ -38,7 +38,7 @@ type client struct {
 // Ensure the client type implements the Client interface
 var _ Client = (*client)(nil)
 
-func (a *client) Send(result openreports.ORResultAdapter) {
+func (a *client) Send(result openreports.ResultAdapter) {
 	zap.L().Debug("Sending policy violation to AlertManager",
 		zap.String("policy", result.Policy),
 		zap.String("rule", result.Rule),
@@ -51,7 +51,7 @@ func (a *client) Send(result openreports.ORResultAdapter) {
 	a.sendAlerts([]Alert{alert})
 }
 
-func (a *client) BatchSend(report openreports.ReportInterface, results []openreports.ORResultAdapter) {
+func (a *client) BatchSend(report openreports.ReportInterface, results []openreports.ResultAdapter) {
 	zap.L().Debug("Batch sending policy violations to AlertManager",
 		zap.Int("count", len(results)),
 		zap.String("reportName", report.GetName()),
@@ -71,7 +71,7 @@ func (a *client) BatchSend(report openreports.ReportInterface, results []openrep
 	a.sendAlerts(alerts)
 }
 
-func (a *client) createAlert(result openreports.ORResultAdapter) Alert {
+func (a *client) createAlert(result openreports.ResultAdapter) Alert {
 	labels := map[string]string{
 		"alertname": "PolicyReporterViolation",
 		"severity":  string(result.Severity),

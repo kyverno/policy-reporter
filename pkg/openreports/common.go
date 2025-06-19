@@ -58,8 +58,8 @@ type ReportInterface interface {
 	GetID() string
 	GetKey() string
 	GetScope() *corev1.ObjectReference
-	GetResults() []ORResultAdapter
-	SetResults([]ORResultAdapter)
+	GetResults() []ResultAdapter
+	SetResults([]ResultAdapter)
 	HasResult(id string) bool
 	GetSummary() v1alpha1.ReportSummary
 	GetSource() string

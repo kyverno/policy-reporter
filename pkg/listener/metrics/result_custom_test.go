@@ -119,7 +119,7 @@ func Test_CustomResultMetricGeneration(t *testing.T) {
 	})
 }
 
-func testCustomResultMetricLabels(t *testing.T, metric *ioprometheusclient.Metric, result openreports.ORResultAdapter, expVal float64) error {
+func testCustomResultMetricLabels(t *testing.T, metric *ioprometheusclient.Metric, result openreports.ResultAdapter, expVal float64) error {
 	var index int
 
 	res := &corev1.ObjectReference{}

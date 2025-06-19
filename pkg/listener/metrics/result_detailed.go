@@ -58,7 +58,7 @@ func CreateDetailedResultMetricListener(filter *report.ResultFilter, gauge *prom
 	}
 }
 
-func generateResultLabels(report openreports.ReportInterface, result openreports.ORResultAdapter) map[string]string {
+func generateResultLabels(report openreports.ReportInterface, result openreports.ResultAdapter) map[string]string {
 	labels := prometheus.Labels{
 		"namespace": report.GetNamespace(),
 		"rule":      result.Rule,

@@ -31,13 +31,13 @@ type client struct {
 	client       http.Client
 }
 
-func (s *client) Send(result openreports.ORResultAdapter) {
-	s.PostMessage(s.newMessage(result.GetResource(), []openreports.ORResultAdapter{result}))
+func (s *client) Send(result openreports.ResultAdapter) {
+	s.PostMessage(s.newMessage(result.GetResource(), []openreports.ResultAdapter{result}))
 }
 
 func (s *client) CleanUp(_ context.Context, _ openreports.ReportInterface) {}
 
-func (s *client) BatchSend(report openreports.ReportInterface, results []openreports.ORResultAdapter) {
+func (s *client) BatchSend(report openreports.ReportInterface, results []openreports.ResultAdapter) {
 	if report.GetScope() == nil {
 		for idx := range results {
 			s.Send(results[idx])
@@ -72,7 +72,7 @@ func (s *client) Type() target.ClientType {
 	return target.BatchSend
 }
 
-func (s *client) newMessage(resource *corev1.ObjectReference, results []openreports.ORResultAdapter) *adaptivecard.Message {
+func (s *client) newMessage(resource *corev1.ObjectReference, results []openreports.ResultAdapter) *adaptivecard.Message {
 	header := adaptivecard.NewContainer()
 
 	if resource != nil {

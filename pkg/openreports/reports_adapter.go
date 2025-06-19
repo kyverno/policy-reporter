@@ -12,16 +12,16 @@ import (
 
 type ReportAdapter struct {
 	*v1alpha1.Report
-	Results []ORResultAdapter
+	Results []ResultAdapter
 }
 
-func (r *ReportAdapter) GetResults() []ORResultAdapter {
+func (r *ReportAdapter) GetResults() []ResultAdapter {
 	if len(r.Results) > 0 {
 		return r.Results
 	}
-	ors := []ORResultAdapter{}
+	ors := []ResultAdapter{}
 	for _, r := range r.Report.Results {
-		ors = append(ors, ORResultAdapter{ReportResult: r})
+		ors = append(ors, ResultAdapter{ReportResult: r})
 	}
 	r.Results = ors
 	return ors
@@ -29,7 +29,7 @@ func (r *ReportAdapter) GetResults() []ORResultAdapter {
 
 func (r *ReportAdapter) HasResult(id string) bool {
 	for _, r := range r.Report.Results {
-		or := &ORResultAdapter{ReportResult: r}
+		or := &ResultAdapter{ReportResult: r}
 		if or.GetID() == id {
 			return true
 		}
@@ -38,7 +38,7 @@ func (r *ReportAdapter) HasResult(id string) bool {
 	return false
 }
 
-func (r *ReportAdapter) SetResults(results []ORResultAdapter) {
+func (r *ReportAdapter) SetResults(results []ResultAdapter) {
 	r.Results = results
 }
 
@@ -61,7 +61,7 @@ func (r *ReportAdapter) GetKinds() []string {
 
 	list := make([]string, 0)
 	for _, k := range r.Report.Results {
-		or := &ORResultAdapter{ReportResult: k}
+		or := &ResultAdapter{ReportResult: k}
 		if !or.HasResource() {
 			continue
 		}

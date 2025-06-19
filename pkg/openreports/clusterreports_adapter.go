@@ -12,16 +12,16 @@ import (
 
 type ClusterReportAdapter struct {
 	*v1alpha1.ClusterReport
-	Results []ORResultAdapter
+	Results []ResultAdapter
 }
 
-func (r *ClusterReportAdapter) GetResults() []ORResultAdapter {
+func (r *ClusterReportAdapter) GetResults() []ResultAdapter {
 	if len(r.Results) > 0 {
 		return r.Results
 	}
-	ors := []ORResultAdapter{}
+	ors := []ResultAdapter{}
 	for _, r := range r.ClusterReport.Results {
-		ors = append(ors, ORResultAdapter{ReportResult: r})
+		ors = append(ors, ResultAdapter{ReportResult: r})
 	}
 	r.Results = ors
 	return ors
@@ -29,7 +29,7 @@ func (r *ClusterReportAdapter) GetResults() []ORResultAdapter {
 
 func (r *ClusterReportAdapter) HasResult(id string) bool {
 	for _, r := range r.ClusterReport.Results {
-		or := &ORResultAdapter{ReportResult: r}
+		or := &ResultAdapter{ReportResult: r}
 		if or.GetID() == id {
 			return true
 		}
@@ -38,7 +38,7 @@ func (r *ClusterReportAdapter) HasResult(id string) bool {
 	return false
 }
 
-func (r *ClusterReportAdapter) SetResults(results []ORResultAdapter) {
+func (r *ClusterReportAdapter) SetResults(results []ResultAdapter) {
 	r.Results = results
 }
 
@@ -61,7 +61,7 @@ func (r *ClusterReportAdapter) GetKinds() []string {
 
 	list := make([]string, 0)
 	for _, k := range r.ClusterReport.Results {
-		or := &ORResultAdapter{ReportResult: k}
+		or := &ResultAdapter{ReportResult: k}
 		if !or.HasResource() {
 			continue
 		}

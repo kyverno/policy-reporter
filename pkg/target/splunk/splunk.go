@@ -35,14 +35,14 @@ type client struct {
 	token        string
 }
 
-func (c *client) Send(result openreports.ORResultAdapter) {
+func (c *client) Send(result openreports.ResultAdapter) {
 	c.sendAndLogResult(splunkRequest{
 		Event:      http.NewJSONResult(result),
 		SourceType: policyReporterSource,
 	})
 }
 
-func (c *client) BatchSend(rep openreports.ReportInterface, results []openreports.ORResultAdapter) {
+func (c *client) BatchSend(rep openreports.ReportInterface, results []openreports.ResultAdapter) {
 	srs := ""
 	for _, res := range results {
 		sr := splunkRequest{

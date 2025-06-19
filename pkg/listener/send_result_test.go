@@ -21,7 +21,7 @@ type client struct {
 	cleanup               bool
 }
 
-func (c *client) Send(result openreports.ORResultAdapter) {
+func (c *client) Send(result openreports.ResultAdapter) {
 	c.Called = true
 }
 
@@ -41,7 +41,7 @@ func (c *client) SkipExistingOnStartup() bool {
 	return c.skipExistingOnStartup
 }
 
-func (c client) Validate(rep openreports.ReportInterface, result openreports.ORResultAdapter) bool {
+func (c client) Validate(rep openreports.ReportInterface, result openreports.ResultAdapter) bool {
 	return c.validated
 }
 
@@ -55,7 +55,7 @@ func (c *client) CleanUp(_ context.Context, _ openreports.ReportInterface) {
 	c.cleanupCalled = true
 }
 
-func (c *client) BatchSend(_ openreports.ReportInterface, _ []openreports.ORResultAdapter) {
+func (c *client) BatchSend(_ openreports.ReportInterface, _ []openreports.ResultAdapter) {
 	c.Called = true
 }
 

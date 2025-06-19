@@ -50,12 +50,12 @@ func GetType(r openreports.ReportInterface) ResourceType {
 	return PolicyReportType
 }
 
-func FindNewResults(nr, or openreports.ReportInterface) []openreports.ORResultAdapter {
+func FindNewResults(nr, or openreports.ReportInterface) []openreports.ResultAdapter {
 	if or == nil {
 		return nr.GetResults()
 	}
 
-	diff := make([]openreports.ORResultAdapter, 0)
+	diff := make([]openreports.ResultAdapter, 0)
 loop:
 	for _, r := range nr.GetResults() {
 		for _, o := range or.GetResults() {

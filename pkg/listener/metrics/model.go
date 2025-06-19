@@ -20,19 +20,19 @@ const (
 )
 
 var LabelGeneratorMapping = map[string]LabelCallback{
-	"namespace": func(m map[string]string, pr openreports.ReportInterface, _ openreports.ORResultAdapter) {
+	"namespace": func(m map[string]string, pr openreports.ReportInterface, _ openreports.ResultAdapter) {
 		m["namespace"] = pr.GetNamespace()
 	},
-	"report": func(m map[string]string, pr openreports.ReportInterface, _ openreports.ORResultAdapter) {
+	"report": func(m map[string]string, pr openreports.ReportInterface, _ openreports.ResultAdapter) {
 		m["report"] = pr.GetName()
 	},
-	"policy": func(m map[string]string, _ openreports.ReportInterface, r openreports.ORResultAdapter) {
+	"policy": func(m map[string]string, _ openreports.ReportInterface, r openreports.ResultAdapter) {
 		m["policy"] = r.Policy
 	},
-	"rule": func(m map[string]string, _ openreports.ReportInterface, r openreports.ORResultAdapter) {
+	"rule": func(m map[string]string, _ openreports.ReportInterface, r openreports.ResultAdapter) {
 		m["rule"] = r.Rule
 	},
-	"kind": func(m map[string]string, _ openreports.ReportInterface, r openreports.ORResultAdapter) {
+	"kind": func(m map[string]string, _ openreports.ReportInterface, r openreports.ResultAdapter) {
 		if !r.HasResource() {
 			m["kind"] = ""
 			return
@@ -40,7 +40,7 @@ var LabelGeneratorMapping = map[string]LabelCallback{
 
 		m["kind"] = r.GetResource().Kind
 	},
-	"name": func(m map[string]string, _ openreports.ReportInterface, r openreports.ORResultAdapter) {
+	"name": func(m map[string]string, _ openreports.ReportInterface, r openreports.ResultAdapter) {
 		if !r.HasResource() {
 			m["name"] = ""
 			return
@@ -48,19 +48,19 @@ var LabelGeneratorMapping = map[string]LabelCallback{
 
 		m["name"] = r.GetResource().Name
 	},
-	"severity": func(m map[string]string, _ openreports.ReportInterface, r openreports.ORResultAdapter) {
+	"severity": func(m map[string]string, _ openreports.ReportInterface, r openreports.ResultAdapter) {
 		m["severity"] = string(r.Severity)
 	},
-	"category": func(m map[string]string, _ openreports.ReportInterface, r openreports.ORResultAdapter) {
+	"category": func(m map[string]string, _ openreports.ReportInterface, r openreports.ResultAdapter) {
 		m["category"] = r.Category
 	},
-	"source": func(m map[string]string, _ openreports.ReportInterface, r openreports.ORResultAdapter) {
+	"source": func(m map[string]string, _ openreports.ReportInterface, r openreports.ResultAdapter) {
 		m["source"] = r.Source
 	},
-	"status": func(m map[string]string, _ openreports.ReportInterface, r openreports.ORResultAdapter) {
+	"status": func(m map[string]string, _ openreports.ReportInterface, r openreports.ResultAdapter) {
 		m["status"] = string(r.Result)
 	},
-	"message": func(m map[string]string, _ openreports.ReportInterface, r openreports.ORResultAdapter) {
+	"message": func(m map[string]string, _ openreports.ReportInterface, r openreports.ResultAdapter) {
 		m["message"] = r.Description
 	},
 }
@@ -73,14 +73,14 @@ func CreateLabelGenerator(labels []string, names []string) LabelGenerator {
 			label := strings.TrimPrefix(label, ReportLabelPrefix)
 			lIndex := index
 
-			chains = append(chains, func(m map[string]string, pr openreports.ReportInterface, _ openreports.ORResultAdapter) {
+			chains = append(chains, func(m map[string]string, pr openreports.ReportInterface, _ openreports.ResultAdapter) {
 				m[names[lIndex]] = pr.GetLabels()[label]
 			})
 		} else if strings.HasPrefix(label, ReportPropertyPrefix) {
 			label := strings.TrimPrefix(label, ReportPropertyPrefix)
 			pIndex := index
 
-			chains = append(chains, func(m map[string]string, _ openreports.ReportInterface, r openreports.ORResultAdapter) {
+			chains = append(chains, func(m map[string]string, _ openreports.ReportInterface, r openreports.ResultAdapter) {
 				val := ""
 
 				if r.Properties != nil {
@@ -94,7 +94,7 @@ func CreateLabelGenerator(labels []string, names []string) LabelGenerator {
 		}
 	}
 
-	return func(pr openreports.ReportInterface, r openreports.ORResultAdapter) map[string]string {
+	return func(pr openreports.ReportInterface, r openreports.ResultAdapter) map[string]string {
 		labels := map[string]string{}
 		for _, generate := range chains {
 			generate(labels, pr, r)

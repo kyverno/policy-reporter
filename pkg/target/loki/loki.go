@@ -38,7 +38,7 @@ type Stream struct {
 
 type Value = []string
 
-func newLokiStream(result openreports.ORResultAdapter, customFields map[string]string) Stream {
+func newLokiStream(result openreports.ResultAdapter, customFields map[string]string) Stream {
 	timestamp := time.Now()
 	if result.Timestamp.Seconds != 0 {
 		timestamp = time.Unix(result.Timestamp.Seconds, int64(result.Timestamp.Nanos))
@@ -101,7 +101,7 @@ type client struct {
 	password     string
 }
 
-func (l *client) Send(result openreports.ORResultAdapter) {
+func (l *client) Send(result openreports.ResultAdapter) {
 	l.send(Payload{
 		Streams: []Stream{
 			newLokiStream(result, l.customFields),
@@ -109,8 +109,8 @@ func (l *client) Send(result openreports.ORResultAdapter) {
 	})
 }
 
-func (l *client) BatchSend(_ openreports.ReportInterface, results []openreports.ORResultAdapter) {
-	l.send(Payload{Streams: helper.Map(results, func(result openreports.ORResultAdapter) Stream {
+func (l *client) BatchSend(_ openreports.ReportInterface, results []openreports.ResultAdapter) {
+	l.send(Payload{Streams: helper.Map(results, func(result openreports.ResultAdapter) Stream {
 		return newLokiStream(result, l.customFields)
 	})})
 }

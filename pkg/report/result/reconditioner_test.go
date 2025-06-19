@@ -104,7 +104,7 @@ func TestReconditioner(t *testing.T) {
 				},
 			},
 
-			Results: []openreports.ORResultAdapter{
+			Results: []openreports.ResultAdapter{
 				{
 					ID: "12348",
 					ReportResult: v1alpha1.ReportResult{

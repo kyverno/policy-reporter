@@ -60,7 +60,7 @@ func Test_FindNewEvents(t *testing.T) {
 			Results: []v1alpha1.ReportResult{fixtures.FailResult.ReportResult},
 			Summary: v1alpha1.ReportSummary{},
 		},
-		Results: []openreports.ORResultAdapter{fixtures.FailResult},
+		Results: []openreports.ResultAdapter{fixtures.FailResult},
 	}
 	preport2 := &openreports.ReportAdapter{
 		Report: &v1alpha1.Report{
@@ -72,7 +72,7 @@ func Test_FindNewEvents(t *testing.T) {
 			Results: []v1alpha1.ReportResult{fixtures.FailResult.ReportResult, fixtures.FailPodResult.ReportResult},
 			Summary: v1alpha1.ReportSummary{},
 		},
-		Results: []openreports.ORResultAdapter{fixtures.FailResult, fixtures.FailPodResult},
+		Results: []openreports.ResultAdapter{fixtures.FailResult, fixtures.FailPodResult},
 	}
 
 	diff := report.FindNewResults(preport2, preport1)

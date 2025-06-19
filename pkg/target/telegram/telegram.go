@@ -58,7 +58,7 @@ type Payload struct {
 }
 
 type values struct {
-	Result   openreports.ORResultAdapter
+	Result   openreports.ResultAdapter
 	Time     time.Time
 	Resource *corev1.ObjectReference
 	Props    map[string]string
@@ -84,7 +84,7 @@ type client struct {
 	client       http.Client
 }
 
-func (e *client) Send(result openreports.ORResultAdapter) {
+func (e *client) Send(result openreports.ResultAdapter) {
 	if len(e.customFields) > 0 {
 		props := make(map[string]string, 0)
 
@@ -150,7 +150,7 @@ func (e *client) Reset(_ context.Context) error {
 	return nil
 }
 
-func (e *client) BatchSend(_ openreports.ReportInterface, _ []openreports.ORResultAdapter) {}
+func (e *client) BatchSend(_ openreports.ReportInterface, _ []openreports.ResultAdapter) {}
 
 func (e *client) Type() target.ClientType {
 	return target.SingleSend

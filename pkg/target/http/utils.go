@@ -53,7 +53,7 @@ func ProcessHTTPResponse(target string, resp *http.Response, err error) {
 	}
 }
 
-func NewJSONResult(r openreports.ORResultAdapter) Result {
+func NewJSONResult(r openreports.ResultAdapter) Result {
 	res := Resource{}
 	if r.HasResource() {
 		resOb := r.GetResource()
