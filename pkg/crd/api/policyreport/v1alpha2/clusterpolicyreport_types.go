@@ -69,8 +69,8 @@ func (r *ClusterPolicyReport) GetResults() []PolicyReportResult {
 }
 
 func (r *ClusterPolicyReport) HasResult(id string) bool {
-	for _, r := range r.Results {
-		if r.GetID() == id {
+	for idx := range r.Results {
+		if r.Results[idx].GetID() == id {
 			return true
 		}
 	}
@@ -111,12 +111,12 @@ func (r *ClusterPolicyReport) GetKinds() []string {
 	}
 
 	list := make([]string, 0)
-	for _, k := range r.Results {
-		if !k.HasResource() {
+	for idx := range r.Results {
+		if !r.Results[idx].HasResource() {
 			continue
 		}
 
-		kind := k.GetResource().Kind
+		kind := r.Results[idx].GetResource().Kind
 
 		if kind == "" || helper.Contains(kind, list) {
 			continue
@@ -130,13 +130,13 @@ func (r *ClusterPolicyReport) GetKinds() []string {
 
 func (r *ClusterPolicyReport) GetSeverities() []string {
 	list := make([]string, 0)
-	for _, k := range r.Results {
+	for idx := range r.Results {
 
-		if k.Severity == "" || helper.Contains(string(k.Severity), list) {
+		if r.Results[idx].Severity == "" || helper.Contains(string(r.Results[idx].Severity), list) {
 			continue
 		}
 
-		list = append(list, string(k.Severity))
+		list = append(list, string(r.Results[idx].Severity))
 	}
 
 	return list

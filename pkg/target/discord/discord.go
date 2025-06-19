@@ -65,8 +65,11 @@ func newPayload(result v1alpha2.PolicyReportResult, customFields map[string]stri
 	if result.HasResource() {
 		res := result.GetResource()
 
-		embedFields = append(embedFields, embedField{"Kind", res.Kind, true})
-		embedFields = append(embedFields, embedField{"Name", res.Name, true})
+		embedFields = append(
+			embedFields,
+			embedField{"Kind", res.Kind, true},
+			embedField{"Name", res.Name, true},
+		)
 		if res.Namespace != "" {
 			embedFields = append(embedFields, embedField{"Namespace", res.Namespace, true})
 		}

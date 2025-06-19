@@ -25,7 +25,7 @@ func TestDebug(t *testing.T) {
 
 	r := http.NewLoggingRoundTripper(mock{})
 
-	_, err := r.RoundTrip(httptest.NewRequest("GET", "http://localhost:8080/healthz", nil))
+	_, err := r.RoundTrip(httptest.NewRequest("GET", "http://localhost:8080/healthz", net.NoBody))
 
 	assert.Nil(t, err)
 

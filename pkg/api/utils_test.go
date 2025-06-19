@@ -23,14 +23,13 @@ func TestSendResponseSuccess(t *testing.T) {
 		api.SendResponse(ctx, "data", "", nil)
 	})
 
-	req, _ := http.NewRequest("GET", "/send", nil)
+	req, _ := http.NewRequest("GET", "/send", http.NoBody)
 	w := httptest.NewRecorder()
 
 	server.Serve(w, req)
 
-	assert := assert.New(t)
-	assert.Equal(http.StatusOK, w.Code)
-	assert.Equal(`"data"`, w.Body.String())
+	assert.Equal(t, http.StatusOK, w.Code)
+	assert.Equal(t, `"data"`, w.Body.String())
 }
 
 func TestSendResponseError(t *testing.T) {
@@ -42,14 +41,13 @@ func TestSendResponseError(t *testing.T) {
 		api.SendResponse(ctx, nil, "errorMsg", errors.New("error"))
 	})
 
-	req, _ := http.NewRequest("GET", "/send", nil)
+	req, _ := http.NewRequest("GET", "/send", http.NoBody)
 	w := httptest.NewRecorder()
 
 	server.Serve(w, req)
 
-	assert := assert.New(t)
-	assert.Equal(http.StatusInternalServerError, w.Code)
-	assert.Equal("", w.Body.String())
+	assert.Equal(t, http.StatusInternalServerError, w.Code)
+	assert.Equal(t, "", w.Body.String())
 }
 
 func TestBuildFilter(t *testing.T) {
@@ -61,8 +59,7 @@ func TestBuildFilter(t *testing.T) {
 		},
 	})
 
-	assert := assert.New(t)
-	assert.Equal(db.Filter{
+	assert.Equal(t, db.Filter{
 		ReportLabel: map[string]string{
 			"env": "test",
 			"app": "nginx",
@@ -84,8 +81,7 @@ func TestPaginationDefaults(t *testing.T) {
 		},
 	}, []string{"namespace", "source"})
 
-	assert := assert.New(t)
-	assert.Equal(db.Pagination{
+	assert.Equal(t, db.Pagination{
 		Page:      0,
 		Offset:    0,
 		SortBy:    []string{"namespace", "source"},
@@ -102,8 +98,7 @@ func TestPaginationFromURL(t *testing.T) {
 		},
 	}, []string{"namespace", "source"})
 
-	assert := assert.New(t)
-	assert.Equal(db.Pagination{
+	assert.Equal(t, db.Pagination{
 		Page:      5,
 		Offset:    10,
 		SortBy:    []string{"namespace", "kind"},

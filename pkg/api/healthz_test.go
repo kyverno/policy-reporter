@@ -21,13 +21,12 @@ func TestHealthCheckSuccess(t *testing.T) {
 
 	server := api.NewServer(gin.New(), api.WithHealthChecks([]api.HealthCheck{check}))
 
-	req, _ := http.NewRequest("GET", "/healthz", nil)
+	req, _ := http.NewRequest("GET", "/healthz", http.NoBody)
 	w := httptest.NewRecorder()
 
 	server.Serve(w, req)
 
-	assert := assert.New(t)
-	assert.Equal(http.StatusOK, w.Code)
+	assert.Equal(t, http.StatusOK, w.Code)
 }
 
 func TestHealthCheckError(t *testing.T) {
@@ -43,13 +42,12 @@ func TestHealthCheckError(t *testing.T) {
 
 	server := api.NewServer(gin.New(), api.WithHealthChecks([]api.HealthCheck{check, err}))
 
-	req, _ := http.NewRequest("GET", "/healthz", nil)
+	req, _ := http.NewRequest("GET", "/healthz", http.NoBody)
 	w := httptest.NewRecorder()
 
 	server.Serve(w, req)
 
-	assert := assert.New(t)
-	assert.Equal(http.StatusServiceUnavailable, w.Code)
+	assert.Equal(t, http.StatusServiceUnavailable, w.Code)
 }
 
 func TestReadyCheckSuccess(t *testing.T) {
@@ -61,11 +59,10 @@ func TestReadyCheckSuccess(t *testing.T) {
 
 	server := api.NewServer(gin.New(), api.WithHealthChecks([]api.HealthCheck{check}))
 
-	req, _ := http.NewRequest("GET", "/ready", nil)
+	req, _ := http.NewRequest("GET", "/ready", http.NoBody)
 	w := httptest.NewRecorder()
 
 	server.Serve(w, req)
 
-	assert := assert.New(t)
-	assert.Equal(http.StatusOK, w.Code)
+	assert.Equal(t, http.StatusOK, w.Code)
 }

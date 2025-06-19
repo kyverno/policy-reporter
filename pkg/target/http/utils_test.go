@@ -57,7 +57,7 @@ func TestProcessHTTPResponse(t *testing.T) {
 		zap.ReplaceGlobals(zap.New(obs))
 
 		w := httptest.NewRecorder()
-		w.Write([]byte(`["test"]`))
+		w.WriteString(`["test"]`)
 
 		http.ProcessHTTPResponse("Test", w.Result(), nil)
 
@@ -70,7 +70,7 @@ func TestProcessHTTPResponse(t *testing.T) {
 		zap.ReplaceGlobals(zap.New(obs))
 
 		w := httptest.NewRecorder()
-		w.Write([]byte(`["test"]`))
+		w.WriteString(`["test"]`)
 
 		http.ProcessHTTPResponse("Test", w.Result(), errors.New("error"))
 
