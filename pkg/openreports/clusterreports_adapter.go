@@ -10,12 +10,12 @@ import (
 	"openreports.io/apis/openreports.io/v1alpha1"
 )
 
-type ORClusterReportAdapter struct {
+type ClusterReportAdapter struct {
 	*v1alpha1.ClusterReport
 	Results []ORResultAdapter
 }
 
-func (r *ORClusterReportAdapter) GetResults() []ORResultAdapter {
+func (r *ClusterReportAdapter) GetResults() []ORResultAdapter {
 	if len(r.Results) > 0 {
 		return r.Results
 	}
@@ -27,7 +27,7 @@ func (r *ORClusterReportAdapter) GetResults() []ORResultAdapter {
 	return ors
 }
 
-func (r *ORClusterReportAdapter) HasResult(id string) bool {
+func (r *ClusterReportAdapter) HasResult(id string) bool {
 	for _, r := range r.ClusterReport.Results {
 		or := &ORResultAdapter{ReportResult: r}
 		if or.GetID() == id {
@@ -38,15 +38,15 @@ func (r *ORClusterReportAdapter) HasResult(id string) bool {
 	return false
 }
 
-func (r *ORClusterReportAdapter) SetResults(results []ORResultAdapter) {
+func (r *ClusterReportAdapter) SetResults(results []ORResultAdapter) {
 	r.Results = results
 }
 
-func (r *ORClusterReportAdapter) GetSummary() v1alpha1.ReportSummary {
+func (r *ClusterReportAdapter) GetSummary() v1alpha1.ReportSummary {
 	return r.Summary
 }
 
-func (r *ORClusterReportAdapter) GetSource() string {
+func (r *ClusterReportAdapter) GetSource() string {
 	if len(r.Results) == 0 {
 		return ""
 	}
@@ -54,7 +54,7 @@ func (r *ORClusterReportAdapter) GetSource() string {
 	return r.Results[0].Source
 }
 
-func (r *ORClusterReportAdapter) GetKinds() []string {
+func (r *ClusterReportAdapter) GetKinds() []string {
 	if r.GetScope() != nil {
 		return []string{r.Scope.Kind}
 	}
@@ -78,7 +78,7 @@ func (r *ORClusterReportAdapter) GetKinds() []string {
 	return list
 }
 
-func (r *ORClusterReportAdapter) GetSeverities() []string {
+func (r *ClusterReportAdapter) GetSeverities() []string {
 	list := make([]string, 0)
 	for _, k := range r.Results {
 
@@ -92,17 +92,17 @@ func (r *ORClusterReportAdapter) GetSeverities() []string {
 	return list
 }
 
-func (r *ORClusterReportAdapter) GetID() string {
+func (r *ClusterReportAdapter) GetID() string {
 	h1 := fnv1a.Init64
 	h1 = fnv1a.AddString64(h1, r.GetName())
 
 	return strconv.FormatUint(h1, 10)
 }
 
-func (r *ORClusterReportAdapter) GetKey() string {
+func (r *ClusterReportAdapter) GetKey() string {
 	return fmt.Sprintf("%s/%s", r.Namespace, r.Name)
 }
 
-func (r *ORClusterReportAdapter) GetScope() *corev1.ObjectReference {
+func (r *ClusterReportAdapter) GetScope() *corev1.ObjectReference {
 	return r.Scope
 }

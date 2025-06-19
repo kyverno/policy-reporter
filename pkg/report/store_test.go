@@ -31,7 +31,7 @@ func Test_PolicyReportStore(t *testing.T) {
 	})
 
 	t.Run("Update/Get", func(t *testing.T) {
-		ureport := &openreports.ORReportAdapter{
+		ureport := &openreports.ReportAdapter{
 			Report: &v1alpha1.Report{
 				ObjectMeta: v1.ObjectMeta{
 					Name:              "polr-test",

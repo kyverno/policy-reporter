@@ -10,12 +10,12 @@ import (
 	"openreports.io/apis/openreports.io/v1alpha1"
 )
 
-type ORReportAdapter struct {
+type ReportAdapter struct {
 	*v1alpha1.Report
 	Results []ORResultAdapter
 }
 
-func (r *ORReportAdapter) GetResults() []ORResultAdapter {
+func (r *ReportAdapter) GetResults() []ORResultAdapter {
 	if len(r.Results) > 0 {
 		return r.Results
 	}
@@ -27,7 +27,7 @@ func (r *ORReportAdapter) GetResults() []ORResultAdapter {
 	return ors
 }
 
-func (r *ORReportAdapter) HasResult(id string) bool {
+func (r *ReportAdapter) HasResult(id string) bool {
 	for _, r := range r.Report.Results {
 		or := &ORResultAdapter{ReportResult: r}
 		if or.GetID() == id {
@@ -38,15 +38,15 @@ func (r *ORReportAdapter) HasResult(id string) bool {
 	return false
 }
 
-func (r *ORReportAdapter) SetResults(results []ORResultAdapter) {
+func (r *ReportAdapter) SetResults(results []ORResultAdapter) {
 	r.Results = results
 }
 
-func (r *ORReportAdapter) GetSummary() v1alpha1.ReportSummary {
+func (r *ReportAdapter) GetSummary() v1alpha1.ReportSummary {
 	return r.Summary
 }
 
-func (r *ORReportAdapter) GetSource() string {
+func (r *ReportAdapter) GetSource() string {
 	if len(r.Report.Results) == 0 {
 		return ""
 	}
@@ -54,7 +54,7 @@ func (r *ORReportAdapter) GetSource() string {
 	return r.Report.Results[0].Source
 }
 
-func (r *ORReportAdapter) GetKinds() []string {
+func (r *ReportAdapter) GetKinds() []string {
 	if r.GetScope() != nil {
 		return []string{r.Scope.Kind}
 	}
@@ -78,7 +78,7 @@ func (r *ORReportAdapter) GetKinds() []string {
 	return list
 }
 
-func (r *ORReportAdapter) GetSeverities() []string {
+func (r *ReportAdapter) GetSeverities() []string {
 	list := make([]string, 0)
 	for _, k := range r.Report.Results {
 		if k.Severity == "" || slices.Contains(list, string(k.Severity)) {
@@ -91,7 +91,7 @@ func (r *ORReportAdapter) GetSeverities() []string {
 	return list
 }
 
-func (r *ORReportAdapter) GetID() string {
+func (r *ReportAdapter) GetID() string {
 	h1 := fnv1a.Init64
 	h1 = fnv1a.AddString64(h1, r.GetName())
 	h1 = fnv1a.AddString64(h1, r.GetNamespace())
@@ -99,10 +99,10 @@ func (r *ORReportAdapter) GetID() string {
 	return strconv.FormatUint(h1, 10)
 }
 
-func (r *ORReportAdapter) GetKey() string {
+func (r *ReportAdapter) GetKey() string {
 	return fmt.Sprintf("%s/%s", r.Namespace, r.Name)
 }
 
-func (r *ORReportAdapter) GetScope() *corev1.ObjectReference {
+func (r *ReportAdapter) GetScope() *corev1.ObjectReference {
 	return r.Scope
 }

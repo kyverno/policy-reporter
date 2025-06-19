@@ -11,7 +11,7 @@ import (
 	"github.com/kyverno/policy-reporter/pkg/openreports"
 )
 
-var preport = &openreports.ORReportAdapter{
+var preport = &openreports.ReportAdapter{
 	Report: &v1alpha1.Report{
 		ObjectMeta: v1.ObjectMeta{
 			Name:              "polr-test",

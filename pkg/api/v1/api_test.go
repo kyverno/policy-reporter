@@ -41,8 +41,8 @@ func TestV1(t *testing.T) {
 	}
 
 	store.Add(context.Background(), reconditioner.Prepare(fixtures.DefaultPolicyReport))
-	store.Add(context.Background(), reconditioner.Prepare(&openreports.ORReportAdapter{Report: fixtures.KyvernoPolicyReport}))
-	store.Add(context.Background(), reconditioner.Prepare(&openreports.ORClusterReportAdapter{ClusterReport: fixtures.KyvernoClusterPolicyReport}))
+	store.Add(context.Background(), reconditioner.Prepare(&openreports.ReportAdapter{Report: fixtures.KyvernoPolicyReport}))
+	store.Add(context.Background(), reconditioner.Prepare(&openreports.ClusterReportAdapter{ClusterReport: fixtures.KyvernoClusterPolicyReport}))
 
 	gin.SetMode(gin.ReleaseMode)
 

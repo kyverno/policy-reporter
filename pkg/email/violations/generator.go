@@ -69,7 +69,7 @@ func (o *Generator) GenerateData(ctx context.Context) ([]Source, error) {
 						continue
 					}
 
-					s.AddClusterResults(mapResult(&openreports.ORClusterReportAdapter{ClusterReport: &report}, result))
+					s.AddClusterResults(mapResult(&openreports.ClusterReportAdapter{ClusterReport: &report}, result))
 				}
 			}(rep)
 		}
@@ -118,7 +118,7 @@ func (o *Generator) GenerateData(ctx context.Context) ([]Source, error) {
 				if result.Result == openreports.StatusPass || result.Result == openreports.StatusSkip {
 					continue
 				}
-				s.AddNamespacedResults(report.Namespace, mapResult(&openreports.ORReportAdapter{Report: &report}, result))
+				s.AddNamespacedResults(report.Namespace, mapResult(&openreports.ReportAdapter{Report: &report}, result))
 			}
 		}(rep)
 	}

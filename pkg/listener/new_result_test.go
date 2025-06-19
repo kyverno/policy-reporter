@@ -124,7 +124,7 @@ func Test_ResultListener(t *testing.T) {
 			Timestamp: v1.Timestamp{Seconds: time.Now().Add(-24 * time.Hour).Unix()},
 		})
 
-		slistener.Listen(report.LifecycleEvent{Type: report.Updated, PolicyReport: &openreports.ORReportAdapter{Report: rep}})
+		slistener.Listen(report.LifecycleEvent{Type: report.Updated, PolicyReport: &openreports.ReportAdapter{Report: rep}})
 
 		assert.False(t, called, "Expected Listener not called because it was unregistered")
 	})

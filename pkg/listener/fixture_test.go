@@ -11,7 +11,7 @@ import (
 	"github.com/kyverno/policy-reporter/pkg/openreports"
 )
 
-var scopereport1 = &openreports.ORReportAdapter{
+var scopereport1 = &openreports.ReportAdapter{
 	Report: &v1alpha1.Report{
 		ObjectMeta: v1.ObjectMeta{
 			Name:              "polr-test",
@@ -30,7 +30,7 @@ var scopereport1 = &openreports.ORReportAdapter{
 	Results: []openreports.ORResultAdapter{fixtures.FailResult},
 }
 
-var preport1 = &openreports.ORReportAdapter{
+var preport1 = &openreports.ReportAdapter{
 	Report: &v1alpha1.Report{
 		ObjectMeta: v1.ObjectMeta{
 			Name:              "polr-test",
@@ -43,7 +43,7 @@ var preport1 = &openreports.ORReportAdapter{
 	Results: []openreports.ORResultAdapter{fixtures.FailResult},
 }
 
-var preport2 = &openreports.ORReportAdapter{
+var preport2 = &openreports.ReportAdapter{
 	Report: &v1alpha1.Report{
 		ObjectMeta: v1.ObjectMeta{
 			Name:              "polr-test",
@@ -56,7 +56,7 @@ var preport2 = &openreports.ORReportAdapter{
 	Results: []openreports.ORResultAdapter{fixtures.FailPodResult},
 }
 
-var preport3 = &openreports.ORReportAdapter{
+var preport3 = &openreports.ReportAdapter{
 	Report: &v1alpha1.Report{
 		ObjectMeta: v1.ObjectMeta{
 			Name:              "polr-test",
@@ -67,7 +67,7 @@ var preport3 = &openreports.ORReportAdapter{
 	},
 }
 
-var creport = &openreports.ORClusterReportAdapter{
+var creport = &openreports.ClusterReportAdapter{
 	ClusterReport: &v1alpha1.ClusterReport{
 		ObjectMeta: v1.ObjectMeta{
 			Name:              "cpolr-test",

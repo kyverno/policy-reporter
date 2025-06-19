@@ -12,7 +12,7 @@ import (
 	"github.com/kyverno/policy-reporter/pkg/report"
 )
 
-var preport = &openreports.ORReportAdapter{
+var preport = &openreports.ReportAdapter{
 	Report: &v1alpha1.Report{
 		ObjectMeta: v1.ObjectMeta{
 			Name:              "polr-test",
@@ -24,7 +24,7 @@ var preport = &openreports.ORReportAdapter{
 	},
 }
 
-var creport = &openreports.ORClusterReportAdapter{
+var creport = &openreports.ClusterReportAdapter{
 	ClusterReport: &v1alpha1.ClusterReport{
 		ObjectMeta: v1.ObjectMeta{
 			Name:              "cpolr-test",
@@ -50,7 +50,7 @@ func Test_GetType(t *testing.T) {
 }
 
 func Test_FindNewEvents(t *testing.T) {
-	preport1 := &openreports.ORReportAdapter{
+	preport1 := &openreports.ReportAdapter{
 		Report: &v1alpha1.Report{
 			ObjectMeta: v1.ObjectMeta{
 				Name:              "polr-test",
@@ -62,7 +62,7 @@ func Test_FindNewEvents(t *testing.T) {
 		},
 		Results: []openreports.ORResultAdapter{fixtures.FailResult},
 	}
-	preport2 := &openreports.ORReportAdapter{
+	preport2 := &openreports.ReportAdapter{
 		Report: &v1alpha1.Report{
 			ObjectMeta: v1.ObjectMeta{
 				Name:              "polr-test",

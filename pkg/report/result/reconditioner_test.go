@@ -14,7 +14,7 @@ import (
 
 func TestReconditioner(t *testing.T) {
 	t.Run("prepare with default generator", func(t *testing.T) {
-		var report openreports.ReportInterface = &openreports.ORReportAdapter{
+		var report openreports.ReportInterface = &openreports.ReportAdapter{
 			Report: &v1alpha1.Report{
 				ObjectMeta: v1.ObjectMeta{
 					Name:      "policy-report",
@@ -68,7 +68,7 @@ func TestReconditioner(t *testing.T) {
 	})
 
 	t.Run("prepare with custom generator", func(t *testing.T) {
-		var report openreports.ReportInterface = &openreports.ORReportAdapter{
+		var report openreports.ReportInterface = &openreports.ReportAdapter{
 			Report: &v1alpha1.Report{
 				ObjectMeta: v1.ObjectMeta{
 					Name:      "policy-report",

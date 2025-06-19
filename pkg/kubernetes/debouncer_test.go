@@ -32,7 +32,7 @@ func Test_Debouncer(t *testing.T) {
 
 		debouncer.Add(report.LifecycleEvent{
 			Type:         report.Updated,
-			PolicyReport: &openreports.ORReportAdapter{Report: fixtures.MinPolicyReport.Report},
+			PolicyReport: &openreports.ReportAdapter{Report: fixtures.MinPolicyReport.Report},
 		})
 
 		time.Sleep(10 * time.Millisecond)
@@ -69,7 +69,7 @@ func Test_Debouncer(t *testing.T) {
 
 		debouncer.Add(report.LifecycleEvent{
 			Type:         report.Updated,
-			PolicyReport: &openreports.ORReportAdapter{Report: fixtures.MinPolicyReport.Report},
+			PolicyReport: &openreports.ReportAdapter{Report: fixtures.MinPolicyReport.Report},
 		})
 
 		time.Sleep(5 * time.Millisecond)
@@ -101,7 +101,7 @@ func Test_Debouncer(t *testing.T) {
 
 		debouncer.Add(report.LifecycleEvent{
 			Type:         report.Updated,
-			PolicyReport: &openreports.ORReportAdapter{Report: fixtures.MinPolicyReport.Report},
+			PolicyReport: &openreports.ReportAdapter{Report: fixtures.MinPolicyReport.Report},
 		})
 
 		time.Sleep(10 * time.Millisecond)

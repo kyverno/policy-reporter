@@ -78,12 +78,12 @@ func (q *ORQueue) processNextItem() bool {
 
 	if namespace != "" {
 		r, err = q.client.Reports(namespace).Get(context.Background(), name, v1.GetOptions{})
-		rep = &openreports.ORReportAdapter{
+		rep = &openreports.ReportAdapter{
 			Report: r,
 		}
 	} else {
 		cr, err = q.client.ClusterReports().Get(context.Background(), name, v1.GetOptions{})
-		rep = &openreports.ORClusterReportAdapter{
+		rep = &openreports.ClusterReportAdapter{
 			ClusterReport: cr,
 		}
 	}
@@ -138,7 +138,7 @@ func (q *ORQueue) handleNotFoundReport(key string) {
 	var rep openreports.ReportInterface
 	namespace, name, _ := cache.SplitMetaNamespaceKey(key)
 	if namespace == "" {
-		rep = &openreports.ORClusterReportAdapter{
+		rep = &openreports.ClusterReportAdapter{
 			ClusterReport: &reportsv1alpha1.ClusterReport{
 				ObjectMeta: v1.ObjectMeta{
 					Name: name,
@@ -146,7 +146,7 @@ func (q *ORQueue) handleNotFoundReport(key string) {
 			},
 		}
 	} else {
-		rep = &openreports.ORReportAdapter{
+		rep = &openreports.ReportAdapter{
 			Report: &reportsv1alpha1.Report{
 				ObjectMeta: v1.ObjectMeta{
 					Name:      name,

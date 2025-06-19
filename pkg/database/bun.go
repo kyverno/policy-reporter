@@ -1024,7 +1024,7 @@ func (s *Store) Get(ctx context.Context, id string) (openreports.ReportInterface
 		return nil, err
 	}
 
-	return &openreports.ORReportAdapter{
+	return &openreports.ReportAdapter{
 		Report: &v1alpha1.Report{
 			ObjectMeta: v1.ObjectMeta{
 				Name:              polr.Name,

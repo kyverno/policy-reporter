@@ -113,7 +113,7 @@ func (c *client) mapFindings(polr openreports.ReportInterface, results []openrep
 }
 
 func (c *client) Send(result openreports.ORResultAdapter) {
-	c.BatchSend(&openreports.ORReportAdapter{Report: &v1alpha1.Report{}}, []openreports.ORResultAdapter{result})
+	c.BatchSend(&openreports.ReportAdapter{Report: &v1alpha1.Report{}}, []openreports.ORResultAdapter{result})
 }
 
 func filterResults(results []openreports.ORResultAdapter) []openreports.ORResultAdapter {

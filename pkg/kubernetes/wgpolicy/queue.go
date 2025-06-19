@@ -79,10 +79,10 @@ func (q *WGPolicyQueue) processNextItem() bool {
 
 	if namespace != "" {
 		polr, err = q.client.PolicyReports(namespace).Get(context.Background(), name, v1.GetOptions{})
-		rep = &openreports.ORReportAdapter{Report: polr.ToOpenReports()}
+		rep = &openreports.ReportAdapter{Report: polr.ToOpenReports()}
 	} else {
 		cpolr, err = q.client.ClusterPolicyReports().Get(context.Background(), name, v1.GetOptions{})
-		rep = &openreports.ORClusterReportAdapter{ClusterReport: cpolr.ToOpenReports()}
+		rep = &openreports.ClusterReportAdapter{ClusterReport: cpolr.ToOpenReports()}
 	}
 	if errors.IsNotFound(err) {
 		q.handleNotFoundReport(key)
@@ -136,7 +136,7 @@ func (q *WGPolicyQueue) handleNotFoundReport(key string) {
 	namespace, name, _ := cache.SplitMetaNamespaceKey(key)
 
 	if namespace == "" {
-		rep = &openreports.ORClusterReportAdapter{
+		rep = &openreports.ClusterReportAdapter{
 			ClusterReport: &reportsv1alpha1.ClusterReport{
 				ObjectMeta: v1.ObjectMeta{
 					Name: name,
@@ -144,7 +144,7 @@ func (q *WGPolicyQueue) handleNotFoundReport(key string) {
 			},
 		}
 	} else {
-		rep = &openreports.ORReportAdapter{
+		rep = &openreports.ReportAdapter{
 			Report: &reportsv1alpha1.Report{
 				ObjectMeta: v1.ObjectMeta{
 					Name:      name,

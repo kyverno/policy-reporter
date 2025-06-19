@@ -20,7 +20,7 @@ import (
 func Test_DetailedResultMetricGeneration(t *testing.T) {
 	gauge := metrics.RegisterDetailedResultGauge("policy_report_result")
 
-	report1 := &openreports.ORReportAdapter{
+	report1 := &openreports.ReportAdapter{
 		Report: &v1alpha1.Report{
 			ObjectMeta: v1.ObjectMeta{
 				Name:              "polr-test",
@@ -32,7 +32,7 @@ func Test_DetailedResultMetricGeneration(t *testing.T) {
 		},
 	}
 
-	report2 := &openreports.ORReportAdapter{
+	report2 := &openreports.ReportAdapter{
 		Report: &v1alpha1.Report{
 			ObjectMeta: v1.ObjectMeta{
 				Name:              "polr-test",

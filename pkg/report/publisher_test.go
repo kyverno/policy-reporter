@@ -23,7 +23,7 @@ func Test_PublishLifecycleEvents(t *testing.T) {
 		wg.Done()
 	})
 
-	publisher.Publish(report.LifecycleEvent{Type: report.Added, PolicyReport: &openreports.ORReportAdapter{
+	publisher.Publish(report.LifecycleEvent{Type: report.Added, PolicyReport: &openreports.ReportAdapter{
 		Report: &v1alpha1.Report{
 			ObjectMeta: v1.ObjectMeta{
 				Name:      "polr-test",
@@ -32,7 +32,7 @@ func Test_PublishLifecycleEvents(t *testing.T) {
 		},
 	}})
 
-	publisher.Publish(report.LifecycleEvent{Type: report.Updated, PolicyReport: &openreports.ORReportAdapter{
+	publisher.Publish(report.LifecycleEvent{Type: report.Updated, PolicyReport: &openreports.ReportAdapter{
 		Report: &v1alpha1.Report{
 			ObjectMeta: v1.ObjectMeta{
 				Name:      "polr-test",
@@ -60,7 +60,7 @@ func Test_PublishDeleteLifecycleEvents(t *testing.T) {
 		wg.Done()
 	})
 
-	publisher.Publish(report.LifecycleEvent{Type: report.Added, PolicyReport: &openreports.ORReportAdapter{
+	publisher.Publish(report.LifecycleEvent{Type: report.Added, PolicyReport: &openreports.ReportAdapter{
 		Report: &v1alpha1.Report{
 			ObjectMeta: v1.ObjectMeta{
 				Name:      "polr-test",
@@ -69,7 +69,7 @@ func Test_PublishDeleteLifecycleEvents(t *testing.T) {
 		},
 	}})
 
-	publisher.Publish(report.LifecycleEvent{Type: report.Deleted, PolicyReport: &openreports.ORReportAdapter{
+	publisher.Publish(report.LifecycleEvent{Type: report.Deleted, PolicyReport: &openreports.ReportAdapter{
 		Report: &v1alpha1.Report{
 			ObjectMeta: v1.ObjectMeta{
 				Name:      "polr-test",

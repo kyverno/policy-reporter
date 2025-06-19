@@ -20,7 +20,7 @@ import (
 func Test_CustomResultMetricGeneration(t *testing.T) {
 	gauge := metrics.RegisterCustomResultGauge("policy_report_custom_result", []string{"namespace", "policy", "status", "source", "app", "xyz"})
 
-	report1 := &openreports.ORReportAdapter{
+	report1 := &openreports.ReportAdapter{
 		Report: &v1alpha1.Report{
 			ObjectMeta: v1.ObjectMeta{
 				Labels:            map[string]string{"app": "policy-reporter"},
@@ -33,7 +33,7 @@ func Test_CustomResultMetricGeneration(t *testing.T) {
 		},
 	}
 
-	report2 := &openreports.ORReportAdapter{
+	report2 := &openreports.ReportAdapter{
 		Report: &v1alpha1.Report{
 			ObjectMeta: v1.ObjectMeta{
 				Labels:            map[string]string{"app": "policy-reporter"},

@@ -20,7 +20,7 @@ var DefaultMeta = &v1.PartialObjectMetadata{
 	},
 }
 
-var DefaultPolicyReport = &openreports.ORReportAdapter{
+var DefaultPolicyReport = &openreports.ReportAdapter{
 	Report: &v1alpha1.Report{
 		ObjectMeta: v1.ObjectMeta{
 			Name:      "policy-report",
@@ -149,7 +149,7 @@ var DefaultPolicyReport = &openreports.ORReportAdapter{
 	},
 }
 
-var ScopePolicyReport = &openreports.ORReportAdapter{
+var ScopePolicyReport = &openreports.ReportAdapter{
 	Report: &v1alpha1.Report{
 		ObjectMeta: v1.ObjectMeta{
 			Name:      "policy-report",
@@ -190,7 +190,7 @@ var ScopePolicyReport = &openreports.ORReportAdapter{
 	},
 }
 
-var MultiResourcePolicyReport = &openreports.ORReportAdapter{
+var MultiResourcePolicyReport = &openreports.ReportAdapter{
 	Report: &v1alpha1.Report{
 		ObjectMeta: v1.ObjectMeta{
 			Name:      "policy-report",
@@ -236,7 +236,7 @@ var MultiResourcePolicyReport = &openreports.ORReportAdapter{
 	},
 }
 
-var MinPolicyReport = &openreports.ORReportAdapter{
+var MinPolicyReport = &openreports.ReportAdapter{
 	Report: &v1alpha1.Report{
 		ObjectMeta: v1.ObjectMeta{
 			Name:      "policy-report",
@@ -245,7 +245,7 @@ var MinPolicyReport = &openreports.ORReportAdapter{
 	},
 }
 
-var EnforceReport = &openreports.ORReportAdapter{
+var EnforceReport = &openreports.ReportAdapter{
 	Report: &v1alpha1.Report{
 		ObjectMeta: v1.ObjectMeta{
 			Name:              "policy-report",
@@ -312,7 +312,7 @@ var DefaultClusterMeta = &v1.PartialObjectMetadata{
 	},
 }
 
-var ClusterPolicyReport = &openreports.ORClusterReportAdapter{
+var ClusterPolicyReport = &openreports.ClusterReportAdapter{
 	ClusterReport: &v1alpha1.ClusterReport{
 		ObjectMeta: v1.ObjectMeta{
 			Name: "cluster-policy-report",
@@ -404,7 +404,7 @@ var PassPolicyReport = &v1alpha1.Report{
 	},
 }
 
-var EmptyPolicyReport = &openreports.ORReportAdapter{
+var EmptyPolicyReport = &openreports.ReportAdapter{
 	Report: &v1alpha1.Report{
 		ObjectMeta: v1.ObjectMeta{
 			Name:      "empty-policy-report",
@@ -414,7 +414,7 @@ var EmptyPolicyReport = &openreports.ORReportAdapter{
 	},
 }
 
-var PassClusterPolicyReport = &openreports.ORClusterReportAdapter{
+var PassClusterPolicyReport = &openreports.ClusterReportAdapter{
 	ClusterReport: &v1alpha1.ClusterReport{
 		ObjectMeta: v1.ObjectMeta{
 			Name: "pass-cluster-policy-report",

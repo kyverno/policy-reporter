@@ -14,7 +14,7 @@ import (
 	"github.com/kyverno/policy-reporter/pkg/validate"
 )
 
-var preport = &openreports.ORReportAdapter{
+var preport = &openreports.ReportAdapter{
 	Report: &v1alpha1.Report{
 		ObjectMeta: v1.ObjectMeta{
 			Labels: map[string]string{"app": "policy-reporter"},
@@ -341,7 +341,7 @@ func Test_BaseClient(t *testing.T) {
 			SkipExistingOnStartup: true,
 		})
 
-		assert.False(t, client.Validate(&openreports.ORReportAdapter{Report: &v1alpha1.Report{}}, fixtures.FailResult), "Unexpected Validation Result")
+		assert.False(t, client.Validate(&openreports.ReportAdapter{Report: &v1alpha1.Report{}}, fixtures.FailResult), "Unexpected Validation Result")
 	})
 
 	t.Run("Client Report Validation", func(t *testing.T) {
@@ -354,7 +354,7 @@ func Test_BaseClient(t *testing.T) {
 			SkipExistingOnStartup: true,
 		})
 
-		assert.False(t, client.Validate(&openreports.ORReportAdapter{Report: &v1alpha1.Report{}}, fixtures.FailResult), "Unexpected Validation Result")
+		assert.False(t, client.Validate(&openreports.ReportAdapter{Report: &v1alpha1.Report{}}, fixtures.FailResult), "Unexpected Validation Result")
 	})
 
 	t.Run("Client nil Validation", func(t *testing.T) {
@@ -376,7 +376,7 @@ func Test_BaseClient(t *testing.T) {
 			SkipExistingOnStartup: true,
 		})
 
-		assert.True(t, client.Validate(&openreports.ORReportAdapter{Report: &v1alpha1.Report{}}, fixtures.FailResult), "Should fallback to true")
+		assert.True(t, client.Validate(&openreports.ReportAdapter{Report: &v1alpha1.Report{}}, fixtures.FailResult), "Should fallback to true")
 		assert.Equal(t, client.MinimumSeverity(), openreports.SeverityInfo, "Should fallback to severity info")
 		assert.NotNil(t, client.Sources(), "Should fallback to empty list")
 	})
