@@ -3,8 +3,9 @@ package summary
 import (
 	"sync"
 
-	"github.com/kyverno/policy-reporter/pkg/openreports"
 	reportsv1alpha1 "openreports.io/apis/openreports.io/v1alpha1"
+
+	"github.com/kyverno/policy-reporter/pkg/openreports"
 )
 
 type Summary struct {
