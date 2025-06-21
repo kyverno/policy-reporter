@@ -5,7 +5,7 @@ import (
 
 	"go.uber.org/zap"
 
-	"github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
+	"github.com/kyverno/policy-reporter/pkg/openreports"
 	"github.com/kyverno/policy-reporter/pkg/target"
 	targethttp "github.com/kyverno/policy-reporter/pkg/target/http"
 )
@@ -38,20 +38,20 @@ type client struct {
 // Ensure the client type implements the Client interface
 var _ Client = (*client)(nil)
 
-func (a *client) Send(result v1alpha2.PolicyReportResult) {
+func (a *client) Send(result openreports.ResultAdapter) {
 	zap.L().Debug("Sending policy violation to AlertManager",
 		zap.String("policy", result.Policy),
 		zap.String("rule", result.Rule),
 		zap.String("severity", string(result.Severity)),
 		zap.String("status", string(result.Result)),
 		zap.String("source", result.Source),
-		zap.String("message", result.Message))
+		zap.String("message", result.Description))
 
 	alert := a.createAlert(result)
 	a.sendAlerts([]Alert{alert})
 }
 
-func (a *client) BatchSend(report v1alpha2.ReportInterface, results []v1alpha2.PolicyReportResult) {
+func (a *client) BatchSend(report openreports.ReportInterface, results []openreports.ResultAdapter) {
 	zap.L().Debug("Batch sending policy violations to AlertManager",
 		zap.Int("count", len(results)),
 		zap.String("reportName", report.GetName()),
@@ -71,7 +71,7 @@ func (a *client) BatchSend(report v1alpha2.ReportInterface, results []v1alpha2.P
 	a.sendAlerts(alerts)
 }
 
-func (a *client) createAlert(result v1alpha2.PolicyReportResult) Alert {
+func (a *client) createAlert(result openreports.ResultAdapter) Alert {
 	labels := map[string]string{
 		"alertname": "PolicyReporterViolation",
 		"severity":  string(result.Severity),
@@ -82,7 +82,7 @@ func (a *client) createAlert(result v1alpha2.PolicyReportResult) Alert {
 	}
 
 	annotations := map[string]string{
-		"message": result.Message,
+		"message": result.Description,
 	}
 
 	// Add resource information if available

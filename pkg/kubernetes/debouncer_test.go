@@ -7,6 +7,7 @@ import (
 
 	"github.com/kyverno/policy-reporter/pkg/fixtures"
 	"github.com/kyverno/policy-reporter/pkg/kubernetes"
+	"github.com/kyverno/policy-reporter/pkg/openreports"
 	"github.com/kyverno/policy-reporter/pkg/report"
 )
 
@@ -31,7 +32,7 @@ func Test_Debouncer(t *testing.T) {
 
 		debouncer.Add(report.LifecycleEvent{
 			Type:         report.Updated,
-			PolicyReport: fixtures.MinPolicyReport,
+			PolicyReport: &openreports.ReportAdapter{Report: fixtures.MinPolicyReport.Report},
 		})
 
 		time.Sleep(10 * time.Millisecond)
@@ -68,7 +69,7 @@ func Test_Debouncer(t *testing.T) {
 
 		debouncer.Add(report.LifecycleEvent{
 			Type:         report.Updated,
-			PolicyReport: fixtures.MinPolicyReport,
+			PolicyReport: &openreports.ReportAdapter{Report: fixtures.MinPolicyReport.Report},
 		})
 
 		time.Sleep(5 * time.Millisecond)
@@ -100,7 +101,7 @@ func Test_Debouncer(t *testing.T) {
 
 		debouncer.Add(report.LifecycleEvent{
 			Type:         report.Updated,
-			PolicyReport: fixtures.MinPolicyReport,
+			PolicyReport: &openreports.ReportAdapter{Report: fixtures.MinPolicyReport.Report},
 		})
 
 		time.Sleep(10 * time.Millisecond)

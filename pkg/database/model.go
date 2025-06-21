@@ -6,8 +6,8 @@ import (
 	"github.com/segmentio/fasthash/fnv1a"
 	"github.com/uptrace/bun"
 
-	"github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
 	"github.com/kyverno/policy-reporter/pkg/helper"
+	"github.com/kyverno/policy-reporter/pkg/openreports"
 	"github.com/kyverno/policy-reporter/pkg/report"
 	"github.com/kyverno/policy-reporter/pkg/report/result"
 )
@@ -122,7 +122,7 @@ func (r *PolicyReportFilter) Hash() string {
 	return strconv.FormatUint(h1, 10)
 }
 
-func MapPolicyReport(r v1alpha2.ReportInterface) *PolicyReport {
+func MapPolicyReport(r openreports.ReportInterface) *PolicyReport {
 	return &PolicyReport{
 		ID:        r.GetID(),
 		Type:      report.GetType(r),
@@ -139,7 +139,7 @@ func MapPolicyReport(r v1alpha2.ReportInterface) *PolicyReport {
 	}
 }
 
-func MapPolicyReportResults(polr v1alpha2.ReportInterface) []*PolicyReportResult {
+func MapPolicyReportResults(polr openreports.ReportInterface) []*PolicyReportResult {
 	list := make([]*PolicyReportResult, 0, len(polr.GetResults()))
 	for _, r := range polr.GetResults() {
 		res := result.Resource(polr, r)
@@ -166,7 +166,7 @@ func MapPolicyReportResults(polr v1alpha2.ReportInterface) []*PolicyReportResult
 			Rule:           r.Rule,
 			Source:         r.Source,
 			Scored:         r.Scored,
-			Message:        r.Message,
+			Message:        r.Description,
 			Result:         string(r.Result),
 			Severity:       string(r.Severity),
 			Category:       r.Category,
@@ -178,7 +178,7 @@ func MapPolicyReportResults(polr v1alpha2.ReportInterface) []*PolicyReportResult
 	return list
 }
 
-func MapPolicyReportFilter(polr v1alpha2.ReportInterface) []*PolicyReportFilter {
+func MapPolicyReportFilter(polr openreports.ReportInterface) []*PolicyReportFilter {
 	mapping := make(map[string]*PolicyReportFilter)
 	for _, res := range polr.GetResults() {
 		kind := res.GetKind()
@@ -212,7 +212,7 @@ func MapPolicyReportFilter(polr v1alpha2.ReportInterface) []*PolicyReportFilter 
 	return list
 }
 
-func MapPolicyReportResource(polr v1alpha2.ReportInterface) []*ResourceResult {
+func MapPolicyReportResource(polr openreports.ReportInterface) []*ResourceResult {
 	mapping := make(map[string]*ResourceResult)
 	for _, res := range polr.GetResults() {
 		resource := polr.GetScope()
@@ -248,28 +248,28 @@ func MapPolicyReportResource(polr v1alpha2.ReportInterface) []*ResourceResult {
 		}
 
 		switch res.Result {
-		case v1alpha2.StatusPass:
+		case openreports.StatusPass:
 			value.Pass = value.Pass + 1
-		case v1alpha2.StatusSkip:
+		case openreports.StatusSkip:
 			value.Skip = value.Skip + 1
-		case v1alpha2.StatusWarn:
+		case openreports.StatusWarn:
 			value.Warn = value.Warn + 1
-		case v1alpha2.StatusFail:
+		case openreports.StatusFail:
 			value.Fail = value.Fail + 1
-		case v1alpha2.StatusError:
+		case openreports.StatusError:
 			value.Error = value.Error + 1
 		}
 
 		switch res.Severity {
-		case v1alpha2.SeverityInfo:
+		case openreports.SeverityInfo:
 			value.Info = value.Info + 1
-		case v1alpha2.SeverityLow:
+		case openreports.SeverityLow:
 			value.Low = value.Low + 1
-		case v1alpha2.SeverityMedium:
+		case openreports.SeverityMedium:
 			value.Medium = value.Medium + 1
-		case v1alpha2.SeverityHigh:
+		case openreports.SeverityHigh:
 			value.High = value.High + 1
-		case v1alpha2.SeverityCritical:
+		case openreports.SeverityCritical:
 			value.Critical = value.Critical + 1
 		default:
 			value.Unknown = value.Unknown + 1

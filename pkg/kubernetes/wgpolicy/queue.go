@@ -1,4 +1,4 @@
-package kubernetes
+package wgpolicyclient
 
 import (
 	"context"
@@ -13,35 +13,37 @@ import (
 	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/client-go/tools/cache"
 	"k8s.io/client-go/util/workqueue"
+	reportsv1alpha1 "openreports.io/apis/openreports.io/v1alpha1"
 
 	pr "github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
 	"github.com/kyverno/policy-reporter/pkg/crd/client/policyreport/clientset/versioned/typed/policyreport/v1alpha2"
+	"github.com/kyverno/policy-reporter/pkg/kubernetes"
+	"github.com/kyverno/policy-reporter/pkg/openreports"
 	"github.com/kyverno/policy-reporter/pkg/report"
 	"github.com/kyverno/policy-reporter/pkg/report/result"
 )
 
-type Queue struct {
+type WGPolicyQueue struct {
 	queue         workqueue.TypedRateLimitingInterface[string]
 	client        v1alpha2.Wgpolicyk8sV1alpha2Interface
 	reconditioner *result.Reconditioner
-	debouncer     Debouncer
+	debouncer     kubernetes.Debouncer
 	lock          *sync.Mutex
 	cache         sets.Set[string]
 	filter        *report.SourceFilter
 }
 
-func (q *Queue) Add(obj *v1.PartialObjectMetadata) error {
+func (q *WGPolicyQueue) Add(obj *v1.PartialObjectMetadata) error {
 	key, err := cache.MetaNamespaceKeyFunc(obj)
 	if err != nil {
 		return err
 	}
 
 	q.queue.Add(key)
-
 	return nil
 }
 
-func (q *Queue) Run(workers int, stopCh chan struct{}) {
+func (q *WGPolicyQueue) Run(workers int, stopCh chan struct{}) {
 	defer runtime.HandleCrash()
 
 	for i := 0; i < workers; i++ {
@@ -51,12 +53,12 @@ func (q *Queue) Run(workers int, stopCh chan struct{}) {
 	<-stopCh
 }
 
-func (q *Queue) runWorker() {
+func (q *WGPolicyQueue) runWorker() {
 	for q.processNextItem() {
 	}
 }
 
-func (q *Queue) processNextItem() bool {
+func (q *WGPolicyQueue) processNextItem() bool {
 	key, quit := q.queue.Get()
 	if quit {
 		return false
@@ -69,41 +71,25 @@ func (q *Queue) processNextItem() bool {
 		return true
 	}
 
-	var polr pr.ReportInterface
+	var (
+		rep   openreports.ReportInterface
+		polr  *pr.PolicyReport
+		cpolr *pr.ClusterPolicyReport
+	)
 
-	if namespace == "" {
-		polr, err = q.client.ClusterPolicyReports().Get(context.Background(), name, v1.GetOptions{})
-	} else {
+	if namespace != "" {
 		polr, err = q.client.PolicyReports(namespace).Get(context.Background(), name, v1.GetOptions{})
+		rep = &openreports.ReportAdapter{Report: polr.ToOpenReports()}
+	} else {
+		cpolr, err = q.client.ClusterPolicyReports().Get(context.Background(), name, v1.GetOptions{})
+		rep = &openreports.ClusterReportAdapter{ClusterReport: cpolr.ToOpenReports()}
 	}
-
 	if errors.IsNotFound(err) {
-		if namespace == "" {
-			polr = &pr.ClusterPolicyReport{
-				ObjectMeta: v1.ObjectMeta{
-					Name: name,
-				},
-			}
-		} else {
-			polr = &pr.PolicyReport{
-				ObjectMeta: v1.ObjectMeta{
-					Name:      name,
-					Namespace: namespace,
-				},
-			}
-		}
-
-		func() {
-			q.lock.Lock()
-			defer q.lock.Unlock()
-			q.cache.Delete(key)
-		}()
-		q.debouncer.Add(report.LifecycleEvent{Type: report.Deleted, PolicyReport: q.reconditioner.Prepare(polr)})
-
+		q.handleNotFoundReport(key)
 		return true
 	}
 
-	if ok := q.filter.Validate(polr); !ok {
+	if ok := q.filter.Validate(rep); !ok {
 		return true
 	}
 
@@ -121,12 +107,12 @@ func (q *Queue) processNextItem() bool {
 
 	q.handleErr(err, key)
 
-	q.debouncer.Add(report.LifecycleEvent{Type: event, PolicyReport: q.reconditioner.Prepare(polr)})
+	q.debouncer.Add(report.LifecycleEvent{Type: event, PolicyReport: q.reconditioner.Prepare(rep)})
 
 	return true
 }
 
-func (q *Queue) handleErr(err error, key string) {
+func (q *WGPolicyQueue) handleErr(err error, key string) {
 	if err == nil {
 		q.queue.Forget(key)
 		return
@@ -145,14 +131,45 @@ func (q *Queue) handleErr(err error, key string) {
 	zap.L().Warn("dropping report out of queue", zap.Any("key", key), zap.Error(err))
 }
 
-func NewQueue(
-	debouncer Debouncer,
+func (q *WGPolicyQueue) handleNotFoundReport(key string) {
+	var rep openreports.ReportInterface
+	namespace, name, _ := cache.SplitMetaNamespaceKey(key)
+
+	if namespace == "" {
+		rep = &openreports.ClusterReportAdapter{
+			ClusterReport: &reportsv1alpha1.ClusterReport{
+				ObjectMeta: v1.ObjectMeta{
+					Name: name,
+				},
+			},
+		}
+	} else {
+		rep = &openreports.ReportAdapter{
+			Report: &reportsv1alpha1.Report{
+				ObjectMeta: v1.ObjectMeta{
+					Name:      name,
+					Namespace: namespace,
+				},
+			},
+		}
+	}
+
+	func() {
+		q.lock.Lock()
+		defer q.lock.Unlock()
+		q.cache.Delete(key)
+	}()
+	q.debouncer.Add(report.LifecycleEvent{Type: report.Deleted, PolicyReport: q.reconditioner.Prepare(rep)})
+}
+
+func NewWGPolicyQueue(
+	debouncer kubernetes.Debouncer,
 	queue workqueue.TypedRateLimitingInterface[string],
 	client v1alpha2.Wgpolicyk8sV1alpha2Interface,
 	filter *report.SourceFilter,
 	reconditioner *result.Reconditioner,
-) *Queue {
-	return &Queue{
+) *WGPolicyQueue {
+	return &WGPolicyQueue{
 		debouncer:     debouncer,
 		queue:         queue,
 		client:        client,

@@ -1,6 +1,7 @@
 package send
 
 import (
+	"flag"
 	"strings"
 	"sync"
 
@@ -39,7 +40,7 @@ func NewSummaryCMD() *cobra.Command {
 				return err
 			}
 
-			generator, err := resolver.SummaryGenerator()
+			generator, err := resolver.SummaryGenerator(c.Openreports)
 			if err != nil {
 				return err
 			}
@@ -120,6 +121,9 @@ func NewSummaryCMD() *cobra.Command {
 			return nil
 		},
 	}
+
+	cmd.PersistentFlags().Bool("openreports", true, "Use openreports.io/v1alpha1 for the reporting api group while generating summaries")
+	flag.Parse()
 
 	return cmd
 }

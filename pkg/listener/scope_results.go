@@ -3,8 +3,8 @@ package listener
 import (
 	"sync"
 
-	"github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
 	"github.com/kyverno/policy-reporter/pkg/helper"
+	"github.com/kyverno/policy-reporter/pkg/openreports"
 	"github.com/kyverno/policy-reporter/pkg/report"
 	"github.com/kyverno/policy-reporter/pkg/target"
 )
@@ -12,7 +12,7 @@ import (
 const SendScopeResults = "send_scope_results_listener"
 
 func NewSendScopeResultsListener(targets *target.Collection) report.ScopeResultsListener {
-	return func(rep v1alpha2.ReportInterface, r []v1alpha2.PolicyReportResult, e bool) {
+	return func(rep openreports.ReportInterface, r []openreports.ResultAdapter, e bool) {
 		clients := targets.BatchSendClients()
 		if len(clients) == 0 {
 			return
@@ -22,10 +22,10 @@ func NewSendScopeResultsListener(targets *target.Collection) report.ScopeResults
 		wg.Add(len(clients))
 
 		for _, t := range clients {
-			go func(target target.Client, re v1alpha2.ReportInterface, results []v1alpha2.PolicyReportResult, preExisted bool) {
+			go func(target target.Client, re openreports.ReportInterface, results []openreports.ResultAdapter, preExisted bool) {
 				defer wg.Done()
 
-				filtered := helper.Filter(results, func(result v1alpha2.PolicyReportResult) bool {
+				filtered := helper.Filter(results, func(result openreports.ResultAdapter) bool {
 					return target.Validate(re, result)
 				})
 

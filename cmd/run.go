@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"flag"
+	"fmt"
 
 	"github.com/spf13/cobra"
 	"go.uber.org/zap"
@@ -17,6 +18,7 @@ import (
 	"github.com/kyverno/policy-reporter/pkg/config"
 	"github.com/kyverno/policy-reporter/pkg/database"
 	"github.com/kyverno/policy-reporter/pkg/listener"
+	"github.com/kyverno/policy-reporter/pkg/report"
 )
 
 func newRunCMD(version string) *cobra.Command {
@@ -52,9 +54,19 @@ func newRunCMD(version string) *cobra.Command {
 				return err
 			}
 
-			client, err := resolver.PolicyReportClient()
+			var wgClient, orClient report.PolicyReportClient
+
+			orClient, err = resolver.OpenReportsClient()
 			if err != nil {
 				return err
+			}
+			wgClient, err = resolver.WGPolicyReportClient()
+			if err != nil {
+				return err
+			}
+
+			if wgClient == nil && orClient == nil {
+				return fmt.Errorf("no valid reporting API group found in the cluster")
 			}
 
 			secretInformer, err := resolver.SecretInformer()
@@ -69,8 +81,20 @@ func newRunCMD(version string) *cobra.Command {
 				api.WithPort(c.API.Port),
 				api.WithHealthChecks([]api.HealthCheck{
 					func() error {
-						if !client.HasSynced() {
-							return errors.New("informer not ready")
+						if wgClient == nil {
+							return nil
+						}
+						if !wgClient.HasSynced() {
+							return errors.New("wginformer not ready")
+						}
+						return nil
+					},
+					func() error {
+						if orClient == nil {
+							return nil
+						}
+						if !orClient.HasSynced() {
+							return errors.New("orinformer not ready")
 						}
 						return nil
 					},
@@ -130,13 +154,18 @@ func newRunCMD(version string) *cobra.Command {
 
 					if c.REST.Enabled && !store.IsSQLite() {
 						store.PrepareDatabase(cmd.Context())
-
 						logger.Debug("register database persistence")
 						resolver.RegisterStoreListener(ctx, store)
 
 						if readinessProbe.Running() {
 							logger.Debug("trigger informer restart")
-							client.Stop()
+							if orClient != nil {
+								orClient.Stop()
+							}
+
+							if wgClient != nil {
+								wgClient.Stop()
+							}
 						}
 					}
 
@@ -193,22 +222,39 @@ func newRunCMD(version string) *cobra.Command {
 					return nil
 				})
 			}
+			if wgClient != nil {
+				g.Go(func() error {
+					logger.Info("wait for wgpolicy informer")
+					readinessProbe.Wait()
 
-			g.Go(func() error {
-				logger.Info("wait for policy informer")
-				readinessProbe.Wait()
+					logger.Info("start wgpolicy client", zap.Int("worker", c.WorkerCount))
+					for {
+						stop := make(chan struct{})
+						if err := wgClient.Run(c.WorkerCount, stop); err != nil {
+							logger.Error("wgpolicy informer client error", zap.Error(err))
+						}
 
-				logger.Info("start client", zap.Int("worker", c.WorkerCount))
-				for {
-					stop := make(chan struct{})
-
-					if err := client.Run(c.WorkerCount, stop); err != nil {
-						logger.Error("informer client error", zap.Error(err))
+						logger.Debug("wgpolicy informer restarts")
 					}
+				})
+			}
 
-					logger.Debug("informer restarts")
-				}
-			})
+			if orClient != nil {
+				g.Go(func() error {
+					logger.Info("wait for openreports informer")
+					readinessProbe.Wait()
+
+					logger.Info("start openreports client", zap.Int("worker", c.WorkerCount))
+					for {
+						stop := make(chan struct{})
+						if err := orClient.Run(c.WorkerCount, stop); err != nil {
+							logger.Error("openreports informer client error", zap.Error(err))
+						}
+
+						logger.Debug("openreports informer restarts")
+					}
+				})
+			}
 
 			g.Go(func() error {
 				collection := resolver.TargetClients()

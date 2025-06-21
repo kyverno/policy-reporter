@@ -3,7 +3,9 @@ package summary
 import (
 	"sync"
 
-	"github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
+	reportsv1alpha1 "openreports.io/apis/openreports.io/v1alpha1"
+
+	"github.com/kyverno/policy-reporter/pkg/openreports"
 )
 
 type Summary struct {
@@ -23,15 +25,15 @@ type Source struct {
 	mx *sync.Mutex
 }
 
-func (s *Source) AddClusterSummary(sum v1alpha2.PolicyReportSummary) {
-	s.ClusterScopeSummary.Skip += sum.Skip
-	s.ClusterScopeSummary.Pass += sum.Pass
-	s.ClusterScopeSummary.Warn += sum.Warn
-	s.ClusterScopeSummary.Fail += sum.Fail
-	s.ClusterScopeSummary.Error += sum.Error
+func (s *Source) AddClusterSummary(rep openreports.ReportInterface) {
+	s.ClusterScopeSummary.Skip += rep.GetSummary().Skip
+	s.ClusterScopeSummary.Pass += rep.GetSummary().Pass
+	s.ClusterScopeSummary.Warn += rep.GetSummary().Warn
+	s.ClusterScopeSummary.Fail += rep.GetSummary().Fail
+	s.ClusterScopeSummary.Error += rep.GetSummary().Error
 }
 
-func (s *Source) AddNamespacedSummary(ns string, sum v1alpha2.PolicyReportSummary) {
+func (s *Source) AddNamespacedSummary(ns string, sum reportsv1alpha1.ReportSummary) {
 	s.mx.Lock()
 	defer s.mx.Unlock()
 	if d, ok := s.NamespaceScopeSummary[ns]; ok {

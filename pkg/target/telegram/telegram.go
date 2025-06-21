@@ -11,7 +11,7 @@ import (
 	"go.uber.org/zap"
 	corev1 "k8s.io/api/core/v1"
 
-	"github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
+	"github.com/kyverno/policy-reporter/pkg/openreports"
 	"github.com/kyverno/policy-reporter/pkg/target"
 	"github.com/kyverno/policy-reporter/pkg/target/http"
 )
@@ -58,7 +58,7 @@ type Payload struct {
 }
 
 type values struct {
-	Result   v1alpha2.PolicyReportResult
+	Result   openreports.ResultAdapter
 	Time     time.Time
 	Resource *corev1.ObjectReference
 	Props    map[string]string
@@ -84,7 +84,7 @@ type client struct {
 	client       http.Client
 }
 
-func (e *client) Send(result v1alpha2.PolicyReportResult) {
+func (e *client) Send(result openreports.ResultAdapter) {
 	if len(e.customFields) > 0 {
 		props := make(map[string]string, 0)
 
@@ -144,13 +144,13 @@ func (e *client) Send(result v1alpha2.PolicyReportResult) {
 	http.ProcessHTTPResponse(e.Name(), resp, err)
 }
 
-func (e *client) CleanUp(_ context.Context, _ v1alpha2.ReportInterface) {}
+func (e *client) CleanUp(_ context.Context, _ openreports.ReportInterface) {}
 
 func (e *client) Reset(_ context.Context) error {
 	return nil
 }
 
-func (e *client) BatchSend(_ v1alpha2.ReportInterface, _ []v1alpha2.PolicyReportResult) {}
+func (e *client) BatchSend(_ openreports.ReportInterface, _ []openreports.ResultAdapter) {}
 
 func (e *client) Type() target.ClientType {
 	return target.SingleSend

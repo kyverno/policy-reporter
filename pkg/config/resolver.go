@@ -17,15 +17,18 @@ import (
 	mail "github.com/xhit/go-simple-mail/v2"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
+	"k8s.io/client-go/discovery"
 	k8s "k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/metadata"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/util/workqueue"
+	"openreports.io/pkg/client/clientset/versioned"
+	"openreports.io/pkg/client/clientset/versioned/typed/openreports.io/v1alpha1"
 
 	"github.com/kyverno/policy-reporter/pkg/api"
 	"github.com/kyverno/policy-reporter/pkg/cache"
-	"github.com/kyverno/policy-reporter/pkg/crd/client/policyreport/clientset/versioned"
-	wgpolicyk8sv1alpha2 "github.com/kyverno/policy-reporter/pkg/crd/client/policyreport/clientset/versioned/typed/policyreport/v1alpha2"
+	polrversioned "github.com/kyverno/policy-reporter/pkg/crd/client/policyreport/clientset/versioned"
+	"github.com/kyverno/policy-reporter/pkg/crd/client/policyreport/clientset/versioned/typed/policyreport/v1alpha2"
 	tcv1alpha1 "github.com/kyverno/policy-reporter/pkg/crd/client/targetconfig/clientset/versioned"
 	"github.com/kyverno/policy-reporter/pkg/database"
 	"github.com/kyverno/policy-reporter/pkg/email"
@@ -35,8 +38,10 @@ import (
 	"github.com/kyverno/policy-reporter/pkg/kubernetes"
 	"github.com/kyverno/policy-reporter/pkg/kubernetes/jobs"
 	"github.com/kyverno/policy-reporter/pkg/kubernetes/namespaces"
+	orclient "github.com/kyverno/policy-reporter/pkg/kubernetes/openreports"
 	"github.com/kyverno/policy-reporter/pkg/kubernetes/pods"
 	"github.com/kyverno/policy-reporter/pkg/kubernetes/secrets"
+	wgpolicyclient "github.com/kyverno/policy-reporter/pkg/kubernetes/wgpolicy"
 	"github.com/kyverno/policy-reporter/pkg/leaderelection"
 	"github.com/kyverno/policy-reporter/pkg/listener"
 	"github.com/kyverno/policy-reporter/pkg/listener/metrics"
@@ -56,7 +61,8 @@ type Resolver struct {
 	publisher          report.EventPublisher
 	policyStore        *database.Store
 	database           *bun.DB
-	policyReportClient report.PolicyReportClient
+	wgpolicyClient     report.PolicyReportClient
+	openreportsClient  report.PolicyReportClient
 	leaderElector      *leaderelection.Client
 	resultCache        cache.Cache
 	targetClients      *target.Collection
@@ -206,8 +212,8 @@ func (r *Resolver) CustomIDGenerators() map[string]result.IDGenerator {
 }
 
 // EventPublisher resolver method
-func (r *Resolver) Queue() (*kubernetes.Queue, error) {
-	client, err := r.CRDClient()
+func (r *Resolver) WGPolicyQueue() (*wgpolicyclient.WGPolicyQueue, error) {
+	polrClient, err := r.WgPolicyCRClient()
 	if err != nil {
 		return nil, err
 	}
@@ -222,12 +228,48 @@ func (r *Resolver) Queue() (*kubernetes.Queue, error) {
 		return nil, err
 	}
 
-	return kubernetes.NewQueue(
+	return wgpolicyclient.NewWGPolicyQueue(
 		kubernetes.NewDebouncer(1*time.Minute, r.EventPublisher()),
 		workqueue.NewTypedRateLimitingQueueWithConfig(workqueue.DefaultTypedControllerRateLimiter[string](), workqueue.TypedRateLimitingQueueConfig[string]{
-			Name: "report-queue",
+			Name: "wgreport-queue",
 		}),
-		client,
+		polrClient,
+		report.NewSourceFilter(podsClient, jobsClient, helper.Map(r.config.SourceFilters, func(f SourceFilter) report.SourceValidation {
+			return report.SourceValidation{
+				Selector:              report.ReportSelector{Source: f.Selector.Source},
+				Kinds:                 ToRuleSet(f.Kinds),
+				Sources:               ToRuleSet(f.Sources),
+				Namespaces:            ToRuleSet(f.Namespaces),
+				UncontrolledOnly:      f.UncontrolledOnly,
+				DisableClusterReports: f.DisableClusterReports,
+			}
+		})),
+		result.NewReconditioner(r.CustomIDGenerators()),
+	), nil
+}
+
+func (r *Resolver) ORQueue() (*orclient.ORQueue, error) {
+	polrClient, err := r.OpenreportsCRClient()
+	if err != nil {
+		return nil, err
+	}
+
+	podsClient, err := r.PodClient()
+	if err != nil {
+		return nil, err
+	}
+
+	jobsClient, err := r.JobClient()
+	if err != nil {
+		return nil, err
+	}
+
+	return orclient.NewORQueue(
+		kubernetes.NewDebouncer(1*time.Minute, r.EventPublisher()),
+		workqueue.NewTypedRateLimitingQueueWithConfig(workqueue.DefaultTypedControllerRateLimiter[string](), workqueue.TypedRateLimitingQueueConfig[string]{
+			Name: "orreport-queue",
+		}),
+		polrClient,
 		report.NewSourceFilter(podsClient, jobsClient, helper.Map(r.config.SourceFilters, func(f SourceFilter) report.SourceValidation {
 			return report.SourceValidation{
 				Selector:              report.ReportSelector{Source: f.Selector.Source},
@@ -430,13 +472,22 @@ func (r *Resolver) SkipExistingOnStartup() bool {
 	return true
 }
 
-func (r *Resolver) CRDClient() (wgpolicyk8sv1alpha2.Wgpolicyk8sV1alpha2Interface, error) {
+func (r *Resolver) WgPolicyCRClient() (v1alpha2.Wgpolicyk8sV1alpha2Interface, error) {
+	polrclient, err := polrversioned.NewForConfig(r.k8sConfig)
+	if err != nil {
+		return nil, err
+	}
+
+	return polrclient.Wgpolicyk8sV1alpha2(), nil
+}
+
+func (r *Resolver) OpenreportsCRClient() (v1alpha1.OpenreportsV1alpha1Interface, error) {
 	client, err := versioned.NewForConfig(r.k8sConfig)
 	if err != nil {
 		return nil, err
 	}
 
-	return client.Wgpolicyk8sV1alpha2(), nil
+	return client.OpenreportsV1alpha1(), nil
 }
 
 func (r *Resolver) CRDMetadataClient() (metadata.Interface, error) {
@@ -448,8 +499,12 @@ func (r *Resolver) CRDMetadataClient() (metadata.Interface, error) {
 	return client, nil
 }
 
-func (r *Resolver) SummaryGenerator() (*summary.Generator, error) {
-	client, err := r.CRDClient()
+func (r *Resolver) SummaryGenerator(openreports bool) (*summary.Generator, error) {
+	orclient, err := r.OpenreportsCRClient()
+	if err != nil {
+		return nil, err
+	}
+	wgpolicyclient, err := r.WgPolicyCRClient()
 	if err != nil {
 		return nil, err
 	}
@@ -460,9 +515,11 @@ func (r *Resolver) SummaryGenerator() (*summary.Generator, error) {
 	}
 
 	return summary.NewGenerator(
-		client,
+		orclient,
+		wgpolicyclient,
 		EmailReportFilterFromConfig(nsclient, r.config.EmailReports.Summary.Filter),
 		!r.config.EmailReports.Summary.Filter.DisableClusterReports,
+		openreports,
 	), nil
 }
 
@@ -475,7 +532,7 @@ func (r *Resolver) SummaryReporter() *summary.Reporter {
 }
 
 func (r *Resolver) ViolationsGenerator() (*violations.Generator, error) {
-	client, err := r.CRDClient()
+	client, err := r.OpenreportsCRClient() // todo: to same for wgpoliocy
 	if err != nil {
 		return nil, err
 	}
@@ -543,21 +600,36 @@ func (r *Resolver) TargetConfigClient() (*targetconfig.Client, error) {
 		return nil, err
 	}
 
-	crdClient, err := r.CRDClient()
+	wgpolicyClient, err := r.WgPolicyCRClient()
+	if err != nil {
+		return nil, err
+	}
+	orClient, err := r.OpenreportsCRClient()
 	if err != nil {
 		return nil, err
 	}
 
-	tcc := targetconfig.NewClient(tcClient, r.TargetFactory(), r.TargetClients(), crdClient)
+	tcc := targetconfig.NewClient(tcClient, r.TargetFactory(), r.TargetClients(), orClient, wgpolicyClient)
 	tcc.ConfigureInformer()
 
 	r.targetConfigClient = tcc
 	return tcc, nil
 }
 
-func (r *Resolver) PolicyReportClient() (report.PolicyReportClient, error) {
-	if r.policyReportClient != nil {
-		return r.policyReportClient, nil
+func (r *Resolver) WGPolicyReportClient() (report.PolicyReportClient, error) {
+	if r.wgpolicyClient != nil {
+		return r.wgpolicyClient, nil
+	}
+
+	discoveryClient, err := discovery.NewDiscoveryClientForConfig(r.k8sConfig)
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = discoveryClient.ServerResourcesForGroupVersion(orclient.OpenreportsReport.Group + "/" + orclient.OpenreportsReport.Version)
+	if err != nil {
+		zap.L().Info("wgreports api not available in the cluster")
+		return nil, nil
 	}
 
 	client, err := r.CRDMetadataClient()
@@ -565,14 +637,45 @@ func (r *Resolver) PolicyReportClient() (report.PolicyReportClient, error) {
 		return nil, err
 	}
 
-	queue, err := r.Queue()
+	queue, err := r.WGPolicyQueue()
 	if err != nil {
 		return nil, err
 	}
 
-	r.policyReportClient = kubernetes.NewPolicyReportClient(client, r.ReportFilter(), queue)
+	r.wgpolicyClient = wgpolicyclient.NewPolicyReportClient(client, r.ReportFilter(), queue)
 
-	return r.policyReportClient, nil
+	return r.wgpolicyClient, nil
+}
+
+func (r *Resolver) OpenReportsClient() (report.PolicyReportClient, error) {
+	if r.openreportsClient != nil {
+		return r.openreportsClient, nil
+	}
+
+	discoveryClient, err := discovery.NewDiscoveryClientForConfig(r.k8sConfig)
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = discoveryClient.ServerResourcesForGroupVersion(orclient.OpenreportsReport.Group + "/" + orclient.OpenreportsReport.Version)
+	if err != nil {
+		zap.L().Info("openreports api not available in the cluster")
+		return nil, nil
+	}
+
+	client, err := r.CRDMetadataClient()
+	if err != nil {
+		return nil, err
+	}
+
+	queue, err := r.ORQueue()
+	if err != nil {
+		return nil, err
+	}
+
+	r.openreportsClient = orclient.NewOpenreportsClient(client, r.ReportFilter(), queue)
+
+	return r.openreportsClient, nil
 }
 
 func (r *Resolver) ReportFilter() *report.MetaFilter {

@@ -3,7 +3,10 @@ package violations
 import (
 	"sync"
 
+	"openreports.io/apis/openreports.io/v1alpha1"
+
 	"github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
+	"github.com/kyverno/policy-reporter/pkg/openreports"
 )
 
 type Result struct {
@@ -14,11 +17,11 @@ type Result struct {
 	Status string
 }
 
-func mapResult(polr v1alpha2.ReportInterface, res v1alpha2.PolicyReportResult) []Result {
-	count := len(res.Resources)
+func mapResult(polr openreports.ReportInterface, res v1alpha1.ReportResult) []Result {
+	count := len(res.Subjects)
 	rule := res.Rule
 	if rule == "" {
-		rule = res.Message
+		rule = res.Description
 	}
 
 	if count == 0 && polr.GetScope() == nil {
@@ -38,7 +41,7 @@ func mapResult(polr v1alpha2.ReportInterface, res v1alpha2.PolicyReportResult) [
 	}
 
 	list := make([]Result, 0, count)
-	for _, re := range res.Resources {
+	for _, re := range res.Subjects {
 		list = append(list, Result{
 			Policy: res.Policy,
 			Rule:   rule,

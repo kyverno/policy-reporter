@@ -5,7 +5,7 @@ import (
 
 	"go.uber.org/zap"
 
-	"github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
+	"github.com/kyverno/policy-reporter/pkg/openreports"
 	"github.com/kyverno/policy-reporter/pkg/target"
 	"github.com/kyverno/policy-reporter/pkg/target/http"
 )
@@ -35,14 +35,14 @@ type client struct {
 	token        string
 }
 
-func (c *client) Send(result v1alpha2.PolicyReportResult) {
+func (c *client) Send(result openreports.ResultAdapter) {
 	c.sendAndLogResult(splunkRequest{
 		Event:      http.NewJSONResult(result),
 		SourceType: policyReporterSource,
 	})
 }
 
-func (c *client) BatchSend(rep v1alpha2.ReportInterface, results []v1alpha2.PolicyReportResult) {
+func (c *client) BatchSend(rep openreports.ReportInterface, results []openreports.ResultAdapter) {
 	srs := ""
 	for _, res := range results {
 		sr := splunkRequest{

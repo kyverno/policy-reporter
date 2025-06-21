@@ -8,10 +8,11 @@ import (
 	"github.com/stretchr/testify/assert"
 	corev1 "k8s.io/api/core/v1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"openreports.io/apis/openreports.io/v1alpha1"
 
-	"github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
 	"github.com/kyverno/policy-reporter/pkg/fixtures"
 	"github.com/kyverno/policy-reporter/pkg/listener/metrics"
+	"github.com/kyverno/policy-reporter/pkg/openreports"
 	"github.com/kyverno/policy-reporter/pkg/report"
 	"github.com/kyverno/policy-reporter/pkg/validate"
 )
@@ -19,24 +20,28 @@ import (
 func Test_DetailedResultMetricGeneration(t *testing.T) {
 	gauge := metrics.RegisterDetailedResultGauge("policy_report_result")
 
-	report1 := &v1alpha2.PolicyReport{
-		ObjectMeta: v1.ObjectMeta{
-			Name:              "polr-test",
-			Namespace:         "test",
-			CreationTimestamp: v1.Now(),
+	report1 := &openreports.ReportAdapter{
+		Report: &v1alpha1.Report{
+			ObjectMeta: v1.ObjectMeta{
+				Name:              "polr-test",
+				Namespace:         "test",
+				CreationTimestamp: v1.Now(),
+			},
+			Summary: v1alpha1.ReportSummary{Pass: 2, Fail: 1},
+			Results: []v1alpha1.ReportResult{fixtures.PassResult.ReportResult, fixtures.PassPodResult.ReportResult, fixtures.FailDisallowRuleResult.ReportResult},
 		},
-		Summary: v1alpha2.PolicyReportSummary{Pass: 2, Fail: 1},
-		Results: []v1alpha2.PolicyReportResult{fixtures.PassResult, fixtures.PassPodResult, fixtures.FailDisallowRuleResult},
 	}
 
-	report2 := &v1alpha2.PolicyReport{
-		ObjectMeta: v1.ObjectMeta{
-			Name:              "polr-test",
-			Namespace:         "test",
-			CreationTimestamp: v1.Now(),
+	report2 := &openreports.ReportAdapter{
+		Report: &v1alpha1.Report{
+			ObjectMeta: v1.ObjectMeta{
+				Name:              "polr-test",
+				Namespace:         "test",
+				CreationTimestamp: v1.Now(),
+			},
+			Summary: v1alpha1.ReportSummary{Pass: 0, Fail: 1},
+			Results: []v1alpha1.ReportResult{fixtures.PassResult.ReportResult, fixtures.FailDisallowRuleResult.ReportResult},
 		},
-		Summary: v1alpha2.PolicyReportSummary{Pass: 0, Fail: 1},
-		Results: []v1alpha2.PolicyReportResult{fixtures.PassResult, fixtures.FailDisallowRuleResult},
 	}
 
 	filter := metrics.NewResultFilter(validate.RuleSets{}, validate.RuleSets{}, validate.RuleSets{Exclude: []string{"disallow-policy"}}, validate.RuleSets{}, validate.RuleSets{}, validate.RuleSets{})
@@ -84,7 +89,7 @@ func Test_DetailedResultMetricGeneration(t *testing.T) {
 	})
 }
 
-func testResultMetricLabels(t *testing.T, metric *ioprometheusclient.Metric, result v1alpha2.PolicyReportResult) error {
+func testResultMetricLabels(t *testing.T, metric *ioprometheusclient.Metric, result openreports.ResultAdapter) error {
 	res := &corev1.ObjectReference{}
 	if result.HasResource() {
 		res = result.GetResource()
