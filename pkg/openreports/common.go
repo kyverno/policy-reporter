@@ -24,8 +24,6 @@ const (
 	SeverityInfo     = "info"
 )
 
-// +kubebuilder:validation:Enum=pass;fail;warn;error;skip
-
 // PolicyResult has one of the following values:
 //   - pass: indicates that the policy requirements are met
 //   - fail: indicates that the policy requirements are not met
@@ -33,8 +31,6 @@ const (
 //   - error: indicates that the policy could not be evaluated
 //   - skip: indicates that the policy was not selected based on user inputs or applicability
 type PolicyResult string
-
-// +kubebuilder:validation:Enum=critical;high;low;medium;info
 
 // PolicySeverity has one of the following values:
 // - critical
