@@ -47,6 +47,15 @@ func (r *ReportAdapter) GetSummary() v1alpha1.ReportSummary {
 }
 
 func (r *ReportAdapter) GetSource() string {
+	if r.Report.Source != "" {
+		return r.Report.Source
+	}
+
+	if len(r.GetResults()) == 0 {
+		return ""
+	}
+
+	r.Report.Source = r.Report.Results[0].Source
 	return r.Report.Source
 }
 
