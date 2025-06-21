@@ -13,6 +13,7 @@ import (
 type ReportAdapter struct {
 	*v1alpha1.Report
 	Results []ResultAdapter
+	Source  string
 }
 
 func (r *ReportAdapter) GetResults() []ResultAdapter {
@@ -28,9 +29,8 @@ func (r *ReportAdapter) GetResults() []ResultAdapter {
 }
 
 func (r *ReportAdapter) HasResult(id string) bool {
-	for _, r := range r.Report.Results {
-		or := &ResultAdapter{ReportResult: r}
-		if or.GetID() == id {
+	for _, r := range r.GetResults() {
+		if r.GetID() == id {
 			return true
 		}
 	}
@@ -47,11 +47,7 @@ func (r *ReportAdapter) GetSummary() v1alpha1.ReportSummary {
 }
 
 func (r *ReportAdapter) GetSource() string {
-	if len(r.Report.Results) == 0 {
-		return ""
-	}
-
-	return r.Report.Results[0].Source
+	return r.Report.Source
 }
 
 func (r *ReportAdapter) GetKinds() []string {
