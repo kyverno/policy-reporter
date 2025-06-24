@@ -39,8 +39,8 @@ func TestReport(t *testing.T) {
 	t.Run("GetID", func(t *testing.T) {
 		creport := openreports.ReportAdapter{Report: &v1alpha1.Report{ObjectMeta: v1.ObjectMeta{Name: "report-pod-nginx", Namespace: "default"}}}
 
-		if s := creport.GetID(); s != "1687999035284166534" {
-			t.Errorf("unexpected ID, expected '1687999035284166534', got: %s", s)
+		if s := creport.GetID(); s != "17831693618079313969" {
+			t.Errorf("unexpected ID, expected '17831693618079313969', got: %s", s)
 		}
 	})
 
