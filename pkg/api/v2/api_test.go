@@ -19,6 +19,7 @@ import (
 
 	"github.com/kyverno/policy-reporter/pkg/api"
 	v2 "github.com/kyverno/policy-reporter/pkg/api/v2"
+	"github.com/kyverno/policy-reporter/pkg/crd/api/targetconfig"
 	"github.com/kyverno/policy-reporter/pkg/crd/api/targetconfig/v1alpha1"
 	"github.com/kyverno/policy-reporter/pkg/database"
 	"github.com/kyverno/policy-reporter/pkg/fixtures"
@@ -82,7 +83,7 @@ func TestV2(t *testing.T) {
 	gin.SetMode(gin.ReleaseMode)
 
 	server := api.NewServer(gin.New(), v2.WithAPI(store, client, target.Targets{
-		Webhook: &v1alpha1.Config[v1alpha1.WebhookOptions]{
+		Webhook: &targetconfig.Config[v1alpha1.WebhookOptions]{
 			Name:            "Webhook",
 			MinimumSeverity: "warn",
 			Config: &v1alpha1.WebhookOptions{

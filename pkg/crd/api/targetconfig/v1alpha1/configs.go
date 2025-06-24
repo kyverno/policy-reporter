@@ -138,21 +138,7 @@ type GCSOptions struct {
 	Bucket      string `mapstructure:"bucket" json:"bucket"`
 }
 
-type Config[T any] struct {
-	Config          *T                `mapstructure:"config" json:"config"`
-	Name            string            `mapstructure:"name" json:"name"`
-	MinimumSeverity string            `mapstructure:"minimumSeverity" json:"minimumSeverity"`
-	Filter          filters.Filter    `mapstructure:"filter" json:"filter"`
-	SecretRef       string            `mapstructure:"secretRef" json:"secretRef"`
-	MountedSecret   string            `mapstructure:"mountedSecret" json:"mountedSecret"`
-	Sources         []string          `mapstructure:"sources" json:"sources"`
-	CustomFields    map[string]string `mapstructure:"customFields" json:"customFields"`
-	SkipExisting    bool              `mapstructure:"skipExistingOnStartup" json:"skipExistingOnStartup"`
-	Channels        []*Config[T]      `mapstructure:"channels" json:"channels"`
-	Valid           bool              `mapstructure:"-" json:"-"`
-}
-
-type ConfigStrict struct {
+type Config struct {
 	// +optional
 	Name string `mapstructure:"name" json:"name"`
 	// +optional
@@ -169,20 +155,6 @@ type ConfigStrict struct {
 	CustomFields map[string]string `mapstructure:"customFields" json:"customFields"`
 	// +optional
 	// SkipExisting bool `mapstructure:"skipExistingOnStartup" json:"skipExistingOnStartup"`
-}
-
-func (config *Config[T]) MapBaseParent(parent *Config[T]) {
-	if config.MinimumSeverity == "" {
-		config.MinimumSeverity = parent.MinimumSeverity
-	}
-
-	if !config.SkipExisting {
-		config.SkipExisting = parent.SkipExisting
-	}
-}
-
-func (config *Config[T]) Secret() string {
-	return config.SecretRef
 }
 
 func (config *AWSConfig) MapAWSParent(parent AWSConfig) {

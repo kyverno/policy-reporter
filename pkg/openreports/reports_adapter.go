@@ -13,14 +13,13 @@ import (
 type ReportAdapter struct {
 	*v1alpha1.Report
 	Results []ResultAdapter
-	Source  string
 }
 
 func (r *ReportAdapter) GetResults() []ResultAdapter {
 	if len(r.Results) > 0 {
 		return r.Results
 	}
-	ors := []ResultAdapter{}
+	ors := make([]ResultAdapter, 0, len(r.Report.Results))
 	for _, r := range r.Report.Results {
 		ors = append(ors, ResultAdapter{ReportResult: r})
 	}
@@ -47,15 +46,10 @@ func (r *ReportAdapter) GetSummary() v1alpha1.ReportSummary {
 }
 
 func (r *ReportAdapter) GetSource() string {
-	if r.Report.Source != "" {
-		return r.Report.Source
+	if r.Report.Source == "" && len(r.GetResults()) > 0 {
+		r.Report.Source = r.Report.Results[0].Source
 	}
 
-	if len(r.GetResults()) == 0 {
-		return ""
-	}
-
-	r.Report.Source = r.Report.Results[0].Source
 	return r.Report.Source
 }
 
@@ -65,8 +59,7 @@ func (r *ReportAdapter) GetKinds() []string {
 	}
 
 	list := make([]string, 0)
-	for _, k := range r.Report.Results {
-		or := &ResultAdapter{ReportResult: k}
+	for _, or := range r.GetResults() {
 		if !or.HasResource() {
 			continue
 		}

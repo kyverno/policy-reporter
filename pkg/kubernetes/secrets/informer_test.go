@@ -10,6 +10,7 @@ import (
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	metafake "k8s.io/client-go/metadata/fake"
 
+	"github.com/kyverno/policy-reporter/pkg/crd/api/targetconfig"
 	"github.com/kyverno/policy-reporter/pkg/crd/api/targetconfig/v1alpha1"
 	"github.com/kyverno/policy-reporter/pkg/kubernetes/secrets"
 	"github.com/kyverno/policy-reporter/pkg/target"
@@ -39,12 +40,12 @@ func Test_SecretInformer(t *testing.T) {
 						Name: "Webhook",
 					},
 				}),
-				Config: &v1alpha1.Config[v1alpha1.WebhookOptions]{
+				Config: &targetconfig.Config[v1alpha1.WebhookOptions]{
 					Name:      "Webhook",
 					SecretRef: secretName,
 					Config:    &v1alpha1.WebhookOptions{},
 				},
-				ParentConfig: &v1alpha1.Config[v1alpha1.WebhookOptions]{Config: &v1alpha1.WebhookOptions{}},
+				ParentConfig: &targetconfig.Config[v1alpha1.WebhookOptions]{Config: &v1alpha1.WebhookOptions{}},
 			},
 		)
 
@@ -63,6 +64,6 @@ func Test_SecretInformer(t *testing.T) {
 		secret.UpdateFake(&metav1.PartialObjectMetadata{ObjectMeta: metav1.ObjectMeta{Name: secretName, Namespace: "default"}}, metav1.UpdateOptions{})
 		time.Sleep(1 * time.Second)
 
-		assert.Equal(t, collection.Targets()[0].Config.(*v1alpha1.Config[v1alpha1.WebhookOptions]).Config.Webhook, "http://localhost:9200/webhook")
+		assert.Equal(t, collection.Targets()[0].Config.(*targetconfig.Config[v1alpha1.WebhookOptions]).Config.Webhook, "http://localhost:9200/webhook")
 	})
 }

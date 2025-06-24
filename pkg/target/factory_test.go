@@ -6,12 +6,13 @@ import (
 	"github.com/stretchr/testify/assert"
 
 	"github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
+	"github.com/kyverno/policy-reporter/pkg/crd/api/targetconfig"
 	"github.com/kyverno/policy-reporter/pkg/crd/api/targetconfig/v1alpha1"
 )
 
 func TestConfig(t *testing.T) {
 	t.Run("return expected secret ref", func(t *testing.T) {
-		c := &v1alpha1.Config[v1alpha1.WebhookOptions]{
+		c := &targetconfig.Config[v1alpha1.WebhookOptions]{
 			SecretRef: "webhook-secret",
 		}
 
@@ -19,7 +20,7 @@ func TestConfig(t *testing.T) {
 	})
 
 	t.Run("ignores secret mount", func(t *testing.T) {
-		c := &v1alpha1.Config[v1alpha1.WebhookOptions]{
+		c := &targetconfig.Config[v1alpha1.WebhookOptions]{
 			MountedSecret: "webhook-secret",
 		}
 
@@ -27,12 +28,12 @@ func TestConfig(t *testing.T) {
 	})
 
 	t.Run("base mapper set expected fallbacks from parent config", func(t *testing.T) {
-		p := &v1alpha1.Config[v1alpha1.WebhookOptions]{
+		p := &targetconfig.Config[v1alpha1.WebhookOptions]{
 			MinimumSeverity: v1alpha2.SeverityMedium,
 			SkipExisting:    true,
 		}
 
-		c := &v1alpha1.Config[v1alpha1.WebhookOptions]{}
+		c := &targetconfig.Config[v1alpha1.WebhookOptions]{}
 		c.MapBaseParent(p)
 
 		assert.Equal(t, c.MinimumSeverity, p.MinimumSeverity)
@@ -40,11 +41,11 @@ func TestConfig(t *testing.T) {
 	})
 
 	t.Run("base mapper keeps none empty values", func(t *testing.T) {
-		p := &v1alpha1.Config[v1alpha1.WebhookOptions]{
+		p := &targetconfig.Config[v1alpha1.WebhookOptions]{
 			MinimumSeverity: v1alpha2.SeverityMedium,
 		}
 
-		c := &v1alpha1.Config[v1alpha1.WebhookOptions]{
+		c := &targetconfig.Config[v1alpha1.WebhookOptions]{
 			MinimumSeverity: v1alpha2.SeverityInfo,
 		}
 

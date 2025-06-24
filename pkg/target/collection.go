@@ -8,6 +8,7 @@ import (
 
 	"go.uber.org/zap"
 
+	"github.com/kyverno/policy-reporter/pkg/crd/api/targetconfig"
 	"github.com/kyverno/policy-reporter/pkg/crd/api/targetconfig/v1alpha1"
 	"github.com/kyverno/policy-reporter/pkg/helper"
 )
@@ -33,21 +34,21 @@ const (
 )
 
 type Targets struct {
-	Loki          *v1alpha1.Config[v1alpha1.LokiOptions]          `mapstructure:"loki"`
-	Elasticsearch *v1alpha1.Config[v1alpha1.ElasticsearchOptions] `mapstructure:"elasticsearch"`
-	Slack         *v1alpha1.Config[v1alpha1.SlackOptions]         `mapstructure:"slack"`
-	Discord       *v1alpha1.Config[v1alpha1.WebhookOptions]       `mapstructure:"discord"`
-	Teams         *v1alpha1.Config[v1alpha1.WebhookOptions]       `mapstructure:"teams"`
-	Webhook       *v1alpha1.Config[v1alpha1.WebhookOptions]       `mapstructure:"webhook"`
-	GoogleChat    *v1alpha1.Config[v1alpha1.WebhookOptions]       `mapstructure:"googleChat"`
-	Jira          *v1alpha1.Config[v1alpha1.JiraOptions]          `mapstructure:"jira"`
-	Telegram      *v1alpha1.Config[v1alpha1.TelegramOptions]      `mapstructure:"telegram"`
-	S3            *v1alpha1.Config[v1alpha1.S3Options]            `mapstructure:"s3"`
-	Kinesis       *v1alpha1.Config[v1alpha1.KinesisOptions]       `mapstructure:"kinesis"`
-	SecurityHub   *v1alpha1.Config[v1alpha1.SecurityHubOptions]   `mapstructure:"securityHub"`
-	GCS           *v1alpha1.Config[v1alpha1.GCSOptions]           `mapstructure:"gcs"`
-	AlertManager  *v1alpha1.Config[v1alpha1.AlertManagerOptions]  `mapstructure:"alertManager"`
-	Splunk        *v1alpha1.Config[v1alpha1.SplunkOptions]        `mapstructure:"splunk"`
+	Loki          *targetconfig.Config[v1alpha1.LokiOptions]          `mapstructure:"loki"`
+	Elasticsearch *targetconfig.Config[v1alpha1.ElasticsearchOptions] `mapstructure:"elasticsearch"`
+	Slack         *targetconfig.Config[v1alpha1.SlackOptions]         `mapstructure:"slack"`
+	Discord       *targetconfig.Config[v1alpha1.WebhookOptions]       `mapstructure:"discord"`
+	Teams         *targetconfig.Config[v1alpha1.WebhookOptions]       `mapstructure:"teams"`
+	Webhook       *targetconfig.Config[v1alpha1.WebhookOptions]       `mapstructure:"webhook"`
+	GoogleChat    *targetconfig.Config[v1alpha1.WebhookOptions]       `mapstructure:"googleChat"`
+	Jira          *targetconfig.Config[v1alpha1.JiraOptions]          `mapstructure:"jira"`
+	Telegram      *targetconfig.Config[v1alpha1.TelegramOptions]      `mapstructure:"telegram"`
+	S3            *targetconfig.Config[v1alpha1.S3Options]            `mapstructure:"s3"`
+	Kinesis       *targetconfig.Config[v1alpha1.KinesisOptions]       `mapstructure:"kinesis"`
+	SecurityHub   *targetconfig.Config[v1alpha1.SecurityHubOptions]   `mapstructure:"securityHub"`
+	GCS           *targetconfig.Config[v1alpha1.GCSOptions]           `mapstructure:"gcs"`
+	AlertManager  *targetconfig.Config[v1alpha1.AlertManagerOptions]  `mapstructure:"alertManager"`
+	Splunk        *targetconfig.Config[v1alpha1.SplunkOptions]        `mapstructure:"splunk"`
 }
 
 type TargetConfig interface {
