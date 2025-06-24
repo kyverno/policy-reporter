@@ -20,10 +20,6 @@ var (
 	CpolrResource = pr.SchemeGroupVersion.WithResource("clusterpolicyreports")
 )
 
-const (
-	wgpolicyAPIGroup = "wgpolicyk8s.io/v1alpha2"
-)
-
 type wgpolicyReportClient struct {
 	queue        *WGPolicyQueue
 	metaClient   metadata.Interface
@@ -84,7 +80,6 @@ func (k *wgpolicyReportClient) configureInformer(informer cache.SharedIndexInfor
 		AddFunc: func(obj interface{}) {
 			if item, ok := obj.(*v1.PartialObjectMetadata); ok {
 				if k.reportFilter.AllowReport(item) {
-					item.APIVersion = wgpolicyAPIGroup
 					k.queue.Add(item)
 				}
 			}
@@ -92,7 +87,6 @@ func (k *wgpolicyReportClient) configureInformer(informer cache.SharedIndexInfor
 		DeleteFunc: func(obj interface{}) {
 			if item, ok := obj.(*v1.PartialObjectMetadata); ok {
 				if k.reportFilter.AllowReport(item) {
-					item.APIVersion = wgpolicyAPIGroup
 					k.queue.Add(item)
 				}
 			}
@@ -100,7 +94,6 @@ func (k *wgpolicyReportClient) configureInformer(informer cache.SharedIndexInfor
 		UpdateFunc: func(_, newObj interface{}) {
 			if item, ok := newObj.(*v1.PartialObjectMetadata); ok {
 				if k.reportFilter.AllowReport(item) {
-					item.APIVersion = wgpolicyAPIGroup
 					k.queue.Add(item)
 				}
 			}
