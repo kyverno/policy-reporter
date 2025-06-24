@@ -26,7 +26,7 @@ func Test_CreateReport(t *testing.T) {
 	_, _ = cClient.Create(ctx, fixtures.EmptyClusterPolicyReport, v1.CreateOptions{})
 	_, _ = cClient.Create(ctx, fixtures.KyvernoClusterPolicyReport, v1.CreateOptions{})
 
-	generator := violations.NewGenerator(client.OpenreportsV1alpha1(), filter, true)
+	generator := violations.NewGenerator(client.OpenreportsV1alpha1(), nil, filter, true)
 	data, err := generator.GenerateData(ctx)
 	if err != nil {
 		t.Fatalf("unexpected error: %s", err)

@@ -4,6 +4,7 @@ import (
 	"context"
 	"crypto/tls"
 	"crypto/x509"
+	"errors"
 	"os"
 	"strings"
 	"time"
@@ -70,6 +71,8 @@ type Resolver struct {
 	targetConfigClient *targetconfig.Client
 	logger             *zap.Logger
 	resultListener     *listener.ResultListener
+	orClient           v1alpha1.OpenreportsV1alpha1Interface
+	wgClient           v1alpha2.Wgpolicyk8sV1alpha2Interface
 }
 
 // APIServer resolver method
@@ -473,21 +476,55 @@ func (r *Resolver) SkipExistingOnStartup() bool {
 }
 
 func (r *Resolver) WgPolicyCRClient() (v1alpha2.Wgpolicyk8sV1alpha2Interface, error) {
+	if r.wgClient != nil {
+		return r.wgClient, nil
+	}
+
+	discoveryClient, err := discovery.NewDiscoveryClientForConfig(r.k8sConfig)
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = discoveryClient.ServerResourcesForGroupVersion(wgpolicyclient.PolrResource.GroupVersion().String())
+	if err != nil {
+		zap.L().Info("wgreports api not available in the cluster")
+		return nil, nil
+	}
+
 	polrclient, err := polrversioned.NewForConfig(r.k8sConfig)
 	if err != nil {
 		return nil, err
 	}
 
-	return polrclient.Wgpolicyk8sV1alpha2(), nil
+	r.wgClient = polrclient.Wgpolicyk8sV1alpha2()
+
+	return r.wgClient, nil
 }
 
 func (r *Resolver) OpenreportsCRClient() (v1alpha1.OpenreportsV1alpha1Interface, error) {
+	if r.orClient != nil {
+		return r.orClient, nil
+	}
+
+	discoveryClient, err := discovery.NewDiscoveryClientForConfig(r.k8sConfig)
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = discoveryClient.ServerResourcesForGroupVersion(orclient.OpenreportsReport.GroupVersion().String())
+	if err != nil {
+		zap.L().Info("openreports api not available in the cluster")
+		return nil, nil
+	}
+
 	client, err := versioned.NewForConfig(r.k8sConfig)
 	if err != nil {
 		return nil, err
 	}
 
-	return client.OpenreportsV1alpha1(), nil
+	r.orClient = client.OpenreportsV1alpha1()
+
+	return r.orClient, nil
 }
 
 func (r *Resolver) CRDMetadataClient() (metadata.Interface, error) {
@@ -499,7 +536,7 @@ func (r *Resolver) CRDMetadataClient() (metadata.Interface, error) {
 	return client, nil
 }
 
-func (r *Resolver) SummaryGenerator(openreports bool) (*summary.Generator, error) {
+func (r *Resolver) SummaryGenerator() (*summary.Generator, error) {
 	orclient, err := r.OpenreportsCRClient()
 	if err != nil {
 		return nil, err
@@ -507,6 +544,10 @@ func (r *Resolver) SummaryGenerator(openreports bool) (*summary.Generator, error
 	wgpolicyclient, err := r.WgPolicyCRClient()
 	if err != nil {
 		return nil, err
+	}
+
+	if orclient == nil && wgpolicyclient == nil {
+		return nil, errors.New("no valid reporting API group found in the cluster")
 	}
 
 	nsclient, err := r.NamespaceClient()
@@ -519,7 +560,6 @@ func (r *Resolver) SummaryGenerator(openreports bool) (*summary.Generator, error
 		wgpolicyclient,
 		EmailReportFilterFromConfig(nsclient, r.config.EmailReports.Summary.Filter),
 		!r.config.EmailReports.Summary.Filter.DisableClusterReports,
-		openreports,
 	), nil
 }
 
@@ -532,9 +572,17 @@ func (r *Resolver) SummaryReporter() *summary.Reporter {
 }
 
 func (r *Resolver) ViolationsGenerator() (*violations.Generator, error) {
-	client, err := r.OpenreportsCRClient() // todo: to same for wgpoliocy
+	orclient, err := r.OpenreportsCRClient()
 	if err != nil {
 		return nil, err
+	}
+	wgpolicyclient, err := r.WgPolicyCRClient()
+	if err != nil {
+		return nil, err
+	}
+
+	if orclient == nil && wgpolicyclient == nil {
+		return nil, errors.New("no valid reporting API group found in the cluster")
 	}
 
 	nsclient, err := r.NamespaceClient()
@@ -543,7 +591,8 @@ func (r *Resolver) ViolationsGenerator() (*violations.Generator, error) {
 	}
 
 	return violations.NewGenerator(
-		client,
+		orclient,
+		wgpolicyclient,
 		EmailReportFilterFromConfig(nsclient, r.config.EmailReports.Violations.Filter),
 		!r.config.EmailReports.Violations.Filter.DisableClusterReports,
 	), nil

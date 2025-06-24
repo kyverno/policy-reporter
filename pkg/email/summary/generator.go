@@ -18,7 +18,6 @@ type Generator struct {
 	wgpolicyClient    v1alpha2.Wgpolicyk8sV1alpha2Interface
 	filter            email.Filter
 	clusterReports    bool
-	openreports       bool
 }
 
 func (o *Generator) GenerateData(ctx context.Context) ([]Source, error) {
@@ -29,7 +28,7 @@ func (o *Generator) GenerateData(ctx context.Context) ([]Source, error) {
 
 	if o.clusterReports {
 		clusterReports := []openreports.ReportInterface{}
-		if o.openreports {
+		if o.openreportsClient != nil {
 			crs, err := o.openreportsClient.ClusterReports().List(ctx, v1.ListOptions{})
 			if err != nil {
 				return make([]Source, 0), err
@@ -37,7 +36,9 @@ func (o *Generator) GenerateData(ctx context.Context) ([]Source, error) {
 			for _, cr := range crs.Items {
 				clusterReports = append(clusterReports, &openreports.ClusterReportAdapter{ClusterReport: &cr})
 			}
-		} else {
+		}
+
+		if o.wgpolicyClient != nil {
 			crs, err := o.wgpolicyClient.ClusterPolicyReports().List(ctx, v1.ListOptions{})
 			if err != nil {
 				return make([]Source, 0), err
@@ -57,7 +58,7 @@ func (o *Generator) GenerateData(ctx context.Context) ([]Source, error) {
 					return
 				}
 
-				rs := report.GetResults()[0].Source
+				rs := report.GetSource()
 				if !o.filter.ValidateSource(rs) {
 					return
 				}
@@ -78,7 +79,7 @@ func (o *Generator) GenerateData(ctx context.Context) ([]Source, error) {
 	}
 	reports := []openreports.ReportInterface{}
 
-	if o.openreports {
+	if o.openreportsClient != nil {
 		rs, err := o.openreportsClient.Reports(v1.NamespaceAll).List(ctx, v1.ListOptions{})
 		if err != nil {
 			return make([]Source, 0), err
@@ -86,7 +87,9 @@ func (o *Generator) GenerateData(ctx context.Context) ([]Source, error) {
 		for _, r := range rs.Items {
 			reports = append(reports, &openreports.ReportAdapter{Report: &r})
 		}
-	} else {
+	}
+
+	if o.wgpolicyClient != nil {
 		crs, err := o.wgpolicyClient.PolicyReports(v1.NamespaceAll).List(ctx, v1.ListOptions{})
 		if err != nil {
 			return make([]Source, 0), err
@@ -105,7 +108,7 @@ func (o *Generator) GenerateData(ctx context.Context) ([]Source, error) {
 				return
 			}
 
-			rs := report.GetResults()[0].Source
+			rs := report.GetSource()
 			if !o.filter.ValidateSource(rs) {
 				return
 			}
@@ -133,8 +136,8 @@ func (o *Generator) GenerateData(ctx context.Context) ([]Source, error) {
 	return list, nil
 }
 
-func NewGenerator(orclient v1alpha1.OpenreportsV1alpha1Interface, wgpolicyclient v1alpha2.Wgpolicyk8sV1alpha2Interface, filter email.Filter, clusterReports bool, openreports bool) *Generator {
-	return &Generator{orclient, wgpolicyclient, filter, clusterReports, openreports}
+func NewGenerator(orclient v1alpha1.OpenreportsV1alpha1Interface, wgpolicyclient v1alpha2.Wgpolicyk8sV1alpha2Interface, filter email.Filter, clusterReports bool) *Generator {
+	return &Generator{orclient, wgpolicyclient, filter, clusterReports}
 }
 
 func FilterSources(sources []Source, filter email.Filter, clusterReports bool) []Source {

@@ -20,7 +20,7 @@ func Test_GenerateDataWithSingleSource(t *testing.T) {
 	_, _ = pClient.Create(ctx, fixtures.DefaultPolicyReport.Report, v1.CreateOptions{})
 	_, _ = cClient.Create(ctx, fixtures.ClusterPolicyReport.ClusterReport, v1.CreateOptions{})
 
-	generator := summary.NewGenerator(client, nil, filter, true, true)
+	generator := summary.NewGenerator(client, nil, filter, true)
 
 	data, err := generator.GenerateData(ctx)
 	if err != nil {
@@ -56,7 +56,7 @@ func Test_GenerateDataWithMultipleSource(t *testing.T) {
 	_, _ = cClient.Create(ctx, fixtures.EmptyClusterPolicyReport, v1.CreateOptions{})
 	_, _ = cClient.Create(ctx, fixtures.KyvernoClusterPolicyReport, v1.CreateOptions{})
 
-	generator := summary.NewGenerator(client, nil, filter, true, true)
+	generator := summary.NewGenerator(client, nil, filter, true)
 
 	data, err := generator.GenerateData(ctx)
 	if err != nil {
@@ -81,7 +81,7 @@ func Test_GenerateDataWithSourceFilter(t *testing.T) {
 	_, _ = cClient.Create(ctx, fixtures.EmptyClusterPolicyReport, v1.CreateOptions{})
 	_, _ = cClient.Create(ctx, fixtures.KyvernoClusterPolicyReport, v1.CreateOptions{})
 
-	generator := summary.NewGenerator(client, nil, email.NewFilter(nil, validate.RuleSets{}, validate.RuleSets{Include: []string{"test"}}), true, true)
+	generator := summary.NewGenerator(client, nil, email.NewFilter(nil, validate.RuleSets{}, validate.RuleSets{Include: []string{"test"}}), true)
 
 	data, err := generator.GenerateData(ctx)
 	if err != nil {
@@ -106,7 +106,7 @@ func Test_FilterSourcesBySource(t *testing.T) {
 	_, _ = cClient.Create(ctx, fixtures.EmptyClusterPolicyReport, v1.CreateOptions{})
 	_, _ = cClient.Create(ctx, fixtures.KyvernoClusterPolicyReport, v1.CreateOptions{})
 
-	generator := summary.NewGenerator(client, nil, filter, true, true)
+	generator := summary.NewGenerator(client, nil, filter, true)
 
 	data, err := generator.GenerateData(ctx)
 	if err != nil {
@@ -132,7 +132,7 @@ func Test_FilterSourcesByNamespace(t *testing.T) {
 	_, _ = cClient.Create(ctx, fixtures.EmptyClusterPolicyReport, v1.CreateOptions{})
 	_, _ = cClient.Create(ctx, fixtures.KyvernoClusterPolicyReport, v1.CreateOptions{})
 
-	generator := summary.NewGenerator(client, nil, filter, true, true)
+	generator := summary.NewGenerator(client, nil, filter, true)
 
 	data, err := generator.GenerateData(ctx)
 	if err != nil {
@@ -163,7 +163,7 @@ func Test_RemoveEmptySource(t *testing.T) {
 	_, _ = cClient.Create(ctx, fixtures.EmptyClusterPolicyReport, v1.CreateOptions{})
 	_, _ = cClient.Create(ctx, fixtures.KyvernoClusterPolicyReport, v1.CreateOptions{})
 
-	generator := summary.NewGenerator(client, nil, filter, true, true)
+	generator := summary.NewGenerator(client, nil, filter, true)
 
 	data, err := generator.GenerateData(ctx)
 	if err != nil {

@@ -473,7 +473,7 @@ func Test_RegisterSendResultListener(t *testing.T) {
 func Test_SummaryReportServices(t *testing.T) {
 	t.Run("Generator", func(t *testing.T) {
 		resolver := config.NewResolver(testConfig, &rest.Config{})
-		generator, err := resolver.SummaryGenerator(true)
+		generator, err := resolver.SummaryGenerator()
 
 		assert.Nil(t, err)
 		assert.NotNil(t, generator)
@@ -484,7 +484,7 @@ func Test_SummaryReportServices(t *testing.T) {
 
 		resolver := config.NewResolver(testConfig, k8sConfig)
 
-		_, err := resolver.SummaryGenerator(true)
+		_, err := resolver.SummaryGenerator()
 		assert.NotNil(t, err, "Error: 'host must be a URL or a host:port pair' was expected")
 	})
 	t.Run("Reporter", func(t *testing.T) {

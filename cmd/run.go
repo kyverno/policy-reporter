@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"flag"
-	"fmt"
 
 	"github.com/spf13/cobra"
 	"go.uber.org/zap"
@@ -66,7 +65,7 @@ func newRunCMD(version string) *cobra.Command {
 			}
 
 			if wgClient == nil && orClient == nil {
-				return fmt.Errorf("no valid reporting API group found in the cluster")
+				return errors.New("no valid reporting API group found in the cluster")
 			}
 
 			secretInformer, err := resolver.SecretInformer()
