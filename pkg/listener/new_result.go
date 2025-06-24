@@ -5,8 +5,8 @@ import (
 	"time"
 
 	"github.com/kyverno/policy-reporter/pkg/cache"
-	"github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
 	"github.com/kyverno/policy-reporter/pkg/helper"
+	"github.com/kyverno/policy-reporter/pkg/openreports"
 	"github.com/kyverno/policy-reporter/pkg/report"
 )
 
@@ -45,8 +45,8 @@ func (l *ResultListener) UnregisterSyncListener() {
 	l.syncListener = make([]report.SyncResultsListener, 0)
 }
 
-func (l *ResultListener) Validate(r v1alpha2.PolicyReportResult) bool {
-	if r.Result == v1alpha2.StatusSkip || r.Result == v1alpha2.StatusPass {
+func (l *ResultListener) Validate(r openreports.ResultAdapter) bool {
+	if r.Result == openreports.StatusSkip || r.Result == openreports.StatusPass {
 		return false
 	}
 
@@ -100,7 +100,7 @@ func (l *ResultListener) Listen(event report.LifecycleEvent) {
 	}
 
 	existing := l.cache.GetResults(event.PolicyReport.GetID())
-	newResults := make([]v1alpha2.PolicyReportResult, 0)
+	newResults := make([]openreports.ResultAdapter, 0)
 
 	for _, r := range event.PolicyReport.GetResults() {
 		if helper.Contains(r.GetID(), existing) || !l.Validate(r) {
@@ -127,7 +127,7 @@ func (l *ResultListener) Listen(event report.LifecycleEvent) {
 		wg.Add(scopeListenerCount)
 
 		for _, cb := range l.scopeListener {
-			go func(callback report.ScopeResultsListener, results []v1alpha2.PolicyReportResult) {
+			go func(callback report.ScopeResultsListener, results []openreports.ResultAdapter) {
 				defer wg.Done()
 
 				callback(event.PolicyReport, results, preExisted)
@@ -144,14 +144,14 @@ func (l *ResultListener) Listen(event report.LifecycleEvent) {
 	grp := sync.WaitGroup{}
 	grp.Add(len(newResults))
 	for _, res := range newResults {
-		go func(r v1alpha2.PolicyReportResult) {
+		go func(r openreports.ResultAdapter) {
 			defer grp.Done()
 
 			wg := sync.WaitGroup{}
 			wg.Add(listenerCount)
 
 			for _, cb := range l.listener {
-				go func(callback report.PolicyReportResultListener, result v1alpha2.PolicyReportResult) {
+				go func(callback report.PolicyReportResultListener, result openreports.ResultAdapter) {
 					defer wg.Done()
 
 					callback(event.PolicyReport, result, preExisted)

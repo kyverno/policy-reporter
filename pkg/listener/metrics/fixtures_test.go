@@ -5,18 +5,22 @@ import (
 
 	ioprometheusclient "github.com/prometheus/client_model/go"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"openreports.io/apis/openreports.io/v1alpha1"
 
 	"github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
+	"github.com/kyverno/policy-reporter/pkg/openreports"
 )
 
-var preport = &v1alpha2.PolicyReport{
-	ObjectMeta: v1.ObjectMeta{
-		Name:              "polr-test",
-		Namespace:         "test",
-		CreationTimestamp: v1.Now(),
+var preport = &openreports.ReportAdapter{
+	Report: &v1alpha1.Report{
+		ObjectMeta: v1.ObjectMeta{
+			Name:              "polr-test",
+			Namespace:         "test",
+			CreationTimestamp: v1.Now(),
+		},
+		Results: make([]v1alpha1.ReportResult, 0),
+		Summary: v1alpha1.ReportSummary{},
 	},
-	Results: make([]v1alpha2.PolicyReportResult, 0),
-	Summary: v1alpha2.PolicyReportSummary{},
 }
 
 func testSummaryMetricLabels(

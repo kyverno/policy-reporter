@@ -1,4 +1,4 @@
-package kubernetes
+package wgpolicyclient
 
 import (
 	"fmt"
@@ -16,12 +16,16 @@ import (
 )
 
 var (
-	polrResource  = pr.SchemeGroupVersion.WithResource("policyreports")
-	cpolrResource = pr.SchemeGroupVersion.WithResource("clusterpolicyreports")
+	PolrResource  = pr.SchemeGroupVersion.WithResource("policyreports")
+	CpolrResource = pr.SchemeGroupVersion.WithResource("clusterpolicyreports")
 )
 
-type k8sPolicyReportClient struct {
-	queue        *Queue
+const (
+	wgpolicyAPIGroup = "wgpolicyk8s.io/v1alpha2"
+)
+
+type wgpolicyReportClient struct {
+	queue        *WGPolicyQueue
 	metaClient   metadata.Interface
 	synced       bool
 	mx           *sync.Mutex
@@ -29,23 +33,23 @@ type k8sPolicyReportClient struct {
 	stopChan     chan struct{}
 }
 
-func (k *k8sPolicyReportClient) HasSynced() bool {
+func (k *wgpolicyReportClient) HasSynced() bool {
 	return k.synced
 }
 
-func (k *k8sPolicyReportClient) Stop() {
+func (k *wgpolicyReportClient) Stop() {
 	close(k.stopChan)
 }
 
-func (k *k8sPolicyReportClient) Sync(stopper chan struct{}) error {
+func (k *wgpolicyReportClient) Sync(stopper chan struct{}) error {
 	factory := metadatainformer.NewSharedInformerFactory(k.metaClient, 15*time.Minute)
 
 	var cpolrInformer cache.SharedIndexInformer
 
-	polrInformer := k.configureInformer(factory.ForResource(polrResource).Informer())
+	polrInformer := k.configureInformer(factory.ForResource(PolrResource).Informer())
 
 	if !k.reportFilter.DisableClusterReports() {
-		cpolrInformer = k.configureInformer(factory.ForResource(cpolrResource).Informer())
+		cpolrInformer = k.configureInformer(factory.ForResource(PolrResource).Informer())
 	}
 
 	factory.Start(stopper)
@@ -65,7 +69,7 @@ func (k *k8sPolicyReportClient) Sync(stopper chan struct{}) error {
 	return nil
 }
 
-func (k *k8sPolicyReportClient) Run(worker int, stopper chan struct{}) error {
+func (k *wgpolicyReportClient) Run(worker int, stopper chan struct{}) error {
 	k.stopChan = stopper
 	if err := k.Sync(stopper); err != nil {
 		return err
@@ -75,11 +79,12 @@ func (k *k8sPolicyReportClient) Run(worker int, stopper chan struct{}) error {
 	return nil
 }
 
-func (k *k8sPolicyReportClient) configureInformer(informer cache.SharedIndexInformer) cache.SharedIndexInformer {
+func (k *wgpolicyReportClient) configureInformer(informer cache.SharedIndexInformer) cache.SharedIndexInformer {
 	informer.AddEventHandler(cache.ResourceEventHandlerFuncs{
 		AddFunc: func(obj interface{}) {
 			if item, ok := obj.(*v1.PartialObjectMetadata); ok {
 				if k.reportFilter.AllowReport(item) {
+					item.APIVersion = wgpolicyAPIGroup
 					k.queue.Add(item)
 				}
 			}
@@ -87,6 +92,7 @@ func (k *k8sPolicyReportClient) configureInformer(informer cache.SharedIndexInfo
 		DeleteFunc: func(obj interface{}) {
 			if item, ok := obj.(*v1.PartialObjectMetadata); ok {
 				if k.reportFilter.AllowReport(item) {
+					item.APIVersion = wgpolicyAPIGroup
 					k.queue.Add(item)
 				}
 			}
@@ -94,6 +100,7 @@ func (k *k8sPolicyReportClient) configureInformer(informer cache.SharedIndexInfo
 		UpdateFunc: func(_, newObj interface{}) {
 			if item, ok := newObj.(*v1.PartialObjectMetadata); ok {
 				if k.reportFilter.AllowReport(item) {
+					item.APIVersion = wgpolicyAPIGroup
 					k.queue.Add(item)
 				}
 			}
@@ -108,8 +115,8 @@ func (k *k8sPolicyReportClient) configureInformer(informer cache.SharedIndexInfo
 }
 
 // NewPolicyReportClient new Client for Policy Report Kubernetes API
-func NewPolicyReportClient(metaClient metadata.Interface, reportFilter *report.MetaFilter, queue *Queue) report.PolicyReportClient {
-	return &k8sPolicyReportClient{
+func NewPolicyReportClient(metaClient metadata.Interface, reportFilter *report.MetaFilter, queue *WGPolicyQueue) report.PolicyReportClient {
+	return &wgpolicyReportClient{
 		metaClient:   metaClient,
 		mx:           &sync.Mutex{},
 		queue:        queue,

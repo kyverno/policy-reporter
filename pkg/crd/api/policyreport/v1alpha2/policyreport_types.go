@@ -20,6 +20,7 @@ import (
 	"github.com/segmentio/fasthash/fnv1a"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	reportsv1alpha1 "openreports.io/apis/openreports.io/v1alpha1"
 
 	"github.com/kyverno/policy-reporter/pkg/helper"
 )
@@ -117,7 +118,6 @@ func (r *PolicyReport) GetKinds() []string {
 func (r *PolicyReport) GetSeverities() []string {
 	list := make([]string, 0)
 	for _, k := range r.Results {
-
 		if k.Severity == "" || helper.Contains(string(k.Severity), list) {
 			continue
 		}
@@ -152,4 +152,38 @@ type PolicyReportList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata,omitempty"`
 	Items           []PolicyReport `json:"items"`
+}
+
+func (polr *PolicyReport) ToOpenReports() *reportsv1alpha1.Report {
+	res := []reportsv1alpha1.ReportResult{}
+	for _, r := range polr.GetResults() {
+		res = append(res, reportsv1alpha1.ReportResult{
+			Source:           r.Source,
+			Policy:           r.Policy,
+			Rule:             r.Rule,
+			Category:         r.Category,
+			Timestamp:        r.Timestamp,
+			Severity:         reportsv1alpha1.ResultSeverity(r.Severity),
+			Result:           reportsv1alpha1.Result(r.Result),
+			Subjects:         r.Resources,
+			ResourceSelector: r.ResourceSelector,
+			Scored:           r.Scored,
+			Description:      r.Message,
+			Properties:       r.Properties,
+		})
+	}
+	return &reportsv1alpha1.Report{
+		ObjectMeta:    polr.ObjectMeta,
+		Source:        polr.GetSource(),
+		Scope:         polr.Scope,
+		ScopeSelector: polr.ScopeSelector,
+		Summary: reportsv1alpha1.ReportSummary{
+			Pass:  polr.Summary.Pass,
+			Fail:  polr.Summary.Fail,
+			Warn:  polr.Summary.Warn,
+			Error: polr.Summary.Error,
+			Skip:  polr.Summary.Skip,
+		},
+		Results: res,
+	}
 }

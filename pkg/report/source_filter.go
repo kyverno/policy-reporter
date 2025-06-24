@@ -8,8 +8,8 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	"github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
 	"github.com/kyverno/policy-reporter/pkg/helper"
+	"github.com/kyverno/policy-reporter/pkg/openreports"
 	"github.com/kyverno/policy-reporter/pkg/validate"
 )
 
@@ -40,7 +40,7 @@ type SourceFilter struct {
 	validations []SourceValidation
 }
 
-func (s *SourceFilter) Validate(polr v1alpha2.ReportInterface) bool {
+func (s *SourceFilter) Validate(polr openreports.ReportInterface) bool {
 	for _, validation := range s.validations {
 		if ok := s.run(polr, validation); !ok {
 			return false
@@ -50,7 +50,7 @@ func (s *SourceFilter) Validate(polr v1alpha2.ReportInterface) bool {
 	return true
 }
 
-func (s *SourceFilter) run(polr v1alpha2.ReportInterface, options SourceValidation) bool {
+func (s *SourceFilter) run(polr openreports.ReportInterface, options SourceValidation) bool {
 	logger := zap.L().With(
 		zap.String("namespace", polr.GetNamespace()),
 		zap.String("report", polr.GetName()),
@@ -149,6 +149,6 @@ func Uncontrolled(owner []metav1.OwnerReference) bool {
 	return true
 }
 
-func Match(polr v1alpha2.ReportInterface, selector ReportSelector) bool {
+func Match(polr openreports.ReportInterface, selector ReportSelector) bool {
 	return selector.Source == "" || strings.EqualFold(selector.Source, polr.GetSource())
 }

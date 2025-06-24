@@ -10,7 +10,8 @@ import (
 
 func TestInMemory(t *testing.T) {
 	t.Run("add report", func(t *testing.T) {
-		id := fixtures.DefaultPolicyReport.GetID()
+		or := fixtures.DefaultPolicyReport
+		id := or.GetID()
 
 		c := cache.NewInMermoryCache(time.Millisecond, time.Millisecond)
 
@@ -31,7 +32,8 @@ func TestInMemory(t *testing.T) {
 		}
 	})
 	t.Run("remove report", func(t *testing.T) {
-		id := fixtures.DefaultPolicyReport.GetID()
+		or := fixtures.DefaultPolicyReport
+		id := or.GetID()
 
 		c := cache.NewInMermoryCache(time.Millisecond, time.Millisecond)
 
@@ -47,7 +49,8 @@ func TestInMemory(t *testing.T) {
 		}
 	})
 	t.Run("ceanup report", func(t *testing.T) {
-		id := fixtures.DefaultPolicyReport.GetID()
+		or := fixtures.DefaultPolicyReport
+		id := or.GetID()
 
 		c := cache.NewInMermoryCache(time.Millisecond, time.Millisecond)
 

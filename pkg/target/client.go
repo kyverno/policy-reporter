@@ -6,9 +6,11 @@ import (
 
 	"github.com/kyverno/go-wildcard"
 	"go.uber.org/zap"
+	"openreports.io/apis/openreports.io/v1alpha1"
 
 	"github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
 	"github.com/kyverno/policy-reporter/pkg/kubernetes/namespaces"
+	"github.com/kyverno/policy-reporter/pkg/openreports"
 	"github.com/kyverno/policy-reporter/pkg/report"
 	"github.com/kyverno/policy-reporter/pkg/validate"
 )
@@ -24,15 +26,15 @@ const (
 // Client for a provided Target
 type Client interface {
 	// Send the given Result to the configured Target
-	Send(result v1alpha2.PolicyReportResult)
+	Send(result openreports.ResultAdapter)
 	// BatchSend the given Results of a single PolicyReport to the configured Target
-	BatchSend(report v1alpha2.ReportInterface, results []v1alpha2.PolicyReportResult)
+	BatchSend(report openreports.ReportInterface, results []openreports.ResultAdapter)
 	// SkipExistingOnStartup skips already existing PolicyReportResults on startup
 	SkipExistingOnStartup() bool
 	// Name is a unique identifier for each Target
 	Name() string
 	// Validate if a result should send
-	Validate(rep v1alpha2.ReportInterface, result v1alpha2.PolicyReportResult) bool
+	Validate(rep openreports.ReportInterface, result openreports.ResultAdapter) bool
 	// MinimumSeverity for a triggered Result to send to this target
 	MinimumSeverity() string
 	// Sources of the Results which should send to this target, empty means all sources
@@ -40,7 +42,7 @@ type Client interface {
 	// Type for the given target
 	Type() ClientType
 	// CleanUp old results if supported by the target
-	CleanUp(context.Context, v1alpha2.ReportInterface)
+	CleanUp(context.Context, openreports.ReportInterface)
 	// Reset the current state in the related target
 	Reset(context.Context) error
 	// SendHeartbeat sends a periodic keepalive message
@@ -57,7 +59,7 @@ func (rf *ResultFilterFactory) CreateFilter(namespace, severity, status, policy,
 	f.MinimumSeverity = minimumSeverity
 
 	if namespace.Count() > 0 {
-		f.AddValidation(func(r v1alpha2.PolicyReportResult) bool {
+		f.AddValidation(func(r openreports.ResultAdapter) bool {
 			if r.GetResource() == nil {
 				return true
 			}
@@ -67,7 +69,7 @@ func (rf *ResultFilterFactory) CreateFilter(namespace, severity, status, policy,
 	}
 
 	if len(namespace.Selector) > 0 {
-		f.AddValidation(func(r v1alpha2.PolicyReportResult) bool {
+		f.AddValidation(func(r openreports.ResultAdapter) bool {
 			if r.GetResource() == nil || r.GetResource().Namespace == "" {
 				return true
 			}
@@ -83,31 +85,31 @@ func (rf *ResultFilterFactory) CreateFilter(namespace, severity, status, policy,
 	}
 
 	if minimumSeverity != "" {
-		f.AddValidation(func(r v1alpha2.PolicyReportResult) bool {
-			return v1alpha2.SeverityLevel[r.Severity] >= v1alpha2.SeverityLevel[v1alpha2.PolicySeverity(f.MinimumSeverity)]
+		f.AddValidation(func(r openreports.ResultAdapter) bool {
+			return openreports.SeverityLevel[r.Severity] >= openreports.SeverityLevel[v1alpha1.ResultSeverity(f.MinimumSeverity)]
 		})
 	}
 
 	if sources.Count() > 0 {
-		f.AddValidation(func(r v1alpha2.PolicyReportResult) bool {
+		f.AddValidation(func(r openreports.ResultAdapter) bool {
 			return validate.MatchRuleSet(r.Source, sources)
 		})
 	}
 
 	if policy.Count() > 0 {
-		f.AddValidation(func(r v1alpha2.PolicyReportResult) bool {
+		f.AddValidation(func(r openreports.ResultAdapter) bool {
 			return validate.MatchRuleSet(r.Policy, policy)
 		})
 	}
 
 	if severity.Count() > 0 {
-		f.AddValidation(func(r v1alpha2.PolicyReportResult) bool {
+		f.AddValidation(func(r openreports.ResultAdapter) bool {
 			return validate.ContainsRuleSet(string(r.Severity), severity)
 		})
 	}
 
 	if status.Count() > 0 {
-		f.AddValidation(func(r v1alpha2.PolicyReportResult) bool {
+		f.AddValidation(func(r openreports.ResultAdapter) bool {
 			return validate.ContainsRuleSet(string(r.Result), status)
 		})
 	}
@@ -119,7 +121,7 @@ func NewReportFilter(labels, sources validate.RuleSets) *report.ReportFilter {
 	f := report.NewReportFilter()
 
 	if labels.Count() > 0 {
-		f.AddValidation(func(r v1alpha2.ReportInterface) bool {
+		f.AddValidation(func(r openreports.ReportInterface) bool {
 			if len(labels.Include) > 0 {
 				for _, label := range labels.Include {
 					parts := strings.Split(label, ":")
@@ -161,7 +163,7 @@ func NewReportFilter(labels, sources validate.RuleSets) *report.ReportFilter {
 	}
 
 	if sources.Count() > 0 {
-		f.AddValidation(func(r v1alpha2.ReportInterface) bool {
+		f.AddValidation(func(r openreports.ReportInterface) bool {
 			source := r.GetSource()
 			if source == "" {
 				return true
@@ -212,7 +214,7 @@ func (c *BaseClient) Sources() []string {
 	return c.resultFilter.Sources
 }
 
-func (c *BaseClient) Validate(rep v1alpha2.ReportInterface, result v1alpha2.PolicyReportResult) bool {
+func (c *BaseClient) Validate(rep openreports.ReportInterface, result openreports.ResultAdapter) bool {
 	if !c.ValidateReport(rep) {
 		return false
 	}
@@ -224,7 +226,7 @@ func (c *BaseClient) Validate(rep v1alpha2.ReportInterface, result v1alpha2.Poli
 	return true
 }
 
-func (c *BaseClient) ValidateReport(rep v1alpha2.ReportInterface) bool {
+func (c *BaseClient) ValidateReport(rep openreports.ReportInterface) bool {
 	if rep == nil {
 		return false
 	}
@@ -244,9 +246,9 @@ func (c *BaseClient) Reset(_ context.Context) error {
 	return nil
 }
 
-func (c *BaseClient) CleanUp(_ context.Context, _ v1alpha2.ReportInterface) {}
+func (c *BaseClient) CleanUp(_ context.Context, _ openreports.ReportInterface) {}
 
-func (c *BaseClient) BatchSend(_ v1alpha2.ReportInterface, _ []v1alpha2.PolicyReportResult) {}
+func (c *BaseClient) BatchSend(_ openreports.ReportInterface, _ []openreports.ResultAdapter) {}
 
 func (c *BaseClient) SendHeartbeat() {} // Default no-op implementation
 

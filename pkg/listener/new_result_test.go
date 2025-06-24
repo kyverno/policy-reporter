@@ -6,20 +6,22 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"openreports.io/apis/openreports.io/v1alpha1"
 
 	"github.com/kyverno/policy-reporter/pkg/cache"
 	"github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
 	"github.com/kyverno/policy-reporter/pkg/fixtures"
 	"github.com/kyverno/policy-reporter/pkg/listener"
+	"github.com/kyverno/policy-reporter/pkg/openreports"
 	"github.com/kyverno/policy-reporter/pkg/report"
 )
 
 func Test_ResultListener(t *testing.T) {
 	t.Run("Publish Result", func(t *testing.T) {
-		var called v1alpha2.PolicyReportResult
+		called := openreports.ResultAdapter{ReportResult: v1alpha1.ReportResult{}}
 
 		slistener := listener.NewResultListener(true, cache.NewInMermoryCache(time.Minute, time.Minute), time.Now())
-		slistener.RegisterListener(func(_ v1alpha2.ReportInterface, r v1alpha2.PolicyReportResult, b bool) {
+		slistener.RegisterListener(func(_ openreports.ReportInterface, r openreports.ResultAdapter, b bool) {
 			called = r
 		})
 
@@ -33,7 +35,7 @@ func Test_ResultListener(t *testing.T) {
 		var called bool
 
 		slistener := listener.NewResultListener(true, cache.NewInMermoryCache(time.Minute, time.Minute), time.Now())
-		slistener.RegisterListener(func(_ v1alpha2.ReportInterface, r v1alpha2.PolicyReportResult, b bool) {
+		slistener.RegisterListener(func(_ openreports.ReportInterface, r openreports.ResultAdapter, b bool) {
 			called = true
 		})
 
@@ -46,7 +48,7 @@ func Test_ResultListener(t *testing.T) {
 		var called bool
 
 		slistener := listener.NewResultListener(true, cache.NewInMermoryCache(time.Minute, time.Minute), time.Now())
-		slistener.RegisterListener(func(_ v1alpha2.ReportInterface, r v1alpha2.PolicyReportResult, b bool) {
+		slistener.RegisterListener(func(_ openreports.ReportInterface, r openreports.ResultAdapter, b bool) {
 			called = true
 		})
 
@@ -59,7 +61,7 @@ func Test_ResultListener(t *testing.T) {
 		var called bool
 
 		slistener := listener.NewResultListener(true, cache.NewInMermoryCache(time.Minute, time.Minute), time.Now())
-		slistener.RegisterListener(func(_ v1alpha2.ReportInterface, r v1alpha2.PolicyReportResult, b bool) {
+		slistener.RegisterListener(func(_ openreports.ReportInterface, r openreports.ResultAdapter, b bool) {
 			called = true
 		})
 
@@ -73,7 +75,7 @@ func Test_ResultListener(t *testing.T) {
 		var called bool
 
 		slistener := listener.NewResultListener(true, cache.NewInMermoryCache(time.Minute, time.Minute), time.Now())
-		slistener.RegisterListener(func(_ v1alpha2.ReportInterface, r v1alpha2.PolicyReportResult, b bool) {
+		slistener.RegisterListener(func(_ openreports.ReportInterface, r openreports.ResultAdapter, b bool) {
 			called = true
 		})
 
@@ -84,18 +86,19 @@ func Test_ResultListener(t *testing.T) {
 
 	t.Run("Skip process events when no listeners registered", func(t *testing.T) {
 		c := cache.NewInMermoryCache(time.Minute, time.Minute)
+		or := preport2
 
 		slistener := listener.NewResultListener(true, c, time.Now())
-		slistener.Listen(report.LifecycleEvent{Type: report.Added, PolicyReport: preport2})
+		slistener.Listen(report.LifecycleEvent{Type: report.Added, PolicyReport: or})
 
-		assert.Greater(t, len(c.GetResults(preport2.GetID())), 0, "Expected cached report was found")
+		assert.Greater(t, len(c.GetResults(or.GetID())), 0, "Expected cached report was found")
 	})
 
 	t.Run("UnregisterListener removes all listeners", func(t *testing.T) {
 		var called bool
 
 		slistener := listener.NewResultListener(true, cache.NewInMermoryCache(time.Minute, time.Minute), time.Now())
-		slistener.RegisterListener(func(_ v1alpha2.ReportInterface, r v1alpha2.PolicyReportResult, b bool) {
+		slistener.RegisterListener(func(_ openreports.ReportInterface, r openreports.ResultAdapter, b bool) {
 			called = true
 		})
 
@@ -109,28 +112,28 @@ func Test_ResultListener(t *testing.T) {
 		var called bool
 
 		slistener := listener.NewResultListener(true, cache.NewInMermoryCache(time.Minute, time.Minute), time.Now())
-		slistener.RegisterListener(func(_ v1alpha2.ReportInterface, r v1alpha2.PolicyReportResult, b bool) {
+		slistener.RegisterListener(func(_ openreports.ReportInterface, r openreports.ResultAdapter, b bool) {
 			called = true
 		})
 
-		rep := &v1alpha2.PolicyReport{
-			Results: make([]v1alpha2.PolicyReportResult, 0),
+		rep := &v1alpha1.Report{
+			Results: make([]v1alpha1.ReportResult, 0),
 		}
-		rep.Results = append(rep.Results, v1alpha2.PolicyReportResult{
+		rep.Results = append(rep.Results, v1alpha1.ReportResult{
 			Result:    v1alpha2.StatusFail,
 			Timestamp: v1.Timestamp{Seconds: time.Now().Add(-24 * time.Hour).Unix()},
 		})
 
-		slistener.Listen(report.LifecycleEvent{Type: report.Updated, PolicyReport: rep})
+		slistener.Listen(report.LifecycleEvent{Type: report.Updated, PolicyReport: &openreports.ReportAdapter{Report: rep}})
 
 		assert.False(t, called, "Expected Listener not called because it was unregistered")
 	})
 
 	t.Run("Publish Scoped Report", func(t *testing.T) {
-		var called []v1alpha2.PolicyReportResult
+		var called []openreports.ResultAdapter
 
 		slistener := listener.NewResultListener(true, cache.NewInMermoryCache(time.Minute, time.Minute), time.Now())
-		slistener.RegisterScopeListener(func(_ v1alpha2.ReportInterface, r []v1alpha2.PolicyReportResult, b bool) {
+		slistener.RegisterScopeListener(func(_ openreports.ReportInterface, r []openreports.ResultAdapter, b bool) {
 			called = r
 		})
 
@@ -140,10 +143,10 @@ func Test_ResultListener(t *testing.T) {
 	})
 
 	t.Run("Unregister Scope Listener", func(t *testing.T) {
-		var called []v1alpha2.PolicyReportResult
+		var called []openreports.ResultAdapter
 
 		slistener := listener.NewResultListener(true, cache.NewInMermoryCache(time.Minute, time.Minute), time.Now())
-		slistener.RegisterScopeListener(func(_ v1alpha2.ReportInterface, r []v1alpha2.PolicyReportResult, b bool) {
+		slistener.RegisterScopeListener(func(_ openreports.ReportInterface, r []openreports.ResultAdapter, b bool) {
 			called = r
 		})
 
@@ -155,10 +158,10 @@ func Test_ResultListener(t *testing.T) {
 	})
 
 	t.Run("Publish Scoped Report to Sync Target", func(t *testing.T) {
-		var called v1alpha2.ReportInterface
+		var called openreports.ReportInterface
 
 		slistener := listener.NewResultListener(true, cache.NewInMermoryCache(time.Minute, time.Minute), time.Now())
-		slistener.RegisterSyncListener(func(r v1alpha2.ReportInterface) {
+		slistener.RegisterSyncListener(func(r openreports.ReportInterface) {
 			called = r
 		})
 
@@ -168,10 +171,10 @@ func Test_ResultListener(t *testing.T) {
 	})
 
 	t.Run("Publish Scoped Report to Sync Target", func(t *testing.T) {
-		var called v1alpha2.ReportInterface
+		var called openreports.ReportInterface
 
 		slistener := listener.NewResultListener(true, cache.NewInMermoryCache(time.Minute, time.Minute), time.Now())
-		slistener.RegisterSyncListener(func(r v1alpha2.ReportInterface) {
+		slistener.RegisterSyncListener(func(r openreports.ReportInterface) {
 			called = r
 		})
 

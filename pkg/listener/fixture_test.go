@@ -5,60 +5,75 @@ import (
 
 	corev1 "k8s.io/api/core/v1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"openreports.io/apis/openreports.io/v1alpha1"
 
-	"github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
 	"github.com/kyverno/policy-reporter/pkg/fixtures"
+	"github.com/kyverno/policy-reporter/pkg/openreports"
 )
 
-var scopereport1 = &v1alpha2.PolicyReport{
-	ObjectMeta: v1.ObjectMeta{
-		Name:              "polr-test",
-		Namespace:         "test",
-		CreationTimestamp: v1.NewTime(time.Now().Add(time.Hour)),
+var scopereport1 = &openreports.ReportAdapter{
+	Report: &v1alpha1.Report{
+		ObjectMeta: v1.ObjectMeta{
+			Name:              "polr-test",
+			Namespace:         "test",
+			CreationTimestamp: v1.NewTime(time.Now().Add(time.Hour)),
+		},
+		Scope: &corev1.ObjectReference{
+			APIVersion: "v1",
+			Kind:       "Pod",
+			Name:       "test",
+			Namespace:  "test",
+		},
+		Results: []v1alpha1.ReportResult{fixtures.FailResult.ReportResult},
+		Summary: v1alpha1.ReportSummary{Fail: 1},
 	},
-	Scope: &corev1.ObjectReference{
-		APIVersion: "v1",
-		Kind:       "Pod",
-		Name:       "test",
-		Namespace:  "test",
-	},
-	Results: []v1alpha2.PolicyReportResult{fixtures.FailResult},
-	Summary: v1alpha2.PolicyReportSummary{Fail: 1},
+	Results: []openreports.ResultAdapter{fixtures.FailResult},
 }
 
-var preport1 = &v1alpha2.PolicyReport{
-	ObjectMeta: v1.ObjectMeta{
-		Name:              "polr-test",
-		Namespace:         "test",
-		CreationTimestamp: v1.Now(),
+var preport1 = &openreports.ReportAdapter{
+	Report: &v1alpha1.Report{
+		ObjectMeta: v1.ObjectMeta{
+			Name:              "polr-test",
+			Namespace:         "test",
+			CreationTimestamp: v1.Now(),
+		},
+		Results: []v1alpha1.ReportResult{fixtures.FailResult.ReportResult},
+		Summary: v1alpha1.ReportSummary{Fail: 1},
 	},
-	Results: []v1alpha2.PolicyReportResult{fixtures.FailResult},
-	Summary: v1alpha2.PolicyReportSummary{Fail: 1},
+	Results: []openreports.ResultAdapter{fixtures.FailResult},
 }
 
-var preport2 = &v1alpha2.PolicyReport{
-	ObjectMeta: v1.ObjectMeta{
-		Name:              "polr-test",
-		Namespace:         "test",
-		CreationTimestamp: v1.Now(),
+var preport2 = &openreports.ReportAdapter{
+	Report: &v1alpha1.Report{
+		ObjectMeta: v1.ObjectMeta{
+			Name:              "polr-test",
+			Namespace:         "test",
+			CreationTimestamp: v1.Now(),
+		},
+		Results: []v1alpha1.ReportResult{fixtures.FailPodResult.ReportResult},
+		Summary: v1alpha1.ReportSummary{Fail: 1, Pass: 1},
 	},
-	Results: []v1alpha2.PolicyReportResult{fixtures.FailPodResult},
-	Summary: v1alpha2.PolicyReportSummary{Fail: 1, Pass: 1},
+	Results: []openreports.ResultAdapter{fixtures.FailPodResult},
 }
 
-var preport3 = &v1alpha2.PolicyReport{
-	ObjectMeta: v1.ObjectMeta{
-		Name:              "polr-test",
-		Namespace:         "test",
-		CreationTimestamp: v1.Now(),
+var preport3 = &openreports.ReportAdapter{
+	Report: &v1alpha1.Report{
+		ObjectMeta: v1.ObjectMeta{
+			Name:              "polr-test",
+			Namespace:         "test",
+			CreationTimestamp: v1.Now(),
+		},
+		Results: []v1alpha1.ReportResult{},
 	},
-	Results: []v1alpha2.PolicyReportResult{},
 }
 
-var creport = &v1alpha2.ClusterPolicyReport{
-	ObjectMeta: v1.ObjectMeta{
-		Name:              "cpolr-test",
-		CreationTimestamp: v1.Now(),
+var creport = &openreports.ClusterReportAdapter{
+	ClusterReport: &v1alpha1.ClusterReport{
+		ObjectMeta: v1.ObjectMeta{
+			Name:              "cpolr-test",
+			CreationTimestamp: v1.Now(),
+		},
+		Results: []v1alpha1.ReportResult{fixtures.FailResult.ReportResult, fixtures.FailPodResult.ReportResult},
 	},
-	Results: []v1alpha2.PolicyReportResult{fixtures.FailResult, fixtures.FailPodResult},
+	Results: []openreports.ResultAdapter{fixtures.FailResult, fixtures.FailPodResult},
 }

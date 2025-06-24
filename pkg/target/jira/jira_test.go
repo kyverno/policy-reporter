@@ -139,7 +139,7 @@ func Test_JiraTarget(t *testing.T) {
 			IssueType:  "Bug",
 			HTTPClient: testClient{callback, 200},
 		})
-		client.Send(fixtures.MinimalTargetSendResult)
+		client.Send(fixtures.CompleteTargetSendResult)
 	})
 
 	t.Run("Default IssueType", func(t *testing.T) {
@@ -170,7 +170,7 @@ func Test_JiraTarget(t *testing.T) {
 			IssueType:  "", // Empty to test default
 			HTTPClient: testClient{callback, 200},
 		})
-		client.Send(fixtures.MinimalTargetSendResult)
+		client.Send(fixtures.CompleteTargetSendResult)
 	})
 
 	t.Run("Custom Fields", func(t *testing.T) {
@@ -205,7 +205,7 @@ func Test_JiraTarget(t *testing.T) {
 			},
 			HTTPClient: testClient{callback, 200},
 		})
-		client.Send(fixtures.MinimalTargetSendResult)
+		client.Send(fixtures.CompleteTargetSendResult)
 	})
 
 	t.Run("Name", func(t *testing.T) {

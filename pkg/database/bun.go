@@ -16,8 +16,9 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
+	"openreports.io/apis/openreports.io/v1alpha1"
 
-	"github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
+	"github.com/kyverno/policy-reporter/pkg/openreports"
 	"github.com/kyverno/policy-reporter/pkg/report"
 )
 
@@ -941,7 +942,7 @@ func (s *Store) DropSchema(ctx context.Context) error {
 	return err
 }
 
-func (s *Store) Add(ctx context.Context, report v1alpha2.ReportInterface) error {
+func (s *Store) Add(ctx context.Context, report openreports.ReportInterface) error {
 	_, err := s.db.NewInsert().Model(MapPolicyReport(report)).Exec(ctx)
 	if err != nil {
 		zap.L().Error("failed to persist policy report", zap.Error(err))
@@ -977,7 +978,7 @@ func (s *Store) Add(ctx context.Context, report v1alpha2.ReportInterface) error 
 	return err
 }
 
-func (s *Store) Update(ctx context.Context, report v1alpha2.ReportInterface) error {
+func (s *Store) Update(ctx context.Context, report openreports.ReportInterface) error {
 	err := s.Remove(ctx, report.GetID())
 	if err != nil {
 		return err
@@ -1006,7 +1007,7 @@ func (s *Store) CleanUp(ctx context.Context) error {
 	return err
 }
 
-func (s *Store) Get(ctx context.Context, id string) (v1alpha2.ReportInterface, error) {
+func (s *Store) Get(ctx context.Context, id string) (openreports.ReportInterface, error) {
 	polr := &PolicyReport{}
 
 	err := s.db.NewSelect().Model(polr).Where("id = ?", id).Scan(ctx)
@@ -1023,21 +1024,23 @@ func (s *Store) Get(ctx context.Context, id string) (v1alpha2.ReportInterface, e
 		return nil, err
 	}
 
-	return &v1alpha2.PolicyReport{
-		ObjectMeta: v1.ObjectMeta{
-			Name:              polr.Name,
-			Namespace:         polr.Namespace,
-			CreationTimestamp: v1.NewTime(time.Unix(polr.Created, 0)),
-			Labels:            polr.Labels,
+	return &openreports.ReportAdapter{
+		Report: &v1alpha1.Report{
+			ObjectMeta: v1.ObjectMeta{
+				Name:              polr.Name,
+				Namespace:         polr.Namespace,
+				CreationTimestamp: v1.NewTime(time.Unix(polr.Created, 0)),
+				Labels:            polr.Labels,
+			},
+			Summary: v1alpha1.ReportSummary{
+				Skip:  polr.Skip,
+				Pass:  polr.Pass,
+				Warn:  polr.Warn,
+				Fail:  polr.Fail,
+				Error: polr.Error,
+			},
+			Results: results,
 		},
-		Summary: v1alpha2.PolicyReportSummary{
-			Skip:  polr.Skip,
-			Pass:  polr.Pass,
-			Warn:  polr.Warn,
-			Fail:  polr.Fail,
-			Error: polr.Error,
-		},
-		Results: results,
 	}, nil
 }
 
@@ -1049,7 +1052,7 @@ func (s *Store) IsSQLite() bool {
 	return s.db.Dialect().Name() == dialect.SQLite
 }
 
-func (s *Store) fetchResults(ctx context.Context, id string) ([]v1alpha2.PolicyReportResult, error) {
+func (s *Store) fetchResults(ctx context.Context, id string) ([]v1alpha1.ReportResult, error) {
 	polr := []*PolicyReportResult{}
 
 	err := s.db.NewSelect().Model(&polr).Where("policy_report_id = ?", id).Scan(ctx)
@@ -1058,17 +1061,16 @@ func (s *Store) fetchResults(ctx context.Context, id string) ([]v1alpha2.PolicyR
 		return nil, err
 	}
 
-	list := make([]v1alpha2.PolicyReportResult, 0, len(polr))
+	list := make([]v1alpha1.ReportResult, 0, len(polr))
 	for _, result := range polr {
-		list = append(list, v1alpha2.PolicyReportResult{
-			ID:       result.ID,
-			Result:   v1alpha2.PolicyResult(result.Result),
-			Severity: v1alpha2.PolicySeverity(result.Severity),
-			Policy:   result.Policy,
-			Rule:     result.Rule,
-			Message:  result.Message,
-			Source:   result.Source,
-			Resources: []corev1.ObjectReference{
+		list = append(list, v1alpha1.ReportResult{
+			Result:      v1alpha1.Result(result.Result),
+			Severity:    v1alpha1.ResultSeverity(result.Severity),
+			Policy:      result.Policy,
+			Rule:        result.Rule,
+			Description: result.Message,
+			Source:      result.Source,
+			Subjects: []corev1.ObjectReference{
 				{
 					APIVersion: result.Resource.APIVersion,
 					Kind:       result.Resource.Kind,

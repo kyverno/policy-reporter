@@ -12,7 +12,7 @@ import (
 
 	"go.uber.org/zap"
 
-	"github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
+	"github.com/kyverno/policy-reporter/pkg/openreports"
 )
 
 // CreateJSONRequest for the given configuration
@@ -53,7 +53,7 @@ func ProcessHTTPResponse(target string, resp *http.Response, err error) {
 	}
 }
 
-func NewJSONResult(r v1alpha2.PolicyReportResult) Result {
+func NewJSONResult(r openreports.ResultAdapter) Result {
 	res := Resource{}
 	if r.HasResource() {
 		resOb := r.GetResource()
@@ -65,7 +65,7 @@ func NewJSONResult(r v1alpha2.PolicyReportResult) Result {
 		res.UID = string(resOb.UID)
 	}
 	return Result{
-		Message:           r.Message,
+		Message:           r.Description,
 		Policy:            r.Policy,
 		Rule:              r.Rule,
 		Status:            string(r.Result),

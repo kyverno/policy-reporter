@@ -8,7 +8,7 @@ import (
 	"go.uber.org/zap"
 	corev1 "k8s.io/api/core/v1"
 
-	"github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
+	"github.com/kyverno/policy-reporter/pkg/openreports"
 	"github.com/kyverno/policy-reporter/pkg/target"
 	"github.com/kyverno/policy-reporter/pkg/target/formatting"
 	"github.com/kyverno/policy-reporter/pkg/target/http"
@@ -31,13 +31,13 @@ type client struct {
 	client       http.Client
 }
 
-func (s *client) Send(result v1alpha2.PolicyReportResult) {
-	s.PostMessage(s.newMessage(result.GetResource(), []v1alpha2.PolicyReportResult{result}))
+func (s *client) Send(result openreports.ResultAdapter) {
+	s.PostMessage(s.newMessage(result.GetResource(), []openreports.ResultAdapter{result}))
 }
 
-func (s *client) CleanUp(_ context.Context, _ v1alpha2.ReportInterface) {}
+func (s *client) CleanUp(_ context.Context, _ openreports.ReportInterface) {}
 
-func (s *client) BatchSend(report v1alpha2.ReportInterface, results []v1alpha2.PolicyReportResult) {
+func (s *client) BatchSend(report openreports.ReportInterface, results []openreports.ResultAdapter) {
 	if report.GetScope() == nil {
 		for idx := range results {
 			s.Send(results[idx])
@@ -72,7 +72,7 @@ func (s *client) Type() target.ClientType {
 	return target.BatchSend
 }
 
-func (s *client) newMessage(resource *corev1.ObjectReference, results []v1alpha2.PolicyReportResult) *adaptivecard.Message {
+func (s *client) newMessage(resource *corev1.ObjectReference, results []openreports.ResultAdapter) *adaptivecard.Message {
 	header := adaptivecard.NewContainer()
 
 	if resource != nil {
@@ -130,7 +130,7 @@ func (s *client) newMessage(resource *corev1.ObjectReference, results []v1alpha2
 			zap.L().Error(s.Name()+": error adding facts to card", zap.Error(err))
 		}
 
-		if err := r.AddElement(false, adaptivecard.NewTextBlock(results[idx].Message, true)); err != nil {
+		if err := r.AddElement(false, adaptivecard.NewTextBlock(results[idx].Description, true)); err != nil {
 			zap.L().Error(s.Name()+": error adding message to card", zap.Error(err))
 		}
 
