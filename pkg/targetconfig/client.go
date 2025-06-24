@@ -42,42 +42,22 @@ func (c *Client) ConfigureInformer() {
 
 			c.collection.AddTarget(tc.Name, t)
 
-			// (ammar): handle open reports and v1alpha2 here as well
 			if !tc.Spec.SkipExisting {
 				reports := []openreports.ReportInterface{}
-				existingPolrs, err := c.wgpolicyClient.PolicyReports("").List(context.Background(), metav1.ListOptions{})
+
+				polrReports, err := c.WGPolicyReports(context.TODO())
 				if err != nil {
-					zap.L().Error("Failed to sync existing policy reports for client", zap.String("name", tc.Name), zap.Error(err))
+					zap.L().Error("unable to get WGPolicy reports", zap.String("name", tc.Name), zap.Error(err))
 				}
-				existingcPolrs, err := c.wgpolicyClient.ClusterPolicyReports().List(context.Background(), metav1.ListOptions{})
+
+				reports = append(reports, polrReports...)
+
+				openReports, err := c.OpenReports(context.TODO())
 				if err != nil {
-					zap.L().Error("Failed to sync existing cluster policy reports for client", zap.String("name", tc.Name), zap.Error(err))
+					zap.L().Error("unable to get OpenReports", zap.String("name", tc.Name), zap.Error(err))
 				}
 
-				existingReports, err := c.orClient.Reports("").List(context.Background(), metav1.ListOptions{})
-				if err != nil {
-					zap.L().Error("Failed to sync existing openreports reports for client", zap.String("name", tc.Name), zap.Error(err))
-				}
-				existingCReports, err := c.orClient.ClusterReports().List(context.Background(), metav1.ListOptions{})
-				if err != nil {
-					zap.L().Error("Failed to sync existing openreports cluster reports for client", zap.String("name", tc.Name), zap.Error(err))
-				}
-
-				for _, p := range existingPolrs.Items {
-					reports = append(reports, &openreports.ReportAdapter{Report: p.ToOpenReports()})
-				}
-
-				for _, cp := range existingcPolrs.Items {
-					reports = append(reports, &openreports.ClusterReportAdapter{ClusterReport: cp.ToOpenReports()})
-				}
-
-				for _, p := range existingReports.Items {
-					reports = append(reports, &openreports.ReportAdapter{Report: &p})
-				}
-
-				for _, cp := range existingCReports.Items {
-					reports = append(reports, &openreports.ClusterReportAdapter{ClusterReport: &cp})
-				}
+				reports = append(reports, openReports...)
 
 				switch t.Client.Type() {
 				case target.SingleSend:
@@ -124,6 +104,60 @@ func (c *Client) ConfigureInformer() {
 			c.collection.RemoveTarget(tc.Name)
 		},
 	})
+}
+
+func (c *Client) OpenReports(ctx context.Context) ([]openreports.ReportInterface, error) {
+	reports := make([]openreports.ReportInterface, 0)
+	if c.wgpolicyClient == nil {
+		return reports, nil
+	}
+
+	existingReports, err := c.orClient.Reports("").List(ctx, metav1.ListOptions{})
+	if err != nil {
+		return nil, err
+	}
+
+	existingCReports, err := c.orClient.ClusterReports().List(ctx, metav1.ListOptions{})
+	if err != nil {
+		return nil, err
+	}
+
+	for _, p := range existingReports.Items {
+		reports = append(reports, &openreports.ReportAdapter{Report: &p})
+	}
+
+	for _, cp := range existingCReports.Items {
+		reports = append(reports, &openreports.ClusterReportAdapter{ClusterReport: &cp})
+	}
+
+	return reports, nil
+}
+
+func (c *Client) WGPolicyReports(ctx context.Context) ([]openreports.ReportInterface, error) {
+	reports := make([]openreports.ReportInterface, 0)
+	if c.wgpolicyClient == nil {
+		return reports, nil
+	}
+
+	existingPolrs, err := c.wgpolicyClient.PolicyReports("").List(ctx, metav1.ListOptions{})
+	if err != nil {
+		return nil, err
+	}
+
+	existingcPolrs, err := c.wgpolicyClient.ClusterPolicyReports().List(ctx, metav1.ListOptions{})
+	if err != nil {
+		return nil, err
+	}
+
+	for _, p := range existingPolrs.Items {
+		reports = append(reports, &openreports.ReportAdapter{Report: p.ToOpenReports()})
+	}
+
+	for _, cp := range existingcPolrs.Items {
+		reports = append(reports, &openreports.ClusterReportAdapter{ClusterReport: cp.ToOpenReports()})
+	}
+
+	return reports, nil
 }
 
 func (c *Client) Run(stopChan chan struct{}) {

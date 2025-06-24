@@ -40,7 +40,7 @@ func NewSummaryCMD() *cobra.Command {
 				return err
 			}
 
-			generator, err := resolver.SummaryGenerator(c.Openreports)
+			generator, err := resolver.SummaryGenerator()
 			if err != nil {
 				return err
 			}
@@ -122,7 +122,6 @@ func NewSummaryCMD() *cobra.Command {
 		},
 	}
 
-	cmd.PersistentFlags().Bool("openreports", true, "Use openreports.io/v1alpha1 for the reporting api group while generating summaries")
 	flag.Parse()
 
 	return cmd

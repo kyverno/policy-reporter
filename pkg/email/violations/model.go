@@ -3,8 +3,6 @@ package violations
 import (
 	"sync"
 
-	"openreports.io/apis/openreports.io/v1alpha1"
-
 	"github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
 	"github.com/kyverno/policy-reporter/pkg/openreports"
 )
@@ -17,7 +15,7 @@ type Result struct {
 	Status string
 }
 
-func mapResult(polr openreports.ReportInterface, res v1alpha1.ReportResult) []Result {
+func mapResult(polr openreports.ReportInterface, res openreports.ResultAdapter) []Result {
 	count := len(res.Subjects)
 	rule := res.Rule
 	if rule == "" {
