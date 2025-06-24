@@ -93,6 +93,6 @@ oauth:
   {{- toYaml . | nindent 4 }}
 {{- end }}
 
-{{- with .Values.plugin.ui.extraConfig }}
+{{- with .Values.ui.extraConfig }}
 {{- toYaml . | nindent 0 }}
 {{- end }}

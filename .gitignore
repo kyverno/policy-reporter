@@ -5,7 +5,7 @@
 build
 /test.yaml
 *.db
-values*.yaml
+/values*.yaml
 monitoring.yaml
 coverage.out*
 heap*
