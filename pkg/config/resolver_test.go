@@ -8,6 +8,7 @@ import (
 	"k8s.io/client-go/rest"
 
 	"github.com/kyverno/policy-reporter/pkg/config"
+	"github.com/kyverno/policy-reporter/pkg/crd/api/targetconfig"
 	"github.com/kyverno/policy-reporter/pkg/crd/api/targetconfig/v1alpha1"
 	"github.com/kyverno/policy-reporter/pkg/database"
 	"github.com/kyverno/policy-reporter/pkg/report"
@@ -15,7 +16,7 @@ import (
 )
 
 var targets = target.Targets{
-	Loki: &v1alpha1.Config[v1alpha1.LokiOptions]{
+	Loki: &targetconfig.Config[v1alpha1.LokiOptions]{
 		Config: &v1alpha1.LokiOptions{
 			HostOptions: v1alpha1.HostOptions{
 				Host:    "http://localhost:3100",
@@ -25,13 +26,13 @@ var targets = target.Targets{
 		SkipExisting:    true,
 		MinimumSeverity: "debug",
 		CustomFields:    map[string]string{"field": "value"},
-		Channels: []*v1alpha1.Config[v1alpha1.LokiOptions]{
+		Channels: []*targetconfig.Config[v1alpha1.LokiOptions]{
 			{
 				CustomFields: map[string]string{"label2": "value2"},
 			},
 		},
 	},
-	Elasticsearch: &v1alpha1.Config[v1alpha1.ElasticsearchOptions]{
+	Elasticsearch: &targetconfig.Config[v1alpha1.ElasticsearchOptions]{
 		Config: &v1alpha1.ElasticsearchOptions{
 			HostOptions: v1alpha1.HostOptions{
 				Host:    "http://localhost:9200",
@@ -43,9 +44,9 @@ var targets = target.Targets{
 		SkipExisting:    true,
 		MinimumSeverity: "debug",
 		CustomFields:    map[string]string{"field": "value"},
-		Channels:        []*v1alpha1.Config[v1alpha1.ElasticsearchOptions]{{}},
+		Channels:        []*targetconfig.Config[v1alpha1.ElasticsearchOptions]{{}},
 	},
-	Slack: &v1alpha1.Config[v1alpha1.SlackOptions]{
+	Slack: &targetconfig.Config[v1alpha1.SlackOptions]{
 		Config: &v1alpha1.SlackOptions{
 			WebhookOptions: v1alpha1.WebhookOptions{
 				Webhook: "http://localhost:80",
@@ -55,7 +56,7 @@ var targets = target.Targets{
 		SkipExisting:    true,
 		MinimumSeverity: "debug",
 		CustomFields:    map[string]string{"field": "value"},
-		Channels: []*v1alpha1.Config[v1alpha1.SlackOptions]{{
+		Channels: []*targetconfig.Config[v1alpha1.SlackOptions]{{
 			Config: &v1alpha1.SlackOptions{
 				WebhookOptions: v1alpha1.WebhookOptions{
 					Webhook: "http://localhost:9200",
@@ -67,7 +68,7 @@ var targets = target.Targets{
 			},
 		}},
 	},
-	Discord: &v1alpha1.Config[v1alpha1.WebhookOptions]{
+	Discord: &targetconfig.Config[v1alpha1.WebhookOptions]{
 		Config: &v1alpha1.WebhookOptions{
 			Webhook: "http://discord:80",
 			SkipTLS: true,
@@ -75,13 +76,13 @@ var targets = target.Targets{
 		SkipExisting:    true,
 		MinimumSeverity: "debug",
 		CustomFields:    map[string]string{"field": "value"},
-		Channels: []*v1alpha1.Config[v1alpha1.WebhookOptions]{{
+		Channels: []*targetconfig.Config[v1alpha1.WebhookOptions]{{
 			Config: &v1alpha1.WebhookOptions{
 				Webhook: "http://localhost:9200",
 			},
 		}},
 	},
-	Teams: &v1alpha1.Config[v1alpha1.WebhookOptions]{
+	Teams: &targetconfig.Config[v1alpha1.WebhookOptions]{
 		Config: &v1alpha1.WebhookOptions{
 			Webhook: "http://hook.teams:80",
 			SkipTLS: true,
@@ -89,13 +90,13 @@ var targets = target.Targets{
 		SkipExisting:    true,
 		MinimumSeverity: "debug",
 		CustomFields:    map[string]string{"field": "value"},
-		Channels: []*v1alpha1.Config[v1alpha1.WebhookOptions]{{
+		Channels: []*targetconfig.Config[v1alpha1.WebhookOptions]{{
 			Config: &v1alpha1.WebhookOptions{
 				Webhook: "http://localhost:9200",
 			},
 		}},
 	},
-	GoogleChat: &v1alpha1.Config[v1alpha1.WebhookOptions]{
+	GoogleChat: &targetconfig.Config[v1alpha1.WebhookOptions]{
 		Config: &v1alpha1.WebhookOptions{
 			Webhook: "http://localhost:900/webhook",
 			SkipTLS: true,
@@ -103,9 +104,9 @@ var targets = target.Targets{
 		SkipExisting:    true,
 		MinimumSeverity: "debug",
 		CustomFields:    map[string]string{"field": "value"},
-		Channels:        []*v1alpha1.Config[v1alpha1.WebhookOptions]{{}},
+		Channels:        []*targetconfig.Config[v1alpha1.WebhookOptions]{{}},
 	},
-	Telegram: &v1alpha1.Config[v1alpha1.TelegramOptions]{
+	Telegram: &targetconfig.Config[v1alpha1.TelegramOptions]{
 		Config: &v1alpha1.TelegramOptions{
 			WebhookOptions: v1alpha1.WebhookOptions{
 				Webhook: "http://localhost:80",
@@ -117,13 +118,13 @@ var targets = target.Targets{
 		SkipExisting:    true,
 		MinimumSeverity: "debug",
 		CustomFields:    map[string]string{"field": "value"},
-		Channels: []*v1alpha1.Config[v1alpha1.TelegramOptions]{{
+		Channels: []*targetconfig.Config[v1alpha1.TelegramOptions]{{
 			Config: &v1alpha1.TelegramOptions{
 				ChatID: "1234567",
 			},
 		}},
 	},
-	Webhook: &v1alpha1.Config[v1alpha1.WebhookOptions]{
+	Webhook: &targetconfig.Config[v1alpha1.WebhookOptions]{
 		Config: &v1alpha1.WebhookOptions{
 			Webhook: "http://localhost:8080",
 			SkipTLS: true,
@@ -134,7 +135,7 @@ var targets = target.Targets{
 		SkipExisting:    true,
 		MinimumSeverity: "debug",
 		CustomFields:    map[string]string{"field": "value"},
-		Channels: []*v1alpha1.Config[v1alpha1.WebhookOptions]{{
+		Channels: []*targetconfig.Config[v1alpha1.WebhookOptions]{{
 			Config: &v1alpha1.WebhookOptions{
 				Webhook: "http://localhost:8081",
 				Headers: map[string]string{
@@ -143,7 +144,7 @@ var targets = target.Targets{
 			},
 		}},
 	},
-	S3: &v1alpha1.Config[v1alpha1.S3Options]{
+	S3: &targetconfig.Config[v1alpha1.S3Options]{
 		Config: &v1alpha1.S3Options{
 			AWSConfig: v1alpha1.AWSConfig{
 				AccessKeyID:     "AccessKey",
@@ -161,9 +162,9 @@ var targets = target.Targets{
 		SkipExisting:    true,
 		MinimumSeverity: "debug",
 		CustomFields:    map[string]string{"field": "value"},
-		Channels:        []*v1alpha1.Config[v1alpha1.S3Options]{{}},
+		Channels:        []*targetconfig.Config[v1alpha1.S3Options]{{}},
 	},
-	Kinesis: &v1alpha1.Config[v1alpha1.KinesisOptions]{
+	Kinesis: &targetconfig.Config[v1alpha1.KinesisOptions]{
 		Config: &v1alpha1.KinesisOptions{
 			AWSConfig: v1alpha1.AWSConfig{
 				AccessKeyID:     "AccessKey",
@@ -176,9 +177,9 @@ var targets = target.Targets{
 		SkipExisting:    true,
 		MinimumSeverity: "debug",
 		CustomFields:    map[string]string{"field": "value"},
-		Channels:        []*v1alpha1.Config[v1alpha1.KinesisOptions]{{}},
+		Channels:        []*targetconfig.Config[v1alpha1.KinesisOptions]{{}},
 	},
-	SecurityHub: &v1alpha1.Config[v1alpha1.SecurityHubOptions]{
+	SecurityHub: &targetconfig.Config[v1alpha1.SecurityHubOptions]{
 		Config: &v1alpha1.SecurityHubOptions{
 			AWSConfig: v1alpha1.AWSConfig{
 				AccessKeyID:     "AccessKey",
@@ -191,9 +192,9 @@ var targets = target.Targets{
 		SkipExisting:    true,
 		MinimumSeverity: "debug",
 		CustomFields:    map[string]string{"field": "value"},
-		Channels:        []*v1alpha1.Config[v1alpha1.SecurityHubOptions]{{}},
+		Channels:        []*targetconfig.Config[v1alpha1.SecurityHubOptions]{{}},
 	},
-	GCS: &v1alpha1.Config[v1alpha1.GCSOptions]{
+	GCS: &targetconfig.Config[v1alpha1.GCSOptions]{
 		Config: &v1alpha1.GCSOptions{
 			Credentials: `{"token": "token", "type": "authorized_user"}`,
 			Bucket:      "test",
@@ -202,7 +203,7 @@ var targets = target.Targets{
 		SkipExisting:    true,
 		MinimumSeverity: "debug",
 		CustomFields:    map[string]string{"field": "value"},
-		Channels:        []*v1alpha1.Config[v1alpha1.GCSOptions]{{}},
+		Channels:        []*targetconfig.Config[v1alpha1.GCSOptions]{{}},
 	},
 }
 
@@ -257,7 +258,7 @@ func Test_ResolveHasTargets(t *testing.T) {
 func Test_ResolveSkipExistingOnStartup(t *testing.T) {
 	testConfig := &config.Config{
 		Targets: target.Targets{
-			Loki: &v1alpha1.Config[v1alpha1.LokiOptions]{
+			Loki: &targetconfig.Config[v1alpha1.LokiOptions]{
 				Config: &v1alpha1.LokiOptions{
 					HostOptions: v1alpha1.HostOptions{
 						Host: "http://localhost:3100",
@@ -266,7 +267,7 @@ func Test_ResolveSkipExistingOnStartup(t *testing.T) {
 				SkipExisting:    true,
 				MinimumSeverity: "debug",
 			},
-			Elasticsearch: &v1alpha1.Config[v1alpha1.ElasticsearchOptions]{
+			Elasticsearch: &targetconfig.Config[v1alpha1.ElasticsearchOptions]{
 				Config: &v1alpha1.ElasticsearchOptions{
 					HostOptions: v1alpha1.HostOptions{
 						Host: "http://localhost:9200",
@@ -547,7 +548,7 @@ func Test_ResolveEnableLeaderElection(t *testing.T) {
 		resolver := config.NewResolver(&config.Config{
 			LeaderElection: config.LeaderElection{Enabled: false},
 			Targets: target.Targets{
-				Loki: &v1alpha1.Config[v1alpha1.LokiOptions]{
+				Loki: &targetconfig.Config[v1alpha1.LokiOptions]{
 					Config: &v1alpha1.LokiOptions{
 						HostOptions: v1alpha1.HostOptions{
 							Host: "http://localhost:3100",
@@ -576,7 +577,7 @@ func Test_ResolveEnableLeaderElection(t *testing.T) {
 			LeaderElection: config.LeaderElection{Enabled: true},
 			Database:       config.Database{Type: database.SQLite},
 			Targets: target.Targets{
-				Loki: &v1alpha1.Config[v1alpha1.LokiOptions]{
+				Loki: &targetconfig.Config[v1alpha1.LokiOptions]{
 					Config: &v1alpha1.LokiOptions{
 						HostOptions: v1alpha1.HostOptions{
 							Host: "http://localhost:3100",

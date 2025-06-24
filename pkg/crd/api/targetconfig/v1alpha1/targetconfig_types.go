@@ -36,7 +36,7 @@ import (
 
 // TargetConfigSpec defines the desired state of TargetConfig.
 type TargetConfigSpec struct {
-	ConfigStrict `json:",inline"`
+	Config `json:",inline"`
 
 	//+optional
 	S3 *S3Options `json:"s3,omitempty"`
