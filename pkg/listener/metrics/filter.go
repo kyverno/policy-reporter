@@ -65,11 +65,11 @@ func NewReportFilter(namespace, source validate.RuleSets) *report.ReportFilter {
 
 	if source.Count() > 0 {
 		f.AddValidation(func(r openreports.ReportInterface) bool {
-			if len(r.GetResults()) == 0 {
+			if r.GetSource() == "" {
 				return true
 			}
 
-			return validate.MatchRuleSet(r.GetResults()[0].Source, source)
+			return validate.MatchRuleSet(r.GetSource(), source)
 		})
 	}
 

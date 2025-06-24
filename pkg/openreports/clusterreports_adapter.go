@@ -47,11 +47,11 @@ func (r *ClusterReportAdapter) GetSummary() v1alpha1.ReportSummary {
 }
 
 func (r *ClusterReportAdapter) GetSource() string {
-	if len(r.Results) == 0 {
-		return ""
+	if r.ClusterReport.Source == "" && len(r.GetResults()) > 0 {
+		r.ClusterReport.Source = r.ClusterReport.Results[0].Source
 	}
 
-	return r.Results[0].Source
+	return r.ClusterReport.Source
 }
 
 func (r *ClusterReportAdapter) GetKinds() []string {
@@ -60,8 +60,7 @@ func (r *ClusterReportAdapter) GetKinds() []string {
 	}
 
 	list := make([]string, 0)
-	for _, k := range r.ClusterReport.Results {
-		or := &ResultAdapter{ReportResult: k}
+	for _, or := range r.GetResults() {
 		if !or.HasResource() {
 			continue
 		}
@@ -80,7 +79,7 @@ func (r *ClusterReportAdapter) GetKinds() []string {
 
 func (r *ClusterReportAdapter) GetSeverities() []string {
 	list := make([]string, 0)
-	for _, k := range r.Results {
+	for _, k := range r.GetResults() {
 
 		if k.Severity == "" || slices.Contains(list, string(k.Severity)) {
 			continue

@@ -17,14 +17,9 @@ limitations under the License.
 package v1alpha2
 
 import (
-	"strconv"
-
-	"github.com/segmentio/fasthash/fnv1a"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	reportsv1alpha1 "openreports.io/apis/openreports.io/v1alpha1"
-
-	"github.com/kyverno/policy-reporter/pkg/helper"
 )
 
 // +genclient
@@ -65,86 +60,12 @@ type ClusterPolicyReport struct {
 	Results []PolicyReportResult `json:"results,omitempty"`
 }
 
-func (r *ClusterPolicyReport) GetResults() []PolicyReportResult {
-	return r.Results
-}
-
-func (r *ClusterPolicyReport) HasResult(id string) bool {
-	for _, r := range r.Results {
-		if r.GetID() == id {
-			return true
-		}
-	}
-
-	return false
-}
-
-func (r *ClusterPolicyReport) SetResults(results []PolicyReportResult) {
-	r.Results = results
-}
-
-func (r *ClusterPolicyReport) GetSummary() PolicyReportSummary {
-	return r.Summary
-}
-
 func (r *ClusterPolicyReport) GetSource() string {
 	if len(r.Results) == 0 {
 		return ""
 	}
 
 	return r.Results[0].Source
-}
-
-func (r *ClusterPolicyReport) GetID() string {
-	h1 := fnv1a.Init64
-	h1 = fnv1a.AddString64(h1, r.GetName())
-
-	return strconv.FormatUint(h1, 10)
-}
-
-func (r *ClusterPolicyReport) GetKey() string {
-	return r.Name
-}
-
-func (r *ClusterPolicyReport) GetKinds() []string {
-	if r.GetScope() != nil {
-		return []string{r.Scope.Kind}
-	}
-
-	list := make([]string, 0)
-	for _, k := range r.Results {
-		if !k.HasResource() {
-			continue
-		}
-
-		kind := k.GetResource().Kind
-
-		if kind == "" || helper.Contains(kind, list) {
-			continue
-		}
-
-		list = append(list, kind)
-	}
-
-	return list
-}
-
-func (r *ClusterPolicyReport) GetSeverities() []string {
-	list := make([]string, 0)
-	for _, k := range r.Results {
-
-		if k.Severity == "" || helper.Contains(string(k.Severity), list) {
-			continue
-		}
-
-		list = append(list, string(k.Severity))
-	}
-
-	return list
-}
-
-func (r *ClusterPolicyReport) GetScope() *corev1.ObjectReference {
-	return r.Scope
 }
 
 // +kubebuilder:object:root=true
@@ -159,7 +80,7 @@ type ClusterPolicyReportList struct {
 
 func (polr *ClusterPolicyReport) ToOpenReports() *reportsv1alpha1.ClusterReport {
 	res := []reportsv1alpha1.ReportResult{}
-	for _, r := range polr.GetResults() {
+	for _, r := range polr.Results {
 		res = append(res, reportsv1alpha1.ReportResult{
 			Source:           r.Source,
 			Policy:           r.Policy,

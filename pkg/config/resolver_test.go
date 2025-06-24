@@ -409,13 +409,6 @@ func Test_ResolveLeaderElectionWithInvalidK8sConfig(t *testing.T) {
 	assert.NotNil(t, err, "Error: 'host must be a URL or a host:port pair' was expected")
 }
 
-func Test_ResolveCRDClient(t *testing.T) {
-	resolver := config.NewResolver(testConfig, &rest.Config{})
-
-	_, err := resolver.OpenreportsCRClient()
-	assert.Nil(t, err)
-}
-
 func Test_ResolveCRDClientWithInvalidK8sConfig(t *testing.T) {
 	k8sConfig := &rest.Config{}
 	k8sConfig.Host = "invalid/url"
@@ -467,54 +460,6 @@ func Test_RegisterSendResultListener(t *testing.T) {
 		resolver.RegisterSendResultListener()
 
 		assert.Len(t, resolver.EventPublisher().GetListener(), 1, "Expected one Listener to be registered")
-	})
-}
-
-func Test_SummaryReportServices(t *testing.T) {
-	t.Run("Generator without report APIs", func(t *testing.T) {
-		resolver := config.NewResolver(testConfig, &rest.Config{})
-		generator, err := resolver.SummaryGenerator()
-
-		assert.NotNil(t, err)
-		assert.Nil(t, generator)
-	})
-	t.Run("Generator.Error", func(t *testing.T) {
-		k8sConfig := &rest.Config{}
-		k8sConfig.Host = "invalid/url"
-
-		resolver := config.NewResolver(testConfig, k8sConfig)
-
-		_, err := resolver.SummaryGenerator()
-		assert.NotNil(t, err, "Error: 'host must be a URL or a host:port pair' was expected")
-	})
-	t.Run("Reporter", func(t *testing.T) {
-		resolver := config.NewResolver(testConfig, &rest.Config{})
-
-		assert.NotNil(t, resolver.SummaryReporter())
-	})
-}
-
-func Test_ViolationReportServices(t *testing.T) {
-	t.Run("Generator without report APIs", func(t *testing.T) {
-		resolver := config.NewResolver(testConfig, &rest.Config{})
-		generator, err := resolver.ViolationsGenerator()
-
-		assert.NotNil(t, err)
-		assert.Nil(t, generator)
-	})
-	t.Run("Generator.Error", func(t *testing.T) {
-		k8sConfig := &rest.Config{}
-		k8sConfig.Host = "invalid/url"
-
-		resolver := config.NewResolver(testConfig, k8sConfig)
-
-		_, err := resolver.ViolationsGenerator()
-		assert.NotNil(t, err, "Error: 'host must be a URL or a host:port pair' was expected")
-	})
-	t.Run("Reporter", func(t *testing.T) {
-		resolver := config.NewResolver(testConfig, &rest.Config{})
-
-		assert.NotNil(t, resolver.ViolationsReporter())
 	})
 }
 
