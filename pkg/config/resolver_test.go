@@ -471,12 +471,12 @@ func Test_RegisterSendResultListener(t *testing.T) {
 }
 
 func Test_SummaryReportServices(t *testing.T) {
-	t.Run("Generator", func(t *testing.T) {
+	t.Run("Generator without report APIs", func(t *testing.T) {
 		resolver := config.NewResolver(testConfig, &rest.Config{})
 		generator, err := resolver.SummaryGenerator()
 
-		assert.Nil(t, err)
-		assert.NotNil(t, generator)
+		assert.NotNil(t, err)
+		assert.Nil(t, generator)
 	})
 	t.Run("Generator.Error", func(t *testing.T) {
 		k8sConfig := &rest.Config{}
@@ -495,12 +495,12 @@ func Test_SummaryReportServices(t *testing.T) {
 }
 
 func Test_ViolationReportServices(t *testing.T) {
-	t.Run("Generator", func(t *testing.T) {
+	t.Run("Generator without report APIs", func(t *testing.T) {
 		resolver := config.NewResolver(testConfig, &rest.Config{})
 		generator, err := resolver.ViolationsGenerator()
 
-		assert.Nil(t, err)
-		assert.NotNil(t, generator)
+		assert.NotNil(t, err)
+		assert.Nil(t, generator)
 	})
 	t.Run("Generator.Error", func(t *testing.T) {
 		k8sConfig := &rest.Config{}

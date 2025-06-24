@@ -541,6 +541,7 @@ func (r *Resolver) SummaryGenerator() (*summary.Generator, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	wgpolicyclient, err := r.WgPolicyCRClient()
 	if err != nil {
 		return nil, err
