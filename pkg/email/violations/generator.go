@@ -75,7 +75,7 @@ func (o *Generator) GenerateData(ctx context.Context) ([]Source, error) {
 
 				s.AddClusterPassed(report.GetSummary().Pass)
 
-				zap.L().Info("Processed PolicyRepor", zap.String("name", report.GetName()))
+				zap.L().Info("Processed Report", zap.String("name", report.GetName()))
 
 				length := len(report.GetResults())
 				if length == 0 || length == report.GetSummary().Pass+report.GetSummary().Skip {
@@ -141,7 +141,7 @@ func (o *Generator) GenerateData(ctx context.Context) ([]Source, error) {
 
 			s.AddNamespacedPassed(report.GetNamespace(), report.GetSummary().Pass)
 
-			defer zap.L().Info("Processed PolicyRepor", zap.String("name", report.GetName()))
+			defer zap.L().Info("Processed Report", zap.String("name", report.GetName()))
 
 			length := len(report.GetResults())
 			if length == 0 || length == report.GetSummary().Pass+report.GetSummary().Skip {

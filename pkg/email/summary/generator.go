@@ -122,7 +122,7 @@ func (o *Generator) GenerateData(ctx context.Context) ([]Source, error) {
 			mx.Unlock()
 
 			s.AddNamespacedSummary(report.GetNamespace(), report.GetSummary())
-			zap.L().Info("Processed PolicyRepor", zap.String("name", report.GetName()))
+			zap.L().Info("Processed Report", zap.String("name", report.GetName()))
 		}(rep)
 	}
 
