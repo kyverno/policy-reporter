@@ -2,6 +2,7 @@ package database
 
 import (
 	"strconv"
+	"strings"
 
 	"github.com/segmentio/fasthash/fnv1a"
 	"github.com/uptrace/bun"
@@ -232,7 +233,7 @@ func MapPolicyReportResource(polr openreports.ReportInterface) []*ResourceResult
 			Name:       resource.Name,
 		}
 
-		id := r.GetID() + res.Category + polr.GetID()
+		id := strings.Join([]string{r.GetID(), res.Category, polr.GetID(), res.Source}, "/")
 
 		value, ok := mapping[id]
 		if !ok {
