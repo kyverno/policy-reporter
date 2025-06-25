@@ -20,10 +20,6 @@ var (
 	OpenreportsCReport = v1alpha1.SchemeGroupVersion.WithResource("clusterreports")
 )
 
-const (
-	openreportsAPIGroup = "openreports.io/v1alpha1"
-)
-
 type openreportsClient struct {
 	queue        *ORQueue
 	metaClient   metadata.Interface
@@ -55,9 +51,6 @@ func (k *openreportsClient) Sync(stopper chan struct{}) error {
 	factory.Start(stopper)
 
 	if !cache.WaitForCacheSync(stopper, orInformer.HasSynced) {
-		return fmt.Errorf("failed to sync policy reports")
-	}
-	if !cache.WaitForCacheSync(stopper, orInformer.HasSynced) {
 		return fmt.Errorf("failed to sync openreports reports")
 	}
 
@@ -87,7 +80,6 @@ func (k *openreportsClient) configureInformer(informer cache.SharedIndexInformer
 		AddFunc: func(obj interface{}) {
 			if item, ok := obj.(*v1.PartialObjectMetadata); ok {
 				if k.reportFilter.AllowReport(item) {
-					item.APIVersion = openreportsAPIGroup
 					k.queue.Add(item)
 				}
 			}
@@ -95,7 +87,6 @@ func (k *openreportsClient) configureInformer(informer cache.SharedIndexInformer
 		DeleteFunc: func(obj interface{}) {
 			if item, ok := obj.(*v1.PartialObjectMetadata); ok {
 				if k.reportFilter.AllowReport(item) {
-					item.APIVersion = openreportsAPIGroup
 					k.queue.Add(item)
 				}
 			}
@@ -103,7 +94,6 @@ func (k *openreportsClient) configureInformer(informer cache.SharedIndexInformer
 		UpdateFunc: func(_, newObj interface{}) {
 			if item, ok := newObj.(*v1.PartialObjectMetadata); ok {
 				if k.reportFilter.AllowReport(item) {
-					item.APIVersion = openreportsAPIGroup
 					k.queue.Add(item)
 				}
 			}
