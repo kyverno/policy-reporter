@@ -104,7 +104,7 @@ metadata:
 type: Opaque
 stringData:
   username: "your-jira-username"
-  apiToken: "your-jira-api-token"
+  token: "your-jira-api-token"
   host: "https://your-jira-instance.atlassian.net"
   projectKey: "POL"
 ```

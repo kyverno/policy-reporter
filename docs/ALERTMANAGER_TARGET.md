@@ -28,7 +28,6 @@ spec:
     minimumSeverity: warning
     sources:
       - kyverno
-      - policy-reporter
 ```
 
 Configuration options:
