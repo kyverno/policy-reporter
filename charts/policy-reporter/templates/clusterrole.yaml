@@ -12,7 +12,7 @@ metadata:
   name: {{ include "policyreporter.fullname" . }}
 rules:
 - apiGroups:
-  - 'openreports.io/v1alpha1'
+  - 'openreports.io'
   resources:
   - reports
   - reports/status
