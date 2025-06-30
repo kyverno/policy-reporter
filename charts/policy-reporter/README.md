@@ -93,16 +93,20 @@ Open `http://localhost:8082/` in your browser.
 | rest.enabled | bool | `false` | Enables the REST API |
 | metrics.enabled | bool | `false` | Enables Prometheus Metrics |
 | metrics.mode | string | `"detailed"` | Metric Mode allows to customize labels Allowed values: detailed, simple, custom |
-| metrics.customLabels | list | `[]` | List of used labels in custom mode Supported fields are: ["namespace", "rule", "policy", "report" // PolicyReport name, "kind" // resource kind, "name" // resource name, "status", "severity", "category", "source"] |
+| metrics.customLabels | list | `[]` | List of used labels in custom mode Supported fields are: ["namespace", "rule", "policy", "report" // Report name, "kind" // resource kind, "name" // resource name, "status", "severity", "category", "source"] |
 | metrics.filter | object | `{}` | Filter results to reduce cardinality |
 | profiling.enabled | bool | `false` | Enable profiling with pprof |
-| worker | int | `5` | Amount of queue workers for PolicyReport resource processing |
-| reportFilter | object | `{}` | Filter PolicyReport resources to process |
+| worker | int | `5` | Amount of queue workers for Report resource processing |
+| reportFilter | object | `{}` | Filter Report resources to process |
 | sourceConfig | list | `[]` | Customize source specific logic like result ID generation |
-| sourceFilters[0].selector.source | string | `"kyverno"` | select PolicyReport by source |
-| sourceFilters[0].uncontrolledOnly | bool | `true` | Filter out PolicyReports of controlled Pods and Jobs, only works for PolicyReport with scope resource |
-| sourceFilters[0].disableClusterReports | bool | `false` | Filter out ClusterPolicyReports |
-| sourceFilters[0].kinds | object | `{"exclude":["ReplicaSet"]}` | Filter out PolicyReports based on the scope resource kind |
+| sourceFilters[0].selector.source | string | `"kyverno"` | select Report by source |
+| sourceFilters[0].uncontrolledOnly | bool | `true` | Filter out Reports of controlled Pods and Jobs, only works for Reports with scope resource |
+| sourceFilters[0].disableClusterReports | bool | `false` | Filter out cluster scoped Reports |
+| sourceFilters[0].kinds | object | `{"exclude":["ReplicaSet"]}` | Filter out Reports based on the scope resource kind |
+| sourceFilters[1].selector.source | string | `"KyvernoValidatingPolicy"` | select Report by source |
+| sourceFilters[1].uncontrolledOnly | bool | `true` | Filter out Reports of controlled Pods and Jobs, only works for Reports with scope resource |
+| sourceFilters[1].disableClusterReports | bool | `false` | Filter out cluster scoped Reports |
+| sourceFilters[1].kinds | object | `{"exclude":["ReplicaSet"]}` | Filter out Reports based on the scope resource kind |
 | global.labels | object | `{}` | additional labels added on each resource |
 | basicAuth.username | string | `""` | HTTP BasicAuth username |
 | basicAuth.password | string | `""` | HTTP BasicAuth password |
@@ -149,7 +153,7 @@ Open `http://localhost:8082/` in your browser.
 | target.loki.mountedSecret | string | `""` | Mounted secret path by Secrets Controller, secret should be in json format |
 | target.loki.minimumSeverity | string | `""` | Minimum severity: "" < info < low < medium < high < critical |
 | target.loki.sources | list | `[]` | List of sources which should send |
-| target.loki.skipExistingOnStartup | bool | `true` | Skip already existing PolicyReportResults on startup |
+| target.loki.skipExistingOnStartup | bool | `true` | Skip already existing report results on startup |
 | target.loki.customFields | object | `{}` | Added as additional labels |
 | target.loki.headers | object | `{}` | Additional HTTP Headers |
 | target.loki.username | string | `""` | HTTP BasicAuth username |
@@ -170,7 +174,7 @@ Open `http://localhost:8082/` in your browser.
 | target.elasticsearch.mountedSecret | string | `""` | Mounted secret path by Secrets Controller, secret should be in json format |
 | target.elasticsearch.minimumSeverity | string | `""` | Minimum severity: "" < info < low < medium < high < critical |
 | target.elasticsearch.sources | list | `[]` | List of sources which should send |
-| target.elasticsearch.skipExistingOnStartup | bool | `true` | Skip already existing PolicyReportResults on startup |
+| target.elasticsearch.skipExistingOnStartup | bool | `true` | Skip already existing report results on startup |
 | target.elasticsearch.customFields | object | `{}` | Added as additional labels |
 | target.elasticsearch.filter | object | `{}` | Filter Results which should send to this target Wildcars for namespaces and policies are supported, you can either define exclude or include values Filters are available for all targets except the UI |
 | target.elasticsearch.channels | list | `[]` | List of channels to route results to different configurations |
@@ -180,7 +184,7 @@ Open `http://localhost:8082/` in your browser.
 | target.slack.mountedSecret | string | `""` | Mounted secret path by Secrets Controller, secret should be in json format |
 | target.slack.minimumSeverity | string | `""` | Minimum severity: "" < info < low < medium < high < critical |
 | target.slack.sources | list | `[]` | List of sources which should send |
-| target.slack.skipExistingOnStartup | bool | `true` | Skip already existing PolicyReportResults on startup |
+| target.slack.skipExistingOnStartup | bool | `true` | Skip already existing report results on startup |
 | target.slack.customFields | object | `{}` | Added as additional labels |
 | target.slack.filter | object | `{}` | Filter Results which should send to this target Wildcars for namespaces and policies are supported, you can either define exclude or include values Filters are available for all targets except the UI |
 | target.slack.channels | list | `[]` | List of channels to route results to different configurations |
@@ -192,7 +196,7 @@ Open `http://localhost:8082/` in your browser.
 | target.discord.mountedSecret | string | `""` | Mounted secret path by Secrets Controller, secret should be in json format |
 | target.discord.minimumSeverity | string | `""` | Minimum severity: "" < info < low < medium < high < critical |
 | target.discord.sources | list | `[]` | List of sources which should send |
-| target.discord.skipExistingOnStartup | bool | `true` | Skip already existing PolicyReportResults on startup |
+| target.discord.skipExistingOnStartup | bool | `true` | Skip already existing report results on startup |
 | target.discord.customFields | object | `{}` | Added as additional labels |
 | target.discord.filter | object | `{}` | Filter Results which should send to this target Wildcars for namespaces and policies are supported, you can either define exclude or include values Filters are available for all targets except the UI |
 | target.discord.channels | list | `[]` | List of channels to route results to different configurations |
@@ -204,7 +208,7 @@ Open `http://localhost:8082/` in your browser.
 | target.teams.mountedSecret | string | `""` | Mounted secret path by Secrets Controller, secret should be in json format |
 | target.teams.minimumSeverity | string | `""` | Minimum severity: "" < info < low < medium < high < critical |
 | target.teams.sources | list | `[]` | List of sources which should send |
-| target.teams.skipExistingOnStartup | bool | `true` | Skip already existing PolicyReportResults on startup |
+| target.teams.skipExistingOnStartup | bool | `true` | Skip already existing report results on startup |
 | target.teams.customFields | object | `{}` | Added as additional labels |
 | target.teams.filter | object | `{}` | Filter Results which should send to this target Wildcars for namespaces and policies are supported, you can either define exclude or include values Filters are available for all targets except the UI |
 | target.teams.channels | list | `[]` | List of channels to route results to different configurations |
@@ -216,7 +220,7 @@ Open `http://localhost:8082/` in your browser.
 | target.webhook.mountedSecret | string | `""` | Mounted secret path by Secrets Controller, secret should be in json format |
 | target.webhook.minimumSeverity | string | `""` | Minimum severity: "" < info < low < medium < high < critical |
 | target.webhook.sources | list | `[]` | List of sources which should send |
-| target.webhook.skipExistingOnStartup | bool | `true` | Skip already existing PolicyReportResults on startup |
+| target.webhook.skipExistingOnStartup | bool | `true` | Skip already existing report results on startup |
 | target.webhook.customFields | object | `{}` | Added as additional labels |
 | target.webhook.keepalive | object | `{"interval":"0","params":{}}` | Keepalive configuration |
 | target.webhook.keepalive.interval | string | `"0"` | Duration string like "30s" for heartbeat interval, '0' - disabled |
@@ -233,7 +237,7 @@ Open `http://localhost:8082/` in your browser.
 | target.telegram.mountedSecret | string | `""` | Mounted secret path by Secrets Controller, secret should be in json format |
 | target.telegram.minimumSeverity | string | `""` | Minimum severity: "" < info < low < medium < high < critical |
 | target.telegram.sources | list | `[]` | List of sources which should send |
-| target.telegram.skipExistingOnStartup | bool | `true` | Skip already existing PolicyReportResults on startup |
+| target.telegram.skipExistingOnStartup | bool | `true` | Skip already existing report results on startup |
 | target.telegram.customFields | object | `{}` | Added as additional labels |
 | target.telegram.filter | object | `{}` | Filter Results which should send to this target Wildcars for namespaces and policies are supported, you can either define exclude or include values Filters are available for all targets except the UI |
 | target.telegram.channels | list | `[]` | List of channels to route results to different configurations |
@@ -245,7 +249,7 @@ Open `http://localhost:8082/` in your browser.
 | target.googleChat.mountedSecret | string | `""` | Mounted secret path by Secrets Controller, secret should be in json format |
 | target.googleChat.minimumSeverity | string | `""` | Minimum severity: "" < info < low < medium < high < critical |
 | target.googleChat.sources | list | `[]` | List of sources which should send |
-| target.googleChat.skipExistingOnStartup | bool | `true` | Skip already existing PolicyReportResults on startup |
+| target.googleChat.skipExistingOnStartup | bool | `true` | Skip already existing report results on startup |
 | target.googleChat.customFields | object | `{}` | Added as additional labels |
 | target.googleChat.filter | object | `{}` | Filter Results which should send to this target Wildcars for namespaces and policies are supported, you can either define exclude or include values Filters are available for all targets except the UI |
 | target.googleChat.channels | list | `[]` | List of channels to route results to different configurations |
@@ -261,7 +265,7 @@ Open `http://localhost:8082/` in your browser.
 | target.jira.mountedSecret | string | `""` | Mounted secret path by Secrets Controller, secret should be in json format |
 | target.jira.minimumSeverity | string | `""` | Minimum severity: "" < info < low < medium < high < critical |
 | target.jira.sources | list | `[]` | List of sources which should send |
-| target.jira.skipExistingOnStartup | bool | `true` | Skip already existing PolicyReportResults on startup |
+| target.jira.skipExistingOnStartup | bool | `true` | Skip already existing report results on startup |
 | target.jira.customFields | object | `{}` | Added as additional labels |
 | target.jira.filter | object | `{}` | Filter Results which should send to this target Wildcars for namespaces and policies are supported, you can either define exclude or include values Filters are available for all targets except the UI |
 | target.jira.channels | list | `[]` | List of channels to route results to different configurations |
@@ -291,7 +295,7 @@ Open `http://localhost:8082/` in your browser.
 | target.s3.mountedSecret | string | `""` | Mounted secret path by Secrets Controller, secret should be in json format |
 | target.s3.minimumSeverity | string | `""` | Minimum severity: "" < info < low < medium < high < critical |
 | target.s3.sources | list | `[]` | List of sources which should send |
-| target.s3.skipExistingOnStartup | bool | `true` | Skip already existing PolicyReportResults on startup |
+| target.s3.skipExistingOnStartup | bool | `true` | Skip already existing report results on startup |
 | target.s3.customFields | object | `{}` | Added as additional labels |
 | target.s3.filter | object | `{}` | Filter Results which should send to this target Wildcars for namespaces and policies are supported, you can either define exclude or include values Filters are available for all targets except the UI |
 | target.s3.channels | list | `[]` | List of channels to route results to different configurations |
@@ -304,7 +308,7 @@ Open `http://localhost:8082/` in your browser.
 | target.kinesis.mountedSecret | string | `""` | Mounted secret path by Secrets Controller, secret should be in json format |
 | target.kinesis.minimumSeverity | string | `""` | Minimum severity: "" < info < low < medium < high < critical |
 | target.kinesis.sources | list | `[]` | List of sources which should send |
-| target.kinesis.skipExistingOnStartup | bool | `true` | Skip already existing PolicyReportResults on startup |
+| target.kinesis.skipExistingOnStartup | bool | `true` | Skip already existing report results on startup |
 | target.kinesis.customFields | object | `{}` | Added as additional labels |
 | target.kinesis.filter | object | `{}` | Filter Results which should send to this target Wildcars for namespaces and policies are supported, you can either define exclude or include values Filters are available for all targets except the UI |
 | target.kinesis.channels | list | `[]` | List of channels to route results to different configurations |
@@ -321,7 +325,7 @@ Open `http://localhost:8082/` in your browser.
 | target.securityHub.mountedSecret | string | `""` | Mounted secret path by Secrets Controller, secret should be in json format |
 | target.securityHub.minimumSeverity | string | `""` | Minimum severity: "" < info < low < medium < high < critical |
 | target.securityHub.sources | list | `[]` | List of sources which should send |
-| target.securityHub.skipExistingOnStartup | bool | `true` | Skip already existing PolicyReportResults on startup |
+| target.securityHub.skipExistingOnStartup | bool | `true` | Skip already existing report results on startup |
 | target.securityHub.customFields | object | `{}` | Added as additional labels |
 | target.securityHub.filter | object | `{}` | Filter Results which should send to this target Wildcars for namespaces and policies are supported, you can either define exclude or include values Filters are available for all targets except the UI |
 | target.securityHub.channels | list | `[]` | List of channels to route results to different configurations |
@@ -331,7 +335,7 @@ Open `http://localhost:8082/` in your browser.
 | target.gcs.mountedSecret | string | `""` | Mounted secret path by Secrets Controller, secret should be in json format |
 | target.gcs.minimumSeverity | string | `""` | Minimum severity: "" < info < low < medium < high < critical |
 | target.gcs.sources | list | `[]` | List of sources which should send |
-| target.gcs.skipExistingOnStartup | bool | `true` | Skip already existing PolicyReportResults on startup |
+| target.gcs.skipExistingOnStartup | bool | `true` | Skip already existing report results on startup |
 | target.gcs.customFields | object | `{}` | Added as additional labels |
 | target.gcs.filter | object | `{}` | Filter Results which should send to this target Wildcars for namespaces and policies are supported, you can either define exclude or include values Filters are available for all targets except the UI |
 | target.gcs.channels | list | `[]` | List of channels to route results to different configurations |

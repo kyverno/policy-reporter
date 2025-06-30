@@ -53,6 +53,13 @@ boards:
     {{- end -}}
 {{- end }}
 
+{{- $vpol := false -}}
+{{- range .Values.ui.sources }}
+    {{- if eq .name "KyvernoValidatingPolicy" -}}
+      {{- $vpol = true -}}
+    {{- end -}}
+{{- end }}
+
 {{- $trivy := false -}}
 {{- range .Values.ui.sources }}
     {{- if eq .name "Trivy Vulnerability" -}}
@@ -70,6 +77,17 @@ sources:
       - warn
       - error
 {{- end }}
+
+{{- if not $vpol }}
+  - name: KyvernoValidatingPolicy
+    type: result
+    exceptions: false
+    excludes:
+      results:
+      - warn
+      - error
+{{- end }}
+
 {{- if and (not $trivy) .Values.plugin.trivy.enabled }}
   - name: Trivy Vulnerability
     type: severity

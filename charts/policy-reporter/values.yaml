@@ -155,7 +155,7 @@ metrics:
   # Allowed values: detailed, simple, custom
   mode: detailed
   # -- List of used labels in custom mode
-  # Supported fields are: ["namespace", "rule", "policy", "report" // PolicyReport name, "kind" // resource kind, "name" // resource name, "status", "severity", "category", "source"]
+  # Supported fields are: ["namespace", "rule", "policy", "report" // Report name, "kind" // resource kind, "name" // resource name, "status", "severity", "category", "source"]
   customLabels: []
   # -- Filter results to reduce cardinality
   filter: {}
@@ -168,16 +168,16 @@ profiling:
   # -- Enable profiling with pprof
   enabled: false
 
-# -- Amount of queue workers for PolicyReport resource processing
+# -- Amount of queue workers for Report resource processing
 worker: 5
 
-# -- Filter PolicyReport resources to process
+# -- Filter Report resources to process
 reportFilter: {}
   # # -- Filter reports based on an namespace allow- or disallow list, wildcards are supported
   # namespaces:
   #  include: []
   #  exclude: []
-  # # -- Disable the processing of ClusterPolicyReports
+  # # -- Disable the processing of cluster scoped Reports
   # disableClusterReports: false
 
 # -- Customize source specific logic like result ID generation
@@ -188,16 +188,26 @@ sourceConfig: []
 #     enabled: true
 #     fields: ["resource", "policy", "rule", "category", "result", "message"]
 
-# Source based PolicyReport filter
+# Source based Report filter
 sourceFilters:
   - selector:
-      # -- select PolicyReport by source
+      # -- select Report by source
       source: kyverno
-    # -- Filter out PolicyReports of controlled Pods and Jobs, only works for PolicyReport with scope resource
+    # -- Filter out Reports of controlled Pods and Jobs, only works for Reports with scope resource
     uncontrolledOnly: true
-    # -- Filter out ClusterPolicyReports
+    # -- Filter out cluster scoped Reports
     disableClusterReports: false
-    # -- Filter out PolicyReports based on the scope resource kind
+    # -- Filter out Reports based on the scope resource kind
+    kinds:
+      exclude: [ReplicaSet]
+  - selector:
+      # -- select Report by source
+      source: KyvernoValidatingPolicy
+    # -- Filter out Reports of controlled Pods and Jobs, only works for Reports with scope resource
+    uncontrolledOnly: true
+    # -- Filter out cluster scoped Reports
+    disableClusterReports: false
+    # -- Filter out Reports based on the scope resource kind
     kinds:
       exclude: [ReplicaSet]
 
@@ -340,7 +350,7 @@ target:
     minimumSeverity: ""
     # -- List of sources which should send
     sources: []
-    # -- Skip already existing PolicyReportResults on startup
+    # -- Skip already existing report results on startup
     skipExistingOnStartup: true
     # -- Added as additional labels
     customFields: {}
@@ -405,7 +415,7 @@ target:
     minimumSeverity: ""
     # -- List of sources which should send
     sources: []
-    # -- Skip already existing PolicyReportResults on startup
+    # -- Skip already existing report results on startup
     skipExistingOnStartup: true
     # -- Added as additional labels
     customFields: {}
@@ -429,7 +439,7 @@ target:
     minimumSeverity: ""
     # -- List of sources which should send
     sources: []
-    # -- Skip already existing PolicyReportResults on startup
+    # -- Skip already existing report results on startup
     skipExistingOnStartup: true
     # -- Added as additional labels
     customFields: {}
@@ -474,7 +484,7 @@ target:
     minimumSeverity: ""
     # -- List of sources which should send
     sources: []
-    # -- Skip already existing PolicyReportResults on startup
+    # -- Skip already existing report results on startup
     skipExistingOnStartup: true
     # -- Added as additional labels
     customFields: {}
@@ -503,7 +513,7 @@ target:
     minimumSeverity: ""
     # -- List of sources which should send
     sources: []
-    # -- Skip already existing PolicyReportResults on startup
+    # -- Skip already existing report results on startup
     skipExistingOnStartup: true
     # -- Added as additional labels
     customFields: {}
@@ -532,7 +542,7 @@ target:
     minimumSeverity: ""
     # -- List of sources which should send
     sources: []
-    # -- Skip already existing PolicyReportResults on startup
+    # -- Skip already existing report results on startup
     skipExistingOnStartup: true
     # -- Added as additional labels
     customFields: {}
@@ -571,7 +581,7 @@ target:
     minimumSeverity: ""
     # -- List of sources which should send
     sources: []
-    # -- Skip already existing PolicyReportResults on startup
+    # -- Skip already existing report results on startup
     skipExistingOnStartup: true
     # -- Added as additional labels
     customFields: {}
@@ -600,7 +610,7 @@ target:
     minimumSeverity: ""
     # -- List of sources which should send
     sources: []
-    # -- Skip already existing PolicyReportResults on startup
+    # -- Skip already existing report results on startup
     skipExistingOnStartup: true
     # -- Added as additional labels
     customFields: {}
@@ -637,7 +647,7 @@ target:
     minimumSeverity: ""
     # -- List of sources which should send
     sources: []
-    # -- Skip already existing PolicyReportResults on startup
+    # -- Skip already existing report results on startup
     skipExistingOnStartup: true
     # -- Added as additional labels
     customFields: {}
@@ -707,7 +717,7 @@ target:
     minimumSeverity: ""
     # -- List of sources which should send
     sources: []
-    # -- Skip already existing PolicyReportResults on startup
+    # -- Skip already existing report results on startup
     skipExistingOnStartup: true
     # -- Added as additional labels
     customFields: {}
@@ -738,7 +748,7 @@ target:
     minimumSeverity: ""
     # -- List of sources which should send
     sources: []
-    # -- Skip already existing PolicyReportResults on startup
+    # -- Skip already existing report results on startup
     skipExistingOnStartup: true
     # -- Added as additional labels
     customFields: {}
@@ -777,7 +787,7 @@ target:
     minimumSeverity: ""
     # -- List of sources which should send
     sources: []
-    # -- Skip already existing PolicyReportResults on startup
+    # -- Skip already existing report results on startup
     skipExistingOnStartup: true
     # -- Added as additional labels
     customFields: {}
@@ -802,7 +812,7 @@ target:
     minimumSeverity: ""
     # -- List of sources which should send
     sources: []
-    # -- Skip already existing PolicyReportResults on startup
+    # -- Skip already existing report results on startup
     skipExistingOnStartup: true
     # -- Added as additional labels
     customFields: {}
