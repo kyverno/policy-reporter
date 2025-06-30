@@ -238,7 +238,7 @@ spec:
                   username:
                     type: string
                 required:
-                - host
+                - projectKey
                 type: object
               kinesis:
                 properties:
