@@ -31,6 +31,8 @@ type WebhookOptions struct {
 }
 
 type JiraOptions struct {
+	ProjectKey string `mapstructure:"projectKey" json:"projectKey"`
+	// +optional
 	Host string `mapstructure:"host" json:"host"`
 	// +optional
 	APIToken string `mapstructure:"apiToken" json:"apiToken"`
@@ -38,8 +40,6 @@ type JiraOptions struct {
 	Username string `mapstructure:"username" json:"username"`
 	// +optional
 	Password string `mapstructure:"password" json:"password"`
-	// +optional
-	ProjectKey string `mapstructure:"projectKey" json:"projectKey"`
 	// +optional
 	IssueType string `mapstructure:"issueType" json:"issueType"`
 	// +optional

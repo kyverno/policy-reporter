@@ -106,7 +106,6 @@ stringData:
   username: "your-jira-username"
   token: "your-jira-api-token"
   host: "https://your-jira-instance.atlassian.net"
-  projectKey: "POL"
 ```
 
 2. Reference the Secret in your configuration:
@@ -114,7 +113,22 @@ stringData:
 ```yaml
 target:
   jira:
+    projectKey: "POL"
     secretRef: "jira-credentials"
+```
+
+or as TargetConfig resource
+
+```
+apiVersion: policyreporter.io/v1alpha1
+kind: TargetConfig
+metadata:
+  name: policy-reporter-jira
+spec:
+  jira:
+    host: "https://your-jira-instance.atlassian.net"
+    projectKey: "POL"
+  secretRef: "jira-credentials"
 ```
 
 ## Issue Format
