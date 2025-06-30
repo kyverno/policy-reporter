@@ -201,5 +201,4 @@ type Config struct {
 	SourceConfig   []SourceConfig `mapstructure:"sourceConfig"`
 	Templates      Templates      `mapstructure:"templates"`
 	CRD            CRD            `mapstructure:"crd"`
-	Openreports    bool           `mapstructure:"openreports"`
 }

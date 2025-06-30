@@ -47,7 +47,7 @@ type Targets struct {
 	Kinesis       *targetconfig.Config[v1alpha1.KinesisOptions]       `mapstructure:"kinesis"`
 	SecurityHub   *targetconfig.Config[v1alpha1.SecurityHubOptions]   `mapstructure:"securityHub"`
 	GCS           *targetconfig.Config[v1alpha1.GCSOptions]           `mapstructure:"gcs"`
-	AlertManager  *targetconfig.Config[v1alpha1.AlertManagerOptions]  `mapstructure:"alertManager"`
+	AlertManager  *targetconfig.Config[v1alpha1.HostOptions]          `mapstructure:"alertManager"`
 	Splunk        *targetconfig.Config[v1alpha1.SplunkOptions]        `mapstructure:"splunk"`
 }
 

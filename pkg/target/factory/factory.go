@@ -901,7 +901,7 @@ func (f *TargetFactory) CreateGCSTarget(config, parent *targetconfig.Config[v1al
 	}
 }
 
-func (f *TargetFactory) CreateAlertManagerTarget(config, parent *targetconfig.Config[v1alpha1.AlertManagerOptions]) *target.Target {
+func (f *TargetFactory) CreateAlertManagerTarget(config, parent *targetconfig.Config[v1alpha1.HostOptions]) *target.Target {
 	if config == nil || config.Config == nil {
 		return nil
 	}
@@ -1085,7 +1085,7 @@ func (f *TargetFactory) mapSecretValues(config any, ref, mountedSecret string) {
 			c.Config.Webhook = values.Host
 		}
 
-	case *targetconfig.Config[v1alpha1.AlertManagerOptions]:
+	case *targetconfig.Config[v1alpha1.HostOptions]:
 		if values.Host != "" {
 			c.Config.Host = values.Host
 		}
@@ -1094,6 +1094,20 @@ func (f *TargetFactory) mapSecretValues(config any, ref, mountedSecret string) {
 				c.Config.Headers = make(map[string]string)
 			}
 			c.Config.Headers["Authorization"] = values.Token
+		}
+
+	case *targetconfig.Config[v1alpha1.JiraOptions]:
+		if values.Host != "" {
+			c.Config.Host = values.Host
+		}
+		if values.Username != "" {
+			c.Config.Username = values.Username
+		}
+		if values.Password != "" {
+			c.Config.Password = values.Password
+		}
+		if values.Token != "" {
+			c.Config.APIToken = values.Token
 		}
 	}
 }

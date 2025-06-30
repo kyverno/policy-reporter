@@ -712,7 +712,7 @@ func MapGCSToTarget(ta *targetconfig.Config[v1alpha1.GCSOptions]) *Target {
 	return t
 }
 
-func MapAlertManagerToTarget(ta *targetconfig.Config[v1alpha1.AlertManagerOptions]) *Target {
+func MapAlertManagerToTarget(ta *targetconfig.Config[v1alpha1.HostOptions]) *Target {
 	t := MapBaseToTarget(ta)
 	t.Type = "AlertManager"
 	t.Host = ta.Config.Host
