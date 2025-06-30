@@ -12,6 +12,17 @@ metadata:
   name: {{ include "policyreporter.fullname" . }}
 rules:
 - apiGroups:
+  - 'openreports.io'
+  resources:
+  - reports
+  - reports/status
+  - clusterreports
+  - clusterreports/status
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
   - '*'
   resources:
   - policyreports
