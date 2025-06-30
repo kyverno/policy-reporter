@@ -648,6 +648,35 @@ target:
     # -- List of channels to route results to different configurations
     channels: []
 
+  alertManager:
+    # -- host address
+    host: ""
+    # -- Server Certificate file path
+    # Can be added under extraVolumes
+    certificate: ""
+    # -- Skip TLS verification
+    skipTLS: false
+    # -- Additional HTTP Headers
+    headers: {}
+    # -- Read configuration from an already existing Secret
+    secretRef: ""
+    # -- Mounted secret path by Secrets Controller, secret should be in json format
+    mountedSecret: ""
+    # -- Minimum severity: "" < info < low < medium < high < critical
+    minimumSeverity: ""
+    # -- List of sources which should send
+    sources: []
+    # -- Skip already existing PolicyReportResults on startup
+    skipExistingOnStartup: true
+    # -- Added as additional labels
+    customFields: {}
+    # -- Filter Results which should send to this target
+    # Wildcars for namespaces and policies are supported, you can either define exclude or include values
+    # Filters are available for all targets except the UI
+    filter: {}
+    # -- List of channels to route results to different configurations
+    channels: []
+
   # Authentication via PodIdentity or WebIdentity are also supported
   s3:
     # -- (optional) S3 Access key

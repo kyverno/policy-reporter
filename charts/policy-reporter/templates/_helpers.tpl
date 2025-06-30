@@ -231,6 +231,18 @@ config:
 {{ include "target" . }}
 {{- end }}
 
+{{- define "target.alertManager" -}}
+config:
+  host: {{ .host | quote }}
+  certificate: {{ .certificate | quote }}
+  skipTLS: {{ .skipTLS }}
+  {{- with .headers }}
+  headers:
+  {{- toYaml . | nindent 4 }}
+  {{- end }}
+{{ include "target" . }}
+{{- end }}
+
 {{- define "target.telegram" -}}
 config:
   chatId: {{ .chatId | quote }}

@@ -72,7 +72,7 @@ type TargetConfigSpec struct {
 	Jira *JiraOptions `json:"jira,omitempty"`
 
 	// +optional
-	AlertManager *AlertManagerOptions `json:"alertManager,omitempty"`
+	AlertManager *HostOptions `json:"alertManager,omitempty"`
 
 	// +optional
 	Splunk *SplunkOptions `json:"splunk,omitempty"`

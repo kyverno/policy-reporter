@@ -265,6 +265,18 @@ Open `http://localhost:8082/` in your browser.
 | target.jira.customFields | object | `{}` | Added as additional labels |
 | target.jira.filter | object | `{}` | Filter Results which should send to this target Wildcars for namespaces and policies are supported, you can either define exclude or include values Filters are available for all targets except the UI |
 | target.jira.channels | list | `[]` | List of channels to route results to different configurations |
+| target.alertManager.host | string | `""` | host address |
+| target.alertManager.certificate | string | `""` | Server Certificate file path Can be added under extraVolumes |
+| target.alertManager.skipTLS | bool | `false` | Skip TLS verification |
+| target.alertManager.headers | object | `{}` | Additional HTTP Headers |
+| target.alertManager.secretRef | string | `""` | Read configuration from an already existing Secret |
+| target.alertManager.mountedSecret | string | `""` | Mounted secret path by Secrets Controller, secret should be in json format |
+| target.alertManager.minimumSeverity | string | `""` | Minimum severity: "" < info < low < medium < high < critical |
+| target.alertManager.sources | list | `[]` | List of sources which should send |
+| target.alertManager.skipExistingOnStartup | bool | `true` | Skip already existing PolicyReportResults on startup |
+| target.alertManager.customFields | object | `{}` | Added as additional labels |
+| target.alertManager.filter | object | `{}` | Filter Results which should send to this target Wildcars for namespaces and policies are supported, you can either define exclude or include values Filters are available for all targets except the UI |
+| target.alertManager.channels | list | `[]` | List of channels to route results to different configurations |
 | target.s3.accessKeyId | optional | `""` | S3 Access key |
 | target.s3.secretAccessKey | optional | `""` | S3 SecretAccess key |
 | target.s3.region | optional | `""` | S3 Storage region |
@@ -441,6 +453,7 @@ Open `http://localhost:8082/` in your browser.
 | ui.affinity | object | `{}` | Affinity constraints. |
 | ui.extraVolumes.volumeMounts | list | `[]` | Deployment volumeMounts |
 | ui.extraVolumes.volumes | list | `[]` | Deployment values |
+| ui.extraConfig | object | `{}` | Extra configuration options appended to UI settings |
 | plugin.kyverno.enabled | bool | `false` | Enable Kyverno Plugin |
 | plugin.kyverno.image.registry | string | `"ghcr.io"` | Image registry |
 | plugin.kyverno.image.repository | string | `"kyverno/policy-reporter/kyverno-plugin"` | Image repository |
@@ -506,6 +519,7 @@ Open `http://localhost:8082/` in your browser.
 | plugin.kyverno.topologySpreadConstraints | object | `{}` | Pod Topology Spread Constraints for the kyverno plugin. |
 | plugin.kyverno.extraVolumes.volumeMounts | list | `[]` | Deployment volumeMounts |
 | plugin.kyverno.extraVolumes.volumes | list | `[]` | Deployment values |
+| plugin.kyverno.extraConfig | object | `{}` | Extra configuration options appended to kyverno plugin settings |
 | plugin.trivy.enabled | bool | `false` | Enable Trivy Operator Plugin |
 | plugin.trivy.image.registry | string | `"ghcr.io"` | Image registry |
 | plugin.trivy.image.repository | string | `"kyverno/policy-reporter/trivy-plugin"` | Image repository |
@@ -574,6 +588,7 @@ Open `http://localhost:8082/` in your browser.
 | plugin.trivy.topologySpreadConstraints | object | `{}` | Pod Topology Spread Constraints for the trivy plugin. |
 | plugin.trivy.extraVolumes.volumeMounts | list | `[]` | Deployment volumeMounts |
 | plugin.trivy.extraVolumes.volumes | list | `[]` | Deployment values |
+| plugin.trivy.extraConfig | object | `{}` | Extra configuration options appended to trivy plugin settings |
 | monitoring.enabled | bool | `false` | Enables the Prometheus Operator integration |
 | monitoring.annotations | object | `{}` | Key/value pairs that are attached to all resources. |
 | monitoring.serviceMonitor.honorLabels | bool | `false` | HonorLabels chooses the metrics labels on collisions with target labels |
@@ -632,6 +647,7 @@ Open `http://localhost:8082/` in your browser.
 | monitoring.policyReportOverview.failingPolicyRuleTable.height | int | `10` |  |
 | monitoring.policyReportOverview.failingClusterPolicyRuleTable.height | int | `10` |  |
 | extraManifests | list | `[]` | list of extra manifests |
+| extraConfig | object | `{}` | Extra configuration options appended to core policy reporter |
 
 ## Source Code
 
