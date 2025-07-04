@@ -41,7 +41,7 @@ func Test_JiraTarget(t *testing.T) {
 
 			// Verify basic auth
 			token := req.Header.Get("Authorization")
-			assert.Equal(t, "Bearer test-token", token)
+			assert.Equal(t, "Basic dGVzdC11c2VyOnRlc3QtdG9rZW4=", token)
 
 			// Verify request body
 			body, err := io.ReadAll(req.Body)

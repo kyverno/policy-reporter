@@ -157,7 +157,7 @@ func NewClient(options Options) (target.Client, error) {
 	}
 
 	if options.APIToken != "" {
-		jira.Auth.SetBearerToken(options.APIToken)
+		jira.Auth.SetBasicAuth(options.Username, options.APIToken)
 	} else {
 		jira.Auth.SetBasicAuth(options.Username, options.Password)
 	}
