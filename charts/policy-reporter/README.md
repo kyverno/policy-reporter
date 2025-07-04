@@ -3,7 +3,7 @@
 Policy Reporter watches for PolicyReport Resources.
 It creates Prometheus Metrics and can send rule validation events to different targets like Loki, Elasticsearch, Slack or Discord
 
-![Version: 3.2.2](https://img.shields.io/badge/Version-3.2.2-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 3.2.1](https://img.shields.io/badge/AppVersion-3.2.1-informational?style=flat-square)
+![Version: 3.2.3](https://img.shields.io/badge/Version-3.2.3-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 3.2.2](https://img.shields.io/badge/AppVersion-3.2.2-informational?style=flat-square)
 
 ## Documentation
 
@@ -257,9 +257,11 @@ Open `http://localhost:8082/` in your browser.
 | target.jira.username | string | `""` | JIRA username |
 | target.jira.password | string | `""` | JIRA password (use password or apiToken, not both) |
 | target.jira.apiToken | string | `""` | JIRA API token (use password or apiToken, not both) |
+| target.jira.apiVersion | string | `"v3"` | JIRA static labels |
 | target.jira.projectKey | string | `""` | JIRA project key |
 | target.jira.issueType | string | `""` | JIRA issue type (default: "Bug") |
 | target.jira.components | list | `[]` | JIRA component names list |
+| target.jira.labels | list | `[]` | JIRA static labels |
 | target.jira.summaryTemplate | string | `""` | JIRA summary go template, available values: result, customfield default: "{{ if result.ResourceString }}{{ result.ResourceString }}: {{ end }}Policy Violation: {{ result.Policy }}" |
 | target.jira.certificate | string | `""` | Server Certificate file path Can be added under extraVolumes |
 | target.jira.skipTLS | bool | `false` | Skip TLS verification |

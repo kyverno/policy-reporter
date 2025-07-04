@@ -223,6 +223,8 @@ spec:
                 properties:
                   apiToken:
                     type: string
+                  apiVersion:
+                    type: string
                   certificate:
                     type: string
                   components:
@@ -233,6 +235,10 @@ spec:
                     type: string
                   issueType:
                     type: string
+                  labels:
+                    items:
+                      type: string
+                    type: array
                   password:
                     type: string
                   projectKey:

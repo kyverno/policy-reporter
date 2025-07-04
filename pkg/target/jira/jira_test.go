@@ -37,7 +37,7 @@ func Test_JiraTarget(t *testing.T) {
 			assert.Equal(t, "application/json", req.Header.Get("Content-Type"))
 
 			// Verify URL
-			assert.Equal(t, "https://jira.example.com/rest/api/2/issue", req.URL.String())
+			assert.Equal(t, "https://jira.example.com/rest/api/3/issue", req.URL.String())
 
 			// Verify basic auth
 			token := req.Header.Get("Authorization")
@@ -47,30 +47,30 @@ func Test_JiraTarget(t *testing.T) {
 			body, err := io.ReadAll(req.Body)
 			assert.NoError(t, err)
 
-			var issueData map[string]interface{}
+			var issueData map[string]any
 			err = json.Unmarshal(body, &issueData)
 			assert.NoError(t, err)
 
-			fields, ok := issueData["fields"].(map[string]interface{})
+			fields, ok := issueData["fields"].(map[string]any)
 			assert.True(t, ok)
 
 			// Check essential fields
-			project, ok := fields["project"].(map[string]interface{})
+			project, ok := fields["project"].(map[string]any)
 			assert.True(t, ok)
 			assert.Equal(t, "TEST", project["key"])
 
-			issueType, ok := fields["issuetype"].(map[string]interface{})
+			issueType, ok := fields["issuetype"].(map[string]any)
 			assert.True(t, ok)
 			assert.Equal(t, "Task", issueType["name"])
 			// Check summary and description are set
 			summary, ok := fields["summary"].(string)
 			assert.True(t, ok)
 			assert.Equal(t, "default/deployment/nginx: Policy Violation: require-requests-and-limits-required", summary)
-			_, ok = fields["description"].(string)
+			_, ok = fields["description"].(any)
 			assert.True(t, ok)
 
 			// Check labels
-			labels, ok := fields["labels"].([]interface{})
+			labels, ok := fields["labels"].([]any)
 			assert.True(t, ok)
 			assert.Contains(t, labels, "policy-reporter")
 			assert.Contains(t, labels, "policy-violation")
@@ -110,11 +110,11 @@ func Test_JiraTarget(t *testing.T) {
 			body, err := io.ReadAll(req.Body)
 			assert.NoError(t, err)
 
-			var issueData map[string]interface{}
+			var issueData map[string]any
 			err = json.Unmarshal(body, &issueData)
 			assert.NoError(t, err)
 
-			fields, ok := issueData["fields"].(map[string]interface{})
+			fields, ok := issueData["fields"].(map[string]any)
 			assert.True(t, ok)
 
 			// Check summary is set
@@ -123,15 +123,15 @@ func Test_JiraTarget(t *testing.T) {
 			assert.Equal(t, "test: Policy Violation: require-requests-and-limits-required", summary)
 
 			// Check essential fields
-			project, ok := fields["project"].(map[string]interface{})
+			project, ok := fields["project"].(map[string]any)
 			assert.True(t, ok)
 			assert.Equal(t, "TEST", project["key"])
 
-			issueType, ok := fields["issuetype"].(map[string]interface{})
+			issueType, ok := fields["issuetype"].(map[string]any)
 			assert.True(t, ok)
 			assert.Equal(t, "Bug", issueType["name"])
 
-			components, ok := fields["compoenents"].(map[string]interface{})
+			components, ok := fields["compoenents"].(map[string]any)
 			assert.True(t, ok)
 			assert.Equal(t, []string{"policy-reporter"}, components["name"])
 		}
@@ -160,14 +160,14 @@ func Test_JiraTarget(t *testing.T) {
 			body, err := io.ReadAll(req.Body)
 			assert.NoError(t, err)
 
-			var issueData map[string]interface{}
+			var issueData map[string]any
 			err = json.Unmarshal(body, &issueData)
 			assert.NoError(t, err)
 
-			fields, ok := issueData["fields"].(map[string]interface{})
+			fields, ok := issueData["fields"].(map[string]any)
 			assert.True(t, ok)
 
-			issueType, ok := fields["issuetype"].(map[string]interface{})
+			issueType, ok := fields["issuetype"].(map[string]any)
 			assert.True(t, ok)
 			assert.Equal(t, "Task", issueType["name"]) // Default should be Task
 		}
@@ -191,11 +191,11 @@ func Test_JiraTarget(t *testing.T) {
 			body, err := io.ReadAll(req.Body)
 			assert.NoError(t, err)
 
-			var issueData map[string]interface{}
+			var issueData map[string]any
 			err = json.Unmarshal(body, &issueData)
 			assert.NoError(t, err)
 
-			fields, ok := issueData["fields"].(map[string]interface{})
+			fields, ok := issueData["fields"].(map[string]any)
 			assert.True(t, ok)
 
 			// Check custom fields
