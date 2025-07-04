@@ -2,8 +2,10 @@ package openreports
 
 import (
 	"fmt"
+	"strconv"
 	"strings"
 
+	"github.com/segmentio/fasthash/fnv1a"
 	corev1 "k8s.io/api/core/v1"
 	"openreports.io/apis/openreports.io/v1alpha1"
 )
@@ -57,6 +59,21 @@ func ToResourceString(res *corev1.ObjectReference) string {
 	}
 
 	return resource
+}
+
+func ToResourceID(res *corev1.ObjectReference) string {
+	if res == nil {
+		return ""
+	}
+
+	h1 := fnv1a.Init64
+	h1 = fnv1a.AddString64(h1, res.Namespace)
+	h1 = fnv1a.AddString64(h1, res.Name)
+	h1 = fnv1a.AddString64(h1, res.Kind)
+	h1 = fnv1a.AddString64(h1, string(res.UID))
+	h1 = fnv1a.AddString64(h1, res.APIVersion)
+
+	return strconv.FormatUint(h1, 10)
 }
 
 func (r *ResultAdapter) ResourceString() string {

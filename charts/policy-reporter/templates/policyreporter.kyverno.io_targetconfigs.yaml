@@ -236,6 +236,8 @@ spec:
                     type: string
                   skipTLS:
                     type: boolean
+                  summaryTemplate:
+                    type: string
                   username:
                     type: string
                 required:
