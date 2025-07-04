@@ -1,6 +1,7 @@
 package jira_test
 
 import (
+	"bytes"
 	"encoding/json"
 	"io"
 	"net/http"
@@ -23,6 +24,8 @@ func (c testClient) Do(req *http.Request) (*http.Response, error) {
 
 	return &http.Response{
 		StatusCode: c.statusCode,
+		Request:    req,
+		Body:       io.NopCloser(bytes.NewBufferString(``)),
 	}, nil
 }
 
@@ -32,16 +35,13 @@ func Test_JiraTarget(t *testing.T) {
 			// Verify HTTP headers and method
 			assert.Equal(t, "POST", req.Method)
 			assert.Equal(t, "application/json", req.Header.Get("Content-Type"))
-			assert.Equal(t, "Policy-Reporter", req.Header.Get("User-Agent"))
 
 			// Verify URL
 			assert.Equal(t, "https://jira.example.com/rest/api/2/issue", req.URL.String())
 
 			// Verify basic auth
-			username, password, ok := req.BasicAuth()
-			assert.True(t, ok)
-			assert.Equal(t, "test-user", username)
-			assert.Equal(t, "test-token", password)
+			token := req.Header.Get("Authorization")
+			assert.Equal(t, "Bearer test-token", token)
 
 			// Verify request body
 			body, err := io.ReadAll(req.Body)
@@ -62,10 +62,10 @@ func Test_JiraTarget(t *testing.T) {
 			issueType, ok := fields["issuetype"].(map[string]interface{})
 			assert.True(t, ok)
 			assert.Equal(t, "Task", issueType["name"])
-
 			// Check summary and description are set
-			_, ok = fields["summary"].(string)
+			summary, ok := fields["summary"].(string)
 			assert.True(t, ok)
+			assert.Equal(t, "default/deployment/nginx: Policy Violation: require-requests-and-limits-required", summary)
 			_, ok = fields["description"].(string)
 			assert.True(t, ok)
 
@@ -76,7 +76,7 @@ func Test_JiraTarget(t *testing.T) {
 			assert.Contains(t, labels, "policy-violation")
 		}
 
-		client := jira.NewClient(jira.Options{
+		client, _ := jira.NewClient(jira.Options{
 			ClientOptions: target.ClientOptions{
 				Name: "Jira",
 			},
@@ -96,7 +96,6 @@ func Test_JiraTarget(t *testing.T) {
 			// Verify HTTP headers and method
 			assert.Equal(t, "POST", req.Method)
 			assert.Equal(t, "application/json", req.Header.Get("Content-Type"))
-			assert.Equal(t, "Policy-Reporter", req.Header.Get("User-Agent"))
 
 			// Verify URL
 			assert.Equal(t, "https://jira.example.com/rest/api/2/issue", req.URL.String())
@@ -118,6 +117,11 @@ func Test_JiraTarget(t *testing.T) {
 			fields, ok := issueData["fields"].(map[string]interface{})
 			assert.True(t, ok)
 
+			// Check summary is set
+			summary, ok := fields["summary"].(string)
+			assert.True(t, ok)
+			assert.Equal(t, "test: Policy Violation: require-requests-and-limits-required", summary)
+
 			// Check essential fields
 			project, ok := fields["project"].(map[string]interface{})
 			assert.True(t, ok)
@@ -126,20 +130,29 @@ func Test_JiraTarget(t *testing.T) {
 			issueType, ok := fields["issuetype"].(map[string]interface{})
 			assert.True(t, ok)
 			assert.Equal(t, "Bug", issueType["name"])
+
+			components, ok := fields["compoenents"].(map[string]interface{})
+			assert.True(t, ok)
+			assert.Equal(t, []string{"policy-reporter"}, components["name"])
 		}
 
-		client := jira.NewClient(jira.Options{
+		client, err := jira.NewClient(jira.Options{
 			ClientOptions: target.ClientOptions{
 				Name: "Jira",
 			},
-			Host:       "https://jira.example.com",
-			Username:   "test-user",
-			Password:   "test-password",
-			ProjectKey: "TEST",
-			IssueType:  "Bug",
-			HTTPClient: testClient{callback, 200},
+			Host:           "https://jira.example.com",
+			Username:       "test-user",
+			Password:       "test-password",
+			ProjectKey:     "TEST",
+			IssueType:      "Bug",
+			HTTPClient:     testClient{callback, 200},
+			CustomFields:   map[string]string{"cluster": "test"},
+			Components:     []string{"policy-reporter"},
+			SummaryTmplate: "{{ customfield.cluster }}: Policy Violation: {{ result.Policy }}",
 		})
-		client.Send(fixtures.CompleteTargetSendResult)
+		if assert.NoError(t, err) {
+			client.Send(fixtures.CompleteTargetSendResult)
+		}
 	})
 
 	t.Run("Default IssueType", func(t *testing.T) {
@@ -159,7 +172,7 @@ func Test_JiraTarget(t *testing.T) {
 			assert.Equal(t, "Task", issueType["name"]) // Default should be Task
 		}
 
-		client := jira.NewClient(jira.Options{
+		client, _ := jira.NewClient(jira.Options{
 			ClientOptions: target.ClientOptions{
 				Name: "Jira",
 			},
@@ -190,7 +203,7 @@ func Test_JiraTarget(t *testing.T) {
 			assert.Equal(t, "Kubernetes", fields["customfield_10002"])
 		}
 
-		client := jira.NewClient(jira.Options{
+		client, _ := jira.NewClient(jira.Options{
 			ClientOptions: target.ClientOptions{
 				Name: "Jira",
 			},
@@ -209,7 +222,7 @@ func Test_JiraTarget(t *testing.T) {
 	})
 
 	t.Run("Name", func(t *testing.T) {
-		client := jira.NewClient(jira.Options{
+		client, _ := jira.NewClient(jira.Options{
 			ClientOptions: target.ClientOptions{
 				Name: "JiraTarget",
 			},
@@ -225,7 +238,7 @@ func Test_JiraTarget(t *testing.T) {
 	})
 
 	t.Run("Type", func(t *testing.T) {
-		client := jira.NewClient(jira.Options{
+		client, _ := jira.NewClient(jira.Options{
 			ClientOptions: target.ClientOptions{
 				Name: "JiraTarget",
 			},

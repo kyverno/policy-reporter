@@ -2,91 +2,69 @@ package jira
 
 import (
 	"bytes"
-	"encoding/json"
+	"context"
 	"fmt"
-	"net/http"
+	"html/template"
 	"strings"
 
+	v2 "github.com/ctreminiom/go-atlassian/v2/jira/v2"
+	"github.com/ctreminiom/go-atlassian/v2/pkg/infra/models"
+	"go.uber.org/zap"
+
+	"github.com/kyverno/policy-reporter/pkg/helper"
 	"github.com/kyverno/policy-reporter/pkg/openreports"
 	"github.com/kyverno/policy-reporter/pkg/target"
 	targethttp "github.com/kyverno/policy-reporter/pkg/target/http"
 )
 
+const summaryTmplate = "{{ if .result.ResourceString }}{{ .result.ResourceString }}: {{ end }}Policy Violation: {{ .result.Policy }}"
+
 // Options to configure the JIRA target
 type Options struct {
 	target.ClientOptions
-	Host         string
-	Username     string
-	Password     string
-	APIToken     string
-	ProjectKey   string
-	IssueType    string
-	SkipTLS      bool
-	Certificate  string
-	CustomFields map[string]string
-	HTTPClient   targethttp.Client
+	Host           string
+	Username       string
+	Password       string
+	APIToken       string
+	ProjectKey     string
+	IssueType      string
+	SummaryTmplate string
+	SkipTLS        bool
+	Certificate    string
+	CustomFields   map[string]string
+	Components     []string
+	HTTPClient     targethttp.Client
 }
 
 type client struct {
 	target.BaseClient
-	host         string
-	username     string
-	password     string
-	apiToken     string
-	projectKey   string
-	issueType    string
-	skipTLS      bool
-	certificate  string
-	customFields map[string]string
-	client       targethttp.Client
-}
-
-// Issue represents a JIRA issue to be created
-type Issue struct {
-	Fields struct {
-		Project struct {
-			Key string `json:"key"`
-		} `json:"project"`
-		Summary     string `json:"summary"`
-		Description string `json:"description"`
-		IssueType   struct {
-			Name string `json:"name"`
-		} `json:"issuetype"`
-		Labels       []string               `json:"labels,omitempty"`
-		CustomFields map[string]interface{} `json:"-"`
-	} `json:"fields"`
+	projectKey     string
+	issueType      string
+	summaryTmplate string
+	customFields   map[string]string
+	compoenents    []string
+	jira           *v2.Client
 }
 
 func (e *client) Send(result openreports.ResultAdapter) {
-	issue := Issue{}
-	issue.Fields.Project.Key = e.projectKey
-	issue.Fields.IssueType.Name = e.issueType
-	if e.issueType == "" {
-		issue.Fields.IssueType.Name = "Task"
-	}
-
-	// Set summary and description based on policy result
-	issue.Fields.Summary = fmt.Sprintf("Policy Violation: %s", result.Policy)
-
 	// Create a detailed description
-	description := fmt.Sprintf("**Policy**: %s\n**Severity**: %s\n**Status**: %s\n",
-		result.Policy, result.Severity, result.Result)
+	description := fmt.Sprintf("*Policy*: %s\n*Severity*: %s\n*Status*: %s\n", result.Policy, result.Severity, result.Result)
 
 	if result.Category != "" {
-		description += fmt.Sprintf("**Category**: %s\n", result.Category)
+		description += fmt.Sprintf("*Category*: %s\n", result.Category)
 	}
 
 	if result.Source != "" {
-		description += fmt.Sprintf("**Source**: %s\n", result.Source)
+		description += fmt.Sprintf("*Source*: %s\n", result.Source)
 	}
 
 	if result.Description != "" {
-		description += fmt.Sprintf("\n**Message**:\n%s\n", result.Description)
+		description += fmt.Sprintf("\n*Message*:\n%s\n", result.Description)
 	}
 
 	if result.GetResource() != nil {
 		resource := result.GetResource()
-		description += fmt.Sprintf("\n**Resource**:\n- Kind: %s\n- Name: %s\n",
+		description += fmt.Sprintf("\n*Resource*:\n- Kind: %s\n- Name: %s\n",
 			resource.Kind, resource.Name)
 
 		if resource.Namespace != "" {
@@ -100,76 +78,71 @@ func (e *client) Send(result openreports.ResultAdapter) {
 
 	// Add properties as additional information
 	if len(result.Properties) > 0 {
-		description += "\n**Additional Properties**:\n"
+		description += "\n*Additional Properties*:\n"
 		for k, v := range result.Properties {
 			description += fmt.Sprintf("- %s: %s\n", k, v)
 		}
 	}
 
-	issue.Fields.Description = description
+	customFields := models.CustomFields{}
 
 	// Add custom fields if any
 	if len(e.customFields) > 0 {
-		issue.Fields.CustomFields = make(map[string]interface{})
 		for property, value := range e.customFields {
-			issue.Fields.CustomFields[property] = value
+			if !strings.HasPrefix(property, "customfield_") {
+				continue
+			}
+
+			err := customFields.Text(property, value)
+			if err != nil {
+				zap.L().Error("failed to add jira custom field", zap.String("name", e.Name()), zap.String("field", property), zap.Error(err), zap.Any("result", result))
+			}
 		}
 	}
 
+	var summary bytes.Buffer
+
+	t, err := template.New("summary").Parse(e.summaryTmplate)
+	if err != nil {
+		zap.L().Error("failed to parse summary template", zap.String("name", e.Name()), zap.Error(err), zap.Any("result", result))
+		return
+	}
+
+	if err := t.Execute(&summary, map[string]any{"result": &result, "customfield": e.customFields}); err != nil {
+		zap.L().Error("failed to execute summary template", zap.String("name", e.Name()), zap.Error(err), zap.Any("result", result))
+		return
+	}
+
+	issue := &models.IssueSchemeV2{
+		Fields: &models.IssueFieldsSchemeV2{
+			Project:     &models.ProjectScheme{Key: e.projectKey},
+			IssueType:   &models.IssueTypeScheme{Name: helper.Defaults(e.issueType, "Task")},
+			Summary:     summary.String(),
+			Labels:      []string{"policy-reporter", "policy-violation"},
+			Description: description,
+			Components: helper.Map(e.compoenents, func(s string) *models.ComponentScheme {
+				return &models.ComponentScheme{Name: s}
+			}),
+		},
+	}
+
 	// Add labels
-	issue.Fields.Labels = []string{"policy-reporter", "policy-violation"}
 	if result.Policy != "" {
 		issue.Fields.Labels = append(issue.Fields.Labels, fmt.Sprintf("policy-%s", result.Policy))
 	}
 	if string(result.Severity) != "" {
 		issue.Fields.Labels = append(issue.Fields.Labels, fmt.Sprintf("severity-%s", result.Severity))
 	}
-
-	// Custom fields need to be mapped to the top level of fields for the JIRA API
-	issueData := make(map[string]interface{})
-	fieldsData := make(map[string]interface{})
-
-	rawIssue, _ := json.Marshal(issue)
-	json.Unmarshal(rawIssue, &issueData)
-
-	// Get the fields section
-	if fieldsRaw, ok := issueData["fields"].(map[string]interface{}); ok {
-		fieldsData = fieldsRaw
+	if result.HasResource() {
+		issue.Fields.Labels = append(issue.Fields.Labels, fmt.Sprintf("resource-%s", openreports.ToResourceID(result.GetResource())))
 	}
 
-	// Add custom fields directly to fields section
-	for k, v := range issue.Fields.CustomFields {
-		fieldsData[k] = v
+	s, resp, err := e.jira.Issue.Create(context.Background(), issue, &customFields)
+	if err == nil {
+		zap.L().Debug("JIRA issue created", zap.String("key", s.Key), zap.String("id", s.ID))
 	}
 
-	issueData["fields"] = fieldsData
-
-	// Create the JSON request body
-	jsonBody, err := json.Marshal(issueData)
-	if err != nil {
-		return
-	}
-
-	// Create HTTP request directly
-	req, err := http.NewRequest("POST", fmt.Sprintf("%s/rest/api/2/issue", strings.TrimRight(e.host, "/")), bytes.NewBuffer(jsonBody))
-	if err != nil {
-		return
-	}
-
-	// JIRA API requires Content-Type to be exactly "application/json" (without charset)
-	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("User-Agent", "Policy-Reporter")
-
-	// Set authentication
-	if e.apiToken != "" && e.username != "" {
-		req.SetBasicAuth(e.username, e.apiToken)
-	} else if e.username != "" && e.password != "" {
-		req.SetBasicAuth(e.username, e.password)
-	}
-
-	// Execute the request
-	resp, err := e.client.Do(req)
-	targethttp.ProcessHTTPResponse(e.Name(), resp, err)
+	targethttp.ProcessHTTPResponse(e.Name(), resp.Response, err)
 }
 
 func (e *client) Type() target.ClientType {
@@ -177,23 +150,25 @@ func (e *client) Type() target.ClientType {
 }
 
 // NewClient creates a new jira.client to send Results to JIRA
-func NewClient(options Options) target.Client {
-	httpClient := options.HTTPClient
-	if httpClient == nil {
-		httpClient = targethttp.NewClient(options.Certificate, options.SkipTLS)
+func NewClient(options Options) (target.Client, error) {
+	jira, err := v2.New(options.HTTPClient, options.Host)
+	if err != nil {
+		return nil, err
+	}
+
+	if options.APIToken != "" {
+		jira.Auth.SetBearerToken(options.APIToken)
+	} else {
+		jira.Auth.SetBasicAuth(options.Username, options.Password)
 	}
 
 	return &client{
 		target.NewBaseClient(options.ClientOptions),
-		options.Host,
-		options.Username,
-		options.Password,
-		options.APIToken,
 		options.ProjectKey,
 		options.IssueType,
-		options.SkipTLS,
-		options.Certificate,
+		helper.Defaults(options.SummaryTmplate, summaryTmplate),
 		options.CustomFields,
-		httpClient,
-	}
+		options.Components,
+		jira,
+	}, nil
 }

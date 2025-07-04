@@ -226,6 +226,10 @@ spec:
                     type: string
                   certificate:
                     type: string
+                  components:
+                    items:
+                      type: string
+                    type: array
                   host:
                     type: string
                   issueType:
@@ -236,6 +240,8 @@ spec:
                     type: string
                   skipTLS:
                     type: boolean
+                  summaryTemplate:
+                    type: string
                   username:
                     type: string
                 required:

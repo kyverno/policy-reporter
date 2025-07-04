@@ -620,29 +620,36 @@ func (f *TargetFactory) CreateJiraTarget(config, parent *targetconfig.Config[v1a
 
 	zap.S().Infof("%s configured", config.Name)
 
+	client, err := jira.NewClient(jira.Options{
+		ClientOptions: target.ClientOptions{
+			Name:                  config.Name,
+			SkipExistingOnStartup: config.SkipExisting,
+			ResultFilter:          f.createResultFilter(config.Filter, config.MinimumSeverity, config.Sources),
+			ReportFilter:          createReportFilter(config.Filter),
+		},
+		Host:         config.Config.Host,
+		Username:     config.Config.Username,
+		Password:     config.Config.Password,
+		APIToken:     config.Config.APIToken,
+		ProjectKey:   config.Config.ProjectKey,
+		IssueType:    config.Config.IssueType,
+		Components:   config.Config.Components,
+		SkipTLS:      config.Config.SkipTLS,
+		Certificate:  config.Config.Certificate,
+		CustomFields: config.CustomFields,
+		HTTPClient:   http.NewClient(config.Config.Certificate, config.Config.SkipTLS),
+	})
+	if err != nil {
+		zap.S().Errorf("failed to create Jira client: %v", err)
+		return nil
+	}
+
 	return &target.Target{
 		ID:           uuid.NewString(),
 		Type:         target.Jira,
 		Config:       config,
 		ParentConfig: parent,
-		Client: jira.NewClient(jira.Options{
-			ClientOptions: target.ClientOptions{
-				Name:                  config.Name,
-				SkipExistingOnStartup: config.SkipExisting,
-				ResultFilter:          f.createResultFilter(config.Filter, config.MinimumSeverity, config.Sources),
-				ReportFilter:          createReportFilter(config.Filter),
-			},
-			Host:         config.Config.Host,
-			Username:     config.Config.Username,
-			Password:     config.Config.Password,
-			APIToken:     config.Config.APIToken,
-			ProjectKey:   config.Config.ProjectKey,
-			IssueType:    config.Config.IssueType,
-			SkipTLS:      config.Config.SkipTLS,
-			Certificate:  config.Config.Certificate,
-			CustomFields: config.CustomFields,
-			HTTPClient:   http.NewClient(config.Config.Certificate, config.Config.SkipTLS),
-		}),
+		Client:       client,
 	}
 }
 
