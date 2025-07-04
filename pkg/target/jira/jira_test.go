@@ -140,15 +140,15 @@ func Test_JiraTarget(t *testing.T) {
 			ClientOptions: target.ClientOptions{
 				Name: "Jira",
 			},
-			Host:           "https://jira.example.com",
-			Username:       "test-user",
-			Password:       "test-password",
-			ProjectKey:     "TEST",
-			IssueType:      "Bug",
-			HTTPClient:     testClient{callback, 200},
-			CustomFields:   map[string]string{"cluster": "test"},
-			Components:     []string{"policy-reporter"},
-			SummaryTmplate: "{{ customfield.cluster }}: Policy Violation: {{ result.Policy }}",
+			Host:            "https://jira.example.com",
+			Username:        "test-user",
+			Password:        "test-password",
+			ProjectKey:      "TEST",
+			IssueType:       "Bug",
+			HTTPClient:      testClient{callback, 200},
+			CustomFields:    map[string]string{"cluster": "test"},
+			Components:      []string{"policy-reporter"},
+			SummaryTemplate: "{{ customfield.cluster }}: Policy Violation: {{ result.Policy }}",
 		})
 		if assert.NoError(t, err) {
 			client.Send(fixtures.CompleteTargetSendResult)
