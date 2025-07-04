@@ -630,12 +630,16 @@ target:
     password: ""
     # -- JIRA API token (use password or apiToken, not both)
     apiToken: ""
+    # -- JIRA static labels
+    apiVersion: "v3"
     # -- JIRA project key
     projectKey: ""
     # -- JIRA issue type (default: "Bug")
     issueType: ""
     # -- JIRA component names list
     components: []
+    # -- JIRA static labels
+    labels: []
     # -- JIRA summary go template, available values: result, customfield
     # default: "{{ if result.ResourceString }}{{ result.ResourceString }}: {{ end }}Policy Violation: {{ result.Policy }}"
     summaryTemplate: ""

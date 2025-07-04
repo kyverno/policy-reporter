@@ -224,10 +224,20 @@ config:
   username: {{ .username | quote }}
   password: {{ .password | quote }}
   apiToken: {{ .apiToken | quote }}
+  apiVersion: {{ .apiVersion | quote }}
+  summaryTemplate: {{ .summaryTemplate | quote }}
   projectKey: {{ .projectKey | quote }}
   issueType: {{ .issueType | quote }}
   certificate: {{ .certificate | quote }}
   skipTLS: {{ .skipTLS }}
+  {{- with .labels }}
+  labels:
+  {{- toYaml . | nindent 4 }}
+  {{- end }}
+  {{- with .components }}
+  components:
+  {{- toYaml . | nindent 4 }}
+  {{- end }}
 {{ include "target" . }}
 {{- end }}
 
