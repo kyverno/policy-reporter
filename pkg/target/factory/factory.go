@@ -633,6 +633,7 @@ func (f *TargetFactory) CreateJiraTarget(config, parent *targetconfig.Config[v1a
 		APIToken:     config.Config.APIToken,
 		ProjectKey:   config.Config.ProjectKey,
 		IssueType:    config.Config.IssueType,
+		Components:   config.Config.Components,
 		SkipTLS:      config.Config.SkipTLS,
 		Certificate:  config.Config.Certificate,
 		CustomFields: config.CustomFields,

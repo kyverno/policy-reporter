@@ -225,6 +225,10 @@ spec:
                     type: string
                   certificate:
                     type: string
+                  components:
+                    items:
+                      type: string
+                    type: array
                   host:
                     type: string
                   issueType:

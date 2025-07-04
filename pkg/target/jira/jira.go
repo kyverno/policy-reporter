@@ -32,6 +32,7 @@ type Options struct {
 	SkipTLS        bool
 	Certificate    string
 	CustomFields   map[string]string
+	Components     []string
 	HTTPClient     targethttp.Client
 }
 
@@ -41,6 +42,7 @@ type client struct {
 	issueType      string
 	summaryTmplate string
 	customFields   map[string]string
+	compoenents    []string
 	jira           *v2.Client
 }
 
@@ -118,6 +120,9 @@ func (e *client) Send(result openreports.ResultAdapter) {
 			Summary:     summary.String(),
 			Labels:      []string{"policy-reporter", "policy-violation"},
 			Description: description,
+			Components: helper.Map(e.compoenents, func(s string) *models.ComponentScheme {
+				return &models.ComponentScheme{Name: s}
+			}),
 		},
 	}
 
@@ -163,6 +168,7 @@ func NewClient(options Options) (target.Client, error) {
 		options.IssueType,
 		helper.Defaults(options.SummaryTmplate, summaryTmplate),
 		options.CustomFields,
+		options.Components,
 		jira,
 	}, nil
 }

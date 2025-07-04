@@ -130,6 +130,10 @@ func Test_JiraTarget(t *testing.T) {
 			issueType, ok := fields["issuetype"].(map[string]interface{})
 			assert.True(t, ok)
 			assert.Equal(t, "Bug", issueType["name"])
+
+			components, ok := fields["compoenents"].(map[string]interface{})
+			assert.True(t, ok)
+			assert.Equal(t, []string{"policy-reporter"}, components["name"])
 		}
 
 		client, err := jira.NewClient(jira.Options{
@@ -143,6 +147,7 @@ func Test_JiraTarget(t *testing.T) {
 			IssueType:      "Bug",
 			HTTPClient:     testClient{callback, 200},
 			CustomFields:   map[string]string{"cluster": "test"},
+			Components:     []string{"policy-reporter"},
 			SummaryTmplate: "{{ customfield.cluster }}: Policy Violation: {{ result.Policy }}",
 		})
 		if assert.NoError(t, err) {

@@ -43,7 +43,9 @@ type JiraOptions struct {
 	// +optional
 	IssueType string `mapstructure:"issueType" json:"issueType"`
 	// +optional
-	SummaryTmplate string `mapstructure:"summaryTemplate" json:"summaryTemplate"`
+	SummaryTemplate string `mapstructure:"summaryTemplate" json:"summaryTemplate"`
+	// +optional
+	Components []string `mapstructure:"components" json:"components"`
 	// +optional
 	SkipTLS bool `mapstructure:"skipTLS" json:"skipTLS"`
 	// +optional
