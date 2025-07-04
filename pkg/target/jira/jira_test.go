@@ -41,7 +41,7 @@ func Test_JiraTarget(t *testing.T) {
 
 			// Verify basic auth
 			token := req.Header.Get("Authorization")
-			assert.Equal(t, "Bearer test-token", token)
+			assert.Equal(t, "Basic dGVzdC11c2VyOnRlc3QtdG9rZW4=", token)
 
 			// Verify request body
 			body, err := io.ReadAll(req.Body)
@@ -140,15 +140,15 @@ func Test_JiraTarget(t *testing.T) {
 			ClientOptions: target.ClientOptions{
 				Name: "Jira",
 			},
-			Host:           "https://jira.example.com",
-			Username:       "test-user",
-			Password:       "test-password",
-			ProjectKey:     "TEST",
-			IssueType:      "Bug",
-			HTTPClient:     testClient{callback, 200},
-			CustomFields:   map[string]string{"cluster": "test"},
-			Components:     []string{"policy-reporter"},
-			SummaryTmplate: "{{ customfield.cluster }}: Policy Violation: {{ result.Policy }}",
+			Host:            "https://jira.example.com",
+			Username:        "test-user",
+			Password:        "test-password",
+			ProjectKey:      "TEST",
+			IssueType:       "Bug",
+			HTTPClient:      testClient{callback, 200},
+			CustomFields:    map[string]string{"cluster": "test"},
+			Components:      []string{"policy-reporter"},
+			SummaryTemplate: "{{ customfield.cluster }}: Policy Violation: {{ result.Policy }}",
 		})
 		if assert.NoError(t, err) {
 			client.Send(fixtures.CompleteTargetSendResult)

@@ -22,28 +22,28 @@ const summaryTmplate = "{{ if .result.ResourceString }}{{ .result.ResourceString
 // Options to configure the JIRA target
 type Options struct {
 	target.ClientOptions
-	Host           string
-	Username       string
-	Password       string
-	APIToken       string
-	ProjectKey     string
-	IssueType      string
-	SummaryTmplate string
-	SkipTLS        bool
-	Certificate    string
-	CustomFields   map[string]string
-	Components     []string
-	HTTPClient     targethttp.Client
+	Host            string
+	Username        string
+	Password        string
+	APIToken        string
+	ProjectKey      string
+	IssueType       string
+	SummaryTemplate string
+	SkipTLS         bool
+	Certificate     string
+	CustomFields    map[string]string
+	Components      []string
+	HTTPClient      targethttp.Client
 }
 
 type client struct {
 	target.BaseClient
-	projectKey     string
-	issueType      string
-	summaryTmplate string
-	customFields   map[string]string
-	compoenents    []string
-	jira           *v2.Client
+	projectKey      string
+	issueType       string
+	summaryTemplate string
+	customFields    map[string]string
+	compoenents     []string
+	jira            *v2.Client
 }
 
 func (e *client) Send(result openreports.ResultAdapter) {
@@ -102,7 +102,7 @@ func (e *client) Send(result openreports.ResultAdapter) {
 
 	var summary bytes.Buffer
 
-	t, err := template.New("summary").Parse(e.summaryTmplate)
+	t, err := template.New("summary").Parse(e.summaryTemplate)
 	if err != nil {
 		zap.L().Error("failed to parse summary template", zap.String("name", e.Name()), zap.Error(err), zap.Any("result", result))
 		return
@@ -157,7 +157,7 @@ func NewClient(options Options) (target.Client, error) {
 	}
 
 	if options.APIToken != "" {
-		jira.Auth.SetBearerToken(options.APIToken)
+		jira.Auth.SetBasicAuth(options.Username, options.APIToken)
 	} else {
 		jira.Auth.SetBasicAuth(options.Username, options.Password)
 	}
@@ -166,7 +166,7 @@ func NewClient(options Options) (target.Client, error) {
 		target.NewBaseClient(options.ClientOptions),
 		options.ProjectKey,
 		options.IssueType,
-		helper.Defaults(options.SummaryTmplate, summaryTmplate),
+		helper.Defaults(options.SummaryTemplate, summaryTmplate),
 		options.CustomFields,
 		options.Components,
 		jira,

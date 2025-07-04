@@ -634,6 +634,8 @@ target:
     projectKey: ""
     # -- JIRA issue type (default: "Bug")
     issueType: ""
+    # -- JIRA component names list
+    components: []
     # -- JIRA summary go template, available values: result, customfield
     # default: "{{ if result.ResourceString }}{{ result.ResourceString }}: {{ end }}Policy Violation: {{ result.Policy }}"
     summaryTemplate: ""
