@@ -135,6 +135,23 @@ func (e *client) sendV2(summary string, result openreports.ResultAdapter, labels
 		}
 	}
 
+	fields := make(map[string]string)
+	for k, v := range e.customFields {
+		if strings.HasPrefix(k, "customfield_") {
+			continue
+		}
+
+		fields[k] = v
+	}
+
+	if len(fields) > 0 {
+		description += "\n*Custom Fields*:\n"
+
+		for k, v := range fields {
+			description += fmt.Sprintf("- %s: %s\n", k, v)
+		}
+	}
+
 	issue := &models.IssueSchemeV2{
 		Fields: &models.IssueFieldsSchemeV2{
 			Project:     &models.ProjectScheme{Key: e.projectKey},
@@ -194,6 +211,32 @@ func (e *client) sendV3(summary string, result openreports.ResultAdapter, labels
 
 		props := make([]*models.CommentNodeScheme, 0, len(result.Properties))
 		for k, v := range result.Properties {
+			props = append(props, &models.CommentNodeScheme{Type: "listItem", Content: []*models.CommentNodeScheme{{Type: "paragraph", Content: []*models.CommentNodeScheme{{Type: "text", Text: fmt.Sprintf("%s: %s", k, v)}}}}})
+		}
+
+		document.AppendNode(&models.CommentNodeScheme{
+			Type:    "bulletList",
+			Content: props,
+		})
+	}
+
+	fields := make(map[string]string)
+	for k, v := range e.customFields {
+		if strings.HasPrefix(k, "customfield_") {
+			continue
+		}
+
+		fields[k] = v
+	}
+
+	if len(fields) > 0 {
+		document.AppendNode(&models.CommentNodeScheme{
+			Type:    "paragraph",
+			Content: []*models.CommentNodeScheme{{Type: "text", Text: "Custom Fields", Marks: []*models.MarkScheme{{Type: "strong"}}}},
+		})
+
+		props := make([]*models.CommentNodeScheme, 0, len(fields))
+		for k, v := range fields {
 			props = append(props, &models.CommentNodeScheme{Type: "listItem", Content: []*models.CommentNodeScheme{{Type: "paragraph", Content: []*models.CommentNodeScheme{{Type: "text", Text: fmt.Sprintf("%s: %s", k, v)}}}}})
 		}
 
@@ -266,7 +309,7 @@ func NewClient(options Options) (target.Client, error) {
 	}
 
 	if options.APIToken != "" && options.Username == "" {
-		auth.SetBearerToken(options.Username)
+		auth.SetBearerToken(options.APIToken)
 	} else if options.APIToken != "" && options.Username != "" {
 		auth.SetBasicAuth(options.Username, options.APIToken)
 	} else {
