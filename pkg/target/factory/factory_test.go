@@ -297,8 +297,8 @@ func Test_ResolveTarget(t *testing.T) {
 	factory := factory.NewFactory(nil, nil)
 
 	clients := factory.CreateClients(&targets)
-	if len(clients.Clients()) != 26 {
-		t.Errorf("Expected 26 Client, got %d clients", len(clients.Clients()))
+	if len(clients.Clients()) != 27 {
+		t.Errorf("Expected 27 Client, got %d clients", len(clients.Clients()))
 	}
 }
 
