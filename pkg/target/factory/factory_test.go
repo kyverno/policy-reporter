@@ -276,14 +276,29 @@ var targets = target.Targets{
 		MinimumSeverity: openreports.SeverityInfo,
 		CustomFields:    map[string]string{"field": "value"},
 	},
+	Jira: &targetconfig.Config[v1alpha1.JiraOptions]{
+		Config: &v1alpha1.JiraOptions{
+			ProjectKey: "PR",
+			Host:       "http://localhost:9200",
+			APIToken:   "token",
+			APIVersion: "v2",
+			IssueType:  "Bug",
+			Username:   "username",
+			Labels:     []string{"dev-cluster"},
+			Components: []string{"component1"},
+		},
+		SkipExisting:    true,
+		MinimumSeverity: openreports.SeverityInfo,
+		CustomFields:    map[string]string{"field": "value"},
+	},
 }
 
 func Test_ResolveTarget(t *testing.T) {
 	factory := factory.NewFactory(nil, nil)
 
 	clients := factory.CreateClients(&targets)
-	if len(clients.Clients()) != 26 {
-		t.Errorf("Expected 26 Client, got %d clients", len(clients.Clients()))
+	if len(clients.Clients()) != 27 {
+		t.Errorf("Expected 27 Client, got %d clients", len(clients.Clients()))
 	}
 }
 
@@ -302,6 +317,7 @@ func Test_ResolveTargetsWithoutRequiredConfiguration(t *testing.T) {
 		S3:            &targetconfig.Config[v1alpha1.S3Options]{},
 		Kinesis:       &targetconfig.Config[v1alpha1.KinesisOptions]{},
 		SecurityHub:   &targetconfig.Config[v1alpha1.SecurityHubOptions]{},
+		Jira:          &targetconfig.Config[v1alpha1.JiraOptions]{},
 	}
 
 	if len(factory.CreateClients(&targets).Clients()) != 0 {
