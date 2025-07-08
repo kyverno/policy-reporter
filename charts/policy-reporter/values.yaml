@@ -942,7 +942,7 @@ ui:
     # -- (string) Image PullPolicy
     pullPolicy: IfNotPresent
     # -- (string) Image tag
-    tag: "2.4.0"
+    tag: "2.4.1"
 
   # -- Deployment replica count
   replicaCount: 1
