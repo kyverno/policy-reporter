@@ -182,6 +182,7 @@ func (e *client) sendV3(summary string, result openreports.ResultAdapter, labels
 
 	AppendProperty(document, "Policy", result.Policy)
 	AppendProperty(document, "Status", string(result.Result))
+	AppendProperty(document, "Severity", string(result.Severity))
 	AppendProperty(document, "Category", result.Category)
 	AppendProperty(document, "Source", result.Source)
 	AppendProperty(document, "Message", result.Description)
