@@ -108,7 +108,7 @@ func (c *Client) ConfigureInformer() {
 
 func (c *Client) OpenReports(ctx context.Context) ([]openreports.ReportInterface, error) {
 	reports := make([]openreports.ReportInterface, 0)
-	if c.wgpolicyClient == nil {
+	if c.orClient == nil {
 		return reports, nil
 	}
 
