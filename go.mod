@@ -39,7 +39,7 @@ require (
 	github.com/xhit/go-simple-mail/v2 v2.16.0
 	go.uber.org/zap v1.27.0
 	golang.org/x/oauth2 v0.30.0
-	golang.org/x/sync v0.15.0
+	golang.org/x/sync v0.16.0
 	golang.org/x/text v0.26.0
 	google.golang.org/api v0.240.0
 	k8s.io/api v0.33.2
