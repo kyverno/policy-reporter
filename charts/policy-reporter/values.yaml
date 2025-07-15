@@ -824,6 +824,11 @@ database:
   # supported fields: username, password, host, dsn, database
   mountedSecret: ""
 
+# Add this configuration section for periodic sync
+periodicSync:
+  enabled: false
+  interval: 30 # minutes
+
 # enabled if replicaCount > 1
 podDisruptionBudget:
   # -- Configures the minimum available pods for policy-reporter disruptions.

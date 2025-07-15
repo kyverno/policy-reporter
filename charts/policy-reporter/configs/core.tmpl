@@ -187,3 +187,8 @@ database:
   dsn: {{ .Values.database.dsn }}
   secretRef: {{ .Values.database.secretRef }}
   mountedSecret: {{ .Values.database.mountedSecret }}
+
+{{- with .Values.periodicSync }}
+periodicSync:
+  {{- toYaml . | nindent 2 }}
+{{- end }}
