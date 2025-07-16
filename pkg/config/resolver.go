@@ -678,7 +678,7 @@ func (r *Resolver) WGPolicyReportClient() (report.PolicyReportClient, error) {
 
 	_, err = discoveryClient.ServerResourcesForGroupVersion(wgpolicyclient.PolrResource.GroupVersion().String())
 	if err != nil {
-		zap.L().Info("wgreports api not available in the cluster")
+		zap.L().Info("wgreports api not available in the cluster", zap.Error(err))
 		return nil, nil
 	}
 
@@ -709,7 +709,7 @@ func (r *Resolver) OpenReportsClient() (report.PolicyReportClient, error) {
 
 	_, err = discoveryClient.ServerResourcesForGroupVersion(orclient.OpenreportsReport.GroupVersion().String())
 	if err != nil {
-		zap.L().Info("openreports api not available in the cluster")
+		zap.L().Info("openreports api not available in the cluster", zap.Error(err))
 		return nil, nil
 	}
 
