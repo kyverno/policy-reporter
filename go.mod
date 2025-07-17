@@ -45,7 +45,7 @@ require (
 	k8s.io/api v0.33.3
 	k8s.io/apiextensions-apiserver v0.33.2
 	k8s.io/apimachinery v0.33.3
-	k8s.io/client-go v0.33.2
+	k8s.io/client-go v0.33.3
 	k8s.io/kube-aggregator v0.33.2
 	openreports.io v0.0.0-20250321064407-5081e5b516e8
 )
