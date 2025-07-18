@@ -3,9 +3,9 @@ package slack
 import (
 	"fmt"
 
+	"github.com/openreports/reports-api/apis/openreports.io/v1alpha1"
 	"github.com/slack-go/slack"
 	"go.uber.org/zap"
-	"openreports.io/apis/openreports.io/v1alpha1"
 
 	"github.com/kyverno/policy-reporter/pkg/helper"
 	"github.com/kyverno/policy-reporter/pkg/openreports"

@@ -3,11 +3,11 @@ package orclient
 import (
 	"sync"
 
+	pr "github.com/openreports/reports-api/apis/openreports.io/v1alpha1"
+	"github.com/openreports/reports-api/pkg/client/clientset/versioned/fake"
+	"github.com/openreports/reports-api/pkg/client/clientset/versioned/typed/openreports.io/v1alpha1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	metafake "k8s.io/client-go/metadata/fake"
-	pr "openreports.io/apis/openreports.io/v1alpha1"
-	"openreports.io/pkg/client/clientset/versioned/fake"
-	"openreports.io/pkg/client/clientset/versioned/typed/openreports.io/v1alpha1"
 
 	"github.com/kyverno/policy-reporter/pkg/report"
 )
