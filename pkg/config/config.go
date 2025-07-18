@@ -179,26 +179,32 @@ type CRD struct {
 	TargetConfig bool `mapstructure:"targetConfig"`
 }
 
+type PeriodicSyncConfig struct {
+	Enabled  bool `mapstructure:"enabled"`
+	Interval int  `mapstructure:"interval"` // in minutes
+}
+
 // Config of the PolicyReporter
 type Config struct {
 	Version        string
-	Namespace      string         `mapstructure:"namespace"`
-	API            API            `mapstructure:"api"`
-	WorkerCount    int            `mapstructure:"worker"`
-	DBFile         string         `mapstructure:"dbfile"`
-	Metrics        Metrics        `mapstructure:"metrics"`
-	REST           REST           `mapstructure:"rest"`
-	ReportFilter   ReportFilter   `mapstructure:"reportFilter"`
-	SourceFilters  []SourceFilter `mapstructure:"sourceFilters"`
-	Redis          Redis          `mapstructure:"redis"`
-	Profiling      Profiling      `mapstructure:"profiling"`
-	EmailReports   EmailReports   `mapstructure:"emailReports"`
-	LeaderElection LeaderElection `mapstructure:"leaderElection"`
-	K8sClient      K8sClient      `mapstructure:"k8sClient"`
-	Logging        Logging        `mapstructure:"logging"`
-	Database       Database       `mapstructure:"database"`
-	Targets        target.Targets `mapstructure:"target"`
-	SourceConfig   []SourceConfig `mapstructure:"sourceConfig"`
-	Templates      Templates      `mapstructure:"templates"`
-	CRD            CRD            `mapstructure:"crd"`
+	Namespace      string             `mapstructure:"namespace"`
+	API            API                `mapstructure:"api"`
+	WorkerCount    int                `mapstructure:"worker"`
+	DBFile         string             `mapstructure:"dbfile"`
+	Metrics        Metrics            `mapstructure:"metrics"`
+	REST           REST               `mapstructure:"rest"`
+	ReportFilter   ReportFilter       `mapstructure:"reportFilter"`
+	SourceFilters  []SourceFilter     `mapstructure:"sourceFilters"`
+	Redis          Redis              `mapstructure:"redis"`
+	Profiling      Profiling          `mapstructure:"profiling"`
+	EmailReports   EmailReports       `mapstructure:"emailReports"`
+	LeaderElection LeaderElection     `mapstructure:"leaderElection"`
+	K8sClient      K8sClient          `mapstructure:"k8sClient"`
+	Logging        Logging            `mapstructure:"logging"`
+	Database       Database           `mapstructure:"database"`
+	Targets        target.Targets     `mapstructure:"target"`
+	SourceConfig   []SourceConfig     `mapstructure:"sourceConfig"`
+	Templates      Templates          `mapstructure:"templates"`
+	CRD            CRD                `mapstructure:"crd"`
+	PeriodicSync   PeriodicSyncConfig `mapstructure:"periodicSync"`
 }
