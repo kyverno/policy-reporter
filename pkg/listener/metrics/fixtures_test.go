@@ -3,9 +3,9 @@ package metrics_test
 import (
 	"fmt"
 
+	"github.com/openreports/reports-api/apis/openreports.io/v1alpha1"
 	ioprometheusclient "github.com/prometheus/client_model/go"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"openreports.io/apis/openreports.io/v1alpha1"
 
 	"github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
 	"github.com/kyverno/policy-reporter/pkg/openreports"

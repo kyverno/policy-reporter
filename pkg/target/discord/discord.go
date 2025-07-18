@@ -1,7 +1,7 @@
 package discord
 
 import (
-	"openreports.io/apis/openreports.io/v1alpha1"
+	"github.com/openreports/reports-api/apis/openreports.io/v1alpha1"
 
 	"github.com/kyverno/policy-reporter/pkg/helper"
 	"github.com/kyverno/policy-reporter/pkg/openreports"

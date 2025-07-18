@@ -12,6 +12,8 @@ import (
 	"github.com/gin-gonic/gin"
 	goredis "github.com/go-redis/redis/v8"
 	_ "github.com/mattn/go-sqlite3"
+	"github.com/openreports/reports-api/pkg/client/clientset/versioned"
+	"github.com/openreports/reports-api/pkg/client/clientset/versioned/typed/openreports.io/v1alpha1"
 	gocache "github.com/patrickmn/go-cache"
 	"github.com/uptrace/bun"
 	"github.com/uptrace/bun/dialect"
@@ -23,8 +25,6 @@ import (
 	"k8s.io/client-go/metadata"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/util/workqueue"
-	"openreports.io/pkg/client/clientset/versioned"
-	"openreports.io/pkg/client/clientset/versioned/typed/openreports.io/v1alpha1"
 
 	"github.com/kyverno/policy-reporter/pkg/api"
 	"github.com/kyverno/policy-reporter/pkg/cache"
