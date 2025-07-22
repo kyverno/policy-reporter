@@ -692,7 +692,6 @@ func (r *Resolver) WGPolicyReportClient() (report.PolicyReportClient, error) {
 		return nil, err
 	}
 
-	// Get periodic sync settings from config
 	periodicSync := r.config.PeriodicSync.Enabled
 	syncInterval := time.Duration(r.config.PeriodicSync.Interval) * time.Minute
 
@@ -700,7 +699,7 @@ func (r *Resolver) WGPolicyReportClient() (report.PolicyReportClient, error) {
 		zap.Bool("periodicSync", periodicSync),
 		zap.Duration("syncInterval", syncInterval))
 
-	r.wgpolicyClient = wgpolicyclient.NewPolicyReportClient(client, r.ReportFilter(), queue, periodicSync, syncInterval)
+	r.wgpolicyClient = wgpolicyclient.NewPolicyReportClient(client, r.ReportFilter(), queue, periodicSync, syncInterval, r.ResultCache())
 
 	return r.wgpolicyClient, nil
 }
@@ -731,7 +730,14 @@ func (r *Resolver) OpenReportsClient() (report.PolicyReportClient, error) {
 		return nil, err
 	}
 
-	r.openreportsClient = orclient.NewOpenreportsClient(client, r.ReportFilter(), queue)
+	periodicSync := r.config.PeriodicSync.Enabled
+	syncInterval := time.Duration(r.config.PeriodicSync.Interval) * time.Minute
+
+	zap.L().Info("openreports client configuration",
+		zap.Bool("periodicSync", periodicSync),
+		zap.Duration("syncInterval", syncInterval))
+
+	r.openreportsClient = orclient.NewOpenreportsClient(client, r.ReportFilter(), queue, periodicSync, syncInterval, r.ResultCache())
 
 	return r.openreportsClient, nil
 }
