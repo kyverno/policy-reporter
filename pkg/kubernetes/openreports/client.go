@@ -12,6 +12,7 @@ import (
 	"k8s.io/client-go/metadata/metadatainformer"
 	"k8s.io/client-go/tools/cache"
 
+	prcache "github.com/kyverno/policy-reporter/pkg/cache"
 	"github.com/kyverno/policy-reporter/pkg/report"
 )
 
@@ -27,6 +28,9 @@ type openreportsClient struct {
 	mx           *sync.Mutex
 	reportFilter *report.MetaFilter
 	stopChan     chan struct{}
+	periodicSync bool
+	syncInterval time.Duration
+	cache        prcache.Cache
 }
 
 func (k *openreportsClient) HasSynced() bool {
@@ -71,6 +75,32 @@ func (k *openreportsClient) Run(worker int, stopper chan struct{}) error {
 		return err
 	}
 
+	// Periodic sync if enabled - just stop the informer to trigger restart
+	if k.periodicSync {
+		zap.L().Info("openreports periodic sync enabled",
+			zap.String("interval", k.syncInterval.String()))
+		ticker := time.NewTicker(k.syncInterval)
+		go func() {
+			for {
+				select {
+				case <-ticker.C:
+					zap.L().Info("triggering openreports sync - clearing cache and stopping informer")
+					if k.cache != nil {
+						k.cache.Clear()
+						zap.L().Info("result cache cleared for openreports periodic sync")
+					}
+					k.Stop()
+					return
+				case <-stopper:
+					ticker.Stop()
+					return
+				}
+			}
+		}()
+	} else {
+		zap.L().Info("openreports periodic sync disabled")
+	}
+
 	k.queue.Run(worker, stopper)
 	return nil
 }
@@ -108,11 +138,14 @@ func (k *openreportsClient) configureInformer(informer cache.SharedIndexInformer
 }
 
 // NewPolicyReportClient new Client for Policy Report Kubernetes API
-func NewOpenreportsClient(metaClient metadata.Interface, reportFilter *report.MetaFilter, queue *ORQueue) report.PolicyReportClient {
+func NewOpenreportsClient(metaClient metadata.Interface, reportFilter *report.MetaFilter, queue *ORQueue, periodicSync bool, syncInterval time.Duration, cache prcache.Cache) report.PolicyReportClient {
 	return &openreportsClient{
 		metaClient:   metaClient,
 		mx:           &sync.Mutex{},
 		queue:        queue,
 		reportFilter: reportFilter,
+		periodicSync: periodicSync,
+		syncInterval: syncInterval,
+		cache:        cache,
 	}
 }
