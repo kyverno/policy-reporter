@@ -4,6 +4,8 @@ import (
 	"sync"
 	"time"
 
+	"go.uber.org/zap"
+
 	"github.com/kyverno/policy-reporter/pkg/cache"
 	"github.com/kyverno/policy-reporter/pkg/helper"
 	"github.com/kyverno/policy-reporter/pkg/openreports"
@@ -54,6 +56,8 @@ func (l *ResultListener) Validate(r openreports.ResultAdapter) bool {
 }
 
 func (l *ResultListener) Listen(event report.LifecycleEvent) {
+	logger := zap.L().Sugar()
+	logger.Debugf("new event: type %s, report ID %s", event.Type, event.PolicyReport.GetID())
 	if event.Type != report.Added && event.Type != report.Updated {
 		l.cache.RemoveReport(event.PolicyReport.GetID())
 		return
@@ -84,6 +88,7 @@ func (l *ResultListener) Listen(event report.LifecycleEvent) {
 	}
 
 	if listenerCount == 0 && scopeListenerCount == 0 {
+		logger.Debugf("report id %s: caching the results and returning because no listeners are configured", event.PolicyReport.GetID())
 		l.cache.AddReport(event.PolicyReport)
 		return
 	}
@@ -104,12 +109,14 @@ func (l *ResultListener) Listen(event report.LifecycleEvent) {
 
 	for _, r := range event.PolicyReport.GetResults() {
 		if helper.Contains(r.GetID(), existing) || !l.Validate(r) {
+			logger.Debugf("result for %s, policy %s, rule %s: skipping result sending because the result is already in the cached results for this report or is a pass result", r.ResourceString(), r.Policy, r.Rule)
 			continue
 		}
 
 		if r.Timestamp.Seconds > 0 {
 			created := time.Unix(r.Timestamp.Seconds, int64(r.Timestamp.Nanos))
 			if l.skipExisting && created.Local().Before(l.startUp) {
+				logger.Debugf("result for %s, policy %s, rule %s: skipping result sending because it was created before the reporter started", r.ResourceString(), r.Policy, r.Rule)
 				continue
 			}
 		}
@@ -119,6 +126,7 @@ func (l *ResultListener) Listen(event report.LifecycleEvent) {
 
 	l.cache.AddReport(event.PolicyReport)
 	if len(newResults) == 0 {
+		logger.Debugf("not calling the listeners because there are no new results to send")
 		return
 	}
 
