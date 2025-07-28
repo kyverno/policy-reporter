@@ -45,7 +45,7 @@ func (k *wgpolicyReportClient) Sync(stopper chan struct{}) error {
 	polrInformer := k.configureInformer(factory.ForResource(PolrResource).Informer())
 
 	if !k.reportFilter.DisableClusterReports() {
-		cpolrInformer = k.configureInformer(factory.ForResource(PolrResource).Informer())
+		cpolrInformer = k.configureInformer(factory.ForResource(CpolrResource).Informer())
 	}
 
 	factory.Start(stopper)
