@@ -47,7 +47,7 @@ func ProcessHTTPResponse(target string, resp *http.Response, err error) {
 
 		zap.L().Error(target+": PUSH FAILED", zap.Error(err), zap.String("body", buf.String()), zap.Int("statusCode", resp.StatusCode))
 	} else if err != nil {
-		zap.L().Error(target+": PUSH FAILED", zap.Int("statusCode", resp.StatusCode))
+		zap.L().Error(target+": PUSH FAILED", zap.Error(err))
 	} else if resp.StatusCode >= 400 {
 		buf := new(bytes.Buffer)
 		buf.ReadFrom(resp.Body)
