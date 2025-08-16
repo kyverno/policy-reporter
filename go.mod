@@ -24,7 +24,7 @@ require (
 	github.com/mattn/go-sqlite3 v1.14.32
 	github.com/openreports/reports-api v0.0.0-20250718142136-d0b5320e18ce
 	github.com/patrickmn/go-cache v2.1.0+incompatible
-	github.com/prometheus/client_golang v1.22.0
+	github.com/prometheus/client_golang v1.23.0
 	github.com/prometheus/client_model v0.6.2
 	github.com/segmentio/fasthash v1.0.3
 	github.com/slack-go/slack v0.17.3
