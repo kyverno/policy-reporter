@@ -8,7 +8,7 @@ require (
 	github.com/aws/aws-sdk-go-v2 v1.38.0
 	github.com/aws/aws-sdk-go-v2/config v1.31.0
 	github.com/aws/aws-sdk-go-v2/credentials v1.18.4
-	github.com/aws/aws-sdk-go-v2/service/kinesis v1.38.0
+	github.com/aws/aws-sdk-go-v2/service/kinesis v1.39.0
 	github.com/aws/aws-sdk-go-v2/service/s3 v1.87.0
 	github.com/aws/aws-sdk-go-v2/service/securityhub v1.62.1
 	github.com/aws/aws-sdk-go-v2/service/sts v1.37.0
