@@ -140,6 +140,8 @@ func (f *TargetFactory) CreateSingleClient(tc *v1alpha1.TargetConfig) (*target.T
 		target = helper.First(createClients(tc.Name, createConfig(tc, tc.Spec.Teams), f.CreateTeamsTarget))
 	case tc.Spec.Jira != nil:
 		target = helper.First(createClients(tc.Name, createConfig(tc, tc.Spec.Jira), f.CreateJiraTarget))
+	case tc.Spec.AlertManager != nil:
+		target = helper.First(createClients(tc.Name, createConfig(tc, tc.Spec.AlertManager), f.CreateAlertManagerTarget))
 	case tc.Spec.Splunk != nil:
 		target = helper.First(createClients(tc.Name, createConfig(tc, tc.Spec.Splunk), f.CreateSplunkTarget))
 	default:
