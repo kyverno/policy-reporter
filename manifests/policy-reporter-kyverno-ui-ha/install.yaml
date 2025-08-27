@@ -41,6 +41,7 @@ metadata:
   name: policy-reporter-ui
   namespace: policy-reporter
   labels:
+    
     app.kubernetes.io/name: policy-reporter-ui
     app.kubernetes.io/instance: policy-reporter
     app.kubernetes.io/version: "3.4.0"
@@ -48,6 +49,7 @@ spec:
   minAvailable: 1
   selector:
     matchLabels:
+      
       app.kubernetes.io/name: policy-reporter-ui
       app.kubernetes.io/instance: policy-reporter
 ---
@@ -83,6 +85,7 @@ metadata:
   name: policy-reporter-ui
   namespace: policy-reporter
   labels:
+    
     app.kubernetes.io/name: policy-reporter-ui
     app.kubernetes.io/instance: policy-reporter
     app.kubernetes.io/version: "3.4.0"
@@ -142,6 +145,7 @@ metadata:
   name: policy-reporter-ui-config
   namespace: policy-reporter
   labels:
+    
     app.kubernetes.io/name: policy-reporter-ui
     app.kubernetes.io/instance: policy-reporter
     app.kubernetes.io/version: "3.4.0"
@@ -338,6 +342,7 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
   labels:
+    
     app.kubernetes.io/name: policy-reporter-ui
     app.kubernetes.io/instance: policy-reporter
     app.kubernetes.io/version: "3.4.0"
@@ -418,6 +423,7 @@ metadata:
   name: policy-reporter-ui-secret-reader
   namespace: policy-reporter
   labels:
+    
     app.kubernetes.io/name: policy-reporter-ui
     app.kubernetes.io/instance: policy-reporter
     app.kubernetes.io/version: "3.4.0"
@@ -481,6 +487,7 @@ metadata:
   name: policy-reporter-ui
   namespace: policy-reporter
   labels:
+    
     app.kubernetes.io/name: policy-reporter-ui
     app.kubernetes.io/instance: policy-reporter
     app.kubernetes.io/version: "3.4.0"
@@ -492,6 +499,7 @@ spec:
       protocol: TCP
       name: http
   selector:
+    
     app.kubernetes.io/name: policy-reporter-ui
     app.kubernetes.io/instance: policy-reporter
 ---
@@ -685,6 +693,7 @@ metadata:
   name: policy-reporter-ui
   namespace: policy-reporter
   labels:
+    
     app.kubernetes.io/name: policy-reporter-ui
     app.kubernetes.io/instance: policy-reporter
     app.kubernetes.io/version: "3.4.0"
@@ -693,14 +702,16 @@ spec:
   revisionHistoryLimit: 10
   selector:
     matchLabels:
+      
       app.kubernetes.io/name: policy-reporter-ui
       app.kubernetes.io/instance: policy-reporter
   template:
     metadata:
       annotations:
-        checksum/secret: "080d3ecae459c96f2109a6eec9609de0154410719068e420a7fd7a169760d4c7"
+        checksum/secret: "7a355eb675889abfad576a0c53ae05a3faa3614d5b8dcf709e6d2cb061dd76c6"
         checksum/cluster-secret: "a3607af42064f31d4a3fe7175df6f32827b65cb7473263116a008e1b7529cadd"
       labels:
+        
         app.kubernetes.io/name: policy-reporter-ui
         app.kubernetes.io/instance: policy-reporter
         app.kubernetes.io/version: "3.4.0"
