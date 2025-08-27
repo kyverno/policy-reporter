@@ -8,7 +8,7 @@ metadata:
   labels:
     app.kubernetes.io/name: policy-reporter
     app.kubernetes.io/instance: policy-reporter
-    app.kubernetes.io/version: "3.4.1"
+    app.kubernetes.io/version: "3.4.2"
     app.kubernetes.io/component: reporting
     app.kubernetes.io/part-of: policy-reporter
 ---
@@ -21,7 +21,7 @@ metadata:
   labels:
     app.kubernetes.io/name: policy-reporter
     app.kubernetes.io/instance: policy-reporter
-    app.kubernetes.io/version: "3.4.1"
+    app.kubernetes.io/version: "3.4.2"
     app.kubernetes.io/component: reporting
     app.kubernetes.io/part-of: policy-reporter
 type: Opaque
@@ -36,7 +36,7 @@ metadata:
     rbac.authorization.k8s.io/aggregate-to-admin: "true"
     app.kubernetes.io/name: policy-reporter
     app.kubernetes.io/instance: policy-reporter
-    app.kubernetes.io/version: "3.4.1"
+    app.kubernetes.io/version: "3.4.2"
     app.kubernetes.io/component: reporting
     app.kubernetes.io/part-of: policy-reporter
   name: policy-reporter
@@ -98,7 +98,7 @@ metadata:
   labels:
     app.kubernetes.io/name: policy-reporter
     app.kubernetes.io/instance: policy-reporter
-    app.kubernetes.io/version: "3.4.1"
+    app.kubernetes.io/version: "3.4.2"
     app.kubernetes.io/component: reporting
     app.kubernetes.io/part-of: policy-reporter
 roleRef:
@@ -117,7 +117,7 @@ metadata:
   labels:
     app.kubernetes.io/name: policy-reporter
     app.kubernetes.io/instance: policy-reporter
-    app.kubernetes.io/version: "3.4.1"
+    app.kubernetes.io/version: "3.4.2"
     app.kubernetes.io/component: reporting
     app.kubernetes.io/part-of: policy-reporter
   name: policy-reporter-secret-reader
@@ -140,7 +140,7 @@ metadata:
   labels:
     app.kubernetes.io/name: policy-reporter
     app.kubernetes.io/instance: policy-reporter
-    app.kubernetes.io/version: "3.4.1"
+    app.kubernetes.io/version: "3.4.2"
     app.kubernetes.io/component: reporting
     app.kubernetes.io/part-of: policy-reporter
 roleRef:
@@ -161,7 +161,7 @@ metadata:
   labels:
     app.kubernetes.io/name: policy-reporter
     app.kubernetes.io/instance: policy-reporter
-    app.kubernetes.io/version: "3.4.1"
+    app.kubernetes.io/version: "3.4.2"
     app.kubernetes.io/component: reporting
     app.kubernetes.io/part-of: policy-reporter
 spec:
@@ -184,7 +184,7 @@ metadata:
   labels:
     app.kubernetes.io/name: policy-reporter
     app.kubernetes.io/instance: policy-reporter
-    app.kubernetes.io/version: "3.4.1"
+    app.kubernetes.io/version: "3.4.2"
     app.kubernetes.io/component: reporting
     app.kubernetes.io/part-of: policy-reporter
 spec:
@@ -199,10 +199,10 @@ spec:
       labels:
         app.kubernetes.io/name: policy-reporter
         app.kubernetes.io/instance: policy-reporter
-        app.kubernetes.io/version: "3.4.1"
+        app.kubernetes.io/version: "3.4.2"
         app.kubernetes.io/part-of: policy-reporter
       annotations:
-        checksum/secret: "c5b5f114341fcc9eb35a26703eac82ca59cd918e1be155e8c285e27c42a9583d"
+        checksum/secret: "3a7772e0fdb02de4b2316b34152dfd0acb1497e0520bde9386c1035be6345750"
     spec:
       serviceAccountName: policy-reporter
       automountServiceAccountToken: true
@@ -210,7 +210,7 @@ spec:
         fsGroup: 1234
       containers:
         - name: policy-reporter
-          image: "ghcr.io/kyverno/policy-reporter:3.4.1"
+          image: "ghcr.io/kyverno/policy-reporter:3.4.2"
           imagePullPolicy: IfNotPresent
           securityContext:
             allowPrivilegeEscalation: false
