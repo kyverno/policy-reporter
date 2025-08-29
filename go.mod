@@ -11,7 +11,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/kinesis v1.40.1
 	github.com/aws/aws-sdk-go-v2/service/s3 v1.87.2
 	github.com/aws/aws-sdk-go-v2/service/securityhub v1.63.1
-	github.com/aws/aws-sdk-go-v2/service/sts v1.38.1
+	github.com/aws/aws-sdk-go-v2/service/sts v1.38.2
 	github.com/ctreminiom/go-atlassian/v2 v2.7.1
 	github.com/gin-contrib/gzip v1.2.3
 	github.com/gin-contrib/pprof v1.5.3
@@ -71,7 +71,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/internal/v4a v1.4.5 // indirect
 	github.com/aws/aws-sdk-go-v2/service/internal/accept-encoding v1.13.1 // indirect
 	github.com/aws/aws-sdk-go-v2/service/internal/checksum v1.8.5 // indirect
-	github.com/aws/aws-sdk-go-v2/service/internal/presigned-url v1.13.5 // indirect
+	github.com/aws/aws-sdk-go-v2/service/internal/presigned-url v1.13.6 // indirect
 	github.com/aws/aws-sdk-go-v2/service/internal/s3shared v1.19.5 // indirect
 	github.com/aws/aws-sdk-go-v2/service/sso v1.29.0 // indirect
 	github.com/aws/aws-sdk-go-v2/service/ssooidc v1.34.1 // indirect
