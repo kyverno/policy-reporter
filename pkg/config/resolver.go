@@ -148,7 +148,7 @@ func (r *Resolver) Database() *bun.DB {
 	}
 
 	zap.L().Info("sqlite connection created")
-	r.database = factory.NewSQLite(r.config.DBFile)
+	r.database = factory.NewSQLite(r.config.DBFile, r.config.Database.Metrics)
 	return r.database
 }
 

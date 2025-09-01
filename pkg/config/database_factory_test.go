@@ -53,7 +53,7 @@ func Test_ResolveDatabase(t *testing.T) {
 	factory := config.NewDatabaseFactory(nil)
 
 	t.Run("SQLite Fallback", func(t *testing.T) {
-		db := factory.NewSQLite("test.db")
+		db := factory.NewSQLite("test.db", false)
 		if db == nil || db.Dialect().Name() != dialect.SQLite {
 			t.Error("Expected SQLite database as fallback")
 		}

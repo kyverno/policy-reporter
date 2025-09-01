@@ -141,15 +141,21 @@ type Logging struct {
 }
 
 type Database struct {
-	Type          string `mapstructure:"type"`
-	DSN           string `mapstructure:"dsn"`
-	Username      string `mapstructure:"username"`
-	Password      string `mapstructure:"password"`
-	Database      string `mapstructure:"database"`
-	Host          string `mapstructure:"host"`
-	EnableSSL     bool   `mapstructure:"enableSSL"`
-	SecretRef     string `mapstructure:"secretRef"`
-	MountedSecret string `mapstructure:"mountedSecret"`
+	Type            string `mapstructure:"type"`
+	DSN             string `mapstructure:"dsn"`
+	Username        string `mapstructure:"username"`
+	Password        string `mapstructure:"password"`
+	Database        string `mapstructure:"database"`
+	Host            string `mapstructure:"host"`
+	EnableSSL       bool   `mapstructure:"enableSSL"`
+	SecretRef       string `mapstructure:"secretRef"`
+	MountedSecret   string `mapstructure:"mountedSecret"`
+	MaxOpenConns    int    `mapstructure:"maxOpenConnections"`
+	MaxIdleConns    int    `mapstructure:"maxIdleConnections"`
+	ConnMaxLifetime int    `mapstructure:"connectionMaxLifetime"` // in minutes
+	ConnMaxIdleTime int    `mapstructure:"connectionMaxIdleTime"` // in minutes
+	Timeout         int    `mapstructure:"timeout"`               // in seconds
+	Metrics         bool   `mapstructure:"metrics"`
 }
 
 type SourceSelector struct {
