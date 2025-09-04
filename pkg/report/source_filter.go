@@ -98,7 +98,7 @@ func (s *SourceFilter) run(polr openreports.ReportInterface, options SourceValid
 			return true
 		}
 
-		if ok := Uncontrolled(pod.OwnerReferences); ok {
+		if ok := Uncontrolled(pod.OwnerReferences, podControllers); ok {
 			return true
 		}
 
@@ -113,7 +113,7 @@ func (s *SourceFilter) run(polr openreports.ReportInterface, options SourceValid
 			return true
 		}
 
-		if ok := Uncontrolled(job.OwnerReferences); ok {
+		if ok := Uncontrolled(job.OwnerReferences, jobControllers); ok {
 			return true
 		}
 
@@ -128,9 +128,11 @@ func NewSourceFilter(pods PodClient, jobs JobClient, validations []SourceValidat
 	return &SourceFilter{pods: pods, jobs: jobs, validations: validations}
 }
 
-var controller = []string{"ReplicaSet", "DaemonSet", "CronJob", "Job", "Job", "StatefulSet"}
+var podControllers = []string{"ReplicaSet", "DaemonSet", "Job", "StatefulSet"}
 
-func Uncontrolled(owner []metav1.OwnerReference) bool {
+var jobControllers = []string{"CronJob"}
+
+func Uncontrolled(owner []metav1.OwnerReference, controllers []string) bool {
 	if len(owner) == 0 {
 		return true
 	}
@@ -141,7 +143,7 @@ func Uncontrolled(owner []metav1.OwnerReference) bool {
 			continue
 		}
 
-		if *isController && helper.Contains(o.Kind, controller) {
+		if *isController && helper.Contains(o.Kind, controllers) {
 			return false
 		}
 	}

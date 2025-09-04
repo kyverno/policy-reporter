@@ -15,7 +15,10 @@ import (
 	"github.com/kyverno/policy-reporter/pkg/validate"
 )
 
-var controlled = true
+var (
+	controlled   = true
+	uncontrolled = false
+)
 
 type podClient struct {
 	pod *corev1.Pod
@@ -215,6 +218,146 @@ func TestSourceFilter(t *testing.T) {
 		}}))
 
 		c.job = &batchv1.Job{ObjectMeta: v1.ObjectMeta{Name: "nginx", Namespace: "test"}}
+
+		assert.True(t, filter.Validate(&openreports.ReportAdapter{Report: &v1alpha1.Report{
+			ObjectMeta: v1.ObjectMeta{Name: "polr", Namespace: "test"},
+			Scope:      &corev1.ObjectReference{APIVersion: "v1", Kind: "Job", Name: "nginx", Namespace: "test"},
+			Results:    []v1alpha1.ReportResult{fixtures.FailPodResult.ReportResult},
+		}}))
+	})
+
+	t.Run("pod with cronjob owner should not be filtered", func(t *testing.T) {
+		c := podClient{
+			pod: &corev1.Pod{ObjectMeta: v1.ObjectMeta{Name: "nginx", Namespace: "test", OwnerReferences: []v1.OwnerReference{
+				{APIVersion: "batch/v1", Kind: "CronJob", Name: "nginx-cronjob", Controller: &controlled},
+			}}},
+		}
+
+		filter := report.NewSourceFilter(&c, nil, []report.SourceValidation{
+			{
+				Selector: report.ReportSelector{
+					Source: "kyverno",
+				},
+				UncontrolledOnly: true,
+			},
+		})
+
+		assert.True(t, filter.Validate(&openreports.ReportAdapter{Report: &v1alpha1.Report{
+			ObjectMeta: v1.ObjectMeta{Name: "polr", Namespace: "test"},
+			Scope:      &corev1.ObjectReference{APIVersion: "v1", Kind: "Pod", Name: "nginx", Namespace: "test"},
+			Results:    []v1alpha1.ReportResult{fixtures.FailPodResult.ReportResult},
+		}}))
+	})
+
+	t.Run("job with replicaset owner should not be filtered", func(t *testing.T) {
+		c := jobClient{
+			job: &batchv1.Job{ObjectMeta: v1.ObjectMeta{Name: "nginx", Namespace: "test", OwnerReferences: []v1.OwnerReference{
+				{APIVersion: "apps/v1", Kind: "ReplicaSet", Name: "nginx-rs", Controller: &controlled},
+			}}},
+		}
+
+		filter := report.NewSourceFilter(nil, &c, []report.SourceValidation{
+			{
+				Selector: report.ReportSelector{
+					Source: "kyverno",
+				},
+				UncontrolledOnly: true,
+			},
+		})
+
+		assert.True(t, filter.Validate(&openreports.ReportAdapter{Report: &v1alpha1.Report{
+			ObjectMeta: v1.ObjectMeta{Name: "polr", Namespace: "test"},
+			Scope:      &corev1.ObjectReference{APIVersion: "v1", Kind: "Job", Name: "nginx", Namespace: "test"},
+			Results:    []v1alpha1.ReportResult{fixtures.FailPodResult.ReportResult},
+		}}))
+	})
+
+	t.Run("pod with multiple owners including valid controller should be filtered", func(t *testing.T) {
+		c := podClient{
+			pod: &corev1.Pod{ObjectMeta: v1.ObjectMeta{Name: "nginx", Namespace: "test", OwnerReferences: []v1.OwnerReference{
+				{APIVersion: "batch/v1", Kind: "CronJob", Name: "nginx-cronjob", Controller: &controlled},
+				{APIVersion: "apps/v1", Kind: "ReplicaSet", Name: "nginx-rs", Controller: &controlled},
+			}}},
+		}
+
+		filter := report.NewSourceFilter(&c, nil, []report.SourceValidation{
+			{
+				Selector: report.ReportSelector{
+					Source: "kyverno",
+				},
+				UncontrolledOnly: true,
+			},
+		})
+
+		assert.False(t, filter.Validate(&openreports.ReportAdapter{Report: &v1alpha1.Report{
+			ObjectMeta: v1.ObjectMeta{Name: "polr", Namespace: "test"},
+			Scope:      &corev1.ObjectReference{APIVersion: "v1", Kind: "Pod", Name: "nginx", Namespace: "test"},
+			Results:    []v1alpha1.ReportResult{fixtures.FailPodResult.ReportResult},
+		}}))
+	})
+
+	t.Run("job with multiple owners including valid controller should be filtered", func(t *testing.T) {
+		c := jobClient{
+			job: &batchv1.Job{ObjectMeta: v1.ObjectMeta{Name: "nginx", Namespace: "test", OwnerReferences: []v1.OwnerReference{
+				{APIVersion: "apps/v1", Kind: "ReplicaSet", Name: "nginx-rs", Controller: &controlled},
+				{APIVersion: "batch/v1", Kind: "CronJob", Name: "nginx-cronjob", Controller: &controlled},
+			}}},
+		}
+
+		filter := report.NewSourceFilter(nil, &c, []report.SourceValidation{
+			{
+				Selector: report.ReportSelector{
+					Source: "kyverno",
+				},
+				UncontrolledOnly: true,
+			},
+		})
+
+		assert.False(t, filter.Validate(&openreports.ReportAdapter{Report: &v1alpha1.Report{
+			ObjectMeta: v1.ObjectMeta{Name: "polr", Namespace: "test"},
+			Scope:      &corev1.ObjectReference{APIVersion: "v1", Kind: "Job", Name: "nginx", Namespace: "test"},
+			Results:    []v1alpha1.ReportResult{fixtures.FailPodResult.ReportResult},
+		}}))
+	})
+
+	t.Run("pod with non-controller owner should not be filtered", func(t *testing.T) {
+		c := podClient{
+			pod: &corev1.Pod{ObjectMeta: v1.ObjectMeta{Name: "nginx", Namespace: "test", OwnerReferences: []v1.OwnerReference{
+				{APIVersion: "apps/v1", Kind: "ReplicaSet", Name: "nginx-rs", Controller: &uncontrolled},
+			}}},
+		}
+
+		filter := report.NewSourceFilter(&c, nil, []report.SourceValidation{
+			{
+				Selector: report.ReportSelector{
+					Source: "kyverno",
+				},
+				UncontrolledOnly: true,
+			},
+		})
+
+		assert.True(t, filter.Validate(&openreports.ReportAdapter{Report: &v1alpha1.Report{
+			ObjectMeta: v1.ObjectMeta{Name: "polr", Namespace: "test"},
+			Scope:      &corev1.ObjectReference{APIVersion: "v1", Kind: "Pod", Name: "nginx", Namespace: "test"},
+			Results:    []v1alpha1.ReportResult{fixtures.FailPodResult.ReportResult},
+		}}))
+	})
+
+	t.Run("job with non-controller owner should not be filtered", func(t *testing.T) {
+		c := jobClient{
+			job: &batchv1.Job{ObjectMeta: v1.ObjectMeta{Name: "nginx", Namespace: "test", OwnerReferences: []v1.OwnerReference{
+				{APIVersion: "batch/v1", Kind: "CronJob", Name: "nginx-cronjob", Controller: &uncontrolled},
+			}}},
+		}
+
+		filter := report.NewSourceFilter(nil, &c, []report.SourceValidation{
+			{
+				Selector: report.ReportSelector{
+					Source: "kyverno",
+				},
+				UncontrolledOnly: true,
+			},
+		})
 
 		assert.True(t, filter.Validate(&openreports.ReportAdapter{Report: &v1alpha1.Report{
 			ObjectMeta: v1.ObjectMeta{Name: "polr", Namespace: "test"},
