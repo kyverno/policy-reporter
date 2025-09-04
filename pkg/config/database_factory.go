@@ -47,13 +47,21 @@ func (f *DatabaseFactory) NewPostgres(config Database) *bun.DB {
 		dsn = fmt.Sprintf("postgres://%s:%s@%s/%s?sslmode=%s", config.Username, config.Password, config.Host, config.Database, sslMode)
 	}
 
-	sqldb := sql.OpenDB(pgdriver.NewConnector(pgdriver.WithDSN(dsn)))
-	sqldb.SetMaxOpenConns(25)
-	sqldb.SetMaxIdleConns(25)
-	sqldb.SetConnMaxLifetime(15 * time.Minute)
+	sqldb := sql.OpenDB(pgdriver.NewConnector(
+		pgdriver.WithDSN(dsn),
+		pgdriver.WithTimeout(time.Duration(WithDefault(config.Timeout, 5))*time.Second),
+	))
+
+	sqldb.SetMaxOpenConns(config.MaxOpenConns)
+	sqldb.SetMaxIdleConns(config.MaxIdleConns)
+	sqldb.SetConnMaxLifetime(time.Duration(config.ConnMaxLifetime) * time.Minute)
+	sqldb.SetConnMaxIdleTime(time.Duration(config.ConnMaxIdleTime) * time.Minute)
 
 	db := bun.NewDB(sqldb, pgdialect.New())
 	db.AddQueryHook(bundebug.NewQueryHook())
+	if config.Metrics {
+		db.AddQueryHook(database.NewQueryHook(database.WithDBName(config.Database)))
+	}
 
 	return db
 }
@@ -71,6 +79,9 @@ func (f *DatabaseFactory) NewMySQL(config Database) *bun.DB {
 	if config.DSN == "" {
 		dsn = fmt.Sprintf("%s:%s@tcp(%s)/%s?tls=%v", config.Username, config.Password, config.Host, config.Database, config.EnableSSL)
 	}
+	if config.Timeout > 0 {
+		dsn = fmt.Sprintf("%s&timeout=%ds", dsn, config.Timeout)
+	}
 
 	sqldb, err := sql.Open("mysql", dsn)
 	if err != nil {
@@ -78,14 +89,20 @@ func (f *DatabaseFactory) NewMySQL(config Database) *bun.DB {
 		return nil
 	}
 
-	sqldb.SetMaxOpenConns(25)
-	sqldb.SetMaxIdleConns(25)
-	sqldb.SetConnMaxLifetime(15 * time.Minute)
+	sqldb.SetMaxOpenConns(config.MaxOpenConns)
+	sqldb.SetMaxIdleConns(config.MaxIdleConns)
+	sqldb.SetConnMaxLifetime(time.Duration(config.ConnMaxLifetime) * time.Minute)
+	sqldb.SetConnMaxIdleTime(time.Duration(config.ConnMaxIdleTime) * time.Minute)
 
-	return bun.NewDB(sqldb, mysqldialect.New())
+	db := bun.NewDB(sqldb, mysqldialect.New())
+	if config.Metrics {
+		db.AddQueryHook(database.NewQueryHook(database.WithDBName(config.Database)))
+	}
+
+	return db
 }
 
-func (f *DatabaseFactory) NewSQLite(file string) *bun.DB {
+func (f *DatabaseFactory) NewSQLite(file string, metrics bool) *bun.DB {
 	sqldb, err := database.NewSQLiteDB(file)
 	if err != nil {
 		zap.L().Error("failed to create sqlite connection", zap.Error(err))
@@ -93,6 +110,9 @@ func (f *DatabaseFactory) NewSQLite(file string) *bun.DB {
 	}
 
 	sqldb.AddQueryHook(bundebug.NewQueryHook())
+	if metrics {
+		sqldb.AddQueryHook(database.NewQueryHook(database.WithDBName("sqlite")))
+	}
 
 	return sqldb
 }
@@ -145,4 +165,13 @@ func NewDatabaseFactory(client secrets.Client) *DatabaseFactory {
 	return &DatabaseFactory{
 		secretClient: client,
 	}
+}
+
+func WithDefault[T comparable](value, fallback T) T {
+	var init T
+	if value == init {
+		return fallback
+	}
+
+	return value
 }

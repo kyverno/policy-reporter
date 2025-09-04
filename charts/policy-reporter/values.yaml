@@ -871,6 +871,18 @@ database:
   # example postgres: postgres://postgres:password@localhost:5432/postgres?sslmode=disable
   # example mysql: root:password@tcp(localhost:3306)/test?tls=false
   dsn: ""
+  # -- Maximum number of open connections, supported for mysql and postgres
+  maxOpenConnections: 25
+  # -- Maximum number of idle connections, supported for mysql and postgres
+  maxIdleConnections: 25
+  # -- Maximum amount of time in minutes a connection may be reused, supported for mysql and postgres
+  connectionMaxLifetime: 0
+  # -- Maximum amount of time in minutes a connection may be idle, supported for mysql and postgres
+  connectionMaxIdleTime: 0
+  # -- Timeout for database operations in seconds, supported for mysql and postgres
+  timeout: 10
+  # -- Enables database related metrics, connection status and query histogram
+  metrics: false
   # -- Read configuration from an existing Secret
   # supported fields: username, password, host, dsn, database
   secretRef: ""
