@@ -262,8 +262,8 @@ github.com/onsi/ginkgo/v2 v2.22.0 h1:Yed107/8DjTr0lKCNt7Dn8yQ6ybuDRQoMGrNFKzMfHg
 github.com/onsi/ginkgo/v2 v2.22.0/go.mod h1:7Du3c42kxCUegi0IImZ1wUQzMBVecgIHjR1C+NkhLQo=
 github.com/onsi/gomega v1.36.1 h1:bJDPBO7ibjxcbHMgSCoo4Yj18UWbKDlLwX1x9sybDcw=
 github.com/onsi/gomega v1.36.1/go.mod h1:PvZbdDc8J6XJEpDK4HCuRBm8a6Fzp9/DmhC9C7yFlog=
-github.com/openreports/reports-api v0.2.0-alpha.1 h1:zgrFsI3sXMvTpK56AdhtiP+u+La7ljpXqvZfYE7eL+w=
-github.com/openreports/reports-api v0.2.0-alpha.1/go.mod h1:Es52ppXibHHVWs8dEd322rEzCP6R6/7Wu+3rdwuRndU=
+github.com/openreports/reports-api v0.2.0-alpha.3 h1:Oc5hoc6e3vBmmWZiHMu0d2AS4SzZuVa3tRS/IIYtIXM=
+github.com/openreports/reports-api v0.2.0-alpha.3/go.mod h1:Es52ppXibHHVWs8dEd322rEzCP6R6/7Wu+3rdwuRndU=
 github.com/patrickmn/go-cache v2.1.0+incompatible h1:HRMgzkcYKYpi3C8ajMPV8OFXaaRUnok+kx1WdO15EQc=
 github.com/patrickmn/go-cache v2.1.0+incompatible/go.mod h1:3Qf8kWWT7OJRJbdiICTKqZju1ZixQ/KpMGzzAfe6+WQ=
 github.com/pelletier/go-toml/v2 v2.2.4 h1:mye9XuhQ6gvn5h28+VilKrrPoQVanw5PMw/TB0t5Ec4=
