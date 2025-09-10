@@ -462,6 +462,7 @@ Open `http://localhost:8082/` in your browser.
 | ui.nodeSelector | object | `{}` | Node labels for pod assignment |
 | ui.tolerations | list | `[]` | List of node taints to tolerate |
 | ui.affinity | object | `{}` | Affinity constraints. |
+| ui.topologySpreadConstraints | object | `{}` | Pod Topology Spread Constraints for the policy-reporter-ui. |
 | ui.extraVolumes.volumeMounts | list | `[]` | Deployment volumeMounts |
 | ui.extraVolumes.volumes | list | `[]` | Deployment values |
 | ui.extraConfig | object | `{}` | Extra configuration options appended to UI settings |

@@ -1279,6 +1279,9 @@ ui:
     # -- Affinity constraints.
   affinity: {}
 
+  # -- Pod Topology Spread Constraints for the policy-reporter-ui.
+  topologySpreadConstraints: {}
+
   extraVolumes:
     # -- Deployment volumeMounts
     volumeMounts: []
