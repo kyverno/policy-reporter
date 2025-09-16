@@ -3,6 +3,7 @@ package jira
 import (
 	"bytes"
 	"context"
+	"encoding/json"
 	"fmt"
 	"html/template"
 	"net/http"
@@ -276,7 +277,16 @@ func (e *client) jiraCustomFields() *models.CustomFields {
 				continue
 			}
 
-			err := customFields.Text(property, value)
+			var err error
+
+			text := ConvertProperty(value)
+			switch v := text.(type) {
+			case string:
+				err = customFields.Text(property, v)
+			case []string:
+				err = customFields.MultiSelect(property, v)
+			}
+
 			if err != nil {
 				zap.L().Error("failed to add jira custom field", zap.String("name", e.Name()), zap.String("field", property), zap.Error(err))
 			}
@@ -342,4 +352,26 @@ func AppendProperty(doc *models.CommentNodeScheme, key, value string) {
 			{Type: "text", Text: value},
 		},
 	})
+}
+
+func ConvertProperty(s string) any {
+	var result any
+	if err := json.Unmarshal([]byte(s), &result); err != nil {
+		return s
+	}
+
+	if result == nil {
+		return s
+	}
+
+	switch v := result.(type) {
+	case string:
+		return v
+	case []any:
+		return helper.Map(v, func(i any) string {
+			return fmt.Sprintf("%v", i)
+		})
+	default:
+		return v
+	}
 }
