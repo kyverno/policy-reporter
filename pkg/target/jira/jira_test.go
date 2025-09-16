@@ -66,7 +66,7 @@ func Test_JiraTarget(t *testing.T) {
 			summary, ok := fields["summary"].(string)
 			assert.True(t, ok)
 			assert.Equal(t, "default/deployment/nginx: Policy Violation: require-requests-and-limits-required", summary)
-			_, ok = fields["description"].(any)
+			_, ok = fields["description"]
 			assert.True(t, ok)
 
 			// Check labels
