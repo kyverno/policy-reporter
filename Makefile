@@ -44,15 +44,15 @@ TOOLS_DIR                     := $(PWD)/.tools
 KIND                 		  := $(TOOLS_DIR)/kind
 KIND_VERSION                  := v0.29.0
 KO             				  := $(TOOLS_DIR)/ko
-KO_VERSION     				  := v0.17.1
+KO_VERSION     				  := v0.18.0
 HELM                          := $(TOOLS_DIR)/helm
-HELM_VERSION                  := v3.17.3
+HELM_VERSION                  := v3.19.0
 HELM_DOCS                     := $(TOOLS_DIR)/helm-docs
 HELM_DOCS_VERSION             := v1.14.2
 GCI                           := $(TOOLS_DIR)/gci
-GCI_VERSION                   := v0.9.1
+GCI_VERSION                   := v0.13.7
 GOFUMPT                       := $(TOOLS_DIR)/gofumpt
-GOFUMPT_VERSION               := v0.4.0
+GOFUMPT_VERSION               := v0.9.1
 TOOLS                         := $(HELM) $(HELM_DOCS) $(GCI) $(GOFUMPT)
 
 

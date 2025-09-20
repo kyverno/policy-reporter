@@ -29,6 +29,10 @@ func (r *Reconditioner) Prepare(polr openreports.ReportInterface) openreports.Re
 			r.Subjects = append(r.Subjects, *scope)
 		}
 
+		if r.Source == "" {
+			r.Source = polr.GetSource()
+		}
+
 		newResults = append(newResults, r)
 	}
 	polr.SetResults(newResults)
