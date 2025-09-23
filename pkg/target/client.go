@@ -215,7 +215,12 @@ func (c *BaseClient) Sources() []string {
 }
 
 func (c *BaseClient) Validate(rep openreports.ReportInterface, result openreports.ResultAdapter) bool {
+	if rep == nil {
+		return false
+	}
+
 	if !c.ValidateReport(rep) {
+		zap.L().Debug("report skipped by report filter", zap.String("report", rep.GetName()), zap.String("target", c.name))
 		return false
 	}
 

@@ -24,6 +24,10 @@ func (config *Config[T]) MapBaseParent(parent *Config[T]) {
 	if !config.SkipExisting {
 		config.SkipExisting = parent.SkipExisting
 	}
+
+	if len(config.Sources) == 0 {
+		config.Sources = parent.Sources
+	}
 }
 
 func (config *Config[T]) Secret() string {

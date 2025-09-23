@@ -6,14 +6,17 @@ import (
 	"reflect"
 	"testing"
 
+	"github.com/stretchr/testify/assert"
 	"go.uber.org/zap"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes/fake"
 	v1 "k8s.io/client-go/kubernetes/typed/core/v1"
 
+	"github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
 	"github.com/kyverno/policy-reporter/pkg/crd/api/targetconfig"
 	"github.com/kyverno/policy-reporter/pkg/crd/api/targetconfig/v1alpha1"
+	"github.com/kyverno/policy-reporter/pkg/filters"
 	"github.com/kyverno/policy-reporter/pkg/kubernetes/secrets"
 	"github.com/kyverno/policy-reporter/pkg/openreports"
 	"github.com/kyverno/policy-reporter/pkg/target"
@@ -1049,4 +1052,49 @@ func Test_GetValuesFromMountedSecret(t *testing.T) {
 			t.Error("Expected client are skipped")
 		}
 	})
+}
+
+func Test_ReportFilter_Wildcard(t *testing.T) {
+	type testCase struct {
+		name       string
+		labelValue string
+		expected   bool
+	}
+
+	for _, tc := range []testCase{
+		{
+			name:       "mariadb",
+			labelValue: "mariadb",
+			expected:   false,
+		},
+		{
+			name:       "mariadb",
+			labelValue: "exclude-app-mariadb-deployment-76cc98765f",
+			expected:   false,
+		},
+		{
+			name:       "mysql",
+			labelValue: "mysql",
+			expected:   true,
+		},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			filter := target.NewReportFilter(
+				factory.ToRuleSet(filters.ValueFilter{
+					Exclude: []string{"trivy-operator.resource.name:*mariadb*"},
+				}),
+				factory.ToRuleSet(filters.ValueFilter{}),
+			)
+
+			pr := v1alpha2.PolicyReport{
+				ObjectMeta: metav1.ObjectMeta{
+					Labels: map[string]string{
+						"trivy-operator.resource.name": tc.labelValue,
+					},
+				},
+			}
+
+			assert.Equal(t, tc.expected, filter.Validate(&openreports.ReportAdapter{Report: pr.ToOpenReports()}))
+		})
+	}
 }
