@@ -210,6 +210,16 @@ sourceFilters:
     # -- Filter out Reports based on the scope resource kind
     kinds:
       exclude: [ReplicaSet]
+  - selector:
+      # -- select Report by source
+      source: KyvernoImageValidatingPolicy
+    # -- Filter out Reports of controlled Pods and Jobs, only works for Reports with scope resource
+    uncontrolledOnly: true
+    # -- Filter out cluster scoped Reports
+    disableClusterReports: false
+    # -- Filter out Reports based on the scope resource kind
+    kinds:
+      exclude: [ReplicaSet]
 
 global:
   # -- additional labels added on each resource

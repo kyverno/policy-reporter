@@ -9,6 +9,16 @@ metadata:
   name: {{ include "kyverno-plugin.fullname" . }}
 rules:
 - apiGroups:
+  - policies.kyverno.io
+  resources:
+  - validatingpolicies
+  - validatingpolicies/status
+  - imagevalidatingpolicies
+  - imagevalidatingpolicies/status
+  verbs:
+  - get
+  - list
+- apiGroups:
   - kyverno.io
   resources:
   - policies
