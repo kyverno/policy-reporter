@@ -192,27 +192,7 @@ sourceConfig: []
 sourceFilters:
   - selector:
       # -- select Report by source
-      source: kyverno
-    # -- Filter out Reports of controlled Pods and Jobs, only works for Reports with scope resource
-    uncontrolledOnly: true
-    # -- Filter out cluster scoped Reports
-    disableClusterReports: false
-    # -- Filter out Reports based on the scope resource kind
-    kinds:
-      exclude: [ReplicaSet]
-  - selector:
-      # -- select Report by source
-      source: KyvernoValidatingPolicy
-    # -- Filter out Reports of controlled Pods and Jobs, only works for Reports with scope resource
-    uncontrolledOnly: true
-    # -- Filter out cluster scoped Reports
-    disableClusterReports: false
-    # -- Filter out Reports based on the scope resource kind
-    kinds:
-      exclude: [ReplicaSet]
-  - selector:
-      # -- select Report by source
-      source: KyvernoImageValidatingPolicy
+      sources: [kyverno, KyvernoValidatingPolicy, KyvernoImageValidatingPolicy]
     # -- Filter out Reports of controlled Pods and Jobs, only works for Reports with scope resource
     uncontrolledOnly: true
     # -- Filter out cluster scoped Reports

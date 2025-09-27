@@ -159,7 +159,8 @@ type Database struct {
 }
 
 type SourceSelector struct {
-	Source string `mapstructure:"source"`
+	Source  string   `mapstructure:"source"`
+	Sources []string `mapstructure:"sources"`
 }
 
 type SourceFilter struct {

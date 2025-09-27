@@ -208,6 +208,14 @@ func (r *Resolver) CustomIDGenerators() map[string]result.IDGenerator {
 			continue
 		}
 
+		if len(c.Selector.Sources) > 0 {
+			for _, source := range c.Selector.Sources {
+				generators[strings.ToLower(source)] = result.NewIDGenerator(c.Fields)
+			}
+
+			continue
+		}
+
 		generators[strings.ToLower(c.Selector.Source)] = result.NewIDGenerator(c.Fields)
 	}
 
@@ -239,7 +247,7 @@ func (r *Resolver) WGPolicyQueue() (*wgpolicyclient.WGPolicyQueue, error) {
 		polrClient,
 		report.NewSourceFilter(podsClient, jobsClient, helper.Map(r.config.SourceFilters, func(f SourceFilter) report.SourceValidation {
 			return report.SourceValidation{
-				Selector:              report.ReportSelector{Source: f.Selector.Source},
+				Selector:              report.ReportSelector(f.Selector),
 				Kinds:                 ToRuleSet(f.Kinds),
 				Sources:               ToRuleSet(f.Sources),
 				Namespaces:            ToRuleSet(f.Namespaces),
@@ -275,7 +283,7 @@ func (r *Resolver) ORQueue() (*orclient.ORQueue, error) {
 		polrClient,
 		report.NewSourceFilter(podsClient, jobsClient, helper.Map(r.config.SourceFilters, func(f SourceFilter) report.SourceValidation {
 			return report.SourceValidation{
-				Selector:              report.ReportSelector{Source: f.Selector.Source},
+				Selector:              report.ReportSelector(f.Selector),
 				Kinds:                 ToRuleSet(f.Kinds),
 				Sources:               ToRuleSet(f.Sources),
 				Namespaces:            ToRuleSet(f.Namespaces),

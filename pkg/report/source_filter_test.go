@@ -43,7 +43,7 @@ func TestSourceFilter(t *testing.T) {
 		filter := report.NewSourceFilter(nil, nil, []report.SourceValidation{
 			{
 				Selector: report.ReportSelector{
-					Source: "kyverno",
+					Sources: []string{"kyverno"},
 				},
 				Namespaces: validate.RuleSets{
 					Include: []string{"test"},
