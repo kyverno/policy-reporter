@@ -22,7 +22,8 @@ type JobClient interface {
 }
 
 type ReportSelector struct {
-	Source string
+	Source  string
+	Sources []string `mapstructure:"sources"`
 }
 
 type SourceValidation struct {
@@ -152,5 +153,9 @@ func Uncontrolled(owner []metav1.OwnerReference, controllers []string) bool {
 }
 
 func Match(polr openreports.ReportInterface, selector ReportSelector) bool {
+	if len(selector.Sources) > 0 {
+		return helper.Contains(polr.GetSource(), selector.Sources)
+	}
+
 	return selector.Source == "" || strings.EqualFold(selector.Source, polr.GetSource())
 }
