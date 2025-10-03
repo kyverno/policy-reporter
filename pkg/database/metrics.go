@@ -107,12 +107,11 @@ func (h *QueryHook) AfterQuery(ctx context.Context, event *bun.QueryEvent) {
 		"system":    dbSystem(event.DB),
 		"database":  h.dbName,
 		"operation": event.Operation(),
+		"table":     "",
 	}
 
 	if event.IQuery != nil {
-		if tableName := event.IQuery.GetTableName(); tableName != "" {
-			labels["table"] = tableName
-		}
+		labels["table"] = event.IQuery.GetTableName()
 	}
 
 	dur := time.Since(event.StartTime)
