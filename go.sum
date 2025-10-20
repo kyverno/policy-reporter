@@ -60,8 +60,8 @@ github.com/aws/aws-sdk-go-v2/service/internal/presigned-url v1.13.10 h1:DRND0dkC
 github.com/aws/aws-sdk-go-v2/service/internal/presigned-url v1.13.10/go.mod h1:tGGNmJKOTernmR2+VJ0fCzQRurcPZj9ut60Zu5Fi6us=
 github.com/aws/aws-sdk-go-v2/service/internal/s3shared v1.19.10 h1:DA+Hl5adieRyFvE7pCvBWm3VOZTRexGVkXw33SUqNoY=
 github.com/aws/aws-sdk-go-v2/service/internal/s3shared v1.19.10/go.mod h1:L+A89dH3/gr8L4ecrdzuXUYd1znoko6myzndVGZx/DA=
-github.com/aws/aws-sdk-go-v2/service/kinesis v1.40.5 h1:GWAVIxhYlkFX76WGG2gus5eyonXaKPv00VpiSqHzXDo=
-github.com/aws/aws-sdk-go-v2/service/kinesis v1.40.5/go.mod h1:u/oFMSASsn9QNBRop5lrIpuNwHZwEXjYxNQp7sHFSxc=
+github.com/aws/aws-sdk-go-v2/service/kinesis v1.40.6 h1:4LOFaqlB8CYnuYNBro+AXHGHYbkr0ExwV9R+mU6nSw8=
+github.com/aws/aws-sdk-go-v2/service/kinesis v1.40.6/go.mod h1:NuD0CelXQqJaR8nZ14QBzbZuv4H9uH7I9MdFCGs2Pe8=
 github.com/aws/aws-sdk-go-v2/service/s3 v1.88.5 h1:FlGScxzCGNzT+2AvHT1ZGMvxTwAMa6gsooFb1pO/AiM=
 github.com/aws/aws-sdk-go-v2/service/s3 v1.88.5/go.mod h1:N/iojY+8bW3MYol9NUMuKimpSbPEur75cuI1SmtonFM=
 github.com/aws/aws-sdk-go-v2/service/securityhub v1.64.5 h1:fMXz2UBm8U37ukZxSL/h4Qr2ArK8eWuw5x0YFwtJM5g=
