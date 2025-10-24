@@ -134,6 +134,39 @@ ingress:
   #    hosts:
   #      - chart-example.local
 
+httproute:
+  # -- Enable HTTPRoute resource (Gateway API alternative to Ingress)
+  # Requires Gateway API CRDs (v1) installed in cluster
+  # https://gateway-api.sigs.k8s.io/
+  enabled: false
+  # -- Additional HTTPRoute labels
+  labels: {}
+  # -- Additional HTTPRoute annotations
+  annotations: {}
+  # -- Gateway API parentRefs (list of Gateway references)
+  # Must reference an existing Gateway resource
+  parentRefs: []
+  #  - name: example-gateway
+  #    namespace: gateway-system
+  #    sectionName: https
+  # -- List of hostnames for HTTPRoute
+  hostnames: []
+  #  - policy-reporter.example.com
+  # -- HTTPRoute rules configuration
+  # Allows advanced routing with matches and filters
+  rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /
+      # Optional filters:
+      # filters:
+      #   - type: RequestHeaderModifier
+      #     requestHeaderModifier:
+      #       add:
+      #         - name: X-Custom-Header
+      #           value: value
+
 logging:
   # -- Enables server access logging
   server: false
@@ -1229,6 +1262,39 @@ ui:
     #    hosts:
     #      - chart-example.local
 
+  httproute:
+    # -- Enable HTTPRoute resource (Gateway API alternative to Ingress)
+    # Requires Gateway API CRDs (v1) installed in cluster
+    # https://gateway-api.sigs.k8s.io/
+    enabled: false
+    # -- Additional HTTPRoute labels
+    labels: {}
+    # -- Additional HTTPRoute annotations
+    annotations: {}
+    # -- Gateway API parentRefs (list of Gateway references)
+    # Must reference an existing Gateway resource
+    parentRefs: []
+    #  - name: example-gateway
+    #    namespace: gateway-system
+    #    sectionName: https
+    # -- List of hostnames for HTTPRoute
+    hostnames: []
+    #  - policy-reporter-ui.example.com
+    # -- HTTPRoute rules configuration
+    # Allows advanced routing with matches and filters
+    rules:
+      - matches:
+          - path:
+              type: PathPrefix
+              value: /
+        # Optional filters:
+        # filters:
+        #   - type: RequestHeaderModifier
+        #     requestHeaderModifier:
+        #       add:
+        #         - name: X-Custom-Header
+        #           value: value
+
   networkPolicy:
     # -- When true, use a NetworkPolicy to allow ingress to the webhook
     # This is useful on clusters using Calico and/or native k8s network policies in a default-deny setup.
@@ -1440,6 +1506,39 @@ plugin:
           port: 6443
       # -- A list of valid from selectors according to https://kubernetes.io/docs/concepts/services-networking/network-policies.
       ingress: []
+
+    httproute:
+      # -- Enable HTTPRoute resource (Gateway API alternative to Ingress)
+      # Requires Gateway API CRDs (v1) installed in cluster
+      # https://gateway-api.sigs.k8s.io/
+      enabled: false
+      # -- Additional HTTPRoute labels
+      labels: {}
+      # -- Additional HTTPRoute annotations
+      annotations: {}
+      # -- Gateway API parentRefs (list of Gateway references)
+      # Must reference an existing Gateway resource
+      parentRefs: []
+      #  - name: example-gateway
+      #    namespace: gateway-system
+      #    sectionName: https
+      # -- List of hostnames for HTTPRoute
+      hostnames: []
+      #  - policy-reporter-kyverno-plugin.example.com
+      # -- HTTPRoute rules configuration
+      # Allows advanced routing with matches and filters
+      rules:
+        - matches:
+            - path:
+                type: PathPrefix
+                value: /
+          # Optional filters:
+          # filters:
+          #   - type: RequestHeaderModifier
+          #     requestHeaderModifier:
+          #       add:
+          #         - name: X-Custom-Header
+          #           value: value
 
     # -- Resource constraints
     resources: {}
