@@ -106,7 +106,7 @@ type client struct {
 	client       http.Client
 }
 
-func (d *client) Send(result openreports.ResultAdapter) {
+func (d *client) Send(report openreports.ReportInterface, result openreports.ResultAdapter) {
 	req, err := http.CreateJSONRequest("POST", d.webhook, newPayload(result, d.customFields))
 	if err != nil {
 		return

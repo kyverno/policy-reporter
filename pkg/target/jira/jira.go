@@ -54,7 +54,7 @@ type client struct {
 	jiraV3          *v3.Client
 }
 
-func (e *client) Send(result openreports.ResultAdapter) {
+func (e *client) Send(report openreports.ReportInterface, result openreports.ResultAdapter) {
 	var summary bytes.Buffer
 
 	t, err := template.New("summary").Parse(e.summaryTemplate)

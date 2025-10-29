@@ -47,6 +47,6 @@ func TestSplunkTarget(t *testing.T) {
 			Headers:    map[string]string{"Authorization": "Splunk my-token"},
 			HTTPClient: testClient{callback, 200},
 		})
-		client.Send(fixtures.CompleteTargetSendResult)
+		client.Send(fixtures.DefaultPolicyReport, fixtures.CompleteTargetSendResult)
 	})
 }

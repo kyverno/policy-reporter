@@ -35,7 +35,7 @@ type client struct {
 	token        string
 }
 
-func (c *client) Send(result openreports.ResultAdapter) {
+func (c *client) Send(report openreports.ReportInterface, result openreports.ResultAdapter) {
 	c.sendAndLogResult(splunkRequest{
 		Event:      http.NewJSONResult(result),
 		SourceType: policyReporterSource,

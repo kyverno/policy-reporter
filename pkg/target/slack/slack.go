@@ -277,14 +277,14 @@ func (s *client) batchMessage(polr openreports.ReportInterface, results []openre
 	return p
 }
 
-func (s *client) Send(result openreports.ResultAdapter) {
+func (s *client) Send(report openreports.ReportInterface, result openreports.ResultAdapter) {
 	s.PostMessage(s.message(result))
 }
 
 func (s *client) BatchSend(report openreports.ReportInterface, results []openreports.ResultAdapter) {
 	if report.GetScope() == nil {
 		for _, result := range results {
-			s.Send(result)
+			s.Send(report, result)
 		}
 
 		return

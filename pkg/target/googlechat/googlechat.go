@@ -185,7 +185,7 @@ func mapPayload(result openreports.ResultAdapter) (*Payload, error) {
 	}, nil
 }
 
-func (e *client) Send(result openreports.ResultAdapter) {
+func (e *client) Send(report openreports.ReportInterface, result openreports.ResultAdapter) {
 	if len(e.customFields) > 0 {
 		props := make(map[string]string, 0)
 

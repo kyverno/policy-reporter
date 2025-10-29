@@ -45,7 +45,7 @@ func Test_LokiTarget(t *testing.T) {
 			Webhook:    "http://hook.discord:80",
 			HTTPClient: testClient{callback, 200},
 		})
-		client.Send(fixtures.CompleteTargetSendResult)
+		client.Send(fixtures.DefaultPolicyReport, fixtures.CompleteTargetSendResult)
 	})
 
 	t.Run("Send Minimal Result", func(t *testing.T) {
@@ -70,7 +70,7 @@ func Test_LokiTarget(t *testing.T) {
 			Webhook:    "http://hook.discord:80",
 			HTTPClient: testClient{callback, 200},
 		})
-		client.Send(fixtures.MinimalTargetSendResult)
+		client.Send(fixtures.DefaultPolicyReport, fixtures.MinimalTargetSendResult)
 	})
 	t.Run("Name", func(t *testing.T) {
 		client := discord.NewClient(discord.Options{

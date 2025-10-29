@@ -43,6 +43,14 @@ func Test_AlertManagerClient_Send(t *testing.T) {
 			HTTPClient: http.NewClient("", false),
 		})
 
+		report := v1alpha1.Report{
+			TypeMeta: metav1.TypeMeta{},
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      "test-report",
+				Namespace: "test-namespace",
+			},
+		}
+
 		result := v1alpha1.ReportResult{
 			Description: "test message",
 			Policy:      "test-policy",
@@ -56,13 +64,15 @@ func Test_AlertManagerClient_Send(t *testing.T) {
 			},
 		}
 
-		client.Send(openreports.ResultAdapter{ReportResult: result})
+		client.Send(&openreports.ReportAdapter{Report: &report}, openreports.ResultAdapter{ReportResult: result})
 
 		require.Len(t, receivedAlerts, 1)
 		alert := receivedAlerts[0]
 
 		assert.Equal(t, map[string]string{
 			"alertname": "PolicyReporterViolation",
+			"name":      "test-report",
+			"namespace": "test-namespace",
 			"severity":  "high",
 			"status":    "fail",
 			"source":    "test",
@@ -126,7 +136,7 @@ func Test_AlertManagerClient_Send(t *testing.T) {
 		// Create alerts directly instead of using BatchSend
 		alerts := make([]Alert, 0, len(results))
 		for _, result := range results {
-			alerts = append(alerts, client.createAlert(openreports.ResultAdapter{ReportResult: result}))
+			alerts = append(alerts, client.createAlert(&openreports.ReportAdapter{Report: &v1alpha1.Report{}}, openreports.ResultAdapter{ReportResult: result}))
 		}
 		client.sendAlerts(alerts)
 
@@ -159,7 +169,7 @@ func Test_AlertManagerClient_Send(t *testing.T) {
 		}
 
 		// Should not panic
-		client.Send(openreports.ResultAdapter{ReportResult: result})
+		client.Send(&openreports.ReportAdapter{Report: &v1alpha1.Report{}}, openreports.ResultAdapter{ReportResult: result})
 	})
 
 	t.Run("With Custom Headers", func(t *testing.T) {
@@ -191,7 +201,7 @@ func Test_AlertManagerClient_Send(t *testing.T) {
 			Severity:    "high",
 		}
 
-		client.Send(openreports.ResultAdapter{ReportResult: result})
+		client.Send(&openreports.ReportAdapter{Report: &v1alpha1.Report{}}, openreports.ResultAdapter{ReportResult: result})
 
 		assert.Equal(t, "Bearer test-token", receivedHeaders.Get("Authorization"))
 		assert.Equal(t, "custom-value", receivedHeaders.Get("X-Custom"))
@@ -229,7 +239,7 @@ func Test_AlertManagerClient_Send(t *testing.T) {
 			Severity:    "high",
 		}
 
-		client.Send(openreports.ResultAdapter{ReportResult: result})
+		client.Send(&openreports.ReportAdapter{Report: &v1alpha1.Report{}}, openreports.ResultAdapter{ReportResult: result})
 
 		require.Len(t, receivedAlerts, 1)
 		assert.Equal(t, "production", receivedAlerts[0].Annotations["environment"])
@@ -273,7 +283,7 @@ func Test_AlertManagerClient_Send(t *testing.T) {
 			},
 		}
 
-		client.Send(openreports.ResultAdapter{ReportResult: result})
+		client.Send(&openreports.ReportAdapter{Report: &v1alpha1.Report{}}, openreports.ResultAdapter{ReportResult: result})
 
 		require.Len(t, receivedAlerts, 1)
 		assert.Equal(t, "test-namespace/pod/test-pod", receivedAlerts[0].Annotations["resource"])

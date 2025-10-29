@@ -29,7 +29,7 @@ type client struct {
 	prefix       string
 }
 
-func (c *client) Send(result openreports.ResultAdapter) {
+func (c *client) Send(report openreports.ReportInterface, result openreports.ResultAdapter) {
 	if len(c.customFields) > 0 {
 		props := make(map[string]string, 0)
 
