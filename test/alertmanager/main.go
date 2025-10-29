@@ -4,9 +4,8 @@ import (
 	"fmt"
 	"time"
 
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-
 	"github.com/openreports/reports-api/apis/openreports.io/v1alpha1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/kyverno/policy-reporter/pkg/openreports"
 	"github.com/kyverno/policy-reporter/pkg/target"
@@ -15,7 +14,6 @@ import (
 )
 
 func main() {
-
 	// Create a partial test report
 	report := v1alpha1.Report{
 		TypeMeta: metav1.TypeMeta{},
