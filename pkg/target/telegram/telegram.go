@@ -84,7 +84,7 @@ type client struct {
 	client       http.Client
 }
 
-func (e *client) Send(result openreports.ResultAdapter) {
+func (e *client) Send(report openreports.ReportInterface, result openreports.ResultAdapter) {
 	if len(e.customFields) > 0 {
 		props := make(map[string]string, 0)
 

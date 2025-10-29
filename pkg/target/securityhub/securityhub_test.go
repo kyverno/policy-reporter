@@ -82,7 +82,7 @@ func TestSecurityHub(t *testing.T) {
 			},
 		})
 
-		c.Send(fixtures.CompleteTargetSendResult)
+		c.Send(fixtures.DefaultPolicyReport, fixtures.CompleteTargetSendResult)
 	})
 	t.Run("clean up disabled", func(t *testing.T) {
 		h := &client{}

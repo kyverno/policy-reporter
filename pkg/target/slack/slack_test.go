@@ -46,7 +46,7 @@ func Test_SlackTarget(t *testing.T) {
 			CustomFields: map[string]string{"Cluster": "Name"},
 			HTTPClient:   testClient{callback, 200},
 		})
-		client.Send(fixtures.CompleteTargetSendResult)
+		client.Send(fixtures.DefaultPolicyReport, fixtures.CompleteTargetSendResult)
 	})
 
 	t.Run("Send Minimal Result", func(t *testing.T) {
@@ -71,7 +71,7 @@ func Test_SlackTarget(t *testing.T) {
 			Webhook:    "http://hook.slack:80",
 			HTTPClient: testClient{callback, 200},
 		})
-		client.Send(fixtures.MinimalTargetSendResult)
+		client.Send(fixtures.DefaultPolicyReport, fixtures.MinimalTargetSendResult)
 	})
 
 	t.Run("Send enforce Result", func(t *testing.T) {
@@ -96,7 +96,7 @@ func Test_SlackTarget(t *testing.T) {
 			Webhook:    "http://hook.slack:80",
 			HTTPClient: testClient{callback, 200},
 		})
-		client.Send(fixtures.EnforceTargetSendResult)
+		client.Send(fixtures.DefaultPolicyReport, fixtures.EnforceTargetSendResult)
 	})
 
 	t.Run("Send incomplete Result", func(t *testing.T) {
@@ -122,7 +122,7 @@ func Test_SlackTarget(t *testing.T) {
 			CustomFields: map[string]string{"Cluster": "Name"},
 			HTTPClient:   testClient{callback, 200},
 		})
-		client.Send(fixtures.MissingUIDSendResult)
+		client.Send(fixtures.DefaultPolicyReport, fixtures.MissingUIDSendResult)
 	})
 
 	t.Run("Send incomplete Result2", func(t *testing.T) {
@@ -148,7 +148,7 @@ func Test_SlackTarget(t *testing.T) {
 			CustomFields: map[string]string{"Cluster": "Name"},
 			HTTPClient:   testClient{callback, 200},
 		})
-		client.Send(fixtures.MissingAPIVersionSendResult)
+		client.Send(fixtures.DefaultPolicyReport, fixtures.MissingAPIVersionSendResult)
 	})
 
 	t.Run("Name", func(t *testing.T) {

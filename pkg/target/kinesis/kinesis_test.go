@@ -46,7 +46,7 @@ func Test_KinesisTarget(t *testing.T) {
 			CustomFields: map[string]string{"cluster": "name"},
 			Kinesis:      &testClient{nil, callback},
 		})
-		client.Send(fixtures.CompleteTargetSendResult)
+		client.Send(fixtures.DefaultPolicyReport, fixtures.CompleteTargetSendResult)
 
 		if len(fixtures.CompleteTargetSendResult.Properties) > 1 || fixtures.CompleteTargetSendResult.Properties["cluster"] != "" {
 			t.Error("expected customFields are not added to the actuel result")

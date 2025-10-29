@@ -31,7 +31,7 @@ type client struct {
 	client       http.Client
 }
 
-func (s *client) Send(result openreports.ResultAdapter) {
+func (s *client) Send(report openreports.ReportInterface, result openreports.ResultAdapter) {
 	s.PostMessage(s.newMessage(result.GetResource(), []openreports.ResultAdapter{result}))
 }
 
@@ -40,7 +40,7 @@ func (s *client) CleanUp(_ context.Context, _ openreports.ReportInterface) {}
 func (s *client) BatchSend(report openreports.ReportInterface, results []openreports.ResultAdapter) {
 	if report.GetScope() == nil {
 		for idx := range results {
-			s.Send(results[idx])
+			s.Send(report, results[idx])
 		}
 	}
 

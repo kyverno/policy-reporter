@@ -88,7 +88,7 @@ func Test_JiraTarget(t *testing.T) {
 			CustomFields: map[string]string{"customfield_10001": "PolicyReporter"},
 			HTTPClient:   testClient{callback, 200},
 		})
-		client.Send(fixtures.CompleteTargetSendResult)
+		client.Send(fixtures.DefaultPolicyReport, fixtures.CompleteTargetSendResult)
 	})
 
 	t.Run("Send Minimal Result", func(t *testing.T) {
@@ -151,7 +151,7 @@ func Test_JiraTarget(t *testing.T) {
 			SummaryTemplate: "{{ customfield.cluster }}: Policy Violation: {{ result.Policy }}",
 		})
 		if assert.NoError(t, err) {
-			client.Send(fixtures.CompleteTargetSendResult)
+			client.Send(fixtures.DefaultPolicyReport, fixtures.CompleteTargetSendResult)
 		}
 	})
 
@@ -183,7 +183,7 @@ func Test_JiraTarget(t *testing.T) {
 			IssueType:  "", // Empty to test default
 			HTTPClient: testClient{callback, 200},
 		})
-		client.Send(fixtures.CompleteTargetSendResult)
+		client.Send(fixtures.DefaultPolicyReport, fixtures.CompleteTargetSendResult)
 	})
 
 	t.Run("Custom Fields", func(t *testing.T) {
@@ -218,7 +218,7 @@ func Test_JiraTarget(t *testing.T) {
 			},
 			HTTPClient: testClient{callback, 200},
 		})
-		client.Send(fixtures.CompleteTargetSendResult)
+		client.Send(fixtures.DefaultPolicyReport, fixtures.CompleteTargetSendResult)
 	})
 
 	t.Run("Name", func(t *testing.T) {

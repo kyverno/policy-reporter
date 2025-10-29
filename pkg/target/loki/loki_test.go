@@ -67,7 +67,7 @@ func Test_LokiTarget(t *testing.T) {
 			Password:     "password",
 			Headers:      map[string]string{"X-Forward": "http://loki"},
 		})
-		client.Send(fixtures.CompleteTargetSendResult)
+		client.Send(fixtures.DefaultPolicyReport, fixtures.CompleteTargetSendResult)
 	})
 
 	t.Run("Send Minimal Result", func(t *testing.T) {
@@ -97,7 +97,7 @@ func Test_LokiTarget(t *testing.T) {
 			CustomFields: map[string]string{"custom": "label"},
 			HTTPClient:   testClient{callback, 200},
 		})
-		client.Send(fixtures.MinimalTargetSendResult)
+		client.Send(fixtures.DefaultPolicyReport, fixtures.MinimalTargetSendResult)
 	})
 	t.Run("Name", func(t *testing.T) {
 		client := loki.NewClient(loki.Options{

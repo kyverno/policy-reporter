@@ -26,7 +26,7 @@ const (
 // Client for a provided Target
 type Client interface {
 	// Send the given Result to the configured Target
-	Send(result openreports.ResultAdapter)
+	Send(report openreports.ReportInterface, result openreports.ResultAdapter)
 	// BatchSend the given Results of a single PolicyReport to the configured Target
 	BatchSend(report openreports.ReportInterface, results []openreports.ResultAdapter)
 	// SkipExistingOnStartup skips already existing PolicyReportResults on startup

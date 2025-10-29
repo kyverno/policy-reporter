@@ -101,7 +101,7 @@ type client struct {
 	password     string
 }
 
-func (l *client) Send(result openreports.ResultAdapter) {
+func (l *client) Send(report openreports.ReportInterface, result openreports.ResultAdapter) {
 	l.send(Payload{
 		Streams: []Stream{
 			newLokiStream(result, l.customFields),
