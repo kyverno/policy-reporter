@@ -12,7 +12,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/s3 v1.88.7
 	github.com/aws/aws-sdk-go-v2/service/securityhub v1.65.2
 	github.com/aws/aws-sdk-go-v2/service/sts v1.39.1
-	github.com/ctreminiom/go-atlassian/v2 v2.8.0
+	github.com/ctreminiom/go-atlassian/v2 v2.9.0
 	github.com/gin-contrib/gzip v1.2.5
 	github.com/gin-contrib/pprof v1.5.3
 	github.com/gin-contrib/zap v1.1.5
