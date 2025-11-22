@@ -10,12 +10,12 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/patrickmn/go-cache"
 	"github.com/stretchr/testify/assert"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes/fake"
 	v1 "k8s.io/client-go/kubernetes/typed/core/v1"
+	gocache "zgo.at/zcache/v2"
 
 	"github.com/kyverno/policy-reporter/pkg/api"
 	v2 "github.com/kyverno/policy-reporter/pkg/api/v2"
@@ -78,7 +78,7 @@ func TestV2(t *testing.T) {
 	store.Add(context.Background(), reconditioner.Prepare(&openreports.ReportAdapter{Report: fixtures.KyvernoPolicyReport}))
 	store.Add(context.Background(), reconditioner.Prepare(&openreports.ClusterReportAdapter{ClusterReport: fixtures.KyvernoClusterPolicyReport}))
 
-	client := namespaces.NewClient(newFakeClient(), cache.New(time.Second, time.Second))
+	client := namespaces.NewClient(newFakeClient(), gocache.New[string, []string](time.Second, time.Second))
 
 	gin.SetMode(gin.ReleaseMode)
 

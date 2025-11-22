@@ -13,7 +13,7 @@ func TestInMemory(t *testing.T) {
 		or := fixtures.DefaultPolicyReport
 		id := or.GetID()
 
-		c := cache.NewInMermoryCache(time.Millisecond, time.Millisecond)
+		c := cache.NewInMemoryCache(time.Millisecond, time.Millisecond)
 
 		c.AddReport(fixtures.DefaultPolicyReport)
 
@@ -35,7 +35,7 @@ func TestInMemory(t *testing.T) {
 		or := fixtures.DefaultPolicyReport
 		id := or.GetID()
 
-		c := cache.NewInMermoryCache(time.Millisecond, time.Millisecond)
+		c := cache.NewInMemoryCache(time.Millisecond, time.Millisecond)
 
 		c.AddReport(fixtures.DefaultPolicyReport)
 
@@ -52,7 +52,7 @@ func TestInMemory(t *testing.T) {
 		or := fixtures.DefaultPolicyReport
 		id := or.GetID()
 
-		c := cache.NewInMermoryCache(time.Millisecond, time.Millisecond)
+		c := cache.NewInMemoryCache(time.Millisecond, time.Millisecond)
 
 		c.AddReport(fixtures.DefaultPolicyReport)
 
@@ -64,7 +64,7 @@ func TestInMemory(t *testing.T) {
 		}
 	})
 	t.Run("shared cache", func(t *testing.T) {
-		c := cache.NewInMermoryCache(time.Millisecond, time.Millisecond)
+		c := cache.NewInMemoryCache(time.Millisecond, time.Millisecond)
 		if c.Shared() {
 			t.Error("expected in memory cache is not shared")
 		}

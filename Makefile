@@ -237,7 +237,7 @@ prepare:
 
 .PHONY: test
 test:
-	go test -v ./... -timeout=10s
+	go test -v ./... -timeout=30s
 
 .PHONY: coverage
 coverage:

@@ -3,9 +3,9 @@ package metrics
 import (
 	"strconv"
 
-	gocache "github.com/patrickmn/go-cache"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/segmentio/fasthash/fnv1a"
+	gocache "zgo.at/zcache/v2"
 
 	"github.com/kyverno/policy-reporter/pkg/openreports"
 	"github.com/kyverno/policy-reporter/pkg/report"
@@ -17,7 +17,7 @@ type CacheItem struct {
 }
 
 type Cache struct {
-	cache          *gocache.Cache
+	cache          *gocache.Cache[string, []*CacheItem]
 	filter         *report.ResultFilter
 	labelGenerator LabelGenerator
 }
@@ -49,7 +49,7 @@ func (c *Cache) AddReport(polr openreports.ReportInterface) {
 		list = append(list, l)
 	}
 
-	c.cache.Set(polr.GetID(), list, gocache.NoExpiration)
+	c.cache.Set(polr.GetID(), list)
 }
 
 func (c *Cache) Remove(id string) {
@@ -58,7 +58,7 @@ func (c *Cache) Remove(id string) {
 
 func (c *Cache) GetReportLabels(id string) []*CacheItem {
 	if item, ok := c.cache.Get(id); ok {
-		return item.([]*CacheItem)
+		return item
 	}
 
 	return []*CacheItem{}
@@ -75,7 +75,7 @@ func labelHash(labels prometheus.Labels) string {
 
 func NewCache(filter *report.ResultFilter, labelGenerator LabelGenerator) *Cache {
 	return &Cache{
-		cache:          gocache.New(gocache.NoExpiration, gocache.NoExpiration),
+		cache:          gocache.New[string, []*CacheItem](gocache.NoExpiration, gocache.NoExpiration),
 		filter:         filter,
 		labelGenerator: labelGenerator,
 	}

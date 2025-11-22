@@ -986,6 +986,10 @@ ui:
     # -- (string) Image tag
     tag: "2.4.3"
 
+  crds:
+    # -- Install UI CustomBoard CRDs
+    customBoard: false
+
   # -- Deployment replica count
   replicaCount: 1
 

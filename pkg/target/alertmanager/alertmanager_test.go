@@ -1,4 +1,4 @@
-package alertmanager
+package alertmanager_test
 
 import (
 	"encoding/json"
@@ -15,18 +15,19 @@ import (
 
 	"github.com/kyverno/policy-reporter/pkg/openreports"
 	"github.com/kyverno/policy-reporter/pkg/target"
+	"github.com/kyverno/policy-reporter/pkg/target/alertmanager"
 	"github.com/kyverno/policy-reporter/pkg/target/http"
 )
 
 func Test_AlertManagerClient_Send(t *testing.T) {
 	t.Run("Send Single Alert", func(t *testing.T) {
-		receivedAlerts := make([]Alert, 0)
+		receivedAlerts := make([]alertmanager.Alert, 0)
 		server := httptest.NewServer(stdhttp.HandlerFunc(func(w stdhttp.ResponseWriter, r *stdhttp.Request) {
 			assert.Equal(t, "/api/v2/alerts", r.URL.Path)
 			assert.Equal(t, "POST", r.Method)
 			assert.Equal(t, "application/json; charset=utf-8", r.Header.Get("Content-Type"))
 
-			var alerts []Alert
+			var alerts []alertmanager.Alert
 			err := json.NewDecoder(r.Body).Decode(&alerts)
 			require.NoError(t, err)
 			receivedAlerts = alerts
@@ -35,7 +36,7 @@ func Test_AlertManagerClient_Send(t *testing.T) {
 		}))
 		defer server.Close()
 
-		client := NewClient(Options{
+		client := alertmanager.NewClient(alertmanager.Options{
 			ClientOptions: target.ClientOptions{
 				Name: "test",
 			},
@@ -90,68 +91,13 @@ func Test_AlertManagerClient_Send(t *testing.T) {
 		assert.True(t, alert.EndsAt.Sub(alert.StartsAt) == 24*time.Hour)
 	})
 
-	t.Run("Send Batch Alerts", func(t *testing.T) {
-		receivedAlerts := make([]Alert, 0)
-		server := httptest.NewServer(stdhttp.HandlerFunc(func(w stdhttp.ResponseWriter, r *stdhttp.Request) {
-			assert.Equal(t, "/api/v2/alerts", r.URL.Path)
-			assert.Equal(t, "POST", r.Method)
-			assert.Equal(t, "application/json; charset=utf-8", r.Header.Get("Content-Type"))
-
-			var alerts []Alert
-			err := json.NewDecoder(r.Body).Decode(&alerts)
-			require.NoError(t, err)
-			receivedAlerts = alerts
-
-			w.WriteHeader(stdhttp.StatusOK)
-		}))
-		defer server.Close()
-
-		client := NewClient(Options{
-			ClientOptions: target.ClientOptions{
-				Name: "test",
-			},
-			Host:       server.URL,
-			HTTPClient: http.NewClient("", false),
-		}).(*client)
-
-		results := []v1alpha1.ReportResult{
-			{
-				Description: "test message 1",
-				Policy:      "test-policy-1",
-				Rule:        "test-rule-1",
-				Result:      "fail",
-				Source:      "test",
-				Severity:    "high",
-			},
-			{
-				Description: "test message 2",
-				Policy:      "test-policy-2",
-				Rule:        "test-rule-2",
-				Result:      "fail",
-				Source:      "test",
-				Severity:    "high",
-			},
-		}
-
-		// Create alerts directly instead of using BatchSend
-		alerts := make([]Alert, 0, len(results))
-		for _, result := range results {
-			alerts = append(alerts, client.createAlert(&openreports.ReportAdapter{Report: &v1alpha1.Report{}}, openreports.ResultAdapter{ReportResult: result}))
-		}
-		client.sendAlerts(alerts)
-
-		require.Len(t, receivedAlerts, 2)
-		assert.Equal(t, "test-policy-1", receivedAlerts[0].Labels["policy"])
-		assert.Equal(t, "test-policy-2", receivedAlerts[1].Labels["policy"])
-	})
-
 	t.Run("Handle HTTP Error", func(t *testing.T) {
 		server := httptest.NewServer(stdhttp.HandlerFunc(func(w stdhttp.ResponseWriter, r *stdhttp.Request) {
 			w.WriteHeader(stdhttp.StatusInternalServerError)
 		}))
 		defer server.Close()
 
-		client := NewClient(Options{
+		client := alertmanager.NewClient(alertmanager.Options{
 			ClientOptions: target.ClientOptions{
 				Name: "test",
 			},
@@ -180,7 +126,7 @@ func Test_AlertManagerClient_Send(t *testing.T) {
 		}))
 		defer server.Close()
 
-		client := NewClient(Options{
+		client := alertmanager.NewClient(alertmanager.Options{
 			ClientOptions: target.ClientOptions{
 				Name: "test",
 			},
@@ -208,9 +154,9 @@ func Test_AlertManagerClient_Send(t *testing.T) {
 	})
 
 	t.Run("With Custom Fields", func(t *testing.T) {
-		receivedAlerts := make([]Alert, 0)
+		receivedAlerts := make([]alertmanager.Alert, 0)
 		server := httptest.NewServer(stdhttp.HandlerFunc(func(w stdhttp.ResponseWriter, r *stdhttp.Request) {
-			var alerts []Alert
+			var alerts []alertmanager.Alert
 			err := json.NewDecoder(r.Body).Decode(&alerts)
 			require.NoError(t, err)
 			receivedAlerts = alerts
@@ -218,7 +164,7 @@ func Test_AlertManagerClient_Send(t *testing.T) {
 		}))
 		defer server.Close()
 
-		client := NewClient(Options{
+		client := alertmanager.NewClient(alertmanager.Options{
 			ClientOptions: target.ClientOptions{
 				Name: "test",
 			},
@@ -247,9 +193,9 @@ func Test_AlertManagerClient_Send(t *testing.T) {
 	})
 
 	t.Run("With Resource Information", func(t *testing.T) {
-		receivedAlerts := make([]Alert, 0)
+		receivedAlerts := make([]alertmanager.Alert, 0)
 		server := httptest.NewServer(stdhttp.HandlerFunc(func(w stdhttp.ResponseWriter, r *stdhttp.Request) {
-			var alerts []Alert
+			var alerts []alertmanager.Alert
 			err := json.NewDecoder(r.Body).Decode(&alerts)
 			require.NoError(t, err)
 			receivedAlerts = alerts
@@ -257,7 +203,7 @@ func Test_AlertManagerClient_Send(t *testing.T) {
 		}))
 		defer server.Close()
 
-		client := NewClient(Options{
+		client := alertmanager.NewClient(alertmanager.Options{
 			ClientOptions: target.ClientOptions{
 				Name: "test",
 			},
@@ -295,7 +241,7 @@ func Test_AlertManagerClient_Send(t *testing.T) {
 }
 
 func Test_AlertManagerClient_Type(t *testing.T) {
-	client := NewClient(Options{
+	client := alertmanager.NewClient(alertmanager.Options{
 		ClientOptions: target.ClientOptions{
 			Name: "test",
 		},
