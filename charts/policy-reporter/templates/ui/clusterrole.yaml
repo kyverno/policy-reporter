@@ -16,8 +16,8 @@ rules:
   resources:
   - customboards
   - customboards/status
-  - namespacecustomboard
-  - namespacecustomboard/status
+  - namespacecustomboards
+  - namespacecustomboards/status
   verbs:
   - get
   - list
