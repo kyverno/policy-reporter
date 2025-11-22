@@ -20,7 +20,7 @@ func Test_ResultListener(t *testing.T) {
 	t.Run("Publish Result", func(t *testing.T) {
 		called := openreports.ResultAdapter{ReportResult: v1alpha1.ReportResult{}}
 
-		slistener := listener.NewResultListener(true, cache.NewInMermoryCache(time.Minute, time.Minute), time.Now())
+		slistener := listener.NewResultListener(true, cache.NewInMemoryCache(time.Minute, time.Minute), time.Now())
 		slistener.RegisterListener(func(_ openreports.ReportInterface, r openreports.ResultAdapter, b bool) {
 			called = r
 		})
@@ -34,7 +34,7 @@ func Test_ResultListener(t *testing.T) {
 	t.Run("Ignore Delete Event", func(t *testing.T) {
 		var called bool
 
-		slistener := listener.NewResultListener(true, cache.NewInMermoryCache(time.Minute, time.Minute), time.Now())
+		slistener := listener.NewResultListener(true, cache.NewInMemoryCache(time.Minute, time.Minute), time.Now())
 		slistener.RegisterListener(func(_ openreports.ReportInterface, r openreports.ResultAdapter, b bool) {
 			called = true
 		})
@@ -47,7 +47,7 @@ func Test_ResultListener(t *testing.T) {
 	t.Run("Ignore Added Results created before startup", func(t *testing.T) {
 		var called bool
 
-		slistener := listener.NewResultListener(true, cache.NewInMermoryCache(time.Minute, time.Minute), time.Now())
+		slistener := listener.NewResultListener(true, cache.NewInMemoryCache(time.Minute, time.Minute), time.Now())
 		slistener.RegisterListener(func(_ openreports.ReportInterface, r openreports.ResultAdapter, b bool) {
 			called = true
 		})
@@ -60,7 +60,7 @@ func Test_ResultListener(t *testing.T) {
 	t.Run("Ignore CacheResults", func(t *testing.T) {
 		var called bool
 
-		slistener := listener.NewResultListener(true, cache.NewInMermoryCache(time.Minute, time.Minute), time.Now())
+		slistener := listener.NewResultListener(true, cache.NewInMemoryCache(time.Minute, time.Minute), time.Now())
 		slistener.RegisterListener(func(_ openreports.ReportInterface, r openreports.ResultAdapter, b bool) {
 			called = true
 		})
@@ -74,7 +74,7 @@ func Test_ResultListener(t *testing.T) {
 	t.Run("Early Return if Results are empty", func(t *testing.T) {
 		var called bool
 
-		slistener := listener.NewResultListener(true, cache.NewInMermoryCache(time.Minute, time.Minute), time.Now())
+		slistener := listener.NewResultListener(true, cache.NewInMemoryCache(time.Minute, time.Minute), time.Now())
 		slistener.RegisterListener(func(_ openreports.ReportInterface, r openreports.ResultAdapter, b bool) {
 			called = true
 		})
@@ -85,7 +85,7 @@ func Test_ResultListener(t *testing.T) {
 	})
 
 	t.Run("Skip process events when no listeners registered", func(t *testing.T) {
-		c := cache.NewInMermoryCache(time.Minute, time.Minute)
+		c := cache.NewInMemoryCache(time.Minute, time.Minute)
 		or := preport2
 
 		slistener := listener.NewResultListener(true, c, time.Now())
@@ -97,7 +97,7 @@ func Test_ResultListener(t *testing.T) {
 	t.Run("UnregisterListener removes all listeners", func(t *testing.T) {
 		var called bool
 
-		slistener := listener.NewResultListener(true, cache.NewInMermoryCache(time.Minute, time.Minute), time.Now())
+		slistener := listener.NewResultListener(true, cache.NewInMemoryCache(time.Minute, time.Minute), time.Now())
 		slistener.RegisterListener(func(_ openreports.ReportInterface, r openreports.ResultAdapter, b bool) {
 			called = true
 		})
@@ -111,7 +111,7 @@ func Test_ResultListener(t *testing.T) {
 	t.Run("ignore results with past timestamps", func(t *testing.T) {
 		var called bool
 
-		slistener := listener.NewResultListener(true, cache.NewInMermoryCache(time.Minute, time.Minute), time.Now())
+		slistener := listener.NewResultListener(true, cache.NewInMemoryCache(time.Minute, time.Minute), time.Now())
 		slistener.RegisterListener(func(_ openreports.ReportInterface, r openreports.ResultAdapter, b bool) {
 			called = true
 		})
@@ -132,7 +132,7 @@ func Test_ResultListener(t *testing.T) {
 	t.Run("Publish Scoped Report", func(t *testing.T) {
 		var called []openreports.ResultAdapter
 
-		slistener := listener.NewResultListener(true, cache.NewInMermoryCache(time.Minute, time.Minute), time.Now())
+		slistener := listener.NewResultListener(true, cache.NewInMemoryCache(time.Minute, time.Minute), time.Now())
 		slistener.RegisterScopeListener(func(_ openreports.ReportInterface, r []openreports.ResultAdapter, b bool) {
 			called = r
 		})
@@ -145,7 +145,7 @@ func Test_ResultListener(t *testing.T) {
 	t.Run("Unregister Scope Listener", func(t *testing.T) {
 		var called []openreports.ResultAdapter
 
-		slistener := listener.NewResultListener(true, cache.NewInMermoryCache(time.Minute, time.Minute), time.Now())
+		slistener := listener.NewResultListener(true, cache.NewInMemoryCache(time.Minute, time.Minute), time.Now())
 		slistener.RegisterScopeListener(func(_ openreports.ReportInterface, r []openreports.ResultAdapter, b bool) {
 			called = r
 		})
@@ -160,7 +160,7 @@ func Test_ResultListener(t *testing.T) {
 	t.Run("Publish Scoped Report to Sync Target", func(t *testing.T) {
 		var called openreports.ReportInterface
 
-		slistener := listener.NewResultListener(true, cache.NewInMermoryCache(time.Minute, time.Minute), time.Now())
+		slistener := listener.NewResultListener(true, cache.NewInMemoryCache(time.Minute, time.Minute), time.Now())
 		slistener.RegisterSyncListener(func(r openreports.ReportInterface) {
 			called = r
 		})
@@ -173,7 +173,7 @@ func Test_ResultListener(t *testing.T) {
 	t.Run("Publish Scoped Report to Sync Target", func(t *testing.T) {
 		var called openreports.ReportInterface
 
-		slistener := listener.NewResultListener(true, cache.NewInMermoryCache(time.Minute, time.Minute), time.Now())
+		slistener := listener.NewResultListener(true, cache.NewInMemoryCache(time.Minute, time.Minute), time.Now())
 		slistener.RegisterSyncListener(func(r openreports.ReportInterface) {
 			called = r
 		})
@@ -186,7 +186,7 @@ func Test_ResultListener(t *testing.T) {
 	})
 
 	t.Run("Check Validation Logic", func(t *testing.T) {
-		slistener := listener.NewResultListener(true, cache.NewInMermoryCache(time.Minute, time.Minute), time.Now())
+		slistener := listener.NewResultListener(true, cache.NewInMemoryCache(time.Minute, time.Minute), time.Now())
 
 		assert.True(t, slistener.Validate(fixtures.FailPodResult))
 		assert.True(t, slistener.Validate(fixtures.WarnPodResult))

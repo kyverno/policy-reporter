@@ -46,7 +46,7 @@ func Test_PolicyReportWatcher(t *testing.T) {
 	)
 
 	kclient, rclient, _ := NewFakeMetaClient()
-	client := NewOpenreportsClient(kclient, filter, queue, false, 0, cache.NewInMermoryCache(time.Hour, time.Minute))
+	client := NewOpenreportsClient(kclient, filter, queue, false, 0, cache.NewInMemoryCache(time.Hour, time.Minute))
 
 	go func() {
 		err := client.Run(1, stop)
@@ -99,7 +99,7 @@ func Test_ClusterPolicyReportWatcher(t *testing.T) {
 	)
 
 	kclient, _, rclient := NewFakeMetaClient()
-	client := NewOpenreportsClient(kclient, filter, queue, false, 0, cache.NewInMermoryCache(time.Hour, time.Minute))
+	client := NewOpenreportsClient(kclient, filter, queue, false, 0, cache.NewInMemoryCache(time.Hour, time.Minute))
 
 	go func() {
 		err := client.Run(1, stop)
@@ -141,7 +141,7 @@ func Test_HasSynced(t *testing.T) {
 	)
 
 	kclient, _, _ := NewFakeMetaClient()
-	client := NewOpenreportsClient(kclient, filter, queue, false, 0, cache.NewInMermoryCache(time.Hour, time.Minute))
+	client := NewOpenreportsClient(kclient, filter, queue, false, 0, cache.NewInMemoryCache(time.Hour, time.Minute))
 
 	err := client.Sync(stop)
 	if err != nil {

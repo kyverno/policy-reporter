@@ -3,13 +3,13 @@ package cache
 import (
 	"time"
 
-	gocache "github.com/patrickmn/go-cache"
+	gocache "zgo.at/zcache/v2"
 
 	"github.com/kyverno/policy-reporter/pkg/openreports"
 )
 
 type inMemoryCache struct {
-	caches       *gocache.Cache
+	caches       *gocache.Cache[string, *gocache.Cache[string, any]]
 	keepDuration time.Duration
 	keepReport   time.Duration
 }
@@ -18,23 +18,23 @@ func (c *inMemoryCache) AddReport(report openreports.ReportInterface) {
 	cache, ok := c.getCache(report.GetID())
 
 	if !ok {
-		cache = gocache.New(gocache.NoExpiration, 5*time.Minute)
-		c.caches.Set(report.GetID(), cache, gocache.NoExpiration)
+		cache = gocache.New[string, any](gocache.NoExpiration, 5*time.Minute)
+		c.caches.Set(report.GetID(), cache)
 	}
 
 	next := make(map[string]bool)
 	for _, result := range report.GetResults() {
-		cache.Set(result.GetID(), nil, gocache.NoExpiration)
+		cache.Set(result.GetID(), nil)
 		next[result.GetID()] = true
 	}
 
 	for id, item := range cache.Items() {
 		if !next[id] && item.Expiration == 0 {
-			cache.Set(id, nil, c.keepDuration)
+			cache.SetWithExpire(id, nil, c.keepDuration)
 		}
 	}
 
-	c.caches.Set(report.GetID(), cache, gocache.NoExpiration)
+	c.caches.Set(report.GetID(), cache)
 }
 
 func (c *inMemoryCache) RemoveReport(id string) {
@@ -43,16 +43,11 @@ func (c *inMemoryCache) RemoveReport(id string) {
 		return
 	}
 
-	c.caches.Set(id, cache, c.keepReport)
+	c.caches.SetWithExpire(id, cache, c.keepReport)
 }
 
-func (c *inMemoryCache) getCache(id string) (*gocache.Cache, bool) {
-	cache, ok := c.caches.Get(id)
-	if !ok {
-		return nil, false
-	}
-
-	return cache.(*gocache.Cache), ok
+func (c *inMemoryCache) getCache(id string) (*gocache.Cache[string, any], bool) {
+	return c.caches.Get(id)
 }
 
 func (c *inMemoryCache) GetResults(id string) []string {
@@ -72,26 +67,24 @@ func (c *inMemoryCache) GetResults(id string) []string {
 
 func (c *inMemoryCache) Clear() {
 	for _, cache := range c.caches.Items() {
-		cache.Object.(*gocache.Cache).Flush()
+		cache.Object.Reset()
 	}
 
-	c.caches.Flush()
+	c.caches.Reset()
 }
 
 func (c *inMemoryCache) Shared() bool {
 	return false
 }
 
-func NewInMermoryCache(keepDuration, keepReport time.Duration) Cache {
-	cache := gocache.New(gocache.NoExpiration, 5*time.Minute)
-	cache.OnEvicted(func(s string, i interface{}) {
-		if c, ok := i.(*gocache.Cache); ok {
-			c.Flush()
-		}
+func NewInMemoryCache(keepDuration, keepReport time.Duration) Cache {
+	cache := gocache.New[string, *gocache.Cache[string, any]](gocache.NoExpiration, 5*time.Minute)
+	cache.OnEvicted(func(s string, c *gocache.Cache[string, any]) {
+		c.Reset()
 	})
 
 	return &inMemoryCache{
-		caches:       gocache.New(gocache.NoExpiration, 5*time.Minute),
+		caches:       cache,
 		keepDuration: keepDuration,
 		keepReport:   keepReport,
 	}
