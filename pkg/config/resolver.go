@@ -201,25 +201,32 @@ func (r *Resolver) EventPublisher() report.EventPublisher {
 	return r.publisher
 }
 
-func (r *Resolver) CustomIDGenerators() map[string]result.IDGenerator {
-	generators := make(map[string]result.IDGenerator)
+func (r *Resolver) ReconditionerConfigs() map[string]result.ReconditionerConfig {
+	configs := make(map[string]result.ReconditionerConfig)
 	for _, c := range r.config.SourceConfig {
-		if !c.Enabled || len(c.Fields) == 0 {
-			continue
+		var generator result.IDGenerator
+		if c.CustomID.Enabled && len(c.CustomID.Fields) > 0 {
+			generator = result.NewIDGenerator(c.CustomID.Fields)
 		}
 
 		if len(c.Selector.Sources) > 0 {
 			for _, source := range c.Selector.Sources {
-				generators[strings.ToLower(source)] = result.NewIDGenerator(c.Fields)
+				configs[strings.ToLower(source)] = result.ReconditionerConfig{
+					IDGenerators:         generator,
+					SelfassignNamespaces: c.SelfassignNamespaces,
+				}
 			}
 
 			continue
 		}
 
-		generators[strings.ToLower(c.Selector.Source)] = result.NewIDGenerator(c.Fields)
+		configs[strings.ToLower(c.Selector.Source)] = result.ReconditionerConfig{
+			IDGenerators:         generator,
+			SelfassignNamespaces: c.SelfassignNamespaces,
+		}
 	}
 
-	return generators
+	return configs
 }
 
 // EventPublisher resolver method
@@ -255,7 +262,7 @@ func (r *Resolver) WGPolicyQueue() (*wgpolicyclient.WGPolicyQueue, error) {
 				DisableClusterReports: f.DisableClusterReports,
 			}
 		})),
-		result.NewReconditioner(r.CustomIDGenerators()),
+		result.NewReconditioner(r.ReconditionerConfigs()),
 	), nil
 }
 
@@ -291,7 +298,7 @@ func (r *Resolver) ORQueue() (*orclient.ORQueue, error) {
 				DisableClusterReports: f.DisableClusterReports,
 			}
 		})),
-		result.NewReconditioner(r.CustomIDGenerators()),
+		result.NewReconditioner(r.ReconditionerConfigs()),
 	), nil
 }
 

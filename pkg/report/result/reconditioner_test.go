@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/openreports/reports-api/apis/openreports.io/v1alpha1"
+	"github.com/stretchr/testify/assert"
 	corev1 "k8s.io/api/core/v1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
@@ -56,15 +57,9 @@ func TestReconditioner(t *testing.T) {
 		report = rec.Prepare(report)
 		res := report.GetResults()[0]
 
-		if res.ID != "1412073110812056002" {
-			t.Errorf("result id should be generated from default generator: %s", res.ID)
-		}
-		if res.Category != "Other" {
-			t.Error("result category should default to Other")
-		}
-		if len(res.Subjects) == 0 || res.Subjects[0] != *report.GetScope() {
-			t.Error("result resource should be mapped to scope")
-		}
+		assert.Equal(t, "1412073110812056002", res.ID)
+		assert.Equal(t, "Other", res.Category)
+		assert.Equal(t, *report.GetScope(), res.Subjects[0])
 	})
 
 	t.Run("prepare with custom generator", func(t *testing.T) {
@@ -123,21 +118,70 @@ func TestReconditioner(t *testing.T) {
 			},
 		}
 
-		rec := result.NewReconditioner(map[string]result.IDGenerator{
-			"test": result.NewIDGenerator([]string{"resource", "policy", "rule", "result"}),
+		rec := result.NewReconditioner(map[string]result.ReconditionerConfig{
+			"test": {
+				IDGenerators: result.NewIDGenerator([]string{"policy", "rule", "resource"}),
+			},
 		})
 
 		report = rec.Prepare(report)
 		res := report.GetResults()[0]
 
-		if res.ID != "12714703365089292087" {
-			t.Errorf("result id should be generated from custom generator: %s", res.ID)
-		}
-		if res.Category != "Other" {
-			t.Error("result category should default to Other")
-		}
-		if len(res.Subjects) == 0 || res.Subjects[0] != *report.GetScope() {
-			t.Error("result resource should be mapped to scope")
-		}
+		assert.Equal(t, "17886198668009838131", res.ID)
+		assert.Equal(t, "Other", res.Category)
+		assert.Equal(t, *report.GetScope(), res.Subjects[0])
 	})
+	t.Run("prepare with self assigned namespace", func(t *testing.T) {
+		var report openreports.ReportInterface = &openreports.ReportAdapter{
+			Report: &v1alpha1.Report{
+				ObjectMeta: v1.ObjectMeta{
+					Name:      "policy-report",
+					Namespace: "test",
+				},
+				Summary: v1alpha1.ReportSummary{
+					Pass:  0,
+					Skip:  0,
+					Warn:  0,
+					Fail:  1,
+					Error: 0,
+				},
+				Scope: &corev1.ObjectReference{
+					APIVersion: "v1",
+					Kind:       "Namespace",
+					Name:       "default",
+					Namespace:  "",
+					UID:        "dfd57c50-f30c-4729-b63f-b1954d8988d1",
+				},
+				Results: []v1alpha1.ReportResult{
+					{
+						Description: "message",
+						Result:      v1alpha2.StatusFail,
+						Scored:      true,
+						Policy:      "required-label",
+						Rule:        "label-required",
+						Timestamp:   v1.Timestamp{Seconds: 1614093000},
+						Source:      "test",
+						Category:    "",
+						Severity:    v1alpha2.SeverityHigh,
+						Properties:  map[string]string{"version": "1.2.0"},
+					},
+				},
+			},
+		}
+
+		rec := result.NewReconditioner(map[string]result.ReconditionerConfig{
+			"test": {
+				SelfassignNamespaces: true,
+			},
+		})
+
+		report = rec.Prepare(report)
+		res := report.GetResults()[0]
+
+		assert.Equal(t, "default", res.GetResource().Namespace)
+		assert.Equal(t, "11297973392776184291", res.ID)
+		assert.Equal(t, "Other", res.Category)
+		assert.Equal(t, *report.GetScope(), res.Subjects[0])
+	})
+
 }

@@ -178,8 +178,9 @@ type CustomID struct {
 }
 
 type SourceConfig struct {
-	Selector SourceSelector `mapstructure:"selector"`
-	CustomID `mapstructure:"customId"`
+	Selector             SourceSelector `mapstructure:"selector"`
+	CustomID             CustomID       `mapstructure:"customId"`
+	SelfassignNamespaces bool           `mapstructure:"selfassignNamespaces"`
 }
 
 type CRD struct {

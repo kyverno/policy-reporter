@@ -7,15 +7,28 @@ import (
 	"github.com/kyverno/policy-reporter/pkg/openreports"
 )
 
+type ReconditionerConfig struct {
+	IDGenerators         IDGenerator
+	SelfassignNamespaces bool
+}
+
 type Reconditioner struct {
 	defaultIDGenerator IDGenerator
-	customIDGenerators map[string]IDGenerator
+	configs            map[string]ReconditionerConfig
 }
 
 func (r *Reconditioner) Prepare(polr openreports.ReportInterface) openreports.ReportInterface {
 	generator := r.defaultIDGenerator
-	if g, ok := r.customIDGenerators[strings.ToLower(polr.GetSource())]; ok {
-		generator = g
+
+	config, ok := r.configs[strings.ToLower(polr.GetSource())]
+	if ok && config.IDGenerators != nil {
+		generator = config.IDGenerators
+	}
+
+	scope := polr.GetScope()
+	if scope != nil && scope.APIVersion == "v1" && scope.Kind == "Namespace" && config.SelfassignNamespaces {
+		scope.Namespace = scope.Name
+		polr.SetNamespace(scope.Name)
 	}
 
 	results := polr.GetResults()
@@ -24,7 +37,6 @@ func (r *Reconditioner) Prepare(polr openreports.ReportInterface) openreports.Re
 		r.ID = generator.Generate(polr, r)
 		r.Category = helper.Defaults(r.Category, "Other")
 
-		scope := polr.GetScope()
 		if len(r.Subjects) == 0 && scope != nil {
 			r.Subjects = append(r.Subjects, *scope)
 		}
@@ -39,9 +51,9 @@ func (r *Reconditioner) Prepare(polr openreports.ReportInterface) openreports.Re
 	return polr
 }
 
-func NewReconditioner(generators map[string]IDGenerator) *Reconditioner {
+func NewReconditioner(configs map[string]ReconditionerConfig) *Reconditioner {
 	return &Reconditioner{
 		defaultIDGenerator: NewIDGenerator(nil),
-		customIDGenerators: generators,
+		configs:            configs,
 	}
 }

@@ -540,7 +540,7 @@ func Test_ResolveEnableLeaderElection(t *testing.T) {
 func Test_ResolveCustomIDGenerators(t *testing.T) {
 	resolver := config.NewResolver(testConfig, nil)
 
-	generators := resolver.CustomIDGenerators()
+	generators := resolver.ReconditionerConfigs()
 	assert.Len(t, generators, 1, "only enabled custom id config should be mapped")
 }
 
