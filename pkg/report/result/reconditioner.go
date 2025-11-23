@@ -26,7 +26,7 @@ func (r *Reconditioner) Prepare(polr openreports.ReportInterface) openreports.Re
 	}
 
 	scope := polr.GetScope()
-	if scope != nil && scope.APIVersion == "v1" && scope.Kind == "Namespace" && config.SelfassignNamespaces {
+	if scope != nil && scope.GroupVersionKind().GroupVersion().String() == "v1" && scope.Kind == "Namespace" && config.SelfassignNamespaces {
 		scope.Namespace = scope.Name
 		polr.SetNamespace(scope.Name)
 	}
