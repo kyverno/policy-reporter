@@ -209,6 +209,10 @@ func (r *Resolver) ReconditionerConfigs() map[string]result.ReconditionerConfig 
 			generator = result.NewIDGenerator(c.CustomID.Fields)
 		}
 
+		if generator == nil && !c.SelfassignNamespaces {
+			continue
+		}
+
 		if len(c.Selector.Sources) > 0 {
 			for _, source := range c.Selector.Sources {
 				configs[strings.ToLower(source)] = result.ReconditionerConfig{

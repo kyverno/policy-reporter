@@ -183,5 +183,4 @@ func TestReconditioner(t *testing.T) {
 		assert.Equal(t, "Other", res.Category)
 		assert.Equal(t, *report.GetScope(), res.Subjects[0])
 	})
-
 }
