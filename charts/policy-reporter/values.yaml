@@ -217,6 +217,8 @@ reportFilter: {}
 sourceConfig: []
 # - selector:
 #     source: kyverno
+#   # -- Handles cluster scoped reports for namespaces as self assigned namespace scoped report
+#   selfassignNamespaces: true
 #   customId:
 #     enabled: true
 #     fields: ["resource", "policy", "rule", "category", "result", "message"]
@@ -984,7 +986,7 @@ ui:
     # -- (string) Image PullPolicy
     pullPolicy: IfNotPresent
     # -- (string) Image tag
-    tag: "2.4.3"
+    tag: "2.5.0"
 
   crds:
     # -- Install UI CustomBoard CRDs
@@ -1364,7 +1366,7 @@ plugin:
       # -- (string) Image PullPolicy
       pullPolicy: IfNotPresent
       # -- (string) Image tag
-      tag: "0.5.1"
+      tag: "0.5.2"
 
     # -- Deployment replica count
     replicaCount: 1
@@ -1611,7 +1613,7 @@ plugin:
       pullPolicy: IfNotPresent
         # -- (string) Image tag
         # Defaults to `Chart.AppVersion` if omitted
-      tag: "0.4.10"
+      tag: "0.4.11"
 
     cli:
       image:
