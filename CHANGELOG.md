@@ -1,6 +1,6 @@
 # Changelog
 
-# Helm Chart 3.7.0
+# Helm Chart v3.7.0
 
 ## Chart
 
