@@ -1,5 +1,33 @@
 # Changelog
 
+# Helm Chart 3.7.0
+
+## Chart
+
+* feat: add Gateway API HTTPRoute support [[#1238](https://github.com/kyverno/policy-reporter/pull/1238)] by [lexfrei](https://github.com/lexfrei)
+* feat: add Policy Reporter UI CRDs for CustomBoards [[#1279](https://github.com/kyverno/policy-reporter/pull/1279)]
+* fix: use correct kyverno plugin pdb namespace [[#1249](https://github.com/kyverno/policy-reporter/pull/1249)] by [ogizhelev](https://github.com/ogizhelev)
+* fix: add RBAC for new kyverno types in the plugin [[#1198](https://github.com/kyverno/policy-reporter/pull/1198)]
+* fix: Replace wildcard in clusterrole with actual permission [[#1178](https://github.com/kyverno/policy-reporter/pull/1178)] by [mkilchhofer](https://github.com/mkilchhofer)
+
+## Policy Reporter v3.6.0
+
+* feat: selfassign namespaces [[#1280](https://github.com/kyverno/policy-reporter/pull/1280)]. issue: [[#1195](https://github.com/kyverno/policy-reporter/issues/1195)]
+* feat: add UID to Overview Grafana Dashboard [[#1264](https://github.com/kyverno/policy-reporter/pull/1264)] by [fhielpos](https://github.com/fhielpos)
+* feat: support json for jira custom fields [[#1175](https://github.com/kyverno/policy-reporter/pull/1175)]
+* feat: support source list in sourceFilter Selector [[#1204](https://github.com/kyverno/policy-reporter/pull/1204)]
+* fix: set result source to root source if empty [[#1179](https://github.com/kyverno/policy-reporter/pull/1179)]
+* fix: map source filter from root to channel [[#1184](https://github.com/kyverno/policy-reporter/pull/1184)]
+
+## Policy Reporter UI v2.5.0
+
+* feat: New CustomBoard CRDs to manage custom boards at runtime [[#650](https://github.com/kyverno/policy-reporter/pull/650)]
+* feat: Unify filter syntax between Policy Reporter and Policy Reporter UI CustomBoards [[#651](https://github.com/kyverno/policy-reporter/pull/651)]
+* feat: Add status filter to HTML report generation [[#698](https://github.com/kyverno/policy-reporter/pull/698)]
+* fix: Apply source status exclusion on result tables [[#652](https://github.com/kyverno/policy-reporter/pull/652)]
+* fix: OIDC Logout - Redirect to end session endpoint if available [[#647](https://github.com/kyverno/policy-reporter/pull/647)]
+* fix: Logo loading when accessed via URL subpath
+
 # 2.24.2
 * Policy Reporter v2.20.2
     * Fix LeaderElection without configurared pushes
