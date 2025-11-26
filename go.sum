@@ -64,8 +64,8 @@ github.com/aws/aws-sdk-go-v2/service/kinesis v1.42.5 h1:z/3UF0h4JawOs2ZyB2CjgAa9
 github.com/aws/aws-sdk-go-v2/service/kinesis v1.42.5/go.mod h1:2R0Wat51k1YDy58MSkEUzyiAK0L2ibRoChvSc76fXY0=
 github.com/aws/aws-sdk-go-v2/service/s3 v1.92.0 h1:8FshVvnV2sr9kOSAbOnc/vwVmmAwMjOedKH6JW2ddPM=
 github.com/aws/aws-sdk-go-v2/service/s3 v1.92.0/go.mod h1:wYNqY3L02Z3IgRYxOBPH9I1zD9Cjh9hI5QOy/eOjQvw=
-github.com/aws/aws-sdk-go-v2/service/securityhub v1.66.0 h1:pHds0NVhV7qN/G4aYmtTk9AS3J/HQOr0gj5tvsImZw0=
-github.com/aws/aws-sdk-go-v2/service/securityhub v1.66.0/go.mod h1:QO1Dvdr9q8oznnqvgiaBiOknf4wRGLeFwTeNzZygVJ0=
+github.com/aws/aws-sdk-go-v2/service/securityhub v1.66.1 h1:/Rpiem4Lysu8aQLc1xV3penHrydI8BwOM/X4A9QTUCY=
+github.com/aws/aws-sdk-go-v2/service/securityhub v1.66.1/go.mod h1:QO1Dvdr9q8oznnqvgiaBiOknf4wRGLeFwTeNzZygVJ0=
 github.com/aws/aws-sdk-go-v2/service/signin v1.0.1 h1:BDgIUYGEo5TkayOWv/oBLPphWwNm/A91AebUjAu5L5g=
 github.com/aws/aws-sdk-go-v2/service/signin v1.0.1/go.mod h1:iS6EPmNeqCsGo+xQmXv0jIMjyYtQfnwg36zl2FwEouk=
 github.com/aws/aws-sdk-go-v2/service/sso v1.30.4 h1:U//SlnkE1wOQiIImxzdY5PXat4Wq+8rlfVEw4Y7J8as=
