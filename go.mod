@@ -39,8 +39,8 @@ require (
 	github.com/xhit/go-simple-mail/v2 v2.16.0
 	go.uber.org/zap v1.27.1
 	golang.org/x/oauth2 v0.33.0
-	golang.org/x/sync v0.18.0
-	golang.org/x/text v0.31.0
+	golang.org/x/sync v0.19.0
+	golang.org/x/text v0.32.0
 	google.golang.org/api v0.257.0
 	k8s.io/api v0.34.2
 	k8s.io/apiextensions-apiserver v0.34.2
@@ -181,7 +181,6 @@ require (
 	golang.org/x/sys v0.38.0 // indirect
 	golang.org/x/term v0.37.0 // indirect
 	golang.org/x/time v0.14.0 // indirect
-	golang.org/x/tools v0.39.0 // indirect
 	google.golang.org/genproto v0.0.0-20251111163417-95abcf5c77ba // indirect
 	google.golang.org/genproto/googleapis/api v0.0.0-20251111163417-95abcf5c77ba // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20251124214823-79d6a2a48846 // indirect
