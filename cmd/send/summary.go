@@ -85,7 +85,7 @@ func NewSummaryCMD() *cobra.Command {
 				return err
 			}
 
-			for _, ch := range c.EmailReports.Violations.Channels {
+			for _, ch := range c.EmailReports.Summary.Channels {
 				go func(channel config.EmailReport) {
 					defer wg.Done()
 
