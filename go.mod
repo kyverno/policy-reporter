@@ -1,6 +1,6 @@
 module github.com/kyverno/policy-reporter
 
-go 1.24.2
+go 1.25.0
 
 require (
 	cloud.google.com/go/storage v1.58.0
@@ -42,11 +42,11 @@ require (
 	golang.org/x/sync v0.19.0
 	golang.org/x/text v0.32.0
 	google.golang.org/api v0.257.0
-	k8s.io/api v0.34.3
+	k8s.io/api v0.35.0
 	k8s.io/apiextensions-apiserver v0.34.3
-	k8s.io/apimachinery v0.34.3
-	k8s.io/client-go v0.34.3
-	k8s.io/kube-aggregator v0.34.3
+	k8s.io/apimachinery v0.35.0
+	k8s.io/client-go v0.35.0
+	k8s.io/kube-aggregator v0.35.0
 	zgo.at/zcache/v2 v2.4.1
 )
 
@@ -136,8 +136,6 @@ require (
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/modern-go/reflect2 v1.0.3-0.20250322232337-35a7c28c31ee // indirect
 	github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 // indirect
-	github.com/onsi/ginkgo/v2 v2.22.0 // indirect
-	github.com/onsi/gomega v1.36.1 // indirect
 	github.com/pelletier/go-toml/v2 v2.2.4 // indirect
 	github.com/planetscale/vtprotobuf v0.6.1-0.20240319094008-0393e58bdf10 // indirect
 	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect
