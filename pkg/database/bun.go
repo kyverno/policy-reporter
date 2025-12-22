@@ -334,6 +334,7 @@ func (s *Store) FetchResourceStatusCounts(ctx context.Context, id string, filter
 			"res.source":   filter.Sources,
 			"policy":       filter.Policies,
 		}).
+		HasStatusResults(filter.Status).
 		FilterValue("res.id", id).
 		FilterReportLabels(filter.ReportLabel).
 		Group("res.source").
@@ -353,6 +354,7 @@ func (s *Store) FetchResourceSeverityCounts(ctx context.Context, id string, filt
 			"res.source":   filter.Sources,
 			"policy":       filter.Policies,
 		}).
+		HasSeverityResults(filter.Severities).
 		FilterValue("res.id", id).
 		FilterReportLabels(filter.ReportLabel).
 		Group("res.source").
@@ -375,6 +377,8 @@ func (s *Store) FetchNamespaceResourceResults(ctx context.Context, filter Filter
 			"resource_namespace": filter.Namespaces,
 			"resource_kind":      filter.Kinds,
 		}).
+		HasStatusResults(filter.Status).
+		HasSeverityResults(filter.Severities).
 		FilterValue("res.id", filter.ResourceID).
 		ResourceSearch(filter.Search).
 		FilterReportLabels(filter.ReportLabel).
@@ -396,6 +400,8 @@ func (s *Store) CountNamespaceResourceResults(ctx context.Context, filter Filter
 			"resource_namespace": filter.Namespaces,
 			"resource_kind":      filter.Kinds,
 		}).
+		HasStatusResults(filter.Status).
+		HasSeverityResults(filter.Severities).
 		FilterValue("res.id", filter.ResourceID).
 		ResourceSearch(filter.Search).
 		FilterReportLabels(filter.ReportLabel).
@@ -418,6 +424,8 @@ func (s *Store) FetchClusterResourceResults(ctx context.Context, filter Filter, 
 			"category":      filter.Categories,
 			"resource_kind": filter.Kinds,
 		}).
+		HasStatusResults(filter.Status).
+		HasSeverityResults(filter.Severities).
 		FilterValue("res.id", filter.ResourceID).
 		ResourceSearch(filter.Search).
 		FilterReportLabels(filter.ReportLabel).
@@ -438,6 +446,8 @@ func (s *Store) CountClusterResourceResults(ctx context.Context, filter Filter) 
 			"category":      filter.Categories,
 			"resource_kind": filter.Kinds,
 		}).
+		HasStatusResults(filter.Status).
+		HasSeverityResults(filter.Severities).
 		FilterValue("res.id", filter.ResourceID).
 		ResourceSearch(filter.Search).
 		FilterReportLabels(filter.ReportLabel).
@@ -459,6 +469,8 @@ func (s *Store) FetchResourceResults(ctx context.Context, id string, filter Filt
 			"category":      filter.Categories,
 			"resource_kind": filter.Kinds,
 		}).
+		HasStatusResults(filter.Status).
+		HasSeverityResults(filter.Severities).
 		FilterReportLabels(filter.ReportLabel).
 		ResourceSearch(filter.Search).
 		Order("res.source ASC").

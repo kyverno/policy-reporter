@@ -159,6 +159,26 @@ func (q *QueryBuilder) SelectStatusSummaries() *QueryBuilder {
 	return q
 }
 
+func (q *QueryBuilder) HasStatusResults(status []string) *QueryBuilder {
+	if len(status) == 0 {
+		return q
+	}
+
+	q.query.Where("(" + strings.Join(status, "+") + ") > 0")
+
+	return q
+}
+
+func (q *QueryBuilder) HasSeverityResults(severities []string) *QueryBuilder {
+	if len(severities) == 0 {
+		return q
+	}
+
+	q.query.Where("(" + strings.Join(severities, "+") + ") > 0")
+
+	return q
+}
+
 func (q *QueryBuilder) SelectSeveritySummaries() *QueryBuilder {
 	q.query.ColumnExpr("SUM(res.info) as info, SUM(res.low) as low, SUM(res.medium) as medium, SUM(res.high) as high, SUM(res.critical) as critical, SUM(res.unknown) as unknown")
 
