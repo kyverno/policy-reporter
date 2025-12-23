@@ -65,7 +65,7 @@ OPENAPI_GEN                        ?= $(TOOLS_DIR)/openapi-gen
 REGISTER_GEN                       ?= $(TOOLS_DIR)/register-gen
 DEEPCOPY_GEN                       ?= $(TOOLS_DIR)/deepcopy-gen
 APPLYCONFIGURATION_GEN             ?= $(TOOLS_DIR)/applyconfiguration-gen
-CODE_GEN_VERSION                   ?= v0.28.0
+CODE_GEN_VERSION                   ?= v0.35.0
 
 $(HELM):
 	@echo Install helm... >&2
@@ -274,12 +274,10 @@ docker-push-dev:
 # CODEGEN #
 ###########
 
-OUT_PACKAGE                 := $(PACKAGE)/pkg/crd/client/targetconfig
-INPUT_DIRS                  := $(PACKAGE)/pkg/crd/api/targetconfig/v1alpha1
-CLIENT_INPUT_DIRS           := $(PACKAGE)/pkg/crd/api/targetconfig/v1alpha1
-CLIENTSET_PACKAGE           := $(OUT_PACKAGE)/clientset
-LISTERS_PACKAGE             := $(OUT_PACKAGE)/listers
-INFORMERS_PACKAGE           := $(OUT_PACKAGE)/informers
+CLIENT_PACKAGE              := $(PACKAGE)/pkg/crd/client
+CLIENTSET_PACKAGE           := $(CLIENT_PACKAGE)/clientset
+LISTERS_PACKAGE             := $(CLIENT_PACKAGE)/listers
+INFORMERS_PACKAGE           := $(CLIENT_PACKAGE)/informers
 CRDS_PATH                   := ${PWD}/config/crds
 
 .PHONY: codegen-client-clientset
@@ -289,9 +287,11 @@ codegen-client-clientset: $(CLIENT_GEN) ## Generate clientset
 	@$(CLIENT_GEN) \
 		--go-header-file ./scripts/boilerplate.go.txt \
 		--clientset-name versioned \
-		--output-package $(CLIENTSET_PACKAGE) \
-		--input-base "" \
-		--input $(CLIENT_INPUT_DIRS)
+		--output-pkg $(CLIENTSET_PACKAGE) \
+		--output-dir ./pkg/crd/client/clientset \
+		--input-base github.com/kyverno/policy-reporter \
+		--input ./pkg/crd/api/targetconfig/v1alpha1 \
+		--input ./pkg/crd/api/policyreport/v1alpha2
 
 .PHONY: codegen-client-listers
 codegen-client-listers: $(LISTER_GEN) ## Generate listers
@@ -299,17 +299,21 @@ codegen-client-listers: $(LISTER_GEN) ## Generate listers
 	@rm -rf $(LISTERS_PACKAGE) && mkdir -p $(LISTERS_PACKAGE)
 	@$(LISTER_GEN) \
 		--go-header-file ./scripts/boilerplate.go.txt \
-		--output-package $(LISTERS_PACKAGE) \
-		--input-dirs $(CLIENT_INPUT_DIRS)
+		--output-dir ./pkg/crd/client/listers \
+		--output-pkg $(LISTERS_PACKAGE) \
+		./pkg/crd/api/targetconfig/v1alpha1 \
+		./pkg/crd/api/policyreport/v1alpha2
 
 .PHONY: codegen-client-informers
 codegen-client-informers: $(INFORMER_GEN) ## Generate informers
 	@$(INFORMER_GEN) \
 		--go-header-file ./scripts/boilerplate.go.txt \
-		--output-package $(INFORMERS_PACKAGE) \
-		--input-dirs $(CLIENT_INPUT_DIRS) \
+		--output-dir ./pkg/crd/client/informers \
+		--output-pkg $(INFORMERS_PACKAGE) \
 		--versioned-clientset-package $(CLIENTSET_PACKAGE)/versioned \
-		--listers-package $(LISTERS_PACKAGE)
+		--listers-package $(LISTERS_PACKAGE) \
+		./pkg/crd/api/targetconfig/v1alpha1 \
+		./pkg/crd/api/policyreport/v1alpha2
 
 .PHONY: codegen-client-wrappers
 codegen-client-wrappers: codegen-client-clientset $(GOIMPORTS) ## Generate client wrappers
@@ -323,18 +327,28 @@ codegen-register: $(REGISTER_GEN) ## Generate types registrations
 	@echo Generate registration... >&2
 	@$(REGISTER_GEN) \
 		--go-header-file=./scripts/boilerplate.go.txt \
-		--input-dirs=$(INPUT_DIRS)
+		--output-file zz_generated.register.go \
+		./pkg/crd/api/...
 
 .PHONY: codegen-deepcopy
 codegen-deepcopy: $(DEEPCOPY_GEN) ## Generate deep copy functions
 	@echo Generate deep copy functions... >&2
 	@$(DEEPCOPY_GEN) \
 		--go-header-file=./scripts/boilerplate.go.txt \
-		--input-dirs=$(INPUT_DIRS) \
-		--output-file-base=zz_generated.deepcopy
+		--output-file zz_generated.deepcopy.go \
+		./pkg/crd/api/...
 
 .PHONY: codegen-crds
 codegen-crds: $(CONTROLLER_GEN)
 	@echo Generate policy reporter crds... >&2
 	@rm -rf $(CRDS_PATH) && mkdir -p $(CRDS_PATH)
 	@$(CONTROLLER_GEN) paths=./pkg/crd/api/targetconfig/... crd:crdVersions=v1,ignoreUnexportedFields=true,generateEmbeddedObjectMeta=false output:dir=$(CRDS_PATH)
+
+.PHONY: codegen-all
+codegen-all: ## Generate all generated code
+codegen-all: codegen-register
+codegen-all: codegen-deepcopy
+codegen-all: codegen-client-clientset
+codegen-all: codegen-client-listers
+codegen-all: codegen-client-informers
+codegen-all: codegen-crds

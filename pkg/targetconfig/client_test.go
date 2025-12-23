@@ -13,8 +13,8 @@ import (
 	v1 "k8s.io/client-go/kubernetes/typed/core/v1"
 
 	"github.com/kyverno/policy-reporter/pkg/crd/api/targetconfig/v1alpha1"
-	"github.com/kyverno/policy-reporter/pkg/crd/client/targetconfig/clientset/versioned/fake"
-	tcv1alpha1 "github.com/kyverno/policy-reporter/pkg/crd/client/targetconfig/clientset/versioned/typed/targetconfig/v1alpha1"
+	"github.com/kyverno/policy-reporter/pkg/crd/client/clientset/versioned/fake"
+	tcv1alpha1 "github.com/kyverno/policy-reporter/pkg/crd/client/clientset/versioned/typed/targetconfig/v1alpha1"
 	"github.com/kyverno/policy-reporter/pkg/kubernetes/secrets"
 	"github.com/kyverno/policy-reporter/pkg/target"
 	"github.com/kyverno/policy-reporter/pkg/target/factory"
