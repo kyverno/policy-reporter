@@ -28,9 +28,8 @@ import (
 
 	"github.com/kyverno/policy-reporter/pkg/api"
 	"github.com/kyverno/policy-reporter/pkg/cache"
-	polrversioned "github.com/kyverno/policy-reporter/pkg/crd/client/policyreport/clientset/versioned"
-	"github.com/kyverno/policy-reporter/pkg/crd/client/policyreport/clientset/versioned/typed/policyreport/v1alpha2"
-	tcv1alpha1 "github.com/kyverno/policy-reporter/pkg/crd/client/targetconfig/clientset/versioned"
+	crds "github.com/kyverno/policy-reporter/pkg/crd/client/clientset/versioned"
+	"github.com/kyverno/policy-reporter/pkg/crd/client/clientset/versioned/typed/policyreport/v1alpha2"
 	"github.com/kyverno/policy-reporter/pkg/database"
 	"github.com/kyverno/policy-reporter/pkg/email"
 	"github.com/kyverno/policy-reporter/pkg/email/summary"
@@ -510,7 +509,7 @@ func (r *Resolver) WgPolicyCRClient() (v1alpha2.Wgpolicyk8sV1alpha2Interface, er
 		return nil, nil
 	}
 
-	polrclient, err := polrversioned.NewForConfig(r.k8sConfig)
+	polrclient, err := crds.NewForConfig(r.k8sConfig)
 	if err != nil {
 		return nil, err
 	}
@@ -664,7 +663,7 @@ func (r *Resolver) TargetConfigClient() (*targetconfig.Client, error) {
 		return r.targetConfigClient, nil
 	}
 
-	tcClient, err := tcv1alpha1.NewForConfig(r.k8sConfig)
+	tcClient, err := crds.NewForConfig(r.k8sConfig)
 	if err != nil {
 		return nil, err
 	}

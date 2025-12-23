@@ -9,9 +9,9 @@ import (
 	"k8s.io/client-go/tools/cache"
 
 	"github.com/kyverno/policy-reporter/pkg/crd/api/targetconfig/v1alpha1"
-	"github.com/kyverno/policy-reporter/pkg/crd/client/policyreport/clientset/versioned/typed/policyreport/v1alpha2"
-	tcv1alpha1 "github.com/kyverno/policy-reporter/pkg/crd/client/targetconfig/clientset/versioned"
-	tcinformer "github.com/kyverno/policy-reporter/pkg/crd/client/targetconfig/informers/externalversions"
+	crds "github.com/kyverno/policy-reporter/pkg/crd/client/clientset/versioned"
+	"github.com/kyverno/policy-reporter/pkg/crd/client/clientset/versioned/typed/policyreport/v1alpha2"
+	informer "github.com/kyverno/policy-reporter/pkg/crd/client/informers/externalversions"
 	"github.com/kyverno/policy-reporter/pkg/listener"
 	"github.com/kyverno/policy-reporter/pkg/openreports"
 	"github.com/kyverno/policy-reporter/pkg/target"
@@ -171,10 +171,10 @@ func (c *Client) Run(stopChan chan struct{}) {
 	zap.L().Info("target config cache synced")
 }
 
-func NewClient(tcClient tcv1alpha1.Interface, f target.Factory, targets *target.Collection,
+func NewClient(tcClient crds.Interface, f target.Factory, targets *target.Collection,
 	orClient reports.OpenreportsV1alpha1Interface, wgpolicyClient v1alpha2.Wgpolicyk8sV1alpha2Interface,
 ) *Client {
-	tcInformer := tcinformer.NewSharedInformerFactory(tcClient, 0)
+	tcInformer := informer.NewSharedInformerFactory(tcClient, 0)
 	return &Client{
 		informer:       tcInformer.Policyreporter().V1alpha1().TargetConfigs().Informer(),
 		targetFactory:  f,
