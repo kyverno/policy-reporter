@@ -19,10 +19,11 @@ limitations under the License.
 package v1alpha1
 
 import (
-	targetconfigv1alpha1 "github.com/kyverno/policy-reporter/pkg/crd/api/targetconfig/v1alpha1"
 	labels "k8s.io/apimachinery/pkg/labels"
 	listers "k8s.io/client-go/listers"
 	cache "k8s.io/client-go/tools/cache"
+
+	targetconfigv1alpha1 "github.com/kyverno/policy-reporter/pkg/crd/api/targetconfig/v1alpha1"
 )
 
 // TargetConfigLister helps list TargetConfigs.

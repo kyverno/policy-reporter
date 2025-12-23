@@ -19,9 +19,10 @@ limitations under the License.
 package fake
 
 import (
+	gentype "k8s.io/client-go/gentype"
+
 	v1alpha1 "github.com/kyverno/policy-reporter/pkg/crd/api/targetconfig/v1alpha1"
 	targetconfigv1alpha1 "github.com/kyverno/policy-reporter/pkg/crd/client/clientset/versioned/typed/targetconfig/v1alpha1"
-	gentype "k8s.io/client-go/gentype"
 )
 
 // fakeTargetConfigs implements TargetConfigInterface

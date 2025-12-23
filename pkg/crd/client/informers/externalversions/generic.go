@@ -21,10 +21,11 @@ package externalversions
 import (
 	fmt "fmt"
 
-	v1alpha2 "github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
-	v1alpha1 "github.com/kyverno/policy-reporter/pkg/crd/api/targetconfig/v1alpha1"
 	schema "k8s.io/apimachinery/pkg/runtime/schema"
 	cache "k8s.io/client-go/tools/cache"
+
+	v1alpha2 "github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
+	v1alpha1 "github.com/kyverno/policy-reporter/pkg/crd/api/targetconfig/v1alpha1"
 )
 
 // GenericInformer is type of SharedIndexInformer which will locate and delegate to other

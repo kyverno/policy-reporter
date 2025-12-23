@@ -22,14 +22,15 @@ import (
 	context "context"
 	time "time"
 
-	apipolicyreportv1alpha2 "github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
-	versioned "github.com/kyverno/policy-reporter/pkg/crd/client/clientset/versioned"
-	internalinterfaces "github.com/kyverno/policy-reporter/pkg/crd/client/informers/externalversions/internalinterfaces"
-	policyreportv1alpha2 "github.com/kyverno/policy-reporter/pkg/crd/client/listers/policyreport/v1alpha2"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	runtime "k8s.io/apimachinery/pkg/runtime"
 	watch "k8s.io/apimachinery/pkg/watch"
 	cache "k8s.io/client-go/tools/cache"
+
+	apipolicyreportv1alpha2 "github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
+	versioned "github.com/kyverno/policy-reporter/pkg/crd/client/clientset/versioned"
+	internalinterfaces "github.com/kyverno/policy-reporter/pkg/crd/client/informers/externalversions/internalinterfaces"
+	policyreportv1alpha2 "github.com/kyverno/policy-reporter/pkg/crd/client/listers/policyreport/v1alpha2"
 )
 
 // PolicyReportInformer provides access to a shared informer and lister for

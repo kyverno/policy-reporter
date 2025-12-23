@@ -19,10 +19,11 @@ limitations under the License.
 package v1alpha2
 
 import (
-	policyreportv1alpha2 "github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
 	labels "k8s.io/apimachinery/pkg/labels"
 	listers "k8s.io/client-go/listers"
 	cache "k8s.io/client-go/tools/cache"
+
+	policyreportv1alpha2 "github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
 )
 
 // ClusterPolicyReportLister helps list ClusterPolicyReports.

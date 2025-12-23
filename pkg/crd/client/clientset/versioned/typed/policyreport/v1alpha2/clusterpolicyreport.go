@@ -21,12 +21,13 @@ package v1alpha2
 import (
 	context "context"
 
-	policyreportv1alpha2 "github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
-	scheme "github.com/kyverno/policy-reporter/pkg/crd/client/clientset/versioned/scheme"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	types "k8s.io/apimachinery/pkg/types"
 	watch "k8s.io/apimachinery/pkg/watch"
 	gentype "k8s.io/client-go/gentype"
+
+	policyreportv1alpha2 "github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
+	scheme "github.com/kyverno/policy-reporter/pkg/crd/client/clientset/versioned/scheme"
 )
 
 // ClusterPolicyReportsGetter has a method to return a ClusterPolicyReportInterface.
