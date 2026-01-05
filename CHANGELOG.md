@@ -1,5 +1,20 @@
 # Changelog
 
+# Helm Chart v3.7.1
+
+## Chart
+
+* feat: make selector labels for reporter, kyverno and trivy plugin services configurable as for UI part by [[#1288](https://github.com/kyverno/policy-reporter/pull/1288)] by [pna-nca](https://github.com/pna-nca)
+* feat: update components
+
+## Policy Reporter v3.7.0
+
+* feat: add UID to Overview Grafana Dashboard [[#1264](https://github.com/kyverno/policy-reporter/pull/1264)] by [fhielpos](https://github.com/fhielpos)
+* feat: support json for jira custom fields [[#1175](https://github.com/kyverno/policy-reporter/pull/1175)]
+* feat: support source list in sourceFilter Selector [[#1204](https://github.com/kyverno/policy-reporter/pull/1204)]
+* fix: set result source to root source if empty [[#1179](https://github.com/kyverno/policy-reporter/pull/1179)]
+* fix: map source filter from root to channel [[#1184](https://github.com/kyverno/policy-reporter/pull/1184)]
+
 # Helm Chart v3.7.0
 
 ## Chart
