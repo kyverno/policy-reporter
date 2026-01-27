@@ -7,6 +7,10 @@ fullnameOverride: "policy-reporter"
 # -- Overwrite the namespace of all resources
 namespaceOverride: ""
 
+# -- Overwrite apiVersion for specific resources
+apiVersionOverride:
+  podDisruptionBudget: ""
+
 image:
   # -- (string) Image registry
   registry: ghcr.io
