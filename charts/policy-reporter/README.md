@@ -46,6 +46,7 @@ Open `http://localhost:8082/` in your browser.
 | nameOverride | string | `""` | Override the chart name used for all resources |
 | fullnameOverride | string | `"policy-reporter"` | Overwrite the fullname of all resources |
 | namespaceOverride | string | `""` | Overwrite the namespace of all resources |
+| apiVersionOverride | object | `{"podDisruptionBudget":""}` | Overwrite apiVersion for specific resources |
 | image.registry | string | `"ghcr.io"` | Image registry |
 | image.repository | string | `"kyverno/policy-reporter"` | Image repository |
 | image.pullPolicy | string | `"IfNotPresent"` | Image pullPolicy |
