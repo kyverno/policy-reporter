@@ -69,9 +69,6 @@ func newLokiStream(result openreports.ResultAdapter, customFields map[string]str
 			labels["kind"] = res.Kind
 			labels["name"] = res.Name
 		}
-		if res.UID != "" {
-			labels["uid"] = string(res.UID)
-		}
 		if res.Namespace != "" {
 			labels["namespace"] = res.Namespace
 		}

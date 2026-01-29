@@ -50,7 +50,6 @@ func Test_LokiTarget(t *testing.T) {
 			res := or.GetResource()
 			assert.Equal(t, res.Kind, stream.Stream["kind"])
 			assert.Equal(t, res.Name, stream.Stream["name"])
-			assert.Equal(t, string(res.UID), stream.Stream["uid"])
 			assert.Equal(t, res.Namespace, stream.Stream["namespace"])
 
 			assert.Equal(t, fixtures.CompleteTargetSendResult.Properties["version"], stream.Stream["version"])
