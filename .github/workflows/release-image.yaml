@@ -125,9 +125,9 @@ jobs:
           ARTIFACTS: "${{ steps.goreleaser.outputs.artifacts }}"
         run: |
           set -euo pipefail
-          image_and_digest=$(echo "$ARTIFACTS" | jq -r '.[] | select (.type=="Docker Manifest") | .path')
-          image=$(echo "${image_and_digest}" | cut -d'@' -f1 | cut -d':' -f1)
-          digest=$(echo "${image_and_digest}" | cut -d'@' -f2)
+          digest=$(echo "$ARTIFACTS" | jq -rs '.[] | map(select (.type=="Docker Image"))| first | .extra.Digest')
+          image_with_tag=$(echo "$ARTIFACTS" | jq -rs '.[] | map(select (.type=="Docker Image"))| first | .path')
+          image=$(echo "${image_with_tag}" | cut -d':' -f1)
           echo "image=$image" >> "$GITHUB_OUTPUT"
           echo "digest=$digest" >> "$GITHUB_OUTPUT"
 
