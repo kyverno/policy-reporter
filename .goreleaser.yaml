@@ -59,6 +59,9 @@ archives:
 checksum:
   name_template: checksums.txt
 
+docker_digests:
+  name_template: "digests.txt"
+
 source:
   enabled: true
 
