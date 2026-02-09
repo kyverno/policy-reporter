@@ -885,6 +885,8 @@ redis:
   username: ""
   # -- (optional) Password
   password: ""
+  # -- (optional) Secret name to pull username and password from
+  secretRef: ""
 
 database:
   # -- Use an external Database, supported: mysql, postgres, mariadb
