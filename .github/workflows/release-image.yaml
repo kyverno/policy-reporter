@@ -101,6 +101,14 @@ jobs:
           asset_name: metadata.json
           tag: ${{ github.ref }}
 
+      - name: Upload digest.txt
+        uses: svenstaro/upload-release-action@6b7fa9f267e90b50a19fef07b3596790bb941741 # 2.11.3
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: dist/digests.txt
+          asset_name: digests.txt
+          tag: ${{ github.ref }}
+
       - name: Generate subject
         id: hash
         env:
