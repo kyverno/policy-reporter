@@ -33,7 +33,7 @@ func (h *APIHandler) Register(engine *gin.RouterGroup) error {
 	engine.GET("namespaces", h.ListNamespaces)
 	engine.GET("sources", h.ListSources)
 	engine.GET("sources/:source/use-resources", h.UseResources)
-	engine.GET("sources/:source/status-counts", h.GetTotalStatusCounts)
+	engine.GET("sources/:source/status-counts", h.GetSourceStatusCounts)
 	engine.GET("sources/:source/severity-counts", h.GetTotalSeverityCounts)
 	engine.GET("sources/categories", h.ListSourceWithCategories)
 	engine.GET("policies", h.ListPolicies)
@@ -42,6 +42,7 @@ func (h *APIHandler) Register(engine *gin.RouterGroup) error {
 	engine.GET("results-without-resources", h.ListResultsWithoutResource)
 	engine.GET("targets", h.ListTargets)
 	engine.GET("properties/:property", h.ListProperty)
+	engine.GET("total-results", h.ListTotalResults)
 
 	ns := engine.Group("namespace-scoped")
 	ns.GET("resource-results", h.ListNamespaceResourceResults)
@@ -139,6 +140,19 @@ func (h *APIHandler) ListNamespaceResourceResults(ctx *gin.Context) {
 	api.SendResponse(ctx, Paginated[ResourceResult]{Count: count, Items: MapResourceResults(list)}, "failed to load resource result list", err)
 }
 
+func (h *APIHandler) ListTotalResults(ctx *gin.Context) {
+	filter := api.BuildFilter(ctx)
+	list, err := h.store.FetchTotalResourceResults(ctx, filter, api.BuildPagination(ctx, []string{"resource_namespace", "resource_name", "resource_uid"}))
+	if err != nil {
+		zap.L().Error("failed to load resource results", zap.Error(err))
+		ctx.AbortWithStatus(http.StatusInternalServerError)
+		return
+	}
+	count, err := h.store.CountTotalResourceResults(ctx, filter)
+
+	api.SendResponse(ctx, Paginated[ResourceResult]{Count: count, Items: MapResourceResults(list)}, "failed to load resource result list", err)
+}
+
 func (h *APIHandler) ListClusterResourceResults(ctx *gin.Context) {
 	filter := api.BuildFilter(ctx)
 	list, err := h.store.FetchClusterResourceResults(ctx, filter, api.BuildPagination(ctx, []string{"resource_namespace", "resource_name", "resource_uid"}))
@@ -177,6 +191,12 @@ func (h *APIHandler) GetNamespaceSeverityCounts(ctx *gin.Context) {
 }
 
 func (h *APIHandler) GetTotalStatusCounts(ctx *gin.Context) {
+	results, err := h.store.FetchTotalStatusCounts(ctx, "", api.BuildFilter(ctx))
+
+	api.SendResponse(ctx, MapClusterStatusCounts(results), "failed to calculate total status counts", err)
+}
+
+func (h *APIHandler) GetSourceStatusCounts(ctx *gin.Context) {
 	results, err := h.store.FetchTotalStatusCounts(ctx, ctx.Param("source"), api.BuildFilter(ctx))
 
 	api.SendResponse(ctx, MapClusterStatusCounts(results), "failed to calculate total status counts", err)

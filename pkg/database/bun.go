@@ -18,6 +18,7 @@ import (
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 
+	"github.com/kyverno/policy-reporter/pkg/helper"
 	"github.com/kyverno/policy-reporter/pkg/openreports"
 	"github.com/kyverno/policy-reporter/pkg/report"
 )
@@ -407,6 +408,62 @@ func (s *Store) CountNamespaceResourceResults(ctx context.Context, filter Filter
 		FilterReportLabels(filter.ReportLabel).
 		Exclude(filter, "res").
 		NamespaceScope().
+		GetQuery().
+		Count(ctx)
+}
+
+func (s *Store) FetchTotalResourceResults(ctx context.Context, filter Filter, pagination Pagination) ([]ResourceResult, error) {
+	results := make([]ResourceResult, 0)
+
+	err := FromQuery(s.db.NewSelect().Model(&results)).
+		Columns("resource_namespace").
+		SelectStatusSummaries().
+		SelectSeveritySummaries().
+		Group("resource_namespace").
+		FilterMap(map[string][]string{
+			"source":        filter.Sources,
+			"category":      filter.Categories,
+			"resource_kind": filter.Kinds,
+		}).
+		HasStatusResults(filter.Status).
+		HasSeverityResults(filter.Severities).
+		ResourceSearch(filter.Search).
+		Exclude(filter, "res").
+		Pagination(pagination).
+		Scan(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	return helper.Map(results, func(r ResourceResult) ResourceResult {
+		if r.Resource.Namespace != "" {
+			r.Resource = Resource{
+				Namespace: "",
+				Name:      r.Resource.Namespace,
+			}
+		} else {
+			r.Resource = Resource{
+				Name: "Cluster Scoped",
+			}
+		}
+
+		return r
+	}), nil
+}
+
+func (s *Store) CountTotalResourceResults(ctx context.Context, filter Filter) (int, error) {
+	return FromQuery(s.db.NewSelect().Model((*ResourceResult)(nil))).
+		Columns("resource_namespace").
+		Distinct().
+		FilterMap(map[string][]string{
+			"source":        filter.Sources,
+			"category":      filter.Categories,
+			"resource_kind": filter.Kinds,
+		}).
+		HasStatusResults(filter.Status).
+		HasSeverityResults(filter.Severities).
+		ResourceSearch(filter.Search).
+		Exclude(filter, "res").
 		GetQuery().
 		Count(ctx)
 }
