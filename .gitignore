@@ -13,3 +13,4 @@ heap*
 .tools
 /.idea/
 .gopath
+.dist

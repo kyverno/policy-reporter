@@ -15,21 +15,35 @@ permissions:
   id-token: write
 
 jobs:
-  push-policy-reporter:
+  goreleaser:
+    permissions:
+      contents: write
+      id-token: write
+      packages: write
+    outputs:
+      hashes: ${{ steps.hash.outputs.hashes }}
+      image: ${{ steps.digest.outputs.image }}
+      digest: ${{ steps.digest.outputs.digest }}
     runs-on: ubuntu-latest
+    steps:
+      - uses: jlumbroso/free-disk-space@54081f138730dfa15788a46383842cd2f914a1be # v1.3.1
+        with:
+          tool-cache: true
+          android: true
+          dotnet: true
+          haskell: true
+          large-packages: false
+          swap-storage: false
     steps:
       - name: Checkout
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-
-      - name: Parse Version
-        id: params
+        with:
+          fetch-depth: 0
+      
+      - name: Fetch all tags
         run: |
-          # Strip git ref prefix from version
-          VERSION=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
-          # Strip "v" prefix from tag name
-          [[ "${{ github.ref }}" == "refs/tags/"* ]] && VERSION=$(echo $VERSION | sed -e 's/^v//')
-          echo VERSION=$VERSION
-          echo "VERSION=$VERSION" >> "$GITHUB_ENV"
+          set -e
+          git fetch --force --tags
 
       - name: Login to Github Packages
         uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9 # v3.7.0
@@ -48,119 +62,90 @@ jobs:
           install: true
           version: latest
 
-      - name: Build image and push to GitHub Container Registry
-        uses: docker/build-push-action@263435318d21b8e681c14492fe198d362a7d2c83 # v6.18.0
-        id: push
-        with:
-          push: true
-          platforms: linux/arm64,linux/amd64
-          provenance: mode=max
-          cache-from: type=registry,ref=ghcr.io/${{github.repository_owner}}/policy-reporter:buildcache
-          cache-to: type=registry,ref=ghcr.io/${{github.repository_owner}}/policy-reporter:buildcache,mode=max
-          tags: |
-            ghcr.io/${{github.repository_owner}}/policy-reporter:${{ env.VERSION }}
-
-      - name: Install Cosign
-        uses: sigstore/cosign-installer@faadad0cce49287aee09b3a48701e75088a2c6ad # v4.0.0
-
-      - name: Sign image
-        shell: bash
-        env:
-          COSIGN_REPOSITORY: ghcr.io/${{github.repository_owner}}/signatures
-        run: |
-          set -e
-          cosign sign --yes \
-            -a "repo=${{ github.repository }}" \
-            -a "workflow=${{ github.workflow }}" \
-            -a "ref=${{ github.sha }}" \
-            ghcr.io/${{github.repository_owner}}/policy-reporter@${{ steps.push.outputs.digest }}
-
       - name: Set up Go
         uses: actions/setup-go@7a3fe6cf4cb3a834922a1244abfce67bcef6a0c5 # v6.2.0
         with:
           go-version-file: go.mod
           cache-dependency-path: go.sum
 
-      - name: Generate SBOM
-        uses: CycloneDX/gh-gomod-generate-sbom@efc74245d6802c8cefd925620515442756c70d8f # v2.0.0
-        with:
-          version: v1
-          args: app -licenses -json -output policy-reporter-bom.cdx.json -main .
+      - name: Install Cosign
+        uses: sigstore/cosign-installer@faadad0cce49287aee09b3a48701e75088a2c6ad # v4.0.0
 
-      - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
-        with:
-          name: policy-reporter-bom-cdx
-          path: policy-reporter-bom.cdx.json
+      - name: Install Syft
+        uses: anchore/sbom-action/download-syft@deef08a0db64bfad603422135db61477b16cef56 # v0.22.1
 
-      - name: Attach SBOM to image
-        shell: bash
+      - name: Run GoReleaser
+        id: goreleaser
+        uses: goreleaser/goreleaser-action@e435ccd777264be153ace6237001ef4d979d3a7a # v6.4.0
+        with:
+          distribution: goreleaser
+          version: latest
+          args: release --clean --timeout 90m
         env:
-          COSIGN_REPOSITORY: ghcr.io/${{github.repository_owner}}/sbom
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          KOCACHE: /tmp/ko-cache
+
+      - name: Upload artifacts.json
+        uses: svenstaro/upload-release-action@6b7fa9f267e90b50a19fef07b3596790bb941741 # 2.11.3
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: dist/artifacts.json
+          asset_name: artifacts.json
+          tag: ${{ github.ref }}
+
+      - name: Upload metadata.json
+        uses: svenstaro/upload-release-action@6b7fa9f267e90b50a19fef07b3596790bb941741 # 2.11.3
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: dist/metadata.json
+          asset_name: metadata.json
+          tag: ${{ github.ref }}
+
+      - name: Generate subject
+        id: hash
+        env:
+          ARTIFACTS: "${{ steps.goreleaser.outputs.artifacts }}"
         run: |
-          cosign attach sbom --sbom ./policy-reporter-bom.cdx.json --type cyclonedx ghcr.io/${{github.repository_owner}}/policy-reporter@${{ steps.push.outputs.digest }}
+          set -euo pipefail
+          checksum_file=$(echo "$ARTIFACTS" | jq -r '.[] | select (.type=="Checksum") | .path')
+          hashes=$(cat $checksum_file | base64 -w0)
+          echo "hashes=$hashes" >> $GITHUB_OUTPUT
 
-      - name: Install the crane command
-        uses: kubewarden/github-actions/crane-installer@f1695ca9a575bf58b85d6c3652c7ff7d1d12ec24 # v4.5.16
-
-      - name: Find platform digest
-        shell: bash
+      - name: Image digest
+        id: digest
+        env:
+          ARTIFACTS: "${{ steps.goreleaser.outputs.artifacts }}"
         run: |
-          set -e
-          DIGEST_AMD64=$(crane digest \
-            --platform "linux/amd64" \
-            ghcr.io/${{github.repository_owner}}/policy-reporter@${{ steps.push.outputs.digest }})
-          echo "PLATFORM_DIGEST_AMD64=${DIGEST_AMD64}" >> "$GITHUB_ENV"
-          DIGEST_ARM64=$(crane digest \
-            --platform "linux/arm64" \
-            ghcr.io/${{github.repository_owner}}/policy-reporter@${{ steps.push.outputs.digest }})
-          echo "PLATFORM_DIGEST_ARM64=${DIGEST_ARM64}" >> "$GITHUB_ENV"
+          set -euo pipefail
+          image_and_digest=$(echo "$ARTIFACTS" | jq -r '.[] | select (.type=="Docker Manifest") | .path')
+          image=$(echo "${image_and_digest}" | cut -d'@' -f1 | cut -d':' -f1)
+          digest=$(echo "${image_and_digest}" | cut -d'@' -f2)
+          echo "image=$image" >> "$GITHUB_OUTPUT"
+          echo "digest=$digest" >> "$GITHUB_OUTPUT"
 
-      - name: Find attestation digest
-        run: |
-          set -e
-          DIGEST_AMD64=$(crane manifest ghcr.io/${{github.repository_owner}}/policy-reporter@${{ steps.push.outputs.digest }} \
-            | jq '.manifests[] | select(.annotations["vnd.docker.reference.type"]=="attestation-manifest") | select(.annotations["vnd.docker.reference.digest"]=="${{ env.PLATFORM_DIGEST_AMD64 }}") | .digest'
-          )
-          echo "ATTESTATION_MANIFEST_DIGEST_AMD64=${DIGEST_AMD64}" >> "$GITHUB_ENV"
-          DIGEST_ARM64=$(crane manifest ghcr.io/${{github.repository_owner}}/policy-reporter@${{ steps.push.outputs.digest }} \
-            | jq '.manifests[] | select(.annotations["vnd.docker.reference.type"]=="attestation-manifest") | select(.annotations["vnd.docker.reference.digest"]=="${{ env.PLATFORM_DIGEST_ARM64 }}") | .digest'
-          )
-          echo "ATTESTATION_MANIFEST_DIGEST_ARM64=${DIGEST_ARM64}" >> "$GITHUB_ENV"
+  provenance:
+    needs:
+      - goreleaser
+    permissions:
+      actions: read
+      id-token: write
+      contents: write
+    uses: slsa-framework/slsa-github-generator/.github/workflows/generator_generic_slsa3.yml@v2.1.0
+    with:
+      base64-subjects: "${{ needs.goreleaser.outputs.hashes }}"
+      upload-assets: true
 
-      - name: Sign attestation manifest
-        run: |
-          cosign sign --yes \
-            -a "repo=${{ github.repository }}" \
-            -a "workflow=${{ github.workflow }}" \
-            -a "ref=${{ github.sha }}" \
-            ghcr.io/${{github.repository_owner}}/policy-reporter@${{ env.ATTESTATION_MANIFEST_DIGEST_AMD64}}
-
-          cosign sign --yes \
-            -a "repo=${{ github.repository }}" \
-            -a "workflow=${{ github.workflow }}" \
-            -a "ref=${{ github.sha }}" \
-            ghcr.io/${{github.repository_owner}}/policy-reporter@${{ env.ATTESTATION_MANIFEST_DIGEST_ARM64}}
-
-      - name: Find provenance manifest digest
-        run: |
-          set -e
-          DIGEST_AMD64=$(crane manifest ghcr.io/${{github.repository_owner}}/policy-reporter@${{ env.ATTESTATION_MANIFEST_DIGEST_AMD64}} | \
-            jq '.layers[] | select(.annotations["in-toto.io/predicate-type"] == "https://slsa.dev/provenance/v0.2") | .digest')
-          echo "PROVENANCE_DIGEST_AMD64=${DIGEST_AMD64}" >> "$GITHUB_ENV"
-          DIGEST_ARM64=$(crane manifest ghcr.io/${{github.repository_owner}}/policy-reporter@${{ env.ATTESTATION_MANIFEST_DIGEST_ARM64}} | \
-            jq '.layers[] | select(.annotations["in-toto.io/predicate-type"] == "https://slsa.dev/provenance/v0.2") | .digest')
-          echo "PROVENANCE_DIGEST_ARM64=${DIGEST_ARM64}" >> "$GITHUB_ENV"
-
-      - name: Sign provenance manifest
-        run: |
-          cosign sign --yes \
-            -a "repo=${{ github.repository }}" \
-            -a "workflow=${{ github.workflow }}" \
-            -a "ref=${{ github.sha }}" \
-          ghcr.io/${{github.repository_owner}}/policy-reporter@${{ env.PROVENANCE_DIGEST_AMD64}}
-
-          cosign sign --yes \
-            -a "repo=${{ github.repository }}" \
-            -a "workflow=${{ github.workflow }}" \
-            -a "ref=${{ github.sha }}" \
-          ghcr.io/${{github.repository_owner}}/policy-reporter@${{ env.PROVENANCE_DIGEST_ARM64}}
+  image-provenance:
+    needs:
+      - goreleaser
+    permissions:
+      actions: read
+      id-token: write
+      packages: write
+    uses: slsa-framework/slsa-github-generator/.github/workflows/generator_container_slsa3.yml@v2.1.0
+    with:
+      image: ${{ needs.goreleaser.outputs.image }}
+      digest: ${{ needs.goreleaser.outputs.digest }}
+      registry-username: ${{ github.actor }}
+    secrets:
+      registry-password: ${{ secrets.GITHUB_TOKEN }}

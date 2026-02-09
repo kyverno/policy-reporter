@@ -1,42 +1,37 @@
 version: 2
 
-builds:
-  - id: policy-reporter
-    mod_timestamp: "{{ .CommitTimestamp }}"
-    binary: policy-reporter
-    flags:
-      - -trimpath
-      - -tags="sqlite_unlock_notify"
-    ldflags:
-      - -s -w -linkmode external -extldflags "-static"
-    env:
-      - CGO_ENABLED=1
-      - >-
-        {{- if eq .Os "linux" }}
-          {{- if eq .Arch "amd64" }}CC=zig cc -target x86_64-linux-gnu{{- end }}
-          {{- if eq .Arch "arm64" }}CC=zig cc -target aarch64-linux-gnu{{- end }}
-        {{- else }}
-          CC=clang
-        {{- end }}
+before:
+  hooks:
+    - go mod tidy
 
-kos:
+builds:
+  - skip: true
+
+dockers_v2:
   - id: policy-reporter
-    repositories:
+    images:
       - ghcr.io/kyverno/policy-reporter
     tags:
       - '{{.Tag}}'
-      - '{{ if not .Prerelease }}latest{{ end }}' 
-    base_import_paths: true
-    base_image: gcr.io/distroless/base-debian12
+      - "{{.Version}}"
+      - '{{ if not .Prerelease }}latest{{ end }}'
+    dockerfile: Dockerfile
     platforms:
       - linux/amd64
       - linux/arm64
-    bare: true
-    sbom: spdx
-    flags:
-      - -trimpath
-    ldflags:
-      - -s -w
+      - linux/s390x
+    sbom: true
+    build_args:
+      LD_FLAGS: '-s -w -linkmode external -extldflags "-static"'
+      X: main.Version={{ .Tag }}
+    extra_files:
+      - cmd
+      - pkg
+      - templates
+      - go.mod
+      - go.sum
+      - main.go
+      - LICENSE.md
 
 signs:
   - cmd: cosign
