@@ -7,7 +7,7 @@ import (
 type ReadinessProbe struct {
 	config *Config
 
-	ready   chan bool
+	ready   chan struct{}
 	running bool
 }
 
@@ -23,21 +23,19 @@ func (r *ReadinessProbe) Ready() {
 	if r.required() && !r.running {
 		go func() {
 			zap.L().Debug("readiness probe ready")
-			r.ready <- true
+			close(r.ready)
 		}()
 	}
 }
 
 func (r *ReadinessProbe) Wait() {
 	if r.required() && !r.running {
-		r.running = <-r.ready
+		zap.L().Debug("readiness probe waiting")
+		<-r.ready
+		r.running = true
 		zap.L().Debug("readiness probe finished")
 		return
 	}
-}
-
-func (r *ReadinessProbe) Close() {
-	close(r.ready)
 }
 
 func (r *ReadinessProbe) Running() bool {
@@ -47,7 +45,7 @@ func (r *ReadinessProbe) Running() bool {
 func NewReadinessProbe(config *Config) *ReadinessProbe {
 	return &ReadinessProbe{
 		config:  config,
-		ready:   make(chan bool),
+		ready:   make(chan struct{}),
 		running: false,
 	}
 }
