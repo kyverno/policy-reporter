@@ -12,7 +12,6 @@ dockers_v2:
     images:
       - ghcr.io/kyverno/policy-reporter
     tags:
-      - '{{.Tag}}'
       - "{{.Version}}"
       - '{{ if not .Prerelease }}latest{{ end }}'
     dockerfile: Dockerfile
