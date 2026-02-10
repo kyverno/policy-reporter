@@ -381,6 +381,34 @@ func Test_ResolveCache(t *testing.T) {
 
 		assert.NotNil(t, resolver.ResultCache())
 	})
+
+	t.Run("RedisWithSkipTLS", func(t *testing.T) {
+		redisConfig := &config.Config{
+			Redis: config.Redis{
+				Enabled: true,
+				Address: "localhost:6380",
+				SkipTLS: true,
+			},
+		}
+
+		resolver := config.NewResolver(redisConfig, &rest.Config{})
+
+		assert.NotNil(t, resolver.ResultCache())
+	})
+
+	t.Run("RedisWithCertificate", func(t *testing.T) {
+		redisConfig := &config.Config{
+			Redis: config.Redis{
+				Enabled:     true,
+				Address:     "localhost:6380",
+				Certificate: "/tmp/non-existing-cert.pem",
+			},
+		}
+
+		resolver := config.NewResolver(redisConfig, &rest.Config{})
+
+		assert.NotNil(t, resolver.ResultCache())
+	})
 }
 
 func Test_ResolveReportFilter(t *testing.T) {
