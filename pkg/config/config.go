@@ -113,6 +113,7 @@ type Redis struct {
 	Password    string `mapstructure:"password"`
 	Database    int    `mapstructure:"database"`
 	Certificate string `mapstructure:"certificate"`
+	SecretRef   string `mapstructure:"secretRef"`
 	SkipTLS     bool   `mapstructure:"skipTLS"`
 }
 

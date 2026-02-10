@@ -12,7 +12,6 @@ dockers_v2:
     images:
       - ghcr.io/kyverno/policy-reporter
     tags:
-      - '{{.Tag}}'
       - "{{.Version}}"
       - '{{ if not .Prerelease }}latest{{ end }}'
     dockerfile: Dockerfile
@@ -58,6 +57,9 @@ archives:
 
 checksum:
   name_template: checksums.txt
+
+docker_digest:
+  name_template: "digests.txt"
 
 source:
   enabled: true

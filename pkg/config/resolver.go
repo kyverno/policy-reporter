@@ -774,6 +774,20 @@ func (r *Resolver) ResultCache() cache.Cache {
 	}
 
 	if r.config.Redis.Enabled {
+		if r.config.Redis.SecretRef != "" {
+			values, err := r.SecretClient().Get(context.Background(), r.config.Redis.SecretRef)
+			if err != nil {
+				zap.L().Error("failed to load redis secret", zap.Error(err))
+			}
+
+			if values.Username != "" {
+				r.config.Redis.Username = values.Username
+			}
+			if values.Password != "" {
+				r.config.Redis.Password = values.Password
+			}
+		}
+
 		opts := &goredis.Options{
 			Addr:     r.config.Redis.Address,
 			Username: r.config.Redis.Username,
@@ -802,7 +816,6 @@ func (r *Resolver) ResultCache() cache.Cache {
 			}
 
 			opts.TLSConfig = tlsConfig
-		}
 
 		r.resultCache = cache.NewRedisCache(
 			r.config.Redis.Prefix,
