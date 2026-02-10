@@ -885,6 +885,10 @@ redis:
   username: ""
   # -- (optional) Password
   password: ""
+  # -- (optional) Path to a server CA certificate
+  certificate: ""
+  # -- Skip TLS verification
+  skipTLS: false
 
 database:
   # -- Use an external Database, supported: mysql, postgres, mariadb

@@ -106,12 +106,14 @@ type ReportFilter struct {
 
 // Redis configuration
 type Redis struct {
-	Enabled  bool   `mapstructure:"enabled"`
-	Address  string `mapstructure:"address"`
-	Prefix   string `mapstructure:"prefix"`
-	Username string `mapstructure:"username"`
-	Password string `mapstructure:"password"`
-	Database int    `mapstructure:"database"`
+	Enabled     bool   `mapstructure:"enabled"`
+	Address     string `mapstructure:"address"`
+	Prefix      string `mapstructure:"prefix"`
+	Username    string `mapstructure:"username"`
+	Password    string `mapstructure:"password"`
+	Database    int    `mapstructure:"database"`
+	Certificate string `mapstructure:"certificate"`
+	SkipTLS     bool   `mapstructure:"skipTLS"`
 }
 
 // LeaderElection configuration

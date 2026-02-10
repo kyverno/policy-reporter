@@ -357,6 +357,8 @@ Open `http://localhost:8082/` in your browser.
 | redis.prefix | string | `"policy-reporter"` | Redis key prefix |
 | redis.username | optional | `""` | Username |
 | redis.password | optional | `""` | Password |
+| redis.certificate | optional | `""` | Path to a server CA certificate |
+| redis.skipTLS | bool | `false` | Skip TLS verification |
 | database.type | string | `""` | Use an external Database, supported: mysql, postgres, mariadb |
 | database.database | string | `""` | Database |
 | database.username | string | `""` | Username |

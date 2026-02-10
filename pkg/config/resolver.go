@@ -774,14 +774,39 @@ func (r *Resolver) ResultCache() cache.Cache {
 	}
 
 	if r.config.Redis.Enabled {
+		opts := &goredis.Options{
+			Addr:     r.config.Redis.Address,
+			Username: r.config.Redis.Username,
+			Password: r.config.Redis.Password,
+			DB:       r.config.Redis.Database,
+		}
+
+		if r.config.Redis.Certificate != "" || r.config.Redis.SkipTLS {
+			tlsConfig := &tls.Config{
+				InsecureSkipVerify: r.config.Redis.SkipTLS,
+				ClientAuth:         tls.VerifyClientCertIfGiven,
+			}
+
+			if r.config.Redis.Certificate != "" {
+				caCert, err := os.ReadFile(r.config.Redis.Certificate)
+				if err != nil {
+					zap.L().Error(
+						"failed to read certificate for Redis Client",
+						zap.String("path", r.config.Redis.Certificate),
+					)
+				} else {
+					caCertPool := x509.NewCertPool()
+					caCertPool.AppendCertsFromPEM(caCert)
+					tlsConfig.RootCAs = caCertPool
+				}
+			}
+
+			opts.TLSConfig = tlsConfig
+		}
+
 		r.resultCache = cache.NewRedisCache(
 			r.config.Redis.Prefix,
-			goredis.NewClient(&goredis.Options{
-				Addr:     r.config.Redis.Address,
-				Username: r.config.Redis.Username,
-				Password: r.config.Redis.Password,
-				DB:       r.config.Redis.Database,
-			}),
+			goredis.NewClient(opts),
 			6*time.Hour,
 		)
 	} else {
