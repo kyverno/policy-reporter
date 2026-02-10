@@ -816,6 +816,7 @@ func (r *Resolver) ResultCache() cache.Cache {
 			}
 
 			opts.TLSConfig = tlsConfig
+		}
 
 		r.resultCache = cache.NewRedisCache(
 			r.config.Redis.Prefix,
