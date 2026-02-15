@@ -6,7 +6,7 @@ description: |
 
 type: application
 version: 3.7.2
-appVersion: 3.7.1
+appVersion: 3.7.2
 
 icon: https://github.com/kyverno/kyverno/raw/main/img/logo.png
 home: https://kyverno.github.io/policy-reporter
