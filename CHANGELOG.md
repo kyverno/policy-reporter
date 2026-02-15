@@ -1,5 +1,20 @@
 # Changelog
 
+# Helm Chart v3.7.2
+
+## Chart
+
+* Allow a manual modification of the used PodDisruptionBudget APIVersion
+
+## Policy Reporter v3.7.2
+
+* feat: add redis configs for TLS connections [[#1368](https://github.com/kyverno/policy-reporter/pull/1368)] by [fernandezcuesta](https://github.com/fernandezcuesta)
+* feat: support secretRef for redis auth [[#1364](https://github.com/kyverno/policy-reporter/pull/1364)] by [fernandezcuesta](https://github.com/fernandezcuesta)
+* bugfix: remove resource uid from Loki output for improved loki bucket management
+* bugfix: fix readiness probe
+* bugfix: fix title helper in concurrent use cases
+* feat: use goreleaser for release management
+
 # Helm Chart v3.7.1
 
 ## Chart
