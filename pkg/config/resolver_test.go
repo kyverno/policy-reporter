@@ -409,6 +409,21 @@ func Test_ResolveCache(t *testing.T) {
 
 		assert.NotNil(t, resolver.ResultCache())
 	})
+
+	t.Run("RedisWithClientCertificate", func(t *testing.T) {
+		redisConfig := &config.Config{
+			Redis: config.Redis{
+				Enabled:    true,
+				Address:    "localhost:6380",
+				ClientCert: "/tmp/non-existing-client-cert.pem",
+				ClientKey:  "/tmp/non-existing-client-key.pem",
+			},
+		}
+
+		resolver := config.NewResolver(redisConfig, &rest.Config{})
+
+		assert.NotNil(t, resolver.ResultCache())
+	})
 }
 
 func Test_ResolveReportFilter(t *testing.T) {

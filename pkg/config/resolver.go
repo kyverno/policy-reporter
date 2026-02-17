@@ -795,10 +795,9 @@ func (r *Resolver) ResultCache() cache.Cache {
 			DB:       r.config.Redis.Database,
 		}
 
-		if r.config.Redis.Certificate != "" || r.config.Redis.SkipTLS {
+		if r.config.Redis.Certificate != "" || r.config.Redis.SkipTLS || r.config.Redis.ClientCert != "" {
 			tlsConfig := &tls.Config{
 				InsecureSkipVerify: r.config.Redis.SkipTLS,
-				ClientAuth:         tls.VerifyClientCertIfGiven,
 			}
 
 			if r.config.Redis.Certificate != "" {
@@ -813,6 +812,22 @@ func (r *Resolver) ResultCache() cache.Cache {
 					caCertPool.AppendCertsFromPEM(caCert)
 					tlsConfig.RootCAs = caCertPool
 				}
+			}
+
+			if r.config.Redis.ClientCert != "" && r.config.Redis.ClientKey != "" {
+				clientCert, err := tls.LoadX509KeyPair(r.config.Redis.ClientCert, r.config.Redis.ClientKey)
+				if err != nil {
+					zap.L().Error(
+						"failed to load client certificate for Redis Client",
+						zap.String("cert", r.config.Redis.ClientCert),
+						zap.String("key", r.config.Redis.ClientKey),
+						zap.Error(err),
+					)
+				} else {
+					tlsConfig.Certificates = []tls.Certificate{clientCert}
+				}
+			} else if r.config.Redis.ClientCert != "" || r.config.Redis.ClientKey != "" {
+				zap.L().Warn("both clientCert and clientKey must be set for Redis mTLS, skipping client certificate")
 			}
 
 			opts.TLSConfig = tlsConfig

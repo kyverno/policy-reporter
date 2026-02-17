@@ -358,6 +358,8 @@ Open `http://localhost:8082/` in your browser.
 | redis.username | optional | `""` | Username |
 | redis.password | optional | `""` | Password |
 | redis.certificate | optional | `""` | Path to a server CA certificate |
+| redis.clientCert | optional | `""` | Path to client certificate for mutual TLS authentication |
+| redis.clientKey | optional | `""` | Path to client key for mutual TLS authentication |
 | redis.secretRef | optional | `""` | Secret name to pull username and password from |
 | redis.skipTLS | bool | `false` | Skip TLS verification |
 | database.type | string | `""` | Use an external Database, supported: mysql, postgres, mariadb |
