@@ -1887,6 +1887,10 @@ monitoring:
     scrapeTimeout:
     # -- (optional) Scrape interval
     interval:
+    # -- Is TLS required for endpoint
+    secure: false
+    # -- TLS Configuration for endpoint
+    tlsConfig: {}
 
   grafana:
     # -- Naamespace for configMap of grafana dashboards
