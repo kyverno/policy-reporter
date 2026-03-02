@@ -641,6 +641,8 @@ Open `http://localhost:8082/` in your browser.
 | monitoring.serviceMonitor.namespaceSelector | optional | `{}` | NamespaceSelector |
 | monitoring.serviceMonitor.scrapeTimeout | optional | `nil` | ScrapeTimeout |
 | monitoring.serviceMonitor.interval | optional | `nil` | Scrape interval |
+| monitoring.serviceMonitor.secure | bool | `false` | Is TLS required for endpoint |
+| monitoring.serviceMonitor.tlsConfig | object | `{}` | TLS Configuration for endpoint |
 | monitoring.grafana.namespace | string | `nil` | Naamespace for configMap of grafana dashboards |
 | monitoring.grafana.dashboards.enabled | bool | `true` | Enable the deployment of grafana dashboards |
 | monitoring.grafana.dashboards.label | string | `"grafana_dashboard"` | Label to find dashboards using the k8s sidecar |
