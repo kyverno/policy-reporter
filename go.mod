@@ -30,9 +30,9 @@ require (
 	github.com/spf13/cobra v1.10.2
 	github.com/spf13/viper v1.21.0
 	github.com/stretchr/testify v1.11.1
-	github.com/uptrace/bun v1.2.16
+	github.com/uptrace/bun v1.2.18
 	github.com/uptrace/bun/dialect/mysqldialect v1.2.16
-	github.com/uptrace/bun/dialect/pgdialect v1.2.16
+	github.com/uptrace/bun/dialect/pgdialect v1.2.18
 	github.com/uptrace/bun/dialect/sqlitedialect v1.2.16
 	github.com/uptrace/bun/driver/pgdriver v1.2.16
 	github.com/uptrace/bun/extra/bundebug v1.2.16
