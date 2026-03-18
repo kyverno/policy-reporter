@@ -1383,7 +1383,7 @@ plugin:
       # -- (string) Image PullPolicy
       pullPolicy: IfNotPresent
       # -- (string) Image tag
-      tag: "0.5.3"
+      tag: "0.6.0"
 
     # -- Deployment replica count
     replicaCount: 1
