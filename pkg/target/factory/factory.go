@@ -1008,6 +1008,12 @@ func (f *TargetFactory) mapSecretValues(config any, ref, mountedSecret string) {
 		if values.Host != "" {
 			c.Config.Host = values.Host
 		}
+		if values.Password != "" {
+			c.Config.Password = values.Password
+		}
+		if values.Username != "" {
+			c.Config.Username = values.Username
+		}
 
 	case *targetconfig.Config[v1alpha1.SlackOptions]:
 		if values.Webhook != "" {
@@ -1021,7 +1027,7 @@ func (f *TargetFactory) mapSecretValues(config any, ref, mountedSecret string) {
 		if values.Host != "" {
 			c.Config.Host = values.Host
 		}
-		if values.Channel != "" {
+		if values.Token != "" {
 			c.Config.Token = values.Token
 		}
 
