@@ -1,6 +1,7 @@
 package report_test
 
 import (
+	"context"
 	"sync"
 	"testing"
 
@@ -18,7 +19,7 @@ func Test_PublishLifecycleEvents(t *testing.T) {
 	wg.Add(2)
 
 	publisher := report.NewEventPublisher()
-	publisher.RegisterListener("test", func(le report.LifecycleEvent) {
+	publisher.RegisterListener("test", func(_ context.Context, le report.LifecycleEvent) {
 		event = le
 		wg.Done()
 	})
@@ -55,7 +56,7 @@ func Test_PublishDeleteLifecycleEvents(t *testing.T) {
 	wg.Add(2)
 
 	publisher := report.NewEventPublisher()
-	publisher.RegisterListener("test", func(le report.LifecycleEvent) {
+	publisher.RegisterListener("test", func(_ context.Context, le report.LifecycleEvent) {
 		event = le
 		wg.Done()
 	})
@@ -87,7 +88,7 @@ func Test_PublishDeleteLifecycleEvents(t *testing.T) {
 
 func Test_GetReisteredListeners(t *testing.T) {
 	publisher := report.NewEventPublisher()
-	publisher.RegisterListener("test", func(le report.LifecycleEvent) {})
+	publisher.RegisterListener("test", func(_ context.Context, le report.LifecycleEvent) {})
 
 	if len(publisher.GetListener()) != 1 {
 		t.Error("Expected to get one registered listener back")
@@ -96,7 +97,7 @@ func Test_GetReisteredListeners(t *testing.T) {
 
 func Test_UnreisteredListeners(t *testing.T) {
 	publisher := report.NewEventPublisher()
-	publisher.RegisterListener("test", func(le report.LifecycleEvent) {})
+	publisher.RegisterListener("test", func(_ context.Context, le report.LifecycleEvent) {})
 	publisher.UnregisterListener("test")
 
 	if len(publisher.GetListener()) != 0 {

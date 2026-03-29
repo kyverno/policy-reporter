@@ -1,6 +1,7 @@
 package metrics_test
 
 import (
+	"context"
 	"testing"
 
 	"github.com/openreports/reports-api/apis/openreports.io/v1alpha1"
@@ -18,6 +19,8 @@ import (
 )
 
 func Test_DetailedClusterResultMetricGeneration(t *testing.T) {
+	ctx := context.Background()
+
 	gauge := metrics.RegisterDetailedClusterResultGauge("cluster_policy_report_result")
 
 	report1 := &openreports.ReportAdapter{
@@ -46,7 +49,7 @@ func Test_DetailedClusterResultMetricGeneration(t *testing.T) {
 	handler := metrics.CreateDetailedClusterResultMetricListener(filter, gauge)
 
 	t.Run("Added Metric", func(t *testing.T) {
-		handler(report.LifecycleEvent{Type: report.Added, PolicyReport: report1})
+		handler(ctx, report.LifecycleEvent{Type: report.Added, PolicyReport: report1})
 
 		metricFam, err := prometheus.DefaultGatherer.Gather()
 		assert.NoError(t, err)
@@ -60,8 +63,8 @@ func Test_DetailedClusterResultMetricGeneration(t *testing.T) {
 	})
 
 	t.Run("Modified Metric", func(t *testing.T) {
-		handler(report.LifecycleEvent{Type: report.Added, PolicyReport: report1})
-		handler(report.LifecycleEvent{Type: report.Updated, PolicyReport: report2})
+		handler(ctx, report.LifecycleEvent{Type: report.Added, PolicyReport: report1})
+		handler(ctx, report.LifecycleEvent{Type: report.Updated, PolicyReport: report2})
 
 		metricFam, err := prometheus.DefaultGatherer.Gather()
 		assert.NoError(t, err)
@@ -75,9 +78,9 @@ func Test_DetailedClusterResultMetricGeneration(t *testing.T) {
 	})
 
 	t.Run("Deleted Metric", func(t *testing.T) {
-		handler(report.LifecycleEvent{Type: report.Added, PolicyReport: report1})
-		handler(report.LifecycleEvent{Type: report.Updated, PolicyReport: report2})
-		handler(report.LifecycleEvent{Type: report.Deleted, PolicyReport: report2})
+		handler(ctx, report.LifecycleEvent{Type: report.Added, PolicyReport: report1})
+		handler(ctx, report.LifecycleEvent{Type: report.Updated, PolicyReport: report2})
+		handler(ctx, report.LifecycleEvent{Type: report.Deleted, PolicyReport: report2})
 
 		metricFam, err := prometheus.DefaultGatherer.Gather()
 		assert.NoError(t, err)

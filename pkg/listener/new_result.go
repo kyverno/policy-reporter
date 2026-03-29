@@ -1,6 +1,7 @@
 package listener
 
 import (
+	"context"
 	"sync"
 	"time"
 
@@ -55,7 +56,7 @@ func (l *ResultListener) Validate(r openreports.ResultAdapter) bool {
 	return true
 }
 
-func (l *ResultListener) Listen(event report.LifecycleEvent) {
+func (l *ResultListener) Listen(_ context.Context, event report.LifecycleEvent) {
 	logger := zap.L().Sugar()
 	logger.Debugf("new event: type %s, report ID %s", event.Type, event.PolicyReport.GetID())
 	if event.Type != report.Added && event.Type != report.Updated {

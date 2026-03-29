@@ -30,7 +30,7 @@ func Test_PolicyReportWatcher(t *testing.T) {
 
 	store := newStore(3)
 	publisher := report.NewEventPublisher()
-	publisher.RegisterListener("test", func(event report.LifecycleEvent) {
+	publisher.RegisterListener("test", func(_ context.Context, event report.LifecycleEvent) {
 		store.Add(event)
 		wg.Done()
 	})
@@ -83,7 +83,7 @@ func Test_ClusterPolicyReportWatcher(t *testing.T) {
 
 	store := newStore(3)
 	publisher := report.NewEventPublisher()
-	publisher.RegisterListener("test", func(event report.LifecycleEvent) {
+	publisher.RegisterListener("test", func(_ context.Context, event report.LifecycleEvent) {
 		store.Add(event)
 		wg.Done()
 	})

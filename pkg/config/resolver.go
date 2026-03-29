@@ -312,7 +312,7 @@ func (r *Resolver) RegisterNewResultsListener() {
 	r.resultListener = listener.NewResultListener(r.SkipExistingOnStartup(), r.ResultCache(), time.Now())
 	r.EventPublisher().RegisterListener(listener.NewResults, r.resultListener.Listen)
 
-	r.EventPublisher().RegisterPostListener(listener.CleanUpListener, listener.NewCleanupListener(context.Background(), targets))
+	r.EventPublisher().RegisterPostListener(listener.CleanUpListener, listener.NewCleanupListener(targets))
 }
 
 // RegisterSendResultListener resolver method
@@ -343,7 +343,7 @@ func (r *Resolver) UnregisterSendResultListener() {
 
 // RegisterStoreListener resolver method
 func (r *Resolver) RegisterStoreListener(ctx context.Context, store report.PolicyReportStore) {
-	r.EventPublisher().RegisterListener(listener.Store, listener.NewStoreListener(ctx, store))
+	r.EventPublisher().RegisterListener(listener.Store, listener.NewStoreListener(store))
 }
 
 // RegisterMetricsListener resolver method

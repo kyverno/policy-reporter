@@ -2,27 +2,33 @@ package listener
 
 import (
 	"context"
+	"errors"
 
 	"go.uber.org/zap"
+	"k8s.io/client-go/util/retry"
 
 	"github.com/kyverno/policy-reporter/pkg/report"
 )
 
 const Store = "store_listener"
 
-func NewStoreListener(ctx context.Context, store report.PolicyReportStore) report.PolicyReportListener {
-	return func(event report.LifecycleEvent) {
-		if event.Type == report.Deleted {
-			logOnError("remove", event.PolicyReport.GetName(), store.Remove(ctx, event.PolicyReport.GetID()))
-			return
-		}
+func NewStoreListener(store report.PolicyReportStore) report.PolicyReportListener {
+	return func(ctx context.Context, event report.LifecycleEvent) {
+		err := retry.OnError(retry.DefaultRetry, func(err error) bool {
+			if errors.Is(err, context.DeadlineExceeded) {
+				return false
+			}
 
-		if event.Type == report.Updated {
-			logOnError("update", event.PolicyReport.GetName(), store.Update(ctx, event.PolicyReport))
-			return
-		}
+			return true
+		}, func() error {
+			if event.Type == report.Deleted {
+				return store.Remove(ctx, event.PolicyReport.GetID())
+			}
 
-		logOnError("add", event.PolicyReport.GetName(), store.Update(ctx, event.PolicyReport))
+			return store.Update(ctx, event.PolicyReport)
+		})
+
+		logOnError(event.Type.String(), event.PolicyReport.GetName(), err)
 	}
 }
 

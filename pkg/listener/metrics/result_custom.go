@@ -1,6 +1,8 @@
 package metrics
 
 import (
+	"context"
+
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
 	dto "github.com/prometheus/client_model/go"
@@ -28,7 +30,7 @@ func CreateCustomResultMetricsListener(
 ) report.PolicyReportListener {
 	cache := NewCache(filter, labelGenerator)
 
-	return func(event report.LifecycleEvent) {
+	return func(ctx context.Context, event report.LifecycleEvent) {
 		newReport := event.PolicyReport
 
 		switch event.Type {

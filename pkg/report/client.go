@@ -1,11 +1,13 @@
 package report
 
 import (
+	"context"
+
 	"github.com/kyverno/policy-reporter/pkg/openreports"
 )
 
 // PolicyReportListener is called whenever a new PolicyReport comes in
-type PolicyReportListener = func(LifecycleEvent)
+type PolicyReportListener = func(context.Context, LifecycleEvent)
 
 // PolicyReportResultListener is called whenever a new PolicyResult comes in
 type PolicyReportResultListener = func(openreports.ReportInterface, openreports.ResultAdapter, bool)

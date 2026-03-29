@@ -1,6 +1,8 @@
 package metrics
 
 import (
+	"context"
+
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
 
@@ -18,7 +20,7 @@ func RegisterDetailedResultGauge(name string) *prometheus.GaugeVec {
 func CreateDetailedResultMetricListener(filter *report.ResultFilter, gauge *prometheus.GaugeVec) report.PolicyReportListener {
 	cache := NewCache(filter, generateResultLabels)
 
-	return func(event report.LifecycleEvent) {
+	return func(ctx context.Context, event report.LifecycleEvent) {
 		newReport := event.PolicyReport
 
 		switch event.Type {

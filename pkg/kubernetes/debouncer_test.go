@@ -1,6 +1,7 @@
 package kubernetes_test
 
 import (
+	"context"
 	"sync"
 	"testing"
 	"time"
@@ -18,7 +19,7 @@ func Test_Debouncer(t *testing.T) {
 		wg.Add(2)
 
 		publisher := report.NewEventPublisher()
-		publisher.RegisterListener("test", func(event report.LifecycleEvent) {
+		publisher.RegisterListener("test", func(_ context.Context, event report.LifecycleEvent) {
 			counter++
 			wg.Done()
 		})
@@ -55,7 +56,7 @@ func Test_Debouncer(t *testing.T) {
 		wg.Add(2)
 
 		publisher := report.NewEventPublisher()
-		publisher.RegisterListener("test", func(event report.LifecycleEvent) {
+		publisher.RegisterListener("test", func(_ context.Context, event report.LifecycleEvent) {
 			counter++
 			wg.Done()
 		})
@@ -87,7 +88,7 @@ func Test_Debouncer(t *testing.T) {
 		wg.Add(2)
 
 		publisher := report.NewEventPublisher()
-		publisher.RegisterListener("test", func(event report.LifecycleEvent) {
+		publisher.RegisterListener("test", func(_ context.Context, event report.LifecycleEvent) {
 			counter++
 			wg.Done()
 		})

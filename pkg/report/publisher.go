@@ -1,6 +1,7 @@
 package report
 
 import (
+	"context"
 	"sync"
 )
 
@@ -54,7 +55,7 @@ func (p *lifecycleEventPublisher) Publish(event LifecycleEvent) {
 	g.Add(len(p.listeners))
 	for _, listener := range p.listeners {
 		go func(li PolicyReportListener, ev LifecycleEvent) {
-			li(ev)
+			li(context.Background(), ev)
 
 			g.Done()
 		}(listener, event)
@@ -63,14 +64,14 @@ func (p *lifecycleEventPublisher) Publish(event LifecycleEvent) {
 	g.Wait()
 
 	for _, listener := range p.postListeners {
-		listener(event)
+		listener(context.Background(), event)
 	}
 }
 
 func NewEventPublisher() EventPublisher {
 	return &lifecycleEventPublisher{
-		postListeners: make(map[string]func(LifecycleEvent)),
-		listeners:     make(map[string]func(LifecycleEvent)),
+		postListeners: make(map[string]func(context.Context, LifecycleEvent)),
+		listeners:     make(map[string]func(context.Context, LifecycleEvent)),
 		listenerCount: 0,
 	}
 }
