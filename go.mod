@@ -14,7 +14,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/sts v1.41.10
 	github.com/ctreminiom/go-atlassian/v2 v2.11.0
 	github.com/gin-contrib/gzip v1.2.5
-	github.com/gin-contrib/pprof v1.5.3
+	github.com/gin-contrib/pprof v1.5.4
 	github.com/gin-contrib/zap v1.1.6
 	github.com/gin-gonic/gin v1.12.0
 	github.com/go-redis/redis/v8 v8.11.5
