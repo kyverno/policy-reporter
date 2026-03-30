@@ -259,32 +259,32 @@ func Test_ResolveHasTargets(t *testing.T) {
 
 func Test_ResolveSkipExistingOnStartup(t *testing.T) {
 	t.Parallel()
-	testConfig := &config.Config{
-		Targets: target.Targets{
-			Loki: &targetconfig.Config[v1alpha1.LokiOptions]{
-				Config: &v1alpha1.LokiOptions{
-					HostOptions: v1alpha1.HostOptions{
-						Host: "http://localhost:3100",
-					},
-				},
-				SkipExisting:    true,
-				MinimumSeverity: "debug",
-			},
-			Elasticsearch: &targetconfig.Config[v1alpha1.ElasticsearchOptions]{
-				Config: &v1alpha1.ElasticsearchOptions{
-					HostOptions: v1alpha1.HostOptions{
-						Host: "http://localhost:9200",
-					},
-				},
-				SkipExisting:    true,
-				MinimumSeverity: "debug",
-			},
-		},
-	}
 
 	t.Run("Resolve false", func(t *testing.T) {
 		t.Parallel()
-		testConfig.Targets.Elasticsearch.SkipExisting = false
+
+		testConfig := &config.Config{
+			Targets: target.Targets{
+				Loki: &targetconfig.Config[v1alpha1.LokiOptions]{
+					Config: &v1alpha1.LokiOptions{
+						HostOptions: v1alpha1.HostOptions{
+							Host: "http://localhost:3100",
+						},
+					},
+					SkipExisting:    true,
+					MinimumSeverity: "debug",
+				},
+				Elasticsearch: &targetconfig.Config[v1alpha1.ElasticsearchOptions]{
+					Config: &v1alpha1.ElasticsearchOptions{
+						HostOptions: v1alpha1.HostOptions{
+							Host: "http://localhost:9200",
+						},
+					},
+					SkipExisting:    false,
+					MinimumSeverity: "debug",
+				},
+			},
+		}
 
 		resolver := config.NewResolver(testConfig, &rest.Config{})
 
@@ -293,7 +293,29 @@ func Test_ResolveSkipExistingOnStartup(t *testing.T) {
 
 	t.Run("Resolve true", func(t *testing.T) {
 		t.Parallel()
-		testConfig.Targets.Elasticsearch.SkipExisting = true
+
+		testConfig := &config.Config{
+			Targets: target.Targets{
+				Loki: &targetconfig.Config[v1alpha1.LokiOptions]{
+					Config: &v1alpha1.LokiOptions{
+						HostOptions: v1alpha1.HostOptions{
+							Host: "http://localhost:3100",
+						},
+					},
+					SkipExisting:    true,
+					MinimumSeverity: "debug",
+				},
+				Elasticsearch: &targetconfig.Config[v1alpha1.ElasticsearchOptions]{
+					Config: &v1alpha1.ElasticsearchOptions{
+						HostOptions: v1alpha1.HostOptions{
+							Host: "http://localhost:9200",
+						},
+					},
+					SkipExisting:    true,
+					MinimumSeverity: "debug",
+				},
+			},
+		}
 
 		resolver := config.NewResolver(testConfig, &rest.Config{})
 
