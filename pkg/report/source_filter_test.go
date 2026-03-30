@@ -39,7 +39,9 @@ func (c jobClient) Get(res *corev1.ObjectReference) (*batchv1.Job, error) {
 }
 
 func TestSourceFilter(t *testing.T) {
+	t.Parallel()
 	t.Run("include by namespace succeed", func(t *testing.T) {
+		t.Parallel()
 		filter := report.NewSourceFilter(nil, nil, []report.SourceValidation{
 			{
 				Selector: report.ReportSelector{
@@ -61,6 +63,7 @@ func TestSourceFilter(t *testing.T) {
 	})
 
 	t.Run("include by namespace fails", func(t *testing.T) {
+		t.Parallel()
 		filter := report.NewSourceFilter(nil, nil, []report.SourceValidation{
 			{
 				Selector: report.ReportSelector{
@@ -82,6 +85,7 @@ func TestSourceFilter(t *testing.T) {
 	})
 
 	t.Run("include by kind succeed", func(t *testing.T) {
+		t.Parallel()
 		filter := report.NewSourceFilter(nil, nil, []report.SourceValidation{
 			{
 				Selector: report.ReportSelector{
@@ -103,6 +107,7 @@ func TestSourceFilter(t *testing.T) {
 	})
 
 	t.Run("include by kind fails", func(t *testing.T) {
+		t.Parallel()
 		filter := report.NewSourceFilter(nil, nil, []report.SourceValidation{
 			{
 				Selector: report.ReportSelector{
@@ -124,6 +129,7 @@ func TestSourceFilter(t *testing.T) {
 	})
 
 	t.Run("disable cluster reports", func(t *testing.T) {
+		t.Parallel()
 		filter := report.NewSourceFilter(nil, nil, []report.SourceValidation{
 			{
 				Selector: report.ReportSelector{
@@ -145,6 +151,7 @@ func TestSourceFilter(t *testing.T) {
 	})
 
 	t.Run("include by kind succeed", func(t *testing.T) {
+		t.Parallel()
 		filter := report.NewSourceFilter(nil, nil, []report.SourceValidation{
 			{
 				Selector: report.ReportSelector{
@@ -165,6 +172,7 @@ func TestSourceFilter(t *testing.T) {
 	})
 
 	t.Run("filter controlled pod", func(t *testing.T) {
+		t.Parallel()
 		c := podClient{
 			pod: &corev1.Pod{ObjectMeta: v1.ObjectMeta{Name: "nginx", Namespace: "test", OwnerReferences: []v1.OwnerReference{
 				{APIVersion: "apps/v1", Kind: "ReplicaSet", Name: "nginx-rs", Controller: &controlled},
@@ -196,6 +204,7 @@ func TestSourceFilter(t *testing.T) {
 	})
 
 	t.Run("filter controlled job", func(t *testing.T) {
+		t.Parallel()
 		c := jobClient{
 			job: &batchv1.Job{ObjectMeta: v1.ObjectMeta{Name: "nginx", Namespace: "test", OwnerReferences: []v1.OwnerReference{
 				{APIVersion: "batch/v1", Kind: "CronJob", Name: "nginx-rs", Controller: &controlled},
@@ -227,6 +236,7 @@ func TestSourceFilter(t *testing.T) {
 	})
 
 	t.Run("pod with cronjob owner should not be filtered", func(t *testing.T) {
+		t.Parallel()
 		c := podClient{
 			pod: &corev1.Pod{ObjectMeta: v1.ObjectMeta{Name: "nginx", Namespace: "test", OwnerReferences: []v1.OwnerReference{
 				{APIVersion: "batch/v1", Kind: "CronJob", Name: "nginx-cronjob", Controller: &controlled},
@@ -250,6 +260,7 @@ func TestSourceFilter(t *testing.T) {
 	})
 
 	t.Run("job with replicaset owner should not be filtered", func(t *testing.T) {
+		t.Parallel()
 		c := jobClient{
 			job: &batchv1.Job{ObjectMeta: v1.ObjectMeta{Name: "nginx", Namespace: "test", OwnerReferences: []v1.OwnerReference{
 				{APIVersion: "apps/v1", Kind: "ReplicaSet", Name: "nginx-rs", Controller: &controlled},
@@ -273,6 +284,7 @@ func TestSourceFilter(t *testing.T) {
 	})
 
 	t.Run("pod with multiple owners including valid controller should be filtered", func(t *testing.T) {
+		t.Parallel()
 		c := podClient{
 			pod: &corev1.Pod{ObjectMeta: v1.ObjectMeta{Name: "nginx", Namespace: "test", OwnerReferences: []v1.OwnerReference{
 				{APIVersion: "batch/v1", Kind: "CronJob", Name: "nginx-cronjob", Controller: &controlled},
@@ -297,6 +309,7 @@ func TestSourceFilter(t *testing.T) {
 	})
 
 	t.Run("job with multiple owners including valid controller should be filtered", func(t *testing.T) {
+		t.Parallel()
 		c := jobClient{
 			job: &batchv1.Job{ObjectMeta: v1.ObjectMeta{Name: "nginx", Namespace: "test", OwnerReferences: []v1.OwnerReference{
 				{APIVersion: "apps/v1", Kind: "ReplicaSet", Name: "nginx-rs", Controller: &controlled},
@@ -321,6 +334,7 @@ func TestSourceFilter(t *testing.T) {
 	})
 
 	t.Run("pod with non-controller owner should not be filtered", func(t *testing.T) {
+		t.Parallel()
 		c := podClient{
 			pod: &corev1.Pod{ObjectMeta: v1.ObjectMeta{Name: "nginx", Namespace: "test", OwnerReferences: []v1.OwnerReference{
 				{APIVersion: "apps/v1", Kind: "ReplicaSet", Name: "nginx-rs", Controller: &uncontrolled},
@@ -344,6 +358,7 @@ func TestSourceFilter(t *testing.T) {
 	})
 
 	t.Run("job with non-controller owner should not be filtered", func(t *testing.T) {
+		t.Parallel()
 		c := jobClient{
 			job: &batchv1.Job{ObjectMeta: v1.ObjectMeta{Name: "nginx", Namespace: "test", OwnerReferences: []v1.OwnerReference{
 				{APIVersion: "batch/v1", Kind: "CronJob", Name: "nginx-cronjob", Controller: &uncontrolled},

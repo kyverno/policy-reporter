@@ -71,7 +71,9 @@ func (c *client) Type() target.ClientType {
 }
 
 func Test_SendResultListener(t *testing.T) {
+	t.Parallel()
 	t.Run("Send Result", func(t *testing.T) {
+		t.Parallel()
 		c := &client{validated: true}
 		slistener := listener.NewSendResultListener(target.NewCollection(&target.Target{Client: c}))
 		slistener(preport1, fixtures.FailResult, false)
@@ -79,6 +81,7 @@ func Test_SendResultListener(t *testing.T) {
 		assert.True(t, c.Called, "Expected Send to be called")
 	})
 	t.Run("Don't Send Result when validation fails", func(t *testing.T) {
+		t.Parallel()
 		c := &client{validated: false}
 		slistener := listener.NewSendResultListener(target.NewCollection(&target.Target{Client: c}))
 		slistener(preport1, fixtures.FailResult, false)
@@ -86,6 +89,7 @@ func Test_SendResultListener(t *testing.T) {
 		assert.False(t, c.Called, "Expected Send not to be called")
 	})
 	t.Run("Don't Send pre existing Result when skipExistingOnStartup is true", func(t *testing.T) {
+		t.Parallel()
 		c := &client{skipExistingOnStartup: true}
 		slistener := listener.NewSendResultListener(target.NewCollection(&target.Target{Client: c}))
 		slistener(preport1, fixtures.FailResult, true)

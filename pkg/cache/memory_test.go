@@ -9,7 +9,9 @@ import (
 )
 
 func TestInMemory(t *testing.T) {
+	t.Parallel()
 	t.Run("add report", func(t *testing.T) {
+		t.Parallel()
 		or := fixtures.DefaultPolicyReport
 		id := or.GetID()
 
@@ -32,6 +34,7 @@ func TestInMemory(t *testing.T) {
 		}
 	})
 	t.Run("remove report", func(t *testing.T) {
+		t.Parallel()
 		or := fixtures.DefaultPolicyReport
 		id := or.GetID()
 
@@ -49,6 +52,7 @@ func TestInMemory(t *testing.T) {
 		}
 	})
 	t.Run("ceanup report", func(t *testing.T) {
+		t.Parallel()
 		or := fixtures.DefaultPolicyReport
 		id := or.GetID()
 
@@ -64,6 +68,7 @@ func TestInMemory(t *testing.T) {
 		}
 	})
 	t.Run("shared cache", func(t *testing.T) {
+		t.Parallel()
 		c := cache.NewInMemoryCache(time.Millisecond, time.Millisecond)
 		if c.Shared() {
 			t.Error("expected in memory cache is not shared")

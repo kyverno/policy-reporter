@@ -15,7 +15,7 @@ type QueryBuilder struct {
 
 func (q *QueryBuilder) Filter(column string, values []string) *QueryBuilder {
 	if len(values) > 1 {
-		q.query.Where(column+" IN (?)", bun.In(values))
+		q.query.Where(column+" IN (?)", bun.List(values))
 	} else if len(values) == 1 {
 		q.query.Where(column+" = ?", values[0])
 	}
@@ -54,7 +54,7 @@ func (q *QueryBuilder) WithNotEmpty(column string) *QueryBuilder {
 func (q *QueryBuilder) Exclude(filter Filter, prefix string) *QueryBuilder {
 	if filter.ResourceID == "" && len(filter.Kinds) == 0 && len(filter.Exclude) > 0 {
 		for source, kind := range filter.Exclude {
-			q.query.Where(fmt.Sprintf("(%s.source != ? OR (%s.source = ? AND %s.resource_kind NOT IN (?)))", prefix, prefix, prefix), source, source, bun.In(kind))
+			q.query.Where(fmt.Sprintf("(%s.source != ? OR (%s.source = ? AND %s.resource_kind NOT IN (?)))", prefix, prefix, prefix), source, source, bun.List(kind))
 		}
 	}
 
@@ -88,7 +88,7 @@ func (q *QueryBuilder) ResultSearch(value string) *QueryBuilder {
 func (q *QueryBuilder) FilterMap(columns map[string][]string) *QueryBuilder {
 	for column, values := range columns {
 		if len(values) > 1 {
-			q.query.Where(column+" IN (?)", bun.In(values))
+			q.query.Where(column+" IN (?)", bun.List(values))
 		} else if len(values) == 1 {
 			q.query.Where(column+" = ?", values[0])
 		}
@@ -99,7 +99,7 @@ func (q *QueryBuilder) FilterMap(columns map[string][]string) *QueryBuilder {
 
 func (q *QueryBuilder) FilterOptionalNamespaces(values []string) *QueryBuilder {
 	if len(values) > 1 {
-		q.query.Where("(resource_namespace IN (?) OR resource_namespace = '')", bun.In(values))
+		q.query.Where("(resource_namespace IN (?) OR resource_namespace = '')", bun.List(values))
 	} else if len(values) == 1 {
 		q.query.Where("(resource_namespace = ? OR resource_namespace = '')", values[0])
 	}
@@ -186,7 +186,7 @@ func (q *QueryBuilder) SelectSeveritySummaries() *QueryBuilder {
 }
 
 func (q *QueryBuilder) Pagination(pagination Pagination) *QueryBuilder {
-	sortExpr := []string{}
+	sortExpr := make([]string, 0, len(pagination.SortBy))
 	for _, sort := range pagination.SortBy {
 		sortExpr = append(sortExpr, fmt.Sprintf("%s %s", sort, pagination.Direction))
 	}

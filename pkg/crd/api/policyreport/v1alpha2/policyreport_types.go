@@ -75,7 +75,7 @@ type PolicyReportList struct {
 }
 
 func (polr *PolicyReport) ToOpenReports() *reportsv1alpha1.Report {
-	res := []reportsv1alpha1.ReportResult{}
+	res := make([]reportsv1alpha1.ReportResult, 0, len(polr.Results))
 	for _, r := range polr.Results {
 		res = append(res, reportsv1alpha1.ReportResult{
 			Source:           r.Source,

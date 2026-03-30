@@ -21,8 +21,6 @@ import (
 	"github.com/kyverno/policy-reporter/pkg/target/http"
 )
 
-var enable = true
-
 type Client interface {
 	// Upload given Data the configured AWS storage
 	Upload(body *bytes.Buffer, key string) error
@@ -41,12 +39,12 @@ type Options func(s *s3Client)
 func WithKMS(bucketKeyEnabled bool, kmsKeyID, serverSideEncryption *string) Options {
 	return func(s *s3Client) {
 		s.bucketKeyEnabled = bucketKeyEnabled
-		if *kmsKeyID != "" {
+		if kmsKeyID != nil && *kmsKeyID != "" {
 			s.kmsKeyID = kmsKeyID
 		}
 
-		if *serverSideEncryption != "" {
-			s.serverSideEncryption = types.ServerSideEncryption(s.serverSideEncryption)
+		if serverSideEncryption != nil && *serverSideEncryption != "" {
+			s.serverSideEncryption = types.ServerSideEncryption(*serverSideEncryption)
 		}
 	}
 }

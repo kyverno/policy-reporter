@@ -12,7 +12,9 @@ import (
 )
 
 func Test_ScopeResultsListener(t *testing.T) {
+	t.Parallel()
 	t.Run("Send Results", func(t *testing.T) {
+		t.Parallel()
 		c := &client{validated: true, batchSend: true}
 		slistener := listener.NewSendScopeResultsListener(target.NewCollection(&target.Target{Client: c}))
 		slistener(preport1, []openreports.ResultAdapter{fixtures.FailResult}, false)
@@ -20,6 +22,7 @@ func Test_ScopeResultsListener(t *testing.T) {
 		assert.True(t, c.Called, "Expected Send to be called")
 	})
 	t.Run("Don't Send Result when validation fails", func(t *testing.T) {
+		t.Parallel()
 		c := &client{validated: false, batchSend: true}
 		slistener := listener.NewSendScopeResultsListener(target.NewCollection(&target.Target{Client: c}))
 		slistener(preport1, []openreports.ResultAdapter{fixtures.FailResult}, false)
@@ -27,6 +30,7 @@ func Test_ScopeResultsListener(t *testing.T) {
 		assert.False(t, c.Called, "Expected Send not to be called")
 	})
 	t.Run("Don't Send pre existing Result when skipExistingOnStartup is true", func(t *testing.T) {
+		t.Parallel()
 		c := &client{skipExistingOnStartup: true, batchSend: true}
 		slistener := listener.NewSendScopeResultsListener(target.NewCollection(&target.Target{Client: c}))
 		slistener(preport1, []openreports.ResultAdapter{fixtures.FailResult}, true)

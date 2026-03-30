@@ -19,6 +19,7 @@ func (rt mock) RoundTrip(req *net.Request) (*net.Response, error) {
 }
 
 func TestDebug(t *testing.T) {
+	t.Parallel()
 	obs, logs := observer.New(zap.DebugLevel)
 
 	zap.ReplaceGlobals(zap.New(obs))

@@ -12,6 +12,7 @@ import (
 )
 
 func TestClient(t *testing.T) {
+	t.Parallel()
 	client := leaderelection.New(&fake.FakeCoordinationV1{}, "policy-reporter", "namespace", "pod-123", time.Second, time.Second, time.Second, true)
 
 	if client == nil {

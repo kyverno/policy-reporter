@@ -13,7 +13,9 @@ import (
 )
 
 func TestSendJSONResponse(t *testing.T) {
+	t.Parallel()
 	t.Run("success response", func(t *testing.T) {
+		t.Parallel()
 		w := httptest.NewRecorder()
 
 		helper.SendJSONResponse(w, []string{"default", "user"}, nil)
@@ -28,6 +30,7 @@ func TestSendJSONResponse(t *testing.T) {
 	})
 
 	t.Run("error response", func(t *testing.T) {
+		t.Parallel()
 		w := httptest.NewRecorder()
 
 		helper.SendJSONResponse(w, nil, errors.New("error"))

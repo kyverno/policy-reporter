@@ -27,10 +27,14 @@ func NewFakeMetaClient() (*metafake.FakeMetadataClient, metafake.MetadataClient)
 }
 
 func Test_SecretInformer(t *testing.T) {
+	t.Parallel()
 	stop := make(chan struct{})
-	defer close(stop)
+	t.Cleanup(func() {
+		close(stop)
+	})
 
 	t.Run("update secretRef", func(t *testing.T) {
+		t.Parallel()
 		collection := target.NewCollection(
 			&target.Target{
 				ID:   uuid.NewString(),

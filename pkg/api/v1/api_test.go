@@ -26,6 +26,7 @@ import (
 var reconditioner = result.NewReconditioner(nil)
 
 func TestV1(t *testing.T) {
+	t.Parallel()
 	db, err := database.NewSQLiteDB("db_v2.db")
 	if err != nil {
 		assert.Fail(t, "failed to init SQLite DB")
@@ -61,6 +62,7 @@ func TestV1(t *testing.T) {
 	}), violations.NewReporter("../../../templates", "Cluster", "Report")))
 
 	t.Run("TargetResponse", func(t *testing.T) {
+		t.Parallel()
 		req, _ := http.NewRequest("GET", "/v1/targets", nil)
 		w := httptest.NewRecorder()
 
@@ -84,6 +86,7 @@ func TestV1(t *testing.T) {
 	})
 
 	t.Run("ListPolicyReports", func(t *testing.T) {
+		t.Parallel()
 		req, _ := http.NewRequest("GET", "/v1/policy-reports", nil)
 		w := httptest.NewRecorder()
 
@@ -101,6 +104,7 @@ func TestV1(t *testing.T) {
 	})
 
 	t.Run("ListClusterPolicyReports", func(t *testing.T) {
+		t.Parallel()
 		req, _ := http.NewRequest("GET", "/v1/cluster-policy-reports", nil)
 		w := httptest.NewRecorder()
 
@@ -118,6 +122,7 @@ func TestV1(t *testing.T) {
 	})
 
 	t.Run("ListNamespaces", func(t *testing.T) {
+		t.Parallel()
 		req, _ := http.NewRequest("GET", "/v1/namespaces", nil)
 		w := httptest.NewRecorder()
 
@@ -135,6 +140,7 @@ func TestV1(t *testing.T) {
 	})
 
 	t.Run("RuleStatusCounts", func(t *testing.T) {
+		t.Parallel()
 		req, _ := http.NewRequest("GET", "/v1/rule-status-count?policy=required-limit&rule=resource-limit-required", nil)
 		w := httptest.NewRecorder()
 
@@ -154,6 +160,7 @@ func TestV1(t *testing.T) {
 	})
 
 	t.Run("ListClusterFilter(Source)", func(t *testing.T) {
+		t.Parallel()
 		req, _ := http.NewRequest("GET", "/v1/cluster-resources/sources", nil)
 		w := httptest.NewRecorder()
 
@@ -172,6 +179,7 @@ func TestV1(t *testing.T) {
 	})
 
 	t.Run("ListNamespacedFilter(Source)", func(t *testing.T) {
+		t.Parallel()
 		req, _ := http.NewRequest("GET", "/v1/namespaced-resources/sources", nil)
 		w := httptest.NewRecorder()
 
@@ -190,6 +198,7 @@ func TestV1(t *testing.T) {
 	})
 
 	t.Run("ListClusterResources", func(t *testing.T) {
+		t.Parallel()
 		req, _ := http.NewRequest("GET", "/v1/cluster-resources/resources", nil)
 		w := httptest.NewRecorder()
 
@@ -207,6 +216,7 @@ func TestV1(t *testing.T) {
 	})
 
 	t.Run("ListNamespacedResources", func(t *testing.T) {
+		t.Parallel()
 		req, _ := http.NewRequest("GET", "/v1/namespaced-resources/resources", nil)
 		w := httptest.NewRecorder()
 
@@ -224,6 +234,7 @@ func TestV1(t *testing.T) {
 	})
 
 	t.Run("ListClusterStatusCounts", func(t *testing.T) {
+		t.Parallel()
 		req, _ := http.NewRequest("GET", "/v1/cluster-resources/status-counts", nil)
 		w := httptest.NewRecorder()
 
@@ -241,6 +252,7 @@ func TestV1(t *testing.T) {
 	})
 
 	t.Run("ListNamespacedStatusCounts", func(t *testing.T) {
+		t.Parallel()
 		req, _ := http.NewRequest("GET", "/v1/namespaced-resources/status-counts", nil)
 		w := httptest.NewRecorder()
 
@@ -258,6 +270,7 @@ func TestV1(t *testing.T) {
 	})
 
 	t.Run("ListClusterResults", func(t *testing.T) {
+		t.Parallel()
 		req, _ := http.NewRequest("GET", "/v1/cluster-resources/results", nil)
 		w := httptest.NewRecorder()
 
@@ -275,6 +288,7 @@ func TestV1(t *testing.T) {
 	})
 
 	t.Run("ListNamespacedResults", func(t *testing.T) {
+		t.Parallel()
 		req, _ := http.NewRequest("GET", "/v1/namespaced-resources/results", nil)
 		w := httptest.NewRecorder()
 
@@ -292,6 +306,7 @@ func TestV1(t *testing.T) {
 	})
 
 	t.Run("HTMLViolationsReport", func(t *testing.T) {
+		t.Parallel()
 		req, _ := http.NewRequest("GET", "/v1/html-report/violations", nil)
 		w := httptest.NewRecorder()
 

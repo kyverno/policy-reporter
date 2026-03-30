@@ -48,7 +48,9 @@ func (c *client) BatchUpdateFindings(ctx context.Context, params *hub.BatchUpdat
 }
 
 func TestSecurityHub(t *testing.T) {
+	t.Parallel()
 	t.Run("send result", func(t *testing.T) {
+		t.Parallel()
 		c := securityhub.NewClient(securityhub.Options{
 			AccountID:   "accountId",
 			Region:      "eu-central-1",
@@ -85,6 +87,7 @@ func TestSecurityHub(t *testing.T) {
 		c.Send(fixtures.DefaultPolicyReport, fixtures.CompleteTargetSendResult)
 	})
 	t.Run("clean up disabled", func(t *testing.T) {
+		t.Parallel()
 		h := &client{}
 
 		c := securityhub.NewClient(securityhub.Options{
@@ -106,6 +109,7 @@ func TestSecurityHub(t *testing.T) {
 		}
 	})
 	t.Run("findings without results", func(t *testing.T) {
+		t.Parallel()
 		h := &client{}
 
 		c := securityhub.NewClient(securityhub.Options{
@@ -127,6 +131,7 @@ func TestSecurityHub(t *testing.T) {
 		}
 	})
 	t.Run("findings with existing result", func(t *testing.T) {
+		t.Parallel()
 		h := &client{
 			findings: []types.AwsSecurityFinding{
 				{
@@ -154,6 +159,7 @@ func TestSecurityHub(t *testing.T) {
 		}
 	})
 	t.Run("findings with not existing result", func(t *testing.T) {
+		t.Parallel()
 		h := &client{
 			findings: []types.AwsSecurityFinding{
 				{
@@ -181,6 +187,7 @@ func TestSecurityHub(t *testing.T) {
 		}
 	})
 	t.Run("MapSeverity", func(t *testing.T) {
+		t.Parallel()
 		if securityhub.MapSeverity(v1alpha2.SeverityInfo) != types.SeverityLabelInformational {
 			t.Error("unexpected severity mapping")
 		}

@@ -14,10 +14,12 @@ import (
 var ctx = context.Background()
 
 func Test_PolicyReportStore(t *testing.T) {
+	t.Parallel()
 	store := report.NewPolicyReportStore()
 	store.CreateSchemas(ctx)
 
 	t.Run("Add/Get", func(t *testing.T) {
+		t.Parallel()
 		_, err := store.Get(ctx, preport.GetID())
 		if err == nil {
 			t.Fatalf("Should not be found in empty Store")
@@ -31,6 +33,7 @@ func Test_PolicyReportStore(t *testing.T) {
 	})
 
 	t.Run("Update/Get", func(t *testing.T) {
+		t.Parallel()
 		ureport := &openreports.ReportAdapter{
 			Report: &v1alpha1.Report{
 				ObjectMeta: v1.ObjectMeta{
@@ -57,6 +60,7 @@ func Test_PolicyReportStore(t *testing.T) {
 	})
 
 	t.Run("Delete/Get", func(t *testing.T) {
+		t.Parallel()
 		_, err := store.Get(ctx, preport.GetID())
 		if err != nil {
 			t.Errorf("Should be found in Store after adding report to the store")
@@ -70,6 +74,7 @@ func Test_PolicyReportStore(t *testing.T) {
 	})
 
 	t.Run("CleanUp", func(t *testing.T) {
+		t.Parallel()
 		store.Add(ctx, preport)
 
 		store.CleanUp(ctx)

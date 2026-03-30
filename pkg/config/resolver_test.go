@@ -196,7 +196,7 @@ var targets = target.Targets{
 	},
 	GCS: &targetconfig.Config[v1alpha1.GCSOptions]{
 		Config: &v1alpha1.GCSOptions{
-			Credentials: `{"token": "token", "type": "authorized_user"}`,
+			Credentials: `{"token": "token", "type": "service_account"}`,
 			Bucket:      "test",
 			Prefix:      "prefix",
 		},
@@ -244,18 +244,21 @@ var testConfig = &config.Config{
 }
 
 func Test_ResolveTargets(t *testing.T) {
+	t.Parallel()
 	resolver := config.NewResolver(testConfig, &rest.Config{})
 
 	assert.Equal(t, resolver.TargetClients().Length(), 25)
 }
 
 func Test_ResolveHasTargets(t *testing.T) {
+	t.Parallel()
 	resolver := config.NewResolver(testConfig, &rest.Config{})
 
 	assert.True(t, resolver.HasTargets())
 }
 
 func Test_ResolveSkipExistingOnStartup(t *testing.T) {
+	t.Parallel()
 	testConfig := &config.Config{
 		Targets: target.Targets{
 			Loki: &targetconfig.Config[v1alpha1.LokiOptions]{
@@ -280,6 +283,7 @@ func Test_ResolveSkipExistingOnStartup(t *testing.T) {
 	}
 
 	t.Run("Resolve false", func(t *testing.T) {
+		t.Parallel()
 		testConfig.Targets.Elasticsearch.SkipExisting = false
 
 		resolver := config.NewResolver(testConfig, &rest.Config{})
@@ -288,6 +292,7 @@ func Test_ResolveSkipExistingOnStartup(t *testing.T) {
 	})
 
 	t.Run("Resolve true", func(t *testing.T) {
+		t.Parallel()
 		testConfig.Targets.Elasticsearch.SkipExisting = true
 
 		resolver := config.NewResolver(testConfig, &rest.Config{})
@@ -297,6 +302,7 @@ func Test_ResolveSkipExistingOnStartup(t *testing.T) {
 }
 
 func Test_ResolvePolicyClient(t *testing.T) {
+	t.Parallel()
 	resolver := config.NewResolver(&config.Config{DBFile: "test.db"}, &rest.Config{})
 
 	client1, err := resolver.OpenReportsClient()
@@ -308,6 +314,7 @@ func Test_ResolvePolicyClient(t *testing.T) {
 }
 
 func Test_ResolveSecretInformer(t *testing.T) {
+	t.Parallel()
 	resolver := config.NewResolver(&config.Config{DBFile: "test.db"}, &rest.Config{})
 
 	informer, err := resolver.SecretInformer()
@@ -316,6 +323,7 @@ func Test_ResolveSecretInformer(t *testing.T) {
 }
 
 func Test_ResolveSecretInformerWithInvalidK8sConfig(t *testing.T) {
+	t.Parallel()
 	k8sConfig := &rest.Config{}
 	k8sConfig.Host = "invalid/url"
 
@@ -326,6 +334,7 @@ func Test_ResolveSecretInformerWithInvalidK8sConfig(t *testing.T) {
 }
 
 func Test_ResolveLeaderElectionClient(t *testing.T) {
+	t.Parallel()
 	resolver := config.NewResolver(&config.Config{DBFile: "test.db"}, &rest.Config{})
 
 	client1, err := resolver.LeaderElectionClient()
@@ -337,6 +346,7 @@ func Test_ResolveLeaderElectionClient(t *testing.T) {
 }
 
 func Test_ResolvePolicyStore(t *testing.T) {
+	t.Parallel()
 	resolver := config.NewResolver(&config.Config{DBFile: "test.db"}, &rest.Config{})
 	db := resolver.Database()
 	defer db.Close()
@@ -349,6 +359,7 @@ func Test_ResolvePolicyStore(t *testing.T) {
 }
 
 func Test_ResolveAPIServer(t *testing.T) {
+	t.Parallel()
 	resolver := config.NewResolver(&config.Config{
 		API: config.API{
 			BasicAuth: config.BasicAuth{Username: "user", Password: "password"},
@@ -360,7 +371,9 @@ func Test_ResolveAPIServer(t *testing.T) {
 }
 
 func Test_ResolveCache(t *testing.T) {
+	t.Parallel()
 	t.Run("InMemory", func(t *testing.T) {
+		t.Parallel()
 		resolver := config.NewResolver(testConfig, &rest.Config{})
 
 		cache1 := resolver.ResultCache()
@@ -370,6 +383,7 @@ func Test_ResolveCache(t *testing.T) {
 	})
 
 	t.Run("Redis", func(t *testing.T) {
+		t.Parallel()
 		redisConfig := &config.Config{
 			Redis: config.Redis{
 				Enabled: true,
@@ -383,6 +397,7 @@ func Test_ResolveCache(t *testing.T) {
 	})
 
 	t.Run("RedisWithSkipTLS", func(t *testing.T) {
+		t.Parallel()
 		redisConfig := &config.Config{
 			Redis: config.Redis{
 				Enabled: true,
@@ -397,6 +412,7 @@ func Test_ResolveCache(t *testing.T) {
 	})
 
 	t.Run("RedisWithCertificate", func(t *testing.T) {
+		t.Parallel()
 		redisConfig := &config.Config{
 			Redis: config.Redis{
 				Enabled:     true,
@@ -411,6 +427,7 @@ func Test_ResolveCache(t *testing.T) {
 	})
 
 	t.Run("RedisWithClientCertificate", func(t *testing.T) {
+		t.Parallel()
 		redisConfig := &config.Config{
 			Redis: config.Redis{
 				Enabled:    true,
@@ -427,12 +444,14 @@ func Test_ResolveCache(t *testing.T) {
 }
 
 func Test_ResolveReportFilter(t *testing.T) {
+	t.Parallel()
 	resolver := config.NewResolver(testConfig, &rest.Config{})
 
 	assert.NotNil(t, resolver.ReportFilter())
 }
 
 func Test_ResolveClientWithInvalidK8sConfig(t *testing.T) {
+	t.Parallel()
 	k8sConfig := &rest.Config{}
 	k8sConfig.Host = "invalid/url"
 
@@ -443,6 +462,7 @@ func Test_ResolveClientWithInvalidK8sConfig(t *testing.T) {
 }
 
 func Test_ResolveLeaderElectionWithInvalidK8sConfig(t *testing.T) {
+	t.Parallel()
 	k8sConfig := &rest.Config{}
 	k8sConfig.Host = "invalid/url"
 
@@ -453,6 +473,7 @@ func Test_ResolveLeaderElectionWithInvalidK8sConfig(t *testing.T) {
 }
 
 func Test_ResolveCRDClientWithInvalidK8sConfig(t *testing.T) {
+	t.Parallel()
 	k8sConfig := &rest.Config{}
 	k8sConfig.Host = "invalid/url"
 
@@ -463,12 +484,14 @@ func Test_ResolveCRDClientWithInvalidK8sConfig(t *testing.T) {
 }
 
 func Test_ResolveSecretClient(t *testing.T) {
+	t.Parallel()
 	resolver := config.NewResolver(testConfig, &rest.Config{})
 
 	assert.NotNil(t, resolver.SecretClient())
 }
 
 func Test_ResolveSecretCClientWithInvalidK8sConfig(t *testing.T) {
+	t.Parallel()
 	k8sConfig := &rest.Config{}
 	k8sConfig.Host = "invalid/url"
 
@@ -479,7 +502,9 @@ func Test_ResolveSecretCClientWithInvalidK8sConfig(t *testing.T) {
 }
 
 func Test_RegisterStoreListener(t *testing.T) {
+	t.Parallel()
 	t.Run("Register StoreListener", func(t *testing.T) {
+		t.Parallel()
 		resolver := config.NewResolver(testConfig, &rest.Config{})
 		resolver.RegisterStoreListener(context.Background(), report.NewPolicyReportStore())
 
@@ -488,7 +513,9 @@ func Test_RegisterStoreListener(t *testing.T) {
 }
 
 func Test_RegisterMetricsListener(t *testing.T) {
+	t.Parallel()
 	t.Run("Register MetricsListener", func(t *testing.T) {
+		t.Parallel()
 		resolver := config.NewResolver(testConfig, &rest.Config{})
 		resolver.RegisterMetricsListener()
 
@@ -497,7 +524,9 @@ func Test_RegisterMetricsListener(t *testing.T) {
 }
 
 func Test_RegisterSendResultListener(t *testing.T) {
+	t.Parallel()
 	t.Run("Register SendResultListener with Targets", func(t *testing.T) {
+		t.Parallel()
 		resolver := config.NewResolver(testConfig, &rest.Config{})
 		resolver.Logger()
 		resolver.RegisterSendResultListener()
@@ -507,12 +536,15 @@ func Test_RegisterSendResultListener(t *testing.T) {
 }
 
 func Test_SMTP(t *testing.T) {
+	t.Parallel()
 	t.Run("SMTP", func(t *testing.T) {
+		t.Parallel()
 		resolver := config.NewResolver(testConfig, &rest.Config{})
 
 		assert.NotNil(t, resolver.SMTPServer())
 	})
 	t.Run("EmailClient", func(t *testing.T) {
+		t.Parallel()
 		resolver := config.NewResolver(testConfig, &rest.Config{})
 
 		assert.NotNil(t, resolver.EmailClient())
@@ -520,6 +552,7 @@ func Test_SMTP(t *testing.T) {
 }
 
 func Test_ResolveLogger(t *testing.T) {
+	t.Parallel()
 	resolver := config.NewResolver(testConfig, &rest.Config{})
 
 	logger1, _ := resolver.Logger()
@@ -532,7 +565,9 @@ func Test_ResolveLogger(t *testing.T) {
 }
 
 func Test_ResolveEnableLeaderElection(t *testing.T) {
+	t.Parallel()
 	t.Run("general disabled", func(t *testing.T) {
+		t.Parallel()
 		resolver := config.NewResolver(&config.Config{
 			LeaderElection: config.LeaderElection{Enabled: false},
 			Targets: target.Targets{
@@ -551,6 +586,7 @@ func Test_ResolveEnableLeaderElection(t *testing.T) {
 	})
 
 	t.Run("no pushes and SQLite Database", func(t *testing.T) {
+		t.Parallel()
 		resolver := config.NewResolver(&config.Config{
 			LeaderElection: config.LeaderElection{Enabled: true},
 			Database:       config.Database{Type: database.SQLite},
@@ -561,6 +597,7 @@ func Test_ResolveEnableLeaderElection(t *testing.T) {
 	})
 
 	t.Run("enabled if pushes defined", func(t *testing.T) {
+		t.Parallel()
 		resolver := config.NewResolver(&config.Config{
 			LeaderElection: config.LeaderElection{Enabled: true},
 			Database:       config.Database{Type: database.SQLite},
@@ -581,6 +618,7 @@ func Test_ResolveEnableLeaderElection(t *testing.T) {
 }
 
 func Test_ResolveCustomIDGenerators(t *testing.T) {
+	t.Parallel()
 	resolver := config.NewResolver(testConfig, nil)
 
 	generators := resolver.ReconditionerConfigs()
@@ -588,6 +626,7 @@ func Test_ResolveCustomIDGenerators(t *testing.T) {
 }
 
 func Test_ResolveTargetCollection(t *testing.T) {
+	t.Parallel()
 	resolver := config.NewResolver(testConfig, &rest.Config{})
 
 	collection := resolver.TargetClients()

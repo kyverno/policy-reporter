@@ -15,6 +15,7 @@ import (
 )
 
 func TestSendResponseSuccess(t *testing.T) {
+	t.Parallel()
 	gin.SetMode(gin.ReleaseMode)
 	engine := gin.New()
 	server := api.NewServer(engine, api.WithRecovery())
@@ -34,6 +35,7 @@ func TestSendResponseSuccess(t *testing.T) {
 }
 
 func TestSendResponseError(t *testing.T) {
+	t.Parallel()
 	gin.SetMode(gin.ReleaseMode)
 	engine := gin.New()
 	server := api.NewServer(engine, api.WithRecovery())
@@ -53,6 +55,7 @@ func TestSendResponseError(t *testing.T) {
 }
 
 func TestBuildFilter(t *testing.T) {
+	t.Parallel()
 	filter := api.BuildFilter(&gin.Context{
 		Request: &http.Request{
 			URL: &url.URL{
@@ -76,6 +79,7 @@ func TestBuildFilter(t *testing.T) {
 }
 
 func TestPaginationDefaults(t *testing.T) {
+	t.Parallel()
 	pagination := api.BuildPagination(&gin.Context{
 		Request: &http.Request{
 			URL: &url.URL{
@@ -94,6 +98,7 @@ func TestPaginationDefaults(t *testing.T) {
 }
 
 func TestPaginationFromURL(t *testing.T) {
+	t.Parallel()
 	pagination := api.BuildPagination(&gin.Context{
 		Request: &http.Request{
 			URL: &url.URL{

@@ -8,6 +8,7 @@ import (
 )
 
 func Test_LabelMappings(t *testing.T) {
+	t.Parallel()
 	results := map[string]string{}
 	res := fixtures.FailPodResult.GetResource()
 

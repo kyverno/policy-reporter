@@ -26,7 +26,9 @@ func (c testClient) Do(req *http.Request) (*http.Response, error) {
 }
 
 func Test_TelegramTarget(t *testing.T) {
+	t.Parallel()
 	t.Run("Send", func(t *testing.T) {
+		t.Parallel()
 		callback := func(req *http.Request) error {
 			if contentType := req.Header.Get("Content-Type"); contentType != "application/json; charset=utf-8" {
 				t.Errorf("Unexpected Content-Type: %s", contentType)
@@ -63,6 +65,7 @@ func Test_TelegramTarget(t *testing.T) {
 		}
 	})
 	t.Run("Name", func(t *testing.T) {
+		t.Parallel()
 		client := telegram.NewClient(telegram.Options{
 			ClientOptions: target.ClientOptions{
 				Name: "Telegram",

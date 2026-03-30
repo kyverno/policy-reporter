@@ -13,6 +13,7 @@ import (
 )
 
 func Test_PublishLifecycleEvents(t *testing.T) {
+	t.Parallel()
 	var event report.LifecycleEvent
 
 	wg := sync.WaitGroup{}
@@ -50,6 +51,7 @@ func Test_PublishLifecycleEvents(t *testing.T) {
 }
 
 func Test_PublishDeleteLifecycleEvents(t *testing.T) {
+	t.Parallel()
 	var event report.LifecycleEvent
 
 	wg := sync.WaitGroup{}
@@ -87,6 +89,7 @@ func Test_PublishDeleteLifecycleEvents(t *testing.T) {
 }
 
 func Test_GetReisteredListeners(t *testing.T) {
+	t.Parallel()
 	publisher := report.NewEventPublisher()
 	publisher.RegisterListener("test", func(_ context.Context, le report.LifecycleEvent) {})
 
@@ -96,6 +99,7 @@ func Test_GetReisteredListeners(t *testing.T) {
 }
 
 func Test_UnreisteredListeners(t *testing.T) {
+	t.Parallel()
 	publisher := report.NewEventPublisher()
 	publisher.RegisterListener("test", func(_ context.Context, le report.LifecycleEvent) {})
 	publisher.UnregisterListener("test")

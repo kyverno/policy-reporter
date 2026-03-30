@@ -17,6 +17,7 @@ var check = func() error {
 }
 
 func TestWithoutGZIP(t *testing.T) {
+	t.Parallel()
 	gin.SetMode(gin.ReleaseMode)
 
 	engine := gin.New()
@@ -35,6 +36,7 @@ func TestWithoutGZIP(t *testing.T) {
 }
 
 func TestWithGZIP(t *testing.T) {
+	t.Parallel()
 	gin.SetMode(gin.ReleaseMode)
 
 	server := api.NewServer(gin.New(), api.WithGZIP(), api.WithHealthChecks([]api.HealthCheck{check}))
@@ -51,6 +53,7 @@ func TestWithGZIP(t *testing.T) {
 }
 
 func TestWithProfiling(t *testing.T) {
+	t.Parallel()
 	gin.SetMode(gin.ReleaseMode)
 
 	server := api.NewServer(gin.New(), api.WithProfiling())
@@ -75,21 +78,23 @@ func (h *testHandler) Register(group *gin.RouterGroup) error {
 }
 
 func TestWithCustomHandler(t *testing.T) {
+	t.Parallel()
 	gin.SetMode(gin.ReleaseMode)
 
 	server := api.NewServer(gin.New(), api.WithProfiling())
-	server.Register("/test", &testHandler{})
+	err := server.Register("/test", &testHandler{})
+	assert.NoError(t, err)
 
 	req, _ := http.NewRequest("GET", "/test", nil)
 	w := httptest.NewRecorder()
 
 	server.Serve(w, req)
 
-	assert := assert.New(t)
-	assert.Equal(http.StatusOK, w.Code)
+	assert.Equal(t, http.StatusOK, w.Code)
 }
 
 func TestWithRecover(t *testing.T) {
+	t.Parallel()
 	gin.SetMode(gin.ReleaseMode)
 	engine := gin.New()
 	server := api.NewServer(engine, api.WithRecovery())
@@ -108,6 +113,7 @@ func TestWithRecover(t *testing.T) {
 }
 
 func TestWithZapLoggingRecover(t *testing.T) {
+	t.Parallel()
 	gin.SetMode(gin.ReleaseMode)
 	engine := gin.New()
 	server := api.NewServer(engine, api.WithLogging(zap.L()))
@@ -126,6 +132,7 @@ func TestWithZapLoggingRecover(t *testing.T) {
 }
 
 func TestWithPort(t *testing.T) {
+	t.Parallel()
 	gin.SetMode(gin.ReleaseMode)
 
 	server := api.NewServer(gin.New(), api.WithProfiling(), api.WithPort(8082))

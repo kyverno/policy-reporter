@@ -11,7 +11,9 @@ import (
 )
 
 func Test_CleanupListener(t *testing.T) {
+	t.Parallel()
 	t.Run("Execute Cleanup Handler", func(t *testing.T) {
+		t.Parallel()
 		c := &client{cleanup: true}
 
 		slistener := listener.NewCleanupListener(target.NewCollection(&target.Target{Client: c}))
@@ -22,7 +24,9 @@ func Test_CleanupListener(t *testing.T) {
 }
 
 func Test_Cleanup_Listener_Skip_Added(t *testing.T) {
+	t.Parallel()
 	t.Run("Execute Cleanup Handler", func(t *testing.T) {
+		t.Parallel()
 		c := &client{cleanup: true}
 
 		slistener := listener.NewCleanupListener(target.NewCollection(&target.Target{Client: c}))

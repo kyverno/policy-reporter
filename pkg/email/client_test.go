@@ -9,19 +9,23 @@ import (
 )
 
 func Test_EncryptionFromString(t *testing.T) {
+	t.Parallel()
 	t.Run("EncryptionFromString.SSLTLS", func(t *testing.T) {
+		t.Parallel()
 		encryption := email.EncryptionFromString("ssl/tls")
 		if encryption != mail.EncryptionSSLTLS {
 			t.Errorf("Unexpected encryption mapping: %d", encryption)
 		}
 	})
 	t.Run("EncryptionFromString.STARTTLS", func(t *testing.T) {
+		t.Parallel()
 		encryption := email.EncryptionFromString("starttls")
 		if encryption != mail.EncryptionSTARTTLS {
 			t.Errorf("Unexpected encryption mapping: %d", encryption)
 		}
 	})
 	t.Run("EncryptionFromString.Default", func(t *testing.T) {
+		t.Parallel()
 		encryption := email.EncryptionFromString("")
 		if encryption != mail.EncryptionNone {
 			t.Errorf("Unexpected encryption mapping: %d", encryption)
@@ -30,6 +34,7 @@ func Test_EncryptionFromString(t *testing.T) {
 }
 
 func Test_NewClient(t *testing.T) {
+	t.Parallel()
 	client := email.NewClient("policy-reporter@kyverno.io", nil)
 	if client == nil {
 		t.Errorf("Unexpected client result")

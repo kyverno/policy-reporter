@@ -23,7 +23,9 @@ func (c testClient) Do(req *http.Request) (*http.Response, error) {
 }
 
 func Test_SlackTarget(t *testing.T) {
+	t.Parallel()
 	t.Run("Send Complete Result", func(t *testing.T) {
+		t.Parallel()
 		callback := func(req *http.Request) {
 			if contentType := req.Header.Get("Content-Type"); contentType != "application/json; charset=utf-8" {
 				t.Errorf("Unexpected Content-Type: %s", contentType)
@@ -50,6 +52,7 @@ func Test_SlackTarget(t *testing.T) {
 	})
 
 	t.Run("Send Minimal Result", func(t *testing.T) {
+		t.Parallel()
 		callback := func(req *http.Request) {
 			if contentType := req.Header.Get("Content-Type"); contentType != "application/json; charset=utf-8" {
 				t.Errorf("Unexpected Content-Type: %s", contentType)
@@ -75,6 +78,7 @@ func Test_SlackTarget(t *testing.T) {
 	})
 
 	t.Run("Send enforce Result", func(t *testing.T) {
+		t.Parallel()
 		callback := func(req *http.Request) {
 			if contentType := req.Header.Get("Content-Type"); contentType != "application/json; charset=utf-8" {
 				t.Errorf("Unexpected Content-Type: %s", contentType)
@@ -100,6 +104,7 @@ func Test_SlackTarget(t *testing.T) {
 	})
 
 	t.Run("Send incomplete Result", func(t *testing.T) {
+		t.Parallel()
 		callback := func(req *http.Request) {
 			if contentType := req.Header.Get("Content-Type"); contentType != "application/json; charset=utf-8" {
 				t.Errorf("Unexpected Content-Type: %s", contentType)
@@ -126,6 +131,7 @@ func Test_SlackTarget(t *testing.T) {
 	})
 
 	t.Run("Send incomplete Result2", func(t *testing.T) {
+		t.Parallel()
 		callback := func(req *http.Request) {
 			if contentType := req.Header.Get("Content-Type"); contentType != "application/json; charset=utf-8" {
 				t.Errorf("Unexpected Content-Type: %s", contentType)
@@ -152,6 +158,7 @@ func Test_SlackTarget(t *testing.T) {
 	})
 
 	t.Run("Name", func(t *testing.T) {
+		t.Parallel()
 		client := slack.NewClient(slack.Options{
 			ClientOptions: target.ClientOptions{
 				Name: "Slack",

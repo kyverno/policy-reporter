@@ -36,7 +36,9 @@ var creport = &openreports.ClusterReportAdapter{
 }
 
 func Test_Events(t *testing.T) {
+	t.Parallel()
 	t.Run("Event.String", func(t *testing.T) {
+		t.Parallel()
 		assert.Equal(t, "add", report.Added.String(), "Unexpected type conversion")
 		assert.Equal(t, "update", report.Updated.String(), "Unexpected type conversion")
 		assert.Equal(t, "delete", report.Deleted.String(), "Unexpected type conversion")
@@ -45,11 +47,13 @@ func Test_Events(t *testing.T) {
 }
 
 func Test_GetType(t *testing.T) {
+	t.Parallel()
 	assert.Equal(t, report.PolicyReportType, report.GetType(preport), "expected type")
 	assert.Equal(t, report.ClusterPolicyReportType, report.GetType(creport), "expected type")
 }
 
 func Test_FindNewEvents(t *testing.T) {
+	t.Parallel()
 	preport1 := &openreports.ReportAdapter{
 		Report: &v1alpha1.Report{
 			ObjectMeta: v1.ObjectMeta{

@@ -11,13 +11,16 @@ import (
 )
 
 func Test_Source(t *testing.T) {
+	t.Parallel()
 	source := summary.NewSource("kyverno", true)
 	t.Run("Source.ClusterReports", func(t *testing.T) {
+		t.Parallel()
 		if !source.ClusterReports {
 			t.Errorf("Expected Surce.ClusterReports to be true")
 		}
 	})
 	t.Run("Source.AddClusterSummary", func(t *testing.T) {
+		t.Parallel()
 		source.AddClusterSummary(&openreports.ReportAdapter{
 			Report: &v1alpha1.Report{
 				ObjectMeta: v1.ObjectMeta{
@@ -46,6 +49,7 @@ func Test_Source(t *testing.T) {
 		}
 	})
 	t.Run("Source.AddNamespacedSummary", func(t *testing.T) {
+		t.Parallel()
 		source.AddNamespacedSummary("test", v1alpha1.ReportSummary{
 			Pass:  5,
 			Warn:  6,

@@ -15,11 +15,7 @@ const Store = "store_listener"
 func NewStoreListener(store report.PolicyReportStore) report.PolicyReportListener {
 	return func(ctx context.Context, event report.LifecycleEvent) {
 		err := retry.OnError(retry.DefaultRetry, func(err error) bool {
-			if errors.Is(err, context.DeadlineExceeded) {
-				return false
-			}
-
-			return true
+			return !errors.Is(err, context.DeadlineExceeded)
 		}, func() error {
 			if event.Type == report.Deleted {
 				return store.Remove(ctx, event.PolicyReport.GetID())

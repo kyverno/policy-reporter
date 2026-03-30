@@ -1,0 +1,56 @@
+version: "2"
+linters:
+  enable:
+    - asasalint
+    - asciicheck
+    - bidichk
+    - containedctx
+    - copyloopvar
+    - decorder
+    - dogsled
+    - durationcheck
+    - errname
+    - gochecknoinits
+    - goprintffuncname
+    - gosec
+    - grouper
+    - importas
+    - makezero
+    - misspell
+    - nolintlint
+    - nosprintfhostport
+    - thelper
+    - tparallel
+    - unconvert
+    - wastedassign
+    - whitespace
+  disable:
+    - errcheck
+    - gosec
+  settings:
+    gosec:
+      excludes:
+        - G704
+        - G117
+  exclusions:
+    generated: lax
+    presets:
+      - comments
+      - common-false-positives
+      - legacy
+      - std-error-handling
+    paths:
+      - third_party$
+      - builtin$
+      - examples$
+formatters:
+  enable:
+    - gofmt
+    - gofumpt
+    - goimports
+  exclusions:
+    generated: lax
+    paths:
+      - third_party$
+      - builtin$
+      - examples$

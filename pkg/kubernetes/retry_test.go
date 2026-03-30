@@ -16,7 +16,7 @@ import (
 )
 
 func newFakeClient() v1.NamespaceInterface {
-	return fake.NewSimpleClientset(
+	return fake.NewClientset(
 		&corev1.Namespace{
 			ObjectMeta: metav1.ObjectMeta{
 				Name: "default",
@@ -58,7 +58,9 @@ func (s *ns) List(ctx context.Context, opts metav1.ListOptions) (*corev1.Namespa
 }
 
 func TestRetry(t *testing.T) {
+	t.Parallel()
 	t.Run("direct success", func(t *testing.T) {
+		t.Parallel()
 		client := &ns{NamespaceInterface: newFakeClient()}
 
 		list, err := kubernetes.Retry(func() (*corev1.NamespaceList, error) {
@@ -70,6 +72,7 @@ func TestRetry(t *testing.T) {
 	})
 
 	t.Run("retry success", func(t *testing.T) {
+		t.Parallel()
 		client := &ns{maxRetry: 1, NamespaceInterface: newFakeClient()}
 
 		list, err := kubernetes.Retry(func() (*corev1.NamespaceList, error) {
@@ -81,6 +84,7 @@ func TestRetry(t *testing.T) {
 	})
 
 	t.Run("retry error", func(t *testing.T) {
+		t.Parallel()
 		client := &ns{NamespaceInterface: newFakeClient(), err: true}
 
 		_, err := kubernetes.Retry(func() (*corev1.NamespaceList, error) {
@@ -91,6 +95,7 @@ func TestRetry(t *testing.T) {
 	})
 
 	t.Run("retry timeout", func(t *testing.T) {
+		t.Parallel()
 		try := 0
 
 		_, err := kubernetes.Retry(func() (any, error) {
@@ -106,6 +111,7 @@ func TestRetry(t *testing.T) {
 	})
 
 	t.Run("retry server timeout", func(t *testing.T) {
+		t.Parallel()
 		try := 0
 
 		_, err := kubernetes.Retry(func() (any, error) {
@@ -121,6 +127,7 @@ func TestRetry(t *testing.T) {
 	})
 
 	t.Run("retry service unavailable", func(t *testing.T) {
+		t.Parallel()
 		try := 0
 
 		_, err := kubernetes.Retry(func() (any, error) {
@@ -136,6 +143,7 @@ func TestRetry(t *testing.T) {
 	})
 
 	t.Run("retry ignore other status", func(t *testing.T) {
+		t.Parallel()
 		try := 0
 
 		_, err := kubernetes.Retry(func() (any, error) {

@@ -14,3 +14,4 @@ heap*
 /.idea/
 .gopath
 /dist
+/.claude

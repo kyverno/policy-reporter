@@ -11,7 +11,9 @@ import (
 )
 
 func TestConfig(t *testing.T) {
+	t.Parallel()
 	t.Run("return expected secret ref", func(t *testing.T) {
+		t.Parallel()
 		c := &targetconfig.Config[v1alpha1.WebhookOptions]{
 			SecretRef: "webhook-secret",
 		}
@@ -20,6 +22,7 @@ func TestConfig(t *testing.T) {
 	})
 
 	t.Run("ignores secret mount", func(t *testing.T) {
+		t.Parallel()
 		c := &targetconfig.Config[v1alpha1.WebhookOptions]{
 			MountedSecret: "webhook-secret",
 		}
@@ -28,6 +31,7 @@ func TestConfig(t *testing.T) {
 	})
 
 	t.Run("base mapper set expected fallbacks from parent config", func(t *testing.T) {
+		t.Parallel()
 		p := &targetconfig.Config[v1alpha1.WebhookOptions]{
 			MinimumSeverity: v1alpha2.SeverityMedium,
 			SkipExisting:    true,
@@ -41,6 +45,7 @@ func TestConfig(t *testing.T) {
 	})
 
 	t.Run("base mapper keeps none empty values", func(t *testing.T) {
+		t.Parallel()
 		p := &targetconfig.Config[v1alpha1.WebhookOptions]{
 			MinimumSeverity: v1alpha2.SeverityMedium,
 		}
@@ -56,7 +61,9 @@ func TestConfig(t *testing.T) {
 }
 
 func TestAWSConfig(t *testing.T) {
+	t.Parallel()
 	t.Run("aws mapper set expected fallbacks from parent config", func(t *testing.T) {
+		t.Parallel()
 		p := v1alpha1.AWSConfig{
 			AccessKeyID:     "access",
 			SecretAccessKey: "secret",
@@ -74,6 +81,7 @@ func TestAWSConfig(t *testing.T) {
 	})
 
 	t.Run("base mapper keeps none empty values", func(t *testing.T) {
+		t.Parallel()
 		p := v1alpha1.AWSConfig{
 			AccessKeyID:     "access",
 			SecretAccessKey: "secret",

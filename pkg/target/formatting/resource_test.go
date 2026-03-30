@@ -10,7 +10,9 @@ import (
 )
 
 func TestResourceString(t *testing.T) {
+	t.Parallel()
 	t.Run("namespaced resource", func(t *testing.T) {
+		t.Parallel()
 		res := formatting.ResourceString(&corev1.ObjectReference{
 			APIVersion: "v1",
 			Kind:       "Deployment",
@@ -22,6 +24,7 @@ func TestResourceString(t *testing.T) {
 	})
 
 	t.Run("cluster resource", func(t *testing.T) {
+		t.Parallel()
 		res := formatting.ResourceString(&corev1.ObjectReference{
 			APIVersion: "v1",
 			Kind:       "Namespace",

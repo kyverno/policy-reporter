@@ -13,7 +13,9 @@ import (
 )
 
 func Test_Debouncer(t *testing.T) {
+	t.Parallel()
 	t.Run("Skip Empty Update", func(t *testing.T) {
+		t.Parallel()
 		counter := 0
 		wg := sync.WaitGroup{}
 		wg.Add(2)
@@ -51,6 +53,7 @@ func Test_Debouncer(t *testing.T) {
 	})
 
 	t.Run("Execute Empty Updates after waiting time", func(t *testing.T) {
+		t.Parallel()
 		counter := 0
 		wg := sync.WaitGroup{}
 		wg.Add(2)
@@ -83,6 +86,7 @@ func Test_Debouncer(t *testing.T) {
 	})
 
 	t.Run("Skip Empty Update when delete event follows directly", func(t *testing.T) {
+		t.Parallel()
 		counter := 0
 		wg := sync.WaitGroup{}
 		wg.Add(2)

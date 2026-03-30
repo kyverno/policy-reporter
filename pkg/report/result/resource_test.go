@@ -11,7 +11,9 @@ import (
 )
 
 func TestResource(t *testing.T) {
+	t.Parallel()
 	t.Run("resource from scope", func(t *testing.T) {
+		t.Parallel()
 		resource := &corev1.ObjectReference{Name: "test", Kind: "Pod"}
 
 		res := result.Resource(&openreports.ReportAdapter{Report: &v1alpha1.Report{Scope: resource}}, openreports.ResultAdapter{})
@@ -21,6 +23,7 @@ func TestResource(t *testing.T) {
 		}
 	})
 	t.Run("resource from result", func(t *testing.T) {
+		t.Parallel()
 		resource := &corev1.ObjectReference{Name: "test", Kind: "Pod"}
 
 		res := result.Resource(&openreports.ReportAdapter{Report: &v1alpha1.Report{}}, openreports.ResultAdapter{ReportResult: v1alpha1.ReportResult{Subjects: []corev1.ObjectReference{*resource}}})
@@ -30,6 +33,7 @@ func TestResource(t *testing.T) {
 		}
 	})
 	t.Run("empty fallback resource", func(t *testing.T) {
+		t.Parallel()
 		res := result.Resource(&openreports.ReportAdapter{Report: &v1alpha1.Report{}}, openreports.ResultAdapter{ReportResult: v1alpha1.ReportResult{Subjects: []corev1.ObjectReference{}}})
 
 		if res == nil {

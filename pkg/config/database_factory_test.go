@@ -21,7 +21,7 @@ const (
 )
 
 func newFakeClient() v1.SecretInterface {
-	return k8sfake.NewSimpleClientset(&corev1.Secret{
+	return k8sfake.NewClientset(&corev1.Secret{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      secretName,
 			Namespace: "default",
@@ -50,9 +50,11 @@ func mountSecret() {
 }
 
 func Test_ResolveDatabase(t *testing.T) {
+	t.Parallel()
 	factory := config.NewDatabaseFactory(nil)
 
 	t.Run("SQLite Fallback", func(t *testing.T) {
+		t.Parallel()
 		db := factory.NewSQLite("test.db", false)
 		if db == nil || db.Dialect().Name() != dialect.SQLite {
 			t.Error("Expected SQLite database as fallback")
@@ -60,6 +62,7 @@ func Test_ResolveDatabase(t *testing.T) {
 	})
 
 	t.Run("MySQL", func(t *testing.T) {
+		t.Parallel()
 		db := factory.NewMySQL(config.Database{
 			Username:  "admin",
 			Password:  "password",
@@ -72,6 +75,7 @@ func Test_ResolveDatabase(t *testing.T) {
 	})
 
 	t.Run("PostgreSQL", func(t *testing.T) {
+		t.Parallel()
 		db := factory.NewPostgres(config.Database{
 			Username:  "admin",
 			Password:  "password",
@@ -85,10 +89,12 @@ func Test_ResolveDatabase(t *testing.T) {
 }
 
 func Test_DatabaseValuesFromSecret(t *testing.T) {
+	t.Parallel()
 	factory := config.NewDatabaseFactory(secrets.NewClient(newFakeClient()))
 	mountSecret()
 
 	t.Run("Values from SecretRef", func(t *testing.T) {
+		t.Parallel()
 		db := factory.NewPostgres(config.Database{SecretRef: secretName, EnableSSL: false})
 		if db == nil {
 			t.Error("Expected PostgreSQL connection created")
@@ -96,6 +102,7 @@ func Test_DatabaseValuesFromSecret(t *testing.T) {
 	})
 
 	t.Run("Values from MountedSecret", func(t *testing.T) {
+		t.Parallel()
 		db := factory.NewMySQL(config.Database{MountedSecret: mountedSecret, EnableSSL: false})
 		if db == nil {
 			t.Error("Expected MySQL connection created")
@@ -103,6 +110,7 @@ func Test_DatabaseValuesFromSecret(t *testing.T) {
 	})
 
 	t.Run("Get none existing mounted secret skips target", func(t *testing.T) {
+		t.Parallel()
 		db := factory.NewPostgres(config.Database{MountedSecret: "no-exists"})
 		if db != nil {
 			t.Error("Expected no connection created without host or DSN config")

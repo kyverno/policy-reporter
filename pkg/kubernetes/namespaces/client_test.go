@@ -16,7 +16,7 @@ import (
 )
 
 func newFakeClient() v1.NamespaceInterface {
-	return fake.NewSimpleClientset(
+	return fake.NewClientset(
 		&corev1.Namespace{
 			ObjectMeta: metav1.ObjectMeta{
 				Name: "default",
@@ -48,7 +48,9 @@ func (s *nsErrorClient) List(ctx context.Context, opts metav1.ListOptions) (*cor
 }
 
 func TestClient(t *testing.T) {
+	t.Parallel()
 	t.Run("read from api with list", func(t *testing.T) {
+		t.Parallel()
 		client := namespaces.NewClient(newFakeClient(), gocache.New[string, []string](gocache.DefaultExpiration, gocache.DefaultExpiration))
 
 		list, err := client.List(context.Background(), map[string]string{"name": "default,user"})
@@ -57,6 +59,7 @@ func TestClient(t *testing.T) {
 		assert.Equal(t, 2, len(list))
 	})
 	t.Run("read from api with exist check", func(t *testing.T) {
+		t.Parallel()
 		client := namespaces.NewClient(newFakeClient(), gocache.New[string, []string](gocache.DefaultExpiration, gocache.DefaultExpiration))
 
 		list, err := client.List(context.Background(), map[string]string{"exist": "*"})
@@ -66,6 +69,7 @@ func TestClient(t *testing.T) {
 		assert.Equal(t, list[0], "default")
 	})
 	t.Run("read from api with not exist check", func(t *testing.T) {
+		t.Parallel()
 		client := namespaces.NewClient(newFakeClient(), gocache.New[string, []string](gocache.DefaultExpiration, gocache.DefaultExpiration))
 
 		list, err := client.List(context.Background(), map[string]string{"exist": "!*"})
@@ -76,6 +80,7 @@ func TestClient(t *testing.T) {
 	})
 
 	t.Run("read from api", func(t *testing.T) {
+		t.Parallel()
 		client := namespaces.NewClient(newFakeClient(), gocache.New[string, []string](gocache.DefaultExpiration, gocache.DefaultExpiration))
 
 		list, err := client.List(context.Background(), map[string]string{"name": "default"})
@@ -85,6 +90,7 @@ func TestClient(t *testing.T) {
 	})
 
 	t.Run("read from cache", func(t *testing.T) {
+		t.Parallel()
 		fake := newFakeClient()
 		cache := gocache.New[string, []string](gocache.NoExpiration, gocache.NoExpiration)
 
@@ -118,6 +124,7 @@ func TestClient(t *testing.T) {
 		assert.Equal(t, 3, len(list))
 	})
 	t.Run("return error", func(t *testing.T) {
+		t.Parallel()
 		client := namespaces.NewClient(&nsErrorClient{NamespaceInterface: newFakeClient()}, gocache.New[string, []string](gocache.DefaultExpiration, gocache.DefaultExpiration))
 
 		_, err := client.List(context.Background(), map[string]string{"team": "team-a"})

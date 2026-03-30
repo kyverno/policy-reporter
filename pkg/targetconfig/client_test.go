@@ -24,7 +24,7 @@ import (
 const secretName = "secret-values"
 
 func newSecretClient() v1.SecretInterface {
-	return corefake.NewSimpleClientset(&corev1.Secret{
+	return corefake.NewClientset(&corev1.Secret{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      secretName,
 			Namespace: "default",
@@ -54,6 +54,7 @@ func NewFakeClient() (*fake.Clientset, tcv1alpha1.TargetConfigInterface) {
 }
 
 func Test_TargetConfig_TargetCreation(t *testing.T) {
+	t.Parallel()
 	ctx := context.Background()
 	stop := make(chan struct{})
 
@@ -97,6 +98,7 @@ func Test_TargetConfig_TargetCreation(t *testing.T) {
 }
 
 func Test_TargetConfig_TargetUpdates(t *testing.T) {
+	t.Parallel()
 	ctx := context.Background()
 	stop := make(chan struct{})
 
@@ -155,6 +157,7 @@ func Test_TargetConfig_TargetUpdates(t *testing.T) {
 }
 
 func Test_TargetConfig_TargetDeletion(t *testing.T) {
+	t.Parallel()
 	ctx := context.Background()
 	stop := make(chan struct{})
 

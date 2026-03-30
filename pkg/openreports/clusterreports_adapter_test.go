@@ -12,7 +12,9 @@ import (
 )
 
 func TestClusterReport(t *testing.T) {
+	t.Parallel()
 	t.Run("GetSource Fallback", func(t *testing.T) {
+		t.Parallel()
 		report := openreports.ClusterReportAdapter{ClusterReport: &v1alpha1.ClusterReport{}}
 
 		if s := report.GetSource(); s != "" {
@@ -21,6 +23,7 @@ func TestClusterReport(t *testing.T) {
 	})
 
 	t.Run("GetSource From Result", func(t *testing.T) {
+		t.Parallel()
 		cpolr := openreports.ClusterReportAdapter{ClusterReport: &v1alpha1.ClusterReport{Results: []v1alpha1.ReportResult{{Source: "Kyverno"}}}}
 
 		if s := cpolr.GetSource(); s != "Kyverno" {
@@ -29,6 +32,7 @@ func TestClusterReport(t *testing.T) {
 	})
 
 	t.Run("GetSource from root property", func(t *testing.T) {
+		t.Parallel()
 		report := openreports.ClusterReportAdapter{ClusterReport: &v1alpha1.ClusterReport{Source: "Kyverno"}}
 
 		if s := report.GetSource(); s != "Kyverno" {
@@ -37,6 +41,7 @@ func TestClusterReport(t *testing.T) {
 	})
 
 	t.Run("GetID", func(t *testing.T) {
+		t.Parallel()
 		report := openreports.ClusterReportAdapter{ClusterReport: &v1alpha1.ClusterReport{ObjectMeta: v1.ObjectMeta{Name: "cpolr-pod-nginx"}}}
 
 		if s := report.GetID(); s != "10821080135567234638" {
@@ -45,6 +50,7 @@ func TestClusterReport(t *testing.T) {
 	})
 
 	t.Run("GetKinds from Scope", func(t *testing.T) {
+		t.Parallel()
 		report := openreports.ClusterReportAdapter{ClusterReport: &v1alpha1.ClusterReport{Scope: &corev1.ObjectReference{Kind: "ClusterRole"}}}
 
 		if len(report.GetKinds()) != 1 && report.GetKinds()[0] != "ClusterRole" {
@@ -53,6 +59,7 @@ func TestClusterReport(t *testing.T) {
 	})
 
 	t.Run("GetKinds from Results", func(t *testing.T) {
+		t.Parallel()
 		report := openreports.ClusterReportAdapter{ClusterReport: &v1alpha1.ClusterReport{
 			Results: []v1alpha1.ReportResult{
 				{},
@@ -68,6 +75,7 @@ func TestClusterReport(t *testing.T) {
 	})
 
 	t.Run("GetSeverities from Results", func(t *testing.T) {
+		t.Parallel()
 		report := openreports.ClusterReportAdapter{ClusterReport: &v1alpha1.ClusterReport{
 			Results: []v1alpha1.ReportResult{
 				{Severity: v1alpha2.SeverityHigh},
@@ -81,6 +89,7 @@ func TestClusterReport(t *testing.T) {
 		}
 	})
 	t.Run("Results", func(t *testing.T) {
+		t.Parallel()
 		report := openreports.ClusterReportAdapter{ClusterReport: &v1alpha1.ClusterReport{}}
 
 		if s := len(report.GetResults()); s != 0 {
@@ -96,6 +105,7 @@ func TestClusterReport(t *testing.T) {
 		}
 	})
 	t.Run("Summary", func(t *testing.T) {
+		t.Parallel()
 		report := openreports.ClusterReportAdapter{ClusterReport: &v1alpha1.ClusterReport{Summary: v1alpha1.ReportSummary{Pass: 1}}}
 
 		if s := report.GetSummary().Pass; s != 1 {

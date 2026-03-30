@@ -26,7 +26,9 @@ func (c testClient) Do(req *http.Request) (*http.Response, error) {
 }
 
 func Test_TeamsTarget(t *testing.T) {
+	t.Parallel()
 	t.Run("Send Complete Result", func(t *testing.T) {
+		t.Parallel()
 		callback := func(req *http.Request) {
 			assert.Equal(t, "application/json; charset=utf-8", req.Header.Get("Content-Type"), "unexpected Content-Type")
 			assert.Equal(t, "Policy-Reporter", req.Header.Get("User-Agent"), "unexpected Agent")
@@ -52,6 +54,7 @@ func Test_TeamsTarget(t *testing.T) {
 	})
 
 	t.Run("Send Minimal Result", func(t *testing.T) {
+		t.Parallel()
 		callback := func(req *http.Request) {
 			assert.Equal(t, "application/json; charset=utf-8", req.Header.Get("Content-Type"), "unexpected Content-Type")
 			assert.Equal(t, "Policy-Reporter", req.Header.Get("User-Agent"), "unexpected Agent")
@@ -74,6 +77,7 @@ func Test_TeamsTarget(t *testing.T) {
 		client.Send(fixtures.DefaultPolicyReport, fixtures.MinimalTargetSendResult)
 	})
 	t.Run("Send Minimal InfoResult", func(t *testing.T) {
+		t.Parallel()
 		callback := func(req *http.Request) {
 			payload := make(map[string]interface{})
 
@@ -92,6 +96,7 @@ func Test_TeamsTarget(t *testing.T) {
 		client.Send(fixtures.DefaultPolicyReport, fixtures.InfoSendResult)
 	})
 	t.Run("Send Minimal ErrorResult", func(t *testing.T) {
+		t.Parallel()
 		callback := func(req *http.Request) {
 			payload := make(map[string]interface{})
 
@@ -110,6 +115,7 @@ func Test_TeamsTarget(t *testing.T) {
 		client.Send(fixtures.DefaultPolicyReport, fixtures.ErrorSendResult)
 	})
 	t.Run("Send Minimal Debug Result", func(t *testing.T) {
+		t.Parallel()
 		callback := func(req *http.Request) {
 			assert.Equal(t, "application/json; charset=utf-8", req.Header.Get("Content-Type"), "unexpected Content-Type")
 			assert.Equal(t, "Policy-Reporter", req.Header.Get("User-Agent"), "unexpected Agent")
@@ -132,6 +138,7 @@ func Test_TeamsTarget(t *testing.T) {
 		client.Send(fixtures.DefaultPolicyReport, fixtures.DebugSendResult)
 	})
 	t.Run("Name", func(t *testing.T) {
+		t.Parallel()
 		client := teams.NewClient(teams.Options{
 			ClientOptions: target.ClientOptions{
 				Name: "Teams",
@@ -144,6 +151,7 @@ func Test_TeamsTarget(t *testing.T) {
 		assert.Equal(t, "Teams", client.Name())
 	})
 	t.Run("SupportBatchSend", func(t *testing.T) {
+		t.Parallel()
 		client := teams.NewClient(teams.Options{
 			ClientOptions: target.ClientOptions{
 				Name: "Teams",

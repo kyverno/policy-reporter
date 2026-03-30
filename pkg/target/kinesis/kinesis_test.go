@@ -19,10 +19,10 @@ func (c *testClient) Upload(_ *bytes.Buffer, _ string) error {
 	return c.err
 }
 
-var testCallback = func(body *bytes.Buffer, key string) {}
-
 func Test_KinesisTarget(t *testing.T) {
+	t.Parallel()
 	t.Run("Send", func(t *testing.T) {
+		t.Parallel()
 		callback := func(body *bytes.Buffer, key string) {
 			report := new(bytes.Buffer)
 			if err := json.NewEncoder(report).Encode(fixtures.CompleteTargetSendResult); err != nil {
@@ -53,6 +53,7 @@ func Test_KinesisTarget(t *testing.T) {
 		}
 	})
 	t.Run("Name", func(t *testing.T) {
+		t.Parallel()
 		client := kinesis.NewClient(kinesis.Options{
 			ClientOptions: target.ClientOptions{
 				Name: "Kinesis",

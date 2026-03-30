@@ -34,7 +34,6 @@ func WithDBName(name string) Option {
 
 type QueryHook struct {
 	dbName             string
-	formatQueries      bool
 	connections        *prometheus.GaugeVec
 	maxOpenConnections *prometheus.GaugeVec
 	maxIdleTimeClosed  *prometheus.GaugeVec
@@ -45,7 +44,6 @@ type QueryHook struct {
 	waitCount          *prometheus.GaugeVec
 	waitDuration       *prometheus.GaugeVec
 	queryHistogram     *prometheus.HistogramVec
-	spanNameQueryGen   func(*bun.QueryEvent) string
 }
 
 var _ bun.QueryHook = (*QueryHook)(nil)
@@ -83,8 +81,7 @@ func (h *QueryHook) Init(db *bun.DB) {
 
 	go func() {
 		for range ticker.C {
-
-			stats := db.DB.Stats()
+			stats := db.Stats()
 			h.connections.With(labels).Set(float64(stats.OpenConnections))
 			h.maxOpenConnections.With(labels).Set(float64(stats.MaxOpenConnections))
 			h.idleConnections.With(labels).Set(float64(stats.Idle))

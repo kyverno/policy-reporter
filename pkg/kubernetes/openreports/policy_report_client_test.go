@@ -20,6 +20,7 @@ import (
 var filter = report.NewMetaFilter(false, validate.RuleSets{})
 
 func Test_PolicyReportWatcher(t *testing.T) {
+	t.Parallel()
 	ctx := context.Background()
 	stop := make(chan struct{})
 
@@ -74,6 +75,7 @@ func Test_PolicyReportWatcher(t *testing.T) {
 }
 
 func Test_ClusterPolicyReportWatcher(t *testing.T) {
+	t.Parallel()
 	ctx := context.Background()
 	stop := make(chan struct{})
 
@@ -127,6 +129,7 @@ func Test_ClusterPolicyReportWatcher(t *testing.T) {
 }
 
 func Test_HasSynced(t *testing.T) {
+	t.Parallel()
 	stop := make(chan struct{})
 	defer close(stop)
 

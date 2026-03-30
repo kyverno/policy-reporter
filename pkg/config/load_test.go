@@ -26,6 +26,7 @@ func createCMD() *cobra.Command {
 }
 
 func Test_Load(t *testing.T) {
+	t.Parallel()
 	cmd := createCMD()
 
 	_ = cmd.Flags().Set("kubeconfig", "./config")

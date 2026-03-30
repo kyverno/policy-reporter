@@ -7,7 +7,6 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"go.uber.org/zap"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes/fake"
@@ -29,7 +28,7 @@ const (
 )
 
 func newFakeClient() v1.SecretInterface {
-	return fake.NewSimpleClientset(&corev1.Secret{
+	return fake.NewClientset(&corev1.Secret{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      secretName,
 			Namespace: "default",
@@ -47,7 +46,7 @@ func newFakeClient() v1.SecretInterface {
 			"secretAccessKey": []byte("secretAccessKey"),
 			"kmsKeyId":        []byte("kmsKeyId"),
 			"token":           []byte("token"),
-			"credentials":     []byte(`{"token": "token", "type": "authorized_user"}`),
+			"credentials":     []byte(`{"token": "token", "type": "service_account"}`),
 			"database":        []byte("database"),
 			"dsn":             []byte(""),
 		},
@@ -67,7 +66,7 @@ func mountSecret() {
 		SecretAccessKey: "secretAccessKey",
 		KmsKeyID:        "kmsKeyId",
 		Token:           "token",
-		Credentials:     `{"token": "token", "type": "authorized_user"}`,
+		Credentials:     `{"token": "token", "type": "service_account"}`,
 		Database:        "database",
 		TypelessAPI:     true,
 		DSN:             "",
@@ -75,8 +74,6 @@ func mountSecret() {
 	file, _ := json.MarshalIndent(secretValues, "", " ")
 	_ = os.WriteFile(mountedSecret, file, 0o644)
 }
-
-var logger = zap.NewNop()
 
 var targets = target.Targets{
 	Loki: &targetconfig.Config[v1alpha1.LokiOptions]{
@@ -259,7 +256,7 @@ var targets = target.Targets{
 	},
 	GCS: &targetconfig.Config[v1alpha1.GCSOptions]{
 		Config: &v1alpha1.GCSOptions{
-			Credentials: `{"token": "token", "type": "authorized_user"}`,
+			Credentials: `{"token": "token", "type": "service_account"}`,
 			Bucket:      "test",
 			Prefix:      "prefix",
 		},
@@ -297,6 +294,7 @@ var targets = target.Targets{
 }
 
 func Test_ResolveTarget(t *testing.T) {
+	t.Parallel()
 	factory := factory.NewFactory(nil, nil)
 
 	clients := factory.CreateClients(&targets)
@@ -306,6 +304,7 @@ func Test_ResolveTarget(t *testing.T) {
 }
 
 func Test_ResolveTargetsWithoutRequiredConfiguration(t *testing.T) {
+	t.Parallel()
 	factory := factory.NewFactory(nil, nil)
 
 	targets := target.Targets{
@@ -340,6 +339,7 @@ func Test_ResolveTargetsWithoutRequiredConfiguration(t *testing.T) {
 }
 
 func Test_S3Validation(t *testing.T) {
+	t.Parallel()
 	factory := factory.NewFactory(nil, nil)
 
 	targets := target.Targets{
@@ -351,6 +351,7 @@ func Test_S3Validation(t *testing.T) {
 	}
 
 	t.Run("S3.AccessKey", func(t *testing.T) {
+		t.Parallel()
 		if len(factory.CreateClients(&targets).Clients()) != 0 {
 			t.Error("Expected Client to be nil if no accessKey is configured")
 		}
@@ -358,6 +359,7 @@ func Test_S3Validation(t *testing.T) {
 
 	targets.S3.Config.AccessKeyID = "access"
 	t.Run("S3.SecretAccessKey", func(t *testing.T) {
+		t.Parallel()
 		if len(factory.CreateClients(&targets).Clients()) != 0 {
 			t.Error("Expected Client to be nil if no secretAccessKey is configured")
 		}
@@ -365,6 +367,7 @@ func Test_S3Validation(t *testing.T) {
 
 	targets.S3.Config.SecretAccessKey = "secret"
 	t.Run("S3.Region", func(t *testing.T) {
+		t.Parallel()
 		if len(factory.CreateClients(&targets).Clients()) != 0 {
 			t.Error("Expected Client to be nil if no region is configured")
 		}
@@ -372,6 +375,7 @@ func Test_S3Validation(t *testing.T) {
 
 	targets.S3.Config.Region = "ru-central1"
 	t.Run("S3.Bucket", func(t *testing.T) {
+		t.Parallel()
 		if len(factory.CreateClients(&targets).Clients()) != 0 {
 			t.Error("Expected Client to be nil if no bucket is configured")
 		}
@@ -379,6 +383,7 @@ func Test_S3Validation(t *testing.T) {
 
 	targets.S3.Config.ServerSideEncryption = "AES256"
 	t.Run("S3.SSE-S3", func(t *testing.T) {
+		t.Parallel()
 		if len(factory.CreateClients(&targets).Clients()) != 0 {
 			t.Error("Expected Client to be nil if server side encryption is not configured")
 		}
@@ -386,6 +391,7 @@ func Test_S3Validation(t *testing.T) {
 
 	targets.S3.Config.ServerSideEncryption = "aws:kms"
 	t.Run("S3.SSE-KMS", func(t *testing.T) {
+		t.Parallel()
 		if len(factory.CreateClients(&targets).Clients()) != 0 {
 			t.Error("Expected Client to be nil if server side encryption is not configured")
 		}
@@ -393,6 +399,7 @@ func Test_S3Validation(t *testing.T) {
 
 	targets.S3.Config.BucketKeyEnabled = true
 	t.Run("S3.SSE-KMS-S3-KEY", func(t *testing.T) {
+		t.Parallel()
 		if len(factory.CreateClients(&targets).Clients()) != 0 {
 			t.Error("Expected Client to be nil if server side encryption is not configured")
 		}
@@ -400,6 +407,7 @@ func Test_S3Validation(t *testing.T) {
 
 	targets.S3.Config.KmsKeyID = "kmsKeyId"
 	t.Run("S3.SSE-KMS-KEY-ID", func(t *testing.T) {
+		t.Parallel()
 		if len(factory.CreateClients(&targets).Clients()) != 0 {
 			t.Error("Expected Client to be nil if server side encryption is not configured")
 		}
@@ -407,6 +415,7 @@ func Test_S3Validation(t *testing.T) {
 }
 
 func Test_KinesisValidation(t *testing.T) {
+	t.Parallel()
 	factory := factory.NewFactory(nil, nil)
 
 	targets := target.Targets{
@@ -418,6 +427,7 @@ func Test_KinesisValidation(t *testing.T) {
 	}
 
 	t.Run("Kinesis.AccessKey", func(t *testing.T) {
+		t.Parallel()
 		if len(factory.CreateClients(&targets).Clients()) != 0 {
 			t.Error("Expected Client to be nil if no accessKey is configured")
 		}
@@ -425,6 +435,7 @@ func Test_KinesisValidation(t *testing.T) {
 
 	targets.Kinesis.Config.AccessKeyID = "access"
 	t.Run("Kinesis.SecretAccessKey", func(t *testing.T) {
+		t.Parallel()
 		if len(factory.CreateClients(&targets).Clients()) != 0 {
 			t.Error("Expected Client to be nil if no secretAccessKey is configured")
 		}
@@ -433,6 +444,7 @@ func Test_KinesisValidation(t *testing.T) {
 	targets.Kinesis.Config.SecretAccessKey = "secret"
 
 	t.Run("Kinesis.Region", func(t *testing.T) {
+		t.Parallel()
 		if len(factory.CreateClients(&targets).Clients()) != 0 {
 			t.Error("Expected Client to be nil if no region is configured")
 		}
@@ -441,6 +453,7 @@ func Test_KinesisValidation(t *testing.T) {
 	targets.Kinesis.Config.Region = "ru-central1"
 
 	t.Run("Kinesis.StreamName", func(t *testing.T) {
+		t.Parallel()
 		if len(factory.CreateClients(&targets).Clients()) != 0 {
 			t.Error("Expected Client to be nil if no stream name is configured")
 		}
@@ -448,6 +461,7 @@ func Test_KinesisValidation(t *testing.T) {
 }
 
 func Test_SecurityHubValidation(t *testing.T) {
+	t.Parallel()
 	factory := factory.NewFactory(nil, nil)
 
 	targets := target.Targets{
@@ -459,6 +473,7 @@ func Test_SecurityHubValidation(t *testing.T) {
 	}
 
 	t.Run("SecurityHub.AccountId", func(t *testing.T) {
+		t.Parallel()
 		if len(factory.CreateClients(&targets).Clients()) != 0 {
 			t.Error("Expected Client to be nil if no accountId is configured")
 		}
@@ -466,6 +481,7 @@ func Test_SecurityHubValidation(t *testing.T) {
 
 	targets.SecurityHub.Config.AccountID = "accountId"
 	t.Run("SecurityHub.AccessKey", func(t *testing.T) {
+		t.Parallel()
 		if len(factory.CreateClients(&targets).Clients()) != 0 {
 			t.Error("Expected Client to be nil if no accessKey is configured")
 		}
@@ -473,6 +489,7 @@ func Test_SecurityHubValidation(t *testing.T) {
 
 	targets.SecurityHub.Config.AccessKeyID = "access"
 	t.Run("SecurityHub.SecretAccessKey", func(t *testing.T) {
+		t.Parallel()
 		if len(factory.CreateClients(&targets).Clients()) != 0 {
 			t.Error("Expected Client to be nil if no secretAccessKey is configured")
 		}
@@ -480,6 +497,7 @@ func Test_SecurityHubValidation(t *testing.T) {
 
 	targets.SecurityHub.Config.SecretAccessKey = "secret"
 	t.Run("SecurityHub.Region", func(t *testing.T) {
+		t.Parallel()
 		if len(factory.CreateClients(&targets).Clients()) != 0 {
 			t.Error("Expected Client to be nil if no region is configured")
 		}
@@ -487,6 +505,7 @@ func Test_SecurityHubValidation(t *testing.T) {
 }
 
 func Test_GCSValidation(t *testing.T) {
+	t.Parallel()
 	factory := factory.NewFactory(nil, nil)
 
 	targets := target.Targets{
@@ -498,6 +517,7 @@ func Test_GCSValidation(t *testing.T) {
 	}
 
 	t.Run("GCS.Bucket", func(t *testing.T) {
+		t.Parallel()
 		if len(factory.CreateClients(&targets).Clients()) != 0 {
 			t.Error("Expected Client to be nil if no bucket is configured")
 		}
@@ -505,6 +525,7 @@ func Test_GCSValidation(t *testing.T) {
 
 	targets.GCS.Config.Bucket = "policy-reporter"
 	t.Run("GCS.Credentials", func(t *testing.T) {
+		t.Parallel()
 		if len(factory.CreateClients(&targets).Clients()) != 0 {
 			t.Error("Expected Client to be nil if no accessKey is configured")
 		}
@@ -512,6 +533,7 @@ func Test_GCSValidation(t *testing.T) {
 }
 
 func Test_GetValuesFromSecret(t *testing.T) {
+	t.Parallel()
 	factory := factory.NewFactory(secrets.NewClient(newFakeClient()), nil)
 
 	targets := target.Targets{
@@ -566,6 +588,7 @@ func Test_GetValuesFromSecret(t *testing.T) {
 	}
 
 	t.Run("Get Loki values from Secret", func(t *testing.T) {
+		t.Parallel()
 		fv := reflect.ValueOf(clients.Client("Loki")).Elem().FieldByName("host")
 		if v := fv.String(); v != "http://localhost:9200/loki/api/v1/push" {
 			t.Errorf("Expected host from secret, got %s", v)
@@ -573,6 +596,7 @@ func Test_GetValuesFromSecret(t *testing.T) {
 	})
 
 	t.Run("Get Elasticsearch values from Secret", func(t *testing.T) {
+		t.Parallel()
 		client := reflect.ValueOf(clients.Client("Elasticsearch")).Elem()
 
 		host := client.FieldByName("host").String()
@@ -607,6 +631,7 @@ func Test_GetValuesFromSecret(t *testing.T) {
 	})
 
 	t.Run("Get Slack values from Secret", func(t *testing.T) {
+		t.Parallel()
 		client := reflect.ValueOf(clients.Client("Slack")).Elem()
 
 		webhook := client.FieldByName("channel").String()
@@ -616,6 +641,7 @@ func Test_GetValuesFromSecret(t *testing.T) {
 	})
 
 	t.Run("Get Discord values from Secret", func(t *testing.T) {
+		t.Parallel()
 		client := reflect.ValueOf(clients.Client("Discord")).Elem()
 
 		webhook := client.FieldByName("webhook").String()
@@ -625,6 +651,7 @@ func Test_GetValuesFromSecret(t *testing.T) {
 	})
 
 	t.Run("Get Splunk values from Secret", func(t *testing.T) {
+		t.Parallel()
 		client := reflect.ValueOf(clients.Client("Splunk")).Elem()
 
 		host := client.FieldByName("host").String()
@@ -639,6 +666,7 @@ func Test_GetValuesFromSecret(t *testing.T) {
 	})
 
 	t.Run("Get MS Teams values from Secret", func(t *testing.T) {
+		t.Parallel()
 		client := reflect.ValueOf(clients.Client("Teams")).Elem()
 
 		webhook := client.FieldByName("webhook").String()
@@ -648,6 +676,7 @@ func Test_GetValuesFromSecret(t *testing.T) {
 	})
 
 	t.Run("Get GoogleChat Webhook from Secret", func(t *testing.T) {
+		t.Parallel()
 		client := reflect.ValueOf(clients.Client("GoogleChat")).Elem()
 
 		host := client.FieldByName("webhook").String()
@@ -657,6 +686,7 @@ func Test_GetValuesFromSecret(t *testing.T) {
 	})
 
 	t.Run("Get Telegram Token from Secret", func(t *testing.T) {
+		t.Parallel()
 		client := reflect.ValueOf(clients.Client("Telegram")).Elem()
 
 		host := client.FieldByName("host").String()
@@ -666,6 +696,7 @@ func Test_GetValuesFromSecret(t *testing.T) {
 	})
 
 	t.Run("Get Webhook Authentication Token from Secret", func(t *testing.T) {
+		t.Parallel()
 		client := reflect.ValueOf(clients.Client("Webhook")).Elem()
 
 		token := client.FieldByName("headers").MapIndex(reflect.ValueOf("Authorization")).String()
@@ -675,6 +706,7 @@ func Test_GetValuesFromSecret(t *testing.T) {
 	})
 
 	t.Run("Get none existing secret skips target", func(t *testing.T) {
+		t.Parallel()
 		clients := factory.CreateClients(&target.Targets{
 			Loki: &targetconfig.Config[v1alpha1.LokiOptions]{SecretRef: "not-exist"},
 		})
@@ -686,6 +718,7 @@ func Test_GetValuesFromSecret(t *testing.T) {
 }
 
 func Test_CustomFields(t *testing.T) {
+	t.Parallel()
 	factory := factory.NewFactory(nil, nil)
 
 	targets := &target.Targets{
@@ -785,7 +818,7 @@ func Test_CustomFields(t *testing.T) {
 		},
 		GCS: &targetconfig.Config[v1alpha1.GCSOptions]{
 			Config: &v1alpha1.GCSOptions{
-				Credentials: `{"token": "token", "type": "authorized_user"}`,
+				Credentials: `{"token": "token", "type": "service_account"}`,
 				Bucket:      "test",
 				Prefix:      "prefix",
 			},
@@ -795,11 +828,12 @@ func Test_CustomFields(t *testing.T) {
 
 	clients := factory.CreateClients(targets)
 
-	if len(clients.Clients()) != 12 {
-		t.Fatalf("expected 12 client created, got %d", len(clients.Clients()))
+	if !assert.Len(t, clients.Clients(), 12) {
+		t.Fatal()
 	}
 
 	t.Run("Get CustomFields from Loki", func(t *testing.T) {
+		t.Parallel()
 		client := reflect.ValueOf(clients.Client("Loki")).Elem()
 
 		customFields := client.FieldByName("customFields").MapKeys()
@@ -809,6 +843,7 @@ func Test_CustomFields(t *testing.T) {
 	})
 
 	t.Run("Get CustomFields from Elasticsearch", func(t *testing.T) {
+		t.Parallel()
 		client := reflect.ValueOf(clients.Client("Elasticsearch")).Elem()
 
 		customFields := client.FieldByName("customFields").MapKeys()
@@ -818,6 +853,7 @@ func Test_CustomFields(t *testing.T) {
 	})
 
 	t.Run("Get CustomFields from Slack", func(t *testing.T) {
+		t.Parallel()
 		client := reflect.ValueOf(clients.Client("Slack")).Elem()
 
 		customFields := client.FieldByName("customFields").MapKeys()
@@ -826,6 +862,7 @@ func Test_CustomFields(t *testing.T) {
 		}
 	})
 	t.Run("Get CustomFields from Discord", func(t *testing.T) {
+		t.Parallel()
 		client := reflect.ValueOf(clients.Client("Discord")).Elem()
 
 		customFields := client.FieldByName("customFields").MapKeys()
@@ -834,6 +871,7 @@ func Test_CustomFields(t *testing.T) {
 		}
 	})
 	t.Run("Get CustomFields from MS Teams", func(t *testing.T) {
+		t.Parallel()
 		client := reflect.ValueOf(clients.Client("Teams")).Elem()
 
 		customFields := client.FieldByName("customFields").MapKeys()
@@ -843,6 +881,7 @@ func Test_CustomFields(t *testing.T) {
 	})
 
 	t.Run("Get CustomFields from GoogleChat", func(t *testing.T) {
+		t.Parallel()
 		client := reflect.ValueOf(clients.Client("GoogleChat")).Elem()
 
 		customFields := client.FieldByName("customFields").MapKeys()
@@ -852,6 +891,7 @@ func Test_CustomFields(t *testing.T) {
 	})
 
 	t.Run("Get CustomFields from Telegram", func(t *testing.T) {
+		t.Parallel()
 		client := reflect.ValueOf(clients.Client("Telegram")).Elem()
 
 		customFields := client.FieldByName("customFields").MapKeys()
@@ -861,6 +901,7 @@ func Test_CustomFields(t *testing.T) {
 	})
 
 	t.Run("Get CustomFields from Webhook", func(t *testing.T) {
+		t.Parallel()
 		client := reflect.ValueOf(clients.Client("Webhook")).Elem()
 
 		customFields := client.FieldByName("customFields").MapKeys()
@@ -869,6 +910,7 @@ func Test_CustomFields(t *testing.T) {
 		}
 	})
 	t.Run("Get CustomFields from S3", func(t *testing.T) {
+		t.Parallel()
 		client := reflect.ValueOf(clients.Client("S3")).Elem()
 
 		customFields := client.FieldByName("customFields").MapKeys()
@@ -877,6 +919,7 @@ func Test_CustomFields(t *testing.T) {
 		}
 	})
 	t.Run("Get CustomFields from Kinesis", func(t *testing.T) {
+		t.Parallel()
 		client := reflect.ValueOf(clients.Client("Kinesis")).Elem()
 
 		customFields := client.FieldByName("customFields").MapKeys()
@@ -885,6 +928,7 @@ func Test_CustomFields(t *testing.T) {
 		}
 	})
 	t.Run("Get CustomFields from GCS", func(t *testing.T) {
+		t.Parallel()
 		client := reflect.ValueOf(clients.Client("GoogleCloudStorage")).Elem()
 
 		customFields := client.FieldByName("customFields").MapKeys()
@@ -895,10 +939,13 @@ func Test_CustomFields(t *testing.T) {
 }
 
 func Test_GetValuesFromMountedSecret(t *testing.T) {
+	t.Parallel()
 	factory := factory.NewFactory(secrets.NewClient(newFakeClient()), nil)
 
 	mountSecret()
-	defer os.Remove(mountedSecret)
+	t.Cleanup(func() {
+		os.Remove(mountedSecret)
+	})
 
 	targets := target.Targets{
 		Loki:          &targetconfig.Config[v1alpha1.LokiOptions]{MountedSecret: mountedSecret},
@@ -949,6 +996,7 @@ func Test_GetValuesFromMountedSecret(t *testing.T) {
 	}
 
 	t.Run("Get Loki values from Secret", func(t *testing.T) {
+		t.Parallel()
 		fv := reflect.ValueOf(clients.Client("Loki")).Elem().FieldByName("host")
 		if v := fv.String(); v != "http://localhost:9200/loki/api/v1/push" {
 			t.Errorf("Expected host from secret, got %s", v)
@@ -956,6 +1004,7 @@ func Test_GetValuesFromMountedSecret(t *testing.T) {
 	})
 
 	t.Run("Get Elasticsearch values from Secret", func(t *testing.T) {
+		t.Parallel()
 		client := reflect.ValueOf(clients.Client("Elasticsearch")).Elem()
 
 		host := client.FieldByName("host").String()
@@ -990,6 +1039,7 @@ func Test_GetValuesFromMountedSecret(t *testing.T) {
 	})
 
 	t.Run("Get Slack values from Secret", func(t *testing.T) {
+		t.Parallel()
 		client := reflect.ValueOf(clients.Client("Slack")).Elem()
 
 		webhook := client.FieldByName("channel").String()
@@ -999,6 +1049,7 @@ func Test_GetValuesFromMountedSecret(t *testing.T) {
 	})
 
 	t.Run("Get Discord values from Secret", func(t *testing.T) {
+		t.Parallel()
 		client := reflect.ValueOf(clients.Client("Discord")).Elem()
 
 		webhook := client.FieldByName("webhook").String()
@@ -1008,6 +1059,7 @@ func Test_GetValuesFromMountedSecret(t *testing.T) {
 	})
 
 	t.Run("Get MS Teams values from Secret", func(t *testing.T) {
+		t.Parallel()
 		client := reflect.ValueOf(clients.Client("Teams")).Elem()
 
 		webhook := client.FieldByName("webhook").String()
@@ -1017,6 +1069,7 @@ func Test_GetValuesFromMountedSecret(t *testing.T) {
 	})
 
 	t.Run("Get GoogleChat Webhook from Secret", func(t *testing.T) {
+		t.Parallel()
 		client := reflect.ValueOf(clients.Client("GoogleChat")).Elem()
 
 		host := client.FieldByName("webhook").String()
@@ -1026,6 +1079,7 @@ func Test_GetValuesFromMountedSecret(t *testing.T) {
 	})
 
 	t.Run("Get Telegram Token from Secret", func(t *testing.T) {
+		t.Parallel()
 		client := reflect.ValueOf(clients.Client("Telegram")).Elem()
 
 		host := client.FieldByName("host").String()
@@ -1035,6 +1089,7 @@ func Test_GetValuesFromMountedSecret(t *testing.T) {
 	})
 
 	t.Run("Get Webhook Authentication Token from Secret", func(t *testing.T) {
+		t.Parallel()
 		client := reflect.ValueOf(clients.Client("Webhook")).Elem()
 
 		token := client.FieldByName("headers").MapIndex(reflect.ValueOf("Authorization")).String()
@@ -1044,6 +1099,7 @@ func Test_GetValuesFromMountedSecret(t *testing.T) {
 	})
 
 	t.Run("Get none existing secret skips target", func(t *testing.T) {
+		t.Parallel()
 		clients := factory.CreateClients(&target.Targets{
 			Loki: &targetconfig.Config[v1alpha1.LokiOptions]{SecretRef: "not-exist"},
 		})
@@ -1055,6 +1111,7 @@ func Test_GetValuesFromMountedSecret(t *testing.T) {
 }
 
 func Test_ReportFilter_Wildcard(t *testing.T) {
+	t.Parallel()
 	type testCase struct {
 		name       string
 		labelValue string
@@ -1079,6 +1136,7 @@ func Test_ReportFilter_Wildcard(t *testing.T) {
 		},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
 			filter := target.NewReportFilter(
 				factory.ToRuleSet(filters.ValueFilter{
 					Exclude: []string{"trivy-operator.resource.name:*mariadb*"},

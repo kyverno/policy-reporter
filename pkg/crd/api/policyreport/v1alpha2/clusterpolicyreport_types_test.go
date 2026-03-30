@@ -7,7 +7,9 @@ import (
 )
 
 func TestClusterPolicyReport(t *testing.T) {
+	t.Parallel()
 	t.Run("GetSource Fallback", func(t *testing.T) {
+		t.Parallel()
 		cpolr := &v1alpha2.ClusterPolicyReport{}
 
 		if s := cpolr.GetSource(); s != "" {
@@ -16,6 +18,7 @@ func TestClusterPolicyReport(t *testing.T) {
 	})
 
 	t.Run("GetSource From Result", func(t *testing.T) {
+		t.Parallel()
 		cpolr := &v1alpha2.ClusterPolicyReport{Results: []v1alpha2.PolicyReportResult{{Source: "Kyverno"}}}
 
 		if s := cpolr.GetSource(); s != "Kyverno" {

@@ -15,7 +15,7 @@ func HealthzHandler(checks []HealthCheck) gin.HandlerFunc {
 		for _, c := range checks {
 			if err := c(); err != nil {
 				zap.L().Warn("health check failed", zap.Error(err))
-				ctx.AbortWithError(http.StatusServiceUnavailable, err)
+				_ = ctx.AbortWithError(http.StatusServiceUnavailable, err)
 				return
 			}
 		}

@@ -103,7 +103,7 @@ func mapPayload(result openreports.ResultAdapter) (*Payload, error) {
 	}
 
 	var textBuffer bytes.Buffer
-	err = ttmpl.Execute(&textBuffer, values{Result: result, Resource: result.GetResource()})
+	err = ttmpl.Execute(&textBuffer, values{Result: result, Resource: result.GetResource(), Priority: string(prio)})
 	if err != nil {
 		return nil, err
 	}

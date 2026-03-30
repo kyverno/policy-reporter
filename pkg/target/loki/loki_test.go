@@ -28,7 +28,9 @@ func (c testClient) Do(req *http.Request) (*http.Response, error) {
 }
 
 func Test_LokiTarget(t *testing.T) {
+	t.Parallel()
 	t.Run("Send Complete Result", func(t *testing.T) {
+		t.Parallel()
 		callback := func(req *http.Request) {
 			assert.Equal(t, "application/json", req.Header.Get("Content-Type"), "unexpected Content-Type")
 			assert.Equal(t, "http://loki", req.Header.Get("X-Forward"), "unexpected X-Forward")
@@ -38,7 +40,7 @@ func Test_LokiTarget(t *testing.T) {
 
 			expectedLine := fmt.Sprintf("[%s] %s", strings.ToUpper(string(fixtures.CompleteTargetSendResult.Severity)), fixtures.CompleteTargetSendResult.Description)
 
-			stream := convertAndValidateBody(req, t)
+			stream := convertAndValidateBody(t, req)
 
 			assert.Equal(t, expectedLine, stream.Values[0][1])
 			assert.Equal(t, fixtures.CompleteTargetSendResult.Rule, stream.Stream["rule"])
@@ -70,13 +72,14 @@ func Test_LokiTarget(t *testing.T) {
 	})
 
 	t.Run("Send Minimal Result", func(t *testing.T) {
+		t.Parallel()
 		callback := func(req *http.Request) {
 			assert.Equal(t, "application/json", req.Header.Get("Content-Type"), "unexpected Content-Type")
 			assert.Equal(t, "Policy-Reporter", req.Header.Get("User-Agent"), "unexpected Agent")
 			assert.Equal(t, "http://localhost:3100/loki/api/v1/push", req.URL.String(), "unexpected Host")
 
 			expectedLine := fmt.Sprintf("[%s] %s", strings.ToUpper(string(fixtures.MinimalTargetSendResult.Severity)), fixtures.MinimalTargetSendResult.Description)
-			stream := convertAndValidateBody(req, t)
+			stream := convertAndValidateBody(t, req)
 
 			assert.Equal(t, expectedLine, stream.Values[0][1])
 			assert.Equal(t, fixtures.MinimalTargetSendResult.Rule, stream.Stream["rule"])
@@ -99,6 +102,7 @@ func Test_LokiTarget(t *testing.T) {
 		client.Send(fixtures.DefaultPolicyReport, fixtures.MinimalTargetSendResult)
 	})
 	t.Run("Name", func(t *testing.T) {
+		t.Parallel()
 		client := loki.NewClient(loki.Options{
 			ClientOptions: target.ClientOptions{
 				Name: "Loki",
@@ -114,7 +118,8 @@ func Test_LokiTarget(t *testing.T) {
 	})
 }
 
-func convertAndValidateBody(req *http.Request, t *testing.T) loki.Stream {
+func convertAndValidateBody(t *testing.T, req *http.Request) loki.Stream {
+	t.Helper()
 	payload := loki.Payload{}
 
 	err := json.NewDecoder(req.Body).Decode(&payload)

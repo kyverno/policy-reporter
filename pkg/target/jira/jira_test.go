@@ -30,7 +30,9 @@ func (c testClient) Do(req *http.Request) (*http.Response, error) {
 }
 
 func Test_JiraTarget(t *testing.T) {
+	t.Parallel()
 	t.Run("Send Complete Result", func(t *testing.T) {
+		t.Parallel()
 		callback := func(req *http.Request) {
 			// Verify HTTP headers and method
 			assert.Equal(t, "POST", req.Method)
@@ -92,6 +94,7 @@ func Test_JiraTarget(t *testing.T) {
 	})
 
 	t.Run("Send Minimal Result", func(t *testing.T) {
+		t.Parallel()
 		callback := func(req *http.Request) {
 			// Verify HTTP headers and method
 			assert.Equal(t, "POST", req.Method)
@@ -156,6 +159,7 @@ func Test_JiraTarget(t *testing.T) {
 	})
 
 	t.Run("Default IssueType", func(t *testing.T) {
+		t.Parallel()
 		callback := func(req *http.Request) {
 			body, err := io.ReadAll(req.Body)
 			assert.NoError(t, err)
@@ -187,6 +191,7 @@ func Test_JiraTarget(t *testing.T) {
 	})
 
 	t.Run("Custom Fields", func(t *testing.T) {
+		t.Parallel()
 		callback := func(req *http.Request) {
 			body, err := io.ReadAll(req.Body)
 			assert.NoError(t, err)
@@ -222,6 +227,7 @@ func Test_JiraTarget(t *testing.T) {
 	})
 
 	t.Run("Name", func(t *testing.T) {
+		t.Parallel()
 		client, _ := jira.NewClient(jira.Options{
 			ClientOptions: target.ClientOptions{
 				Name: "JiraTarget",
@@ -238,6 +244,7 @@ func Test_JiraTarget(t *testing.T) {
 	})
 
 	t.Run("Type", func(t *testing.T) {
+		t.Parallel()
 		client, _ := jira.NewClient(jira.Options{
 			ClientOptions: target.ClientOptions{
 				Name: "JiraTarget",

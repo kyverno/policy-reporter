@@ -20,7 +20,9 @@ import (
 )
 
 func Test_AlertManagerClient_Send(t *testing.T) {
+	t.Parallel()
 	t.Run("Send Single Alert", func(t *testing.T) {
+		t.Parallel()
 		receivedAlerts := make([]alertmanager.Alert, 0)
 		server := httptest.NewServer(stdhttp.HandlerFunc(func(w stdhttp.ResponseWriter, r *stdhttp.Request) {
 			assert.Equal(t, "/api/v2/alerts", r.URL.Path)
@@ -92,6 +94,7 @@ func Test_AlertManagerClient_Send(t *testing.T) {
 	})
 
 	t.Run("Handle HTTP Error", func(t *testing.T) {
+		t.Parallel()
 		server := httptest.NewServer(stdhttp.HandlerFunc(func(w stdhttp.ResponseWriter, r *stdhttp.Request) {
 			w.WriteHeader(stdhttp.StatusInternalServerError)
 		}))
@@ -119,6 +122,7 @@ func Test_AlertManagerClient_Send(t *testing.T) {
 	})
 
 	t.Run("With Custom Headers", func(t *testing.T) {
+		t.Parallel()
 		receivedHeaders := make(stdhttp.Header)
 		server := httptest.NewServer(stdhttp.HandlerFunc(func(w stdhttp.ResponseWriter, r *stdhttp.Request) {
 			receivedHeaders = r.Header
@@ -154,6 +158,7 @@ func Test_AlertManagerClient_Send(t *testing.T) {
 	})
 
 	t.Run("With Custom Fields", func(t *testing.T) {
+		t.Parallel()
 		receivedAlerts := make([]alertmanager.Alert, 0)
 		server := httptest.NewServer(stdhttp.HandlerFunc(func(w stdhttp.ResponseWriter, r *stdhttp.Request) {
 			var alerts []alertmanager.Alert
@@ -193,6 +198,7 @@ func Test_AlertManagerClient_Send(t *testing.T) {
 	})
 
 	t.Run("With Resource Information", func(t *testing.T) {
+		t.Parallel()
 		receivedAlerts := make([]alertmanager.Alert, 0)
 		server := httptest.NewServer(stdhttp.HandlerFunc(func(w stdhttp.ResponseWriter, r *stdhttp.Request) {
 			var alerts []alertmanager.Alert
@@ -241,6 +247,7 @@ func Test_AlertManagerClient_Send(t *testing.T) {
 }
 
 func Test_AlertManagerClient_Type(t *testing.T) {
+	t.Parallel()
 	client := alertmanager.NewClient(alertmanager.Options{
 		ClientOptions: target.ClientOptions{
 			Name: "test",
@@ -249,63 +256,4 @@ func Test_AlertManagerClient_Type(t *testing.T) {
 	})
 
 	assert.Equal(t, target.BatchSend, client.Type())
-}
-
-// mockReportInterface is a simple implementation of ReportInterface for testing
-type mockReportInterface struct {
-	name      string
-	namespace string
-	scope     *corev1.ObjectReference
-	results   []v1alpha1.ReportResult
-}
-
-func (m *mockReportInterface) GetName() string {
-	return m.name
-}
-
-func (m *mockReportInterface) GetNamespace() string {
-	return m.namespace
-}
-
-func (m *mockReportInterface) GetResults() []v1alpha1.ReportResult {
-	return m.results
-}
-
-func (m *mockReportInterface) GetScope() *corev1.ObjectReference {
-	return m.scope
-}
-
-func (m *mockReportInterface) SetResults(results []v1alpha1.ReportResult) {
-	m.results = results
-}
-
-func (m *mockReportInterface) GetSummary() v1alpha1.ReportSummary {
-	return v1alpha1.ReportSummary{}
-}
-
-func (m *mockReportInterface) GetSource() string {
-	if len(m.results) == 0 {
-		return ""
-	}
-	return m.results[0].Source
-}
-
-func (m *mockReportInterface) GetKinds() []string {
-	return []string{}
-}
-
-func (m *mockReportInterface) GetSeverities() []string {
-	return []string{}
-}
-
-func (m *mockReportInterface) HasResult(string) bool {
-	return false
-}
-
-func (m *mockReportInterface) GetAnnotations() map[string]string {
-	return map[string]string{}
-}
-
-func (m *mockReportInterface) GetCreationTimestamp() metav1.Time {
-	return metav1.Now()
 }

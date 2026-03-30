@@ -11,9 +11,11 @@ import (
 var ctx = context.Background()
 
 func Test_StoreListener(t *testing.T) {
+	t.Parallel()
 	store := report.NewPolicyReportStore()
 
 	t.Run("Save New Report", func(t *testing.T) {
+		t.Parallel()
 		slistener := listener.NewStoreListener(store)
 		slistener(ctx, report.LifecycleEvent{Type: report.Added, PolicyReport: preport1})
 
@@ -22,6 +24,7 @@ func Test_StoreListener(t *testing.T) {
 		}
 	})
 	t.Run("Update Modified Report", func(t *testing.T) {
+		t.Parallel()
 		slistener := listener.NewStoreListener(store)
 		slistener(ctx, report.LifecycleEvent{Type: report.Updated, PolicyReport: preport2})
 
@@ -30,6 +33,7 @@ func Test_StoreListener(t *testing.T) {
 		}
 	})
 	t.Run("Remove Deleted Report", func(t *testing.T) {
+		t.Parallel()
 		slistener := listener.NewStoreListener(store)
 		slistener(ctx, report.LifecycleEvent{Type: report.Deleted, PolicyReport: preport2})
 

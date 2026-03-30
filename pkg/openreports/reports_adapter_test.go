@@ -12,7 +12,9 @@ import (
 )
 
 func TestReport(t *testing.T) {
+	t.Parallel()
 	t.Run("GetSource Fallback", func(t *testing.T) {
+		t.Parallel()
 		creport := openreports.ReportAdapter{Report: &v1alpha1.Report{}}
 
 		if s := creport.GetSource(); s != "" {
@@ -21,6 +23,7 @@ func TestReport(t *testing.T) {
 	})
 
 	t.Run("GetSource from Result", func(t *testing.T) {
+		t.Parallel()
 		creport := openreports.ReportAdapter{Report: &v1alpha1.Report{Results: []v1alpha1.ReportResult{{Source: "Kyverno"}}}}
 
 		if s := creport.GetSource(); s != "Kyverno" {
@@ -29,6 +32,7 @@ func TestReport(t *testing.T) {
 	})
 
 	t.Run("GetSource from root property", func(t *testing.T) {
+		t.Parallel()
 		creport := openreports.ReportAdapter{Report: &v1alpha1.Report{Source: "Kyverno"}}
 
 		if s := creport.GetSource(); s != "Kyverno" {
@@ -37,6 +41,7 @@ func TestReport(t *testing.T) {
 	})
 
 	t.Run("GetID", func(t *testing.T) {
+		t.Parallel()
 		creport := openreports.ReportAdapter{Report: &v1alpha1.Report{ObjectMeta: v1.ObjectMeta{Name: "report-pod-nginx", Namespace: "default"}}}
 
 		if s := creport.GetID(); s != "17831693618079313969" {
@@ -45,6 +50,7 @@ func TestReport(t *testing.T) {
 	})
 
 	t.Run("GetKinds from Scope", func(t *testing.T) {
+		t.Parallel()
 		creport := openreports.ReportAdapter{Report: &v1alpha1.Report{Scope: &corev1.ObjectReference{Kind: "Deployment"}}}
 
 		if len(creport.GetKinds()) != 1 && creport.GetKinds()[0] != "Deployment" {
@@ -53,6 +59,7 @@ func TestReport(t *testing.T) {
 	})
 
 	t.Run("GetKinds from Results", func(t *testing.T) {
+		t.Parallel()
 		creport := openreports.ReportAdapter{Report: &v1alpha1.Report{
 			Results: []v1alpha1.ReportResult{
 				{},
@@ -68,6 +75,7 @@ func TestReport(t *testing.T) {
 	})
 
 	t.Run("GetSeverities from Results", func(t *testing.T) {
+		t.Parallel()
 		creport := openreports.ReportAdapter{Report: &v1alpha1.Report{
 			Results: []v1alpha1.ReportResult{
 				{Severity: v1alpha2.SeverityHigh},
@@ -81,6 +89,7 @@ func TestReport(t *testing.T) {
 		}
 	})
 	t.Run("Results", func(t *testing.T) {
+		t.Parallel()
 		report := openreports.ReportAdapter{Report: &v1alpha1.Report{}}
 
 		if s := len(report.GetResults()); s != 0 {
@@ -96,6 +105,7 @@ func TestReport(t *testing.T) {
 		}
 	})
 	t.Run("Summary", func(t *testing.T) {
+		t.Parallel()
 		report := openreports.ReportAdapter{Report: &v1alpha1.Report{Summary: v1alpha1.ReportSummary{Pass: 1}}}
 
 		if s := report.GetSummary().Pass; s != 1 {

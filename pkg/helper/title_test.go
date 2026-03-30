@@ -9,6 +9,7 @@ import (
 )
 
 func TestTitle(t *testing.T) {
+	t.Parallel()
 	assert.Equal(t, "Kyverno", helper.Title("kyverno"))
 	assert.Equal(t, "Trivy Vulnerability", helper.Title("trivy vulnerability"))
 }

@@ -9,13 +9,16 @@ import (
 )
 
 func Test_ResultFilter(t *testing.T) {
+	t.Parallel()
 	t.Run("don't filter any result without validations", func(t *testing.T) {
+		t.Parallel()
 		filter := report.NewResultFilter()
 		if !filter.Validate(fixtures.FailResult) {
 			t.Error("Expected result validates to true")
 		}
 	})
 	t.Run("filter result with a false validation", func(t *testing.T) {
+		t.Parallel()
 		filter := report.NewResultFilter()
 		filter.AddValidation(func(r openreports.ResultAdapter) bool { return false })
 		if filter.Validate(fixtures.FailResult) {

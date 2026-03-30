@@ -12,9 +12,11 @@ import (
 )
 
 func TestDefaultGenerator(t *testing.T) {
+	t.Parallel()
 	generator := result.NewIDGenerator(nil)
 
 	t.Run("ID From Property", func(t *testing.T) {
+		t.Parallel()
 		id := generator.Generate(&openreports.ReportAdapter{Report: &v1alpha1.Report{}}, openreports.ResultAdapter{ReportResult: v1alpha1.ReportResult{Properties: map[string]string{"resultID": "12345"}}})
 
 		if id != "12345" {
@@ -23,6 +25,7 @@ func TestDefaultGenerator(t *testing.T) {
 	})
 
 	t.Run("ID From Resource", func(t *testing.T) {
+		t.Parallel()
 		id := generator.Generate(&openreports.ReportAdapter{Report: &v1alpha1.Report{}}, openreports.ResultAdapter{ReportResult: v1alpha1.ReportResult{Subjects: []corev1.ObjectReference{{Name: "test", Kind: "Pod"}}}})
 
 		if id != "18007334074686647077" {
@@ -31,6 +34,7 @@ func TestDefaultGenerator(t *testing.T) {
 	})
 
 	t.Run("ID From Scope", func(t *testing.T) {
+		t.Parallel()
 		id := generator.Generate(&openreports.ReportAdapter{Report: &v1alpha1.Report{Scope: &corev1.ObjectReference{Name: "test", Kind: "Pod"}}}, openreports.ResultAdapter{})
 
 		if id != "18007334074686647077" {
@@ -40,7 +44,9 @@ func TestDefaultGenerator(t *testing.T) {
 }
 
 func TestCustomGenerator(t *testing.T) {
+	t.Parallel()
 	t.Run("ID From Property", func(t *testing.T) {
+		t.Parallel()
 		generator := result.NewIDGenerator([]string{"resource"})
 
 		id := generator.Generate(&openreports.ReportAdapter{Report: &v1alpha1.Report{}}, openreports.ResultAdapter{ReportResult: v1alpha1.ReportResult{Properties: map[string]string{"resultID": "12345"}}})
@@ -51,6 +57,7 @@ func TestCustomGenerator(t *testing.T) {
 	})
 
 	t.Run("ID From Resource", func(t *testing.T) {
+		t.Parallel()
 		generator := result.NewIDGenerator([]string{"resource"})
 
 		id := generator.Generate(&openreports.ReportAdapter{Report: &v1alpha1.Report{}}, openreports.ResultAdapter{ReportResult: v1alpha1.ReportResult{Subjects: []corev1.ObjectReference{{Name: "test", Kind: "Pod"}}}})
@@ -61,6 +68,7 @@ func TestCustomGenerator(t *testing.T) {
 	})
 
 	t.Run("ID From Scope", func(t *testing.T) {
+		t.Parallel()
 		generator := result.NewIDGenerator([]string{"resource"})
 
 		id := generator.Generate(&openreports.ReportAdapter{Report: &v1alpha1.Report{Scope: &corev1.ObjectReference{Name: "test", Kind: "Pod"}}}, openreports.ResultAdapter{})
@@ -71,6 +79,7 @@ func TestCustomGenerator(t *testing.T) {
 	})
 
 	t.Run("ID From Namespace", func(t *testing.T) {
+		t.Parallel()
 		generator := result.NewIDGenerator([]string{"namespace"})
 
 		empty := generator.Generate(&openreports.ReportAdapter{Report: &v1alpha1.Report{ObjectMeta: v1.ObjectMeta{Namespace: ""}}}, openreports.ResultAdapter{ReportResult: v1alpha1.ReportResult{Description: ""}})
@@ -82,6 +91,7 @@ func TestCustomGenerator(t *testing.T) {
 	})
 
 	t.Run("ID From Policy", func(t *testing.T) {
+		t.Parallel()
 		generator := result.NewIDGenerator([]string{"policy"})
 
 		empty := generator.Generate(&openreports.ReportAdapter{Report: &v1alpha1.Report{}}, openreports.ResultAdapter{ReportResult: v1alpha1.ReportResult{Policy: ""}})
@@ -93,6 +103,7 @@ func TestCustomGenerator(t *testing.T) {
 	})
 
 	t.Run("ID From Rule", func(t *testing.T) {
+		t.Parallel()
 		generator := result.NewIDGenerator([]string{"rule"})
 
 		empty := generator.Generate(&openreports.ReportAdapter{Report: &v1alpha1.Report{}}, openreports.ResultAdapter{ReportResult: v1alpha1.ReportResult{Rule: ""}})
@@ -104,6 +115,7 @@ func TestCustomGenerator(t *testing.T) {
 	})
 
 	t.Run("ID From Result", func(t *testing.T) {
+		t.Parallel()
 		generator := result.NewIDGenerator([]string{"result"})
 
 		empty := generator.Generate(&openreports.ReportAdapter{Report: &v1alpha1.Report{}}, openreports.ResultAdapter{ReportResult: v1alpha1.ReportResult{Result: ""}})
@@ -115,6 +127,7 @@ func TestCustomGenerator(t *testing.T) {
 	})
 
 	t.Run("ID From Category", func(t *testing.T) {
+		t.Parallel()
 		generator := result.NewIDGenerator([]string{"category"})
 
 		empty := generator.Generate(&openreports.ReportAdapter{Report: &v1alpha1.Report{}}, openreports.ResultAdapter{ReportResult: v1alpha1.ReportResult{Category: ""}})
@@ -126,6 +139,7 @@ func TestCustomGenerator(t *testing.T) {
 	})
 
 	t.Run("ID From Message", func(t *testing.T) {
+		t.Parallel()
 		generator := result.NewIDGenerator([]string{"message"})
 
 		empty := generator.Generate(&openreports.ReportAdapter{Report: &v1alpha1.Report{}}, openreports.ResultAdapter{ReportResult: v1alpha1.ReportResult{Description: ""}})
@@ -137,6 +151,7 @@ func TestCustomGenerator(t *testing.T) {
 	})
 
 	t.Run("ID From Created", func(t *testing.T) {
+		t.Parallel()
 		generator := result.NewIDGenerator([]string{"created"})
 
 		empty := generator.Generate(&openreports.ReportAdapter{Report: &v1alpha1.Report{}}, openreports.ResultAdapter{ReportResult: v1alpha1.ReportResult{Timestamp: v1.Timestamp{Seconds: 0}}})
@@ -148,6 +163,7 @@ func TestCustomGenerator(t *testing.T) {
 	})
 
 	t.Run("ID From Property", func(t *testing.T) {
+		t.Parallel()
 		generator := result.NewIDGenerator([]string{"property:id"})
 
 		empty := generator.Generate(&openreports.ReportAdapter{Report: &v1alpha1.Report{}}, openreports.ResultAdapter{})
@@ -159,6 +175,7 @@ func TestCustomGenerator(t *testing.T) {
 	})
 
 	t.Run("ID From Label", func(t *testing.T) {
+		t.Parallel()
 		generator := result.NewIDGenerator([]string{"label:id"})
 
 		empty := generator.Generate(&openreports.ReportAdapter{Report: &v1alpha1.Report{}}, openreports.ResultAdapter{})
@@ -170,6 +187,7 @@ func TestCustomGenerator(t *testing.T) {
 	})
 
 	t.Run("ID From Annotation", func(t *testing.T) {
+		t.Parallel()
 		generator := result.NewIDGenerator([]string{"annotation:id"})
 
 		empty := generator.Generate(&openreports.ReportAdapter{Report: &v1alpha1.Report{}}, openreports.ResultAdapter{})

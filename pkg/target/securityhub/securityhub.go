@@ -3,7 +3,6 @@ package securityhub
 import (
 	"context"
 	"fmt"
-	"strings"
 	"time"
 
 	hub "github.com/aws/aws-sdk-go-v2/service/securityhub"
@@ -593,15 +592,6 @@ func toResourceIDFilter(report openreports.ReportInterface, results []openreport
 	}
 
 	return filter
-}
-
-func splitPolrKey(key string) (string, string) {
-	parts := strings.Split(key, "/")
-	if len(parts) == 1 {
-		return parts[0], ""
-	}
-
-	return parts[1], parts[0]
 }
 
 func filterFindings(findings []types.AwsSecurityFinding, results []openreports.ResultAdapter) []types.AwsSecurityFinding {

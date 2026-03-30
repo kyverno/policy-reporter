@@ -21,7 +21,9 @@ func (c testClient) Do(req *http.Request) (*http.Response, error) {
 }
 
 func TestSplunkTarget(t *testing.T) {
+	t.Parallel()
 	t.Run("Send", func(t *testing.T) {
+		t.Parallel()
 		callback := func(req *http.Request) error {
 			if agent := req.Header.Get("User-Agent"); agent != "Policy-Reporter" {
 				t.Errorf("Unexpected Agent: %s", agent)

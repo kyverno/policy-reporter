@@ -14,7 +14,9 @@ import (
 )
 
 func TestReconditioner(t *testing.T) {
+	t.Parallel()
 	t.Run("prepare with default generator", func(t *testing.T) {
+		t.Parallel()
 		var report openreports.ReportInterface = &openreports.ReportAdapter{
 			Report: &v1alpha1.Report{
 				ObjectMeta: v1.ObjectMeta{
@@ -63,6 +65,7 @@ func TestReconditioner(t *testing.T) {
 	})
 
 	t.Run("prepare with custom generator", func(t *testing.T) {
+		t.Parallel()
 		var report openreports.ReportInterface = &openreports.ReportAdapter{
 			Report: &v1alpha1.Report{
 				ObjectMeta: v1.ObjectMeta{
@@ -132,6 +135,7 @@ func TestReconditioner(t *testing.T) {
 		assert.Equal(t, *report.GetScope(), res.Subjects[0])
 	})
 	t.Run("prepare with self assigned namespace", func(t *testing.T) {
+		t.Parallel()
 		var report openreports.ReportInterface = &openreports.ReportAdapter{
 			Report: &v1alpha1.Report{
 				ObjectMeta: v1.ObjectMeta{

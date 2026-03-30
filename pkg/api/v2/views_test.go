@@ -13,7 +13,9 @@ import (
 )
 
 func TestV2Views(t *testing.T) {
+	t.Parallel()
 	t.Run("MapValueFilter", func(t *testing.T) {
+		t.Parallel()
 		empty := v2.MapValueFilter(filters.ValueFilter{})
 
 		assert.Nil(t, empty)
@@ -32,6 +34,7 @@ func TestV2Views(t *testing.T) {
 	})
 
 	t.Run("MapResourceCategoryToSourceDetails", func(t *testing.T) {
+		t.Parallel()
 		result := v2.MapResourceCategoryToSourceDetails([]database.ResourceCategory{
 			{
 				Source: "Kyverno",
@@ -84,6 +87,7 @@ func TestV2Views(t *testing.T) {
 	})
 
 	t.Run("MapBaseToTarget", func(t *testing.T) {
+		t.Parallel()
 		target := v2.MapBaseToTarget(&targetconfig.Config[v1alpha1.WebhookOptions]{
 			Name:            "Webhook",
 			MinimumSeverity: "medium",
@@ -104,6 +108,7 @@ func TestV2Views(t *testing.T) {
 	})
 
 	t.Run("MapSlackToTarget", func(t *testing.T) {
+		t.Parallel()
 		target := v2.MapSlackToTarget(&targetconfig.Config[v1alpha1.SlackOptions]{
 			Name:            "Slack",
 			MinimumSeverity: "medium",
@@ -123,6 +128,7 @@ func TestV2Views(t *testing.T) {
 	})
 
 	t.Run("MapLokiToTarget", func(t *testing.T) {
+		t.Parallel()
 		target := v2.MapLokiToTarget(&targetconfig.Config[v1alpha1.LokiOptions]{
 			Name:            "Loki 1",
 			MinimumSeverity: "medium",
@@ -151,6 +157,7 @@ func TestV2Views(t *testing.T) {
 	})
 
 	t.Run("MapElasticsearchToTarget", func(t *testing.T) {
+		t.Parallel()
 		target := v2.MapElasticsearchToTarget(&targetconfig.Config[v1alpha1.ElasticsearchOptions]{
 			Name:            "Target",
 			MinimumSeverity: "medium",
@@ -182,6 +189,7 @@ func TestV2Views(t *testing.T) {
 	})
 
 	t.Run("MapWebhhokToTarget", func(t *testing.T) {
+		t.Parallel()
 		target := v2.MapWebhhokToTarget("Discord")(&targetconfig.Config[v1alpha1.WebhookOptions]{
 			Name:            "Target",
 			MinimumSeverity: "medium",
@@ -207,6 +215,7 @@ func TestV2Views(t *testing.T) {
 	})
 
 	t.Run("MapTelegramToTarget", func(t *testing.T) {
+		t.Parallel()
 		target := v2.MapTelegramToTarget(&targetconfig.Config[v1alpha1.TelegramOptions]{
 			Name:            "Target",
 			MinimumSeverity: "medium",
@@ -234,6 +243,7 @@ func TestV2Views(t *testing.T) {
 	})
 
 	t.Run("MapS3ToTarget", func(t *testing.T) {
+		t.Parallel()
 		target := v2.MapS3ToTarget(&targetconfig.Config[v1alpha1.S3Options]{
 			Name:            "Target",
 			MinimumSeverity: "medium",
@@ -260,6 +270,7 @@ func TestV2Views(t *testing.T) {
 	})
 
 	t.Run("MapKinesisToTarget", func(t *testing.T) {
+		t.Parallel()
 		target := v2.MapKinesisToTarget(&targetconfig.Config[v1alpha1.KinesisOptions]{
 			Name:            "Target",
 			MinimumSeverity: "medium",
@@ -284,6 +295,7 @@ func TestV2Views(t *testing.T) {
 	})
 
 	t.Run("MapSecurityHubToTarget", func(t *testing.T) {
+		t.Parallel()
 		target := v2.MapSecurityHubToTarget(&targetconfig.Config[v1alpha1.SecurityHubOptions]{
 			Name:            "Target",
 			MinimumSeverity: "medium",
@@ -309,6 +321,7 @@ func TestV2Views(t *testing.T) {
 	})
 
 	t.Run("MapGCSToTarget", func(t *testing.T) {
+		t.Parallel()
 		target := v2.MapGCSToTarget(&targetconfig.Config[v1alpha1.GCSOptions]{
 			Name:            "Target",
 			MinimumSeverity: "medium",
@@ -329,6 +342,7 @@ func TestV2Views(t *testing.T) {
 	})
 
 	t.Run("MapTargets", func(t *testing.T) {
+		t.Parallel()
 		targets := v2.MapTargets(&targetconfig.Config[v1alpha1.GCSOptions]{
 			Name:            "Target",
 			MinimumSeverity: "medium",

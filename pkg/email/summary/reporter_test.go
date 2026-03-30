@@ -14,6 +14,7 @@ import (
 )
 
 func Test_CreateReport(t *testing.T) {
+	t.Parallel()
 	ctx := context.Background()
 
 	client, pClient, cClient := NewFakeClient()

@@ -29,7 +29,7 @@ var fieldMapper = map[string]FieldMapperFunc{
 
 		if resource != nil {
 			h1 = fnv1a.AddString64(h1, string(resource.UID))
-			h1 = fnv1a.AddString64(h1, string(resource.Name))
+			h1 = fnv1a.AddString64(h1, resource.Name)
 		}
 
 		return h1

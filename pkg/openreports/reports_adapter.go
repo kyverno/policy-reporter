@@ -46,11 +46,11 @@ func (r *ReportAdapter) GetSummary() v1alpha1.ReportSummary {
 }
 
 func (r *ReportAdapter) GetSource() string {
-	if r.Report.Source == "" && len(r.GetResults()) > 0 {
-		r.Report.Source = r.Report.Results[0].Source
+	if r.Source == "" && len(r.GetResults()) > 0 {
+		r.Source = r.Results[0].Source
 	}
 
-	return r.Report.Source
+	return r.Source
 }
 
 func (r *ReportAdapter) GetKinds() []string {

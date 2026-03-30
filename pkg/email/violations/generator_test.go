@@ -13,6 +13,7 @@ import (
 )
 
 func Test_GenerateDataWithSingleSource(t *testing.T) {
+	t.Parallel()
 	ctx := context.Background()
 
 	client, pClient, cClient := NewFakeClient()
@@ -66,6 +67,7 @@ func Test_GenerateDataWithSingleSource(t *testing.T) {
 }
 
 func Test_GenerateDataWithMultipleSource(t *testing.T) {
+	t.Parallel()
 	ctx := context.Background()
 
 	client, pClient, cClient := NewFakeClient()
@@ -93,6 +95,7 @@ func Test_GenerateDataWithMultipleSource(t *testing.T) {
 }
 
 func Test_GenerateDataWithSourceFilter(t *testing.T) {
+	t.Parallel()
 	ctx := context.Background()
 
 	client, pClient, cClient := NewFakeClient()
@@ -118,6 +121,7 @@ func Test_GenerateDataWithSourceFilter(t *testing.T) {
 }
 
 func Test_FilterSourcesBySource(t *testing.T) {
+	t.Parallel()
 	ctx := context.Background()
 
 	client, pClient, cClient := NewFakeClient()
@@ -144,6 +148,7 @@ func Test_FilterSourcesBySource(t *testing.T) {
 }
 
 func Test_FilterSourcesByNamespace(t *testing.T) {
+	t.Parallel()
 	ctx := context.Background()
 
 	client, pClient, cClient := NewFakeClient()
@@ -175,6 +180,7 @@ func Test_FilterSourcesByNamespace(t *testing.T) {
 }
 
 func Test_RemoveEmptySource(t *testing.T) {
+	t.Parallel()
 	ctx := context.Background()
 
 	client, pClient, cClient := NewFakeClient()

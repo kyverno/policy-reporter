@@ -43,7 +43,7 @@ func NewClient(ctx context.Context, credentials, bucket string) Client {
 	}
 
 	if credentials != "" {
-		cred, err := google.CredentialsFromJSON(ctx, []byte(credentials), storage.ScopeReadWrite)
+		cred, err := google.CredentialsFromJSONWithTypeAndParams(ctx, []byte(credentials), google.ServiceAccount, google.CredentialsParams{Scopes: []string{storage.ScopeReadWrite}})
 		if err != nil {
 			zap.L().Error("error while creating GCS credentials", zap.Error(err))
 			return nil

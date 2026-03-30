@@ -35,7 +35,7 @@ const (
 )
 
 func newFakeClient() v1.NamespaceInterface {
-	return fake.NewSimpleClientset(
+	return fake.NewClientset(
 		&corev1.Namespace{
 			ObjectMeta: metav1.ObjectMeta{
 				Name: nsDefault,
@@ -60,6 +60,7 @@ func newFakeClient() v1.NamespaceInterface {
 var reconditioner = result.NewReconditioner(nil)
 
 func TestV2(t *testing.T) {
+	t.Parallel()
 	db, err := database.NewSQLiteDB("db_v2.db")
 	if err != nil {
 		assert.Fail(t, "failed to init SQLite DB")
@@ -93,6 +94,7 @@ func TestV2(t *testing.T) {
 	}))
 
 	t.Run("TargetResponse", func(t *testing.T) {
+		t.Parallel()
 		req, _ := http.NewRequest("GET", "/v2/targets", nil)
 		w := httptest.NewRecorder()
 
@@ -102,6 +104,7 @@ func TestV2(t *testing.T) {
 	})
 
 	t.Run("ResolveNamespaces", func(t *testing.T) {
+		t.Parallel()
 		body := new(bytes.Buffer)
 		body.Write([]byte(`{"team":"team-a"}`))
 
@@ -120,6 +123,7 @@ func TestV2(t *testing.T) {
 	})
 
 	t.Run("ListNamespaces", func(t *testing.T) {
+		t.Parallel()
 		req, _ := http.NewRequest("GET", "/v2/namespaces", nil)
 		w := httptest.NewRecorder()
 
@@ -137,6 +141,7 @@ func TestV2(t *testing.T) {
 	})
 
 	t.Run("ListSources", func(t *testing.T) {
+		t.Parallel()
 		req, _ := http.NewRequest("GET", "/v2/sources", nil)
 		w := httptest.NewRecorder()
 
@@ -154,6 +159,7 @@ func TestV2(t *testing.T) {
 	})
 
 	t.Run("ListPolicies", func(t *testing.T) {
+		t.Parallel()
 		req, _ := http.NewRequest("GET", "/v2/policies", nil)
 		w := httptest.NewRecorder()
 
@@ -173,6 +179,7 @@ func TestV2(t *testing.T) {
 	})
 
 	t.Run("UseResources", func(t *testing.T) {
+		t.Parallel()
 		req, _ := http.NewRequest("GET", "/v2/sources/Kyverno/use-resources", nil)
 		w := httptest.NewRecorder()
 
@@ -188,6 +195,7 @@ func TestV2(t *testing.T) {
 	})
 
 	t.Run("ListSourceWithCategories", func(t *testing.T) {
+		t.Parallel()
 		req, _ := http.NewRequest("GET", "/v2/sources/categories", nil)
 		w := httptest.NewRecorder()
 
@@ -204,6 +212,7 @@ func TestV2(t *testing.T) {
 	})
 
 	t.Run("ListResourceCategories", func(t *testing.T) {
+		t.Parallel()
 		req, _ := http.NewRequest("GET", "/v2/resource/17962226559046503697/source-categories", nil)
 		w := httptest.NewRecorder()
 
@@ -219,6 +228,7 @@ func TestV2(t *testing.T) {
 	})
 
 	t.Run("GetResource", func(t *testing.T) {
+		t.Parallel()
 		req, _ := http.NewRequest("GET", "/v2/resource/17962226559046503697", nil)
 		w := httptest.NewRecorder()
 
@@ -234,6 +244,7 @@ func TestV2(t *testing.T) {
 	})
 
 	t.Run("GetResourceStatusCounts", func(t *testing.T) {
+		t.Parallel()
 		req, _ := http.NewRequest("GET", "/v2/resource/17962226559046503697/status-counts", nil)
 		w := httptest.NewRecorder()
 
@@ -249,6 +260,7 @@ func TestV2(t *testing.T) {
 	})
 
 	t.Run("ListNamespaceResourceResults", func(t *testing.T) {
+		t.Parallel()
 		req, _ := http.NewRequest("GET", "/v2/namespace-scoped/resource-results?namespaces=kyverno", nil)
 		w := httptest.NewRecorder()
 
@@ -266,6 +278,7 @@ func TestV2(t *testing.T) {
 	})
 
 	t.Run("ListClusterResourceResults", func(t *testing.T) {
+		t.Parallel()
 		req, _ := http.NewRequest("GET", "/v2/cluster-scoped/resource-results", nil)
 		w := httptest.NewRecorder()
 
@@ -282,6 +295,7 @@ func TestV2(t *testing.T) {
 	})
 
 	t.Run("GetClusterStatusCounts", func(t *testing.T) {
+		t.Parallel()
 		req, _ := http.NewRequest("GET", "/v2/cluster-scoped/Kyverno/status-counts", nil)
 		w := httptest.NewRecorder()
 
@@ -298,6 +312,7 @@ func TestV2(t *testing.T) {
 	})
 
 	t.Run("GetNamespaceStatusCounts", func(t *testing.T) {
+		t.Parallel()
 		req, _ := http.NewRequest("GET", "/v2/namespace-scoped/Kyverno/status-counts", nil)
 		w := httptest.NewRecorder()
 
@@ -319,6 +334,7 @@ func TestV2(t *testing.T) {
 	})
 
 	t.Run("ListClusterKinds", func(t *testing.T) {
+		t.Parallel()
 		req, _ := http.NewRequest("GET", "/v2/cluster-scoped/kinds", nil)
 		w := httptest.NewRecorder()
 
@@ -335,6 +351,7 @@ func TestV2(t *testing.T) {
 	})
 
 	t.Run("ListNamespaceKinds", func(t *testing.T) {
+		t.Parallel()
 		req, _ := http.NewRequest("GET", "/v2/namespace-scoped/kinds", nil)
 		w := httptest.NewRecorder()
 
@@ -351,6 +368,7 @@ func TestV2(t *testing.T) {
 	})
 
 	t.Run("ListResourceResults", func(t *testing.T) {
+		t.Parallel()
 		req, _ := http.NewRequest("GET", "/v2/resource/6274512523942114905/resource-results", nil)
 		w := httptest.NewRecorder()
 
@@ -367,6 +385,7 @@ func TestV2(t *testing.T) {
 	})
 
 	t.Run("ListResourcePolilcyResults", func(t *testing.T) {
+		t.Parallel()
 		req, _ := http.NewRequest("GET", "/v2/resource/6274512523942114905/results", nil)
 		w := httptest.NewRecorder()
 
@@ -383,6 +402,7 @@ func TestV2(t *testing.T) {
 	})
 
 	t.Run("ListPolicyResults Namespaced", func(t *testing.T) {
+		t.Parallel()
 		req, _ := http.NewRequest("GET", "/v2/namespace-scoped/results?namespaces=kyverno", nil)
 		w := httptest.NewRecorder()
 
@@ -400,6 +420,7 @@ func TestV2(t *testing.T) {
 	})
 
 	t.Run("ListPolicyResults", func(t *testing.T) {
+		t.Parallel()
 		req, _ := http.NewRequest("GET", "/v2/cluster-scoped/results", nil)
 		w := httptest.NewRecorder()
 
@@ -416,6 +437,7 @@ func TestV2(t *testing.T) {
 	})
 
 	t.Run("ListResultsWithoutResource", func(t *testing.T) {
+		t.Parallel()
 		req, _ := http.NewRequest("GET", "/v2/results-without-resources", nil)
 		w := httptest.NewRecorder()
 
@@ -432,6 +454,7 @@ func TestV2(t *testing.T) {
 	})
 
 	t.Run("UseResources", func(t *testing.T) {
+		t.Parallel()
 		req, _ := http.NewRequest("GET", "/v2/sources/Kyverno/use-resources", nil)
 		w := httptest.NewRecorder()
 
@@ -448,6 +471,7 @@ func TestV2(t *testing.T) {
 	})
 
 	t.Run("ListFindings", func(t *testing.T) {
+		t.Parallel()
 		req, _ := http.NewRequest("GET", "/v2/findings", nil)
 		w := httptest.NewRecorder()
 

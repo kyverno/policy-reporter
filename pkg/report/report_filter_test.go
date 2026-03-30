@@ -8,13 +8,16 @@ import (
 )
 
 func Test_ReportFilter(t *testing.T) {
+	t.Parallel()
 	t.Run("don't filter any result without validations", func(t *testing.T) {
+		t.Parallel()
 		filter := report.NewReportFilter()
 		if !filter.Validate(preport) {
 			t.Error("Expected result validates to true")
 		}
 	})
 	t.Run("filter result with a false validation", func(t *testing.T) {
+		t.Parallel()
 		filter := report.NewReportFilter()
 		filter.AddValidation(func(r openreports.ReportInterface) bool { return false })
 		if filter.Validate(preport) {

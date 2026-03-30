@@ -80,9 +80,7 @@ func (e *client) Send(report openreports.ReportInterface, result openreports.Res
 	if result.HasResource() {
 		labels = append(labels, fmt.Sprintf("resource-%s", openreports.ToResourceID(result.GetResource())))
 	}
-	for _, label := range e.labels {
-		labels = append(labels, label)
-	}
+	labels = append(labels, e.labels...)
 
 	if e.jiraV2 != nil {
 		resp, err := e.sendV2(summary.String(), result, labels)

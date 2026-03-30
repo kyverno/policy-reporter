@@ -91,6 +91,7 @@ func Test_DetailedClusterResultMetricGeneration(t *testing.T) {
 }
 
 func testClusterResultMetricLabels(t *testing.T, metric *ioprometheusclient.Metric, result openreports.ResultAdapter) error {
+	t.Helper()
 	res := &corev1.ObjectReference{}
 	if result.HasResource() {
 		res = result.GetResource()
