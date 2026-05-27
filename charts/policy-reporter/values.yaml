@@ -1870,6 +1870,7 @@ monitoring:
   annotations: {}
 
   serviceMonitor:
+    enabled: true
     # -- HonorLabels chooses the metrics labels on collisions with target labels
     honorLabels: false
     # -- Allow to override the namespace for serviceMonitor
