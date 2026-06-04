@@ -1003,7 +1003,7 @@ ui:
     # -- (string) Image PullPolicy
     pullPolicy: IfNotPresent
     # -- (string) Image tag
-    tag: "2.5.3"
+    tag: "2.5.4"
 
   crds:
     # -- Install UI CustomBoard CRDs
