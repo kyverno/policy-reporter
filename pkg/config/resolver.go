@@ -654,7 +654,7 @@ func (r *Resolver) SMTPServer() *mail.SMTPServer {
 	return server
 }
 
-func (r *Resolver) EmailClient() email.Client {
+func (r *Resolver) EmailClient() email.Sender {
 	if r.config.EmailReports.GraphAPI.Enabled {
 		return email.NewGraphAPIClient(
 			r.config.EmailReports.GraphAPI.Tenant,

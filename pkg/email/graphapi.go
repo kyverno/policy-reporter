@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
 	"strings"
 
@@ -29,8 +30,8 @@ type graphMessage struct {
 }
 
 type graphAPIClient struct {
-	client *http.Client
-	userID string
+	oauthConfig *clientcredentials.Config
+	userID      string
 }
 
 func (c *graphAPIClient) Send(report Report, to []string) error {
@@ -54,28 +55,36 @@ func (c *graphAPIClient) Send(report Report, to []string) error {
 		return err
 	}
 
+	// Create a context-scoped HTTP client so OAuth2 tokens are fetched lazily per request
+	// and not cached across the entire application lifetime.
+	ctx := context.Background()
+	httpClient := c.oauthConfig.Client(ctx)
+
 	url := fmt.Sprintf("https://graph.microsoft.com/v1.0/users/%s/sendMail", c.userID)
-	req, err := http.NewRequest(http.MethodPost, url, bytes.NewBuffer(body))
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, url, bytes.NewBuffer(body))
 	if err != nil {
 		return err
 	}
 
 	req.Header.Set("Content-Type", "application/json")
 
-	resp, err := c.client.Do(req)
+	resp, err := httpClient.Do(req)
 	if err != nil {
 		return err
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusAccepted {
-		return fmt.Errorf("failed to send email via Graph API: %s", resp.Status)
+		respBody, _ := io.ReadAll(resp.Body)
+		return fmt.Errorf("failed to send email via Graph API: %s – %s", resp.Status, string(respBody))
 	}
 
 	return nil
 }
 
-func NewGraphAPIClient(tenant, clientID, clientSecret, userID string) Client {
+// NewGraphAPIClient creates a Sender backed by the Microsoft Graph API.
+// OAuth2 tokens are obtained lazily on each Send call using client credentials flow.
+func NewGraphAPIClient(tenant, clientID, clientSecret, userID string) Sender {
 	config := &clientcredentials.Config{
 		ClientID:     clientID,
 		ClientSecret: clientSecret,
@@ -84,7 +93,7 @@ func NewGraphAPIClient(tenant, clientID, clientSecret, userID string) Client {
 	}
 
 	return &graphAPIClient{
-		client: config.Client(context.Background()),
-		userID: userID,
+		oauthConfig: config,
+		userID:      userID,
 	}
 }
