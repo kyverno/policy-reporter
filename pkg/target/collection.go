@@ -3,9 +3,12 @@ package target
 import (
 	"context"
 	"sync"
+	"sync/atomic"
+	"time"
 
 	"go.uber.org/zap"
 
+	"github.com/kyverno/policy-reporter/pkg/crd/api/targetconfig"
 	"github.com/kyverno/policy-reporter/pkg/crd/api/targetconfig/v1alpha1"
 	"github.com/kyverno/policy-reporter/pkg/helper"
 )
@@ -19,27 +22,33 @@ const (
 	Discord       TargetType = "Discord"
 	Teams         TargetType = "Teams"
 	GoogleChat    TargetType = "GoogleChat"
+	Jira          TargetType = "Jira"
 	Telegram      TargetType = "Telegram"
 	Webhook       TargetType = "Webhook"
 	S3            TargetType = "S3"
 	Kinesis       TargetType = "Kinesis"
 	SecurityHub   TargetType = "SecurityHub"
 	GCS           TargetType = "GCS"
+	AlertManager  TargetType = "AlertManager"
+	Splunk        TargetType = "Splunk"
 )
 
 type Targets struct {
-	Loki          *v1alpha1.Config[v1alpha1.LokiOptions]          `mapstructure:"loki"`
-	Elasticsearch *v1alpha1.Config[v1alpha1.ElasticsearchOptions] `mapstructure:"elasticsearch"`
-	Slack         *v1alpha1.Config[v1alpha1.SlackOptions]         `mapstructure:"slack"`
-	Discord       *v1alpha1.Config[v1alpha1.WebhookOptions]       `mapstructure:"discord"`
-	Teams         *v1alpha1.Config[v1alpha1.WebhookOptions]       `mapstructure:"teams"`
-	Webhook       *v1alpha1.Config[v1alpha1.WebhookOptions]       `mapstructure:"webhook"`
-	GoogleChat    *v1alpha1.Config[v1alpha1.WebhookOptions]       `mapstructure:"googleChat"`
-	Telegram      *v1alpha1.Config[v1alpha1.TelegramOptions]      `mapstructure:"telegram"`
-	S3            *v1alpha1.Config[v1alpha1.S3Options]            `mapstructure:"s3"`
-	Kinesis       *v1alpha1.Config[v1alpha1.KinesisOptions]       `mapstructure:"kinesis"`
-	SecurityHub   *v1alpha1.Config[v1alpha1.SecurityHubOptions]   `mapstructure:"securityHub"`
-	GCS           *v1alpha1.Config[v1alpha1.GCSOptions]           `mapstructure:"gcs"`
+	Loki          *targetconfig.Config[v1alpha1.LokiOptions]          `mapstructure:"loki"`
+	Elasticsearch *targetconfig.Config[v1alpha1.ElasticsearchOptions] `mapstructure:"elasticsearch"`
+	Slack         *targetconfig.Config[v1alpha1.SlackOptions]         `mapstructure:"slack"`
+	Discord       *targetconfig.Config[v1alpha1.WebhookOptions]       `mapstructure:"discord"`
+	Teams         *targetconfig.Config[v1alpha1.WebhookOptions]       `mapstructure:"teams"`
+	Webhook       *targetconfig.Config[v1alpha1.WebhookOptions]       `mapstructure:"webhook"`
+	GoogleChat    *targetconfig.Config[v1alpha1.WebhookOptions]       `mapstructure:"googleChat"`
+	Jira          *targetconfig.Config[v1alpha1.JiraOptions]          `mapstructure:"jira"`
+	Telegram      *targetconfig.Config[v1alpha1.TelegramOptions]      `mapstructure:"telegram"`
+	S3            *targetconfig.Config[v1alpha1.S3Options]            `mapstructure:"s3"`
+	Kinesis       *targetconfig.Config[v1alpha1.KinesisOptions]       `mapstructure:"kinesis"`
+	SecurityHub   *targetconfig.Config[v1alpha1.SecurityHubOptions]   `mapstructure:"securityHub"`
+	GCS           *targetconfig.Config[v1alpha1.GCSOptions]           `mapstructure:"gcs"`
+	AlertManager  *targetconfig.Config[v1alpha1.HostOptions]          `mapstructure:"alertManager"`
+	Splunk        *targetconfig.Config[v1alpha1.SplunkOptions]        `mapstructure:"splunk"`
 }
 
 type TargetConfig interface {
@@ -47,11 +56,14 @@ type TargetConfig interface {
 }
 
 type Target struct {
-	ID           string
-	Type         TargetType
-	Client       Client
-	ParentConfig TargetConfig
-	Config       TargetConfig
+	ID               string
+	Type             TargetType
+	Client           Client
+	ParentConfig     TargetConfig
+	Config           TargetConfig
+	Keepalive        time.Duration
+	keepaliveRunning uint32 // Simple atomic flag
+	cancelKeepalive  context.CancelFunc
 }
 
 func (t *Target) Secret() string {
@@ -60,6 +72,43 @@ func (t *Target) Secret() string {
 	}
 
 	return t.ParentConfig.Secret()
+}
+
+func (t *Target) StartKeepalive() {
+	// Simple atomic check to prevent duplicates
+	if !atomic.CompareAndSwapUint32(&t.keepaliveRunning, 0, 1) {
+		zap.L().Info("keepalive already started for target: ", zap.String("target", t.Type))
+		return
+	}
+	zap.L().Info("starting keepalive for target: ", zap.String("target", t.Type))
+
+	ctx, cancel := context.WithCancel(context.Background())
+	t.cancelKeepalive = cancel
+
+	go func() {
+		defer atomic.StoreUint32(&t.keepaliveRunning, 0)
+
+		ticker := time.NewTicker(t.Keepalive)
+		defer ticker.Stop()
+
+		for {
+			select {
+			case <-ticker.C:
+				t.Client.SendHeartbeat()
+			case <-ctx.Done():
+				return
+			}
+		}
+	}()
+}
+
+func (t *Target) StopKeepalive() {
+	if t.cancelKeepalive != nil {
+		zap.L().Info("stopping keepalive for target: ", zap.String("target", t.Type))
+		t.cancelKeepalive()
+		t.cancelKeepalive = nil
+		atomic.StoreUint32(&t.keepaliveRunning, 0)
+	}
 }
 
 type Collection struct {
@@ -76,7 +125,10 @@ func (c *Collection) AddTarget(key string, t *Target) {
 
 func (c *Collection) RemoveTarget(key string) {
 	c.mx.Lock()
-	delete(c.targets, key)
+	if target, exists := c.targets[key]; exists {
+		target.StopKeepalive()
+		delete(c.targets, key)
+	}
 	c.mx.Unlock()
 }
 
@@ -153,6 +205,7 @@ func (c *Collection) Length() int {
 	return len(c.targets)
 }
 
+// NewCollection creates a new target Collection.
 func NewCollection(targets ...*Target) *Collection {
 	collection := &Collection{
 		clients: make([]Client, 0),

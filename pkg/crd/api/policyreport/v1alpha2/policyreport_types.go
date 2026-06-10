@@ -14,14 +14,9 @@ limitations under the License.
 package v1alpha2
 
 import (
-	"fmt"
-	"strconv"
-
-	"github.com/segmentio/fasthash/fnv1a"
+	reportsv1alpha1 "github.com/openreports/reports-api/apis/openreports.io/v1alpha1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-
-	"github.com/kyverno/policy-reporter/pkg/helper"
 )
 
 // +genclient
@@ -61,87 +56,12 @@ type PolicyReport struct {
 	Results []PolicyReportResult `json:"results,omitempty"`
 }
 
-func (r *PolicyReport) GetResults() []PolicyReportResult {
-	return r.Results
-}
-
-func (r *PolicyReport) HasResult(id string) bool {
-	for _, r := range r.Results {
-		if r.GetID() == id {
-			return true
-		}
-	}
-
-	return false
-}
-
-func (r *PolicyReport) SetResults(results []PolicyReportResult) {
-	r.Results = results
-}
-
-func (r *PolicyReport) GetSummary() PolicyReportSummary {
-	return r.Summary
-}
-
 func (r *PolicyReport) GetSource() string {
 	if len(r.Results) == 0 {
 		return ""
 	}
 
 	return r.Results[0].Source
-}
-
-func (r *PolicyReport) GetKinds() []string {
-	if r.GetScope() != nil {
-		return []string{r.Scope.Kind}
-	}
-
-	list := make([]string, 0)
-	for _, k := range r.Results {
-		if !k.HasResource() {
-			continue
-		}
-
-		kind := k.GetResource().Kind
-
-		if kind == "" || helper.Contains(kind, list) {
-			continue
-		}
-
-		list = append(list, kind)
-	}
-
-	return list
-}
-
-func (r *PolicyReport) GetSeverities() []string {
-	list := make([]string, 0)
-	for _, k := range r.Results {
-
-		if k.Severity == "" || helper.Contains(string(k.Severity), list) {
-			continue
-		}
-
-		list = append(list, string(k.Severity))
-	}
-
-	return list
-}
-
-func (r *PolicyReport) GetID() string {
-	h1 := fnv1a.Init64
-	h1 = fnv1a.AddString64(h1, r.GetName())
-	h1 = fnv1a.AddString64(h1, r.GetNamespace())
-
-	return strconv.FormatUint(h1, 10)
-}
-
-func (r *PolicyReport) GetKey() string {
-	return fmt.Sprintf("%s/%s", r.Namespace, r.Name)
-}
-
-func (r *PolicyReport) GetScope() *corev1.ObjectReference {
-	return r.Scope
 }
 
 // +kubebuilder:object:root=true
@@ -152,4 +72,38 @@ type PolicyReportList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata,omitempty"`
 	Items           []PolicyReport `json:"items"`
+}
+
+func (polr *PolicyReport) ToOpenReports() *reportsv1alpha1.Report {
+	res := make([]reportsv1alpha1.ReportResult, 0, len(polr.Results))
+	for _, r := range polr.Results {
+		res = append(res, reportsv1alpha1.ReportResult{
+			Source:           r.Source,
+			Policy:           r.Policy,
+			Rule:             r.Rule,
+			Category:         r.Category,
+			Timestamp:        r.Timestamp,
+			Severity:         reportsv1alpha1.ResultSeverity(r.Severity),
+			Result:           reportsv1alpha1.Result(r.Result),
+			Subjects:         r.Resources,
+			ResourceSelector: r.ResourceSelector,
+			Scored:           r.Scored,
+			Description:      r.Message,
+			Properties:       r.Properties,
+		})
+	}
+	return &reportsv1alpha1.Report{
+		ObjectMeta:    polr.ObjectMeta,
+		Source:        polr.GetSource(),
+		Scope:         polr.Scope,
+		ScopeSelector: polr.ScopeSelector,
+		Summary: reportsv1alpha1.ReportSummary{
+			Pass:  polr.Summary.Pass,
+			Fail:  polr.Summary.Fail,
+			Warn:  polr.Summary.Warn,
+			Error: polr.Summary.Error,
+			Skip:  polr.Summary.Skip,
+		},
+		Results: res,
+	}
 }

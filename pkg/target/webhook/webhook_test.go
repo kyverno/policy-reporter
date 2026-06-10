@@ -26,7 +26,9 @@ func (c testClient) Do(req *http.Request) (*http.Response, error) {
 }
 
 func Test_UITarget(t *testing.T) {
+	t.Parallel()
 	t.Run("Send", func(t *testing.T) {
+		t.Parallel()
 		callback := func(req *http.Request) error {
 			if contentType := req.Header.Get("Content-Type"); contentType != "application/json; charset=utf-8" {
 				t.Errorf("Unexpected Content-Type: %s", contentType)
@@ -56,13 +58,14 @@ func Test_UITarget(t *testing.T) {
 			CustomFields: map[string]string{"cluster": "name"},
 			HTTPClient:   testClient{callback, 200},
 		})
-		client.Send(fixtures.CompleteTargetSendResult)
+		client.Send(fixtures.DefaultPolicyReport, fixtures.CompleteTargetSendResult)
 
 		if len(fixtures.CompleteTargetSendResult.Properties) > 1 || fixtures.CompleteTargetSendResult.Properties["cluster"] != "" {
 			t.Error("expected customFields are not added to the actuel result")
 		}
 	})
 	t.Run("Name", func(t *testing.T) {
+		t.Parallel()
 		client := webhook.NewClient(webhook.Options{
 			ClientOptions: target.ClientOptions{
 				Name: "HTTP",
@@ -77,6 +80,7 @@ func Test_UITarget(t *testing.T) {
 		}
 	})
 	t.Run("Request Error", func(t *testing.T) {
+		t.Parallel()
 		callback := func(req *http.Request) error {
 			t.Fail()
 
@@ -90,6 +94,6 @@ func Test_UITarget(t *testing.T) {
 			Host:       "\\localhost:8080",
 			HTTPClient: testClient{callback, 200},
 		})
-		client.Send(fixtures.CompleteTargetSendResult)
+		client.Send(fixtures.DefaultPolicyReport, fixtures.CompleteTargetSendResult)
 	})
 }

@@ -3,35 +3,42 @@ package report_test
 import (
 	"testing"
 
+	"github.com/openreports/reports-api/apis/openreports.io/v1alpha1"
 	"github.com/stretchr/testify/assert"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	"github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
 	"github.com/kyverno/policy-reporter/pkg/fixtures"
+	"github.com/kyverno/policy-reporter/pkg/openreports"
 	"github.com/kyverno/policy-reporter/pkg/report"
 )
 
-var preport = &v1alpha2.PolicyReport{
-	ObjectMeta: v1.ObjectMeta{
-		Name:              "polr-test",
-		Namespace:         "test",
-		CreationTimestamp: v1.Now(),
+var preport = &openreports.ReportAdapter{
+	Report: &v1alpha1.Report{
+		ObjectMeta: v1.ObjectMeta{
+			Name:              "polr-test",
+			Namespace:         "test",
+			CreationTimestamp: v1.Now(),
+		},
+		Results: make([]v1alpha1.ReportResult, 0),
+		Summary: v1alpha1.ReportSummary{},
 	},
-	Results: make([]v1alpha2.PolicyReportResult, 0),
-	Summary: v1alpha2.PolicyReportSummary{},
 }
 
-var creport = &v1alpha2.ClusterPolicyReport{
-	ObjectMeta: v1.ObjectMeta{
-		Name:              "cpolr-test",
-		CreationTimestamp: v1.Now(),
+var creport = &openreports.ClusterReportAdapter{
+	ClusterReport: &v1alpha1.ClusterReport{
+		ObjectMeta: v1.ObjectMeta{
+			Name:              "cpolr-test",
+			CreationTimestamp: v1.Now(),
+		},
+		Results: make([]v1alpha1.ReportResult, 0),
+		Summary: v1alpha1.ReportSummary{},
 	},
-	Results: make([]v1alpha2.PolicyReportResult, 0),
-	Summary: v1alpha2.PolicyReportSummary{},
 }
 
 func Test_Events(t *testing.T) {
+	t.Parallel()
 	t.Run("Event.String", func(t *testing.T) {
+		t.Parallel()
 		assert.Equal(t, "add", report.Added.String(), "Unexpected type conversion")
 		assert.Equal(t, "update", report.Updated.String(), "Unexpected type conversion")
 		assert.Equal(t, "delete", report.Deleted.String(), "Unexpected type conversion")
@@ -40,28 +47,36 @@ func Test_Events(t *testing.T) {
 }
 
 func Test_GetType(t *testing.T) {
+	t.Parallel()
 	assert.Equal(t, report.PolicyReportType, report.GetType(preport), "expected type")
 	assert.Equal(t, report.ClusterPolicyReportType, report.GetType(creport), "expected type")
 }
 
 func Test_FindNewEvents(t *testing.T) {
-	preport1 := &v1alpha2.PolicyReport{
-		ObjectMeta: v1.ObjectMeta{
-			Name:              "polr-test",
-			Namespace:         "test",
-			CreationTimestamp: v1.Now(),
+	t.Parallel()
+	preport1 := &openreports.ReportAdapter{
+		Report: &v1alpha1.Report{
+			ObjectMeta: v1.ObjectMeta{
+				Name:              "polr-test",
+				Namespace:         "test",
+				CreationTimestamp: v1.Now(),
+			},
+			Results: []v1alpha1.ReportResult{fixtures.FailResult.ReportResult},
+			Summary: v1alpha1.ReportSummary{},
 		},
-		Results: []v1alpha2.PolicyReportResult{fixtures.FailResult},
-		Summary: v1alpha2.PolicyReportSummary{},
+		Results: []openreports.ResultAdapter{fixtures.FailResult},
 	}
-	preport2 := &v1alpha2.PolicyReport{
-		ObjectMeta: v1.ObjectMeta{
-			Name:              "polr-test",
-			Namespace:         "test",
-			CreationTimestamp: v1.Now(),
+	preport2 := &openreports.ReportAdapter{
+		Report: &v1alpha1.Report{
+			ObjectMeta: v1.ObjectMeta{
+				Name:              "polr-test",
+				Namespace:         "test",
+				CreationTimestamp: v1.Now(),
+			},
+			Results: []v1alpha1.ReportResult{fixtures.FailResult.ReportResult, fixtures.FailPodResult.ReportResult},
+			Summary: v1alpha1.ReportSummary{},
 		},
-		Results: []v1alpha2.PolicyReportResult{fixtures.FailResult, fixtures.FailPodResult},
-		Summary: v1alpha2.PolicyReportSummary{},
+		Results: []openreports.ResultAdapter{fixtures.FailResult, fixtures.FailPodResult},
 	}
 
 	diff := report.FindNewResults(preport2, preport1)

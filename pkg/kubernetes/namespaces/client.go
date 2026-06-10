@@ -4,13 +4,13 @@ import (
 	"context"
 	"strings"
 
-	gocache "github.com/patrickmn/go-cache"
 	"go.uber.org/zap"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/selection"
 	v1 "k8s.io/client-go/kubernetes/typed/core/v1"
+	gocache "zgo.at/zcache/v2"
 
 	"github.com/kyverno/policy-reporter/pkg/helper"
 	"github.com/kyverno/policy-reporter/pkg/kubernetes"
@@ -22,7 +22,7 @@ type Client interface {
 
 type k8sClient struct {
 	client v1.NamespaceInterface
-	cache  *gocache.Cache
+	cache  *gocache.Cache[string, []string]
 }
 
 func (c *k8sClient) List(ctx context.Context, selector map[string]string) ([]string, error) {
@@ -53,7 +53,7 @@ func (c *k8sClient) List(ctx context.Context, selector map[string]string) ([]str
 	zap.L().Debug("created label selector for namespace resolution", zap.String("selector", s.String()))
 
 	if cached, ok := c.cache.Get(s.String()); ok {
-		return cached.([]string), nil
+		return cached, nil
 	}
 
 	list, err := kubernetes.Retry(func() ([]string, error) {
@@ -70,12 +70,12 @@ func (c *k8sClient) List(ctx context.Context, selector map[string]string) ([]str
 		return nil, err
 	}
 
-	c.cache.Set(s.String(), list, 0)
+	c.cache.Set(s.String(), list)
 
 	return list, nil
 }
 
-func NewClient(secretClient v1.NamespaceInterface, cache *gocache.Cache) Client {
+func NewClient(secretClient v1.NamespaceInterface, cache *gocache.Cache[string, []string]) Client {
 	return &k8sClient{
 		client: secretClient,
 		cache:  cache,

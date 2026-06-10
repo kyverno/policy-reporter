@@ -476,7 +476,7 @@ type operation struct {
 }
 
 func (o operation) HasContext() bool {
-	return o.Method.Type.NumIn() > 0 && goType(o.Method.Type.In(0)) == "context.Context"
+	return o.Type.NumIn() > 0 && goType(o.Type.In(0)) == "context.Context"
 }
 
 func (o operation) HasError() bool {
@@ -494,7 +494,7 @@ type resource struct {
 }
 
 func (r resource) Kind() string {
-	return strings.ReplaceAll(r.Type.Name(), "Interface", "")
+	return strings.ReplaceAll(r.Name(), "Interface", "")
 }
 
 type resourceKey reflect.Method
@@ -665,8 +665,10 @@ func executeTemplate(tpl string, data interface{}, folder string, file string) {
 				return toSnakeCase(in)
 			},
 			"Args": func(in reflect.Method) []arg {
-				var out []arg
-				for i, a := range getIns(in) {
+				ins := getIns(in)
+
+				out := make([]arg, 0, len(ins))
+				for i, a := range ins {
 					out = append(out, arg{
 						Type:       a,
 						IsVariadic: in.Type.IsVariadic() && i == in.Type.NumIn()-1,

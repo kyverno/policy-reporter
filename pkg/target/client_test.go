@@ -3,38 +3,44 @@ package target_test
 import (
 	"testing"
 
+	"github.com/openreports/reports-api/apis/openreports.io/v1alpha1"
 	"github.com/stretchr/testify/assert"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	"github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
 	"github.com/kyverno/policy-reporter/pkg/fixtures"
+	"github.com/kyverno/policy-reporter/pkg/openreports"
 	"github.com/kyverno/policy-reporter/pkg/report"
 	"github.com/kyverno/policy-reporter/pkg/target"
 	"github.com/kyverno/policy-reporter/pkg/validate"
 )
 
-var preport = &v1alpha2.PolicyReport{
-	ObjectMeta: v1.ObjectMeta{
-		Labels: map[string]string{"app": "policy-reporter"},
+var preport = &openreports.ReportAdapter{
+	Report: &v1alpha1.Report{
+		ObjectMeta: v1.ObjectMeta{
+			Labels: map[string]string{"app": "policy-reporter"},
+		},
 	},
 }
 
 var factory = target.NewResultFilterFactory(nil)
 
 func Test_BaseClient(t *testing.T) {
+	t.Parallel()
 	t.Run("Validate MinimumSeverity", func(t *testing.T) {
+		t.Parallel()
 		filter := factory.CreateFilter(
 			validate.RuleSets{},
 			validate.RuleSets{},
 			validate.RuleSets{},
 			validate.RuleSets{},
 			validate.RuleSets{},
-			v1alpha2.SeverityCritical,
+			openreports.SeverityCritical,
 		)
 
 		assert.False(t, filter.Validate(fixtures.FailResult), "Unexpected Validation Result")
 	})
 	t.Run("Validate Source", func(t *testing.T) {
+		t.Parallel()
 		filter := factory.CreateFilter(
 			validate.RuleSets{},
 			validate.RuleSets{},
@@ -48,6 +54,7 @@ func Test_BaseClient(t *testing.T) {
 	})
 
 	t.Run("Validate ClusterResult", func(t *testing.T) {
+		t.Parallel()
 		filter := factory.CreateFilter(
 			validate.RuleSets{Include: []string{"default"}},
 			validate.RuleSets{},
@@ -61,6 +68,7 @@ func Test_BaseClient(t *testing.T) {
 	})
 
 	t.Run("Validate Exclude Namespace match", func(t *testing.T) {
+		t.Parallel()
 		filter := factory.CreateFilter(
 			validate.RuleSets{Exclude: []string{"test"}},
 			validate.RuleSets{},
@@ -73,6 +81,7 @@ func Test_BaseClient(t *testing.T) {
 		assert.False(t, filter.Validate(fixtures.FailResult), "Unexpected Validation Result")
 	})
 	t.Run("Validate Exclude Namespace mismatch", func(t *testing.T) {
+		t.Parallel()
 		filter := factory.CreateFilter(
 			validate.RuleSets{Exclude: []string{"team-a"}},
 			validate.RuleSets{},
@@ -85,6 +94,7 @@ func Test_BaseClient(t *testing.T) {
 		assert.True(t, filter.Validate(fixtures.FailResult), "Unexpected Validation Result")
 	})
 	t.Run("Validate Include Namespace match", func(t *testing.T) {
+		t.Parallel()
 		filter := factory.CreateFilter(
 			validate.RuleSets{Include: []string{"test"}},
 			validate.RuleSets{},
@@ -97,6 +107,7 @@ func Test_BaseClient(t *testing.T) {
 		assert.True(t, filter.Validate(fixtures.FailResult), "Unexpected Validation Result")
 	})
 	t.Run("Validate Exclude Namespace mismatch", func(t *testing.T) {
+		t.Parallel()
 		filter := factory.CreateFilter(
 			validate.RuleSets{Include: []string{"team-a"}},
 			validate.RuleSets{},
@@ -110,10 +121,11 @@ func Test_BaseClient(t *testing.T) {
 	})
 
 	t.Run("Validate Exclude Status match", func(t *testing.T) {
+		t.Parallel()
 		filter := factory.CreateFilter(
 			validate.RuleSets{},
 			validate.RuleSets{},
-			validate.RuleSets{Exclude: []string{v1alpha2.StatusFail}},
+			validate.RuleSets{Exclude: []string{openreports.StatusFail}},
 			validate.RuleSets{},
 			validate.RuleSets{},
 			"",
@@ -122,10 +134,11 @@ func Test_BaseClient(t *testing.T) {
 		assert.False(t, filter.Validate(fixtures.FailResult), "Unexpected Validation Result")
 	})
 	t.Run("Validate Exclude Status mismatch", func(t *testing.T) {
+		t.Parallel()
 		filter := factory.CreateFilter(
 			validate.RuleSets{},
 			validate.RuleSets{},
-			validate.RuleSets{Exclude: []string{v1alpha2.StatusSkip}},
+			validate.RuleSets{Exclude: []string{openreports.StatusSkip}},
 			validate.RuleSets{},
 			validate.RuleSets{},
 			"",
@@ -134,10 +147,11 @@ func Test_BaseClient(t *testing.T) {
 		assert.True(t, filter.Validate(fixtures.FailResult), "Unexpected Validation Result")
 	})
 	t.Run("Validate Include Status match", func(t *testing.T) {
+		t.Parallel()
 		filter := factory.CreateFilter(
 			validate.RuleSets{},
 			validate.RuleSets{},
-			validate.RuleSets{Include: []string{v1alpha2.StatusFail}},
+			validate.RuleSets{Include: []string{openreports.StatusFail}},
 			validate.RuleSets{},
 			validate.RuleSets{},
 			"",
@@ -146,10 +160,11 @@ func Test_BaseClient(t *testing.T) {
 		assert.True(t, filter.Validate(fixtures.FailResult), "Unexpected Validation Result")
 	})
 	t.Run("Validate Exclude Status mismatch", func(t *testing.T) {
+		t.Parallel()
 		filter := factory.CreateFilter(
 			validate.RuleSets{},
 			validate.RuleSets{},
-			validate.RuleSets{Exclude: []string{v1alpha2.StatusFail}},
+			validate.RuleSets{Exclude: []string{openreports.StatusFail}},
 			validate.RuleSets{},
 			validate.RuleSets{},
 			"",
@@ -159,9 +174,10 @@ func Test_BaseClient(t *testing.T) {
 	})
 
 	t.Run("Validate Exclude Severity match", func(t *testing.T) {
+		t.Parallel()
 		filter := factory.CreateFilter(
 			validate.RuleSets{},
-			validate.RuleSets{Exclude: []string{v1alpha2.SeverityHigh}},
+			validate.RuleSets{Exclude: []string{openreports.SeverityHigh}},
 			validate.RuleSets{},
 			validate.RuleSets{},
 			validate.RuleSets{},
@@ -171,9 +187,10 @@ func Test_BaseClient(t *testing.T) {
 		assert.False(t, filter.Validate(fixtures.FailResult), "Unexpected Validation Result")
 	})
 	t.Run("Validate Exclude Severity mismatch", func(t *testing.T) {
+		t.Parallel()
 		filter := factory.CreateFilter(
 			validate.RuleSets{},
-			validate.RuleSets{Exclude: []string{v1alpha2.SeverityCritical}},
+			validate.RuleSets{Exclude: []string{openreports.SeverityCritical}},
 			validate.RuleSets{},
 			validate.RuleSets{},
 			validate.RuleSets{},
@@ -183,9 +200,10 @@ func Test_BaseClient(t *testing.T) {
 		assert.True(t, filter.Validate(fixtures.FailResult), "Unexpected Validation Result")
 	})
 	t.Run("Validate Include Severity match", func(t *testing.T) {
+		t.Parallel()
 		filter := factory.CreateFilter(
 			validate.RuleSets{},
-			validate.RuleSets{Include: []string{v1alpha2.SeverityHigh}},
+			validate.RuleSets{Include: []string{openreports.SeverityHigh}},
 			validate.RuleSets{},
 			validate.RuleSets{},
 			validate.RuleSets{},
@@ -195,9 +213,10 @@ func Test_BaseClient(t *testing.T) {
 		assert.True(t, filter.Validate(fixtures.FailResult), "Unexpected Validation Result")
 	})
 	t.Run("Validate Exclude Severity mismatch", func(t *testing.T) {
+		t.Parallel()
 		filter := factory.CreateFilter(
 			validate.RuleSets{},
-			validate.RuleSets{Include: []string{v1alpha2.SeverityCritical}},
+			validate.RuleSets{Include: []string{openreports.SeverityCritical}},
 			validate.RuleSets{},
 			validate.RuleSets{},
 			validate.RuleSets{},
@@ -208,6 +227,7 @@ func Test_BaseClient(t *testing.T) {
 	})
 
 	t.Run("Validate Exclude Policy match", func(t *testing.T) {
+		t.Parallel()
 		filter := factory.CreateFilter(
 			validate.RuleSets{},
 			validate.RuleSets{},
@@ -220,6 +240,7 @@ func Test_BaseClient(t *testing.T) {
 		assert.False(t, filter.Validate(fixtures.FailResult), "Unexpected Validation Result")
 	})
 	t.Run("Validate Exclude Policy mismatch", func(t *testing.T) {
+		t.Parallel()
 		filter := factory.CreateFilter(
 			validate.RuleSets{},
 			validate.RuleSets{},
@@ -232,6 +253,7 @@ func Test_BaseClient(t *testing.T) {
 		assert.True(t, filter.Validate(fixtures.FailResult), "Unexpected Validation Result")
 	})
 	t.Run("Validate Include Policy match", func(t *testing.T) {
+		t.Parallel()
 		filter := factory.CreateFilter(
 			validate.RuleSets{},
 			validate.RuleSets{},
@@ -246,6 +268,7 @@ func Test_BaseClient(t *testing.T) {
 		}
 	})
 	t.Run("Validate Exclude Policy mismatch", func(t *testing.T) {
+		t.Parallel()
 		filter := factory.CreateFilter(
 			validate.RuleSets{},
 			validate.RuleSets{},
@@ -259,6 +282,7 @@ func Test_BaseClient(t *testing.T) {
 	})
 
 	t.Run("Validate Include Label match", func(t *testing.T) {
+		t.Parallel()
 		filter := target.NewReportFilter(
 			validate.RuleSets{Include: []string{"app:policy-reporter"}},
 			validate.RuleSets{},
@@ -267,6 +291,7 @@ func Test_BaseClient(t *testing.T) {
 		assert.True(t, filter.Validate(preport), "Unexpected Validation Result")
 	})
 	t.Run("Validate Exclude Label match", func(t *testing.T) {
+		t.Parallel()
 		filter := target.NewReportFilter(
 			validate.RuleSets{Exclude: []string{"app:policy-reporter"}},
 			validate.RuleSets{},
@@ -277,6 +302,7 @@ func Test_BaseClient(t *testing.T) {
 		}
 	})
 	t.Run("Validate Exclude Label mismatch", func(t *testing.T) {
+		t.Parallel()
 		filter := target.NewReportFilter(
 			validate.RuleSets{Exclude: []string{"app:monitoring"}},
 			validate.RuleSets{},
@@ -285,6 +311,7 @@ func Test_BaseClient(t *testing.T) {
 		assert.True(t, filter.Validate(preport), "Unexpected Validation Result")
 	})
 	t.Run("Validate Include Label mismatch", func(t *testing.T) {
+		t.Parallel()
 		filter := target.NewReportFilter(
 			validate.RuleSets{Include: []string{"app:monitoring"}},
 			validate.RuleSets{},
@@ -293,6 +320,7 @@ func Test_BaseClient(t *testing.T) {
 		assert.False(t, filter.Validate(preport), "Unexpected Validation Result")
 	})
 	t.Run("Validate label as wildcard filter", func(t *testing.T) {
+		t.Parallel()
 		filter := target.NewReportFilter(
 			validate.RuleSets{Exclude: []string{"app"}},
 			validate.RuleSets{},
@@ -308,6 +336,7 @@ func Test_BaseClient(t *testing.T) {
 		assert.True(t, filter.Validate(preport), "Unexpected Validation Result")
 	})
 	t.Run("Validate Include Label wildcard", func(t *testing.T) {
+		t.Parallel()
 		filter := target.NewReportFilter(
 			validate.RuleSets{Include: []string{"app:*"}},
 			validate.RuleSets{},
@@ -316,6 +345,7 @@ func Test_BaseClient(t *testing.T) {
 		assert.True(t, filter.Validate(preport), "Unexpected Validation Result")
 	})
 	t.Run("Validate Exclude Label wildcard", func(t *testing.T) {
+		t.Parallel()
 		filter := target.NewReportFilter(
 			validate.RuleSets{Exclude: []string{"app:*"}},
 			validate.RuleSets{},
@@ -325,6 +355,7 @@ func Test_BaseClient(t *testing.T) {
 	})
 
 	t.Run("Client Result Validation", func(t *testing.T) {
+		t.Parallel()
 		client := target.NewBaseClient(target.ClientOptions{
 			Name: "Client",
 			ResultFilter: factory.CreateFilter(
@@ -338,10 +369,11 @@ func Test_BaseClient(t *testing.T) {
 			SkipExistingOnStartup: true,
 		})
 
-		assert.False(t, client.Validate(&v1alpha2.PolicyReport{}, fixtures.FailResult), "Unexpected Validation Result")
+		assert.False(t, client.Validate(&openreports.ReportAdapter{Report: &v1alpha1.Report{}}, fixtures.FailResult), "Unexpected Validation Result")
 	})
 
 	t.Run("Client Report Validation", func(t *testing.T) {
+		t.Parallel()
 		client := target.NewBaseClient(target.ClientOptions{
 			Name: "Client",
 			ReportFilter: target.NewReportFilter(
@@ -351,10 +383,11 @@ func Test_BaseClient(t *testing.T) {
 			SkipExistingOnStartup: true,
 		})
 
-		assert.False(t, client.Validate(&v1alpha2.PolicyReport{}, fixtures.FailResult), "Unexpected Validation Result")
+		assert.False(t, client.Validate(&openreports.ReportAdapter{Report: &v1alpha1.Report{}}, fixtures.FailResult), "Unexpected Validation Result")
 	})
 
 	t.Run("Client nil Validation", func(t *testing.T) {
+		t.Parallel()
 		client := target.NewBaseClient(target.ClientOptions{
 			Name: "Client",
 			ReportFilter: target.NewReportFilter(
@@ -368,17 +401,19 @@ func Test_BaseClient(t *testing.T) {
 	})
 
 	t.Run("Client Validation Fallbacks", func(t *testing.T) {
+		t.Parallel()
 		client := target.NewBaseClient(target.ClientOptions{
 			Name:                  "Client",
 			SkipExistingOnStartup: true,
 		})
 
-		assert.True(t, client.Validate(&v1alpha2.PolicyReport{}, fixtures.FailResult), "Should fallback to true")
-		assert.Equal(t, client.MinimumSeverity(), v1alpha2.SeverityInfo, "Should fallback to severity info")
+		assert.True(t, client.Validate(&openreports.ReportAdapter{Report: &v1alpha1.Report{}}, fixtures.FailResult), "Should fallback to true")
+		assert.Equal(t, client.MinimumSeverity(), openreports.SeverityInfo, "Should fallback to severity info")
 		assert.NotNil(t, client.Sources(), "Should fallback to empty list")
 	})
 
 	t.Run("SkipExistingOnStartup", func(t *testing.T) {
+		t.Parallel()
 		client := target.NewBaseClient(target.ClientOptions{
 			Name:                  "Client",
 			ResultFilter:          &report.ResultFilter{},
@@ -388,15 +423,17 @@ func Test_BaseClient(t *testing.T) {
 		assert.True(t, client.SkipExistingOnStartup(), "Should return configured SkipExistingOnStartup")
 	})
 	t.Run("MinimumSeverity", func(t *testing.T) {
+		t.Parallel()
 		client := target.NewBaseClient(target.ClientOptions{
 			Name:                  "Client",
-			ResultFilter:          &report.ResultFilter{MinimumSeverity: v1alpha2.SeverityHigh},
+			ResultFilter:          &report.ResultFilter{MinimumSeverity: openreports.SeverityHigh},
 			SkipExistingOnStartup: true,
 		})
 
-		assert.Equal(t, client.MinimumSeverity(), v1alpha2.SeverityHigh, "Should return configured MinimumSeverity")
+		assert.Equal(t, client.MinimumSeverity(), openreports.SeverityHigh, "Should return configured MinimumSeverity")
 	})
 	t.Run("Name", func(t *testing.T) {
+		t.Parallel()
 		client := target.NewBaseClient(target.ClientOptions{
 			Name:                  "Client",
 			ResultFilter:          &report.ResultFilter{MinimumSeverity: "error"},
@@ -406,6 +443,7 @@ func Test_BaseClient(t *testing.T) {
 		assert.Equal(t, client.Name(), "Client", "Should return configured Name")
 	})
 	t.Run("Sources", func(t *testing.T) {
+		t.Parallel()
 		client := target.NewBaseClient(target.ClientOptions{
 			Name:                  "Client",
 			ResultFilter:          &report.ResultFilter{Sources: []string{"Kyverno"}},

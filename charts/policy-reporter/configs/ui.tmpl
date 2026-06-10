@@ -1,5 +1,3 @@
-tempDir: {{ .Values.ui.tempDir }}
-
 logging:
   api: {{ .Values.ui.logging.api }}
   server: {{ .Values.ui.logging.server }}
@@ -10,6 +8,10 @@ server:
   port: {{ .Values.ui.server.port }}
   cors: {{ .Values.ui.server.cors }}
   overwriteHost: {{ .Values.ui.server.overwriteHost }}
+  {{- with .Values.ui.server.sessions }}
+  sessions: 
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
 
 ui:
   displayMode: {{ .Values.ui.displayMode }}
@@ -17,6 +19,9 @@ ui:
   logo:
     path: {{ .Values.ui.logo.path }}
     disabled: {{ .Values.ui.logo.disabled }}
+
+crds:
+  customBoard: {{ .Values.ui.crds.customBoard }}
 
 {{- $default := false -}}
 {{- range .Values.ui.clusters }}
@@ -51,6 +56,13 @@ boards:
     {{- end -}}
 {{- end }}
 
+{{- $vpol := false -}}
+{{- range .Values.ui.sources }}
+    {{- if eq .name "KyvernoValidatingPolicy" -}}
+      {{- $vpol = true -}}
+    {{- end -}}
+{{- end }}
+
 {{- $trivy := false -}}
 {{- range .Values.ui.sources }}
     {{- if eq .name "Trivy Vulnerability" -}}
@@ -68,6 +80,17 @@ sources:
       - warn
       - error
 {{- end }}
+
+{{- if not $vpol }}
+  - name: KyvernoValidatingPolicy
+    type: result
+    exceptions: false
+    excludes:
+      results:
+      - warn
+      - error
+{{- end }}
+
 {{- if and (not $trivy) .Values.plugin.trivy.enabled }}
   - name: Trivy Vulnerability
     type: severity
@@ -89,4 +112,8 @@ openIDConnect:
 {{- with .Values.ui.oauth }}
 oauth:
   {{- toYaml . | nindent 4 }}
+{{- end }}
+
+{{- with .Values.ui.extraConfig }}
+{{- toYaml . | nindent 0 }}
 {{- end }}

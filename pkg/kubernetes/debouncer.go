@@ -15,11 +15,13 @@ type debouncer struct {
 	waitDuration time.Duration
 	events       map[string]report.LifecycleEvent
 	publisher    report.EventPublisher
-	mutx         *sync.Mutex
+	mutx         *sync.RWMutex
 }
 
 func (d *debouncer) Add(event report.LifecycleEvent) {
+	d.mutx.RLock()
 	_, ok := d.events[event.PolicyReport.GetID()]
+	d.mutx.RUnlock()
 	if event.Type != report.Updated && ok {
 		d.mutx.Lock()
 		delete(d.events, event.PolicyReport.GetID())
@@ -63,7 +65,7 @@ func NewDebouncer(waitDuration time.Duration, publisher report.EventPublisher) D
 	return &debouncer{
 		waitDuration: waitDuration,
 		events:       make(map[string]report.LifecycleEvent),
-		mutx:         new(sync.Mutex),
+		mutx:         new(sync.RWMutex),
 		publisher:    publisher,
 	}
 }

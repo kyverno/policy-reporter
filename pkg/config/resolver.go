@@ -4,6 +4,7 @@ import (
 	"context"
 	"crypto/tls"
 	"crypto/x509"
+	"errors"
 	"os"
 	"strings"
 	"time"
@@ -11,22 +12,24 @@ import (
 	"github.com/gin-gonic/gin"
 	goredis "github.com/go-redis/redis/v8"
 	_ "github.com/mattn/go-sqlite3"
-	gocache "github.com/patrickmn/go-cache"
+	"github.com/openreports/reports-api/pkg/client/clientset/versioned"
+	"github.com/openreports/reports-api/pkg/client/clientset/versioned/typed/openreports.io/v1alpha1"
 	"github.com/uptrace/bun"
 	"github.com/uptrace/bun/dialect"
 	mail "github.com/xhit/go-simple-mail/v2"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
+	"k8s.io/client-go/discovery"
 	k8s "k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/metadata"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/util/workqueue"
+	gocache "zgo.at/zcache/v2"
 
 	"github.com/kyverno/policy-reporter/pkg/api"
 	"github.com/kyverno/policy-reporter/pkg/cache"
-	"github.com/kyverno/policy-reporter/pkg/crd/client/policyreport/clientset/versioned"
-	wgpolicyk8sv1alpha2 "github.com/kyverno/policy-reporter/pkg/crd/client/policyreport/clientset/versioned/typed/policyreport/v1alpha2"
-	tcv1alpha1 "github.com/kyverno/policy-reporter/pkg/crd/client/targetconfig/clientset/versioned"
+	crds "github.com/kyverno/policy-reporter/pkg/crd/client/clientset/versioned"
+	"github.com/kyverno/policy-reporter/pkg/crd/client/clientset/versioned/typed/policyreport/v1alpha2"
 	"github.com/kyverno/policy-reporter/pkg/database"
 	"github.com/kyverno/policy-reporter/pkg/email"
 	"github.com/kyverno/policy-reporter/pkg/email/summary"
@@ -35,8 +38,10 @@ import (
 	"github.com/kyverno/policy-reporter/pkg/kubernetes"
 	"github.com/kyverno/policy-reporter/pkg/kubernetes/jobs"
 	"github.com/kyverno/policy-reporter/pkg/kubernetes/namespaces"
+	orclient "github.com/kyverno/policy-reporter/pkg/kubernetes/openreports"
 	"github.com/kyverno/policy-reporter/pkg/kubernetes/pods"
 	"github.com/kyverno/policy-reporter/pkg/kubernetes/secrets"
+	wgpolicyclient "github.com/kyverno/policy-reporter/pkg/kubernetes/wgpolicy"
 	"github.com/kyverno/policy-reporter/pkg/leaderelection"
 	"github.com/kyverno/policy-reporter/pkg/listener"
 	"github.com/kyverno/policy-reporter/pkg/listener/metrics"
@@ -56,7 +61,8 @@ type Resolver struct {
 	publisher          report.EventPublisher
 	policyStore        *database.Store
 	database           *bun.DB
-	policyReportClient report.PolicyReportClient
+	wgpolicyClient     report.PolicyReportClient
+	openreportsClient  report.PolicyReportClient
 	leaderElector      *leaderelection.Client
 	resultCache        cache.Cache
 	targetClients      *target.Collection
@@ -64,6 +70,8 @@ type Resolver struct {
 	targetConfigClient *targetconfig.Client
 	logger             *zap.Logger
 	resultListener     *listener.ResultListener
+	orClient           v1alpha1.OpenreportsV1alpha1Interface
+	wgClient           v1alpha2.Wgpolicyk8sV1alpha2Interface
 }
 
 // APIServer resolver method
@@ -139,7 +147,7 @@ func (r *Resolver) Database() *bun.DB {
 	}
 
 	zap.L().Info("sqlite connection created")
-	r.database = factory.NewSQLite(r.config.DBFile)
+	r.database = factory.NewSQLite(r.config.DBFile, r.config.Database.Metrics)
 	return r.database
 }
 
@@ -192,22 +200,41 @@ func (r *Resolver) EventPublisher() report.EventPublisher {
 	return r.publisher
 }
 
-func (r *Resolver) CustomIDGenerators() map[string]result.IDGenerator {
-	generators := make(map[string]result.IDGenerator)
+func (r *Resolver) ReconditionerConfigs() map[string]result.ReconditionerConfig {
+	configs := make(map[string]result.ReconditionerConfig)
 	for _, c := range r.config.SourceConfig {
-		if !c.Enabled || len(c.Fields) == 0 {
+		var generator result.IDGenerator
+		if c.CustomID.Enabled && len(c.CustomID.Fields) > 0 {
+			generator = result.NewIDGenerator(c.CustomID.Fields)
+		}
+
+		if generator == nil && !c.SelfassignNamespaces {
 			continue
 		}
 
-		generators[strings.ToLower(c.Selector.Source)] = result.NewIDGenerator(c.Fields)
+		if len(c.Selector.Sources) > 0 {
+			for _, source := range c.Selector.Sources {
+				configs[strings.ToLower(source)] = result.ReconditionerConfig{
+					IDGenerators:         generator,
+					SelfassignNamespaces: c.SelfassignNamespaces,
+				}
+			}
+
+			continue
+		}
+
+		configs[strings.ToLower(c.Selector.Source)] = result.ReconditionerConfig{
+			IDGenerators:         generator,
+			SelfassignNamespaces: c.SelfassignNamespaces,
+		}
 	}
 
-	return generators
+	return configs
 }
 
 // EventPublisher resolver method
-func (r *Resolver) Queue() (*kubernetes.Queue, error) {
-	client, err := r.CRDClient()
+func (r *Resolver) WGPolicyQueue() (*wgpolicyclient.WGPolicyQueue, error) {
+	polrClient, err := r.WgPolicyCRClient()
 	if err != nil {
 		return nil, err
 	}
@@ -222,15 +249,15 @@ func (r *Resolver) Queue() (*kubernetes.Queue, error) {
 		return nil, err
 	}
 
-	return kubernetes.NewQueue(
+	return wgpolicyclient.NewWGPolicyQueue(
 		kubernetes.NewDebouncer(1*time.Minute, r.EventPublisher()),
 		workqueue.NewTypedRateLimitingQueueWithConfig(workqueue.DefaultTypedControllerRateLimiter[string](), workqueue.TypedRateLimitingQueueConfig[string]{
-			Name: "report-queue",
+			Name: "wgreport-queue",
 		}),
-		client,
+		polrClient,
 		report.NewSourceFilter(podsClient, jobsClient, helper.Map(r.config.SourceFilters, func(f SourceFilter) report.SourceValidation {
 			return report.SourceValidation{
-				Selector:              report.ReportSelector{Source: f.Selector.Source},
+				Selector:              report.ReportSelector(f.Selector),
 				Kinds:                 ToRuleSet(f.Kinds),
 				Sources:               ToRuleSet(f.Sources),
 				Namespaces:            ToRuleSet(f.Namespaces),
@@ -238,7 +265,43 @@ func (r *Resolver) Queue() (*kubernetes.Queue, error) {
 				DisableClusterReports: f.DisableClusterReports,
 			}
 		})),
-		result.NewReconditioner(r.CustomIDGenerators()),
+		result.NewReconditioner(r.ReconditionerConfigs()),
+	), nil
+}
+
+func (r *Resolver) ORQueue() (*orclient.ORQueue, error) {
+	polrClient, err := r.OpenreportsCRClient()
+	if err != nil {
+		return nil, err
+	}
+
+	podsClient, err := r.PodClient()
+	if err != nil {
+		return nil, err
+	}
+
+	jobsClient, err := r.JobClient()
+	if err != nil {
+		return nil, err
+	}
+
+	return orclient.NewORQueue(
+		kubernetes.NewDebouncer(1*time.Minute, r.EventPublisher()),
+		workqueue.NewTypedRateLimitingQueueWithConfig(workqueue.DefaultTypedControllerRateLimiter[string](), workqueue.TypedRateLimitingQueueConfig[string]{
+			Name: "orreport-queue",
+		}),
+		polrClient,
+		report.NewSourceFilter(podsClient, jobsClient, helper.Map(r.config.SourceFilters, func(f SourceFilter) report.SourceValidation {
+			return report.SourceValidation{
+				Selector:              report.ReportSelector(f.Selector),
+				Kinds:                 ToRuleSet(f.Kinds),
+				Sources:               ToRuleSet(f.Sources),
+				Namespaces:            ToRuleSet(f.Namespaces),
+				UncontrolledOnly:      f.UncontrolledOnly,
+				DisableClusterReports: f.DisableClusterReports,
+			}
+		})),
+		result.NewReconditioner(r.ReconditionerConfigs()),
 	), nil
 }
 
@@ -249,7 +312,7 @@ func (r *Resolver) RegisterNewResultsListener() {
 	r.resultListener = listener.NewResultListener(r.SkipExistingOnStartup(), r.ResultCache(), time.Now())
 	r.EventPublisher().RegisterListener(listener.NewResults, r.resultListener.Listen)
 
-	r.EventPublisher().RegisterPostListener(listener.CleanUpListener, listener.NewCleanupListener(context.Background(), targets))
+	r.EventPublisher().RegisterPostListener(listener.CleanUpListener, listener.NewCleanupListener(targets))
 }
 
 // RegisterSendResultListener resolver method
@@ -280,7 +343,7 @@ func (r *Resolver) UnregisterSendResultListener() {
 
 // RegisterStoreListener resolver method
 func (r *Resolver) RegisterStoreListener(ctx context.Context, store report.PolicyReportStore) {
-	r.EventPublisher().RegisterListener(listener.Store, listener.NewStoreListener(ctx, store))
+	r.EventPublisher().RegisterListener(listener.Store, listener.NewStoreListener(store))
 }
 
 // RegisterMetricsListener resolver method
@@ -338,7 +401,7 @@ func (r *Resolver) NamespaceClient() (namespaces.Client, error) {
 
 	return namespaces.NewClient(
 		clientset.CoreV1().Namespaces(),
-		gocache.New(15*time.Second, 5*time.Second),
+		gocache.New[string, []string](15*time.Second, 5*time.Second),
 	), nil
 }
 
@@ -430,13 +493,56 @@ func (r *Resolver) SkipExistingOnStartup() bool {
 	return true
 }
 
-func (r *Resolver) CRDClient() (wgpolicyk8sv1alpha2.Wgpolicyk8sV1alpha2Interface, error) {
+func (r *Resolver) WgPolicyCRClient() (v1alpha2.Wgpolicyk8sV1alpha2Interface, error) {
+	if r.wgClient != nil {
+		return r.wgClient, nil
+	}
+
+	discoveryClient, err := discovery.NewDiscoveryClientForConfig(r.k8sConfig)
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = discoveryClient.ServerResourcesForGroupVersion(wgpolicyclient.PolrResource.GroupVersion().String())
+	if err != nil {
+		zap.L().Info("wgreports api not available in the cluster")
+		return nil, nil
+	}
+
+	polrclient, err := crds.NewForConfig(r.k8sConfig)
+	if err != nil {
+		return nil, err
+	}
+
+	r.wgClient = polrclient.Wgpolicyk8sV1alpha2()
+
+	return r.wgClient, nil
+}
+
+func (r *Resolver) OpenreportsCRClient() (v1alpha1.OpenreportsV1alpha1Interface, error) {
+	if r.orClient != nil {
+		return r.orClient, nil
+	}
+
+	discoveryClient, err := discovery.NewDiscoveryClientForConfig(r.k8sConfig)
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = discoveryClient.ServerResourcesForGroupVersion(orclient.OpenreportsReport.GroupVersion().String())
+	if err != nil {
+		zap.L().Info("openreports api not available in the cluster")
+		return nil, nil
+	}
+
 	client, err := versioned.NewForConfig(r.k8sConfig)
 	if err != nil {
 		return nil, err
 	}
 
-	return client.Wgpolicyk8sV1alpha2(), nil
+	r.orClient = client.OpenreportsV1alpha1()
+
+	return r.orClient, nil
 }
 
 func (r *Resolver) CRDMetadataClient() (metadata.Interface, error) {
@@ -449,9 +555,18 @@ func (r *Resolver) CRDMetadataClient() (metadata.Interface, error) {
 }
 
 func (r *Resolver) SummaryGenerator() (*summary.Generator, error) {
-	client, err := r.CRDClient()
+	orclient, err := r.OpenreportsCRClient()
 	if err != nil {
 		return nil, err
+	}
+
+	wgpolicyclient, err := r.WgPolicyCRClient()
+	if err != nil {
+		return nil, err
+	}
+
+	if orclient == nil && wgpolicyclient == nil {
+		return nil, errors.New("no valid reporting API group found in the cluster")
 	}
 
 	nsclient, err := r.NamespaceClient()
@@ -460,7 +575,8 @@ func (r *Resolver) SummaryGenerator() (*summary.Generator, error) {
 	}
 
 	return summary.NewGenerator(
-		client,
+		orclient,
+		wgpolicyclient,
 		EmailReportFilterFromConfig(nsclient, r.config.EmailReports.Summary.Filter),
 		!r.config.EmailReports.Summary.Filter.DisableClusterReports,
 	), nil
@@ -475,9 +591,17 @@ func (r *Resolver) SummaryReporter() *summary.Reporter {
 }
 
 func (r *Resolver) ViolationsGenerator() (*violations.Generator, error) {
-	client, err := r.CRDClient()
+	orclient, err := r.OpenreportsCRClient()
 	if err != nil {
 		return nil, err
+	}
+	wgpolicyclient, err := r.WgPolicyCRClient()
+	if err != nil {
+		return nil, err
+	}
+
+	if orclient == nil && wgpolicyclient == nil {
+		return nil, errors.New("no valid reporting API group found in the cluster")
 	}
 
 	nsclient, err := r.NamespaceClient()
@@ -486,7 +610,8 @@ func (r *Resolver) ViolationsGenerator() (*violations.Generator, error) {
 	}
 
 	return violations.NewGenerator(
-		client,
+		orclient,
+		wgpolicyclient,
 		EmailReportFilterFromConfig(nsclient, r.config.EmailReports.Violations.Filter),
 		!r.config.EmailReports.Violations.Filter.DisableClusterReports,
 	), nil
@@ -538,21 +663,41 @@ func (r *Resolver) TargetConfigClient() (*targetconfig.Client, error) {
 		return r.targetConfigClient, nil
 	}
 
-	tcClient, err := tcv1alpha1.NewForConfig(r.k8sConfig)
+	tcClient, err := crds.NewForConfig(r.k8sConfig)
 	if err != nil {
 		return nil, err
 	}
 
-	tcc := targetconfig.NewClient(tcClient, r.TargetFactory(), r.TargetClients())
+	wgpolicyClient, err := r.WgPolicyCRClient()
+	if err != nil {
+		return nil, err
+	}
+	orClient, err := r.OpenreportsCRClient()
+	if err != nil {
+		return nil, err
+	}
+
+	tcc := targetconfig.NewClient(tcClient, r.TargetFactory(), r.TargetClients(), orClient, wgpolicyClient)
 	tcc.ConfigureInformer()
 
 	r.targetConfigClient = tcc
 	return tcc, nil
 }
 
-func (r *Resolver) PolicyReportClient() (report.PolicyReportClient, error) {
-	if r.policyReportClient != nil {
-		return r.policyReportClient, nil
+func (r *Resolver) WGPolicyReportClient() (report.PolicyReportClient, error) {
+	if r.wgpolicyClient != nil {
+		return r.wgpolicyClient, nil
+	}
+
+	discoveryClient, err := discovery.NewDiscoveryClientForConfig(r.k8sConfig)
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = discoveryClient.ServerResourcesForGroupVersion(wgpolicyclient.PolrResource.GroupVersion().String())
+	if err != nil {
+		zap.L().Info("wgreports api not available in the cluster", zap.Error(err))
+		return nil, nil
 	}
 
 	client, err := r.CRDMetadataClient()
@@ -560,14 +705,59 @@ func (r *Resolver) PolicyReportClient() (report.PolicyReportClient, error) {
 		return nil, err
 	}
 
-	queue, err := r.Queue()
+	queue, err := r.WGPolicyQueue()
 	if err != nil {
 		return nil, err
 	}
 
-	r.policyReportClient = kubernetes.NewPolicyReportClient(client, r.ReportFilter(), queue)
+	periodicSync := r.config.PeriodicSync.Enabled
+	syncInterval := time.Duration(r.config.PeriodicSync.Interval) * time.Minute
 
-	return r.policyReportClient, nil
+	zap.L().Info("wgpolicy report client configuration",
+		zap.Bool("periodicSync", periodicSync),
+		zap.Duration("syncInterval", syncInterval))
+
+	r.wgpolicyClient = wgpolicyclient.NewPolicyReportClient(client, r.ReportFilter(), queue, periodicSync, syncInterval, r.ResultCache())
+
+	return r.wgpolicyClient, nil
+}
+
+func (r *Resolver) OpenReportsClient() (report.PolicyReportClient, error) {
+	if r.openreportsClient != nil {
+		return r.openreportsClient, nil
+	}
+
+	discoveryClient, err := discovery.NewDiscoveryClientForConfig(r.k8sConfig)
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = discoveryClient.ServerResourcesForGroupVersion(orclient.OpenreportsReport.GroupVersion().String())
+	if err != nil {
+		zap.L().Info("openreports api not available in the cluster", zap.String("reason", err.Error()))
+		return nil, nil
+	}
+
+	client, err := r.CRDMetadataClient()
+	if err != nil {
+		return nil, err
+	}
+
+	queue, err := r.ORQueue()
+	if err != nil {
+		return nil, err
+	}
+
+	periodicSync := r.config.PeriodicSync.Enabled
+	syncInterval := time.Duration(r.config.PeriodicSync.Interval) * time.Minute
+
+	zap.L().Info("openreports client configuration",
+		zap.Bool("periodicSync", periodicSync),
+		zap.Duration("syncInterval", syncInterval))
+
+	r.openreportsClient = orclient.NewOpenreportsClient(client, r.ReportFilter(), queue, periodicSync, syncInterval, r.ResultCache())
+
+	return r.openreportsClient, nil
 }
 
 func (r *Resolver) ReportFilter() *report.MetaFilter {
@@ -584,18 +774,72 @@ func (r *Resolver) ResultCache() cache.Cache {
 	}
 
 	if r.config.Redis.Enabled {
+		if r.config.Redis.SecretRef != "" {
+			values, err := r.SecretClient().Get(context.Background(), r.config.Redis.SecretRef)
+			if err != nil {
+				zap.L().Error("failed to load redis secret", zap.Error(err))
+			}
+
+			if values.Username != "" {
+				r.config.Redis.Username = values.Username
+			}
+			if values.Password != "" {
+				r.config.Redis.Password = values.Password
+			}
+		}
+
+		opts := &goredis.Options{
+			Addr:     r.config.Redis.Address,
+			Username: r.config.Redis.Username,
+			Password: r.config.Redis.Password,
+			DB:       r.config.Redis.Database,
+		}
+
+		if r.config.Redis.Certificate != "" || r.config.Redis.SkipTLS || r.config.Redis.ClientCert != "" {
+			tlsConfig := &tls.Config{
+				InsecureSkipVerify: r.config.Redis.SkipTLS,
+			}
+
+			if r.config.Redis.Certificate != "" {
+				caCert, err := os.ReadFile(r.config.Redis.Certificate)
+				if err != nil {
+					zap.L().Error(
+						"failed to read certificate for Redis Client",
+						zap.String("path", r.config.Redis.Certificate),
+					)
+				} else {
+					caCertPool := x509.NewCertPool()
+					caCertPool.AppendCertsFromPEM(caCert)
+					tlsConfig.RootCAs = caCertPool
+				}
+			}
+
+			if r.config.Redis.ClientCert != "" && r.config.Redis.ClientKey != "" {
+				clientCert, err := tls.LoadX509KeyPair(r.config.Redis.ClientCert, r.config.Redis.ClientKey)
+				if err != nil {
+					zap.L().Error(
+						"failed to load client certificate for Redis Client",
+						zap.String("cert", r.config.Redis.ClientCert),
+						zap.String("key", r.config.Redis.ClientKey),
+						zap.Error(err),
+					)
+				} else {
+					tlsConfig.Certificates = []tls.Certificate{clientCert}
+				}
+			} else if r.config.Redis.ClientCert != "" || r.config.Redis.ClientKey != "" {
+				zap.L().Warn("both clientCert and clientKey must be set for Redis mTLS, skipping client certificate")
+			}
+
+			opts.TLSConfig = tlsConfig
+		}
+
 		r.resultCache = cache.NewRedisCache(
 			r.config.Redis.Prefix,
-			goredis.NewClient(&goredis.Options{
-				Addr:     r.config.Redis.Address,
-				Username: r.config.Redis.Username,
-				Password: r.config.Redis.Password,
-				DB:       r.config.Redis.Database,
-			}),
+			goredis.NewClient(opts),
 			6*time.Hour,
 		)
 	} else {
-		r.resultCache = cache.NewInMermoryCache(6*time.Hour, 10*time.Minute)
+		r.resultCache = cache.NewInMemoryCache(6*time.Hour, 10*time.Minute)
 	}
 
 	return r.resultCache
@@ -613,9 +857,9 @@ func (r *Resolver) Logger() (*zap.Logger, error) {
 		encoder.EncodeTime = zapcore.TimeEncoderOfLayout("2006-01-02 15:04:05")
 	}
 
-	ouput := "json"
+	output := "json"
 	if r.config.Logging.Encoding != "json" {
-		ouput = "console"
+		output = "console"
 		encoder.EncodeCaller = nil
 	}
 
@@ -631,7 +875,7 @@ func (r *Resolver) Logger() (*zap.Logger, error) {
 		Level:             zap.NewAtomicLevelAt(zapcore.Level(r.config.Logging.LogLevel)),
 		Development:       r.config.Logging.Development,
 		Sampling:          sampling,
-		Encoding:          ouput,
+		Encoding:          output,
 		EncoderConfig:     encoder,
 		DisableStacktrace: !r.config.Logging.Development,
 		OutputPaths:       []string{"stderr"},

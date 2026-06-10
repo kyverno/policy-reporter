@@ -1,11 +1,13 @@
 package metrics
 
 import (
+	"context"
+
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
 	dto "github.com/prometheus/client_model/go"
 
-	"github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
+	"github.com/kyverno/policy-reporter/pkg/openreports"
 	"github.com/kyverno/policy-reporter/pkg/report"
 )
 
@@ -17,8 +19,8 @@ func RegisterCustomResultGauge(name string, labelNames []string) *prometheus.Gau
 }
 
 type (
-	LabelGenerator = func(v1alpha2.ReportInterface, v1alpha2.PolicyReportResult) map[string]string
-	LabelCallback  = func(map[string]string, v1alpha2.ReportInterface, v1alpha2.PolicyReportResult)
+	LabelGenerator = func(openreports.ReportInterface, openreports.ResultAdapter) map[string]string
+	LabelCallback  = func(map[string]string, openreports.ReportInterface, openreports.ResultAdapter)
 )
 
 func CreateCustomResultMetricsListener(
@@ -28,7 +30,7 @@ func CreateCustomResultMetricsListener(
 ) report.PolicyReportListener {
 	cache := NewCache(filter, labelGenerator)
 
-	return func(event report.LifecycleEvent) {
+	return func(ctx context.Context, event report.LifecycleEvent) {
 		newReport := event.PolicyReport
 
 		switch event.Type {

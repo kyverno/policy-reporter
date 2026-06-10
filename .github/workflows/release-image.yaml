@@ -15,152 +15,145 @@ permissions:
   id-token: write
 
 jobs:
-  push-policy-reporter:
+  goreleaser:
+    permissions:
+      contents: write
+      id-token: write
+      packages: write
+    outputs:
+      hashes: ${{ steps.hash.outputs.hashes }}
+      image: ${{ steps.digest.outputs.image }}
+      digest: ${{ steps.digest.outputs.digest }}
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: jlumbroso/free-disk-space@54081f138730dfa15788a46383842cd2f914a1be # v1.3.1
+        with:
+          tool-cache: true
+          android: true
+          dotnet: true
+          haskell: true
+          large-packages: false
+          swap-storage: false
 
-      - name: Parse Version
-        id: params
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          fetch-depth: 0
+      
+      - name: Fetch all tags
         run: |
-          # Strip git ref prefix from version
-          VERSION=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
-          # Strip "v" prefix from tag name
-          [[ "${{ github.ref }}" == "refs/tags/"* ]] && VERSION=$(echo $VERSION | sed -e 's/^v//')
-          echo VERSION=$VERSION
-          echo "VERSION=$VERSION" >> "$GITHUB_ENV"
+          set -e
+          git fetch --force --tags
 
       - name: Login to Github Packages
-        uses: docker/login-action@74a5d142397b4f367a81961eba4e8cd7edddf772 # v3.4.0
+        uses: docker/login-action@650006c6eb7dba73a995cc03b0b2d7f5ca915bee # v4.2.0
         with:
           registry: ghcr.io
           username: ${{ github.repository_owner }}
           password: ${{ secrets.CR_PAT }}
 
       - name: Set up QEMU
-        uses: docker/setup-qemu-action@29109295f81e9208d7d86ff1c6c12d2833863392 # v3.6.0
+        uses: docker/setup-qemu-action@ce360397dd3f832beb865e1373c09c0e9f86d70a # v4.0.0
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@b5ca514318bd6ebac0fb2aedd5d36ec1b5c232a2 #v3.10.0
+        uses: docker/setup-buildx-action@d7f5e7f509e45cec5c76c4d5afdd7de93d0b3df5 #v4.1.0
         id: buildx
         with:
           install: true
           version: latest
 
-      - name: Build image and push to GitHub Container Registry
-        uses: docker/build-push-action@471d1dc4e07e5cdedd4c2171150001c434f0b7a4 # v6.15.0
-        id: push
-        with:
-          push: true
-          platforms: linux/arm64,linux/amd64
-          provenance: mode=max
-          cache-from: type=registry,ref=ghcr.io/${{github.repository_owner}}/policy-reporter:buildcache
-          cache-to: type=registry,ref=ghcr.io/${{github.repository_owner}}/policy-reporter:buildcache,mode=max
-          tags: |
-            ghcr.io/${{github.repository_owner}}/policy-reporter:${{ env.VERSION }}
-
-      - name: Install Cosign
-        uses: sigstore/cosign-installer@d7d6bc7722e3daa8354c50bcb52f4837da5e9b6a # v3.8.1
-
-      - name: Sign image
-        shell: bash
-        env:
-          COSIGN_REPOSITORY: ghcr.io/${{github.repository_owner}}/signatures
-        run: |
-          set -e
-          cosign sign --yes \
-            -a "repo=${{ github.repository }}" \
-            -a "workflow=${{ github.workflow }}" \
-            -a "ref=${{ github.sha }}" \
-            ghcr.io/${{github.repository_owner}}/policy-reporter@${{ steps.push.outputs.digest }}
-
       - name: Set up Go
-        uses: actions/setup-go@0aaccfd150d50ccaeb58ebd88d36e91967a5f35b # v5.4.0
+        uses: actions/setup-go@4a3601121dd01d1626a1e23e37211e3254c1c06c # v6.4.0
         with:
           go-version-file: go.mod
           cache-dependency-path: go.sum
 
-      - name: Generate SBOM
-        uses: CycloneDX/gh-gomod-generate-sbom@efc74245d6802c8cefd925620515442756c70d8f # v2.0.0
-        with:
-          version: v1
-          args: app -licenses -json -output policy-reporter-bom.cdx.json -main .
+      - name: Install Cosign
+        uses: sigstore/cosign-installer@6f9f17788090df1f26f669e9d70d6ae9567deba6 # v4.1.2
 
-      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
-        with:
-          name: policy-reporter-bom-cdx
-          path: policy-reporter-bom.cdx.json
+      - name: Install Syft
+        uses: anchore/sbom-action/download-syft@e22c389904149dbc22b58101806040fa8d37a610 # v0.24.0
 
-      - name: Attach SBOM to image
-        shell: bash
+      - name: Run GoReleaser
+        id: goreleaser
+        uses: goreleaser/goreleaser-action@5daf1e915a5f0af01ddbcd89a43b8061ff4f1a89 # v7.2.2
+        with:
+          distribution: goreleaser
+          version: latest
+          args: release --clean --timeout 90m
         env:
-          COSIGN_REPOSITORY: ghcr.io/${{github.repository_owner}}/sbom
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          KOCACHE: /tmp/ko-cache
+
+      - name: Upload artifacts.json
+        uses: svenstaro/upload-release-action@29e53e917877a24fad85510ded594ab3c9ca12de # 2.11.5
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: dist/artifacts.json
+          asset_name: artifacts.json
+          tag: ${{ github.ref }}
+
+      - name: Upload metadata.json
+        uses: svenstaro/upload-release-action@29e53e917877a24fad85510ded594ab3c9ca12de # 2.11.5
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: dist/metadata.json
+          asset_name: metadata.json
+          tag: ${{ github.ref }}
+
+      - name: Upload digest.txt
+        uses: svenstaro/upload-release-action@29e53e917877a24fad85510ded594ab3c9ca12de # 2.11.5
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: dist/digests.txt
+          asset_name: digests.txt
+          tag: ${{ github.ref }}
+
+      - name: Generate subject
+        id: hash
+        env:
+          ARTIFACTS: "${{ steps.goreleaser.outputs.artifacts }}"
         run: |
-          cosign attach sbom --sbom ./policy-reporter-bom.cdx.json --type cyclonedx ghcr.io/${{github.repository_owner}}/policy-reporter@${{ steps.push.outputs.digest }}
+          set -euo pipefail
+          checksum_file=$(echo "$ARTIFACTS" | jq -r '.[] | select (.type=="Checksum") | .path')
+          hashes=$(cat $checksum_file | base64 -w0)
+          echo "hashes=$hashes" >> $GITHUB_OUTPUT
 
-      - name: Install the crane command
-        uses: kubewarden/github-actions/crane-installer@061457443f381a6c92489003d1d89c67ac32ad51 # v4.3.0
-
-      - name: Find platform digest
-        shell: bash
+      - name: Image digest
+        id: digest
+        env:
+          ARTIFACTS: "${{ steps.goreleaser.outputs.artifacts }}"
         run: |
-          set -e
-          DIGEST_AMD64=$(crane digest \
-            --platform "linux/amd64" \
-            ghcr.io/${{github.repository_owner}}/policy-reporter@${{ steps.push.outputs.digest }})
-          echo "PLATFORM_DIGEST_AMD64=${DIGEST_AMD64}" >> "$GITHUB_ENV"
-          DIGEST_ARM64=$(crane digest \
-            --platform "linux/arm64" \
-            ghcr.io/${{github.repository_owner}}/policy-reporter@${{ steps.push.outputs.digest }})
-          echo "PLATFORM_DIGEST_ARM64=${DIGEST_ARM64}" >> "$GITHUB_ENV"
+          set -euo pipefail
+          digest=$(echo "$ARTIFACTS" | jq -rs '.[] | map(select (.type=="Docker Image"))| first | .extra.Digest')
+          image_with_tag=$(echo "$ARTIFACTS" | jq -rs '.[] | map(select (.type=="Docker Image"))| first | .path')
+          image=$(echo "${image_with_tag}" | cut -d':' -f1)
+          echo "image=$image" >> "$GITHUB_OUTPUT"
+          echo "digest=$digest" >> "$GITHUB_OUTPUT"
 
-      - name: Find attestation digest
-        run: |
-          set -e
-          DIGEST_AMD64=$(crane manifest ghcr.io/${{github.repository_owner}}/policy-reporter@${{ steps.push.outputs.digest }} \
-            | jq '.manifests[] | select(.annotations["vnd.docker.reference.type"]=="attestation-manifest") | select(.annotations["vnd.docker.reference.digest"]=="${{ env.PLATFORM_DIGEST_AMD64 }}") | .digest'
-          )
-          echo "ATTESTATION_MANIFEST_DIGEST_AMD64=${DIGEST_AMD64}" >> "$GITHUB_ENV"
-          DIGEST_ARM64=$(crane manifest ghcr.io/${{github.repository_owner}}/policy-reporter@${{ steps.push.outputs.digest }} \
-            | jq '.manifests[] | select(.annotations["vnd.docker.reference.type"]=="attestation-manifest") | select(.annotations["vnd.docker.reference.digest"]=="${{ env.PLATFORM_DIGEST_ARM64 }}") | .digest'
-          )
-          echo "ATTESTATION_MANIFEST_DIGEST_ARM64=${DIGEST_ARM64}" >> "$GITHUB_ENV"
+  provenance:
+    needs:
+      - goreleaser
+    permissions:
+      actions: read
+      id-token: write
+      contents: write
+    uses: slsa-framework/slsa-github-generator/.github/workflows/generator_generic_slsa3.yml@v2.1.0
+    with:
+      base64-subjects: "${{ needs.goreleaser.outputs.hashes }}"
+      upload-assets: true
 
-      - name: Sign attestation manifest
-        run: |
-          cosign sign --yes \
-            -a "repo=${{ github.repository }}" \
-            -a "workflow=${{ github.workflow }}" \
-            -a "ref=${{ github.sha }}" \
-            ghcr.io/${{github.repository_owner}}/policy-reporter@${{ env.ATTESTATION_MANIFEST_DIGEST_AMD64}}
-
-          cosign sign --yes \
-            -a "repo=${{ github.repository }}" \
-            -a "workflow=${{ github.workflow }}" \
-            -a "ref=${{ github.sha }}" \
-            ghcr.io/${{github.repository_owner}}/policy-reporter@${{ env.ATTESTATION_MANIFEST_DIGEST_ARM64}}
-
-      - name: Find provenance manifest digest
-        run: |
-          set -e
-          DIGEST_AMD64=$(crane manifest ghcr.io/${{github.repository_owner}}/policy-reporter@${{ env.ATTESTATION_MANIFEST_DIGEST_AMD64}} | \
-            jq '.layers[] | select(.annotations["in-toto.io/predicate-type"] == "https://slsa.dev/provenance/v0.2") | .digest')
-          echo "PROVENANCE_DIGEST_AMD64=${DIGEST_AMD64}" >> "$GITHUB_ENV"
-          DIGEST_ARM64=$(crane manifest ghcr.io/${{github.repository_owner}}/policy-reporter@${{ env.ATTESTATION_MANIFEST_DIGEST_ARM64}} | \
-            jq '.layers[] | select(.annotations["in-toto.io/predicate-type"] == "https://slsa.dev/provenance/v0.2") | .digest')
-          echo "PROVENANCE_DIGEST_ARM64=${DIGEST_ARM64}" >> "$GITHUB_ENV"
-
-      - name: Sign provenance manifest
-        run: |
-          cosign sign --yes \
-            -a "repo=${{ github.repository }}" \
-            -a "workflow=${{ github.workflow }}" \
-            -a "ref=${{ github.sha }}" \
-          ghcr.io/${{github.repository_owner}}/policy-reporter@${{ env.PROVENANCE_DIGEST_AMD64}}
-
-          cosign sign --yes \
-            -a "repo=${{ github.repository }}" \
-            -a "workflow=${{ github.workflow }}" \
-            -a "ref=${{ github.sha }}" \
-          ghcr.io/${{github.repository_owner}}/policy-reporter@${{ env.PROVENANCE_DIGEST_ARM64}}
+  image-provenance:
+    needs:
+      - goreleaser
+    permissions:
+      actions: read
+      id-token: write
+      packages: write
+    uses: slsa-framework/slsa-github-generator/.github/workflows/generator_container_slsa3.yml@v2.1.0
+    with:
+      image: ${{ needs.goreleaser.outputs.image }}
+      digest: ${{ needs.goreleaser.outputs.digest }}
+      registry-username: ${{ github.actor }}
+    secrets:
+      registry-password: ${{ secrets.GITHUB_TOKEN }}

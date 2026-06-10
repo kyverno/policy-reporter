@@ -11,22 +11,26 @@ import (
 )
 
 func Test_CleanupListener(t *testing.T) {
+	t.Parallel()
 	t.Run("Execute Cleanup Handler", func(t *testing.T) {
+		t.Parallel()
 		c := &client{cleanup: true}
 
-		slistener := listener.NewCleanupListener(ctx, target.NewCollection(&target.Target{Client: c}))
-		slistener(report.LifecycleEvent{Type: report.Deleted, PolicyReport: preport1})
+		slistener := listener.NewCleanupListener(target.NewCollection(&target.Target{Client: c}))
+		slistener(ctx, report.LifecycleEvent{Type: report.Deleted, PolicyReport: preport1})
 
 		assert.True(t, c.cleanupCalled, "expected cleanup method was called")
 	})
 }
 
 func Test_Cleanup_Listener_Skip_Added(t *testing.T) {
+	t.Parallel()
 	t.Run("Execute Cleanup Handler", func(t *testing.T) {
+		t.Parallel()
 		c := &client{cleanup: true}
 
-		slistener := listener.NewCleanupListener(ctx, target.NewCollection(&target.Target{Client: c}))
-		slistener(report.LifecycleEvent{Type: report.Added, PolicyReport: preport1})
+		slistener := listener.NewCleanupListener(target.NewCollection(&target.Target{Client: c}))
+		slistener(ctx, report.LifecycleEvent{Type: report.Added, PolicyReport: preport1})
 
 		assert.False(t, c.cleanupCalled, "expected cleanup execution was skipped")
 	})

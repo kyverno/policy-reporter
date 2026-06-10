@@ -9,6 +9,7 @@ import (
 )
 
 func TestChunkSize(t *testing.T) {
+	t.Parallel()
 	chunks := helper.ChunkSlice([]int{1, 2, 3, 4, 5, 6, 7}, 3)
 
 	assert.Len(t, chunks, 3)

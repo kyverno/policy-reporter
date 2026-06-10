@@ -4,19 +4,23 @@ import (
 	"context"
 	"testing"
 
+	"github.com/openreports/reports-api/apis/openreports.io/v1alpha1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	"github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
+	"github.com/kyverno/policy-reporter/pkg/openreports"
 	"github.com/kyverno/policy-reporter/pkg/report"
 )
 
 var ctx = context.Background()
 
 func Test_PolicyReportStore(t *testing.T) {
-	store := report.NewPolicyReportStore()
-	store.CreateSchemas(ctx)
+	t.Parallel()
 
 	t.Run("Add/Get", func(t *testing.T) {
+		store := report.NewPolicyReportStore()
+		store.CreateSchemas(ctx)
+
+		t.Parallel()
 		_, err := store.Get(ctx, preport.GetID())
 		if err == nil {
 			t.Fatalf("Should not be found in empty Store")
@@ -30,14 +34,21 @@ func Test_PolicyReportStore(t *testing.T) {
 	})
 
 	t.Run("Update/Get", func(t *testing.T) {
-		ureport := &v1alpha2.PolicyReport{
-			ObjectMeta: v1.ObjectMeta{
-				Name:              "polr-test",
-				Namespace:         "test",
-				CreationTimestamp: v1.Now(),
+		t.Parallel()
+
+		store := report.NewPolicyReportStore()
+		store.CreateSchemas(ctx)
+
+		ureport := &openreports.ReportAdapter{
+			Report: &v1alpha1.Report{
+				ObjectMeta: v1.ObjectMeta{
+					Name:              "polr-test",
+					Namespace:         "test",
+					CreationTimestamp: v1.Now(),
+				},
+				Results: make([]v1alpha1.ReportResult, 0),
+				Summary: v1alpha1.ReportSummary{Skip: 1},
 			},
-			Results: make([]v1alpha2.PolicyReportResult, 0),
-			Summary: v1alpha2.PolicyReportSummary{Skip: 1},
 		}
 
 		store.Add(ctx, preport)
@@ -54,6 +65,12 @@ func Test_PolicyReportStore(t *testing.T) {
 	})
 
 	t.Run("Delete/Get", func(t *testing.T) {
+		t.Parallel()
+
+		store := report.NewPolicyReportStore()
+		store.CreateSchemas(ctx)
+		store.Add(ctx, preport)
+
 		_, err := store.Get(ctx, preport.GetID())
 		if err != nil {
 			t.Errorf("Should be found in Store after adding report to the store")
@@ -67,6 +84,10 @@ func Test_PolicyReportStore(t *testing.T) {
 	})
 
 	t.Run("CleanUp", func(t *testing.T) {
+		t.Parallel()
+
+		store := report.NewPolicyReportStore()
+		store.CreateSchemas(ctx)
 		store.Add(ctx, preport)
 
 		store.CleanUp(ctx)

@@ -13,6 +13,7 @@ import (
 )
 
 func TestHealthCheckSuccess(t *testing.T) {
+	t.Parallel()
 	check := func() error {
 		return nil
 	}
@@ -31,6 +32,7 @@ func TestHealthCheckSuccess(t *testing.T) {
 }
 
 func TestHealthCheckError(t *testing.T) {
+	t.Parallel()
 	check := func() error {
 		return nil
 	}
@@ -53,6 +55,7 @@ func TestHealthCheckError(t *testing.T) {
 }
 
 func TestReadyCheckSuccess(t *testing.T) {
+	t.Parallel()
 	check := func() error {
 		return nil
 	}

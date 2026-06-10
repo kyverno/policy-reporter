@@ -19,7 +19,7 @@ type Paginated[T any] struct {
 func SendResponse(ctx *gin.Context, content any, errMsg string, err error) {
 	if err != nil {
 		zap.L().Error(errMsg, zap.Error(err))
-		ctx.AbortWithError(http.StatusInternalServerError, err)
+		_ = ctx.AbortWithError(http.StatusInternalServerError, err)
 		return
 	}
 

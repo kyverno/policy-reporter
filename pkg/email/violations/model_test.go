@@ -7,13 +7,16 @@ import (
 )
 
 func Test_Source(t *testing.T) {
+	t.Parallel()
 	source := violations.NewSource("kyverno", true)
 	t.Run("Source.ClusterReports", func(t *testing.T) {
+		t.Parallel()
 		if !source.ClusterReports {
 			t.Errorf("Expected Surce.ClusterReports to be true")
 		}
 	})
 	t.Run("Source.AddClusterPassed", func(t *testing.T) {
+		t.Parallel()
 		source.AddClusterPassed(3)
 
 		if source.ClusterPassed != 3 {
@@ -21,6 +24,7 @@ func Test_Source(t *testing.T) {
 		}
 	})
 	t.Run("Source.AddClusterResults", func(t *testing.T) {
+		t.Parallel()
 		source.AddClusterResults([]violations.Result{{
 			Name:   "policy-reporter",
 			Kind:   "Namespace",
@@ -40,6 +44,7 @@ func Test_Source(t *testing.T) {
 		}
 	})
 	t.Run("Source.AddNamespacedPassed", func(t *testing.T) {
+		t.Parallel()
 		source.AddNamespacedPassed("test", 2)
 
 		if source.NamespacePassed["test"] != 2 {
@@ -54,6 +59,7 @@ func Test_Source(t *testing.T) {
 	})
 
 	t.Run("Source.AddNamespacedResults", func(t *testing.T) {
+		t.Parallel()
 		source.AddNamespacedResults("test", []violations.Result{{
 			Name:   "policy-reporter",
 			Kind:   "Deployment",
@@ -86,6 +92,7 @@ func Test_Source(t *testing.T) {
 	})
 
 	t.Run("Source.InitResults", func(t *testing.T) {
+		t.Parallel()
 		source.InitResults("test")
 
 		if source.NamespaceResults["test"]["fail"] == nil {

@@ -29,10 +29,14 @@ import (
 // +kubebuilder:oneOf:={required:{loki}}
 // +kubebuilder:oneOf:={required:{securityHub}}
 // +kubebuilder:oneOf:={required:{kinesis}}
+// +kubebuilder:oneOf:={required:{splunk}}
 // +kubebuilder:oneOf:={required:{teams}}
+// +kubebuilder:oneOf:={required:{jira}}
+// +kubebuilder:oneOf:={required:{alertManager}}
+
 // TargetConfigSpec defines the desired state of TargetConfig.
 type TargetConfigSpec struct {
-	ConfigStrict `json:",inline"`
+	Config `json:",inline"`
 
 	//+optional
 	S3 *S3Options `json:"s3,omitempty"`
@@ -63,6 +67,19 @@ type TargetConfigSpec struct {
 
 	// +optional
 	Teams *WebhookOptions `json:"teams,omitempty"`
+
+	// +optional
+	Jira *JiraOptions `json:"jira,omitempty"`
+
+	// +optional
+	AlertManager *HostOptions `json:"alertManager,omitempty"`
+
+	// +optional
+	Splunk *SplunkOptions `json:"splunk,omitempty"`
+
+	// +kubebuilder:default=true
+	// +optional
+	SkipExisting bool `json:"skipExistingOnStartup,omitempty"`
 }
 
 // TargetConfigStatus defines the observed state of TargetConfig.

@@ -29,6 +29,9 @@ spec:
         {{- toYaml . | nindent 8 }}
         {{- end }}
     spec:
+      {{- with .Values.plugin.trivy.priorityClassName }}
+      priorityClassName: {{ . }}
+      {{- end }}
       {{- with .Values.plugin.trivy.imagePullSecrets }}
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}

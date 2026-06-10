@@ -10,11 +10,13 @@ import (
 )
 
 func TestContains(t *testing.T) {
+	t.Parallel()
 	assert.True(t, helper.Contains("kyverno", []string{"test", "kyverno", "trivy"}))
 	assert.False(t, helper.Contains("kube-bench", []string{"test", "kyverno", "trivy"}))
 }
 
 func TestToList(t *testing.T) {
+	t.Parallel()
 	result := helper.ToList(map[string]string{
 		"first":  "kyverno",
 		"second": "trivy",
@@ -26,12 +28,14 @@ func TestToList(t *testing.T) {
 }
 
 func TestMap(t *testing.T) {
+	t.Parallel()
 	assert.Equal(t, []string{"kyverno", "trivy"}, helper.Map([]string{"source_kyverno", "source_trivy"}, func(value string) string {
 		return strings.TrimPrefix(value, "source_")
 	}))
 }
 
 func TestConvertMap(t *testing.T) {
+	t.Parallel()
 	assert.Equal(t, map[string]string{"first": "kyverno", "second": "trivy"}, helper.ConvertMap(map[string]any{
 		"first":  "kyverno",
 		"second": "trivy",
@@ -40,11 +44,13 @@ func TestConvertMap(t *testing.T) {
 }
 
 func TestDetauls(t *testing.T) {
+	t.Parallel()
 	assert.Equal(t, "fallback", helper.Defaults("", "fallback"))
 	assert.Equal(t, "value", helper.Defaults("value", "fallback"))
 }
 
 func TestToPointer(t *testing.T) {
+	t.Parallel()
 	value := "test"
 	number := 5
 
@@ -53,6 +59,7 @@ func TestToPointer(t *testing.T) {
 }
 
 func TestFind(t *testing.T) {
+	t.Parallel()
 	list := []string{"test", "find", "item"}
 
 	assert.Equal(t, "find", helper.Find(list, func(t string) bool { return t == "find" }, ""))
@@ -60,6 +67,7 @@ func TestFind(t *testing.T) {
 }
 
 func TestMapSlice(t *testing.T) {
+	t.Parallel()
 	mapped := helper.MapSlice(map[int]string{2: "source_kyverno", 3: "source_trivy"}, func(value string) string {
 		return strings.TrimPrefix(value, "source_")
 	})
@@ -69,6 +77,7 @@ func TestMapSlice(t *testing.T) {
 }
 
 func TestFilter(t *testing.T) {
+	t.Parallel()
 	list := []string{"test", "find", "item", "", ""}
 
 	assert.Equal(t, []string{"test", "find", "item"}, helper.Filter(list, func(t string) bool { return t != "" }))

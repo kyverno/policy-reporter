@@ -15,6 +15,7 @@ import (
 )
 
 func TestSendResponseSuccess(t *testing.T) {
+	t.Parallel()
 	gin.SetMode(gin.ReleaseMode)
 	engine := gin.New()
 	server := api.NewServer(engine, api.WithRecovery())
@@ -30,10 +31,11 @@ func TestSendResponseSuccess(t *testing.T) {
 
 	assert := assert.New(t)
 	assert.Equal(http.StatusOK, w.Code)
-	assert.Equal(`"data"`, string(w.Body.Bytes()))
+	assert.Equal(`"data"`, w.Body.String())
 }
 
 func TestSendResponseError(t *testing.T) {
+	t.Parallel()
 	gin.SetMode(gin.ReleaseMode)
 	engine := gin.New()
 	server := api.NewServer(engine, api.WithRecovery())
@@ -49,10 +51,11 @@ func TestSendResponseError(t *testing.T) {
 
 	assert := assert.New(t)
 	assert.Equal(http.StatusInternalServerError, w.Code)
-	assert.Equal("", string(w.Body.Bytes()))
+	assert.Equal("", w.Body.String())
 }
 
 func TestBuildFilter(t *testing.T) {
+	t.Parallel()
 	filter := api.BuildFilter(&gin.Context{
 		Request: &http.Request{
 			URL: &url.URL{
@@ -76,6 +79,7 @@ func TestBuildFilter(t *testing.T) {
 }
 
 func TestPaginationDefaults(t *testing.T) {
+	t.Parallel()
 	pagination := api.BuildPagination(&gin.Context{
 		Request: &http.Request{
 			URL: &url.URL{
@@ -94,6 +98,7 @@ func TestPaginationDefaults(t *testing.T) {
 }
 
 func TestPaginationFromURL(t *testing.T) {
+	t.Parallel()
 	pagination := api.BuildPagination(&gin.Context{
 		Request: &http.Request{
 			URL: &url.URL{

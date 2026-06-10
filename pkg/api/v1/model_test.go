@@ -10,7 +10,9 @@ import (
 )
 
 func TestMapping(t *testing.T) {
+	t.Parallel()
 	t.Run("MapClusterStatusCounts", func(t *testing.T) {
+		t.Parallel()
 		result := v1.MapClusterStatusCounts([]database.StatusCount{
 			{Source: "kyverno", Status: "pass", Count: 3},
 			{Source: "kyverno", Status: "fail", Count: 4},
@@ -22,6 +24,7 @@ func TestMapping(t *testing.T) {
 	})
 
 	t.Run("MapNamespaceStatusCounts", func(t *testing.T) {
+		t.Parallel()
 		result := v1.MapNamespaceStatusCounts([]database.StatusCount{
 			{Source: "kyverno", Status: "pass", Count: 3, Namespace: "default"},
 			{Source: "kyverno", Status: "fail", Count: 4, Namespace: "default"},

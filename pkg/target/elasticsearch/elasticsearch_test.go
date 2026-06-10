@@ -24,7 +24,9 @@ func (c testClient) Do(req *http.Request) (*http.Response, error) {
 }
 
 func Test_ElasticsearchTarget(t *testing.T) {
+	t.Parallel()
 	t.Run("Send with Annually Result", func(t *testing.T) {
+		t.Parallel()
 		callback := func(req *http.Request) {
 			if contentType := req.Header.Get("Content-Type"); contentType != "application/json; charset=utf-8" {
 				t.Errorf("Unexpected Content-Type: %s", contentType)
@@ -56,13 +58,14 @@ func Test_ElasticsearchTarget(t *testing.T) {
 			HTTPClient:   testClient{callback, 200},
 			CustomFields: map[string]string{"cluster": "name"},
 		})
-		client.Send(fixtures.CompleteTargetSendResult)
+		client.Send(fixtures.DefaultPolicyReport, fixtures.CompleteTargetSendResult)
 
 		if len(fixtures.CompleteTargetSendResult.Properties) > 1 {
 			t.Error("expected customFields are not added to the actuel result")
 		}
 	})
 	t.Run("Send with Monthly Result", func(t *testing.T) {
+		t.Parallel()
 		callback := func(req *http.Request) {
 			if url := req.URL.String(); url != "http://localhost:9200/policy-reporter-"+time.Now().Format("2006.01")+"/event" {
 				t.Errorf("Unexpected Host: %s", url)
@@ -82,9 +85,10 @@ func Test_ElasticsearchTarget(t *testing.T) {
 			Rotation:   elasticsearch.Monthly,
 			HTTPClient: testClient{callback, 200},
 		})
-		client.Send(fixtures.CompleteTargetSendResult)
+		client.Send(fixtures.DefaultPolicyReport, fixtures.CompleteTargetSendResult)
 	})
 	t.Run("Send with Monthly Result", func(t *testing.T) {
+		t.Parallel()
 		callback := func(req *http.Request) {
 			if url := req.URL.String(); url != "http://localhost:9200/policy-reporter-"+time.Now().Format("2006.01.02")+"/event" {
 				t.Errorf("Unexpected Host: %s", url)
@@ -100,9 +104,10 @@ func Test_ElasticsearchTarget(t *testing.T) {
 			Rotation:   elasticsearch.Daily,
 			HTTPClient: testClient{callback, 200},
 		})
-		client.Send(fixtures.CompleteTargetSendResult)
+		client.Send(fixtures.DefaultPolicyReport, fixtures.CompleteTargetSendResult)
 	})
 	t.Run("Send with None Result", func(t *testing.T) {
+		t.Parallel()
 		callback := func(req *http.Request) {
 			if url := req.URL.String(); url != "http://localhost:9200/policy-reporter/event" {
 				t.Errorf("Unexpected Host: %s", url)
@@ -118,9 +123,10 @@ func Test_ElasticsearchTarget(t *testing.T) {
 			Rotation:   elasticsearch.None,
 			HTTPClient: testClient{callback, 200},
 		})
-		client.Send(fixtures.CompleteTargetSendResult)
+		client.Send(fixtures.DefaultPolicyReport, fixtures.CompleteTargetSendResult)
 	})
 	t.Run("Name", func(t *testing.T) {
+		t.Parallel()
 		client := elasticsearch.NewClient(elasticsearch.Options{
 			ClientOptions: target.ClientOptions{
 				Name: "Elasticsearch",

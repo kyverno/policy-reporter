@@ -8,8 +8,8 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	"github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
 	"github.com/kyverno/policy-reporter/pkg/helper"
+	"github.com/kyverno/policy-reporter/pkg/openreports"
 	"github.com/kyverno/policy-reporter/pkg/validate"
 )
 
@@ -22,7 +22,8 @@ type JobClient interface {
 }
 
 type ReportSelector struct {
-	Source string
+	Source  string
+	Sources []string `mapstructure:"sources"`
 }
 
 type SourceValidation struct {
@@ -40,7 +41,7 @@ type SourceFilter struct {
 	validations []SourceValidation
 }
 
-func (s *SourceFilter) Validate(polr v1alpha2.ReportInterface) bool {
+func (s *SourceFilter) Validate(polr openreports.ReportInterface) bool {
 	for _, validation := range s.validations {
 		if ok := s.run(polr, validation); !ok {
 			return false
@@ -50,7 +51,7 @@ func (s *SourceFilter) Validate(polr v1alpha2.ReportInterface) bool {
 	return true
 }
 
-func (s *SourceFilter) run(polr v1alpha2.ReportInterface, options SourceValidation) bool {
+func (s *SourceFilter) run(polr openreports.ReportInterface, options SourceValidation) bool {
 	logger := zap.L().With(
 		zap.String("namespace", polr.GetNamespace()),
 		zap.String("report", polr.GetName()),
@@ -98,7 +99,7 @@ func (s *SourceFilter) run(polr v1alpha2.ReportInterface, options SourceValidati
 			return true
 		}
 
-		if ok := Uncontrolled(pod.OwnerReferences); ok {
+		if ok := Uncontrolled(pod.OwnerReferences, podControllers); ok {
 			return true
 		}
 
@@ -113,7 +114,7 @@ func (s *SourceFilter) run(polr v1alpha2.ReportInterface, options SourceValidati
 			return true
 		}
 
-		if ok := Uncontrolled(job.OwnerReferences); ok {
+		if ok := Uncontrolled(job.OwnerReferences, jobControllers); ok {
 			return true
 		}
 
@@ -128,9 +129,11 @@ func NewSourceFilter(pods PodClient, jobs JobClient, validations []SourceValidat
 	return &SourceFilter{pods: pods, jobs: jobs, validations: validations}
 }
 
-var controller = []string{"ReplicaSet", "DaemonSet", "CronJob", "Job", "Job", "StatefulSet"}
+var podControllers = []string{"ReplicaSet", "DaemonSet", "Job", "StatefulSet"}
 
-func Uncontrolled(owner []metav1.OwnerReference) bool {
+var jobControllers = []string{"CronJob"}
+
+func Uncontrolled(owner []metav1.OwnerReference, controllers []string) bool {
 	if len(owner) == 0 {
 		return true
 	}
@@ -141,7 +144,7 @@ func Uncontrolled(owner []metav1.OwnerReference) bool {
 			continue
 		}
 
-		if *isController == true && helper.Contains(o.Kind, controller) {
+		if *isController && helper.Contains(o.Kind, controllers) {
 			return false
 		}
 	}
@@ -149,6 +152,10 @@ func Uncontrolled(owner []metav1.OwnerReference) bool {
 	return true
 }
 
-func Match(polr v1alpha2.ReportInterface, selector ReportSelector) bool {
-	return selector.Source == "" || strings.ToLower(selector.Source) == strings.ToLower(polr.GetSource())
+func Match(polr openreports.ReportInterface, selector ReportSelector) bool {
+	if len(selector.Sources) > 0 {
+		return helper.Contains(polr.GetSource(), selector.Sources)
+	}
+
+	return selector.Source == "" || strings.EqualFold(selector.Source, polr.GetSource())
 }

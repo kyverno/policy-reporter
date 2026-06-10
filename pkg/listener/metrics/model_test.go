@@ -8,6 +8,7 @@ import (
 )
 
 func Test_LabelMappings(t *testing.T) {
+	t.Parallel()
 	results := map[string]string{}
 	res := fixtures.FailPodResult.GetResource()
 
@@ -61,7 +62,7 @@ func Test_LabelMappings(t *testing.T) {
 		t.Errorf("expected empty name without resource, got: %s", val)
 	}
 	metrics.LabelGeneratorMapping["message"](results, preport, fixtures.FailPodResult)
-	if val, ok := results["namespace"]; !ok && val != fixtures.FailPodResult.Message {
+	if val, ok := results["namespace"]; !ok && val != fixtures.FailPodResult.Description {
 		t.Errorf("expected result for message label not found: %s", val)
 	}
 }

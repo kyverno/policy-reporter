@@ -23,7 +23,9 @@ func (c testClient) Do(req *http.Request) (*http.Response, error) {
 }
 
 func Test_SlackTarget(t *testing.T) {
+	t.Parallel()
 	t.Run("Send Complete Result", func(t *testing.T) {
+		t.Parallel()
 		callback := func(req *http.Request) {
 			if contentType := req.Header.Get("Content-Type"); contentType != "application/json; charset=utf-8" {
 				t.Errorf("Unexpected Content-Type: %s", contentType)
@@ -46,10 +48,11 @@ func Test_SlackTarget(t *testing.T) {
 			CustomFields: map[string]string{"Cluster": "Name"},
 			HTTPClient:   testClient{callback, 200},
 		})
-		client.Send(fixtures.CompleteTargetSendResult)
+		client.Send(fixtures.DefaultPolicyReport, fixtures.CompleteTargetSendResult)
 	})
 
 	t.Run("Send Minimal Result", func(t *testing.T) {
+		t.Parallel()
 		callback := func(req *http.Request) {
 			if contentType := req.Header.Get("Content-Type"); contentType != "application/json; charset=utf-8" {
 				t.Errorf("Unexpected Content-Type: %s", contentType)
@@ -71,10 +74,11 @@ func Test_SlackTarget(t *testing.T) {
 			Webhook:    "http://hook.slack:80",
 			HTTPClient: testClient{callback, 200},
 		})
-		client.Send(fixtures.MinimalTargetSendResult)
+		client.Send(fixtures.DefaultPolicyReport, fixtures.MinimalTargetSendResult)
 	})
 
 	t.Run("Send enforce Result", func(t *testing.T) {
+		t.Parallel()
 		callback := func(req *http.Request) {
 			if contentType := req.Header.Get("Content-Type"); contentType != "application/json; charset=utf-8" {
 				t.Errorf("Unexpected Content-Type: %s", contentType)
@@ -96,10 +100,11 @@ func Test_SlackTarget(t *testing.T) {
 			Webhook:    "http://hook.slack:80",
 			HTTPClient: testClient{callback, 200},
 		})
-		client.Send(fixtures.EnforceTargetSendResult)
+		client.Send(fixtures.DefaultPolicyReport, fixtures.EnforceTargetSendResult)
 	})
 
 	t.Run("Send incomplete Result", func(t *testing.T) {
+		t.Parallel()
 		callback := func(req *http.Request) {
 			if contentType := req.Header.Get("Content-Type"); contentType != "application/json; charset=utf-8" {
 				t.Errorf("Unexpected Content-Type: %s", contentType)
@@ -122,10 +127,11 @@ func Test_SlackTarget(t *testing.T) {
 			CustomFields: map[string]string{"Cluster": "Name"},
 			HTTPClient:   testClient{callback, 200},
 		})
-		client.Send(fixtures.MissingUIDSendResult)
+		client.Send(fixtures.DefaultPolicyReport, fixtures.MissingUIDSendResult)
 	})
 
 	t.Run("Send incomplete Result2", func(t *testing.T) {
+		t.Parallel()
 		callback := func(req *http.Request) {
 			if contentType := req.Header.Get("Content-Type"); contentType != "application/json; charset=utf-8" {
 				t.Errorf("Unexpected Content-Type: %s", contentType)
@@ -148,10 +154,11 @@ func Test_SlackTarget(t *testing.T) {
 			CustomFields: map[string]string{"Cluster": "Name"},
 			HTTPClient:   testClient{callback, 200},
 		})
-		client.Send(fixtures.MissingAPIVersionSendResult)
+		client.Send(fixtures.DefaultPolicyReport, fixtures.MissingAPIVersionSendResult)
 	})
 
 	t.Run("Name", func(t *testing.T) {
+		t.Parallel()
 		client := slack.NewClient(slack.Options{
 			ClientOptions: target.ClientOptions{
 				Name: "Slack",

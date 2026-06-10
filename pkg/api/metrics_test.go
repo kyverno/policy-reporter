@@ -12,6 +12,7 @@ import (
 )
 
 func TestMetrics(t *testing.T) {
+	t.Parallel()
 	gin.SetMode(gin.ReleaseMode)
 
 	server := api.NewServer(gin.New(), api.WithMetrics())
@@ -26,6 +27,7 @@ func TestMetrics(t *testing.T) {
 }
 
 func TestMetricsWithBasicAuthError(t *testing.T) {
+	t.Parallel()
 	gin.SetMode(gin.ReleaseMode)
 
 	server := api.NewServer(gin.New(), api.WithBasicAuth(api.BasicAuth{
@@ -43,6 +45,7 @@ func TestMetricsWithBasicAuthError(t *testing.T) {
 }
 
 func TestMetricsWithBasicAuthSuccess(t *testing.T) {
+	t.Parallel()
 	gin.SetMode(gin.ReleaseMode)
 
 	server := api.NewServer(gin.New(), api.WithBasicAuth(api.BasicAuth{

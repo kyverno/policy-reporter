@@ -3,23 +3,36 @@ package summary_test
 import (
 	"testing"
 
-	"github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
+	"github.com/openreports/reports-api/apis/openreports.io/v1alpha1"
+	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
 	"github.com/kyverno/policy-reporter/pkg/email/summary"
+	"github.com/kyverno/policy-reporter/pkg/openreports"
 )
 
 func Test_Source(t *testing.T) {
+	t.Parallel()
 	source := summary.NewSource("kyverno", true)
 	t.Run("Source.ClusterReports", func(t *testing.T) {
+		t.Parallel()
 		if !source.ClusterReports {
 			t.Errorf("Expected Surce.ClusterReports to be true")
 		}
 	})
 	t.Run("Source.AddClusterSummary", func(t *testing.T) {
-		source.AddClusterSummary(v1alpha2.PolicyReportSummary{
-			Pass:  1,
-			Warn:  2,
-			Fail:  4,
-			Error: 3,
+		t.Parallel()
+		source.AddClusterSummary(&openreports.ReportAdapter{
+			Report: &v1alpha1.Report{
+				ObjectMeta: v1.ObjectMeta{
+					Name: "some-report",
+				},
+				Summary: v1alpha1.ReportSummary{
+					Pass:  1,
+					Warn:  2,
+					Fail:  4,
+					Error: 3,
+				},
+			},
 		})
 
 		if source.ClusterScopeSummary.Pass != 1 {
@@ -32,11 +45,12 @@ func Test_Source(t *testing.T) {
 			t.Errorf("Unexpected Fail Summary: %d", source.ClusterScopeSummary.Fail)
 		}
 		if source.ClusterScopeSummary.Error != 3 {
-			t.Errorf("Unexpected Errpr Summary: %d", source.ClusterScopeSummary.Error)
+			t.Errorf("Unexpected Error Summary: %d", source.ClusterScopeSummary.Error)
 		}
 	})
 	t.Run("Source.AddNamespacedSummary", func(t *testing.T) {
-		source.AddNamespacedSummary("test", v1alpha2.PolicyReportSummary{
+		t.Parallel()
+		source.AddNamespacedSummary("test", v1alpha1.ReportSummary{
 			Pass:  5,
 			Warn:  6,
 			Fail:  7,
@@ -53,10 +67,10 @@ func Test_Source(t *testing.T) {
 			t.Errorf("Unexpected Fail Summary: %d", source.ClusterScopeSummary.Fail)
 		}
 		if source.NamespaceScopeSummary["test"].Error != 8 {
-			t.Errorf("Unexpected Errpr Summary: %d", source.ClusterScopeSummary.Error)
+			t.Errorf("Unexpected Error Summary: %d", source.ClusterScopeSummary.Error)
 		}
 
-		source.AddNamespacedSummary("test", v1alpha2.PolicyReportSummary{
+		source.AddNamespacedSummary("test", v1alpha1.ReportSummary{
 			Pass:  2,
 			Warn:  1,
 			Fail:  0,
@@ -73,7 +87,7 @@ func Test_Source(t *testing.T) {
 			t.Errorf("Unexpected Fail Summary: %d", source.ClusterScopeSummary.Fail)
 		}
 		if source.NamespaceScopeSummary["test"].Error != 11 {
-			t.Errorf("Unexpected Errpr Summary: %d", source.ClusterScopeSummary.Error)
+			t.Errorf("Unexpected Error Summary: %d", source.ClusterScopeSummary.Error)
 		}
 	})
 }

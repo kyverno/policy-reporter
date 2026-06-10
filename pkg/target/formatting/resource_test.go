@@ -1,0 +1,36 @@
+package formatting_test
+
+import (
+	"testing"
+
+	"github.com/stretchr/testify/assert"
+	corev1 "k8s.io/api/core/v1"
+
+	"github.com/kyverno/policy-reporter/pkg/target/formatting"
+)
+
+func TestResourceString(t *testing.T) {
+	t.Parallel()
+	t.Run("namespaced resource", func(t *testing.T) {
+		t.Parallel()
+		res := formatting.ResourceString(&corev1.ObjectReference{
+			APIVersion: "v1",
+			Kind:       "Deployment",
+			Name:       "nginx",
+			Namespace:  "default",
+		})
+
+		assert.Equal(t, "v1/Deployment: default/nginx", res)
+	})
+
+	t.Run("cluster resource", func(t *testing.T) {
+		t.Parallel()
+		res := formatting.ResourceString(&corev1.ObjectReference{
+			APIVersion: "v1",
+			Kind:       "Namespace",
+			Name:       "default",
+		})
+
+		assert.Equal(t, "v1/Namespace: default", res)
+	})
+}

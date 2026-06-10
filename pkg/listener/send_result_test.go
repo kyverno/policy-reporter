@@ -6,9 +6,9 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
 	"github.com/kyverno/policy-reporter/pkg/fixtures"
 	"github.com/kyverno/policy-reporter/pkg/listener"
+	"github.com/kyverno/policy-reporter/pkg/openreports"
 	"github.com/kyverno/policy-reporter/pkg/target"
 )
 
@@ -21,12 +21,12 @@ type client struct {
 	cleanup               bool
 }
 
-func (c *client) Send(result v1alpha2.PolicyReportResult) {
+func (c *client) Send(report openreports.ReportInterface, result openreports.ResultAdapter) {
 	c.Called = true
 }
 
 func (c *client) MinimumSeverity() string {
-	return v1alpha2.SeverityInfo
+	return openreports.SeverityInfo
 }
 
 func (c *client) Name() string {
@@ -41,7 +41,7 @@ func (c *client) SkipExistingOnStartup() bool {
 	return c.skipExistingOnStartup
 }
 
-func (c client) Validate(rep v1alpha2.ReportInterface, result v1alpha2.PolicyReportResult) bool {
+func (c client) Validate(rep openreports.ReportInterface, result openreports.ResultAdapter) bool {
 	return c.validated
 }
 
@@ -49,11 +49,13 @@ func (c *client) Reset(_ context.Context) error {
 	return nil
 }
 
-func (c *client) CleanUp(_ context.Context, _ v1alpha2.ReportInterface) {
+func (c *client) SendHeartbeat() {}
+
+func (c *client) CleanUp(_ context.Context, _ openreports.ReportInterface) {
 	c.cleanupCalled = true
 }
 
-func (c *client) BatchSend(_ v1alpha2.ReportInterface, _ []v1alpha2.PolicyReportResult) {
+func (c *client) BatchSend(_ openreports.ReportInterface, _ []openreports.ResultAdapter) {
 	c.Called = true
 }
 
@@ -69,7 +71,9 @@ func (c *client) Type() target.ClientType {
 }
 
 func Test_SendResultListener(t *testing.T) {
+	t.Parallel()
 	t.Run("Send Result", func(t *testing.T) {
+		t.Parallel()
 		c := &client{validated: true}
 		slistener := listener.NewSendResultListener(target.NewCollection(&target.Target{Client: c}))
 		slistener(preport1, fixtures.FailResult, false)
@@ -77,6 +81,7 @@ func Test_SendResultListener(t *testing.T) {
 		assert.True(t, c.Called, "Expected Send to be called")
 	})
 	t.Run("Don't Send Result when validation fails", func(t *testing.T) {
+		t.Parallel()
 		c := &client{validated: false}
 		slistener := listener.NewSendResultListener(target.NewCollection(&target.Target{Client: c}))
 		slistener(preport1, fixtures.FailResult, false)
@@ -84,6 +89,7 @@ func Test_SendResultListener(t *testing.T) {
 		assert.False(t, c.Called, "Expected Send not to be called")
 	})
 	t.Run("Don't Send pre existing Result when skipExistingOnStartup is true", func(t *testing.T) {
+		t.Parallel()
 		c := &client{skipExistingOnStartup: true}
 		slistener := listener.NewSendResultListener(target.NewCollection(&target.Target{Client: c}))
 		slistener(preport1, fixtures.FailResult, true)

@@ -10,18 +10,21 @@ import (
 )
 
 func TestS3Client(t *testing.T) {
+	t.Parallel()
 	client := aws.NewS3Client("access", "secret", "eu-central-1", "http://s3.aws.com", "policy-reporter", false, aws.WithKMS(true, helper.ToPointer("kms"), helper.ToPointer("encryption")))
 
 	assert.NotNil(t, client)
 }
 
 func TestKinesisClient(t *testing.T) {
+	t.Parallel()
 	client := aws.NewKinesisClient("access", "secret", "eu-central-1", "http://kinesis.aws.com", "policy-reporter")
 
 	assert.NotNil(t, client)
 }
 
 func TestSecurityHubClient(t *testing.T) {
+	t.Parallel()
 	client := aws.NewHubClient("access", "secret", "eu-central-1", "http://securityhub.aws.com")
 
 	assert.NotNil(t, client)

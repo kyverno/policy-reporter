@@ -4,18 +4,20 @@ import (
 	"context"
 	"sync"
 
+	"github.com/openreports/reports-api/pkg/client/clientset/versioned/typed/openreports.io/v1alpha1"
 	"go.uber.org/zap"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	"github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
-	api "github.com/kyverno/policy-reporter/pkg/crd/client/policyreport/clientset/versioned/typed/policyreport/v1alpha2"
+	"github.com/kyverno/policy-reporter/pkg/crd/client/clientset/versioned/typed/policyreport/v1alpha2"
 	"github.com/kyverno/policy-reporter/pkg/email"
+	"github.com/kyverno/policy-reporter/pkg/openreports"
 )
 
 type Generator struct {
-	client         api.Wgpolicyk8sV1alpha2Interface
-	filter         email.Filter
-	clusterReports bool
+	openreportsClient v1alpha1.OpenreportsV1alpha1Interface
+	wgpolicyClient    v1alpha2.Wgpolicyk8sV1alpha2Interface
+	filter            email.Filter
+	clusterReports    bool
 }
 
 func (o *Generator) GenerateData(ctx context.Context) ([]Source, error) {
@@ -25,22 +27,38 @@ func (o *Generator) GenerateData(ctx context.Context) ([]Source, error) {
 	wg := &sync.WaitGroup{}
 
 	if o.clusterReports {
-		clusterReports, err := o.client.ClusterPolicyReports().List(ctx, v1.ListOptions{})
-		if err != nil {
-			return make([]Source, 0, 0), err
+		clusterReports := []openreports.ReportInterface{}
+		if o.openreportsClient != nil {
+			crs, err := o.openreportsClient.ClusterReports().List(ctx, v1.ListOptions{})
+			if err != nil {
+				return make([]Source, 0), err
+			}
+			for _, cr := range crs.Items {
+				clusterReports = append(clusterReports, &openreports.ClusterReportAdapter{ClusterReport: &cr})
+			}
 		}
 
-		wg.Add(len(clusterReports.Items))
+		if o.wgpolicyClient != nil {
+			crs, err := o.wgpolicyClient.ClusterPolicyReports().List(ctx, v1.ListOptions{})
+			if err != nil {
+				return make([]Source, 0), err
+			}
+			for _, cr := range crs.Items {
+				clusterReports = append(clusterReports, &openreports.ClusterReportAdapter{ClusterReport: cr.ToOpenReports()})
+			}
+		}
 
-		for _, rep := range clusterReports.Items {
-			go func(report v1alpha2.ClusterPolicyReport) {
+		wg.Add(len(clusterReports))
+
+		for _, rep := range clusterReports {
+			go func(report openreports.ReportInterface) {
 				defer wg.Done()
 
-				if len(report.Results) == 0 {
+				if len(report.GetResults()) == 0 {
 					return
 				}
 
-				rs := report.Results[0].Source
+				rs := report.GetSource()
 				if !o.filter.ValidateSource(rs) {
 					return
 				}
@@ -53,29 +71,44 @@ func (o *Generator) GenerateData(ctx context.Context) ([]Source, error) {
 				}
 				mx.Unlock()
 
-				s.AddClusterSummary(report.Summary)
+				s.AddClusterSummary(report)
 
-				zap.L().Info("Processed ClusterPolicyRepor", zap.String("name", report.Name))
+				zap.L().Info("Processed ClusterPolicyReport", zap.String("name", report.GetName()))
 			}(rep)
 		}
 	}
+	reports := []openreports.ReportInterface{}
 
-	reports, err := o.client.PolicyReports(v1.NamespaceAll).List(ctx, v1.ListOptions{})
-	if err != nil {
-		return make([]Source, 0, 0), err
+	if o.openreportsClient != nil {
+		rs, err := o.openreportsClient.Reports(v1.NamespaceAll).List(ctx, v1.ListOptions{})
+		if err != nil {
+			return make([]Source, 0), err
+		}
+		for _, r := range rs.Items {
+			reports = append(reports, &openreports.ReportAdapter{Report: &r})
+		}
 	}
 
-	wg.Add(len(reports.Items))
+	if o.wgpolicyClient != nil {
+		crs, err := o.wgpolicyClient.PolicyReports(v1.NamespaceAll).List(ctx, v1.ListOptions{})
+		if err != nil {
+			return make([]Source, 0), err
+		}
+		for _, r := range crs.Items {
+			reports = append(reports, &openreports.ReportAdapter{Report: r.ToOpenReports()})
+		}
+	}
 
-	for _, rep := range reports.Items {
-		go func(report v1alpha2.PolicyReport) {
+	wg.Add(len(reports))
+	for _, rep := range reports {
+		go func(report openreports.ReportInterface) {
 			defer wg.Done()
 
-			if len(report.Results) == 0 || !o.filter.ValidateNamespace(report.Namespace) {
+			if len(report.GetResults()) == 0 || !o.filter.ValidateNamespace(report.GetNamespace()) {
 				return
 			}
 
-			rs := report.Results[0].Source
+			rs := report.GetSource()
 			if !o.filter.ValidateSource(rs) {
 				return
 			}
@@ -88,9 +121,8 @@ func (o *Generator) GenerateData(ctx context.Context) ([]Source, error) {
 			}
 			mx.Unlock()
 
-			s.AddNamespacedSummary(report.Namespace, report.Summary)
-
-			zap.L().Info("Processed PolicyRepor", zap.String("name", report.Name))
+			s.AddNamespacedSummary(report.GetNamespace(), report.GetSummary())
+			zap.L().Info("Processed Report", zap.String("name", report.GetName()))
 		}(rep)
 	}
 
@@ -104,8 +136,8 @@ func (o *Generator) GenerateData(ctx context.Context) ([]Source, error) {
 	return list, nil
 }
 
-func NewGenerator(client api.Wgpolicyk8sV1alpha2Interface, filter email.Filter, clusterReports bool) *Generator {
-	return &Generator{client, filter, clusterReports}
+func NewGenerator(orclient v1alpha1.OpenreportsV1alpha1Interface, wgpolicyclient v1alpha2.Wgpolicyk8sV1alpha2Interface, filter email.Filter, clusterReports bool) *Generator {
+	return &Generator{orclient, wgpolicyclient, filter, clusterReports}
 }
 
 func FilterSources(sources []Source, filter email.Filter, clusterReports bool) []Source {

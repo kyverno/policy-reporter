@@ -1,4 +1,4 @@
-{{- if and .Values.monitoring.enabled }}
+{{- if and .Values.monitoring.enabled .Values.monitoring.serviceMonitor.enabled }}
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
@@ -39,6 +39,11 @@ spec:
       username:
         name: {{ .Values.basicAuth.secretRef }}
         key: username
+    {{- end }}
+    {{- if .Values.monitoring.serviceMonitor.secure }}
+    scheme: https
+    tlsConfig:
+      {{- toYaml .Values.monitoring.serviceMonitor.tlsConfig | nindent 6 }}
     {{- end }}
     honorLabels: {{ .Values.monitoring.serviceMonitor.honorLabels }}
     {{- if .Values.monitoring.serviceMonitor.scrapeTimeout }}

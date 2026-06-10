@@ -3,15 +3,16 @@ package securityhub
 import (
 	"context"
 	"fmt"
-	"strings"
 	"time"
 
 	hub "github.com/aws/aws-sdk-go-v2/service/securityhub"
 	"github.com/aws/aws-sdk-go-v2/service/securityhub/types"
+	"github.com/openreports/reports-api/apis/openreports.io/v1alpha1"
 	"go.uber.org/zap"
 
 	"github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
 	"github.com/kyverno/policy-reporter/pkg/helper"
+	"github.com/kyverno/policy-reporter/pkg/openreports"
 	"github.com/kyverno/policy-reporter/pkg/target"
 )
 
@@ -24,7 +25,7 @@ type HubClient interface {
 }
 
 type PolrClient interface {
-	Get(ctx context.Context, name, namespace string) (v1alpha2.ReportInterface, error)
+	Get(ctx context.Context, name, namespace string) (openreports.ReportInterface, error)
 }
 
 // Options to configure the SecurityHub target
@@ -53,13 +54,13 @@ type client struct {
 	arn          *string
 }
 
-func (c *client) mapFindings(polr v1alpha2.ReportInterface, results []v1alpha2.PolicyReportResult) []types.AwsSecurityFinding {
+func (c *client) mapFindings(polr openreports.ReportInterface, results []openreports.ResultAdapter) []types.AwsSecurityFinding {
 	var accID *string
 	if c.accountID != "" {
 		accID = toPointer(c.accountID)
 	}
 
-	return helper.Map(results, func(result v1alpha2.PolicyReportResult) types.AwsSecurityFinding {
+	return helper.Map(results, func(result openreports.ResultAdapter) types.AwsSecurityFinding {
 		generator := result.Policy
 		if generator == "" {
 			generator = result.Rule
@@ -85,7 +86,7 @@ func (c *client) mapFindings(polr v1alpha2.ReportInterface, results []v1alpha2.P
 				Label: MapSeverity(result.Severity),
 			},
 			Title:       &title,
-			Description: &result.Message,
+			Description: &result.Description,
 			ProductName: &c.productName,
 			CompanyName: &c.companyName,
 			Compliance: &types.Compliance{
@@ -110,12 +111,12 @@ func (c *client) mapFindings(polr v1alpha2.ReportInterface, results []v1alpha2.P
 	})
 }
 
-func (c *client) Send(result v1alpha2.PolicyReportResult) {
-	c.BatchSend(&v1alpha2.PolicyReport{}, []v1alpha2.PolicyReportResult{result})
+func (c *client) Send(report openreports.ReportInterface, result openreports.ResultAdapter) {
+	c.BatchSend(&openreports.ReportAdapter{Report: &v1alpha1.Report{}}, []openreports.ResultAdapter{result})
 }
 
-func filterResults(results []v1alpha2.PolicyReportResult) []v1alpha2.PolicyReportResult {
-	return helper.Filter(results, func(r v1alpha2.PolicyReportResult) bool {
+func filterResults(results []openreports.ResultAdapter) []openreports.ResultAdapter {
+	return helper.Filter(results, func(r openreports.ResultAdapter) bool {
 		if r.Result == v1alpha2.StatusFail {
 			return true
 		}
@@ -130,7 +131,7 @@ func filterResults(results []v1alpha2.PolicyReportResult) []v1alpha2.PolicyRepor
 	})
 }
 
-func (c *client) BatchSend(polr v1alpha2.ReportInterface, results []v1alpha2.PolicyReportResult) {
+func (c *client) BatchSend(polr openreports.ReportInterface, results []openreports.ResultAdapter) {
 	results = filterResults(results)
 	if len(results) == 0 {
 		return
@@ -164,7 +165,7 @@ func (c *client) BatchSend(polr v1alpha2.ReportInterface, results []v1alpha2.Pol
 			mapping[*f.Id] = true
 		}
 
-		results = helper.Filter(results, func(result v1alpha2.PolicyReportResult) bool {
+		results = helper.Filter(results, func(result openreports.ResultAdapter) bool {
 			return !mapping[result.GetID()]
 		})
 	}
@@ -220,7 +221,7 @@ func (c *client) Reset(ctx context.Context) error {
 	return nil
 }
 
-func (c *client) CleanUp(ctx context.Context, report v1alpha2.ReportInterface) {
+func (c *client) CleanUp(ctx context.Context, report openreports.ReportInterface) {
 	if !c.synchronize {
 		return
 	}
@@ -228,7 +229,7 @@ func (c *client) CleanUp(ctx context.Context, report v1alpha2.ReportInterface) {
 	zap.L().Info(c.Name()+": start cleanup", zap.String("report", report.GetKey()))
 
 	if report.GetSource() != "" {
-		if !c.BaseClient.ValidateReport(report) {
+		if !c.ValidateReport(report) {
 			return
 		}
 	}
@@ -252,7 +253,7 @@ func (c *client) CleanUp(ctx context.Context, report v1alpha2.ReportInterface) {
 	}
 
 	for _, r := range report.GetResults() {
-		if !c.BaseClient.Validate(report, r) {
+		if !c.Validate(report, r) {
 			continue
 		}
 
@@ -280,7 +281,7 @@ func (c *client) CleanUp(ctx context.Context, report v1alpha2.ReportInterface) {
 	zap.L().Info(c.Name()+": CLEANUP OK", zap.Int("count", count), zap.String("report", report.GetKey()))
 }
 
-func (c *client) mapOtherDetails(polr v1alpha2.ReportInterface, result v1alpha2.PolicyReportResult) map[string]string {
+func (c *client) mapOtherDetails(polr openreports.ReportInterface, result openreports.ResultAdapter) map[string]string {
 	details := map[string]string{
 		"Source":   result.Source,
 		"Category": result.Category,
@@ -375,7 +376,7 @@ func (c *client) batchUpdate(ctx context.Context, findings []types.AwsSecurityFi
 	return updated, nil
 }
 
-func (c *client) getFindingsByIDs(ctx context.Context, report v1alpha2.ReportInterface, resources []types.StringFilter, status string) ([]types.AwsSecurityFinding, error) {
+func (c *client) getFindingsByIDs(ctx context.Context, report openreports.ReportInterface, resources []types.StringFilter, status string) ([]types.AwsSecurityFinding, error) {
 	list := make([]types.AwsSecurityFinding, 0)
 
 	chunks := helper.ChunkSlice(resources, 20)
@@ -422,7 +423,7 @@ func (c *client) getFindingsByIDs(ctx context.Context, report v1alpha2.ReportInt
 	return list, nil
 }
 
-func (c *client) BaseFilter(report v1alpha2.ReportInterface) *types.AwsSecurityFindingFilters {
+func (c *client) BaseFilter(report openreports.ReportInterface) *types.AwsSecurityFindingFilters {
 	source := ""
 	if report != nil {
 		source = report.GetSource()
@@ -512,24 +513,24 @@ func toPointer[T any](value T) *T {
 	return &value
 }
 
-func MapSeverity(s v1alpha2.PolicySeverity) types.SeverityLabel {
+func MapSeverity(s v1alpha1.ResultSeverity) types.SeverityLabel {
 	switch s {
-	case v1alpha2.SeverityInfo:
+	case openreports.SeverityInfo:
 		return types.SeverityLabelInformational
-	case v1alpha2.SeverityLow:
+	case openreports.SeverityLow:
 		return types.SeverityLabelLow
-	case v1alpha2.SeverityMedium:
+	case openreports.SeverityMedium:
 		return types.SeverityLabelMedium
-	case v1alpha2.SeverityHigh:
+	case openreports.SeverityHigh:
 		return types.SeverityLabelHigh
-	case v1alpha2.SeverityCritical:
+	case openreports.SeverityCritical:
 		return types.SeverityLabelCritical
 	default:
 		return types.SeverityLabelInformational
 	}
 }
 
-func mapResourceID(result v1alpha2.PolicyReportResult) *string {
+func mapResourceID(result openreports.ResultAdapter) *string {
 	if result.HasResource() {
 		res := result.GetResource()
 		if res.UID != "" {
@@ -550,7 +551,7 @@ func mapType(source string) string {
 	return "Software and Configuration Checks/Kubernetes Policies/" + source
 }
 
-func toResourceIDFilter(report v1alpha2.ReportInterface, results []v1alpha2.PolicyReportResult) []types.StringFilter {
+func toResourceIDFilter(report openreports.ReportInterface, results []openreports.ResultAdapter) []types.StringFilter {
 	res := report.GetScope()
 	if res != nil {
 		var value string
@@ -593,16 +594,7 @@ func toResourceIDFilter(report v1alpha2.ReportInterface, results []v1alpha2.Poli
 	return filter
 }
 
-func splitPolrKey(key string) (string, string) {
-	parts := strings.Split(key, "/")
-	if len(parts) == 1 {
-		return parts[0], ""
-	}
-
-	return parts[1], parts[0]
-}
-
-func filterFindings(findings []types.AwsSecurityFinding, results []v1alpha2.PolicyReportResult) []types.AwsSecurityFinding {
+func filterFindings(findings []types.AwsSecurityFinding, results []openreports.ResultAdapter) []types.AwsSecurityFinding {
 	filtered := make([]types.AwsSecurityFinding, 0, len(findings))
 
 	mapping := make(map[string]bool, len(results))

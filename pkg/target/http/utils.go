@@ -12,7 +12,7 @@ import (
 
 	"go.uber.org/zap"
 
-	"github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
+	"github.com/kyverno/policy-reporter/pkg/openreports"
 )
 
 // CreateJSONRequest for the given configuration
@@ -41,7 +41,12 @@ func ProcessHTTPResponse(target string, resp *http.Response, err error) {
 		}
 	}()
 
-	if err != nil {
+	if err != nil && resp != nil {
+		buf := new(bytes.Buffer)
+		buf.ReadFrom(resp.Body)
+
+		zap.L().Error(target+": PUSH FAILED", zap.Error(err), zap.String("body", buf.String()), zap.Int("statusCode", resp.StatusCode))
+	} else if err != nil {
 		zap.L().Error(target+": PUSH FAILED", zap.Error(err))
 	} else if resp.StatusCode >= 400 {
 		buf := new(bytes.Buffer)
@@ -53,7 +58,7 @@ func ProcessHTTPResponse(target string, resp *http.Response, err error) {
 	}
 }
 
-func NewJSONResult(r v1alpha2.PolicyReportResult) Result {
+func NewJSONResult(r openreports.ResultAdapter) Result {
 	res := Resource{}
 	if r.HasResource() {
 		resOb := r.GetResource()
@@ -65,7 +70,7 @@ func NewJSONResult(r v1alpha2.PolicyReportResult) Result {
 		res.UID = string(resOb.UID)
 	}
 	return Result{
-		Message:           r.Message,
+		Message:           r.Description,
 		Policy:            r.Policy,
 		Rule:              r.Rule,
 		Status:            string(r.Result),

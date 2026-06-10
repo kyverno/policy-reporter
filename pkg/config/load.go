@@ -10,6 +10,8 @@ import (
 
 func Load(cmd *cobra.Command) (*Config, error) {
 	v := viper.New()
+	v.SetConfigType("yaml") // Set config type explicitly
+	v.SetConfigFile("")     // Don't watch for file changes
 
 	v.SetDefault("leaderElection.releaseOnCancel", true)
 	v.SetDefault("leaderElection.leaseDuration", 15)
@@ -83,6 +85,10 @@ func Load(cmd *cobra.Command) (*Config, error) {
 
 	if flag := cmd.Flags().Lookup("pod-name"); flag != nil {
 		v.BindPFlag("leaderElection.podName", flag)
+	}
+
+	if flag := cmd.Flags().Lookup("openreports"); flag != nil {
+		v.BindPFlag("openreports", flag)
 	}
 
 	if err := v.BindEnv("leaderElection.podName", "POD_NAME"); err != nil {

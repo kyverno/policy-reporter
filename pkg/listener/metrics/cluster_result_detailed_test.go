@@ -1,47 +1,55 @@
 package metrics_test
 
 import (
+	"context"
 	"testing"
 
+	"github.com/openreports/reports-api/apis/openreports.io/v1alpha1"
 	"github.com/prometheus/client_golang/prometheus"
 	ioprometheusclient "github.com/prometheus/client_model/go"
 	"github.com/stretchr/testify/assert"
 	corev1 "k8s.io/api/core/v1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	"github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
 	"github.com/kyverno/policy-reporter/pkg/fixtures"
 	"github.com/kyverno/policy-reporter/pkg/listener/metrics"
+	"github.com/kyverno/policy-reporter/pkg/openreports"
 	"github.com/kyverno/policy-reporter/pkg/report"
 	"github.com/kyverno/policy-reporter/pkg/validate"
 )
 
 func Test_DetailedClusterResultMetricGeneration(t *testing.T) {
+	ctx := context.Background()
+
 	gauge := metrics.RegisterDetailedClusterResultGauge("cluster_policy_report_result")
 
-	report1 := &v1alpha2.PolicyReport{
-		ObjectMeta: v1.ObjectMeta{
-			Name:              "polr-test",
-			CreationTimestamp: v1.Now(),
+	report1 := &openreports.ReportAdapter{
+		Report: &v1alpha1.Report{
+			ObjectMeta: v1.ObjectMeta{
+				Name:              "polr-test",
+				CreationTimestamp: v1.Now(),
+			},
+			Summary: v1alpha1.ReportSummary{Pass: 1, Fail: 2},
+			Results: []v1alpha1.ReportResult{fixtures.PassResult.ReportResult, fixtures.FailResultWithoutResource.ReportResult, fixtures.FailDisallowRuleResult.ReportResult},
 		},
-		Summary: v1alpha2.PolicyReportSummary{Pass: 1, Fail: 2},
-		Results: []v1alpha2.PolicyReportResult{fixtures.PassResult, fixtures.FailResultWithoutResource, fixtures.FailDisallowRuleResult},
 	}
 
-	report2 := &v1alpha2.PolicyReport{
-		ObjectMeta: v1.ObjectMeta{
-			Name:              "polr-test",
-			CreationTimestamp: v1.Now(),
+	report2 := &openreports.ReportAdapter{
+		Report: &v1alpha1.Report{
+			ObjectMeta: v1.ObjectMeta{
+				Name:              "polr-test",
+				CreationTimestamp: v1.Now(),
+			},
+			Summary: v1alpha1.ReportSummary{Pass: 0, Fail: 2},
+			Results: []v1alpha1.ReportResult{fixtures.FailResult.ReportResult, fixtures.FailDisallowRuleResult.ReportResult},
 		},
-		Summary: v1alpha2.PolicyReportSummary{Pass: 0, Fail: 2},
-		Results: []v1alpha2.PolicyReportResult{fixtures.FailResult, fixtures.FailDisallowRuleResult},
 	}
 
 	filter := metrics.NewResultFilter(validate.RuleSets{}, validate.RuleSets{}, validate.RuleSets{Exclude: []string{"disallow-policy"}}, validate.RuleSets{}, validate.RuleSets{}, (validate.RuleSets{}))
 	handler := metrics.CreateDetailedClusterResultMetricListener(filter, gauge)
 
 	t.Run("Added Metric", func(t *testing.T) {
-		handler(report.LifecycleEvent{Type: report.Added, PolicyReport: report1})
+		handler(ctx, report.LifecycleEvent{Type: report.Added, PolicyReport: report1})
 
 		metricFam, err := prometheus.DefaultGatherer.Gather()
 		assert.NoError(t, err)
@@ -55,8 +63,8 @@ func Test_DetailedClusterResultMetricGeneration(t *testing.T) {
 	})
 
 	t.Run("Modified Metric", func(t *testing.T) {
-		handler(report.LifecycleEvent{Type: report.Added, PolicyReport: report1})
-		handler(report.LifecycleEvent{Type: report.Updated, PolicyReport: report2})
+		handler(ctx, report.LifecycleEvent{Type: report.Added, PolicyReport: report1})
+		handler(ctx, report.LifecycleEvent{Type: report.Updated, PolicyReport: report2})
 
 		metricFam, err := prometheus.DefaultGatherer.Gather()
 		assert.NoError(t, err)
@@ -70,9 +78,9 @@ func Test_DetailedClusterResultMetricGeneration(t *testing.T) {
 	})
 
 	t.Run("Deleted Metric", func(t *testing.T) {
-		handler(report.LifecycleEvent{Type: report.Added, PolicyReport: report1})
-		handler(report.LifecycleEvent{Type: report.Updated, PolicyReport: report2})
-		handler(report.LifecycleEvent{Type: report.Deleted, PolicyReport: report2})
+		handler(ctx, report.LifecycleEvent{Type: report.Added, PolicyReport: report1})
+		handler(ctx, report.LifecycleEvent{Type: report.Updated, PolicyReport: report2})
+		handler(ctx, report.LifecycleEvent{Type: report.Deleted, PolicyReport: report2})
 
 		metricFam, err := prometheus.DefaultGatherer.Gather()
 		assert.NoError(t, err)
@@ -82,7 +90,8 @@ func Test_DetailedClusterResultMetricGeneration(t *testing.T) {
 	})
 }
 
-func testClusterResultMetricLabels(t *testing.T, metric *ioprometheusclient.Metric, result v1alpha2.PolicyReportResult) error {
+func testClusterResultMetricLabels(t *testing.T, metric *ioprometheusclient.Metric, result openreports.ResultAdapter) error {
+	t.Helper()
 	res := &corev1.ObjectReference{}
 	if result.HasResource() {
 		res = result.GetResource()

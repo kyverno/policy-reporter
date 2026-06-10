@@ -3,40 +3,57 @@ package result
 import (
 	"strings"
 
-	"github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
 	"github.com/kyverno/policy-reporter/pkg/helper"
+	"github.com/kyverno/policy-reporter/pkg/openreports"
 )
+
+type ReconditionerConfig struct {
+	IDGenerators         IDGenerator
+	SelfassignNamespaces bool
+}
 
 type Reconditioner struct {
 	defaultIDGenerator IDGenerator
-	customIDGenerators map[string]IDGenerator
+	configs            map[string]ReconditionerConfig
 }
 
-func (r *Reconditioner) Prepare(polr v1alpha2.ReportInterface) v1alpha2.ReportInterface {
+func (r *Reconditioner) Prepare(polr openreports.ReportInterface) openreports.ReportInterface {
 	generator := r.defaultIDGenerator
-	if g, ok := r.customIDGenerators[strings.ToLower(polr.GetSource())]; ok {
-		generator = g
+
+	config, ok := r.configs[strings.ToLower(polr.GetSource())]
+	if ok && config.IDGenerators != nil {
+		generator = config.IDGenerators
+	}
+
+	scope := polr.GetScope()
+	if config.SelfassignNamespaces && scope != nil && scope.GroupVersionKind().GroupVersion().String() == "v1" && scope.Kind == "Namespace" {
+		scope.Namespace = scope.Name
+		polr.SetNamespace(scope.Name)
 	}
 
 	results := polr.GetResults()
-	for i, r := range results {
+	newResults := make([]openreports.ResultAdapter, 0, len(results))
+	for _, r := range results {
 		r.ID = generator.Generate(polr, r)
 		r.Category = helper.Defaults(r.Category, "Other")
 
-		scope := polr.GetScope()
-		if len(r.Resources) == 0 && scope != nil {
-			r.Resources = append(r.Resources, *scope)
+		if len(r.Subjects) == 0 && scope != nil {
+			r.Subjects = append(r.Subjects, *scope)
 		}
 
-		results[i] = r
-	}
+		if r.Source == "" {
+			r.Source = polr.GetSource()
+		}
 
+		newResults = append(newResults, r)
+	}
+	polr.SetResults(newResults)
 	return polr
 }
 
-func NewReconditioner(generators map[string]IDGenerator) *Reconditioner {
+func NewReconditioner(configs map[string]ReconditionerConfig) *Reconditioner {
 	return &Reconditioner{
 		defaultIDGenerator: NewIDGenerator(nil),
-		customIDGenerators: generators,
+		configs:            configs,
 	}
 }

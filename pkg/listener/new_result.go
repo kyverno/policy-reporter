@@ -1,12 +1,15 @@
 package listener
 
 import (
+	"context"
 	"sync"
 	"time"
 
+	"go.uber.org/zap"
+
 	"github.com/kyverno/policy-reporter/pkg/cache"
-	"github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
 	"github.com/kyverno/policy-reporter/pkg/helper"
+	"github.com/kyverno/policy-reporter/pkg/openreports"
 	"github.com/kyverno/policy-reporter/pkg/report"
 )
 
@@ -45,15 +48,17 @@ func (l *ResultListener) UnregisterSyncListener() {
 	l.syncListener = make([]report.SyncResultsListener, 0)
 }
 
-func (l *ResultListener) Validate(r v1alpha2.PolicyReportResult) bool {
-	if r.Result == v1alpha2.StatusSkip || r.Result == v1alpha2.StatusPass {
+func (l *ResultListener) Validate(r openreports.ResultAdapter) bool {
+	if r.Result == openreports.StatusSkip || r.Result == openreports.StatusPass {
 		return false
 	}
 
 	return true
 }
 
-func (l *ResultListener) Listen(event report.LifecycleEvent) {
+func (l *ResultListener) Listen(_ context.Context, event report.LifecycleEvent) {
+	logger := zap.L().Sugar()
+	logger.Debugf("new event: type %s, report ID %s", event.Type, event.PolicyReport.GetID())
 	if event.Type != report.Added && event.Type != report.Updated {
 		l.cache.RemoveReport(event.PolicyReport.GetID())
 		return
@@ -84,6 +89,7 @@ func (l *ResultListener) Listen(event report.LifecycleEvent) {
 	}
 
 	if listenerCount == 0 && scopeListenerCount == 0 {
+		logger.Debugf("report id %s: caching the results and returning because no listeners are configured", event.PolicyReport.GetID())
 		l.cache.AddReport(event.PolicyReport)
 		return
 	}
@@ -100,16 +106,18 @@ func (l *ResultListener) Listen(event report.LifecycleEvent) {
 	}
 
 	existing := l.cache.GetResults(event.PolicyReport.GetID())
-	newResults := make([]v1alpha2.PolicyReportResult, 0)
+	newResults := make([]openreports.ResultAdapter, 0)
 
 	for _, r := range event.PolicyReport.GetResults() {
 		if helper.Contains(r.GetID(), existing) || !l.Validate(r) {
+			logger.Debugf("result for %s, policy %s, rule %s: skipping result sending because the result is already in the cached results for this report or is a pass result", r.ResourceString(), r.Policy, r.Rule)
 			continue
 		}
 
 		if r.Timestamp.Seconds > 0 {
 			created := time.Unix(r.Timestamp.Seconds, int64(r.Timestamp.Nanos))
 			if l.skipExisting && created.Local().Before(l.startUp) {
+				logger.Debugf("result for %s, policy %s, rule %s: skipping result sending because it was created before the reporter started", r.ResourceString(), r.Policy, r.Rule)
 				continue
 			}
 		}
@@ -119,6 +127,7 @@ func (l *ResultListener) Listen(event report.LifecycleEvent) {
 
 	l.cache.AddReport(event.PolicyReport)
 	if len(newResults) == 0 {
+		logger.Debugf("not calling the listeners because there are no new results to send")
 		return
 	}
 
@@ -127,7 +136,7 @@ func (l *ResultListener) Listen(event report.LifecycleEvent) {
 		wg.Add(scopeListenerCount)
 
 		for _, cb := range l.scopeListener {
-			go func(callback report.ScopeResultsListener, results []v1alpha2.PolicyReportResult) {
+			go func(callback report.ScopeResultsListener, results []openreports.ResultAdapter) {
 				defer wg.Done()
 
 				callback(event.PolicyReport, results, preExisted)
@@ -144,14 +153,14 @@ func (l *ResultListener) Listen(event report.LifecycleEvent) {
 	grp := sync.WaitGroup{}
 	grp.Add(len(newResults))
 	for _, res := range newResults {
-		go func(r v1alpha2.PolicyReportResult) {
+		go func(r openreports.ResultAdapter) {
 			defer grp.Done()
 
 			wg := sync.WaitGroup{}
 			wg.Add(listenerCount)
 
 			for _, cb := range l.listener {
-				go func(callback report.PolicyReportResultListener, result v1alpha2.PolicyReportResult) {
+				go func(callback report.PolicyReportResultListener, result openreports.ResultAdapter) {
 					defer wg.Done()
 
 					callback(event.PolicyReport, result, preExisted)

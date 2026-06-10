@@ -28,7 +28,9 @@ func (c testClient) Do(req *http.Request) (*http.Response, error) {
 }
 
 func Test_LokiTarget(t *testing.T) {
+	t.Parallel()
 	t.Run("Send Complete Result", func(t *testing.T) {
+		t.Parallel()
 		callback := func(req *http.Request) {
 			assert.Equal(t, "application/json", req.Header.Get("Content-Type"), "unexpected Content-Type")
 			assert.Equal(t, "http://loki", req.Header.Get("X-Forward"), "unexpected X-Forward")
@@ -36,9 +38,9 @@ func Test_LokiTarget(t *testing.T) {
 			assert.Equal(t, "http://localhost:3100/loki/api/v1/push", req.URL.String(), "unexpected Host")
 			assert.NotEqual(t, "", req.Header.Get("Authorization"), "unexpected auth header")
 
-			expectedLine := fmt.Sprintf("[%s] %s", strings.ToUpper(string(fixtures.CompleteTargetSendResult.Severity)), fixtures.CompleteTargetSendResult.Message)
+			expectedLine := fmt.Sprintf("[%s] %s", strings.ToUpper(string(fixtures.CompleteTargetSendResult.Severity)), fixtures.CompleteTargetSendResult.Description)
 
-			stream := convertAndValidateBody(req, t)
+			stream := convertAndValidateBody(t, req)
 
 			assert.Equal(t, expectedLine, stream.Values[0][1])
 			assert.Equal(t, fixtures.CompleteTargetSendResult.Rule, stream.Stream["rule"])
@@ -46,11 +48,10 @@ func Test_LokiTarget(t *testing.T) {
 			assert.Equal(t, fixtures.CompleteTargetSendResult.Category, stream.Stream["category"])
 			assert.Equal(t, string(fixtures.CompleteTargetSendResult.Result), stream.Stream["status"])
 			assert.Equal(t, string(fixtures.CompleteTargetSendResult.Severity), stream.Stream["severity"])
-
-			res := fixtures.CompleteTargetSendResult.GetResource()
+			or := fixtures.CompleteTargetSendResult
+			res := or.GetResource()
 			assert.Equal(t, res.Kind, stream.Stream["kind"])
 			assert.Equal(t, res.Name, stream.Stream["name"])
-			assert.Equal(t, string(res.UID), stream.Stream["uid"])
 			assert.Equal(t, res.Namespace, stream.Stream["namespace"])
 
 			assert.Equal(t, fixtures.CompleteTargetSendResult.Properties["version"], stream.Stream["version"])
@@ -67,17 +68,18 @@ func Test_LokiTarget(t *testing.T) {
 			Password:     "password",
 			Headers:      map[string]string{"X-Forward": "http://loki"},
 		})
-		client.Send(fixtures.CompleteTargetSendResult)
+		client.Send(fixtures.DefaultPolicyReport, fixtures.CompleteTargetSendResult)
 	})
 
 	t.Run("Send Minimal Result", func(t *testing.T) {
+		t.Parallel()
 		callback := func(req *http.Request) {
 			assert.Equal(t, "application/json", req.Header.Get("Content-Type"), "unexpected Content-Type")
 			assert.Equal(t, "Policy-Reporter", req.Header.Get("User-Agent"), "unexpected Agent")
 			assert.Equal(t, "http://localhost:3100/loki/api/v1/push", req.URL.String(), "unexpected Host")
 
-			expectedLine := fmt.Sprintf("[%s] %s", strings.ToUpper(string(fixtures.MinimalTargetSendResult.Severity)), fixtures.MinimalTargetSendResult.Message)
-			stream := convertAndValidateBody(req, t)
+			expectedLine := fmt.Sprintf("[%s] %s", strings.ToUpper(string(fixtures.MinimalTargetSendResult.Severity)), fixtures.MinimalTargetSendResult.Description)
+			stream := convertAndValidateBody(t, req)
 
 			assert.Equal(t, expectedLine, stream.Values[0][1])
 			assert.Equal(t, fixtures.MinimalTargetSendResult.Rule, stream.Stream["rule"])
@@ -97,9 +99,10 @@ func Test_LokiTarget(t *testing.T) {
 			CustomFields: map[string]string{"custom": "label"},
 			HTTPClient:   testClient{callback, 200},
 		})
-		client.Send(fixtures.MinimalTargetSendResult)
+		client.Send(fixtures.DefaultPolicyReport, fixtures.MinimalTargetSendResult)
 	})
 	t.Run("Name", func(t *testing.T) {
+		t.Parallel()
 		client := loki.NewClient(loki.Options{
 			ClientOptions: target.ClientOptions{
 				Name: "Loki",
@@ -115,7 +118,8 @@ func Test_LokiTarget(t *testing.T) {
 	})
 }
 
-func convertAndValidateBody(req *http.Request, t *testing.T) loki.Stream {
+func convertAndValidateBody(t *testing.T, req *http.Request) loki.Stream {
+	t.Helper()
 	payload := loki.Payload{}
 
 	err := json.NewDecoder(req.Body).Decode(&payload)

@@ -8,7 +8,9 @@ import (
 )
 
 func Test_Filters(t *testing.T) {
+	t.Parallel()
 	t.Run("Validate Default", func(t *testing.T) {
+		t.Parallel()
 		filter := email.NewFilter(nil, validate.RuleSets{}, validate.RuleSets{})
 
 		if !filter.ValidateNamespace("test") {

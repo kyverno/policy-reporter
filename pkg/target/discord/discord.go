@@ -1,9 +1,10 @@
 package discord
 
 import (
-	"strings"
+	"github.com/openreports/reports-api/apis/openreports.io/v1alpha1"
 
-	"github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
+	"github.com/kyverno/policy-reporter/pkg/helper"
+	"github.com/kyverno/policy-reporter/pkg/openreports"
 	"github.com/kyverno/policy-reporter/pkg/target"
 	"github.com/kyverno/policy-reporter/pkg/target/http"
 )
@@ -34,15 +35,15 @@ type embedField struct {
 	Inline bool   `json:"inline"`
 }
 
-var colors = map[v1alpha2.PolicySeverity]string{
-	v1alpha2.SeverityInfo:     "12370112",
-	v1alpha2.SeverityLow:      "3066993",
-	v1alpha2.SeverityMedium:   "15105570",
-	v1alpha2.SeverityHigh:     "15158332",
-	v1alpha2.SeverityCritical: "15158332",
+var colors = map[v1alpha1.ResultSeverity]string{
+	openreports.SeverityInfo:     "12370112",
+	openreports.SeverityLow:      "3066993",
+	openreports.SeverityMedium:   "15105570",
+	openreports.SeverityHigh:     "15158332",
+	openreports.SeverityCritical: "15158332",
 }
 
-func newPayload(result v1alpha2.PolicyReportResult, customFields map[string]string) payload {
+func newPayload(result openreports.ResultAdapter, customFields map[string]string) payload {
 	color, exists := colors[result.Severity]
 	if !exists {
 		color = "0"
@@ -77,17 +78,17 @@ func newPayload(result v1alpha2.PolicyReportResult, customFields map[string]stri
 	}
 
 	for property, value := range result.Properties {
-		embedFields = append(embedFields, embedField{strings.Title(property), value, true})
+		embedFields = append(embedFields, embedField{helper.Title(property), value, true})
 	}
 
 	for property, value := range customFields {
-		embedFields = append(embedFields, embedField{strings.Title(property), value, true})
+		embedFields = append(embedFields, embedField{helper.Title(property), value, true})
 	}
 
 	embeds := make([]embed, 0, 1)
 	embeds = append(embeds, embed{
 		Title:       "New Policy Report Result",
-		Description: result.Message,
+		Description: result.Description,
 		Color:       color,
 		Fields:      embedFields,
 	})
@@ -105,7 +106,7 @@ type client struct {
 	client       http.Client
 }
 
-func (d *client) Send(result v1alpha2.PolicyReportResult) {
+func (d *client) Send(report openreports.ReportInterface, result openreports.ResultAdapter) {
 	req, err := http.CreateJSONRequest("POST", d.webhook, newPayload(result, d.customFields))
 	if err != nil {
 		return

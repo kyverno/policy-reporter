@@ -3,7 +3,7 @@
 Policy Reporter watches for PolicyReport Resources.
 It creates Prometheus Metrics and can send rule validation events to different targets like Loki, Elasticsearch, Slack or Discord
 
-![Version: 3.1.0](https://img.shields.io/badge/Version-3.1.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 3.1.0](https://img.shields.io/badge/AppVersion-3.1.0-informational?style=flat-square)
+![Version: 3.7.4](https://img.shields.io/badge/Version-3.7.4-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 3.7.4](https://img.shields.io/badge/AppVersion-3.7.4-informational?style=flat-square)
 
 ## Documentation
 
@@ -46,6 +46,7 @@ Open `http://localhost:8082/` in your browser.
 | nameOverride | string | `""` | Override the chart name used for all resources |
 | fullnameOverride | string | `"policy-reporter"` | Overwrite the fullname of all resources |
 | namespaceOverride | string | `""` | Overwrite the namespace of all resources |
+| apiVersionOverride | object | `{"podDisruptionBudget":""}` | Overwrite apiVersion for specific resources |
 | image.registry | string | `"ghcr.io"` | Image registry |
 | image.repository | string | `"kyverno/policy-reporter"` | Image repository |
 | image.pullPolicy | string | `"IfNotPresent"` | Image pullPolicy |
@@ -77,9 +78,10 @@ Open `http://localhost:8082/` in your browser.
 | securityContext.seccompProfile.type | string | `"RuntimeDefault"` |  |
 | podAnnotations | object | `{}` | Additional annotations to add to each pod |
 | podLabels | object | `{}` | Additional labels to add to each pod |
+| selectorLabels | object | `{}` | Custom selector labels, overwrites the default set |
 | resources | object | `{}` | Resource constraints |
 | networkPolicy.enabled | bool | `false` | Create NetworkPolicy |
-| networkPolicy.egress | list | `[{"ports":[{"port":6443,"protocol":"TCP"}],"to":null}]` | Egress rule to allowe Kubernetes API Server access |
+| networkPolicy.egress | list | `[{"ports":[{"port":6443,"protocol":"TCP"}],"to":null}]` | Egress rule to allow Kubernetes API Server access |
 | networkPolicy.ingress | list | `[]` |  |
 | ingress.enabled | bool | `false` | Create Ingress This ingress exposes the policy-reporter core app. |
 | ingress.className | string | `""` | Ingress className |
@@ -87,22 +89,28 @@ Open `http://localhost:8082/` in your browser.
 | ingress.annotations | object | `{}` | Annotations for the Ingress |
 | ingress.hosts | string | `nil` | Ingress host list |
 | ingress.tls | list | `[]` | Ingress tls list |
+| httproute.enabled | bool | `false` | Enable HTTPRoute resource (Gateway API alternative to Ingress) Requires Gateway API CRDs (v1) installed in cluster https://gateway-api.sigs.k8s.io/ |
+| httproute.labels | object | `{}` | Additional HTTPRoute labels |
+| httproute.annotations | object | `{}` | Additional HTTPRoute annotations |
+| httproute.parentRefs | list | `[]` | Gateway API parentRefs (list of Gateway references) Must reference an existing Gateway resource |
+| httproute.hostnames | list | `[]` | List of hostnames for HTTPRoute |
+| httproute.rules | list | `[{"matches":[{"path":{"type":"PathPrefix","value":"/"}}]}]` | HTTPRoute rules configuration Allows advanced routing with matches and filters |
 | logging.server | bool | `false` | Enables server access logging |
 | logging.encoding | string | `"console"` | Log encoding possible encodings are console and json |
 | logging.logLevel | int | `0` | Log level default info |
 | rest.enabled | bool | `false` | Enables the REST API |
 | metrics.enabled | bool | `false` | Enables Prometheus Metrics |
-| metrics.mode | string | `"detailed"` | Metric Mode allowes to customize labels Allowed values: detailed, simple, custom |
-| metrics.customLabels | list | `[]` | List of used labels in custom mode Supported fields are: ["namespace", "rule", "policy", "report" // PolicyReport name, "kind" // resource kind, "name" // resource name, "status", "severity", "category", "source"] |
+| metrics.mode | string | `"detailed"` | Metric Mode allows to customize labels Allowed values: detailed, simple, custom |
+| metrics.customLabels | list | `[]` | List of used labels in custom mode Supported fields are: ["namespace", "rule", "policy", "report" // Report name, "kind" // resource kind, "name" // resource name, "status", "severity", "category", "source"] |
 | metrics.filter | object | `{}` | Filter results to reduce cardinality |
 | profiling.enabled | bool | `false` | Enable profiling with pprof |
-| worker | int | `5` | Amount of queue workers for PolicyReport resource processing |
-| reportFilter | object | `{}` | Filter PolicyReport resources to process |
+| worker | int | `5` | Amount of queue workers for Report resource processing |
+| reportFilter | object | `{}` | Filter Report resources to process |
 | sourceConfig | list | `[]` | Customize source specific logic like result ID generation |
-| sourceFilters[0].selector.source | string | `"kyverno"` | select PolicyReport by source |
-| sourceFilters[0].uncontrolledOnly | bool | `true` | Filter out PolicyReports of controlled Pods and Jobs, only works for PolicyReport with scope resource |
-| sourceFilters[0].disableClusterReports | bool | `false` | Filter out ClusterPolicyReports |
-| sourceFilters[0].kinds | object | `{"exclude":["ReplicaSet"]}` | Filter out PolicyReports based on the scope resource kind |
+| sourceFilters[0].selector.sources | list | `["kyverno","KyvernoValidatingPolicy","KyvernoImageValidatingPolicy"]` | select Report by source |
+| sourceFilters[0].uncontrolledOnly | bool | `true` | Filter out Reports of controlled Pods and Jobs, only works for Reports with scope resource |
+| sourceFilters[0].disableClusterReports | bool | `false` | Filter out cluster scoped Reports |
+| sourceFilters[0].kinds | object | `{"exclude":["ReplicaSet"]}` | Filter out Reports based on the scope resource kind |
 | global.labels | object | `{}` | additional labels added on each resource |
 | basicAuth.username | string | `""` | HTTP BasicAuth username |
 | basicAuth.password | string | `""` | HTTP BasicAuth password |
@@ -149,7 +157,7 @@ Open `http://localhost:8082/` in your browser.
 | target.loki.mountedSecret | string | `""` | Mounted secret path by Secrets Controller, secret should be in json format |
 | target.loki.minimumSeverity | string | `""` | Minimum severity: "" < info < low < medium < high < critical |
 | target.loki.sources | list | `[]` | List of sources which should send |
-| target.loki.skipExistingOnStartup | bool | `true` | Skip already existing PolicyReportResults on startup |
+| target.loki.skipExistingOnStartup | bool | `true` | Skip already existing report results on startup |
 | target.loki.customFields | object | `{}` | Added as additional labels |
 | target.loki.headers | object | `{}` | Additional HTTP Headers |
 | target.loki.username | string | `""` | HTTP BasicAuth username |
@@ -170,7 +178,7 @@ Open `http://localhost:8082/` in your browser.
 | target.elasticsearch.mountedSecret | string | `""` | Mounted secret path by Secrets Controller, secret should be in json format |
 | target.elasticsearch.minimumSeverity | string | `""` | Minimum severity: "" < info < low < medium < high < critical |
 | target.elasticsearch.sources | list | `[]` | List of sources which should send |
-| target.elasticsearch.skipExistingOnStartup | bool | `true` | Skip already existing PolicyReportResults on startup |
+| target.elasticsearch.skipExistingOnStartup | bool | `true` | Skip already existing report results on startup |
 | target.elasticsearch.customFields | object | `{}` | Added as additional labels |
 | target.elasticsearch.filter | object | `{}` | Filter Results which should send to this target Wildcars for namespaces and policies are supported, you can either define exclude or include values Filters are available for all targets except the UI |
 | target.elasticsearch.channels | list | `[]` | List of channels to route results to different configurations |
@@ -180,7 +188,7 @@ Open `http://localhost:8082/` in your browser.
 | target.slack.mountedSecret | string | `""` | Mounted secret path by Secrets Controller, secret should be in json format |
 | target.slack.minimumSeverity | string | `""` | Minimum severity: "" < info < low < medium < high < critical |
 | target.slack.sources | list | `[]` | List of sources which should send |
-| target.slack.skipExistingOnStartup | bool | `true` | Skip already existing PolicyReportResults on startup |
+| target.slack.skipExistingOnStartup | bool | `true` | Skip already existing report results on startup |
 | target.slack.customFields | object | `{}` | Added as additional labels |
 | target.slack.filter | object | `{}` | Filter Results which should send to this target Wildcars for namespaces and policies are supported, you can either define exclude or include values Filters are available for all targets except the UI |
 | target.slack.channels | list | `[]` | List of channels to route results to different configurations |
@@ -192,7 +200,7 @@ Open `http://localhost:8082/` in your browser.
 | target.discord.mountedSecret | string | `""` | Mounted secret path by Secrets Controller, secret should be in json format |
 | target.discord.minimumSeverity | string | `""` | Minimum severity: "" < info < low < medium < high < critical |
 | target.discord.sources | list | `[]` | List of sources which should send |
-| target.discord.skipExistingOnStartup | bool | `true` | Skip already existing PolicyReportResults on startup |
+| target.discord.skipExistingOnStartup | bool | `true` | Skip already existing report results on startup |
 | target.discord.customFields | object | `{}` | Added as additional labels |
 | target.discord.filter | object | `{}` | Filter Results which should send to this target Wildcars for namespaces and policies are supported, you can either define exclude or include values Filters are available for all targets except the UI |
 | target.discord.channels | list | `[]` | List of channels to route results to different configurations |
@@ -204,7 +212,7 @@ Open `http://localhost:8082/` in your browser.
 | target.teams.mountedSecret | string | `""` | Mounted secret path by Secrets Controller, secret should be in json format |
 | target.teams.minimumSeverity | string | `""` | Minimum severity: "" < info < low < medium < high < critical |
 | target.teams.sources | list | `[]` | List of sources which should send |
-| target.teams.skipExistingOnStartup | bool | `true` | Skip already existing PolicyReportResults on startup |
+| target.teams.skipExistingOnStartup | bool | `true` | Skip already existing report results on startup |
 | target.teams.customFields | object | `{}` | Added as additional labels |
 | target.teams.filter | object | `{}` | Filter Results which should send to this target Wildcars for namespaces and policies are supported, you can either define exclude or include values Filters are available for all targets except the UI |
 | target.teams.channels | list | `[]` | List of channels to route results to different configurations |
@@ -216,8 +224,11 @@ Open `http://localhost:8082/` in your browser.
 | target.webhook.mountedSecret | string | `""` | Mounted secret path by Secrets Controller, secret should be in json format |
 | target.webhook.minimumSeverity | string | `""` | Minimum severity: "" < info < low < medium < high < critical |
 | target.webhook.sources | list | `[]` | List of sources which should send |
-| target.webhook.skipExistingOnStartup | bool | `true` | Skip already existing PolicyReportResults on startup |
+| target.webhook.skipExistingOnStartup | bool | `true` | Skip already existing report results on startup |
 | target.webhook.customFields | object | `{}` | Added as additional labels |
+| target.webhook.keepalive | object | `{"interval":"0","params":{}}` | Keepalive configuration |
+| target.webhook.keepalive.interval | string | `"0"` | Duration string like "30s" for heartbeat interval, '0' - disabled |
+| target.webhook.keepalive.params | object | `{}` | Additional parameters to include in heartbeat payload |
 | target.webhook.filter | object | `{}` | Filter Results which should send to this target Wildcars for namespaces and policies are supported, you can either define exclude or include values Filters are available for all targets except the UI |
 | target.webhook.channels | list | `[]` | List of channels to route results to different configurations |
 | target.telegram.token | string | `""` | Telegram bot token |
@@ -230,7 +241,7 @@ Open `http://localhost:8082/` in your browser.
 | target.telegram.mountedSecret | string | `""` | Mounted secret path by Secrets Controller, secret should be in json format |
 | target.telegram.minimumSeverity | string | `""` | Minimum severity: "" < info < low < medium < high < critical |
 | target.telegram.sources | list | `[]` | List of sources which should send |
-| target.telegram.skipExistingOnStartup | bool | `true` | Skip already existing PolicyReportResults on startup |
+| target.telegram.skipExistingOnStartup | bool | `true` | Skip already existing report results on startup |
 | target.telegram.customFields | object | `{}` | Added as additional labels |
 | target.telegram.filter | object | `{}` | Filter Results which should send to this target Wildcars for namespaces and policies are supported, you can either define exclude or include values Filters are available for all targets except the UI |
 | target.telegram.channels | list | `[]` | List of channels to route results to different configurations |
@@ -242,10 +253,42 @@ Open `http://localhost:8082/` in your browser.
 | target.googleChat.mountedSecret | string | `""` | Mounted secret path by Secrets Controller, secret should be in json format |
 | target.googleChat.minimumSeverity | string | `""` | Minimum severity: "" < info < low < medium < high < critical |
 | target.googleChat.sources | list | `[]` | List of sources which should send |
-| target.googleChat.skipExistingOnStartup | bool | `true` | Skip already existing PolicyReportResults on startup |
+| target.googleChat.skipExistingOnStartup | bool | `true` | Skip already existing report results on startup |
 | target.googleChat.customFields | object | `{}` | Added as additional labels |
 | target.googleChat.filter | object | `{}` | Filter Results which should send to this target Wildcars for namespaces and policies are supported, you can either define exclude or include values Filters are available for all targets except the UI |
 | target.googleChat.channels | list | `[]` | List of channels to route results to different configurations |
+| target.jira.host | string | `""` | JIRA server URL |
+| target.jira.username | string | `""` | JIRA username |
+| target.jira.password | string | `""` | JIRA password (use password or apiToken, not both) |
+| target.jira.apiToken | string | `""` | JIRA API token (use password or apiToken, not both) |
+| target.jira.apiVersion | string | `"v3"` | JIRA static labels |
+| target.jira.projectKey | string | `""` | JIRA project key |
+| target.jira.issueType | string | `""` | JIRA issue type (default: "Bug") |
+| target.jira.components | list | `[]` | JIRA component names list |
+| target.jira.labels | list | `[]` | JIRA static labels |
+| target.jira.summaryTemplate | string | `""` | JIRA summary go template, available values: result, customfield default: "{{ if result.ResourceString }}{{ result.ResourceString }}: {{ end }}Policy Violation: {{ result.Policy }}" |
+| target.jira.certificate | string | `""` | Server Certificate file path Can be added under extraVolumes |
+| target.jira.skipTLS | bool | `false` | Skip TLS verification |
+| target.jira.secretRef | string | `""` | Read configuration from an already existing Secret |
+| target.jira.mountedSecret | string | `""` | Mounted secret path by Secrets Controller, secret should be in json format |
+| target.jira.minimumSeverity | string | `""` | Minimum severity: "" < info < low < medium < high < critical |
+| target.jira.sources | list | `[]` | List of sources which should send |
+| target.jira.skipExistingOnStartup | bool | `true` | Skip already existing report results on startup |
+| target.jira.customFields | object | `{}` | Added as additional labels |
+| target.jira.filter | object | `{}` | Filter Results which should send to this target Wildcars for namespaces and policies are supported, you can either define exclude or include values Filters are available for all targets except the UI |
+| target.jira.channels | list | `[]` | List of channels to route results to different configurations |
+| target.alertManager.host | string | `""` | host address |
+| target.alertManager.certificate | string | `""` | Server Certificate file path Can be added under extraVolumes |
+| target.alertManager.skipTLS | bool | `false` | Skip TLS verification |
+| target.alertManager.headers | object | `{}` | Additional HTTP Headers |
+| target.alertManager.secretRef | string | `""` | Read configuration from an already existing Secret |
+| target.alertManager.mountedSecret | string | `""` | Mounted secret path by Secrets Controller, secret should be in json format |
+| target.alertManager.minimumSeverity | string | `""` | Minimum severity: "" < info < low < medium < high < critical |
+| target.alertManager.sources | list | `[]` | List of sources which should send |
+| target.alertManager.skipExistingOnStartup | bool | `true` | Skip already existing PolicyReportResults on startup |
+| target.alertManager.customFields | object | `{}` | Added as additional labels |
+| target.alertManager.filter | object | `{}` | Filter Results which should send to this target Wildcars for namespaces and policies are supported, you can either define exclude or include values Filters are available for all targets except the UI |
+| target.alertManager.channels | list | `[]` | List of channels to route results to different configurations |
 | target.s3.accessKeyId | optional | `""` | S3 Access key |
 | target.s3.secretAccessKey | optional | `""` | S3 SecretAccess key |
 | target.s3.region | optional | `""` | S3 Storage region |
@@ -260,7 +303,7 @@ Open `http://localhost:8082/` in your browser.
 | target.s3.mountedSecret | string | `""` | Mounted secret path by Secrets Controller, secret should be in json format |
 | target.s3.minimumSeverity | string | `""` | Minimum severity: "" < info < low < medium < high < critical |
 | target.s3.sources | list | `[]` | List of sources which should send |
-| target.s3.skipExistingOnStartup | bool | `true` | Skip already existing PolicyReportResults on startup |
+| target.s3.skipExistingOnStartup | bool | `true` | Skip already existing report results on startup |
 | target.s3.customFields | object | `{}` | Added as additional labels |
 | target.s3.filter | object | `{}` | Filter Results which should send to this target Wildcars for namespaces and policies are supported, you can either define exclude or include values Filters are available for all targets except the UI |
 | target.s3.channels | list | `[]` | List of channels to route results to different configurations |
@@ -273,7 +316,7 @@ Open `http://localhost:8082/` in your browser.
 | target.kinesis.mountedSecret | string | `""` | Mounted secret path by Secrets Controller, secret should be in json format |
 | target.kinesis.minimumSeverity | string | `""` | Minimum severity: "" < info < low < medium < high < critical |
 | target.kinesis.sources | list | `[]` | List of sources which should send |
-| target.kinesis.skipExistingOnStartup | bool | `true` | Skip already existing PolicyReportResults on startup |
+| target.kinesis.skipExistingOnStartup | bool | `true` | Skip already existing report results on startup |
 | target.kinesis.customFields | object | `{}` | Added as additional labels |
 | target.kinesis.filter | object | `{}` | Filter Results which should send to this target Wildcars for namespaces and policies are supported, you can either define exclude or include values Filters are available for all targets except the UI |
 | target.kinesis.channels | list | `[]` | List of channels to route results to different configurations |
@@ -290,17 +333,17 @@ Open `http://localhost:8082/` in your browser.
 | target.securityHub.mountedSecret | string | `""` | Mounted secret path by Secrets Controller, secret should be in json format |
 | target.securityHub.minimumSeverity | string | `""` | Minimum severity: "" < info < low < medium < high < critical |
 | target.securityHub.sources | list | `[]` | List of sources which should send |
-| target.securityHub.skipExistingOnStartup | bool | `true` | Skip already existing PolicyReportResults on startup |
+| target.securityHub.skipExistingOnStartup | bool | `true` | Skip already existing report results on startup |
 | target.securityHub.customFields | object | `{}` | Added as additional labels |
 | target.securityHub.filter | object | `{}` | Filter Results which should send to this target Wildcars for namespaces and policies are supported, you can either define exclude or include values Filters are available for all targets except the UI |
 | target.securityHub.channels | list | `[]` | List of channels to route results to different configurations |
-| target.gcs.credentials | optional | `""` | GCS (Google Cloud Storage) Service Accout Credentials |
+| target.gcs.credentials | optional | `""` | GCS (Google Cloud Storage) Service Account Credentials |
 | target.gcs.bucket | required | `""` | GCS Bucket |
 | target.gcs.secretRef | string | `""` | Read configuration from an already existing Secret |
 | target.gcs.mountedSecret | string | `""` | Mounted secret path by Secrets Controller, secret should be in json format |
 | target.gcs.minimumSeverity | string | `""` | Minimum severity: "" < info < low < medium < high < critical |
 | target.gcs.sources | list | `[]` | List of sources which should send |
-| target.gcs.skipExistingOnStartup | bool | `true` | Skip already existing PolicyReportResults on startup |
+| target.gcs.skipExistingOnStartup | bool | `true` | Skip already existing report results on startup |
 | target.gcs.customFields | object | `{}` | Added as additional labels |
 | target.gcs.filter | object | `{}` | Filter Results which should send to this target Wildcars for namespaces and policies are supported, you can either define exclude or include values Filters are available for all targets except the UI |
 | target.gcs.channels | list | `[]` | List of channels to route results to different configurations |
@@ -314,6 +357,11 @@ Open `http://localhost:8082/` in your browser.
 | redis.prefix | string | `"policy-reporter"` | Redis key prefix |
 | redis.username | optional | `""` | Username |
 | redis.password | optional | `""` | Password |
+| redis.certificate | optional | `""` | Path to a server CA certificate |
+| redis.clientCert | optional | `""` | Path to client certificate for mutual TLS authentication |
+| redis.clientKey | optional | `""` | Path to client key for mutual TLS authentication |
+| redis.secretRef | optional | `""` | Secret name to pull username and password from |
+| redis.skipTLS | bool | `false` | Skip TLS verification |
 | database.type | string | `""` | Use an external Database, supported: mysql, postgres, mariadb |
 | database.database | string | `""` | Database |
 | database.username | string | `""` | Username |
@@ -321,8 +369,16 @@ Open `http://localhost:8082/` in your browser.
 | database.host | string | `""` | Host Address |
 | database.enableSSL | bool | `false` | Enables SSL |
 | database.dsn | string | `""` | Instead of configure the individual values you can also provide an DSN string example postgres: postgres://postgres:password@localhost:5432/postgres?sslmode=disable example mysql: root:password@tcp(localhost:3306)/test?tls=false |
+| database.maxOpenConnections | int | `25` | Maximum number of open connections, supported for mysql and postgres |
+| database.maxIdleConnections | int | `25` | Maximum number of idle connections, supported for mysql and postgres |
+| database.connectionMaxLifetime | int | `0` | Maximum amount of time in minutes a connection may be reused, supported for mysql and postgres |
+| database.connectionMaxIdleTime | int | `0` | Maximum amount of time in minutes a connection may be idle, supported for mysql and postgres |
+| database.timeout | int | `10` | Timeout for database operations in seconds, supported for mysql and postgres |
+| database.metrics | bool | `false` | Enables database related metrics, connection status and query histogram |
 | database.secretRef | string | `""` | Read configuration from an existing Secret supported fields: username, password, host, dsn, database |
 | database.mountedSecret | string | `""` |  |
+| periodicSync.enabled | bool | `false` |  |
+| periodicSync.interval | int | `30` |  |
 | podDisruptionBudget.minAvailable | int | `1` | Configures the minimum available pods for policy-reporter disruptions. Cannot be used if `maxUnavailable` is set. |
 | podDisruptionBudget.maxUnavailable | string | `nil` | Configures the maximum unavailable pods for policy-reporter disruptions. Cannot be used if `minAvailable` is set. |
 | nodeSelector | object | `{}` | Node labels for pod assignment ref: https://kubernetes.io/docs/user-guide/node-selection/ |
@@ -340,9 +396,10 @@ Open `http://localhost:8082/` in your browser.
 | ui.image.registry | string | `"ghcr.io"` | Image registry |
 | ui.image.repository | string | `"kyverno/policy-reporter-ui"` | Image repository |
 | ui.image.pullPolicy | string | `"IfNotPresent"` | Image PullPolicy |
-| ui.image.tag | string | `"2.3.2"` | Image tag |
+| ui.image.tag | string | `"2.5.1"` | Image tag |
+| ui.crds.customBoard | bool | `false` | Install UI CustomBoard CRDs |
 | ui.replicaCount | int | `1` | Deployment replica count |
-| ui.tempDir | string | `"/tmp"` | Temporary Directory to persist session data for authentication |
+| ui.priorityClassName | string | `""` | Deployment priorityClassName |
 | ui.logging.api | bool | `false` | Enables external api request logging |
 | ui.logging.server | bool | `false` | Enables server access logging |
 | ui.logging.encoding | string | `"console"` | Log encoding possible encodings are console and json |
@@ -350,6 +407,7 @@ Open `http://localhost:8082/` in your browser.
 | ui.server.port | int | `8080` | Application port |
 | ui.server.cors | bool | `true` | Enabled CORS header |
 | ui.server.overwriteHost | bool | `true` | Overwrites Request Host with Proxy Host and adds `X-Forwarded-Host` and `X-Origin-Host` headers |
+| ui.server.sessions | object | `{"storage":"filesystem","tempDir":"/tmp"}` | session configuration |
 | ui.openIDConnect.enabled | bool | `false` | Enable openID Connect authentication |
 | ui.openIDConnect.discoveryUrl | string | `""` | OpenID Connect Discovery URL |
 | ui.openIDConnect.callbackUrl | string | `""` | OpenID Connect Callback URL |
@@ -370,7 +428,7 @@ Open `http://localhost:8082/` in your browser.
 | ui.banner | string | `""` | optional banner text |
 | ui.logo.path | string | `""` | custom logo path |
 | ui.logo.disabled | bool | `false` | disable logo entirely |
-| ui.displayMode | string | `""` | DisplayMode dark/light/colorblind/colorblinddark uses the OS configured prefered color scheme as default |
+| ui.displayMode | string | `""` | DisplayMode dark/light/colorblind/colorblinddark uses the OS configured preferred color scheme as default |
 | ui.boards | object | `{}` | Configure access control for all default boards. |
 | ui.customBoards | list | `[]` | Additional customizable dashboards |
 | ui.sources | list | `[]` | source specific configurations |
@@ -384,6 +442,7 @@ Open `http://localhost:8082/` in your browser.
 | ui.sidecarContainers | object | `{}` | Add sidecar containers to the UI deployment  sidecarContainers:    oauth-proxy:      image: quay.io/oauth2-proxy/oauth2-proxy:v7.6.0      args:      - --upstream=http://127.0.0.1:8080      - --http-address=0.0.0.0:8081      - ...      ports:      - containerPort: 8081        name: oauth-proxy        protocol: TCP      resources: {} |
 | ui.podAnnotations | object | `{}` | Additional annotations to add to each pod |
 | ui.podLabels | object | `{}` | Additional labels to add to each pod |
+| ui.selectorLabels | object | `{}` | Custom selector labels, overwrites the default set |
 | ui.updateStrategy | object | `{}` | Deployment update strategy. Ref: https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#strategy |
 | ui.revisionHistoryLimit | int | `10` | The number of revisions to keep |
 | ui.podSecurityContext | object | `{"runAsGroup":1234,"runAsUser":1234}` | Security context for the pod |
@@ -410,6 +469,12 @@ Open `http://localhost:8082/` in your browser.
 | ui.ingress.annotations | object | `{}` | Ingress annotations. |
 | ui.ingress.hosts | list | `[]` | List of ingress host configurations. |
 | ui.ingress.tls | list | `[]` | List of ingress TLS configurations. |
+| ui.httproute.enabled | bool | `false` | Enable HTTPRoute resource (Gateway API alternative to Ingress) Requires Gateway API CRDs (v1) installed in cluster https://gateway-api.sigs.k8s.io/ |
+| ui.httproute.labels | object | `{}` | Additional HTTPRoute labels |
+| ui.httproute.annotations | object | `{}` | Additional HTTPRoute annotations |
+| ui.httproute.parentRefs | list | `[]` | Gateway API parentRefs (list of Gateway references) Must reference an existing Gateway resource |
+| ui.httproute.hostnames | list | `[]` | List of hostnames for HTTPRoute |
+| ui.httproute.rules | list | `[{"matches":[{"path":{"type":"PathPrefix","value":"/"}}]}]` | HTTPRoute rules configuration Allows advanced routing with matches and filters |
 | ui.networkPolicy.enabled | bool | `false` | When true, use a NetworkPolicy to allow ingress to the webhook This is useful on clusters using Calico and/or native k8s network policies in a default-deny setup. |
 | ui.networkPolicy.egress | list | `[{"ports":[{"port":6443,"protocol":"TCP"}]}]` | A list of valid from selectors according to https://kubernetes.io/docs/concepts/services-networking/network-policies. Enables Kubernetes API Server by default |
 | ui.networkPolicy.ingress | list | `[]` | A list of valid from selectors according to https://kubernetes.io/docs/concepts/services-networking/network-policies. |
@@ -419,14 +484,17 @@ Open `http://localhost:8082/` in your browser.
 | ui.nodeSelector | object | `{}` | Node labels for pod assignment |
 | ui.tolerations | list | `[]` | List of node taints to tolerate |
 | ui.affinity | object | `{}` | Affinity constraints. |
+| ui.topologySpreadConstraints | object | `{}` | Pod Topology Spread Constraints for the policy-reporter-ui. |
 | ui.extraVolumes.volumeMounts | list | `[]` | Deployment volumeMounts |
 | ui.extraVolumes.volumes | list | `[]` | Deployment values |
+| ui.extraConfig | object | `{}` | Extra configuration options appended to UI settings |
 | plugin.kyverno.enabled | bool | `false` | Enable Kyverno Plugin |
 | plugin.kyverno.image.registry | string | `"ghcr.io"` | Image registry |
 | plugin.kyverno.image.repository | string | `"kyverno/policy-reporter/kyverno-plugin"` | Image repository |
 | plugin.kyverno.image.pullPolicy | string | `"IfNotPresent"` | Image PullPolicy |
-| plugin.kyverno.image.tag | string | `"0.4.2"` | Image tag |
+| plugin.kyverno.image.tag | string | `"0.6.0"` | Image tag |
 | plugin.kyverno.replicaCount | int | `1` | Deployment replica count |
+| plugin.kyverno.priorityClassName | string | `""` | Deployment priorityClassName |
 | plugin.kyverno.logging.api | bool | `false` | Enables external API request logging |
 | plugin.kyverno.logging.server | bool | `false` | Enables Server access logging |
 | plugin.kyverno.logging.encoding | string | `"console"` | log encoding possible encodings are console and json |
@@ -446,6 +514,7 @@ Open `http://localhost:8082/` in your browser.
 | plugin.kyverno.serviceAccount.name | string | `""` | The ServiceAccount name |
 | plugin.kyverno.podAnnotations | object | `{}` | Additional annotations to add to each pod |
 | plugin.kyverno.podLabels | object | `{}` | Additional labels to add to each pod |
+| plugin.kyverno.selectorLabels | object | `{}` | Custom selector labels, overwrites the default set |
 | plugin.kyverno.updateStrategy | object | `{}` | Deployment update strategy. Ref: https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#strategy |
 | plugin.kyverno.revisionHistoryLimit | int | `10` | The number of revisions to keep |
 | plugin.kyverno.podSecurityContext | object | `{"runAsGroup":1234,"runAsUser":1234}` | Security context for the pod |
@@ -471,6 +540,12 @@ Open `http://localhost:8082/` in your browser.
 | plugin.kyverno.networkPolicy.enabled | bool | `false` | When true, use a NetworkPolicy to allow ingress to the webhook This is useful on clusters using Calico and/or native k8s network policies in a default-deny setup. |
 | plugin.kyverno.networkPolicy.egress | list | `[{"ports":[{"port":6443,"protocol":"TCP"}]}]` | A list of valid from selectors according to https://kubernetes.io/docs/concepts/services-networking/network-policies. Enables Kubernetes API Server by default |
 | plugin.kyverno.networkPolicy.ingress | list | `[]` | A list of valid from selectors according to https://kubernetes.io/docs/concepts/services-networking/network-policies. |
+| plugin.kyverno.httproute.enabled | bool | `false` | Enable HTTPRoute resource (Gateway API alternative to Ingress) Requires Gateway API CRDs (v1) installed in cluster https://gateway-api.sigs.k8s.io/ |
+| plugin.kyverno.httproute.labels | object | `{}` | Additional HTTPRoute labels |
+| plugin.kyverno.httproute.annotations | object | `{}` | Additional HTTPRoute annotations |
+| plugin.kyverno.httproute.parentRefs | list | `[]` | Gateway API parentRefs (list of Gateway references) Must reference an existing Gateway resource |
+| plugin.kyverno.httproute.hostnames | list | `[]` | List of hostnames for HTTPRoute |
+| plugin.kyverno.httproute.rules | list | `[{"matches":[{"path":{"type":"PathPrefix","value":"/"}}]}]` | HTTPRoute rules configuration Allows advanced routing with matches and filters |
 | plugin.kyverno.resources | object | `{}` | Resource constraints |
 | plugin.kyverno.leaderElection.lockName | string | `"kyverno-plugin"` | Lock Name |
 | plugin.kyverno.leaderElection.releaseOnCancel | bool | `true` | Released lock when the run context is cancelled. |
@@ -485,20 +560,24 @@ Open `http://localhost:8082/` in your browser.
 | plugin.kyverno.topologySpreadConstraints | object | `{}` | Pod Topology Spread Constraints for the kyverno plugin. |
 | plugin.kyverno.extraVolumes.volumeMounts | list | `[]` | Deployment volumeMounts |
 | plugin.kyverno.extraVolumes.volumes | list | `[]` | Deployment values |
+| plugin.kyverno.extraConfig | object | `{}` | Extra configuration options appended to kyverno plugin settings |
 | plugin.trivy.enabled | bool | `false` | Enable Trivy Operator Plugin |
 | plugin.trivy.image.registry | string | `"ghcr.io"` | Image registry |
 | plugin.trivy.image.repository | string | `"kyverno/policy-reporter/trivy-plugin"` | Image repository |
 | plugin.trivy.image.pullPolicy | string | `"IfNotPresent"` | Image PullPolicy |
-| plugin.trivy.image.tag | string | `"0.4.3"` | Image tag Defaults to `Chart.AppVersion` if omitted |
+| plugin.trivy.image.tag | string | `"0.4.12"` | Image tag Defaults to `Chart.AppVersion` if omitted |
 | plugin.trivy.cli.image.registry | string | `"ghcr.io"` | Image registry |
 | plugin.trivy.cli.image.repository | string | `"aquasecurity/trivy"` | Image repository |
 | plugin.trivy.cli.image.pullPolicy | string | `"IfNotPresent"` | Image PullPolicy |
-| plugin.trivy.cli.image.tag | string | `"0.58.2"` | Image tag Defaults to `Chart.AppVersion` if omitted |
+| plugin.trivy.cli.image.tag | string | `"0.69.3"` | Image tag Defaults to `Chart.AppVersion` if omitted |
 | plugin.trivy.extraArgs | object | `{}` | Additional container args. |
+| plugin.trivy.cveawg.disable | bool | `false` | disable external CVEAWG API calls. |
+| plugin.trivy.github.disable | bool | `false` | disable GitHub API calls. |
 | plugin.trivy.github.token | string | `""` | optional github token for authenticated GitHub API calls. |
 | plugin.trivy.dbVolume | object | `{}` | If set the volume for dbVolume is freely configurable below "- name: dbVolume". If no value is set an emptyDir is used. |
 | plugin.trivy.tmpVolume | object | `{}` | If set the volume for tmpVolume is freely configurable below "- name: tmpVolume". If no value is set an emptyDir is used. |
 | plugin.trivy.replicaCount | int | `1` | Deployment replica count |
+| plugin.trivy.priorityClassName | string | `""` | Deployment priorityClassName |
 | plugin.trivy.logging.api | bool | `false` | Enables external API request logging |
 | plugin.trivy.logging.server | bool | `false` | Enables Server access logging |
 | plugin.trivy.logging.encoding | string | `"console"` | log encoding possible encodings are console and json |
@@ -514,6 +593,7 @@ Open `http://localhost:8082/` in your browser.
 | plugin.trivy.serviceAccount.name | string | `""` | The ServiceAccount name |
 | plugin.trivy.podAnnotations | object | `{}` | Additional annotations to add to each pod |
 | plugin.trivy.podLabels | object | `{}` | Additional labels to add to each pod |
+| plugin.trivy.selectorLabels | object | `{}` | Custom selector labels, overwrites the default set |
 | plugin.trivy.updateStrategy | object | `{}` | Deployment update strategy. Ref: https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#strategy |
 | plugin.trivy.revisionHistoryLimit | int | `10` | The number of revisions to keep |
 | plugin.trivy.podSecurityContext | object | `{"runAsGroup":1234,"runAsUser":1234}` | Security context for the pod |
@@ -550,6 +630,7 @@ Open `http://localhost:8082/` in your browser.
 | plugin.trivy.topologySpreadConstraints | object | `{}` | Pod Topology Spread Constraints for the trivy plugin. |
 | plugin.trivy.extraVolumes.volumeMounts | list | `[]` | Deployment volumeMounts |
 | plugin.trivy.extraVolumes.volumes | list | `[]` | Deployment values |
+| plugin.trivy.extraConfig | object | `{}` | Extra configuration options appended to trivy plugin settings |
 | monitoring.enabled | bool | `false` | Enables the Prometheus Operator integration |
 | monitoring.annotations | object | `{}` | Key/value pairs that are attached to all resources. |
 | monitoring.serviceMonitor.honorLabels | bool | `false` | HonorLabels chooses the metrics labels on collisions with target labels |
@@ -560,6 +641,8 @@ Open `http://localhost:8082/` in your browser.
 | monitoring.serviceMonitor.namespaceSelector | optional | `{}` | NamespaceSelector |
 | monitoring.serviceMonitor.scrapeTimeout | optional | `nil` | ScrapeTimeout |
 | monitoring.serviceMonitor.interval | optional | `nil` | Scrape interval |
+| monitoring.serviceMonitor.secure | bool | `false` | Is TLS required for endpoint |
+| monitoring.serviceMonitor.tlsConfig | object | `{}` | TLS Configuration for endpoint |
 | monitoring.grafana.namespace | string | `nil` | Naamespace for configMap of grafana dashboards |
 | monitoring.grafana.dashboards.enabled | bool | `true` | Enable the deployment of grafana dashboards |
 | monitoring.grafana.dashboards.label | string | `"grafana_dashboard"` | Label to find dashboards using the k8s sidecar |
@@ -608,6 +691,7 @@ Open `http://localhost:8082/` in your browser.
 | monitoring.policyReportOverview.failingPolicyRuleTable.height | int | `10` |  |
 | monitoring.policyReportOverview.failingClusterPolicyRuleTable.height | int | `10` |  |
 | extraManifests | list | `[]` | list of extra manifests |
+| extraConfig | object | `{}` | Extra configuration options appended to core policy reporter |
 
 ## Source Code
 
@@ -618,6 +702,7 @@ Open `http://localhost:8082/` in your browser.
 | Name | Email | Url |
 | ---- | ------ | --- |
 | Frank Jogeleit |  |  |
+| Ammar Yasser |  |  |
 
 ----------------------------------------------
 Autogenerated from chart metadata using [helm-docs v1.11.0](https://github.com/norwoodj/helm-docs/releases/v1.11.0)

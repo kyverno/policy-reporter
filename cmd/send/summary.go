@@ -1,6 +1,7 @@
 package send
 
 import (
+	"flag"
 	"strings"
 	"sync"
 
@@ -84,7 +85,7 @@ func NewSummaryCMD() *cobra.Command {
 				return err
 			}
 
-			for _, ch := range c.EmailReports.Violations.Channels {
+			for _, ch := range c.EmailReports.Summary.Channels {
 				go func(channel config.EmailReport) {
 					defer wg.Done()
 
@@ -120,6 +121,8 @@ func NewSummaryCMD() *cobra.Command {
 			return nil
 		},
 	}
+
+	flag.Parse()
 
 	return cmd
 }

@@ -1,6 +1,7 @@
 package listener
 
 import (
+	"context"
 	"strings"
 
 	"github.com/kyverno/policy-reporter/pkg/listener/metrics"
@@ -25,11 +26,11 @@ func NewMetricsListener(
 ) report.PolicyReportListener {
 	resultListeners := ResultListeners(filter, reportFilter, mode, fields)
 
-	return func(event report.LifecycleEvent) {
+	return func(ctx context.Context, event report.LifecycleEvent) {
 		if event.PolicyReport.GetNamespace() == "" {
-			resultListeners[1](event)
+			resultListeners[1](ctx, event)
 		} else {
-			resultListeners[0](event)
+			resultListeners[0](ctx, event)
 		}
 	}
 }

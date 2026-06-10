@@ -1,10 +1,10 @@
 package report
 
 import (
-	"github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
+	"github.com/kyverno/policy-reporter/pkg/openreports"
 )
 
-type ResultValidation = func(v1alpha2.PolicyReportResult) bool
+type ResultValidation = func(openreports.ResultAdapter) bool
 
 type ResultFilter struct {
 	validations     []ResultValidation
@@ -16,7 +16,7 @@ func (rf *ResultFilter) AddValidation(v ResultValidation) {
 	rf.validations = append(rf.validations, v)
 }
 
-func (rf *ResultFilter) Validate(result v1alpha2.PolicyReportResult) bool {
+func (rf *ResultFilter) Validate(result openreports.ResultAdapter) bool {
 	for _, validation := range rf.validations {
 		if !validation(result) {
 			return false

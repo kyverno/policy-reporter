@@ -1,0 +1,44 @@
+apiVersion: policyreporter.io/v1alpha1
+kind: TargetConfig
+metadata:
+  name: policy-reporter-jira
+spec:
+  jira:
+    # JIRA server URL
+    host: "https://your-jira-instance.atlassian.net"
+    # JIRA project key
+    projectKey: "POL"
+    # JIRA issue type, defaults to "Bug" if not specified
+    issueType: "Bug"
+    # JIRA authentication - either use username/password or username/apiToken
+    username: "your-jira-username"
+    # Use API token (recommended over password)
+    apiToken: "your-jira-api-token"
+    # Alternatively, use password (not recommended for production)
+    # password: "your-jira-password"
+    
+    # Skip TLS verification (not recommended for production)
+    skipTLS: false
+    
+    # Minimum severity to report to JIRA
+    # Possible values: info, warning, error, critical
+    minimumSeverity: "warning"
+    
+    # Filter results by namespace
+    filter:
+      namespaces:
+        include:
+          - "default"
+          - "kube-system"
+      
+      # Filter by policy name (supports wildcards)
+      policies:
+        include:
+          - "require-pod-probes"
+          - "require-resources-*"
+    
+    # Custom fields to add to JIRA issues
+    customFields:
+      # Map custom fields to JIRA custom field IDs
+      # customfield_10001: "Policy Violation"
+      # customfield_10002: "Kubernetes" 

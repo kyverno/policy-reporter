@@ -6,6 +6,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 
+	"github.com/kyverno/policy-reporter/pkg/crd/api/targetconfig"
 	"github.com/kyverno/policy-reporter/pkg/crd/api/targetconfig/v1alpha1"
 	"github.com/kyverno/policy-reporter/pkg/target"
 	"github.com/kyverno/policy-reporter/pkg/target/discord"
@@ -14,6 +15,7 @@ import (
 )
 
 func TestCollection(t *testing.T) {
+	t.Parallel()
 	collection := target.NewCollection(
 		&target.Target{
 			ID:   uuid.NewString(),
@@ -23,8 +25,8 @@ func TestCollection(t *testing.T) {
 					Name: "Webhook",
 				},
 			}),
-			Config:       &v1alpha1.Config[v1alpha1.WebhookOptions]{SecretRef: "webhook-secret"},
-			ParentConfig: &v1alpha1.Config[v1alpha1.WebhookOptions]{},
+			Config:       &targetconfig.Config[v1alpha1.WebhookOptions]{SecretRef: "webhook-secret"},
+			ParentConfig: &targetconfig.Config[v1alpha1.WebhookOptions]{},
 		},
 		&target.Target{
 			ID:   uuid.NewString(),
@@ -34,8 +36,8 @@ func TestCollection(t *testing.T) {
 					Name: "Slack",
 				},
 			}),
-			Config:       &v1alpha1.Config[v1alpha1.SlackOptions]{},
-			ParentConfig: &v1alpha1.Config[v1alpha1.SlackOptions]{SecretRef: "slack-secret"},
+			Config:       &targetconfig.Config[v1alpha1.SlackOptions]{},
+			ParentConfig: &targetconfig.Config[v1alpha1.SlackOptions]{SecretRef: "slack-secret"},
 		},
 		&target.Target{
 			ID:   uuid.NewString(),
@@ -45,25 +47,29 @@ func TestCollection(t *testing.T) {
 					Name: "Discord",
 				},
 			}),
-			Config:       &v1alpha1.Config[v1alpha1.WebhookOptions]{},
-			ParentConfig: &v1alpha1.Config[v1alpha1.WebhookOptions]{SecretRef: "slack-secret"},
+			Config:       &targetconfig.Config[v1alpha1.WebhookOptions]{},
+			ParentConfig: &targetconfig.Config[v1alpha1.WebhookOptions]{SecretRef: "slack-secret"},
 		},
 	)
 
 	t.Run("empty returns if the collection has any target", func(t *testing.T) {
+		t.Parallel()
 		assert.True(t, target.NewCollection().Empty())
 		assert.False(t, collection.Empty())
 	})
 
 	t.Run("length returns the amount of targets within a collection", func(t *testing.T) {
+		t.Parallel()
 		assert.Equal(t, collection.Length(), 3)
 	})
 
 	t.Run("clients returns all clients of the given targets", func(t *testing.T) {
+		t.Parallel()
 		assert.Equal(t, len(collection.Clients()), 3)
 	})
 
 	t.Run("client searches for a configured target with the given name", func(t *testing.T) {
+		t.Parallel()
 		assert.NotNil(t, collection.Client("Webhook"))
 		assert.NotNil(t, collection.Client("Discord"))
 		assert.NotNil(t, collection.Client("Slack"))
@@ -71,17 +77,20 @@ func TestCollection(t *testing.T) {
 	})
 
 	t.Run("usesSecret checks if at least on target has a secretRef configured", func(t *testing.T) {
+		t.Parallel()
 		assert.False(t, target.NewCollection().UsesSecrets())
 		assert.True(t, collection.UsesSecrets())
 	})
 
 	t.Run("SingleSendClients only returns clients which do not support batch sending", func(t *testing.T) {
+		t.Parallel()
 		for _, c := range collection.SingleSendClients() {
 			assert.Equal(t, target.SingleSend, c.Type())
 		}
 	})
 
 	t.Run("BatchSendClients only returns clients which do support batch sending", func(t *testing.T) {
+		t.Parallel()
 		for _, c := range collection.BatchSendClients() {
 			assert.Equal(t, target.BatchSend, c.Type())
 		}

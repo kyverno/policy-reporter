@@ -59,8 +59,12 @@ helm.sh/chart: {{ include "policyreporter.chart" . }}
 Selector labels
 */}}
 {{- define "policyreporter.selectorLabels" -}}
+{{- if .Values.selectorLabels }}
+{{- toYaml .Values.selectorLabels }}
+{{- else -}}
 app.kubernetes.io/name: policy-reporter
 app.kubernetes.io/instance: {{ .Release.Name }}
+{{- end }}
 {{- end }}
 
 {{/*
@@ -106,6 +110,16 @@ minAvailable: {{ default 1 .Values.podDisruptionBudget.minAvailable }}
 maxUnavailable: {{ .Values.podDisruptionBudget.maxUnavailable }}
 {{- end }}
 {{- end }}
+
+{{- define "policyreporter.podDisruptionBudget.apiVersion" -}}
+{{- if .Values.apiVersionOverride.podDisruptionBudget -}}
+  {{- .Values.apiVersionOverride.podDisruptionBudget -}}
+{{- else if .Capabilities.APIVersions.Has "policy/v1/PodDisruptionBudget" -}}
+  policy/v1
+{{- else -}}
+  policy/v1beta1
+{{- end }}
+{{- end -}}
 
 {{/* Get the namespace name. */}}
 {{- define "policyreporter.namespace" -}}
@@ -201,6 +215,49 @@ config:
 {{- define "target.webhook" -}}
 config:
   webhook: {{ .webhook | quote }}
+  certificate: {{ .certificate | quote }}
+  skipTLS: {{ .skipTLS }}
+  {{- if .keepalive }}
+  keepalive:
+    interval: {{ .keepalive.interval | quote }}
+    {{- if .keepalive.params }}
+    params:
+      {{- toYaml .keepalive.params | nindent 6 }}
+    {{- end }}
+  {{- end }}
+  {{- with .headers }}
+  headers:
+  {{- toYaml . | nindent 4 }}
+  {{- end }}
+{{ include "target" . }}
+{{- end }}
+
+{{- define "target.jira" -}}
+config:
+  host: {{ .host | quote }}
+  username: {{ .username | quote }}
+  password: {{ .password | quote }}
+  apiToken: {{ .apiToken | quote }}
+  apiVersion: {{ .apiVersion | quote }}
+  summaryTemplate: {{ .summaryTemplate | quote }}
+  projectKey: {{ .projectKey | quote }}
+  issueType: {{ .issueType | quote }}
+  certificate: {{ .certificate | quote }}
+  skipTLS: {{ .skipTLS }}
+  {{- with .labels }}
+  labels:
+  {{- toYaml . | nindent 4 }}
+  {{- end }}
+  {{- with .components }}
+  components:
+  {{- toYaml . | nindent 4 }}
+  {{- end }}
+{{ include "target" . }}
+{{- end }}
+
+{{- define "target.alertManager" -}}
+config:
+  host: {{ .host | quote }}
   certificate: {{ .certificate | quote }}
   skipTLS: {{ .skipTLS }}
   {{- with .headers }}

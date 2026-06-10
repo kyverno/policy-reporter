@@ -61,8 +61,11 @@ func newRedis() *redis {
 }
 
 func TestRedisCache(t *testing.T) {
+	t.Parallel()
 	t.Run("add report", func(t *testing.T) {
-		id := fixtures.DefaultPolicyReport.GetID()
+		t.Parallel()
+		or := fixtures.DefaultPolicyReport
+		id := or.GetID()
 
 		c := cache.NewRedisCache("cache", newRedis(), -1)
 
@@ -81,12 +84,13 @@ func TestRedisCache(t *testing.T) {
 		}
 	})
 	t.Run("remove report", func(t *testing.T) {
-		id := fixtures.DefaultPolicyReport.GetID()
+		t.Parallel()
+		or := fixtures.DefaultPolicyReport
+		id := or.GetID()
 
 		c := cache.NewRedisCache("cache", newRedis(), -1)
 
 		c.AddReport(fixtures.DefaultPolicyReport)
-
 		c.RemoveReport(id)
 
 		results := c.GetResults(id)
@@ -95,12 +99,13 @@ func TestRedisCache(t *testing.T) {
 		}
 	})
 	t.Run("ceanup report", func(t *testing.T) {
-		id := fixtures.DefaultPolicyReport.GetID()
+		t.Parallel()
+		or := fixtures.DefaultPolicyReport
+		id := or.GetID()
 
 		c := cache.NewRedisCache("cache", newRedis(), -1)
 
 		c.AddReport(fixtures.DefaultPolicyReport)
-
 		c.Clear()
 
 		results := c.GetResults(id)
@@ -109,6 +114,7 @@ func TestRedisCache(t *testing.T) {
 		}
 	})
 	t.Run("shared cache", func(t *testing.T) {
+		t.Parallel()
 		c := cache.NewRedisCache("cache", newRedis(), -1)
 		if !c.Shared() {
 			t.Error("expected redis cache is shared")

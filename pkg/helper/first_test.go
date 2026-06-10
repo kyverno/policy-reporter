@@ -13,11 +13,14 @@ type item struct {
 }
 
 func TestFirst(t *testing.T) {
+	t.Parallel()
 	t.Run("return nil for empty list", func(t *testing.T) {
+		t.Parallel()
 		assert.Nil(t, helper.First([]*item{}))
 	})
 
 	t.Run("return first item", func(t *testing.T) {
+		t.Parallel()
 		assert.Equal(t, 0, helper.First([]*item{{val: 0}, {val: 1}}).val)
 		assert.Equal(t, 3, helper.First([]*item{{val: 3}, {val: 1}, {val: 2}}).val)
 	})

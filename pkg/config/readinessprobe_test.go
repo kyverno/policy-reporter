@@ -7,7 +7,9 @@ import (
 )
 
 func Test_ReadinessProbe(t *testing.T) {
+	t.Parallel()
 	t.Run("immediate return without REST enabled", func(t *testing.T) {
+		t.Parallel()
 		rdy := config.NewReadinessProbe(
 			&config.Config{
 				REST:           config.REST{Enabled: false},
@@ -19,6 +21,7 @@ func Test_ReadinessProbe(t *testing.T) {
 	})
 
 	t.Run("immediate return without LeaderElection enabled", func(t *testing.T) {
+		t.Parallel()
 		rdy := config.NewReadinessProbe(
 			&config.Config{
 				REST:           config.REST{Enabled: true},
@@ -30,6 +33,7 @@ func Test_ReadinessProbe(t *testing.T) {
 	})
 
 	t.Run("wait for ready state", func(t *testing.T) {
+		t.Parallel()
 		rdy := config.NewReadinessProbe(
 			&config.Config{
 				REST:           config.REST{Enabled: true},

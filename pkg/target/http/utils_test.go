@@ -17,10 +17,10 @@ import (
 func TestResultMapping(t *testing.T) {
 	result := http.NewJSONResult(fixtures.CompleteTargetSendResult)
 
-	assert.Equal(t, result.Message, fixtures.CompleteTargetSendResult.Message)
+	assert.Equal(t, result.Message, fixtures.CompleteTargetSendResult.Description)
 	assert.Equal(t, result.Policy, fixtures.CompleteTargetSendResult.Policy)
 	assert.Equal(t, result.Rule, fixtures.CompleteTargetSendResult.Rule)
-	assert.Equal(t, result.Resource.Name, fixtures.CompleteTargetSendResult.Resources[0].Name)
+	assert.Equal(t, result.Resource.Name, fixtures.CompleteTargetSendResult.Subjects[0].Name)
 }
 
 func TestCreateJSONRequest(t *testing.T) {

@@ -9,8 +9,8 @@ import (
 
 const CleanUpListener = "cleanup_listener"
 
-func NewCleanupListener(ctx context.Context, targets *target.Collection) report.PolicyReportListener {
-	return func(event report.LifecycleEvent) {
+func NewCleanupListener(targets *target.Collection) report.PolicyReportListener {
+	return func(ctx context.Context, event report.LifecycleEvent) {
 		if event.Type == report.Added {
 			return
 		}
