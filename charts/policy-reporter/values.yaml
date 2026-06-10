@@ -283,6 +283,17 @@ emailReports:
     skipTLS: false
     # -- SMTP Server Certificate file path
     certificate: ""
+  # graphAPI:
+  #   # -- Enable Microsoft Graph API for E-Mail reports
+  #   enabled: false
+  #   # -- Microsoft Graph API Tenant ID
+  #   tenant: ""
+  #   # -- Microsoft Graph API Client ID
+  #   clientID: ""
+  #   # -- Microsoft Graph API Client Secret
+  #   clientSecret: ""
+  #   # -- Microsoft Graph API User ID (Sender)
+  #   userID: ""
 
   summary:
     # -- Enable Summary E-Mail reports

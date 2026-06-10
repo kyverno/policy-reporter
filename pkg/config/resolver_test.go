@@ -573,6 +573,25 @@ func Test_SMTP(t *testing.T) {
 	})
 }
 
+func Test_GraphAPI(t *testing.T) {
+	t.Run("GraphAPI EmailClient", func(t *testing.T) {
+		graphConfig := &config.Config{
+			EmailReports: config.EmailReports{
+				GraphAPI: config.GraphAPI{
+					Enabled:      true,
+					Tenant:       "tenant",
+					ClientID:     "client",
+					ClientSecret: "secret",
+					UserID:       "user",
+				},
+			},
+		}
+		resolver := config.NewResolver(graphConfig, &rest.Config{})
+
+		assert.NotNil(t, resolver.EmailClient())
+	})
+}
+
 func Test_ResolveLogger(t *testing.T) {
 	t.Parallel()
 	resolver := config.NewResolver(testConfig, &rest.Config{})

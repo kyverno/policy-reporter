@@ -18,12 +18,16 @@ func EncryptionFromString(enc string) mail.Encryption {
 	}
 }
 
-type Client struct {
+type Client interface {
+	Send(report Report, to []string) error
+}
+
+type SMTPClient struct {
 	server *mail.SMTPServer
 	from   string
 }
 
-func (c *Client) Send(report Report, to []string) error {
+func (c *SMTPClient) Send(report Report, to []string) error {
 	if len(to) > 1 {
 		c.server.KeepAlive = true
 	}
@@ -51,6 +55,6 @@ func (c *Client) Send(report Report, to []string) error {
 	return msg.Send(client)
 }
 
-func NewClient(from string, server *mail.SMTPServer) *Client {
-	return &Client{server: server, from: from}
+func NewClient(from string, server *mail.SMTPServer) Client {
+	return &SMTPClient{server: server, from: from}
 }
