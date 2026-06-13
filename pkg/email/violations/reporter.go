@@ -2,11 +2,14 @@ package violations
 
 import (
 	"html/template"
+	"os"
+	"path/filepath"
 	"strings"
 	"time"
 
 	"github.com/kyverno/policy-reporter/pkg/email"
 	"github.com/kyverno/policy-reporter/pkg/helper"
+	"github.com/kyverno/policy-reporter/templates"
 )
 
 type Reporter struct {
@@ -29,7 +32,7 @@ func (o *Reporter) Report(sources []Source, format string) (email.Report, error)
 		},
 	})
 
-	templ, err := vioTempl.ParseFiles(o.templateDir + "/violations.html")
+	templ, err := parseTemplate(vioTempl, o.templateDir, "violations.html")
 	if err != nil {
 		return email.Report{}, err
 	}
@@ -60,6 +63,21 @@ func (o *Reporter) Report(sources []Source, format string) (email.Report, error)
 		Message:     b.String(),
 		Format:      format,
 	}, nil
+}
+
+// parseTemplate loads name into templ, preferring the on-disk templateDir when
+// the file exists there and otherwise falling back to the embedded copy that
+// ships with the binary. This keeps the --template-dir override working while
+// making the report endpoint resilient to a missing templates directory.
+func parseTemplate(templ *template.Template, templateDir, name string) (*template.Template, error) {
+	if templateDir != "" {
+		path := filepath.Join(templateDir, name)
+		if _, err := os.Stat(path); err == nil {
+			return templ.ParseFiles(path)
+		}
+	}
+
+	return templ.ParseFS(templates.FS, name)
 }
 
 func NewReporter(templateDir string, clusterName string, titlePrefix string) *Reporter {
