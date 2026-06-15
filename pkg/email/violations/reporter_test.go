@@ -60,3 +60,34 @@ func Test_CreateReport(t *testing.T) {
 		t.Fatal("expected format to be set")
 	}
 }
+
+// Test_CreateReport_EmbeddedFallback covers the case from issue #1466 where the
+// templates directory is not present on disk. The reporter must fall back to the
+// embedded template and still render instead of failing with a
+// "no such file or directory" error (which surfaced as a failed report request).
+func Test_CreateReport_EmbeddedFallback(t *testing.T) {
+	t.Parallel()
+	ctx := context.Background()
+
+	client, pClient, cClient := NewFakeClient()
+
+	_, _ = pClient.Create(ctx, fixtures.DefaultPolicyReport.Report, v1.CreateOptions{})
+	_, _ = cClient.Create(ctx, fixtures.ClusterPolicyReport.ClusterReport, v1.CreateOptions{})
+
+	generator := violations.NewGenerator(client.OpenreportsV1alpha1(), nil, filter, true)
+	data, err := generator.GenerateData(ctx)
+	if err != nil {
+		t.Fatalf("unexpected error: %s", err)
+	}
+
+	for _, dir := range []string{"", "/does/not/exist"} {
+		reporter := violations.NewReporter(dir, "Cluster", "Report")
+		report, err := reporter.Report(data, "html")
+		if err != nil {
+			t.Fatalf("template dir %q: unexpected error: %s", dir, err)
+		}
+		if report.Message == "" {
+			t.Fatalf("template dir %q: expected a rendered report message", dir)
+		}
+	}
+}
