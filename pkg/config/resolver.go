@@ -661,6 +661,11 @@ func (r *Resolver) EmailClient() email.Sender {
 			r.config.EmailReports.GraphAPI.ClientID,
 			r.config.EmailReports.GraphAPI.ClientSecret,
 			r.config.EmailReports.GraphAPI.UserID,
+			email.GraphAPIClientOptions{
+				CC:                     r.config.EmailReports.GraphAPI.CC,
+				BCC:                    r.config.EmailReports.GraphAPI.BCC,
+				DisableSaveToSentItems: r.config.EmailReports.GraphAPI.DisableSaveToSentItems,
+			},
 		)
 	}
 
