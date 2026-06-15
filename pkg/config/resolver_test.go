@@ -578,11 +578,14 @@ func Test_GraphAPI(t *testing.T) {
 		graphConfig := &config.Config{
 			EmailReports: config.EmailReports{
 				GraphAPI: config.GraphAPI{
-					Enabled:      true,
-					Tenant:       "tenant",
-					ClientID:     "client",
-					ClientSecret: "secret",
-					UserID:       "user",
+					Enabled:                true,
+					Tenant:                 "tenant",
+					ClientID:               "client",
+					ClientSecret:           "secret",
+					UserID:                 "user",
+					CC:                     []string{"cc@example.com"},
+					BCC:                    []string{"bcc@example.com"},
+					DisableSaveToSentItems: false,
 				},
 			},
 		}

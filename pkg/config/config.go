@@ -44,11 +44,16 @@ type SMTP struct {
 
 // GraphAPI configuration
 type GraphAPI struct {
-	Enabled      bool   `mapstructure:"enabled"`
-	Tenant       string `mapstructure:"tenant"`
-	ClientID     string `mapstructure:"clientID"`
-	ClientSecret string `mapstructure:"clientSecret"`
-	UserID       string `mapstructure:"userID"`
+	Enabled                bool     `mapstructure:"enabled"`
+	Tenant                 string   `mapstructure:"tenant"`
+	ClientID               string   `mapstructure:"clientID"`
+	ClientSecret           string   `mapstructure:"clientSecret"`
+	UserID                 string   `mapstructure:"userID"`
+	CC                     []string `mapstructure:"cc"`
+	BCC                    []string `mapstructure:"bcc"`
+	// DisableSaveToSentItems controls whether sent messages appear in the Sent Items folder.
+	// Defaults to false when omitted, meaning messages ARE saved to Sent Items.
+	DisableSaveToSentItems bool     `mapstructure:"disableSaveToSentItems"`
 }
 
 // EmailReport configuration

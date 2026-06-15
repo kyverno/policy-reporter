@@ -294,6 +294,12 @@ emailReports:
   #   clientSecret: ""
   #   # -- Microsoft Graph API User ID (Sender)
   #   userID: ""
+  #   # -- Microsoft Graph API CC Recipients
+  #   cc: []
+  #   # -- Microsoft Graph API BCC Recipients
+  #   bcc: []
+  #   # -- Microsoft Graph API Disable Save To Sent Items
+  #   disableSaveToSentItems: false
 
   summary:
     # -- Enable Summary E-Mail reports
