@@ -581,7 +581,7 @@ func Test_GraphAPI(t *testing.T) {
 					Enabled:                true,
 					Tenant:                 "tenant",
 					ClientID:               "client",
-					ClientSecret:           "secret",
+					Password:               "secret",
 					UserID:                 "user",
 					CC:                     []string{"cc@example.com"},
 					BCC:                    []string{"bcc@example.com"},

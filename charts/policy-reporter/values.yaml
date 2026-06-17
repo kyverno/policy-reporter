@@ -291,7 +291,11 @@ emailReports:
   #   # -- Microsoft Graph API Client ID
   #   clientID: ""
   #   # -- Microsoft Graph API Client Secret
-  #   clientSecret: ""
+  #   password: ""
+  #   # -- Read configuration from an already existing Secret
+  #   secretRef:
+  #     secret: name-of-k8s-secret
+  #     key: key-within-k8s-secret
   #   # -- Microsoft Graph API User ID (Sender)
   #   userID: ""
   #   # -- Microsoft Graph API CC Recipients
@@ -300,6 +304,10 @@ emailReports:
   #   bcc: []
   #   # -- Microsoft Graph API Disable Save To Sent Items
   #   disableSaveToSentItems: false
+  #   # -- Microsoft Graph API Azure AD Endpoint override
+  #   azureADEndpoint: "https://login.microsoftonline.com"
+  #   # -- Microsoft Graph API endpoint override
+  #   graphEndpoint: "https://graph.microsoft.com"
 
   summary:
     # -- Enable Summary E-Mail reports

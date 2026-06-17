@@ -110,6 +110,19 @@ func Load(cmd *cobra.Command) (*Config, error) {
 	_ = v.BindEnv("emailReports.smtp.host", "EMAIL_REPORTS_SMTP_HOST")
 	_ = v.BindEnv("emailReports.smtp.port", "EMAIL_REPORTS_SMTP_PORT")
 	_ = v.BindEnv("emailReports.smtp.from", "EMAIL_REPORTS_SMTP_FROM")
+	// bind GraphAPI/microsoft_graph_mailer config from environment vars, if existing
+	_ = v.BindEnv("emailReports.graphAPI.password", "EMAIL_REPORTS_GRAPHAPI_CLIENTSECRET")
+	_ = v.BindEnv("emailReports.graphAPI.tenant", "EMAIL_REPORTS_GRAPHAPI_TENANT")
+	_ = v.BindEnv("emailReports.graphAPI.clientID", "EMAIL_REPORTS_GRAPHAPI_CLIENTID")
+	_ = v.BindEnv("emailReports.graphAPI.userID", "EMAIL_REPORTS_GRAPHAPI_USERID")
+	_ = v.BindEnv("emailReports.graphAPI.azureADEndpoint", "EMAIL_REPORTS_GRAPHAPI_AZUREADENDPOINT")
+	_ = v.BindEnv("emailReports.graphAPI.graphEndpoint", "EMAIL_REPORTS_GRAPHAPI_GRAPHENDPOINT")
+	_ = v.BindEnv("emailReports.microsoft_graph_mailer.password", "EMAIL_REPORTS_GRAPHAPI_CLIENTSECRET")
+	_ = v.BindEnv("emailReports.microsoft_graph_mailer.tenant", "EMAIL_REPORTS_GRAPHAPI_TENANT")
+	_ = v.BindEnv("emailReports.microsoft_graph_mailer.clientID", "EMAIL_REPORTS_GRAPHAPI_CLIENTID")
+	_ = v.BindEnv("emailReports.microsoft_graph_mailer.userID", "EMAIL_REPORTS_GRAPHAPI_USERID")
+	_ = v.BindEnv("emailReports.microsoft_graph_mailer.azureADEndpoint", "EMAIL_REPORTS_GRAPHAPI_AZUREADENDPOINT")
+	_ = v.BindEnv("emailReports.microsoft_graph_mailer.graphEndpoint", "EMAIL_REPORTS_GRAPHAPI_GRAPHENDPOINT")
 	// bind slack webhook from environment vars, if existing
 	_ = v.BindEnv("slack.webhook", "SLACK_WEBHOOK")
 	// bind ui host from environment vars, if existing

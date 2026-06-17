@@ -42,18 +42,25 @@ type SMTP struct {
 	Certificate string `mapstructure:"certificate"`
 }
 
+// SecretRef configuration
+type SecretRef struct {
+	Name string `mapstructure:"secret"`
+	Key  string `mapstructure:"key"`
+}
+
 // GraphAPI configuration
 type GraphAPI struct {
-	Enabled      bool     `mapstructure:"enabled"`
-	Tenant       string   `mapstructure:"tenant"`
-	ClientID     string   `mapstructure:"clientID"`
-	ClientSecret string   `mapstructure:"clientSecret"`
-	UserID       string   `mapstructure:"userID"`
-	CC           []string `mapstructure:"cc"`
-	BCC          []string `mapstructure:"bcc"`
-	// DisableSaveToSentItems controls whether sent messages appear in the Sent Items folder.
-	// Defaults to false when omitted, meaning messages ARE saved to Sent Items.
-	DisableSaveToSentItems bool `mapstructure:"disableSaveToSentItems"`
+	Enabled                bool      `mapstructure:"enabled"`
+	Tenant                 string    `mapstructure:"tenant"`
+	ClientID               string    `mapstructure:"clientID"`
+	Password               string    `mapstructure:"password"`
+	SecretRef              SecretRef `mapstructure:"secretRef"`
+	UserID                 string    `mapstructure:"userID"`
+	CC                     []string  `mapstructure:"cc"`
+	BCC                    []string  `mapstructure:"bcc"`
+	DisableSaveToSentItems bool      `mapstructure:"disableSaveToSentItems"`
+	AzureADEndpoint        string    `mapstructure:"azureADEndpoint"`
+	GraphEndpoint          string    `mapstructure:"graphEndpoint"`
 }
 
 // EmailReport configuration
@@ -71,12 +78,13 @@ type Templates struct {
 
 // EmailReports configuration
 type EmailReports struct {
-	SMTP        SMTP        `mapstructure:"smtp"`
-	GraphAPI    GraphAPI    `mapstructure:"graphAPI"`
-	Summary     EmailReport `mapstructure:"summary"`
-	Violations  EmailReport `mapstructure:"violations"`
-	ClusterName string      `mapstructure:"clusterName"`
-	TitlePrefix string      `mapstructure:"titlePrefix"`
+	SMTP                 SMTP        `mapstructure:"smtp"`
+	GraphAPI             GraphAPI    `mapstructure:"graphAPI"`
+	MicrosoftGraphMailer GraphAPI    `mapstructure:"microsoft_graph_mailer"`
+	Summary              EmailReport `mapstructure:"summary"`
+	Violations           EmailReport `mapstructure:"violations"`
+	ClusterName          string      `mapstructure:"clusterName"`
+	TitlePrefix          string      `mapstructure:"titlePrefix"`
 }
 
 // BasicAuth configuration

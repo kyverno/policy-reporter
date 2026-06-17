@@ -44,6 +44,7 @@ type graphAPIClient struct {
 	cc                     []string
 	bcc                    []string
 	disableSaveToSentItems bool
+	graphEndpoint          string
 	// ctx is used for OAuth2 token fetching and HTTP requests.
 	// TODO: propagate a caller-supplied context once the Sender interface accepts one.
 	ctx context.Context
@@ -87,7 +88,7 @@ func (c *graphAPIClient) Send(report Report, to []string) error {
 	// Create an HTTP client that obtains OAuth2 tokens lazily per request.
 	httpClient := c.oauthConfig.Client(c.ctx)
 
-	url := fmt.Sprintf("https://graph.microsoft.com/v1.0/users/%s/sendMail", c.userID)
+	url := fmt.Sprintf("%s/v1.0/users/%s/sendMail", c.graphEndpoint, c.userID)
 	req, err := http.NewRequestWithContext(c.ctx, http.MethodPost, url, bytes.NewBuffer(body))
 	if err != nil {
 		return err
@@ -118,17 +119,32 @@ type GraphAPIClientOptions struct {
 	// DisableSaveToSentItems controls whether sent messages are saved in the Sent Items folder.
 	// Defaults to false (which means messages ARE saved). Set to true to suppress saving.
 	DisableSaveToSentItems bool
+	// AzureADEndpoint overrides the default Azure Active Directory / Entra ID endpoint.
+	// Defaults to "https://login.microsoftonline.com" if not set.
+	AzureADEndpoint string
+	// GraphEndpoint overrides the default Microsoft Graph API endpoint.
+	// Defaults to "https://graph.microsoft.com" if not set.
+	GraphEndpoint string
 }
 
 // NewGraphAPIClient creates a Sender backed by the Microsoft Graph API.
 // OAuth2 tokens are obtained lazily on each Send call using the client credentials flow.
 // Pass GraphAPIClientOptions to configure CC, BCC, and Sent Items behaviour.
 func NewGraphAPIClient(tenant, clientID, clientSecret, userID string, opts GraphAPIClientOptions) Sender {
+	azureADEndpoint := strings.TrimSuffix(opts.AzureADEndpoint, "/")
+	if azureADEndpoint == "" {
+		azureADEndpoint = "https://login.microsoftonline.com"
+	}
+	graphEndpoint := strings.TrimSuffix(opts.GraphEndpoint, "/")
+	if graphEndpoint == "" {
+		graphEndpoint = "https://graph.microsoft.com"
+	}
+
 	config := &clientcredentials.Config{
 		ClientID:     clientID,
 		ClientSecret: clientSecret,
-		TokenURL:     fmt.Sprintf("https://login.microsoftonline.com/%s/oauth2/v2.0/token", tenant),
-		Scopes:       []string{"https://graph.microsoft.com/.default"},
+		TokenURL:     fmt.Sprintf("%s/%s/oauth2/v2.0/token", azureADEndpoint, tenant),
+		Scopes:       []string{fmt.Sprintf("%s/.default", graphEndpoint)},
 	}
 
 	return &graphAPIClient{
@@ -137,6 +153,7 @@ func NewGraphAPIClient(tenant, clientID, clientSecret, userID string, opts Graph
 		cc:                     opts.CC,
 		bcc:                    opts.BCC,
 		disableSaveToSentItems: opts.DisableSaveToSentItems,
+		graphEndpoint:          graphEndpoint,
 		ctx:                    context.Background(),
 	}
 }
