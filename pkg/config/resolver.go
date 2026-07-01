@@ -19,6 +19,7 @@ import (
 	mail "github.com/xhit/go-simple-mail/v2"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/discovery"
 	k8s "k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/metadata"
@@ -58,6 +59,7 @@ type Resolver struct {
 	config             *Config
 	k8sConfig          *rest.Config
 	clientset          *k8s.Clientset
+	k8sClient          k8s.Interface
 	publisher          report.EventPublisher
 	policyStore        *database.Store
 	database           *bun.DB
@@ -382,6 +384,18 @@ func (r *Resolver) Clientset() (*k8s.Clientset, error) {
 	return r.clientset, nil
 }
 
+func (r *Resolver) k8s() (k8s.Interface, error) {
+	if r.k8sClient != nil {
+		return r.k8sClient, nil
+	}
+	clientset, err := r.Clientset()
+	if err != nil {
+		return nil, err
+	}
+	r.k8sClient = clientset
+	return r.k8sClient, nil
+}
+
 // SecretClient resolver method
 func (r *Resolver) SecretClient() secrets.Client {
 	clientset, err := r.Clientset()
@@ -654,7 +668,59 @@ func (r *Resolver) SMTPServer() *mail.SMTPServer {
 	return server
 }
 
-func (r *Resolver) EmailClient() *email.Client {
+func (r *Resolver) EmailClient() email.Sender {
+	graphAPI := r.config.EmailReports.GraphAPI
+	if !graphAPI.Enabled && r.config.EmailReports.MicrosoftGraphMailer.Enabled {
+		graphAPI = r.config.EmailReports.MicrosoftGraphMailer
+	}
+
+	if graphAPI.Enabled {
+		tenant := graphAPI.Tenant
+		clientID := graphAPI.ClientID
+		userID := graphAPI.UserID
+
+		clientSecret := graphAPI.Password
+		if graphAPI.SecretRef.Name != "" {
+			clientset, err := r.k8s()
+			if err != nil {
+				zap.L().Error("failed to get k8s clientset for graph api client secret", zap.Error(err))
+			} else {
+				ctx := context.Background()
+				secret, err := clientset.CoreV1().Secrets(r.config.Namespace).Get(ctx, graphAPI.SecretRef.Name, metav1.GetOptions{})
+				if err != nil {
+					zap.L().Error("failed to load graph api client secret", zap.Error(err), zap.String("secret", graphAPI.SecretRef.Name))
+				} else {
+					key := graphAPI.SecretRef.Key
+					if key == "" {
+						key = "secret"
+					}
+					if val, ok := secret.Data[key]; ok {
+						clientSecret = string(val)
+					} else {
+						zap.L().Error("key not found in graph api client secret", zap.String("secret", graphAPI.SecretRef.Name), zap.String("key", key))
+					}
+				}
+			}
+		}
+
+		azureADEndpoint := graphAPI.AzureADEndpoint
+		graphEndpoint := graphAPI.GraphEndpoint
+
+		return email.NewGraphAPIClient(
+			tenant,
+			clientID,
+			clientSecret,
+			userID,
+			email.GraphAPIClientOptions{
+				CC:                     graphAPI.CC,
+				BCC:                    graphAPI.BCC,
+				DisableSaveToSentItems: graphAPI.DisableSaveToSentItems,
+				AzureADEndpoint:        azureADEndpoint,
+				GraphEndpoint:          graphEndpoint,
+			},
+		)
+	}
+
 	return email.NewClient(r.config.EmailReports.SMTP.From, r.SMTPServer())
 }
 

@@ -18,6 +18,12 @@ func EncryptionFromString(enc string) mail.Encryption {
 	}
 }
 
+// Sender is the interface for sending email reports.
+// Implemented by Client (SMTP) and graphAPIClient (Microsoft Graph API).
+type Sender interface {
+	Send(report Report, to []string) error
+}
+
 type Client struct {
 	server *mail.SMTPServer
 	from   string
