@@ -11,6 +11,7 @@ import (
 	"github.com/kyverno/policy-reporter/pkg/crd/api/targetconfig"
 	"github.com/kyverno/policy-reporter/pkg/crd/api/targetconfig/v1alpha1"
 	"github.com/kyverno/policy-reporter/pkg/database"
+	"github.com/kyverno/policy-reporter/pkg/email"
 	"github.com/kyverno/policy-reporter/pkg/report"
 	"github.com/kyverno/policy-reporter/pkg/target"
 )
@@ -570,6 +571,28 @@ func Test_SMTP(t *testing.T) {
 		resolver := config.NewResolver(testConfig, &rest.Config{})
 
 		assert.NotNil(t, resolver.EmailClient())
+	})
+}
+
+func Test_GraphAPI(t *testing.T) {
+	t.Run("GraphAPI EmailClient", func(t *testing.T) {
+		graphConfig := &config.Config{
+			EmailReports: config.EmailReports{
+				GraphAPI: config.GraphAPI{
+					Enabled:                true,
+					Tenant:                 "tenant",
+					ClientID:               "client",
+					ClientSecret:           "secret",
+					UserID:                 "user",
+					CC:                     []string{"cc@example.com"},
+					BCC:                    []string{"bcc@example.com"},
+					DisableSaveToSentItems: false,
+				},
+			},
+		}
+		resolver := config.NewResolver(graphConfig, &rest.Config{})
+
+		assert.IsType(t, email.NewGraphAPIClient("", "", "", "", email.GraphAPIClientOptions{}), resolver.EmailClient())
 	})
 }
 

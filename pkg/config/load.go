@@ -110,6 +110,13 @@ func Load(cmd *cobra.Command) (*Config, error) {
 	_ = v.BindEnv("emailReports.smtp.host", "EMAIL_REPORTS_SMTP_HOST")
 	_ = v.BindEnv("emailReports.smtp.port", "EMAIL_REPORTS_SMTP_PORT")
 	_ = v.BindEnv("emailReports.smtp.from", "EMAIL_REPORTS_SMTP_FROM")
+	// bind graphAPI config from environment vars, if existing
+	_ = v.BindEnv("emailReports.graphAPI.clientSecret", "EMAIL_REPORTS_GRAPHAPI_CLIENTSECRET")
+	_ = v.BindEnv("emailReports.graphAPI.tenant", "EMAIL_REPORTS_GRAPHAPI_TENANT")
+	_ = v.BindEnv("emailReports.graphAPI.clientID", "EMAIL_REPORTS_GRAPHAPI_CLIENTID")
+	_ = v.BindEnv("emailReports.graphAPI.userID", "EMAIL_REPORTS_GRAPHAPI_USERID")
+	_ = v.BindEnv("emailReports.graphAPI.azureADEndpoint", "EMAIL_REPORTS_GRAPHAPI_AZUREADENDPOINT")
+	_ = v.BindEnv("emailReports.graphAPI.graphEndpoint", "EMAIL_REPORTS_GRAPHAPI_GRAPHENDPOINT")
 	// bind slack webhook from environment vars, if existing
 	_ = v.BindEnv("slack.webhook", "SLACK_WEBHOOK")
 	// bind ui host from environment vars, if existing
