@@ -2,6 +2,7 @@ package database
 
 import (
 	"context"
+	"strings"
 	"time"
 
 	"github.com/prometheus/client_golang/prometheus"
@@ -9,6 +10,11 @@ import (
 	"github.com/uptrace/bun"
 	"github.com/uptrace/bun/dialect"
 )
+
+var errorMetric = promauto.NewCounterVec(prometheus.CounterOpts{
+	Name: "policy_reporter_database_errors_total",
+	Help: "Total number of database errors",
+}, []string{"operation", "table", "reason"})
 
 func RegisterDBStats(name string) *prometheus.GaugeVec {
 	return promauto.NewGaugeVec(prometheus.GaugeOpts{
@@ -128,4 +134,20 @@ func dbSystem(db *bun.DB) string {
 	default:
 		return ""
 	}
+}
+
+func mapReason(err error) string {
+	if err == nil {
+		return ""
+	}
+
+	if strings.Contains(err.Error(), "timeout") {
+		return "timeout"
+	}
+
+	if strings.Contains(err.Error(), "refused") {
+		return "connection_refused"
+	}
+
+	return "unknown"
 }
