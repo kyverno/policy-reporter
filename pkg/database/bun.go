@@ -10,6 +10,7 @@ import (
 
 	_ "github.com/mattn/go-sqlite3"
 	"github.com/openreports/reports-api/apis/openreports.io/v1alpha1"
+	"github.com/prometheus/client_golang/prometheus"
 	"github.com/uptrace/bun"
 	"github.com/uptrace/bun/dialect"
 	"github.com/uptrace/bun/dialect/sqlitedialect"
@@ -958,6 +959,7 @@ func (s *Store) Add(ctx context.Context, report openreports.ReportInterface) err
 	_, err := s.db.NewInsert().Model(MapPolicyReport(report)).Exec(ctx)
 	if err != nil {
 		zap.L().Error("failed to persist policy report", zap.Error(err))
+		errorMetric.With(prometheus.Labels{"operation": "INSERT", "table": "policy_report", "reason": mapReason(err)}).Inc()
 	}
 
 	filters := chunkSlice(MapPolicyReportFilter(report), 50)
@@ -965,6 +967,7 @@ func (s *Store) Add(ctx context.Context, report openreports.ReportInterface) err
 		_, err = s.db.NewInsert().Ignore().Model(&list).Exec(ctx)
 		if err != nil {
 			zap.L().Error("failed to bulk import policy report filter", zap.Error(err))
+			errorMetric.With(prometheus.Labels{"operation": "INSERT", "table": "policy_report_filter", "reason": mapReason(err)}).Inc()
 			return err
 		}
 	}
@@ -974,6 +977,7 @@ func (s *Store) Add(ctx context.Context, report openreports.ReportInterface) err
 		_, err = s.db.NewInsert().Model(&list).Exec(ctx)
 		if err != nil {
 			zap.L().Error("failed to bulk import policy report resources", zap.Error(err))
+			errorMetric.With(prometheus.Labels{"operation": "INSERT", "table": "policy_report_resource", "reason": mapReason(err)}).Inc()
 			return err
 		}
 	}
@@ -983,6 +987,7 @@ func (s *Store) Add(ctx context.Context, report openreports.ReportInterface) err
 		_, err = s.db.NewInsert().Ignore().Model(&list).Exec(ctx)
 		if err != nil {
 			zap.L().Error("failed to bulk import policy report results", zap.Error(err))
+			errorMetric.With(prometheus.Labels{"operation": "INSERT", "table": "policy_report_result", "reason": mapReason(err)}).Inc()
 			return err
 		}
 	}
@@ -1004,7 +1009,8 @@ func (s *Store) Update(ctx context.Context, report openreports.ReportInterface) 
 func (s *Store) Remove(ctx context.Context, id string) error {
 	_, err := s.db.NewDelete().Model((*PolicyReport)(nil)).Where("id = ?", id).Exec(ctx)
 	if err != nil {
-		zap.L().Error("failed to remove previews policy report", zap.Error(err))
+		zap.L().Error("failed to remove previous policy report", zap.Error(err))
+		errorMetric.With(prometheus.Labels{"operation": "DELETE", "table": "policy_report", "reason": mapReason(err)}).Inc()
 	}
 
 	return err
@@ -1014,6 +1020,7 @@ func (s *Store) CleanUp(ctx context.Context) error {
 	_, err := s.db.NewDelete().Model((*PolicyReport)(nil)).Where("id is not null").Exec(ctx)
 	if err != nil {
 		zap.L().Error("failed to remove policy reports", zap.Error(err))
+		errorMetric.With(prometheus.Labels{"operation": "DELETE", "table": "policy_report", "reason": mapReason(err)}).Inc()
 	}
 
 	return err
