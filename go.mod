@@ -1,6 +1,6 @@
 module github.com/kyverno/policy-reporter
 
-go 1.26.0
+go 1.26.4
 
 require (
 	cloud.google.com/go/storage v1.63.0
