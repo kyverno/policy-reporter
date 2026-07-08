@@ -1,6 +1,6 @@
 # Changelog
 
-# Helm Chart v3.81.1
+# Helm Chart v3.8.1
 
 ## Policy Reporter v3.8.1
 
