@@ -8,9 +8,15 @@ import (
 	"io"
 	"net/http"
 	"strings"
+	"time"
 
+	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/clientcredentials"
 )
+
+// requestTimeout bounds each HTTP request (token fetch and sendMail),
+// including connection setup, TLS handshake and reading the response body.
+const requestTimeout = 30 * time.Second
 
 type emailAddress struct {
 	Address string `json:"address"`
@@ -144,8 +150,14 @@ func NewGraphAPIClient(tenant, clientID, clientSecret, userID string, opts Graph
 		Scopes:       []string{fmt.Sprintf("%s/.default", graphEndpoint)},
 	}
 
+	// Token requests are made through the client stored in the oauth2.HTTPClient
+	// context value, so give it a timeout too instead of http.DefaultClient's none.
+	ctx := context.WithValue(context.Background(), oauth2.HTTPClient, &http.Client{Timeout: requestTimeout})
+	httpClient := config.Client(ctx)
+	httpClient.Timeout = requestTimeout
+
 	return &graphAPIClient{
-		httpClient:             config.Client(context.Background()),
+		httpClient:             httpClient,
 		userID:                 userID,
 		cc:                     opts.CC,
 		bcc:                    opts.BCC,
