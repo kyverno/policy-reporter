@@ -42,7 +42,7 @@ endif
 
 TOOLS_DIR                     := $(PWD)/.tools
 KIND                 		  := $(TOOLS_DIR)/kind
-KIND_VERSION                  := v0.29.0
+KIND_VERSION                  := v0.32.0
 KO             				  := $(TOOLS_DIR)/ko
 KO_VERSION     				  := v0.18.0
 HELM                          := $(TOOLS_DIR)/helm
