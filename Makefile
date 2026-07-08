@@ -2,14 +2,14 @@
 # DEFAULTS #
 ############
 
-KIND_IMAGE           ?= kindest/node:v1.33.1
+KIND_IMAGE           ?= kindest/node:v1.36.1
 KIND_NAME            ?= kind
 USE_CONFIG           ?= default
 KUBECONFIG           ?= ""
 PIP                  ?= "pip3"
 GO 					 ?= go
 BUILD 				 ?= build
-IMAGE_TAG 			 ?= 3.0.0
+IMAGE_TAG 			 ?= 3.8.1
 
 #############
 # VARIABLES #

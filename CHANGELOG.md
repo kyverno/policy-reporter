@@ -1,5 +1,23 @@
 # Changelog
 
+# Helm Chart v3.81.1
+
+## Policy Reporter v3.8.1
+
+*  fix(api): fall back to embedded HTML report templates [[#1479](https://github.com/kyverno/policy-reporter/pull/1479)] by [arpitjain099](https://github.com/arpitjain099)
+* feat(db): new counter metric `policy_reporter_database_errors_total` for failed DB write operations
+* feat(api): new API endpoints for cluster statistics
+
+## Policy Reporter UI v2.6.1
+
+* feat(ui): Cluster Summary Dashboard
+* feat(ui): init cluster from URL Query in a multi cluster setup
+* chore(ui): Bump Vuetify to v4
+
+## Policy Reporter Trivy Plugin v0.4.15
+
+* fix(trivy): avoid panic loading basic auth secret [[#359](https://github.com/kyverno/policy-reporter-plugins/pull/359)] by [Suhani95](https://github.com/Suhani95)
+
 # Helm Chart v3.7.2
 
 ## Chart
