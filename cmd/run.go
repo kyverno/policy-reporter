@@ -31,6 +31,15 @@ func newRunCMD(version string) *cobra.Command {
 			}
 			c.Version = version
 
+			logger, err := config.SetupLogger(c)
+			if err != nil {
+				return err
+			}
+			if err := config.SetupMemLimit(c); err != nil {
+				logger.Error("failed to setup memlimit", zap.Error(err))
+				return err
+			}
+
 			var k8sConfig *rest.Config
 			if c.K8sClient.Kubeconfig != "" {
 				k8sConfig, err = clientcmd.BuildConfigFromFlags("", c.K8sClient.Kubeconfig)
@@ -47,11 +56,6 @@ func newRunCMD(version string) *cobra.Command {
 			readinessProbe := config.NewReadinessProbe(c)
 
 			resolver := config.NewResolver(c, k8sConfig)
-			logger, err := resolver.Logger()
-			if err != nil {
-				return err
-			}
-
 			var wgClient, orClient report.PolicyReportClient
 
 			orClient, err = resolver.OpenReportsClient()
@@ -293,6 +297,8 @@ func newRunCMD(version string) *cobra.Command {
 	cmd.PersistentFlags().Int("worker", 5, "amount of queue worker")
 	cmd.PersistentFlags().Float32("qps", 20, "K8s RESTClient QPS")
 	cmd.PersistentFlags().Int("burst", 50, "K8s RESTClient burst")
+	cmd.PersistentFlags().Bool("auto-memory-enabled", true, "Enable automatic GOMEMLIMIT configuration based on container or system memory.")
+	cmd.PersistentFlags().Float64("auto-memory-ratio", 0.9, "The ratio of reserved GOMEMLIMIT memory to the detected maximum container or system memory. Must be greater than 0 and less than or equal to 1.")
 
 	flag.Parse()
 

@@ -18,7 +18,6 @@ import (
 	"github.com/uptrace/bun/dialect"
 	mail "github.com/xhit/go-simple-mail/v2"
 	"go.uber.org/zap"
-	"go.uber.org/zap/zapcore"
 	"k8s.io/client-go/discovery"
 	k8s "k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/metadata"
@@ -900,55 +899,6 @@ func (r *Resolver) ResultCache() cache.Cache {
 	}
 
 	return r.resultCache
-}
-
-// Logger resolver method
-func (r *Resolver) Logger() (*zap.Logger, error) {
-	if r.logger != nil {
-		return r.logger, nil
-	}
-
-	encoder := zap.NewProductionEncoderConfig()
-	if r.config.Logging.Development {
-		encoder = zap.NewDevelopmentEncoderConfig()
-		encoder.EncodeTime = zapcore.TimeEncoderOfLayout("2006-01-02 15:04:05")
-	}
-
-	output := "json"
-	if r.config.Logging.Encoding != "json" {
-		output = "console"
-		encoder.EncodeCaller = nil
-	}
-
-	var sampling *zap.SamplingConfig
-	if !r.config.Logging.Development {
-		sampling = &zap.SamplingConfig{
-			Initial:    100,
-			Thereafter: 100,
-		}
-	}
-
-	config := zap.Config{
-		Level:             zap.NewAtomicLevelAt(zapcore.Level(r.config.Logging.LogLevel)),
-		Development:       r.config.Logging.Development,
-		Sampling:          sampling,
-		Encoding:          output,
-		EncoderConfig:     encoder,
-		DisableStacktrace: !r.config.Logging.Development,
-		OutputPaths:       []string{"stderr"},
-		ErrorOutputPaths:  []string{"stderr"},
-	}
-
-	logger, err := config.Build()
-	if err != nil {
-		return nil, err
-	}
-
-	r.logger = logger
-
-	zap.ReplaceGlobals(logger)
-
-	return r.logger, nil
 }
 
 // NewResolver constructor function
