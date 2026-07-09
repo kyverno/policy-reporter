@@ -42,6 +42,21 @@ type SMTP struct {
 	Certificate string `mapstructure:"certificate"`
 }
 
+// GraphAPI configuration
+type GraphAPI struct {
+	Enabled                bool     `mapstructure:"enabled"`
+	Tenant                 string   `mapstructure:"tenant"`
+	ClientID               string   `mapstructure:"clientID"`
+	ClientSecret           string   `mapstructure:"clientSecret"`
+	SecretRef              string   `mapstructure:"secretRef"`
+	UserID                 string   `mapstructure:"userID"`
+	CC                     []string `mapstructure:"cc"`
+	BCC                    []string `mapstructure:"bcc"`
+	DisableSaveToSentItems bool     `mapstructure:"disableSaveToSentItems"`
+	AzureADEndpoint        string   `mapstructure:"azureADEndpoint"`
+	GraphEndpoint          string   `mapstructure:"graphEndpoint"`
+}
+
 // EmailReport configuration
 type EmailReport struct {
 	To       []string          `mapstructure:"to"`
@@ -58,6 +73,7 @@ type Templates struct {
 // EmailReports configuration
 type EmailReports struct {
 	SMTP        SMTP        `mapstructure:"smtp"`
+	GraphAPI    GraphAPI    `mapstructure:"graphAPI"`
 	Summary     EmailReport `mapstructure:"summary"`
 	Violations  EmailReport `mapstructure:"violations"`
 	ClusterName string      `mapstructure:"clusterName"`

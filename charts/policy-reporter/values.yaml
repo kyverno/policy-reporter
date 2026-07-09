@@ -283,6 +283,29 @@ emailReports:
     skipTLS: false
     # -- SMTP Server Certificate file path
     certificate: ""
+  graphAPI:
+    # -- Enable Microsoft Graph API for E-Mail reports, takes precedence over SMTP
+    enabled: false
+    # -- Microsoft Graph API Tenant ID
+    tenant: ""
+    # -- Microsoft Graph API Client ID
+    clientID: ""
+    # -- Microsoft Graph API Client Secret
+    clientSecret: ""
+    # -- (optional) Name of an existing Secret with a `clientSecret` key, used instead of `clientSecret`
+    secretRef: ""
+    # -- Microsoft Graph API User ID (Sender)
+    userID: ""
+    # -- Microsoft Graph API CC Recipients
+    cc: []
+    # -- Microsoft Graph API BCC Recipients
+    bcc: []
+    # -- Disable saving sent messages to the Sent Items folder
+    disableSaveToSentItems: false
+    # -- Microsoft Graph API Azure AD Endpoint override
+    azureADEndpoint: "https://login.microsoftonline.com"
+    # -- Microsoft Graph API endpoint override
+    graphEndpoint: "https://graph.microsoft.com"
 
   summary:
     # -- Enable Summary E-Mail reports

@@ -127,6 +127,17 @@ Open `http://localhost:8082/` in your browser.
 | emailReports.smtp.encryption | string | `""` | SMTP Encryption Default is none, supports ssl/tls and starttls |
 | emailReports.smtp.skipTLS | bool | `false` | Skip SMTP TLS verification |
 | emailReports.smtp.certificate | string | `""` | SMTP Server Certificate file path |
+| emailReports.graphAPI.enabled | bool | `false` | Enable Microsoft Graph API for E-Mail reports, takes precedence over SMTP |
+| emailReports.graphAPI.tenant | string | `""` | Microsoft Graph API Tenant ID |
+| emailReports.graphAPI.clientID | string | `""` | Microsoft Graph API Client ID |
+| emailReports.graphAPI.clientSecret | string | `""` | Microsoft Graph API Client Secret |
+| emailReports.graphAPI.secretRef | string | `""` | (optional) Name of an existing Secret with a `clientSecret` key, used instead of `clientSecret` |
+| emailReports.graphAPI.userID | string | `""` | Microsoft Graph API User ID (Sender) |
+| emailReports.graphAPI.cc | list | `[]` | Microsoft Graph API CC Recipients |
+| emailReports.graphAPI.bcc | list | `[]` | Microsoft Graph API BCC Recipients |
+| emailReports.graphAPI.disableSaveToSentItems | bool | `false` | Disable saving sent messages to the Sent Items folder |
+| emailReports.graphAPI.azureADEndpoint | string | `"https://login.microsoftonline.com"` | Microsoft Graph API Azure AD Endpoint override |
+| emailReports.graphAPI.graphEndpoint | string | `"https://graph.microsoft.com"` | Microsoft Graph API endpoint override |
 | emailReports.summary.enabled | bool | `false` | Enable Summary E-Mail reports |
 | emailReports.summary.schedule | string | `"0 8 * * *"` | CronJob schedule |
 | emailReports.summary.activeDeadlineSeconds | int | `300` | CronJob activeDeadlineSeconds |

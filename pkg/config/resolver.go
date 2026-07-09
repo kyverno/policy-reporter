@@ -58,6 +58,7 @@ type Resolver struct {
 	config             *Config
 	k8sConfig          *rest.Config
 	clientset          *k8s.Clientset
+	k8sClient          k8s.Interface
 	publisher          report.EventPublisher
 	policyStore        *database.Store
 	database           *bun.DB
@@ -382,9 +383,21 @@ func (r *Resolver) Clientset() (*k8s.Clientset, error) {
 	return r.clientset, nil
 }
 
+func (r *Resolver) k8s() (k8s.Interface, error) {
+	if r.k8sClient != nil {
+		return r.k8sClient, nil
+	}
+	clientset, err := r.Clientset()
+	if err != nil {
+		return nil, err
+	}
+	r.k8sClient = clientset
+	return r.k8sClient, nil
+}
+
 // SecretClient resolver method
 func (r *Resolver) SecretClient() secrets.Client {
-	clientset, err := r.Clientset()
+	clientset, err := r.k8s()
 	if err != nil {
 		return nil
 	}
@@ -654,8 +667,52 @@ func (r *Resolver) SMTPServer() *mail.SMTPServer {
 	return server
 }
 
-func (r *Resolver) EmailClient() *email.Client {
+func (r *Resolver) EmailClient() email.Sender {
+	graphAPI := r.config.EmailReports.GraphAPI
+	if graphAPI.Enabled {
+		return email.NewGraphAPIClient(
+			graphAPI.Tenant,
+			graphAPI.ClientID,
+			r.graphAPIClientSecret(graphAPI),
+			graphAPI.UserID,
+			email.GraphAPIClientOptions{
+				CC:                     graphAPI.CC,
+				BCC:                    graphAPI.BCC,
+				DisableSaveToSentItems: graphAPI.DisableSaveToSentItems,
+				AzureADEndpoint:        graphAPI.AzureADEndpoint,
+				GraphEndpoint:          graphAPI.GraphEndpoint,
+			},
+		)
+	}
+
 	return email.NewClient(r.config.EmailReports.SMTP.From, r.SMTPServer())
+}
+
+// graphAPIClientSecret resolves the Graph API client secret from the referenced
+// secret's "clientSecret" key, falling back to the inline configured value.
+func (r *Resolver) graphAPIClientSecret(graphAPI GraphAPI) string {
+	if graphAPI.SecretRef == "" {
+		return graphAPI.ClientSecret
+	}
+
+	client := r.SecretClient()
+	if client == nil {
+		zap.L().Error("failed to create secret client for graph api client secret", zap.String("secretRef", graphAPI.SecretRef))
+		return graphAPI.ClientSecret
+	}
+
+	values, err := client.Get(context.Background(), graphAPI.SecretRef)
+	if err != nil {
+		zap.L().Error("failed to load graph api client secret", zap.Error(err), zap.String("secretRef", graphAPI.SecretRef))
+		return graphAPI.ClientSecret
+	}
+
+	if values.ClientSecret == "" {
+		zap.L().Error("clientSecret key not found in graph api secret", zap.String("secretRef", graphAPI.SecretRef))
+		return graphAPI.ClientSecret
+	}
+
+	return values.ClientSecret
 }
 
 func (r *Resolver) TargetConfigClient() (*targetconfig.Client, error) {
