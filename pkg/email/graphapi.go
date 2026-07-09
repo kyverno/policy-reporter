@@ -12,6 +12,8 @@ import (
 
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/clientcredentials"
+
+	utilhttp "github.com/kyverno/policy-reporter/pkg/target/http"
 )
 
 // requestTimeout bounds each HTTP request (token fetch and sendMail),
@@ -151,13 +153,10 @@ func NewGraphAPIClient(tenant, clientID, clientSecret, userID string, opts Graph
 	}
 
 	// Token requests are made through the client stored in the oauth2.HTTPClient
-	// context value, so give it a timeout too instead of http.DefaultClient's none.
-	ctx := context.WithValue(context.Background(), oauth2.HTTPClient, &http.Client{Timeout: requestTimeout})
-	httpClient := config.Client(ctx)
-	httpClient.Timeout = requestTimeout
+	ctx := context.WithValue(context.Background(), oauth2.HTTPClient, utilhttp.NewClient("", false))
 
 	return &graphAPIClient{
-		httpClient:             httpClient,
+		httpClient:             config.Client(ctx),
 		userID:                 userID,
 		cc:                     opts.CC,
 		bcc:                    opts.BCC,
