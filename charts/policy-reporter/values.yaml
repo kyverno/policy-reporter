@@ -962,6 +962,12 @@ periodicSync:
   # Interval in minutes for periodic sync
   interval: 30
 
+autoMemoryLimit:
+  # Enable automatic GOMEMLIMIT configuration based on container or system memory
+  enabled: true
+  # The ratio of reserved GOMEMLIMIT memory to the detected maximum container or system memory. Must be greater than 0 and less than or equal to 1.
+  ratio: 0.9
+
 # enabled if replicaCount > 1
 podDisruptionBudget:
   # -- Configures the minimum available pods for policy-reporter disruptions.

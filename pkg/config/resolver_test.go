@@ -551,7 +551,7 @@ func Test_RegisterSendResultListener(t *testing.T) {
 	t.Run("Register SendResultListener with Targets", func(t *testing.T) {
 		t.Parallel()
 		resolver := config.NewResolver(testConfig, &rest.Config{})
-		resolver.Logger()
+		config.SetupLogger(testConfig)
 		resolver.RegisterSendResultListener()
 
 		assert.Len(t, resolver.EventPublisher().GetListener(), 1, "Expected one Listener to be registered")
@@ -594,19 +594,6 @@ func Test_GraphAPI(t *testing.T) {
 
 		assert.IsType(t, email.NewGraphAPIClient("", "", "", "", email.GraphAPIClientOptions{}), resolver.EmailClient())
 	})
-}
-
-func Test_ResolveLogger(t *testing.T) {
-	t.Parallel()
-	resolver := config.NewResolver(testConfig, &rest.Config{})
-
-	logger1, _ := resolver.Logger()
-	assert.NotNil(t, logger1)
-
-	logger2, _ := resolver.Logger()
-	assert.NotNil(t, logger2)
-
-	assert.Equal(t, logger1, logger2, "A second call resolver.Logger() should return the cached first cache")
 }
 
 func Test_ResolveEnableLeaderElection(t *testing.T) {

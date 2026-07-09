@@ -1,6 +1,7 @@
 package send
 
 import (
+	"flag"
 	"strings"
 	"sync"
 
@@ -22,6 +23,14 @@ func NewViolationsCMD() *cobra.Command {
 			if err != nil {
 				return err
 			}
+			logger, err := config.SetupLogger(c)
+			if err != nil {
+				return err
+			}
+			if err := config.SetupMemLimit(c); err != nil {
+				logger.Error("failed to setup memlimit", zap.Error(err))
+				return err
+			}
 
 			var k8sConfig *rest.Config
 			if c.K8sClient.Kubeconfig != "" {
@@ -34,10 +43,6 @@ func NewViolationsCMD() *cobra.Command {
 			}
 
 			resolver := config.NewResolver(c, k8sConfig)
-			logger, err := resolver.Logger()
-			if err != nil {
-				return err
-			}
 
 			generator, err := resolver.ViolationsGenerator()
 			if err != nil {
@@ -120,6 +125,10 @@ func NewViolationsCMD() *cobra.Command {
 			return nil
 		},
 	}
+
+	cmd.PersistentFlags().Bool("auto-memory-enabled", true, "Enable automatic GOMEMLIMIT configuration based on container or system memory.")
+	cmd.PersistentFlags().Float64("auto-memory-ratio", 0.9, "The ratio of reserved GOMEMLIMIT memory to the detected maximum container or system memory. Must be greater than 0 and less than or equal to 1.")
+	flag.Parse()
 
 	return cmd
 }

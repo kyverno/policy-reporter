@@ -91,6 +91,14 @@ func Load(cmd *cobra.Command) (*Config, error) {
 		v.BindPFlag("openreports", flag)
 	}
 
+	if flag := cmd.Flags().Lookup("auto-memory-ratio"); flag != nil {
+		v.BindPFlag("autoMemoryLimit.ratio", flag)
+	}
+
+	if flag := cmd.Flags().Lookup("auto-memory-enabled"); flag != nil {
+		v.BindPFlag("autoMemoryLimit.enabled", flag)
+	}
+
 	if err := v.BindEnv("leaderElection.podName", "POD_NAME"); err != nil {
 		log.Printf("[WARNING] failed to bind env POD_NAME")
 	}
