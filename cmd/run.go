@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"flag"
+	"fmt"
 
 	"github.com/spf13/cobra"
 	"go.uber.org/zap"
@@ -33,11 +34,10 @@ func newRunCMD(version string) *cobra.Command {
 
 			logger, err := config.SetupLogger(c)
 			if err != nil {
-				return err
+				return fmt.Errorf("failed to setup logger: %w", err)
 			}
 			if err := config.SetupMemLimit(c); err != nil {
-				logger.Error("failed to setup memlimit", zap.Error(err))
-				return err
+				return fmt.Errorf("failed to setup memlimit: %w", err)
 			}
 
 			var k8sConfig *rest.Config
