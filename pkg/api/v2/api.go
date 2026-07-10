@@ -9,6 +9,7 @@ import (
 
 	"github.com/kyverno/policy-reporter/pkg/api"
 	db "github.com/kyverno/policy-reporter/pkg/database"
+	"github.com/kyverno/policy-reporter/pkg/helper"
 	"github.com/kyverno/policy-reporter/pkg/kubernetes/namespaces"
 	"github.com/kyverno/policy-reporter/pkg/target"
 )
@@ -150,7 +151,11 @@ func (h *APIHandler) ListTotalResults(ctx *gin.Context) {
 	}
 	count, err := h.store.CountTotalResourceResults(ctx, filter)
 
-	api.SendResponse(ctx, Paginated[ResourceResult]{Count: count, Items: MapResourceResults(list)}, "failed to load resource result list", err)
+	api.SendResponse(ctx, Paginated[ResourceResult]{Count: count, Items: MapResourceResults(helper.Map(list, func(r db.ResourceResult) db.ResourceResult {
+		r.Resource.APIVersion = "v1"
+		r.Resource.Kind = "Namespace"
+		return r
+	}))}, "failed to load resource result list", err)
 }
 
 func (h *APIHandler) ListClusterResourceResults(ctx *gin.Context) {
