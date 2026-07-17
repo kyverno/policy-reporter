@@ -18,6 +18,7 @@ require (
 	github.com/gin-contrib/pprof v1.5.4
 	github.com/gin-contrib/zap v1.1.7
 	github.com/gin-gonic/gin v1.12.0
+	github.com/go-openapi/inflect v0.21.6
 	github.com/go-redis/redis/v8 v8.11.5
 	github.com/go-sql-driver/mysql v1.10.0
 	github.com/google/uuid v1.6.0

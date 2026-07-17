@@ -2,8 +2,6 @@ package violations_test
 
 import (
 	"context"
-	"fmt"
-	"os"
 	"testing"
 	"time"
 
@@ -32,13 +30,6 @@ func Test_CreateReport(t *testing.T) {
 	if err != nil {
 		t.Fatalf("unexpected error: %s", err)
 	}
-
-	path, err := os.Getwd()
-	if err != nil {
-		t.Error(err)
-	}
-
-	fmt.Println(path)
 
 	reporter := violations.NewReporter("../../../templates", "Cluster", "Report")
 	report, err := reporter.Report(data, "html")

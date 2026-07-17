@@ -5,6 +5,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/go-openapi/inflect"
 	"github.com/openreports/reports-api/apis/openreports.io/v1alpha1"
 	"github.com/segmentio/fasthash/fnv1a"
 	corev1 "k8s.io/api/core/v1"
@@ -37,6 +38,12 @@ func (r *ResultAdapter) GetKind() string {
 
 func (r *ResultAdapter) GetID() string {
 	return r.ID
+}
+
+func ResourceAPI(res *corev1.ObjectReference) string {
+	resource := inflect.Pluralize(strings.ToLower(res.Kind))
+
+	return fmt.Sprintf("%s.%s", resource, res.APIVersion)
 }
 
 func ToResourceString(res *corev1.ObjectReference) string {
