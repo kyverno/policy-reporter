@@ -106,7 +106,7 @@ func TestV2(t *testing.T) {
 	t.Run("ResolveNamespaces", func(t *testing.T) {
 		t.Parallel()
 		body := new(bytes.Buffer)
-		body.Write([]byte(`{"team":"team-a"}`))
+		body.Write([]byte(`{"team":"team-b"}`))
 
 		req, _ := http.NewRequest("POST", "/v2/namespaces/resolve-selector", body)
 		w := httptest.NewRecorder()
@@ -470,9 +470,9 @@ func TestV2(t *testing.T) {
 		}
 	})
 
-	t.Run("ListFindings", func(t *testing.T) {
+	t.Run("ListFindings Namespaced", func(t *testing.T) {
 		t.Parallel()
-		req, _ := http.NewRequest("GET", "/v2/findings", nil)
+		req, _ := http.NewRequest("GET", "/v2/findings?namespaced=true", nil)
 		w := httptest.NewRecorder()
 
 		server.Serve(w, req)
@@ -482,16 +482,15 @@ func TestV2(t *testing.T) {
 
 			json.NewDecoder(w.Body).Decode(&resp)
 
-			assert.Equal(t, 6, resp.Total)
-			assert.Equal(t, 4, resp.PerResult["fail"])
+			assert.Equal(t, 5, resp.Total)
+			assert.Equal(t, 3, resp.PerResult["fail"])
 			assert.Equal(t, 1, resp.PerResult["pass"])
 			assert.Equal(t, 1, resp.PerResult["warn"])
 			assert.Equal(t, 2, len(resp.Counts))
 			assert.Contains(t, resp.Counts, &v2.FindingCounts{
-				Total:  3,
+				Total:  2,
 				Source: "Kyverno",
 				Counts: map[string]int{
-					"fail": 1,
 					"pass": 1,
 					"warn": 1,
 				},
@@ -501,6 +500,32 @@ func TestV2(t *testing.T) {
 				Source: "test",
 				Counts: map[string]int{
 					"fail": 3,
+				},
+			})
+		}
+	})
+	t.Run("ListFindings Cluster Scoped", func(t *testing.T) {
+		t.Parallel()
+		req, _ := http.NewRequest("GET", "/v2/findings?namespaced=false", nil)
+		w := httptest.NewRecorder()
+
+		server.Serve(w, req)
+
+		if ok := assert.Equal(t, http.StatusOK, w.Code); ok {
+			resp := v2.Findings{}
+
+			json.NewDecoder(w.Body).Decode(&resp)
+
+			assert.Equal(t, 1, resp.Total)
+			assert.Equal(t, 1, resp.PerResult["fail"])
+			assert.Equal(t, 0, resp.PerResult["pass"])
+			assert.Equal(t, 0, resp.PerResult["warn"])
+			assert.Equal(t, 1, len(resp.Counts))
+			assert.Contains(t, resp.Counts, &v2.FindingCounts{
+				Total:  1,
+				Source: "Kyverno",
+				Counts: map[string]int{
+					"fail": 1,
 				},
 			})
 		}
