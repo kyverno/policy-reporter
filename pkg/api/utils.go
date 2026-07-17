@@ -59,20 +59,21 @@ func BuildFilter(ctx *gin.Context) db.Filter {
 	}
 
 	return db.Filter{
-		Namespaces:  ctx.QueryArray("namespaces"),
-		Kinds:       ctx.QueryArray("kinds"),
-		Resources:   ctx.QueryArray("resources"),
-		Sources:     ctx.QueryArray("sources"),
-		Categories:  ctx.QueryArray("categories"),
-		Severities:  ctx.QueryArray("severities"),
-		Policies:    ctx.QueryArray("policies"),
-		Rules:       ctx.QueryArray("rules"),
-		Status:      ctx.QueryArray("status"),
-		ReportLabel: labels,
-		Search:      ctx.Query("search"),
-		ResourceID:  id,
-		Exclude:     exclude,
-		Namespaced:  ctx.Query("namespaced") == "true",
+		Namespaces:   ctx.QueryArray("namespaces"),
+		Kinds:        ctx.QueryArray("kinds"),
+		Resources:    ctx.QueryArray("resources"),
+		ResourceAPIs: ctx.QueryArray("apis"),
+		Sources:      ctx.QueryArray("sources"),
+		Categories:   ctx.QueryArray("categories"),
+		Severities:   ctx.QueryArray("severities"),
+		Policies:     ctx.QueryArray("policies"),
+		Rules:        ctx.QueryArray("rules"),
+		Status:       ctx.QueryArray("status"),
+		ReportLabel:  labels,
+		Search:       ctx.Query("search"),
+		ResourceID:   id,
+		Exclude:      exclude,
+		Namespaced:   ctx.Query("namespaced") == "true",
 	}
 }
 

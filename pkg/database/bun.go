@@ -124,6 +124,7 @@ func (s *Store) FetchNamespacedFilter(ctx context.Context, column string, filter
 			"f.category":           filter.Categories,
 			"f.policy":             filter.Policies,
 			"f.resource_kind":      filter.Kinds,
+			"f.resource_api":       filter.ResourceAPIs,
 			"f.resource_namespace": filter.Namespaces,
 		}).
 		FilterReportLabels(filter.ReportLabel).
@@ -142,6 +143,7 @@ func (s *Store) FetchClusterFilter(ctx context.Context, column string, filter Fi
 			"f.category":      filter.Categories,
 			"f.policy":        filter.Policies,
 			"f.resource_kind": filter.Kinds,
+			"f.resource_api":  filter.ResourceAPIs,
 		}).
 		FilterReportLabels(filter.ReportLabel).
 		ClusterScope().
@@ -160,6 +162,7 @@ func (s *Store) FetchNamespacedResources(ctx context.Context, filter Filter) ([]
 			"res.category":           filter.Categories,
 			"res.policy":             filter.Policies,
 			"res.resource_kind":      filter.Kinds,
+			"res.resource_api":       filter.ResourceAPIs,
 			"res.resource_namespace": filter.Namespaces,
 		}).
 		FilterReportLabels(filter.ReportLabel).
@@ -179,6 +182,7 @@ func (s *Store) FetchClusterResources(ctx context.Context, filter Filter) ([]Res
 			"f.category":           filter.Categories,
 			"f.policy":             filter.Policies,
 			"f.resource_kind":      filter.Kinds,
+			"f.resource_api":       filter.ResourceAPIs,
 			"f.resource_namespace": filter.Namespaces,
 		}).
 		FilterReportLabels(filter.ReportLabel).
@@ -197,6 +201,7 @@ func (s *Store) FetchClusterScopedStatusCounts(ctx context.Context, filter Filte
 			"f.category":      filter.Categories,
 			"f.policy":        filter.Policies,
 			"f.resource_kind": filter.Kinds,
+			"f.resource_api":  filter.ResourceAPIs,
 			"f.result":        filter.Status,
 			"f.severity":      filter.Severities,
 		}).
@@ -217,6 +222,7 @@ func (s *Store) FetchNamespaceScopedStatusCounts(ctx context.Context, filter Fil
 			"f.category":           filter.Categories,
 			"f.policy":             filter.Policies,
 			"f.resource_kind":      filter.Kinds,
+			"f.resource_api":       filter.ResourceAPIs,
 			"f.resource_namespace": filter.Namespaces,
 			"f.result":             filter.Status,
 			"f.severity":           filter.Severities,
@@ -239,6 +245,7 @@ func (s *Store) FetchSources(ctx context.Context, filter Filter) ([]string, erro
 	err := NewFilterQuery(s.db, "f.source").
 		FilterMap(map[string][]string{
 			"f.resource_kind": filter.Kinds,
+			"f.resource_api":  filter.ResourceAPIs,
 		}).
 		FilterValue("id", filter.ResourceID).
 		FilterReportLabels(filter.ReportLabel).
@@ -256,6 +263,7 @@ func (s *Store) FetchCategories(ctx context.Context, filter Filter) ([]Category,
 			"f.source":             filter.Sources,
 			"f.category":           filter.Categories,
 			"f.resource_kind":      filter.Kinds,
+			"f.resource_api":       filter.ResourceAPIs,
 			"f.resource_namespace": filter.Namespaces,
 		}).
 		Exclude(filter, "f").
@@ -372,12 +380,13 @@ func (s *Store) FetchNamespaceResourceResults(ctx context.Context, filter Filter
 		Columns("res.id", "resource_uid", "resource_kind", "resource_api_version", "resource_namespace", "resource_name").
 		SelectStatusSummaries().
 		SelectSeveritySummaries().
-		Group("res.id", "resource_uid", "resource_kind", "resource_api_version", "resource_namespace", "resource_name").
+		Group("res.id", "resource_uid", "resource_kind", "resource_api_version", "resource_namespace", "resource_name", "resource_api").
 		FilterMap(map[string][]string{
 			"source":             filter.Sources,
 			"category":           filter.Categories,
 			"resource_namespace": filter.Namespaces,
 			"resource_kind":      filter.Kinds,
+			"resource_api":       filter.ResourceAPIs,
 		}).
 		HasStatusResults(filter.Status).
 		HasSeverityResults(filter.Severities).
@@ -401,6 +410,7 @@ func (s *Store) CountNamespaceResourceResults(ctx context.Context, filter Filter
 			"category":           filter.Categories,
 			"resource_namespace": filter.Namespaces,
 			"resource_kind":      filter.Kinds,
+			"resource_api":       filter.ResourceAPIs,
 		}).
 		HasStatusResults(filter.Status).
 		HasSeverityResults(filter.Severities).
@@ -425,6 +435,7 @@ func (s *Store) FetchTotalResourceResults(ctx context.Context, filter Filter, pa
 			"source":        filter.Sources,
 			"category":      filter.Categories,
 			"resource_kind": filter.Kinds,
+			"resource_api":  filter.ResourceAPIs,
 		}).
 		HasStatusResults(filter.Status).
 		HasSeverityResults(filter.Severities).
@@ -460,6 +471,7 @@ func (s *Store) CountTotalResourceResults(ctx context.Context, filter Filter) (i
 			"source":        filter.Sources,
 			"category":      filter.Categories,
 			"resource_kind": filter.Kinds,
+			"resource_api":  filter.ResourceAPIs,
 		}).
 		HasStatusResults(filter.Status).
 		HasSeverityResults(filter.Severities).
@@ -473,14 +485,15 @@ func (s *Store) FetchClusterResourceResults(ctx context.Context, filter Filter, 
 	results := make([]ResourceResult, 0)
 
 	err := FromQuery(s.db.NewSelect().Model(&results)).
-		Columns("res.id", "resource_uid", "resource_kind", "resource_api_version", "resource_namespace", "resource_name").
+		Columns("res.id", "resource_uid", "resource_kind", "resource_api_version", "resource_name", "resource_api").
 		SelectStatusSummaries().
 		SelectSeveritySummaries().
-		Group("res.id", "resource_uid", "resource_kind", "resource_api_version", "resource_namespace", "resource_name").
+		Group("res.id", "resource_uid", "resource_kind", "resource_api_version", "resource_name", "resource_api").
 		FilterMap(map[string][]string{
 			"source":        filter.Sources,
 			"category":      filter.Categories,
 			"resource_kind": filter.Kinds,
+			"resource_api":  filter.ResourceAPIs,
 		}).
 		HasStatusResults(filter.Status).
 		HasSeverityResults(filter.Severities).
@@ -503,6 +516,7 @@ func (s *Store) CountClusterResourceResults(ctx context.Context, filter Filter) 
 			"source":        filter.Sources,
 			"category":      filter.Categories,
 			"resource_kind": filter.Kinds,
+			"resource_api":  filter.ResourceAPIs,
 		}).
 		HasStatusResults(filter.Status).
 		HasSeverityResults(filter.Severities).
@@ -519,20 +533,21 @@ func (s *Store) FetchResourceResults(ctx context.Context, id string, filter Filt
 	results := make([]ResourceResult, 0)
 
 	err := FromQuery(s.db.NewSelect().Model(&results)).
-		Columns("res.id", "resource_uid", "resource_kind", "resource_api_version", "resource_namespace", "resource_name", "res.source").
+		Columns("res.id", "resource_uid", "resource_kind", "resource_api_version", "resource_namespace", "resource_name", "res.source", "resource_api").
 		SelectStatusSummaries().
 		FilterValue(`res.id`, id).
 		FilterMap(map[string][]string{
 			"source":        filter.Sources,
 			"category":      filter.Categories,
 			"resource_kind": filter.Kinds,
+			"resource_api":  filter.ResourceAPIs,
 		}).
 		HasStatusResults(filter.Status).
 		HasSeverityResults(filter.Severities).
 		FilterReportLabels(filter.ReportLabel).
 		ResourceSearch(filter.Search).
 		Order("res.source ASC").
-		Group("res.id", "resource_uid", "resource_kind", "resource_api_version", "resource_namespace", "resource_name", "res.source").
+		Group("res.id", "resource_uid", "resource_kind", "resource_api_version", "resource_namespace", "resource_name", "res.source", "resource_api").
 		Scan(ctx)
 
 	return results, err
@@ -579,6 +594,7 @@ func (s *Store) FetchResults(ctx context.Context, namespaced bool, filter Filter
 			"rule":               filter.Rules,
 			"resource_namespace": filter.Namespaces,
 			"resource_kind":      filter.Kinds,
+			"resource_api":       filter.ResourceAPIs,
 			"resource_name":      filter.Resources,
 			"result":             filter.Status,
 			"severity":           filter.Severities,
@@ -603,6 +619,7 @@ func (s *Store) CountResults(ctx context.Context, namespaced bool, filter Filter
 			"rule":               filter.Rules,
 			"resource_namespace": filter.Namespaces,
 			"resource_kind":      filter.Kinds,
+			"resource_api":       filter.ResourceAPIs,
 			"resource_name":      filter.Resources,
 			"result":             filter.Status,
 			"severity":           filter.Severities,
@@ -683,6 +700,7 @@ func (s *Store) FetchClusterStatusCounts(ctx context.Context, source string, fil
 			"category":      filter.Categories,
 			"policy":        filter.Policies,
 			"resource_kind": filter.Kinds,
+			"resource_api":  filter.ResourceAPIs,
 		}).
 		FilterValue("f.source", source).
 		FilterReportLabels(filter.ReportLabel).
@@ -705,6 +723,7 @@ func (s *Store) FetchClusterSeverityCounts(ctx context.Context, source string, f
 			"category":      filter.Categories,
 			"policy":        filter.Policies,
 			"resource_kind": filter.Kinds,
+			"resource_api":  filter.ResourceAPIs,
 		}).
 		FilterValue("f.source", source).
 		FilterReportLabels(filter.ReportLabel).
@@ -726,6 +745,7 @@ func (s *Store) FetchNamespaceStatusCounts(ctx context.Context, source string, f
 		FilterMap(map[string][]string{
 			"f.category":           filter.Categories,
 			"f.resource_kind":      filter.Kinds,
+			"f.resource_api":       filter.ResourceAPIs,
 			"f.resource_namespace": filter.Namespaces,
 			"f.policy":             filter.Policies,
 			"f.result":             filter.Status,
@@ -751,6 +771,7 @@ func (s *Store) FetchNamespaceSeverityCounts(ctx context.Context, source string,
 		FilterMap(map[string][]string{
 			"f.category":           filter.Categories,
 			"f.resource_kind":      filter.Kinds,
+			"f.resource_api":       filter.ResourceAPIs,
 			"f.resource_namespace": filter.Namespaces,
 			"f.policy":             filter.Policies,
 			"f.severity":           filter.Severities,
@@ -777,6 +798,7 @@ func (s *Store) FetchTotalStatusCounts(ctx context.Context, source string, filte
 			"category":      filter.Categories,
 			"policy":        filter.Policies,
 			"resource_kind": filter.Kinds,
+			"resource_api":  filter.ResourceAPIs,
 		}).
 		FilterValue("f.source", source).
 		FilterReportLabels(filter.ReportLabel).
@@ -798,6 +820,7 @@ func (s *Store) FetchTotalSeverityCounts(ctx context.Context, source string, fil
 			"category":      filter.Categories,
 			"policy":        filter.Policies,
 			"resource_kind": filter.Kinds,
+			"resource_api":  filter.ResourceAPIs,
 		}).
 		FilterValue("f.source", source).
 		FilterReportLabels(filter.ReportLabel).
@@ -849,6 +872,7 @@ func (s *Store) FetchPolicies(ctx context.Context, filter Filter) ([]PolicyRepor
 			"f.source":        filter.Sources,
 			"f.category":      filter.Categories,
 			"f.resource_kind": filter.Kinds,
+			"f.resource_api":  filter.ResourceAPIs,
 		}).
 		PolicySearch(filter.Search).
 		Exclude(filter, "f").
@@ -873,7 +897,7 @@ func (s *Store) FetchFindingCounts(ctx context.Context, filter Filter) ([]Status
 			NamespaceScope().
 			Filter("resource_namespace", filter.Namespaces)
 	} else {
-		query.FilterOptionalNamespaces(filter.Namespaces)
+		query.ClusterScope()
 	}
 
 	err := query.
@@ -881,6 +905,7 @@ func (s *Store) FetchFindingCounts(ctx context.Context, filter Filter) ([]Status
 			"source":        filter.Sources,
 			"category":      filter.Categories,
 			"resource_kind": filter.Kinds,
+			"resource_api":  filter.ResourceAPIs,
 			"policy":        filter.Policies,
 			"f.result":      filter.Status,
 		}).
@@ -914,6 +939,7 @@ func (s *Store) FetchSeverityFindingCounts(ctx context.Context, filter Filter) (
 			"source":        filter.Sources,
 			"category":      filter.Categories,
 			"resource_kind": filter.Kinds,
+			"resource_api":  filter.ResourceAPIs,
 			"policy":        filter.Policies,
 			"severity":      filter.Severities,
 		}).

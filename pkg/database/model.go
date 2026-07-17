@@ -38,6 +38,7 @@ type PolicyReport struct {
 }
 
 type Resource struct {
+	API        string `bun:"api"`
 	APIVersion string `bun:"api_version"`
 	Kind       string
 	Name       string
@@ -101,6 +102,7 @@ type PolicyReportFilter struct {
 	PolicyReportID string `bun:"policy_report_id"`
 	Namespace      string `bun:"resource_namespace"`
 	Kind           string `bun:"resource_kind"`
+	API            string `bun:"resource_api"`
 	Policy         string
 	Result         string
 	Severity       string
@@ -114,7 +116,7 @@ func (r *PolicyReportFilter) Hash() string {
 	h1 = fnv1a.AddString64(h1, r.PolicyReportID)
 	h1 = fnv1a.AddString64(h1, r.Namespace)
 	h1 = fnv1a.AddString64(h1, r.Source)
-	h1 = fnv1a.AddString64(h1, r.Kind)
+	h1 = fnv1a.AddString64(h1, r.API)
 	h1 = fnv1a.AddString64(h1, r.Category)
 	h1 = fnv1a.AddString64(h1, r.Policy)
 	h1 = fnv1a.AddString64(h1, r.Severity)
@@ -151,6 +153,7 @@ func MapPolicyReportResults(polr openreports.ReportInterface) []*PolicyReportRes
 		}
 
 		resource := Resource{
+			API:        openreports.ResourceAPI(res),
 			APIVersion: res.APIVersion,
 			Kind:       res.Kind,
 			Name:       res.Name,
@@ -182,8 +185,13 @@ func MapPolicyReportResults(polr openreports.ReportInterface) []*PolicyReportRes
 func MapPolicyReportFilter(polr openreports.ReportInterface) []*PolicyReportFilter {
 	mapping := make(map[string]*PolicyReportFilter)
 	for _, res := range polr.GetResults() {
-		kind := res.GetKind()
-		if kind == "" && polr.GetScope() != nil {
+		var api, kind string
+
+		if res.HasResource() {
+			api = openreports.ResourceAPI(res.GetResource())
+			kind = res.GetKind()
+		} else if polr.GetScope() != nil {
+			api = openreports.ResourceAPI(polr.GetScope())
 			kind = polr.GetScope().Kind
 		}
 
@@ -192,6 +200,7 @@ func MapPolicyReportFilter(polr openreports.ReportInterface) []*PolicyReportFilt
 			Namespace:      polr.GetNamespace(),
 			Source:         res.Source,
 			Kind:           kind,
+			API:            api,
 			Category:       res.Category,
 			Policy:         res.Policy,
 			Severity:       string(res.Severity),
@@ -226,6 +235,7 @@ func MapPolicyReportResource(polr openreports.ReportInterface) []*ResourceResult
 		}
 
 		r := Resource{
+			API:        openreports.ResourceAPI(resource),
 			APIVersion: resource.APIVersion,
 			Kind:       resource.Kind,
 			UID:        string(resource.UID),
@@ -281,20 +291,21 @@ func MapPolicyReportResource(polr openreports.ReportInterface) []*ResourceResult
 }
 
 type Filter struct {
-	Kinds       []string
-	Categories  []string
-	Namespaces  []string
-	Sources     []string
-	Policies    []string
-	Rules       []string
-	Severities  []string
-	Status      []string
-	Resources   []string
-	ResourceID  string
-	ReportLabel map[string]string
-	Exclude     map[string][]string
-	Namespaced  bool
-	Search      string
+	Kinds        []string
+	Categories   []string
+	Namespaces   []string
+	Sources      []string
+	Policies     []string
+	Rules        []string
+	Severities   []string
+	Status       []string
+	Resources    []string
+	ResourceAPIs []string
+	ResourceID   string
+	ReportLabel  map[string]string
+	Exclude      map[string][]string
+	Namespaced   bool
+	Search       string
 }
 
 type Pagination struct {

@@ -70,8 +70,31 @@ func (h *APIHandler) ResolveNamespaceSelector(ctx *gin.Context) {
 	}
 
 	list, err := h.nsClient.List(ctx, selector)
+	if err != nil {
+		zap.L().Error("resolve namespace selector: failed to list namespaces", zap.Error(err))
+		ctx.AbortWithError(http.StatusInternalServerError, errors.New("failed to list namespaces"))
+	}
 
-	api.SendResponse(ctx, list, "failed to get namespaces for the provided selector", err)
+	if len(list) == 0 {
+		api.SendResponse(ctx, list, "", nil)
+		return
+	}
+
+	mapping := make(map[string]bool, len(list))
+	for _, ns := range list {
+		mapping[ns] = true
+	}
+
+	results := make([]string, 0, len(list))
+
+	namespaces, err := h.store.FetchNamespaces(ctx, api.BuildFilter(ctx))
+	for _, ns := range namespaces {
+		if _, ok := mapping[ns]; ok {
+			results = append(results, ns)
+		}
+	}
+
+	api.SendResponse(ctx, results, "failed to get namespaces for the provided selector", err)
 }
 
 func (h *APIHandler) ListNamespaces(ctx *gin.Context) {
@@ -160,7 +183,7 @@ func (h *APIHandler) ListTotalResults(ctx *gin.Context) {
 
 func (h *APIHandler) ListClusterResourceResults(ctx *gin.Context) {
 	filter := api.BuildFilter(ctx)
-	list, err := h.store.FetchClusterResourceResults(ctx, filter, api.BuildPagination(ctx, []string{"resource_namespace", "resource_name", "resource_uid"}))
+	list, err := h.store.FetchClusterResourceResults(ctx, filter, api.BuildPagination(ctx, []string{"resource_name", "resource_uid"}))
 	if err != nil {
 		zap.L().Error("failed to load resource results", zap.Error(err))
 		ctx.AbortWithStatus(http.StatusInternalServerError)
