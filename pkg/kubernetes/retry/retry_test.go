@@ -1,4 +1,4 @@
-package kubernetes_test
+package retry_test
 
 import (
 	"context"
@@ -12,7 +12,7 @@ import (
 	"k8s.io/client-go/kubernetes/fake"
 	v1 "k8s.io/client-go/kubernetes/typed/core/v1"
 
-	"github.com/kyverno/policy-reporter/pkg/kubernetes"
+	"github.com/kyverno/policy-reporter/pkg/kubernetes/retry"
 )
 
 func newFakeClient() v1.NamespaceInterface {
@@ -63,7 +63,7 @@ func TestRetry(t *testing.T) {
 		t.Parallel()
 		client := &ns{NamespaceInterface: newFakeClient()}
 
-		list, err := kubernetes.Retry(func() (*corev1.NamespaceList, error) {
+		list, err := retry.Retry(func() (*corev1.NamespaceList, error) {
 			return client.List(context.Background(), metav1.ListOptions{})
 		})
 
@@ -75,7 +75,7 @@ func TestRetry(t *testing.T) {
 		t.Parallel()
 		client := &ns{maxRetry: 1, NamespaceInterface: newFakeClient()}
 
-		list, err := kubernetes.Retry(func() (*corev1.NamespaceList, error) {
+		list, err := retry.Retry(func() (*corev1.NamespaceList, error) {
 			return client.List(context.Background(), metav1.ListOptions{})
 		})
 
@@ -87,7 +87,7 @@ func TestRetry(t *testing.T) {
 		t.Parallel()
 		client := &ns{NamespaceInterface: newFakeClient(), err: true}
 
-		_, err := kubernetes.Retry(func() (*corev1.NamespaceList, error) {
+		_, err := retry.Retry(func() (*corev1.NamespaceList, error) {
 			return client.List(context.Background(), metav1.ListOptions{})
 		})
 
@@ -98,7 +98,7 @@ func TestRetry(t *testing.T) {
 		t.Parallel()
 		try := 0
 
-		_, err := kubernetes.Retry(func() (any, error) {
+		_, err := retry.Retry(func() (any, error) {
 			try++
 
 			return nil, &kerr.StatusError{
@@ -114,7 +114,7 @@ func TestRetry(t *testing.T) {
 		t.Parallel()
 		try := 0
 
-		_, err := kubernetes.Retry(func() (any, error) {
+		_, err := retry.Retry(func() (any, error) {
 			try++
 
 			return nil, &kerr.StatusError{
@@ -130,7 +130,7 @@ func TestRetry(t *testing.T) {
 		t.Parallel()
 		try := 0
 
-		_, err := kubernetes.Retry(func() (any, error) {
+		_, err := retry.Retry(func() (any, error) {
 			try++
 
 			return nil, &kerr.StatusError{
@@ -146,7 +146,7 @@ func TestRetry(t *testing.T) {
 		t.Parallel()
 		try := 0
 
-		_, err := kubernetes.Retry(func() (any, error) {
+		_, err := retry.Retry(func() (any, error) {
 			try++
 
 			return nil, &kerr.StatusError{

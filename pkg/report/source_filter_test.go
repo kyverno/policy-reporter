@@ -42,7 +42,7 @@ func TestSourceFilter(t *testing.T) {
 	t.Parallel()
 	t.Run("include by namespace succeed", func(t *testing.T) {
 		t.Parallel()
-		filter := report.NewSourceFilter(nil, nil, []report.SourceValidation{
+		filter := report.NewSourceFilter(nil, nil, nil, nil, []report.SourceValidation{
 			{
 				Selector: report.ReportSelector{
 					Sources: []string{"kyverno"},
@@ -64,7 +64,7 @@ func TestSourceFilter(t *testing.T) {
 
 	t.Run("include by namespace fails", func(t *testing.T) {
 		t.Parallel()
-		filter := report.NewSourceFilter(nil, nil, []report.SourceValidation{
+		filter := report.NewSourceFilter(nil, nil, nil, nil, []report.SourceValidation{
 			{
 				Selector: report.ReportSelector{
 					Source: "kyverno",
@@ -86,7 +86,7 @@ func TestSourceFilter(t *testing.T) {
 
 	t.Run("include by kind succeed", func(t *testing.T) {
 		t.Parallel()
-		filter := report.NewSourceFilter(nil, nil, []report.SourceValidation{
+		filter := report.NewSourceFilter(nil, nil, nil, nil, []report.SourceValidation{
 			{
 				Selector: report.ReportSelector{
 					Source: "kyverno",
@@ -108,7 +108,7 @@ func TestSourceFilter(t *testing.T) {
 
 	t.Run("include by kind fails", func(t *testing.T) {
 		t.Parallel()
-		filter := report.NewSourceFilter(nil, nil, []report.SourceValidation{
+		filter := report.NewSourceFilter(nil, nil, nil, nil, []report.SourceValidation{
 			{
 				Selector: report.ReportSelector{
 					Source: "kyverno",
@@ -130,7 +130,7 @@ func TestSourceFilter(t *testing.T) {
 
 	t.Run("disable cluster reports", func(t *testing.T) {
 		t.Parallel()
-		filter := report.NewSourceFilter(nil, nil, []report.SourceValidation{
+		filter := report.NewSourceFilter(nil, nil, nil, nil, []report.SourceValidation{
 			{
 				Selector: report.ReportSelector{
 					Source: "kyverno",
@@ -152,7 +152,7 @@ func TestSourceFilter(t *testing.T) {
 
 	t.Run("include by kind succeed", func(t *testing.T) {
 		t.Parallel()
-		filter := report.NewSourceFilter(nil, nil, []report.SourceValidation{
+		filter := report.NewSourceFilter(nil, nil, nil, nil, []report.SourceValidation{
 			{
 				Selector: report.ReportSelector{
 					Source: "kyverno",
@@ -179,7 +179,7 @@ func TestSourceFilter(t *testing.T) {
 			}}},
 		}
 
-		filter := report.NewSourceFilter(&c, nil, []report.SourceValidation{
+		filter := report.NewSourceFilter(&c, nil, nil, nil, []report.SourceValidation{
 			{
 				Selector: report.ReportSelector{
 					Source: "kyverno",
@@ -211,7 +211,7 @@ func TestSourceFilter(t *testing.T) {
 			}}},
 		}
 
-		filter := report.NewSourceFilter(nil, &c, []report.SourceValidation{
+		filter := report.NewSourceFilter(nil, &c, nil, nil, []report.SourceValidation{
 			{
 				Selector: report.ReportSelector{
 					Source: "kyverno",
@@ -243,7 +243,7 @@ func TestSourceFilter(t *testing.T) {
 			}}},
 		}
 
-		filter := report.NewSourceFilter(&c, nil, []report.SourceValidation{
+		filter := report.NewSourceFilter(&c, nil, nil, nil, []report.SourceValidation{
 			{
 				Selector: report.ReportSelector{
 					Source: "kyverno",
@@ -267,7 +267,7 @@ func TestSourceFilter(t *testing.T) {
 			}}},
 		}
 
-		filter := report.NewSourceFilter(nil, &c, []report.SourceValidation{
+		filter := report.NewSourceFilter(nil, &c, nil, nil, []report.SourceValidation{
 			{
 				Selector: report.ReportSelector{
 					Source: "kyverno",
@@ -292,7 +292,7 @@ func TestSourceFilter(t *testing.T) {
 			}}},
 		}
 
-		filter := report.NewSourceFilter(&c, nil, []report.SourceValidation{
+		filter := report.NewSourceFilter(&c, nil, nil, nil, []report.SourceValidation{
 			{
 				Selector: report.ReportSelector{
 					Source: "kyverno",
@@ -317,7 +317,7 @@ func TestSourceFilter(t *testing.T) {
 			}}},
 		}
 
-		filter := report.NewSourceFilter(nil, &c, []report.SourceValidation{
+		filter := report.NewSourceFilter(nil, &c, nil, nil, []report.SourceValidation{
 			{
 				Selector: report.ReportSelector{
 					Source: "kyverno",
@@ -341,7 +341,7 @@ func TestSourceFilter(t *testing.T) {
 			}}},
 		}
 
-		filter := report.NewSourceFilter(&c, nil, []report.SourceValidation{
+		filter := report.NewSourceFilter(&c, nil, nil, nil, []report.SourceValidation{
 			{
 				Selector: report.ReportSelector{
 					Source: "kyverno",
@@ -365,7 +365,7 @@ func TestSourceFilter(t *testing.T) {
 			}}},
 		}
 
-		filter := report.NewSourceFilter(nil, &c, []report.SourceValidation{
+		filter := report.NewSourceFilter(nil, &c, nil, nil, []report.SourceValidation{
 			{
 				Selector: report.ReportSelector{
 					Source: "kyverno",

@@ -188,6 +188,7 @@ type SourceFilter struct {
 	Selector              SourceSelector `mapstructure:"selector"`
 	Kinds                 ValueFilter    `mapstructure:"kinds"`
 	Sources               ValueFilter    `mapstructure:"sources"`
+	Resources             ValueFilter    `mapstructure:"resources"`
 	Namespaces            ValueFilter    `mapstructure:"namespaces"`
 	UncontrolledOnly      bool           `mapstructure:"uncontrolledOnly"`
 	DisableClusterReports bool           `mapstructure:"disableClusterReports"`

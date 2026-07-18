@@ -8,7 +8,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	v1 "k8s.io/client-go/kubernetes/typed/batch/v1"
 
-	"github.com/kyverno/policy-reporter/pkg/kubernetes"
+	"github.com/kyverno/policy-reporter/pkg/kubernetes/retry"
 )
 
 type Client interface {
@@ -20,7 +20,7 @@ type k8sClient struct {
 }
 
 func (c *k8sClient) Get(scope *corev1.ObjectReference) (*batchv1.Job, error) {
-	return kubernetes.Retry(func() (*batchv1.Job, error) {
+	return retry.Retry(func() (*batchv1.Job, error) {
 		return c.client.Jobs(scope.Namespace).Get(context.Background(), scope.Name, metav1.GetOptions{})
 	})
 }

@@ -1,4 +1,4 @@
-package kubernetes
+package retry
 
 import (
 	"k8s.io/apimachinery/pkg/api/errors"
