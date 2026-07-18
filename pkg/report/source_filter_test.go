@@ -8,6 +8,8 @@ import (
 	batchv1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/types"
+	gocache "zgo.at/zcache/v2"
 
 	"github.com/kyverno/policy-reporter/pkg/fixtures"
 	"github.com/kyverno/policy-reporter/pkg/openreports"
@@ -42,7 +44,7 @@ func TestSourceFilter(t *testing.T) {
 	t.Parallel()
 	t.Run("include by namespace succeed", func(t *testing.T) {
 		t.Parallel()
-		filter := report.NewSourceFilter(nil, nil, nil, nil, []report.SourceValidation{
+		filter := report.NewSourceFilter(nil, nil, nil, gocache.New[types.UID, bool](gocache.DefaultExpiration, 0), []report.SourceValidation{
 			{
 				Selector: report.ReportSelector{
 					Sources: []string{"kyverno"},
@@ -64,7 +66,7 @@ func TestSourceFilter(t *testing.T) {
 
 	t.Run("include by namespace fails", func(t *testing.T) {
 		t.Parallel()
-		filter := report.NewSourceFilter(nil, nil, nil, nil, []report.SourceValidation{
+		filter := report.NewSourceFilter(nil, nil, nil, gocache.New[types.UID, bool](gocache.DefaultExpiration, 0), []report.SourceValidation{
 			{
 				Selector: report.ReportSelector{
 					Source: "kyverno",
@@ -86,7 +88,7 @@ func TestSourceFilter(t *testing.T) {
 
 	t.Run("include by kind succeed", func(t *testing.T) {
 		t.Parallel()
-		filter := report.NewSourceFilter(nil, nil, nil, nil, []report.SourceValidation{
+		filter := report.NewSourceFilter(nil, nil, nil, gocache.New[types.UID, bool](gocache.DefaultExpiration, 0), []report.SourceValidation{
 			{
 				Selector: report.ReportSelector{
 					Source: "kyverno",
@@ -108,7 +110,7 @@ func TestSourceFilter(t *testing.T) {
 
 	t.Run("include by kind fails", func(t *testing.T) {
 		t.Parallel()
-		filter := report.NewSourceFilter(nil, nil, nil, nil, []report.SourceValidation{
+		filter := report.NewSourceFilter(nil, nil, nil, gocache.New[types.UID, bool](gocache.DefaultExpiration, 0), []report.SourceValidation{
 			{
 				Selector: report.ReportSelector{
 					Source: "kyverno",
@@ -130,7 +132,7 @@ func TestSourceFilter(t *testing.T) {
 
 	t.Run("disable cluster reports", func(t *testing.T) {
 		t.Parallel()
-		filter := report.NewSourceFilter(nil, nil, nil, nil, []report.SourceValidation{
+		filter := report.NewSourceFilter(nil, nil, nil, gocache.New[types.UID, bool](gocache.DefaultExpiration, 0), []report.SourceValidation{
 			{
 				Selector: report.ReportSelector{
 					Source: "kyverno",
@@ -152,7 +154,7 @@ func TestSourceFilter(t *testing.T) {
 
 	t.Run("include by kind succeed", func(t *testing.T) {
 		t.Parallel()
-		filter := report.NewSourceFilter(nil, nil, nil, nil, []report.SourceValidation{
+		filter := report.NewSourceFilter(nil, nil, nil, gocache.New[types.UID, bool](gocache.DefaultExpiration, 0), []report.SourceValidation{
 			{
 				Selector: report.ReportSelector{
 					Source: "kyverno",
@@ -179,7 +181,7 @@ func TestSourceFilter(t *testing.T) {
 			}}},
 		}
 
-		filter := report.NewSourceFilter(&c, nil, nil, nil, []report.SourceValidation{
+		filter := report.NewSourceFilter(&c, nil, nil, gocache.New[types.UID, bool](gocache.DefaultExpiration, 0), []report.SourceValidation{
 			{
 				Selector: report.ReportSelector{
 					Source: "kyverno",
@@ -211,7 +213,7 @@ func TestSourceFilter(t *testing.T) {
 			}}},
 		}
 
-		filter := report.NewSourceFilter(nil, &c, nil, nil, []report.SourceValidation{
+		filter := report.NewSourceFilter(nil, &c, nil, gocache.New[types.UID, bool](gocache.DefaultExpiration, 0), []report.SourceValidation{
 			{
 				Selector: report.ReportSelector{
 					Source: "kyverno",
@@ -243,7 +245,7 @@ func TestSourceFilter(t *testing.T) {
 			}}},
 		}
 
-		filter := report.NewSourceFilter(&c, nil, nil, nil, []report.SourceValidation{
+		filter := report.NewSourceFilter(&c, nil, nil, gocache.New[types.UID, bool](gocache.DefaultExpiration, 0), []report.SourceValidation{
 			{
 				Selector: report.ReportSelector{
 					Source: "kyverno",
@@ -267,7 +269,7 @@ func TestSourceFilter(t *testing.T) {
 			}}},
 		}
 
-		filter := report.NewSourceFilter(nil, &c, nil, nil, []report.SourceValidation{
+		filter := report.NewSourceFilter(nil, &c, nil, gocache.New[types.UID, bool](gocache.DefaultExpiration, 0), []report.SourceValidation{
 			{
 				Selector: report.ReportSelector{
 					Source: "kyverno",
@@ -292,7 +294,7 @@ func TestSourceFilter(t *testing.T) {
 			}}},
 		}
 
-		filter := report.NewSourceFilter(&c, nil, nil, nil, []report.SourceValidation{
+		filter := report.NewSourceFilter(&c, nil, nil, gocache.New[types.UID, bool](gocache.DefaultExpiration, 0), []report.SourceValidation{
 			{
 				Selector: report.ReportSelector{
 					Source: "kyverno",
@@ -317,7 +319,7 @@ func TestSourceFilter(t *testing.T) {
 			}}},
 		}
 
-		filter := report.NewSourceFilter(nil, &c, nil, nil, []report.SourceValidation{
+		filter := report.NewSourceFilter(nil, &c, nil, gocache.New[types.UID, bool](gocache.DefaultExpiration, 0), []report.SourceValidation{
 			{
 				Selector: report.ReportSelector{
 					Source: "kyverno",
@@ -341,7 +343,7 @@ func TestSourceFilter(t *testing.T) {
 			}}},
 		}
 
-		filter := report.NewSourceFilter(&c, nil, nil, nil, []report.SourceValidation{
+		filter := report.NewSourceFilter(&c, nil, nil, gocache.New[types.UID, bool](gocache.DefaultExpiration, 0), []report.SourceValidation{
 			{
 				Selector: report.ReportSelector{
 					Source: "kyverno",
@@ -365,7 +367,7 @@ func TestSourceFilter(t *testing.T) {
 			}}},
 		}
 
-		filter := report.NewSourceFilter(nil, &c, nil, nil, []report.SourceValidation{
+		filter := report.NewSourceFilter(nil, &c, nil, gocache.New[types.UID, bool](gocache.DefaultExpiration, 0), []report.SourceValidation{
 			{
 				Selector: report.ReportSelector{
 					Source: "kyverno",
