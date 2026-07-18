@@ -18,6 +18,7 @@ import (
 	"github.com/uptrace/bun/dialect"
 	mail "github.com/xhit/go-simple-mail/v2"
 	"go.uber.org/zap"
+	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/discovery"
 	k8s "k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/metadata"
@@ -39,6 +40,7 @@ import (
 	"github.com/kyverno/policy-reporter/pkg/kubernetes/namespaces"
 	orclient "github.com/kyverno/policy-reporter/pkg/kubernetes/openreports"
 	"github.com/kyverno/policy-reporter/pkg/kubernetes/pods"
+	"github.com/kyverno/policy-reporter/pkg/kubernetes/replicasets"
 	"github.com/kyverno/policy-reporter/pkg/kubernetes/secrets"
 	wgpolicyclient "github.com/kyverno/policy-reporter/pkg/kubernetes/wgpolicy"
 	"github.com/kyverno/policy-reporter/pkg/leaderelection"
@@ -249,16 +251,22 @@ func (r *Resolver) WGPolicyQueue() (*wgpolicyclient.WGPolicyQueue, error) {
 		return nil, err
 	}
 
+	replicasetsClient, err := r.ReplicaSetClient()
+	if err != nil {
+		return nil, err
+	}
+
 	return wgpolicyclient.NewWGPolicyQueue(
 		kubernetes.NewDebouncer(1*time.Minute, r.EventPublisher()),
 		workqueue.NewTypedRateLimitingQueueWithConfig(workqueue.DefaultTypedControllerRateLimiter[string](), workqueue.TypedRateLimitingQueueConfig[string]{
 			Name: "wgreport-queue",
 		}),
 		polrClient,
-		report.NewSourceFilter(podsClient, jobsClient, helper.Map(r.config.SourceFilters, func(f SourceFilter) report.SourceValidation {
+		report.NewSourceFilter(podsClient, jobsClient, replicasetsClient, gocache.New[types.UID, bool](1*time.Minute, 10*time.Second), helper.Map(r.config.SourceFilters, func(f SourceFilter) report.SourceValidation {
 			return report.SourceValidation{
 				Selector:              report.ReportSelector(f.Selector),
 				Kinds:                 ToRuleSet(f.Kinds),
+				Resources:             ToRuleSet(f.Resources),
 				Sources:               ToRuleSet(f.Sources),
 				Namespaces:            ToRuleSet(f.Namespaces),
 				UncontrolledOnly:      f.UncontrolledOnly,
@@ -285,13 +293,18 @@ func (r *Resolver) ORQueue() (*orclient.ORQueue, error) {
 		return nil, err
 	}
 
+	replicasetsClient, err := r.ReplicaSetClient()
+	if err != nil {
+		return nil, err
+	}
+
 	return orclient.NewORQueue(
 		kubernetes.NewDebouncer(1*time.Minute, r.EventPublisher()),
 		workqueue.NewTypedRateLimitingQueueWithConfig(workqueue.DefaultTypedControllerRateLimiter[string](), workqueue.TypedRateLimitingQueueConfig[string]{
 			Name: "orreport-queue",
 		}),
 		polrClient,
-		report.NewSourceFilter(podsClient, jobsClient, helper.Map(r.config.SourceFilters, func(f SourceFilter) report.SourceValidation {
+		report.NewSourceFilter(podsClient, jobsClient, replicasetsClient, gocache.New[types.UID, bool](1*time.Minute, 10*time.Second), helper.Map(r.config.SourceFilters, func(f SourceFilter) report.SourceValidation {
 			return report.SourceValidation{
 				Selector:              report.ReportSelector(f.Selector),
 				Kinds:                 ToRuleSet(f.Kinds),
@@ -425,6 +438,16 @@ func (r *Resolver) PodClient() (pods.Client, error) {
 	}
 
 	return pods.NewClient(clientset.CoreV1()), nil
+}
+
+// ReplicaSetClient resolver method
+func (r *Resolver) ReplicaSetClient() (replicasets.Client, error) {
+	clientset, err := r.Clientset()
+	if err != nil {
+		return nil, err
+	}
+
+	return replicasets.NewClient(clientset.AppsV1()), nil
 }
 
 // JobClient resolver method

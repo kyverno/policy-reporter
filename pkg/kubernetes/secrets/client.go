@@ -8,7 +8,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	v1 "k8s.io/client-go/kubernetes/typed/core/v1"
 
-	"github.com/kyverno/policy-reporter/pkg/kubernetes"
+	"github.com/kyverno/policy-reporter/pkg/kubernetes/retry"
 )
 
 type Values struct {
@@ -39,7 +39,7 @@ type k8sClient struct {
 }
 
 func (c *k8sClient) Get(ctx context.Context, name string) (Values, error) {
-	secret, err := kubernetes.Retry(func() (*corev1.Secret, error) {
+	secret, err := retry.Retry(func() (*corev1.Secret, error) {
 		return c.client.Get(ctx, name, metav1.GetOptions{})
 	})
 

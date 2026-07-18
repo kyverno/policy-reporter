@@ -241,7 +241,7 @@ sourceFilters:
     disableClusterReports: false
     # -- Filter out Reports based on the scope resource kind
     kinds:
-      exclude: [ReplicaSet]
+      exclude: []
 
 global:
   # -- additional labels added on each resource

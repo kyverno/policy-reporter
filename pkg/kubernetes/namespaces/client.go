@@ -13,7 +13,7 @@ import (
 	gocache "zgo.at/zcache/v2"
 
 	"github.com/kyverno/policy-reporter/pkg/helper"
-	"github.com/kyverno/policy-reporter/pkg/kubernetes"
+	"github.com/kyverno/policy-reporter/pkg/kubernetes/retry"
 )
 
 type Client interface {
@@ -56,7 +56,7 @@ func (c *k8sClient) List(ctx context.Context, selector map[string]string) ([]str
 		return cached, nil
 	}
 
-	list, err := kubernetes.Retry(func() ([]string, error) {
+	list, err := retry.Retry(func() ([]string, error) {
 		namespaces, err := c.client.List(ctx, metav1.ListOptions{LabelSelector: s.String()})
 		if err != nil {
 			return nil, err
