@@ -4,13 +4,13 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/go-openapi/inflect"
 	"go.uber.org/zap"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 	gocache "zgo.at/zcache/v2"
 
-	"github.com/go-openapi/inflect"
 	"github.com/kyverno/policy-reporter/pkg/helper"
 	"github.com/kyverno/policy-reporter/pkg/kubernetes/jobs"
 	"github.com/kyverno/policy-reporter/pkg/kubernetes/pods"
