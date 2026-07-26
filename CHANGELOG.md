@@ -1,5 +1,9 @@
 # Changelog
 
+# Helm Chart v3.9.1
+
+* fix: update custom board crds, add resource and clusterResource filter
+
 # Helm Chart v3.9.0
 
 ## Policy Reporter v3.9.0
