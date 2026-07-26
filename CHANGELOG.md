@@ -1,5 +1,32 @@
 # Changelog
 
+# Helm Chart v3.9.0
+
+## Policy Reporter v3.9.0
+
+* feat: set GOMEMLIMIT on application startup based on container or system memory
+* feat: new resources filter which expects a resource string like `pods.v1` or `deployments.apps/v1`
+* chore(email): use standardized http client config for graphapi
+* feat: support filter for results from the resolved namespaces api
+* feat: add replicaset owner check
+
+## Policy Reporter UI v2.7.0
+
+* feat: set GOMEMLIMIT on application startup based on container or system memory
+* feat: compact mode for default dashboards and custom boards
+* feat: applying custom board filters in the backend changes the previous behavior, in which configured filters were used as default filters in the UI. The new behavior applies these filters on the backend and makes it impossible to remove.
+* chore(security): the policy reporter core api is no longer exposed via a proxy URI. All requests are now done via the UI backend which applies configured filters and/or authentication.
+* feat(openidConnect): auto-detect and apply PKCE from OIDC discovery
+* feat: new cluster config to force attempt http2 
+
+## Policy Reporter Kyverno Plugin v0.7.0
+
+* feat: set GOMEMLIMIT on application startup based on container or system memory
+
+## Policy Reporter Trivy Plugin v0.5.0
+
+* feat: set GOMEMLIMIT on application startup based on container or system memory
+
 # Helm Chart v3.8.1
 
 ## Policy Reporter v3.8.1
