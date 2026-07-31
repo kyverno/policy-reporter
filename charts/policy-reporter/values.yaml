@@ -173,6 +173,10 @@ httproute:
       #       add:
       #         - name: X-Custom-Header
       #           value: value
+      # Optional timeouts configuration:
+      # timeouts:
+      #  request: 30s
+      #  backendRequest: 30s
 
 logging:
   # -- Enables server access logging
@@ -1346,6 +1350,10 @@ ui:
         #       add:
         #         - name: X-Custom-Header
         #           value: value
+        # Optional timeouts configuration:
+        # timeouts:
+        #  request: 30s
+        #  backendRequest: 30s
 
   networkPolicy:
     # -- When true, use a NetworkPolicy to allow ingress to the webhook
@@ -1594,6 +1602,10 @@ plugin:
           #       add:
           #         - name: X-Custom-Header
           #           value: value
+          # Optional timeouts configuration:
+          # timeouts:
+          #  request: 30s
+          #  backendRequest: 30s
 
     # -- Resource constraints
     resources: {}
