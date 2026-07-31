@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/segmentio/fasthash/fnv1a"
+	"go.uber.org/zap"
 	corev1 "k8s.io/api/core/v1"
 
 	"github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
@@ -160,7 +161,19 @@ func NewIDGenerator(config []string) IDGenerator {
 			continue
 		}
 
-		mappings = append(mappings, fieldMapper[field])
+		mapper, ok := fieldMapper[field]
+		if !ok {
+			// An unknown field would append a nil FieldMapperFunc and panic
+			// on the first result the generator sees.
+			zap.L().Warn("unknown custom id field, ignoring", zap.String("field", field))
+			continue
+		}
+
+		mappings = append(mappings, mapper)
+	}
+
+	if len(mappings) == 0 {
+		return &defaultIDGenerator{}
 	}
 
 	return &customIDGenerator{mappings}

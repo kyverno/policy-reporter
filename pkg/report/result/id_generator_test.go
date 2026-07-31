@@ -67,6 +67,30 @@ func TestCustomGenerator(t *testing.T) {
 		}
 	})
 
+	t.Run("Unknown Field Is Ignored", func(t *testing.T) {
+		t.Parallel()
+		// an unmapped field used to append a nil FieldMapperFunc, which
+		// panicked on the first result
+		generator := result.NewIDGenerator([]string{"resource", "namesapce"})
+
+		id := generator.Generate(&openreports.ReportAdapter{Report: &v1alpha1.Report{}}, openreports.ResultAdapter{ReportResult: v1alpha1.ReportResult{Subjects: []corev1.ObjectReference{{Name: "test", Kind: "Pod"}}}})
+
+		if id != "18007334074686647077" {
+			t.Errorf("expected result id to be '18007334074686647077', got :%s", id)
+		}
+	})
+
+	t.Run("Only Unknown Fields Falls Back To The Default Generator", func(t *testing.T) {
+		t.Parallel()
+		generator := result.NewIDGenerator([]string{"nope"})
+
+		id := generator.Generate(&openreports.ReportAdapter{Report: &v1alpha1.Report{}}, openreports.ResultAdapter{ReportResult: v1alpha1.ReportResult{Subjects: []corev1.ObjectReference{{Name: "test", Kind: "Pod"}}}})
+
+		if id == "" {
+			t.Error("expected a generated id, got an empty string")
+		}
+	})
+
 	t.Run("ID From Scope", func(t *testing.T) {
 		t.Parallel()
 		generator := result.NewIDGenerator([]string{"resource"})
