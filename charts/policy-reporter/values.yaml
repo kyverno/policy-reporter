@@ -1249,6 +1249,9 @@ ui:
   # -- Allow additional env variables to be added
   envVars: []
 
+  # -- Allow custom configuration of the /tmp volume
+  tmpVolume: {}
+
   rbac:
     # -- Create RBAC resources
     enabled: true
