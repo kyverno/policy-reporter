@@ -460,6 +460,7 @@ Open `http://localhost:8082/` in your browser.
 | ui.revisionHistoryLimit | int | `10` | The number of revisions to keep |
 | ui.podSecurityContext | object | `{"runAsGroup":1234,"runAsUser":1234}` | Security context for the pod |
 | ui.envVars | list | `[]` | Allow additional env variables to be added |
+| ui.tmpVolume | object | `{}` | Allow custom configuration of the /tmp volume |
 | ui.rbac.enabled | bool | `true` | Create RBAC resources |
 | ui.securityContext.runAsUser | int | `1234` |  |
 | ui.securityContext.runAsNonRoot | bool | `true` |  |
