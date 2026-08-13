@@ -11,7 +11,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/credentials v1.19.32
 	github.com/aws/aws-sdk-go-v2/service/kinesis v1.46.4
 	github.com/aws/aws-sdk-go-v2/service/s3 v1.106.0
-	github.com/aws/aws-sdk-go-v2/service/securityhub v1.75.0
+	github.com/aws/aws-sdk-go-v2/service/securityhub v1.76.0
 	github.com/aws/aws-sdk-go-v2/service/sts v1.45.2
 	github.com/ctreminiom/go-atlassian/v2 v2.12.0
 	github.com/gin-contrib/gzip v1.2.6
