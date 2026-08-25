@@ -27,7 +27,7 @@ func NewSummaryCMD() *cobra.Command {
 			if err != nil {
 				return err
 			}
-			if err := config.SetupMemLimit(c); err != nil {
+			if err := config.SetupMemLimit(cmd.Context(), c); err != nil {
 				logger.Error("failed to setup memlimit", zap.Error(err))
 				return err
 			}

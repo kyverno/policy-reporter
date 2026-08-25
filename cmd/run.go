@@ -36,7 +36,7 @@ func newRunCMD(version string) *cobra.Command {
 			if err != nil {
 				return fmt.Errorf("failed to setup logger: %w", err)
 			}
-			if err := config.SetupMemLimit(c); err != nil {
+			if err := config.SetupMemLimit(cmd.Context(), c); err != nil {
 				return fmt.Errorf("failed to setup memlimit: %w", err)
 			}
 

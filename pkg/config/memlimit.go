@@ -1,6 +1,7 @@
 package config
 
 import (
+	"context"
 	"fmt"
 	"time"
 
@@ -8,7 +9,7 @@ import (
 	"go.uber.org/zap"
 )
 
-func SetupMemLimit(c *Config) error {
+func SetupMemLimit(ctx context.Context, c *Config) error {
 	if !c.AutoMemoryLimit.Enabled {
 		return nil
 	}
@@ -18,7 +19,7 @@ func SetupMemLimit(c *Config) error {
 	}
 
 	zap.L().Info("setup memlimit...", zap.Float64("ratio", c.AutoMemoryLimit.Ratio))
-	limit, err := memlimit.SetGoMemLimitWithOpts(
+	limit, err := memlimit.Set(
 		memlimit.WithRatio(c.AutoMemoryLimit.Ratio),
 		memlimit.WithProvider(
 			memlimit.ApplyFallback(
@@ -26,7 +27,7 @@ func SetupMemLimit(c *Config) error {
 				memlimit.FromSystem,
 			),
 		),
-		memlimit.WithRefreshInterval(5*time.Minute),
+		memlimit.WithRefreshInterval(ctx, 5*time.Minute),
 	)
 	zap.L().Info("configured memlimit...", zap.Int64("limit", limit))
 
