@@ -48,14 +48,6 @@ func (l *ResultListener) UnregisterSyncListener() {
 	l.syncListener = make([]report.SyncResultsListener, 0)
 }
 
-func (l *ResultListener) Validate(r openreports.ResultAdapter) bool {
-	if r.Result == openreports.StatusSkip || r.Result == openreports.StatusPass {
-		return false
-	}
-
-	return true
-}
-
 func (l *ResultListener) Listen(_ context.Context, event report.LifecycleEvent) {
 	logger := zap.L().Sugar()
 	logger.Debugf("new event: type %s, report ID %s", event.Type, event.PolicyReport.GetID())
@@ -109,8 +101,8 @@ func (l *ResultListener) Listen(_ context.Context, event report.LifecycleEvent) 
 	newResults := make([]openreports.ResultAdapter, 0)
 
 	for _, r := range event.PolicyReport.GetResults() {
-		if helper.Contains(r.GetID(), existing) || !l.Validate(r) {
-			logger.Debugf("result for %s, policy %s, rule %s: skipping result sending because the result is already in the cached results for this report or is a pass result", r.ResourceString(), r.Policy, r.Rule)
+		if helper.Contains(r.GetID(), existing) {
+			logger.Debugf("result for %s, policy %s, rule %s: skipping result sending because the result is already in the cached results for this report", r.ResourceString(), r.Policy, r.Rule)
 			continue
 		}
 

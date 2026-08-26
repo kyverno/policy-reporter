@@ -197,15 +197,4 @@ func Test_ResultListener(t *testing.T) {
 
 		assert.Nil(t, called, "Expected Listener was unregistered")
 	})
-
-	t.Run("Check Validation Logic", func(t *testing.T) {
-		t.Parallel()
-		slistener := listener.NewResultListener(true, cache.NewInMemoryCache(time.Minute, time.Minute), time.Now())
-
-		assert.True(t, slistener.Validate(fixtures.FailPodResult))
-		assert.True(t, slistener.Validate(fixtures.WarnPodResult))
-		assert.True(t, slistener.Validate(fixtures.ErrorPodResult))
-		assert.False(t, slistener.Validate(fixtures.PassPodResult))
-		assert.False(t, slistener.Validate(fixtures.SkipPodResult))
-	})
 }
