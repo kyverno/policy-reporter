@@ -14,8 +14,8 @@ rules:
 - apiGroups:
   - 'ui.policyreporter.kyverno.io'
   resources:
-  - cluster
-  - cluster/status
+  - clusters
+  - clusters/status
   - customboards
   - customboards/status
   - namespacecustomboards
