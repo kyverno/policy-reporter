@@ -12,6 +12,7 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 	"go.uber.org/zap"
 
+	"github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
 	"github.com/kyverno/policy-reporter/pkg/crd/api/targetconfig"
 	"github.com/kyverno/policy-reporter/pkg/crd/api/targetconfig/v1alpha1"
 	"github.com/kyverno/policy-reporter/pkg/filters"
@@ -971,7 +972,7 @@ func (f *TargetFactory) createResultFilter(filter filters.Filter, minimumSeverit
 			Selector: filter.Namespaces.Selector,
 		},
 		ToRuleSet(filter.Severities),
-		ToRuleSet(filter.Status),
+		ToRuleSet(DefaultStatusFilter(filter.Status)),
 		ToRuleSet(filter.Policies),
 		ToRuleSet(sourceFilter),
 		minimumSeverity,
@@ -1218,6 +1219,16 @@ func ToRuleSet(filter filters.ValueFilter) validate.RuleSets {
 		Include: filter.Include,
 		Exclude: filter.Exclude,
 	}
+}
+
+func DefaultStatusFilter(filter filters.ValueFilter) filters.ValueFilter {
+	if len(filter.Include) == 0 && len(filter.Exclude) == 0 {
+		return filters.ValueFilter{
+			Exclude: []string{v1alpha2.StatusPass, v1alpha2.StatusSkip},
+		}
+	}
+
+	return filter
 }
 
 func createConfig[T any](tc *v1alpha1.TargetConfig, config *T) *targetconfig.Config[T] {
