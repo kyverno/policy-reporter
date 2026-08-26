@@ -409,7 +409,7 @@ Open `http://localhost:8082/` in your browser.
 | ui.image.registry | string | `"ghcr.io"` | Image registry |
 | ui.image.repository | string | `"kyverno/policy-reporter-ui"` | Image repository |
 | ui.image.pullPolicy | string | `"IfNotPresent"` | Image PullPolicy |
-| ui.image.tag | string | `"2.8.0"` | Image tag |
+| ui.image.tag | string | `"2.8.1"` | Image tag |
 | ui.crds.customBoard | bool | `false` | Install UI CustomBoard CRDs |
 | ui.crds.cluster | bool | `false` | Install UI CustomBoard CRDs |
 | ui.replicaCount | int | `1` | Deployment replica count |
