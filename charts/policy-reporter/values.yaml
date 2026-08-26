@@ -1036,11 +1036,13 @@ ui:
     # -- (string) Image PullPolicy
     pullPolicy: IfNotPresent
     # -- (string) Image tag
-    tag: "2.7.0"
+    tag: "2.8.0"
 
   crds:
     # -- Install UI CustomBoard CRDs
     customBoard: false
+    # -- Install UI CustomBoard CRDs
+    cluster: false
 
   # -- Deployment replica count
   replicaCount: 1
@@ -1088,6 +1090,8 @@ ui:
     groupClaim: ""
     # -- OpenID Connect allowed Scopes
     scopes: []
+    # -- Enable PKCE (Proof Key for Code Exchange) for OpenID Connect authentication
+    pkce: false
     # -- Skip TLS Verification
     skipTLS: false
     # -- TLS Certificate file path
@@ -1141,7 +1145,7 @@ ui:
   #     # -- list of displayed namespaces
   #     list: []
   #     # -- selector for displayed namespaces
-  #     selector:
+  #     labelSelector:
   #       team: team-a  # equal
   #       workload: *   # label exists
   #       infra: !*     # label does not exist
@@ -1423,7 +1427,7 @@ plugin:
       # -- (string) Image PullPolicy
       pullPolicy: IfNotPresent
       # -- (string) Image tag
-      tag: "0.7.0"
+      tag: "0.7.1"
 
     # -- Deployment replica count
     replicaCount: 1
@@ -1677,7 +1681,7 @@ plugin:
       pullPolicy: IfNotPresent
         # -- (string) Image tag
         # Defaults to `Chart.AppVersion` if omitted
-      tag: "0.5.0"
+      tag: "0.5.1"
 
     cli:
       image:
@@ -1689,7 +1693,7 @@ plugin:
         pullPolicy: IfNotPresent
           # -- (string) Image tag
           # Defaults to `Chart.AppVersion` if omitted
-        tag: "0.72.0"
+        tag: "0.74.0"
 
     # -- Additional container args.
     extraArgs: {}
