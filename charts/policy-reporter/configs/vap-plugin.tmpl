@@ -27,8 +27,8 @@ api:
     debug: {{ .Values.plugin.vap.api.debug }}
     {{- if and .Values.plugin.vap.api.basicAuth.username .Values.plugin.vap.api.basicAuth.password }}
     basicAuth:
-    username: {{ .Values.plugin.vap.api.basicAuth.username | quote }}
-    password: {{ .Values.plugin.vap.api.basicAuth.password | quote }}
+        username: {{ .Values.basicAuth.username | quote }}
+        password: {{ .Values.basicAuth.password | quote }}
     {{- end }}
 logging:
     level: {{ .Values.plugin.vap.logging.level }}

@@ -710,8 +710,6 @@ Open `http://localhost:8082/` in your browser.
 | plugin.vap.api.enabled | bool | `true` |  |
 | plugin.vap.api.port | int | `8080` |  |
 | plugin.vap.api.debug | bool | `false` |  |
-| plugin.vap.api.basicAuth.username | string | `""` |  |
-| plugin.vap.api.basicAuth.password | string | `""` |  |
 | plugin.vap.logging.level | string | `"info"` |  |
 | plugin.vap.logging.development | bool | `false` |  |
 | plugin.vap.autoMemoryLimit.enabled | bool | `true` |  |

@@ -2123,9 +2123,6 @@ plugin:
       enabled: true
       port: 8080
       debug: false
-      basicAuth:
-        username: ""
-        password: ""
     logging:
       level: info
       development: false
