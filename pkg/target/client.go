@@ -13,6 +13,9 @@ import (
 	"github.com/kyverno/policy-reporter/pkg/openreports"
 	"github.com/kyverno/policy-reporter/pkg/report"
 	"github.com/kyverno/policy-reporter/pkg/validate"
+	corev1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/labels"
+	"k8s.io/apimachinery/pkg/selection"
 )
 
 type ClientType = string
@@ -50,10 +53,15 @@ type Client interface {
 }
 
 type ResultFilterFactory struct {
-	client namespaces.Client
+	client         namespaces.Client
+	resourceClient ResourceLabelsClient
 }
 
-func (rf *ResultFilterFactory) CreateFilter(namespace, severity, status, policy, sources validate.RuleSets, minimumSeverity string) *report.ResultFilter {
+type ResourceLabelsClient interface {
+	Get(context.Context, *corev1.ObjectReference) (map[string]string, error)
+}
+
+func (rf *ResultFilterFactory) CreateFilter(namespace, severity, status, policy, sources validate.RuleSets, minimumSeverity string, labelSelectors ...map[string]string) *report.ResultFilter {
 	f := report.NewResultFilter()
 	f.Sources = sources.Include
 	f.MinimumSeverity = minimumSeverity
@@ -114,7 +122,68 @@ func (rf *ResultFilterFactory) CreateFilter(namespace, severity, status, policy,
 		})
 	}
 
+	if len(labelSelectors) > 0 && len(labelSelectors[0]) > 0 {
+		labelSelector := labelSelectors[0]
+
+		f.AddValidation(func(r openreports.ResultAdapter) bool {
+			if rf.resourceClient == nil {
+				zap.L().Error("resource label selector configured without resource client")
+				return false
+			}
+
+			resource := r.GetResource()
+			if resource == nil {
+				return false
+			}
+
+			resourceLabels, err := rf.resourceClient.Get(context.Background(), resource)
+			if err != nil {
+				zap.L().Error(
+					"failed to resolve resource labels",
+					zap.Error(err),
+					zap.String("resource", openreports.ToResourceString(resource)),
+				)
+				return false
+			}
+
+			return matchLabelSelector(resourceLabels, labelSelector)
+		})
+	}
+
 	return f
+}
+
+func matchLabelSelector(resourceLabels, selector map[string]string) bool {
+	set := labels.Set(resourceLabels)
+
+	for key, value := range selector {
+		var (
+			operator selection.Operator
+			values   []string
+		)
+
+		switch {
+		case strings.Contains(value, ","):
+			operator = selection.In
+			for _, v := range strings.Split(value, ",") {
+				values = append(values, strings.TrimSpace(v))
+			}
+		case value == "*":
+			operator = selection.Exists
+		case value == "!*":
+			operator = selection.DoesNotExist
+		default:
+			operator = selection.Equals
+			values = []string{value}
+		}
+
+		requirement, err := labels.NewRequirement(key, operator, values)
+		if err != nil || !requirement.Matches(set) {
+			return false
+		}
+	}
+
+	return true
 }
 
 func NewReportFilter(labels, sources validate.RuleSets) *report.ReportFilter {
@@ -176,8 +245,17 @@ func NewReportFilter(labels, sources validate.RuleSets) *report.ReportFilter {
 	return f
 }
 
-func NewResultFilterFactory(client namespaces.Client) *ResultFilterFactory {
-	return &ResultFilterFactory{client: client}
+func NewResultFilterFactory(client namespaces.Client, resourceClients ...ResourceLabelsClient) *ResultFilterFactory {
+	var resourceClient ResourceLabelsClient
+
+	if len(resourceClients) > 0 {
+		resourceClient = resourceClients[0]
+	}
+
+	return &ResultFilterFactory{
+		client:         client,
+		resourceClient: resourceClient,
+	}
 }
 
 type BaseClient struct {

@@ -147,6 +147,10 @@ spec:
                           type: string
                         type: object
                     type: object
+                  labelSelector:
+                    additionalProperties:
+                      type: string
+                    type: object
                   reportLabels:
                     properties:
                       exclude:
