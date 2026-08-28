@@ -634,6 +634,12 @@ Open `http://localhost:8082/` in your browser.
 | plugin.trivy.ingress.annotations | object | `{}` | Ingress annotations. |
 | plugin.trivy.ingress.hosts | list | `[]` | List of ingress host configurations. |
 | plugin.trivy.ingress.tls | list | `[]` | List of ingress TLS configurations. |
+| plugin.trivy.httproute.enabled | bool | `false` | Enable HTTPRoute resource (Gateway API alternative to Ingress) Requires Gateway API CRDs (v1) installed in cluster https://gateway-api.sigs.k8s.io/ |
+| plugin.trivy.httproute.labels | object | `{}` | Additional HTTPRoute labels |
+| plugin.trivy.httproute.annotations | object | `{}` | Additional HTTPRoute annotations |
+| plugin.trivy.httproute.parentRefs | list | `[]` | Gateway API parentRefs (list of Gateway references) Must reference an existing Gateway resource |
+| plugin.trivy.httproute.hostnames | list | `[]` | List of hostnames for HTTPRoute |
+| plugin.trivy.httproute.rules | list | `[{"matches":[{"path":{"type":"PathPrefix","value":"/"}}]}]` | HTTPRoute rules configuration Allows advanced routing with matches and filters |
 | plugin.trivy.networkPolicy.enabled | bool | `false` | When true, use a NetworkPolicy to allow ingress to the webhook This is useful on clusters using Calico and/or native k8s network policies in a default-deny setup. |
 | plugin.trivy.networkPolicy.egress | list | `[{"ports":[{"port":6443,"protocol":"TCP"}]}]` | A list of valid from selectors according to https://kubernetes.io/docs/concepts/services-networking/network-policies. Enables Kubernetes API Server by default |
 | plugin.trivy.networkPolicy.ingress | list | `[]` | A list of valid from selectors according to https://kubernetes.io/docs/concepts/services-networking/network-policies. |
@@ -647,6 +653,82 @@ Open `http://localhost:8082/` in your browser.
 | plugin.trivy.extraVolumes.volumeMounts | list | `[]` | Deployment volumeMounts |
 | plugin.trivy.extraVolumes.volumes | list | `[]` | Deployment values |
 | plugin.trivy.extraConfig | object | `{}` | Extra configuration options appended to trivy plugin settings |
+| plugin.vap.enabled | bool | `false` | Enable ValidatingAdmissionPolicy Plugin |
+| plugin.vap.image.registry | string | `"ghcr.io"` | Image registry |
+| plugin.vap.image.repository | string | `"kyverno/policy-reporter/vap-plugin"` | Image repository |
+| plugin.vap.image.pullPolicy | string | `"IfNotPresent"` | Image PullPolicy |
+| plugin.vap.image.tag | string | `"0.1.0"` | Image tag |
+| plugin.vap.replicaCount | int | `1` |  |
+| plugin.vap.priorityClassName | string | `""` | Deployment priorityClassName |
+| plugin.vap.imagePullSecrets | list | `[]` | Image pull secrets for image verification policies, this will define the `--imagePullSecrets` argument |
+| plugin.vap.rbac.enabled | bool | `true` | Create RBAC resources |
+| plugin.vap.rbac.extraResources | list | `[]` | Additional rules to add to the ClusterRole |
+| plugin.vap.networkPolicy.enabled | bool | `false` | When true, use a NetworkPolicy to allow ingress to the webhook This is useful on clusters using Calico and/or native k8s network policies in a default-deny setup. |
+| plugin.vap.networkPolicy.egress | list | `[{"ports":[{"port":6443,"protocol":"TCP"}]}]` | A list of valid from selectors according to https://kubernetes.io/docs/concepts/services-networking/network-policies. Enables Kubernetes API Server by default |
+| plugin.vap.networkPolicy.ingress | list | `[{"ports":[{"port":8443,"protocol":"TCP"}]},{"ports":[{"port":8080,"protocol":"TCP"}]}]` | A list of valid from selectors according to https://kubernetes.io/docs/concepts/services-networking/network-policies. |
+| plugin.vap.podAnnotations | object | `{}` | Additional annotations to add to each pod |
+| plugin.vap.podLabels | object | `{}` | Additional labels to add to each pod |
+| plugin.vap.selectorLabels | object | `{}` | Custom selector labels, overwrites the default set |
+| plugin.vap.updateStrategy | object | `{}` | Deployment update strategy. Ref: https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#strategy |
+| plugin.vap.revisionHistoryLimit | int | `10` | The number of revisions to keep |
+| plugin.vap.podSecurityContext | object | `{"runAsGroup":1234,"runAsUser":1234}` | Security context for the pod |
+| plugin.vap.envVars | list | `[]` | Allow additional env variables to be added |
+| plugin.vap.securityContext.runAsUser | int | `1234` |  |
+| plugin.vap.securityContext.runAsNonRoot | bool | `true` |  |
+| plugin.vap.securityContext.privileged | bool | `false` |  |
+| plugin.vap.securityContext.allowPrivilegeEscalation | bool | `false` |  |
+| plugin.vap.securityContext.readOnlyRootFilesystem | bool | `true` |  |
+| plugin.vap.securityContext.capabilities.drop[0] | string | `"ALL"` |  |
+| plugin.vap.securityContext.seccompProfile.type | string | `"RuntimeDefault"` |  |
+| plugin.vap.livenessProbe | object | `{"httpGet":{"path":"/v1/policies","port":"api"},"timeoutSeconds":3}` | Deployment livenessProbe for policy-reporter-vap-plugin |
+| plugin.vap.readinessProbe | object | `{"httpGet":{"path":"/v1/policies","port":"api"},"timeoutSeconds":3}` | Deployment readinessProbe for policy-reporter-vap-plugin |
+| plugin.vap.serviceAccount.create | bool | `true` | Create ServiceAccount |
+| plugin.vap.serviceAccount.automount | bool | `true` | Enable ServiceAccount automount |
+| plugin.vap.serviceAccount.annotations | object | `{}` | Annotations for the ServiceAccount |
+| plugin.vap.serviceAccount.name | string | `""` | The ServiceAccount name |
+| plugin.vap.service.type | string | `"ClusterIP"` | Service type. |
+| plugin.vap.service.port | int | `8443` | Service port. |
+| plugin.vap.service.annotations | object | `{}` | Service annotations. |
+| plugin.vap.service.labels | object | `{}` | Service labels. |
+| plugin.vap.service.clusterIP | string | `""` | Fixed ClusterIP for the service |
+| plugin.vap.podDisruptionBudget.minAvailable | int | `1` | Configures the minimum available pods for kyvernoPlugin disruptions. Cannot be used if `maxUnavailable` is set. |
+| plugin.vap.podDisruptionBudget.maxUnavailable | string | `nil` | Configures the maximum unavailable pods for kyvernoPlugin disruptions. Cannot be used if `minAvailable` is set. |
+| plugin.vap.tls.certManager.enabled | bool | `false` |  |
+| plugin.vap.tls.certManager.issuerRef.name | string | `""` |  |
+| plugin.vap.tls.certManager.issuerRef.kind | string | `"ClusterIssuer"` |  |
+| plugin.vap.tls.existingSecret | string | `""` |  |
+| plugin.vap.server.enabled | bool | `true` |  |
+| plugin.vap.webhook.bufferSize | int | `1000` |  |
+| plugin.vap.webhook.workers | int | `4` |  |
+| plugin.vap.report.severity | string | `""` |  |
+| plugin.vap.report.category | string | `""` |  |
+| plugin.vap.report.labels | object | `{}` |  |
+| plugin.vap.report.annotations | object | `{}` |  |
+| plugin.vap.report.reportDenied | bool | `false` |  |
+| plugin.vap.reconcile.interval | string | `"10m"` |  |
+| plugin.vap.reconcile.orphanTTL | string | `"24h"` |  |
+| plugin.vap.api.enabled | bool | `true` |  |
+| plugin.vap.api.port | int | `8080` |  |
+| plugin.vap.api.debug | bool | `false` |  |
+| plugin.vap.api.basicAuth.username | string | `""` |  |
+| plugin.vap.api.basicAuth.password | string | `""` |  |
+| plugin.vap.logging.level | string | `"info"` |  |
+| plugin.vap.logging.development | bool | `false` |  |
+| plugin.vap.autoMemoryLimit.enabled | bool | `true` |  |
+| plugin.vap.autoMemoryLimit.ratio | float | `0.9` |  |
+| plugin.vap.resources | object | `{}` | Resource constraints |
+| plugin.vap.nodeSelector | object | `{}` | Node labels for pod assignment |
+| plugin.vap.tolerations | list | `[]` | List of node taints to tolerate |
+| plugin.vap.affinity | object | `{}` | Affinity constraints. |
+| plugin.vap.topologySpreadConstraints | object | `{}` | Pod Topology Spread Constraints for the kyverno plugin. |
+| plugin.vap.extraVolumes.volumeMounts | list | `[]` | Deployment volumeMounts |
+| plugin.vap.extraVolumes.volumes | list | `[]` | Deployment values |
+| plugin.vap.httproute.enabled | bool | `false` | Enable HTTPRoute resource (Gateway API alternative to Ingress) Requires Gateway API CRDs (v1) installed in cluster https://gateway-api.sigs.k8s.io/ |
+| plugin.vap.httproute.labels | object | `{}` | Additional HTTPRoute labels |
+| plugin.vap.httproute.annotations | object | `{}` | Additional HTTPRoute annotations |
+| plugin.vap.httproute.parentRefs | list | `[]` | Gateway API parentRefs (list of Gateway references) Must reference an existing Gateway resource |
+| plugin.vap.httproute.hostnames | list | `[]` | List of hostnames for HTTPRoute |
+| plugin.vap.httproute.rules | list | `[{"matches":[{"path":{"type":"PathPrefix","value":"/"}}]}]` | HTTPRoute rules configuration Allows advanced routing with matches and filters |
 | monitoring.enabled | bool | `false` | Enables the Prometheus Operator integration |
 | monitoring.annotations | object | `{}` | Key/value pairs that are attached to all resources. |
 | monitoring.serviceMonitor.enabled | bool | `true` |  |
