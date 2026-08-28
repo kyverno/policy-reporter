@@ -1,0 +1,24 @@
+# Example --audit-policy-file for the kube-apiserver, scoped to capture VAP
+# signal without excessive volume.
+#
+# Level: Metadata is sufficient - both signals vap-plugin looks for live at
+# that level: the responseStatus.details.causes[].message (Deny) and the
+# validation.policy.admission.k8s.io/validation_failure annotation (Audit).
+# Neither requires request/response bodies (Request/RequestResponse
+# levels), which would be far more expensive to log.
+#
+# Verified against a real kind cluster (k8s v1.36.1): audit ObjectRef does
+# not carry the target resource's UID at this level for ordinary
+# create/update/delete requests on the primary resource - only for
+# subresource requests (status, binding). vap-plugin does not depend on it
+# being present (see pkg/kubernetes/report and pkg/kubernetes/reconcile).
+apiVersion: audit.k8s.io/v1
+kind: Policy
+omitStages:
+  - RequestReceived
+rules:
+  # Adjust resources/namespaces to the set your ValidatingAdmissionPolicy
+  # bindings actually target, to keep audit log volume proportional to what
+  # vap-plugin can act on.
+  - level: Metadata
+    verbs: ["create", "update", "patch", "delete"]

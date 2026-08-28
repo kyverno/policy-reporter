@@ -19,7 +19,7 @@ spec:
   template:
     metadata:
       annotations:
-        checksum/secret: {{ include (print .Template.BasePath "/plugins/vap/configmap.yaml") . | sha256sum | quote }}
+        checksum/secret: {{ include (print .Template.BasePath "/plugins/vap/config-secret.yaml") . | sha256sum | quote }}
         {{- with .Values.plugin.vap.podAnnotations }}
           {{- toYaml . | nindent 8 }}
         {{- end }}
@@ -44,7 +44,7 @@ spec:
       {{- end }}
       containers:
         - name: vap-plugin
-          image: "{{ .Values.plugin.vap.image.repository }}:{{ .Values.plugin.vap.image.tag }}"
+          image: "{{ .Values.plugin.vap.image.registry }}/{{ .Values.plugin.vap.image.repository }}:{{ .Values.plugin.vap.image.tag }}"
           imagePullPolicy: {{ .Values.plugin.vap.image.pullPolicy }}
           args: ["run", "--config=/etc/vap-plugin/config.yaml"]
           securityContext:
@@ -92,8 +92,8 @@ spec:
           {{- end }}
       volumes:
         - name: config
-          configMap:
-            name: {{ include "vap-plugin.fullname" . }}
+          secret:
+            secretName: {{ include "vap-plugin.fullname" . }}
         {{- if .Values.plugin.vap.server.enabled }}
         - name: tls
           secret:

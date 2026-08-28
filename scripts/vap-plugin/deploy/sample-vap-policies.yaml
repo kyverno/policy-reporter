@@ -1,0 +1,93 @@
+# Sample ValidatingAdmissionPolicy + bindings used by scripts/setup.sh to
+# exercise both signals vap-plugin understands, and the per-policy
+# metadata overrides (see pkg/kubernetes/policy):
+#   - require-team-label: Deny action, blocks the request; annotated with
+#     vap.kubernetes.io/severity, so its ReportResults get severity=high
+#     instead of the app's configured default.
+#   - require-owner-label: Audit action, allows the request but flags it;
+#     annotated with vap.kubernetes.io/category, so its ReportResults get
+#     category=best-practices instead of the app's configured default. No
+#     severity annotation, so severity uses the configured default.
+apiVersion: admissionregistration.k8s.io/v1
+kind: ValidatingAdmissionPolicy
+metadata:
+  name: require-team-label
+  annotations:
+    vap.kubernetes.io/severity: high
+spec:
+  failurePolicy: Fail
+  matchConstraints:
+    resourceRules:
+      - apiGroups: [""]
+        apiVersions: ["v1"]
+        operations: ["CREATE"]
+        resources: ["pods"]
+  validations:
+    - expression: "has(object.metadata.labels) && 'team' in object.metadata.labels && object.metadata.labels['team'] != ''"
+      message: "pods must have a non-empty 'team' label"
+---
+apiVersion: admissionregistration.k8s.io/v1
+kind: ValidatingAdmissionPolicyBinding
+metadata:
+  name: require-team-label-binding
+spec:
+  policyName: require-team-label
+  validationActions: ["Deny"]
+  matchResources:
+    # Excludes vap-plugin's own namespace: a namespaceSelector: {} (matches
+    # everything) Deny binding blocks not just the initial rollout of
+    # vap-plugin's own pod (see scripts/setup.sh, which orders around that),
+    # but *every future rollout restart* too - a new replica pod is a
+    # Create request like any other, and gets denied the same way. This
+    # isn't a one-time bootstrap quirk, it's permanent for as long as the
+    # binding matches vap-plugin's own namespace.
+    namespaceSelector:
+      matchExpressions:
+        - key: kubernetes.io/metadata.name
+          operator: NotIn
+          values: ["vap-plugin"]
+---
+apiVersion: admissionregistration.k8s.io/v1
+kind: ValidatingAdmissionPolicy
+metadata:
+  name: require-owner-label
+  annotations:
+    vap.kubernetes.io/title: Require Owner Label
+    vap.kubernetes.io/category: Best Practices
+    vap.kubernetes.io/description: Requires a non-empty 'owner' label
+spec:
+  failurePolicy: Fail
+  matchConstraints:
+    resourceRules:
+      - apiGroups: [""]
+        apiVersions: ["v1"]
+        operations: ["CREATE"]
+        resources: ["pods"]
+      - apiGroups: ["apps"]
+        apiVersions: ["v1"]
+        operations: ["CREATE"]
+        resources: ["deployments"]
+  validations:
+    - expression: "has(object.metadata.labels) && 'owner' in object.metadata.labels && object.metadata.labels['owner'] != ''"
+      message: "pods should have a non-empty 'owner' label"
+---
+apiVersion: admissionregistration.k8s.io/v1
+kind: ValidatingAdmissionPolicyBinding
+metadata:
+  name: require-owner-label-binding
+spec:
+  policyName: require-owner-label
+  validationActions: ["Audit"]
+  matchResources:
+    # Excludes vap-plugin's own namespace: a namespaceSelector: {} (matches
+    # everything) Deny binding blocks not just the initial rollout of
+    # vap-plugin's own pod (see scripts/setup.sh, which orders around that),
+    # but *every future rollout restart* too - a new replica pod is a
+    # Create request like any other, and gets denied the same way. This
+    # isn't a one-time bootstrap quirk, it's permanent for as long as the
+    # binding matches vap-plugin's own namespace.
+    namespaceSelector:
+      matchExpressions:
+        - key: kubernetes.io/metadata.name
+          operator: NotIn
+          values: ["vap-plugin"]

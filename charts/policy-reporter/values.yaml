@@ -1951,9 +1951,14 @@ plugin:
     # -- (bool) Enable ValidatingAdmissionPolicy Plugin
     enabled: false
     image:
-      repository: ghcr.io/kyverno/vap-plugin
-      tag: "0.1.0"
+      # -- (string) Image registry
+      registry: ghcr.io
+      # -- (string) Image repository
+      repository: kyverno/policy-reporter/vap-plugin
+      # -- (string) Image PullPolicy
       pullPolicy: IfNotPresent
+      # -- (string) Image tag
+      tag: "0.1.0"
 
     replicaCount: 1
 
@@ -2037,14 +2042,14 @@ plugin:
       timeoutSeconds: 3
       httpGet:
         path: /v1/policies
-        port: http
+        port: api
 
     # -- Deployment readinessProbe for policy-reporter-vap-plugin
     readinessProbe:
       timeoutSeconds: 3
       httpGet:
         path: /v1/policies
-        port: http
+        port: api
 
     serviceAccount:
       # -- Create ServiceAccount
