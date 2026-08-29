@@ -7,15 +7,15 @@ import (
 	"github.com/kyverno/go-wildcard"
 	"github.com/openreports/reports-api/apis/openreports.io/v1alpha1"
 	"go.uber.org/zap"
+	corev1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/labels"
+	"k8s.io/apimachinery/pkg/selection"
 
 	"github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
 	"github.com/kyverno/policy-reporter/pkg/kubernetes/namespaces"
 	"github.com/kyverno/policy-reporter/pkg/openreports"
 	"github.com/kyverno/policy-reporter/pkg/report"
 	"github.com/kyverno/policy-reporter/pkg/validate"
-	corev1 "k8s.io/api/core/v1"
-	"k8s.io/apimachinery/pkg/labels"
-	"k8s.io/apimachinery/pkg/selection"
 )
 
 type ClientType = string
