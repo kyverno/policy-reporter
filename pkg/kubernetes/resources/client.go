@@ -2,6 +2,7 @@ package resources
 
 import (
 	"context"
+	"fmt"
 	"strings"
 	"time"
 
@@ -26,7 +27,7 @@ type k8sClient struct {
 
 func (c *k8sClient) Get(ctx context.Context, ref *corev1.ObjectReference) (map[string]string, error) {
 	if ref == nil || ref.Name == "" || ref.Kind == "" || ref.APIVersion == "" {
-		return nil, nil
+		return nil, fmt.Errorf("invalid resource reference")
 	}
 
 	groupVersion, err := schema.ParseGroupVersion(ref.APIVersion)

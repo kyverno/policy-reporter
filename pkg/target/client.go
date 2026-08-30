@@ -61,7 +61,7 @@ type ResourceLabelsClient interface {
 	Get(context.Context, *corev1.ObjectReference) (map[string]string, error)
 }
 
-func (rf *ResultFilterFactory) CreateFilter(namespace, severity, status, policy, sources validate.RuleSets, minimumSeverity string, labelSelectors ...map[string]string) *report.ResultFilter {
+func (rf *ResultFilterFactory) CreateFilter(namespace, severity, status, policy, sources validate.RuleSets, minimumSeverity string, labelSelector map[string]string) *report.ResultFilter {
 	f := report.NewResultFilter()
 	f.Sources = sources.Include
 	f.MinimumSeverity = minimumSeverity
@@ -122,8 +122,7 @@ func (rf *ResultFilterFactory) CreateFilter(namespace, severity, status, policy,
 		})
 	}
 
-	if len(labelSelectors) > 0 && len(labelSelectors[0]) > 0 {
-		labelSelector := labelSelectors[0]
+	if len(labelSelector) > 0 {
 
 		f.AddValidation(func(r openreports.ResultAdapter) bool {
 			if rf.resourceClient == nil {
@@ -245,13 +244,7 @@ func NewReportFilter(labels, sources validate.RuleSets) *report.ReportFilter {
 	return f
 }
 
-func NewResultFilterFactory(client namespaces.Client, resourceClients ...ResourceLabelsClient) *ResultFilterFactory {
-	var resourceClient ResourceLabelsClient
-
-	if len(resourceClients) > 0 {
-		resourceClient = resourceClients[0]
-	}
-
+func NewResultFilterFactory(client namespaces.Client, resourceClient ResourceLabelsClient) *ResultFilterFactory {
 	return &ResultFilterFactory{
 		client:         client,
 		resourceClient: resourceClient,

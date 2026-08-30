@@ -25,7 +25,7 @@ var preport = &openreports.ReportAdapter{
 	},
 }
 
-var factory = target.NewResultFilterFactory(nil)
+var factory = target.NewResultFilterFactory(nil, nil)
 
 func Test_BaseClient(t *testing.T) {
 	t.Parallel()
@@ -38,6 +38,8 @@ func Test_BaseClient(t *testing.T) {
 			validate.RuleSets{},
 			validate.RuleSets{},
 			openreports.SeverityCritical,
+
+			nil,
 		)
 
 		assert.False(t, filter.Validate(fixtures.FailResult), "Unexpected Validation Result")
@@ -51,6 +53,8 @@ func Test_BaseClient(t *testing.T) {
 			validate.RuleSets{},
 			validate.RuleSets{Include: []string{"jsPolicy"}},
 			"",
+
+			nil,
 		)
 
 		assert.False(t, filter.Validate(fixtures.FailResult), "Unexpected Validation Result")
@@ -65,6 +69,8 @@ func Test_BaseClient(t *testing.T) {
 			validate.RuleSets{},
 			validate.RuleSets{},
 			"",
+
+			nil,
 		)
 
 		assert.True(t, filter.Validate(fixtures.FailResultWithoutResource), "Unexpected Validation Result")
@@ -79,6 +85,8 @@ func Test_BaseClient(t *testing.T) {
 			validate.RuleSets{},
 			validate.RuleSets{},
 			"",
+
+			nil,
 		)
 
 		assert.False(t, filter.Validate(fixtures.FailResult), "Unexpected Validation Result")
@@ -92,6 +100,8 @@ func Test_BaseClient(t *testing.T) {
 			validate.RuleSets{},
 			validate.RuleSets{},
 			"",
+
+			nil,
 		)
 
 		assert.True(t, filter.Validate(fixtures.FailResult), "Unexpected Validation Result")
@@ -105,6 +115,8 @@ func Test_BaseClient(t *testing.T) {
 			validate.RuleSets{},
 			validate.RuleSets{},
 			"",
+
+			nil,
 		)
 
 		assert.True(t, filter.Validate(fixtures.FailResult), "Unexpected Validation Result")
@@ -118,6 +130,8 @@ func Test_BaseClient(t *testing.T) {
 			validate.RuleSets{},
 			validate.RuleSets{},
 			"",
+
+			nil,
 		)
 
 		assert.False(t, filter.Validate(fixtures.FailResult), "Unexpected Validation Result")
@@ -132,6 +146,8 @@ func Test_BaseClient(t *testing.T) {
 			validate.RuleSets{},
 			validate.RuleSets{},
 			"",
+
+			nil,
 		)
 
 		assert.False(t, filter.Validate(fixtures.FailResult), "Unexpected Validation Result")
@@ -145,6 +161,8 @@ func Test_BaseClient(t *testing.T) {
 			validate.RuleSets{},
 			validate.RuleSets{},
 			"",
+
+			nil,
 		)
 
 		assert.True(t, filter.Validate(fixtures.FailResult), "Unexpected Validation Result")
@@ -158,6 +176,8 @@ func Test_BaseClient(t *testing.T) {
 			validate.RuleSets{},
 			validate.RuleSets{},
 			"",
+
+			nil,
 		)
 
 		assert.True(t, filter.Validate(fixtures.FailResult), "Unexpected Validation Result")
@@ -171,6 +191,8 @@ func Test_BaseClient(t *testing.T) {
 			validate.RuleSets{},
 			validate.RuleSets{},
 			"",
+
+			nil,
 		)
 
 		assert.False(t, filter.Validate(fixtures.FailResult), "Unexpected Validation Result")
@@ -185,6 +207,8 @@ func Test_BaseClient(t *testing.T) {
 			validate.RuleSets{},
 			validate.RuleSets{},
 			"",
+
+			nil,
 		)
 
 		assert.False(t, filter.Validate(fixtures.FailResult), "Unexpected Validation Result")
@@ -198,6 +222,8 @@ func Test_BaseClient(t *testing.T) {
 			validate.RuleSets{},
 			validate.RuleSets{},
 			"",
+
+			nil,
 		)
 
 		assert.True(t, filter.Validate(fixtures.FailResult), "Unexpected Validation Result")
@@ -211,6 +237,8 @@ func Test_BaseClient(t *testing.T) {
 			validate.RuleSets{},
 			validate.RuleSets{},
 			"",
+
+			nil,
 		)
 
 		assert.True(t, filter.Validate(fixtures.FailResult), "Unexpected Validation Result")
@@ -224,6 +252,8 @@ func Test_BaseClient(t *testing.T) {
 			validate.RuleSets{},
 			validate.RuleSets{},
 			"",
+
+			nil,
 		)
 
 		assert.False(t, filter.Validate(fixtures.FailResult), "Unexpected Validation Result")
@@ -238,6 +268,8 @@ func Test_BaseClient(t *testing.T) {
 			validate.RuleSets{Exclude: []string{"require-requests-and-limits-required"}},
 			validate.RuleSets{},
 			"",
+
+			nil,
 		)
 
 		assert.False(t, filter.Validate(fixtures.FailResult), "Unexpected Validation Result")
@@ -251,6 +283,8 @@ func Test_BaseClient(t *testing.T) {
 			validate.RuleSets{Exclude: []string{"policy-test"}},
 			validate.RuleSets{},
 			"",
+
+			nil,
 		)
 
 		assert.True(t, filter.Validate(fixtures.FailResult), "Unexpected Validation Result")
@@ -264,6 +298,8 @@ func Test_BaseClient(t *testing.T) {
 			validate.RuleSets{Include: []string{"require-requests-and-limits-required"}},
 			validate.RuleSets{},
 			"",
+
+			nil,
 		)
 
 		if !filter.Validate(fixtures.FailResult) {
@@ -279,6 +315,8 @@ func Test_BaseClient(t *testing.T) {
 			validate.RuleSets{Include: []string{"policy-test"}},
 			validate.RuleSets{},
 			"",
+
+			nil,
 		)
 
 		assert.False(t, filter.Validate(fixtures.FailResult), "Unexpected Validation Result")
@@ -368,6 +406,8 @@ func Test_BaseClient(t *testing.T) {
 				validate.RuleSets{},
 				validate.RuleSets{Include: []string{"jsPolicy"}},
 				"",
+
+				nil,
 			),
 			SkipExistingOnStartup: true,
 		})
