@@ -3,7 +3,7 @@ module github.com/kyverno/policy-reporter
 go 1.27.0
 
 require (
-	cloud.google.com/go/storage v1.65.0
+	cloud.google.com/go/storage v1.66.0
 	github.com/KimMachineGun/automemlimit v1.0.0
 	github.com/atc0005/go-teams-notify/v2 v2.14.0
 	github.com/aws/aws-sdk-go-v2 v1.45.1
