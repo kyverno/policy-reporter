@@ -62,7 +62,7 @@ func Test_TargetConfig_TargetCreation(t *testing.T) {
 
 	kclient, tclient := NewFakeClient()
 	collection := target.NewCollection()
-	factory := factory.NewFactory(secrets.NewClient(newSecretClient()), target.NewResultFilterFactory(nil))
+	factory := factory.NewFactory(secrets.NewClient(newSecretClient()), target.NewResultFilterFactory(nil, nil))
 
 	client := targetconfig.NewClient(kclient, factory, collection, nil, nil)
 	client.ConfigureInformer()
@@ -106,7 +106,7 @@ func Test_TargetConfig_TargetUpdates(t *testing.T) {
 
 	kclient, tclient := NewFakeClient()
 	collection := target.NewCollection()
-	factory := factory.NewFactory(secrets.NewClient(newSecretClient()), target.NewResultFilterFactory(nil))
+	factory := factory.NewFactory(secrets.NewClient(newSecretClient()), target.NewResultFilterFactory(nil, nil))
 
 	client := targetconfig.NewClient(kclient, factory, collection, nil, nil)
 	client.ConfigureInformer()
@@ -165,7 +165,7 @@ func Test_TargetConfig_TargetDeletion(t *testing.T) {
 
 	kclient, tclient := NewFakeClient()
 	collection := target.NewCollection()
-	factory := factory.NewFactory(secrets.NewClient(newSecretClient()), target.NewResultFilterFactory(nil))
+	factory := factory.NewFactory(secrets.NewClient(newSecretClient()), target.NewResultFilterFactory(nil, nil))
 
 	client := targetconfig.NewClient(kclient, factory, collection, nil, nil)
 	client.ConfigureInformer()
