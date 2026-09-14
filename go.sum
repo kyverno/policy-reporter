@@ -127,8 +127,8 @@ github.com/gin-contrib/pprof v1.5.4 h1:daxf2UNZw5IEx6WBdcpnEzgeDfkp083KdjUAFuMEk
 github.com/gin-contrib/pprof v1.5.4/go.mod h1:AUxwt9kgpJGWiytj6RorBqRMyFuOQk7dPNfM9nHEY9I=
 github.com/gin-contrib/sse v1.1.1 h1:uGYpNwTacv5R68bSGMapo62iLTRa9l5zxGCps4hK6ko=
 github.com/gin-contrib/sse v1.1.1/go.mod h1:QXzuVkA0YO7o/gun03UI1Q+FTI8ZV/n5t03kIQAI89s=
-github.com/gin-contrib/zap v1.1.7 h1:eORVNAKR5lT9irhF9yD7VCBgwrLv6+5zJjMfXryDBfo=
-github.com/gin-contrib/zap v1.1.7/go.mod h1:bCR836S2tW8qYbisz97Sbw1C9UjDKbaUh30cS3cLPkw=
+github.com/gin-contrib/zap v1.1.8 h1:1OUgZj9IcEDUhwSwAermS0qesCL3UDcqB/jVYyUM/H0=
+github.com/gin-contrib/zap v1.1.8/go.mod h1:2RXm6SHx42zoxXo337YAcADYadyjPKjtPvPxgca0B/s=
 github.com/gin-gonic/gin v1.12.0 h1:b3YAbrZtnf8N//yjKeU2+MQsh2mY5htkZidOM7O0wG8=
 github.com/gin-gonic/gin v1.12.0/go.mod h1:VxccKfsSllpKshkBWgVgRniFFAzFb9csfngsqANjnLc=
 github.com/go-jose/go-jose/v4 v4.1.4 h1:moDMcTHmvE6Groj34emNPLs/qtYXRVcd6S7NHbHz3kA=
