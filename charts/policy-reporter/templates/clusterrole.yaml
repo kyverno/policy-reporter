@@ -47,6 +47,17 @@ rules:
   - get
   - list
   - watch
+{{- if .Values.emailReports.crd.enabled }}
+- apiGroups:
+  - policyreporter.kyverno.io
+  resources:
+  - emailreports
+  verbs:
+  - get
+  - list
+  - watch
+  - update
+{{- end }}
 - apiGroups:
   - ''
   resources:

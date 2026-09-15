@@ -55,6 +55,8 @@ func (f *genericInformer) Lister() cache.GenericLister {
 func (f *sharedInformerFactory) ForResource(resource schema.GroupVersionResource) (GenericInformer, error) {
 	switch resource {
 	// Group=policyreporter.kyverno.io, Version=v1alpha1
+	case v1alpha1.SchemeGroupVersion.WithResource("emailreports"):
+		return &genericInformer{resource: resource.GroupResource(), informer: f.Policyreporter().V1alpha1().EmailReports().Informer()}, nil
 	case v1alpha1.SchemeGroupVersion.WithResource("targetconfigs"):
 		return &genericInformer{resource: resource.GroupResource(), informer: f.Policyreporter().V1alpha1().TargetConfigs().Informer()}, nil
 

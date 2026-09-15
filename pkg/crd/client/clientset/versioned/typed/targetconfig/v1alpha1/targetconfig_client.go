@@ -29,12 +29,17 @@ import (
 
 type PolicyreporterV1alpha1Interface interface {
 	RESTClient() rest.Interface
+	EmailReportsGetter
 	TargetConfigsGetter
 }
 
 // PolicyreporterV1alpha1Client is used to interact with features provided by the policyreporter.kyverno.io group.
 type PolicyreporterV1alpha1Client struct {
 	restClient rest.Interface
+}
+
+func (c *PolicyreporterV1alpha1Client) EmailReports(namespace string) EmailReportInterface {
+	return newEmailReports(c, namespace)
 }
 
 func (c *PolicyreporterV1alpha1Client) TargetConfigs(namespace string) TargetConfigInterface {

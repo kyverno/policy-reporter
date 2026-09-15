@@ -1,0 +1,36 @@
+{{- if and .Values.rbac.enabled .Values.emailReports.crd.enabled -}}
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: {{ include "policyreporter.fullname" . }}-emailreports
+  namespace: {{ include "policyreporter.namespace" . }}
+  labels:
+    {{- include "policyreporter.labels" . | nindent 4 }}
+rules:
+  - apiGroups:
+      - batch
+    resources:
+      - cronjobs
+    verbs:
+      - create
+      - delete
+      - get
+      - list
+      - update
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: {{ include "policyreporter.fullname" . }}-emailreports
+  namespace: {{ include "policyreporter.namespace" . }}
+  labels:
+    {{- include "policyreporter.labels" . | nindent 4 }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: {{ include "policyreporter.fullname" . }}-emailreports
+subjects:
+  - kind: ServiceAccount
+    name: {{ include "policyreporter.serviceAccountName" . }}
+    namespace: {{ include "policyreporter.namespace" . }}
+{{- end -}}

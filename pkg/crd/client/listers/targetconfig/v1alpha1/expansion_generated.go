@@ -18,6 +18,14 @@ limitations under the License.
 
 package v1alpha1
 
+// EmailReportListerExpansion allows custom methods to be added to
+// EmailReportLister.
+type EmailReportListerExpansion interface{}
+
+// EmailReportNamespaceListerExpansion allows custom methods to be added to
+// EmailReportNamespaceLister.
+type EmailReportNamespaceListerExpansion interface{}
+
 // TargetConfigListerExpansion allows custom methods to be added to
 // TargetConfigLister.
 type TargetConfigListerExpansion interface{}
