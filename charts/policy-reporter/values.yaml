@@ -261,6 +261,17 @@ basicAuth:
   secretRef: ""
 
 emailReports:
+  crd:
+    # -- Enable namespace-owned EmailReport resources and central CronJob reconciliation
+    enabled: false
+    # -- CronJob activeDeadlineSeconds
+    activeDeadlineSeconds: 300
+    # -- CronJob backoffLimit
+    backoffLimit: 3
+    # -- CronJob ttlSecondsAfterFinished
+    ttlSecondsAfterFinished: 0
+    # -- CronJob restartPolicy
+    restartPolicy: Never
   # -- (optional) - Displayed in the email report if configured
   clusterName: ""
   # -- Title prefix in the email subject

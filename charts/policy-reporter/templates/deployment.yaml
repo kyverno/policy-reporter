@@ -89,6 +89,12 @@ spec:
             subPath: config.yaml
             {{- end }}
             readOnly: true
+          {{ if .Values.emailReports.crd.enabled }}
+          - name: email-report-job-template
+            mountPath: /app/email-report-job-template.yaml
+            subPath: job-template.yaml
+            readOnly: true
+          {{ end }}
           - name: tmp
             mountPath: /tmp
           {{- with .Values.extraVolumes.volumeMounts }}
@@ -99,6 +105,12 @@ spec:
             valueFrom:
               fieldRef:
                 fieldPath: metadata.namespace
+          {{ if .Values.emailReports.crd.enabled }}
+          - name: EMAIL_REPORTS_CRD_ENABLED
+            value: "true"
+          - name: EMAIL_REPORTS_CRD_JOB_TEMPLATE
+            value: /app/email-report-job-template.yaml
+          {{ end }}
           {{- if gt (int .Values.replicaCount) 1 }}
           - name: POD_NAME
             valueFrom:
@@ -129,6 +141,11 @@ spec:
         {{- else }}
         emptyDir: {}
         {{- end }}
+      {{ if .Values.emailReports.crd.enabled }}
+      - name: email-report-job-template
+        secret:
+          secretName: {{ include "policyreporter.fullname" . }}-config-email-reports
+      {{ end }}
       {{- with .Values.extraVolumes.volumes }}
       {{ toYaml . | nindent 6 | trim }}
       {{- end }}
