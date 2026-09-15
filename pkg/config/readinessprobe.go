@@ -1,51 +1,53 @@
 package config
 
 import (
+	"sync"
+	"sync/atomic"
+
 	"go.uber.org/zap"
 )
 
 type ReadinessProbe struct {
 	config *Config
 
-	ready   chan struct{}
-	running bool
+	ready     chan struct{}
+	readyOnce sync.Once
+	running   atomic.Bool
 }
 
 func (r *ReadinessProbe) required() bool {
-	if !r.config.REST.Enabled {
-		return false
-	}
-
 	return r.config.LeaderElection.Enabled
 }
 
 func (r *ReadinessProbe) Ready() {
-	if r.required() && !r.running {
-		go func() {
-			zap.L().Debug("readiness probe ready")
-			close(r.ready)
-		}()
+	if !r.required() {
+		return
 	}
+
+	r.readyOnce.Do(func() {
+		zap.L().Debug("readiness probe ready")
+		close(r.ready)
+	})
 }
 
 func (r *ReadinessProbe) Wait() {
-	if r.required() && !r.running {
-		zap.L().Debug("readiness probe waiting")
-		<-r.ready
-		r.running = true
-		zap.L().Debug("readiness probe finished")
+	if !r.required() {
 		return
 	}
+
+	zap.L().Debug("readiness probe waiting")
+	<-r.ready
+	r.running.Store(true)
+	zap.L().Debug("readiness probe finished")
 }
 
 func (r *ReadinessProbe) Running() bool {
-	return r.running
+	return r.running.Load()
 }
 
 func NewReadinessProbe(config *Config) *ReadinessProbe {
 	return &ReadinessProbe{
-		config:  config,
-		ready:   make(chan struct{}),
-		running: false,
+		config: config,
+		ready:  make(chan struct{}),
 	}
 }
