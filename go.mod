@@ -16,7 +16,7 @@ require (
 	github.com/ctreminiom/go-atlassian/v2 v2.12.0
 	github.com/gin-contrib/gzip v1.2.6
 	github.com/gin-contrib/pprof v1.5.4
-	github.com/gin-contrib/zap v1.1.7
+	github.com/gin-contrib/zap v1.1.8
 	github.com/gin-gonic/gin v1.12.0
 	github.com/go-openapi/inflect v1.0.0
 	github.com/go-redis/redis/v8 v8.11.5
