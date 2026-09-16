@@ -24,6 +24,7 @@ import (
 )
 
 type WGPolicyQueue struct {
+	initial       *report.InitialReports
 	queue         workqueue.TypedRateLimitingInterface[string]
 	client        v1alpha2.Wgpolicyk8sV1alpha2Interface
 	reconditioner *result.Reconditioner
@@ -79,17 +80,28 @@ func (q *WGPolicyQueue) processNextItem() bool {
 
 	if namespace != "" {
 		polr, err = q.client.PolicyReports(namespace).Get(context.Background(), name, v1.GetOptions{})
-		rep = &openreports.ReportAdapter{Report: polr.ToOpenReports()}
+		if err == nil {
+			rep = &openreports.ReportAdapter{Report: polr.ToOpenReports()}
+		}
 	} else {
 		cpolr, err = q.client.ClusterPolicyReports().Get(context.Background(), name, v1.GetOptions{})
-		rep = &openreports.ClusterReportAdapter{ClusterReport: cpolr.ToOpenReports()}
+		if err == nil {
+			rep = &openreports.ClusterReportAdapter{ClusterReport: cpolr.ToOpenReports()}
+		}
 	}
 	if errors.IsNotFound(err) {
+		q.queue.Forget(key)
 		q.handleNotFoundReport(key)
 		return true
 	}
 
+	if err != nil {
+		q.handleErr(err, key)
+		return true
+	}
 	if ok := q.filter.Validate(rep); !ok {
+		q.queue.Forget(key)
+		q.initial.Resolve(key)
 		return true
 	}
 
@@ -107,7 +119,7 @@ func (q *WGPolicyQueue) processNextItem() bool {
 
 	q.handleErr(err, key)
 
-	q.debouncer.Add(report.LifecycleEvent{Type: event, PolicyReport: q.reconditioner.Prepare(rep)})
+	q.debouncer.Add(report.LifecycleEvent{Type: event, PolicyReport: q.reconditioner.Prepare(rep), Persisted: q.initial.PersistenceResult(key)})
 
 	return true
 }
@@ -159,7 +171,7 @@ func (q *WGPolicyQueue) handleNotFoundReport(key string) {
 		defer q.lock.Unlock()
 		q.cache.Delete(key)
 	}()
-	q.debouncer.Add(report.LifecycleEvent{Type: report.Deleted, PolicyReport: q.reconditioner.Prepare(rep)})
+	q.debouncer.Add(report.LifecycleEvent{Type: report.Deleted, PolicyReport: q.reconditioner.Prepare(rep), Persisted: q.initial.PersistenceResult(key)})
 }
 
 func NewWGPolicyQueue(

@@ -27,6 +27,14 @@ The basic installation provides an Prometheus Metrics Endpoint and different RES
 helm install policy-reporter policy-reporter/policy-reporter -n policy-reporter --create-namespace
 ```
 
+## Initial report readiness
+
+Set `rest.waitForInitialReports: true` to keep `/ready` and the `/v1` and `/v2` REST APIs unavailable (HTTP 503) until the initial reports have been saved. This option defaults to `false` and requires SQLite and REST enabled, either directly or through the UI. External database configurations are rejected when this option is enabled.
+
+Liveness uses `/healthz`; readiness uses `/ready`. If you override the probes, use these paths to avoid restarting the Pod while reports are loading. Metrics and profiling remain available independently of initial persistence.
+
+Failed writes receive bounded retries. If retries are exhausted, initialization remains incomplete until a later event or restart successfully processes the pending reports; check the database error logs. Completion is retained across periodic informer restarts. This option covers initial loading, not a continuously consistent snapshot of the cluster.
+
 ## Policy Reporter UI
 
 You can use the Policy Reporter as standalone Application along with the optional UI SubChart.
@@ -99,6 +107,7 @@ Open `http://localhost:8082/` in your browser.
 | logging.encoding | string | `"console"` | Log encoding possible encodings are console and json |
 | logging.logLevel | int | `0` | Log level default info |
 | rest.enabled | bool | `false` | Enables the REST API |
+| rest.waitForInitialReports | bool | `false` | Wait for initial reports to be persisted before readiness and REST requests succeed. Requires REST and SQLite. Custom probes must use /healthz for liveness and /ready for readiness. |
 | metrics.enabled | bool | `false` | Enables Prometheus Metrics |
 | metrics.mode | string | `"detailed"` | Metric Mode allows to customize labels Allowed values: detailed, simple, custom |
 | metrics.customLabels | list | `[]` | List of used labels in custom mode Supported fields are: ["namespace", "rule", "policy", "report" // Report name, "kind" // resource kind, "name" // resource name, "status", "severity", "category", "source"] |
@@ -398,8 +407,8 @@ Open `http://localhost:8082/` in your browser.
 | tolerations | list | `[]` | Tolerations for pod assignment ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/ |
 | affinity | object | `{}` | Anti-affinity to disallow deploying client and master nodes on the same worker node |
 | topologySpreadConstraints | list | `[]` | Topology Spread Constraints to better spread pods |
-| livenessProbe | object | `{"httpGet":{"path":"/ready","port":"http"}}` | Deployment livenessProbe for policy-reporter |
-| readinessProbe | object | `{"httpGet":{"path":"/healthz","port":"http"}}` | Deployment readinessProbe for policy-reporter |
+| livenessProbe | object | `{"httpGet":{"path":"/healthz","port":"http"}}` | Deployment livenessProbe for policy-reporter |
+| readinessProbe | object | `{"httpGet":{"path":"/ready","port":"http"}}` | Deployment readinessProbe for policy-reporter |
 | extraVolumes.volumeMounts | list | `[]` | Deployment volumeMounts |
 | extraVolumes.volumes | list | `[]` | Deployment values |
 | sqliteVolume | object | `{}` | If set the volume for sqlite is freely configurable below "- name: sqlite". If no value is set an emptyDir is used. |

@@ -96,7 +96,8 @@ type API struct {
 
 // REST configuration
 type REST struct {
-	Enabled bool `mapstructure:"enabled"`
+	WaitForInitialReports bool `mapstructure:"waitForInitialReports"`
+	Enabled               bool `mapstructure:"enabled"`
 }
 
 // Metrics configuration

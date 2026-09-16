@@ -8,7 +8,7 @@ metadata:
   labels:
     app.kubernetes.io/name: policy-reporter-kyverno-plugin
     app.kubernetes.io/instance: policy-reporter
-    app.kubernetes.io/version: "3.9.0"
+    app.kubernetes.io/version: "3.10.0"
 spec:  
   minAvailable: 1
   selector:
@@ -25,7 +25,7 @@ metadata:
   labels:
     app.kubernetes.io/name: policy-reporter
     app.kubernetes.io/instance: policy-reporter
-    app.kubernetes.io/version: "3.9.0"
+    app.kubernetes.io/version: "3.10.0"
     app.kubernetes.io/component: reporting
     app.kubernetes.io/part-of: policy-reporter
 spec:  
@@ -44,7 +44,7 @@ metadata:
   labels:
     app.kubernetes.io/name: policy-reporter-ui
     app.kubernetes.io/instance: policy-reporter
-    app.kubernetes.io/version: "3.9.0"
+    app.kubernetes.io/version: "3.10.0"
 spec:  
   minAvailable: 1
   selector:
@@ -61,7 +61,7 @@ metadata:
   labels:
     app.kubernetes.io/name: policy-reporter-kyverno-plugin
     app.kubernetes.io/instance: policy-reporter
-    app.kubernetes.io/version: "3.9.0"
+    app.kubernetes.io/version: "3.10.0"
 automountServiceAccountToken: true
 ---
 # Source: policy-reporter/templates/serviceaccount.yaml
@@ -73,7 +73,7 @@ metadata:
   labels:
     app.kubernetes.io/name: policy-reporter
     app.kubernetes.io/instance: policy-reporter
-    app.kubernetes.io/version: "3.9.0"
+    app.kubernetes.io/version: "3.10.0"
     app.kubernetes.io/component: reporting
     app.kubernetes.io/part-of: policy-reporter
 ---
@@ -86,7 +86,7 @@ metadata:
   labels:
     app.kubernetes.io/name: policy-reporter-ui
     app.kubernetes.io/instance: policy-reporter
-    app.kubernetes.io/version: "3.9.0"
+    app.kubernetes.io/version: "3.10.0"
 automountServiceAccountToken: true
 ---
 # Source: policy-reporter/templates/cluster-secret.yaml
@@ -98,7 +98,7 @@ metadata:
   labels:
     app.kubernetes.io/name: policy-reporter
     app.kubernetes.io/instance: policy-reporter
-    app.kubernetes.io/version: "3.9.0"
+    app.kubernetes.io/version: "3.10.0"
     app.kubernetes.io/component: reporting
     app.kubernetes.io/part-of: policy-reporter
 type: Opaque
@@ -117,12 +117,12 @@ metadata:
   labels:
     app.kubernetes.io/name: policy-reporter
     app.kubernetes.io/instance: policy-reporter
-    app.kubernetes.io/version: "3.9.0"
+    app.kubernetes.io/version: "3.10.0"
     app.kubernetes.io/component: reporting
     app.kubernetes.io/part-of: policy-reporter
 type: Opaque
 data:
-  config.yaml: Y3JkOgogIHRhcmdldENvbmZpZzogZmFsc2UKCnRhcmdldDoKICBsb2tpOgogICAgY29uZmlnOgogICAgICBob3N0OiAiIgogICAgICBjZXJ0aWZpY2F0ZTogIiIKICAgICAgc2tpcFRMUzogZmFsc2UKICAgICAgcGF0aDogIiIKICAgIG5hbWU6IAogICAgc2VjcmV0UmVmOiAiIgogICAgbW91bnRlZFNlY3JldDogIiIKICAgIG1pbmltdW1TZXZlcml0eTogIiIKICAgIHNraXBFeGlzdGluZ09uU3RhcnR1cDogdHJ1ZQoKICBlbGFzdGljc2VhcmNoOgogICAgY29uZmlnOgogICAgICBob3N0OiAiIgogICAgICBjZXJ0aWZpY2F0ZTogIiIKICAgICAgc2tpcFRMUzogZmFsc2UKICAgICAgdXNlcm5hbWU6ICIiCiAgICAgIHBhc3N3b3JkOiAiIgogICAgICBhcGlLZXk6ICIiCiAgICAgIGluZGV4OiAicG9saWN5LXJlcG9ydGVyIgogICAgICByb3RhdGlvbjogImRhaWx5IgogICAgICB0eXBlbGVzc0FwaTogImZhbHNlIgogICAgbmFtZTogCiAgICBzZWNyZXRSZWY6ICIiCiAgICBtb3VudGVkU2VjcmV0OiAiIgogICAgbWluaW11bVNldmVyaXR5OiAiIgogICAgc2tpcEV4aXN0aW5nT25TdGFydHVwOiB0cnVlCgogIHNsYWNrOgogICAgY29uZmlnOgogICAgICB3ZWJob29rOiAiIgogICAgICBjaGFubmVsOiAiIgogICAgICBjZXJ0aWZpY2F0ZTogCiAgICAgIHNraXBUTFM6IAogICAgbmFtZTogCiAgICBzZWNyZXRSZWY6ICIiCiAgICBtb3VudGVkU2VjcmV0OiAiIgogICAgbWluaW11bVNldmVyaXR5OiAiIgogICAgc2tpcEV4aXN0aW5nT25TdGFydHVwOiB0cnVlCgogIGRpc2NvcmQ6CiAgICBjb25maWc6CiAgICAgIHdlYmhvb2s6ICIiCiAgICAgIGNlcnRpZmljYXRlOiAiIgogICAgICBza2lwVExTOiBmYWxzZQogICAgbmFtZTogCiAgICBzZWNyZXRSZWY6ICIiCiAgICBtb3VudGVkU2VjcmV0OiAiIgogICAgbWluaW11bVNldmVyaXR5OiAiIgogICAgc2tpcEV4aXN0aW5nT25TdGFydHVwOiB0cnVlCgogIHRlYW1zOgogICAgY29uZmlnOgogICAgICB3ZWJob29rOiAiIgogICAgICBjZXJ0aWZpY2F0ZTogIiIKICAgICAgc2tpcFRMUzogZmFsc2UKICAgIG5hbWU6IAogICAgc2VjcmV0UmVmOiAiIgogICAgbW91bnRlZFNlY3JldDogIiIKICAgIG1pbmltdW1TZXZlcml0eTogIiIKICAgIHNraXBFeGlzdGluZ09uU3RhcnR1cDogdHJ1ZQoKICB3ZWJob29rOgogICAgY29uZmlnOgogICAgICB3ZWJob29rOiAiIgogICAgICBjZXJ0aWZpY2F0ZTogIiIKICAgICAgc2tpcFRMUzogZmFsc2UKICAgICAga2VlcGFsaXZlOgogICAgICAgIGludGVydmFsOiAiMCIKICAgIG5hbWU6IAogICAgc2VjcmV0UmVmOiAiIgogICAgbW91bnRlZFNlY3JldDogIiIKICAgIG1pbmltdW1TZXZlcml0eTogIiIKICAgIHNraXBFeGlzdGluZ09uU3RhcnR1cDogdHJ1ZQoKICB0ZWxlZ3JhbToKICAgIGNvbmZpZzoKICAgICAgY2hhdElkOiAiIgogICAgICB0b2tlbjogIiIKICAgICAgd2ViaG9vazogCiAgICAgIGNlcnRpZmljYXRlOiAiIgogICAgICBza2lwVExTOiBmYWxzZQogICAgbmFtZTogCiAgICBzZWNyZXRSZWY6ICIiCiAgICBtb3VudGVkU2VjcmV0OiAiIgogICAgbWluaW11bVNldmVyaXR5OiAiIgogICAgc2tpcEV4aXN0aW5nT25TdGFydHVwOiB0cnVlCgogIGdvb2dsZUNoYXQ6CiAgICBjb25maWc6CiAgICAgIHdlYmhvb2s6ICIiCiAgICAgIGNlcnRpZmljYXRlOiAiIgogICAgICBza2lwVExTOiBmYWxzZQogICAgbmFtZTogCiAgICBzZWNyZXRSZWY6ICIiCiAgICBtb3VudGVkU2VjcmV0OiAiIgogICAgbWluaW11bVNldmVyaXR5OiAiIgogICAgc2tpcEV4aXN0aW5nT25TdGFydHVwOiB0cnVlCgogIGppcmE6CiAgICBjb25maWc6CiAgICAgIGhvc3Q6ICIiCiAgICAgIHVzZXJuYW1lOiAiIgogICAgICBwYXNzd29yZDogIiIKICAgICAgYXBpVG9rZW46ICIiCiAgICAgIGFwaVZlcnNpb246ICJ2MyIKICAgICAgc3VtbWFyeVRlbXBsYXRlOiAiIgogICAgICBwcm9qZWN0S2V5OiAiIgogICAgICBpc3N1ZVR5cGU6ICIiCiAgICAgIGNlcnRpZmljYXRlOiAiIgogICAgICBza2lwVExTOiBmYWxzZQogICAgbmFtZTogCiAgICBzZWNyZXRSZWY6ICIiCiAgICBtb3VudGVkU2VjcmV0OiAiIgogICAgbWluaW11bVNldmVyaXR5OiAiIgogICAgc2tpcEV4aXN0aW5nT25TdGFydHVwOiB0cnVlCgogIGFsZXJ0TWFuYWdlcjoKICAgIGNvbmZpZzoKICAgICAgaG9zdDogIiIKICAgICAgY2VydGlmaWNhdGU6ICIiCiAgICAgIHNraXBUTFM6IGZhbHNlCiAgICBuYW1lOiAKICAgIHNlY3JldFJlZjogIiIKICAgIG1vdW50ZWRTZWNyZXQ6ICIiCiAgICBtaW5pbXVtU2V2ZXJpdHk6ICIiCiAgICBza2lwRXhpc3RpbmdPblN0YXJ0dXA6IHRydWUKCiAgczM6CiAgICBjb25maWc6CiAgICAgIGFjY2Vzc0tleUlkOiAKICAgICAgc2VjcmV0QWNjZXNzS2V5OiAgCiAgICAgIHJlZ2lvbjogCiAgICAgIGVuZHBvaW50OiAKICAgICAgYnVja2V0OiAKICAgICAgYnVja2V0S2V5RW5hYmxlZDogZmFsc2UKICAgICAga21zS2V5SWQ6IAogICAgICBzZXJ2ZXJTaWRlRW5jcnlwdGlvbjogCiAgICAgIHBhdGhTdHlsZTogZmFsc2UKICAgICAgcHJlZml4OiAKICAgIG5hbWU6IAogICAgc2VjcmV0UmVmOiAiIgogICAgbW91bnRlZFNlY3JldDogIiIKICAgIG1pbmltdW1TZXZlcml0eTogIiIKICAgIHNraXBFeGlzdGluZ09uU3RhcnR1cDogdHJ1ZQoKICBraW5lc2lzOgogICAgY29uZmlnOgogICAgICBhY2Nlc3NLZXlJZDogCiAgICAgIHNlY3JldEFjY2Vzc0tleTogIAogICAgICByZWdpb246IAogICAgICBlbmRwb2ludDogCiAgICAgIHN0cmVhbU5hbWU6IAogICAgbmFtZTogCiAgICBzZWNyZXRSZWY6ICIiCiAgICBtb3VudGVkU2VjcmV0OiAiIgogICAgbWluaW11bVNldmVyaXR5OiAiIgogICAgc2tpcEV4aXN0aW5nT25TdGFydHVwOiB0cnVlCgogIHNlY3VyaXR5SHViOgogICAgY29uZmlnOgogICAgICBhY2Nlc3NLZXlJZDogIiIKICAgICAgc2VjcmV0QWNjZXNzS2V5OiAgIiIKICAgICAgcmVnaW9uOiAKICAgICAgZW5kcG9pbnQ6IAogICAgICBhY2NvdW50SWQ6ICIiCiAgICAgIHByb2R1Y3ROYW1lOiAKICAgICAgY29tcGFueU5hbWU6IAogICAgICBkZWxheUluU2Vjb25kczogMgogICAgICBzeW5jaHJvbml6ZTogdHJ1ZQogICAgbmFtZTogCiAgICBzZWNyZXRSZWY6ICIiCiAgICBtb3VudGVkU2VjcmV0OiAiIgogICAgbWluaW11bVNldmVyaXR5OiAiIgogICAgc2tpcEV4aXN0aW5nT25TdGFydHVwOiB0cnVlCgogIGdjczoKICAgIGNvbmZpZzoKICAgICAgY3JlZGVudGlhbHM6IAogICAgICBidWNrZXQ6IAogICAgICBwcmVmaXg6IAogICAgbmFtZTogCiAgICBzZWNyZXRSZWY6ICIiCiAgICBtb3VudGVkU2VjcmV0OiAiIgogICAgbWluaW11bVNldmVyaXR5OiAiIgogICAgc2tpcEV4aXN0aW5nT25TdGFydHVwOiB0cnVlCgp3b3JrZXI6IDUKbWV0cmljczoKICBjdXN0b21MYWJlbHM6IFtdCiAgZW5hYmxlZDogdHJ1ZQogIGZpbHRlcjoge30KICBtb2RlOiBkZXRhaWxlZApzb3VyY2VGaWx0ZXJzOgogIC0gZGlzYWJsZUNsdXN0ZXJSZXBvcnRzOiBmYWxzZQogICAga2luZHM6CiAgICAgIGV4Y2x1ZGU6IFtdCiAgICBzZWxlY3RvcjoKICAgICAgc291cmNlczoKICAgICAgLSBreXZlcm5vCiAgICAgIC0gS3l2ZXJub1ZhbGlkYXRpbmdQb2xpY3kKICAgICAgLSBLeXZlcm5vSW1hZ2VWYWxpZGF0aW5nUG9saWN5CiAgICB1bmNvbnRyb2xsZWRPbmx5OiB0cnVlCgpsZWFkZXJFbGVjdGlvbjoKICBlbmFibGVkOiB0cnVlCiAgcmVsZWFzZU9uQ2FuY2VsOiB0cnVlCiAgbGVhc2VEdXJhdGlvbjogMTUKICByZW5ld0RlYWRsaW5lOiAxMAogIHJldHJ5UGVyaW9kOiAyCnJlZGlzOgogIGFkZHJlc3M6ICIiCiAgY2VydGlmaWNhdGU6ICIiCiAgY2xpZW50Q2VydDogIiIKICBjbGllbnRLZXk6ICIiCiAgZGF0YWJhc2U6IDAKICBlbmFibGVkOiBmYWxzZQogIHBhc3N3b3JkOiAiIgogIHByZWZpeDogcG9saWN5LXJlcG9ydGVyCiAgc2VjcmV0UmVmOiAiIgogIHNraXBUTFM6IGZhbHNlCiAgdXNlcm5hbWU6ICIiCgpsb2dnaW5nOgogIHNlcnZlcjogZmFsc2UKICBlbmNvZGluZzogY29uc29sZQogIGxvZ0xldmVsOiAwCgphcGk6CiAgYmFzaWNBdXRoOgogICAgdXNlcm5hbWU6IAogICAgcGFzc3dvcmQ6IAogICAgc2VjcmV0UmVmOiAKCmRhdGFiYXNlOgogIHR5cGU6IAogIGRhdGFiYXNlOiAKICB1c2VybmFtZTogCiAgcGFzc3dvcmQ6IAogIGhvc3Q6IAogIGVuYWJsZVNTTDogZmFsc2UKICBkc246IAogIG1heE9wZW5Db25uZWN0aW9uczogMjUKICBtYXhJZGxlQ29ubmVjdGlvbnM6IDI1CiAgY29ubmVjdGlvbk1heElkbGVUaW1lOiAwCiAgY29ubmVjdGlvbk1heExpZmV0aW1lOiAwCiAgdGltZW91dDogMTAKICBtZXRyaWNzOiBmYWxzZQogIHNlY3JldFJlZjogCiAgbW91bnRlZFNlY3JldDogCnBlcmlvZGljU3luYzoKICBlbmFibGVkOiBmYWxzZQogIGludGVydmFsOiAzMAphdXRvTWVtb3J5TGltaXQ6CiAgZW5hYmxlZDogdHJ1ZQogIHJhdGlvOiAwLjkK
+  config.yaml: cmVzdDoKICB3YWl0Rm9ySW5pdGlhbFJlcG9ydHM6IGZhbHNlCgpjcmQ6CiAgdGFyZ2V0Q29uZmlnOiBmYWxzZQoKdGFyZ2V0OgogIGxva2k6CiAgICBjb25maWc6CiAgICAgIGhvc3Q6ICIiCiAgICAgIGNlcnRpZmljYXRlOiAiIgogICAgICBza2lwVExTOiBmYWxzZQogICAgICBwYXRoOiAiIgogICAgbmFtZTogCiAgICBzZWNyZXRSZWY6ICIiCiAgICBtb3VudGVkU2VjcmV0OiAiIgogICAgbWluaW11bVNldmVyaXR5OiAiIgogICAgc2tpcEV4aXN0aW5nT25TdGFydHVwOiB0cnVlCgogIGVsYXN0aWNzZWFyY2g6CiAgICBjb25maWc6CiAgICAgIGhvc3Q6ICIiCiAgICAgIGNlcnRpZmljYXRlOiAiIgogICAgICBza2lwVExTOiBmYWxzZQogICAgICB1c2VybmFtZTogIiIKICAgICAgcGFzc3dvcmQ6ICIiCiAgICAgIGFwaUtleTogIiIKICAgICAgaW5kZXg6ICJwb2xpY3ktcmVwb3J0ZXIiCiAgICAgIHJvdGF0aW9uOiAiZGFpbHkiCiAgICAgIHR5cGVsZXNzQXBpOiAiZmFsc2UiCiAgICBuYW1lOiAKICAgIHNlY3JldFJlZjogIiIKICAgIG1vdW50ZWRTZWNyZXQ6ICIiCiAgICBtaW5pbXVtU2V2ZXJpdHk6ICIiCiAgICBza2lwRXhpc3RpbmdPblN0YXJ0dXA6IHRydWUKCiAgc2xhY2s6CiAgICBjb25maWc6CiAgICAgIHdlYmhvb2s6ICIiCiAgICAgIGNoYW5uZWw6ICIiCiAgICAgIGNlcnRpZmljYXRlOiAKICAgICAgc2tpcFRMUzogCiAgICBuYW1lOiAKICAgIHNlY3JldFJlZjogIiIKICAgIG1vdW50ZWRTZWNyZXQ6ICIiCiAgICBtaW5pbXVtU2V2ZXJpdHk6ICIiCiAgICBza2lwRXhpc3RpbmdPblN0YXJ0dXA6IHRydWUKCiAgZGlzY29yZDoKICAgIGNvbmZpZzoKICAgICAgd2ViaG9vazogIiIKICAgICAgY2VydGlmaWNhdGU6ICIiCiAgICAgIHNraXBUTFM6IGZhbHNlCiAgICBuYW1lOiAKICAgIHNlY3JldFJlZjogIiIKICAgIG1vdW50ZWRTZWNyZXQ6ICIiCiAgICBtaW5pbXVtU2V2ZXJpdHk6ICIiCiAgICBza2lwRXhpc3RpbmdPblN0YXJ0dXA6IHRydWUKCiAgdGVhbXM6CiAgICBjb25maWc6CiAgICAgIHdlYmhvb2s6ICIiCiAgICAgIGNlcnRpZmljYXRlOiAiIgogICAgICBza2lwVExTOiBmYWxzZQogICAgbmFtZTogCiAgICBzZWNyZXRSZWY6ICIiCiAgICBtb3VudGVkU2VjcmV0OiAiIgogICAgbWluaW11bVNldmVyaXR5OiAiIgogICAgc2tpcEV4aXN0aW5nT25TdGFydHVwOiB0cnVlCgogIHdlYmhvb2s6CiAgICBjb25maWc6CiAgICAgIHdlYmhvb2s6ICIiCiAgICAgIGNlcnRpZmljYXRlOiAiIgogICAgICBza2lwVExTOiBmYWxzZQogICAgICBrZWVwYWxpdmU6CiAgICAgICAgaW50ZXJ2YWw6ICIwIgogICAgbmFtZTogCiAgICBzZWNyZXRSZWY6ICIiCiAgICBtb3VudGVkU2VjcmV0OiAiIgogICAgbWluaW11bVNldmVyaXR5OiAiIgogICAgc2tpcEV4aXN0aW5nT25TdGFydHVwOiB0cnVlCgogIHRlbGVncmFtOgogICAgY29uZmlnOgogICAgICBjaGF0SWQ6ICIiCiAgICAgIHRva2VuOiAiIgogICAgICB3ZWJob29rOiAKICAgICAgY2VydGlmaWNhdGU6ICIiCiAgICAgIHNraXBUTFM6IGZhbHNlCiAgICBuYW1lOiAKICAgIHNlY3JldFJlZjogIiIKICAgIG1vdW50ZWRTZWNyZXQ6ICIiCiAgICBtaW5pbXVtU2V2ZXJpdHk6ICIiCiAgICBza2lwRXhpc3RpbmdPblN0YXJ0dXA6IHRydWUKCiAgZ29vZ2xlQ2hhdDoKICAgIGNvbmZpZzoKICAgICAgd2ViaG9vazogIiIKICAgICAgY2VydGlmaWNhdGU6ICIiCiAgICAgIHNraXBUTFM6IGZhbHNlCiAgICBuYW1lOiAKICAgIHNlY3JldFJlZjogIiIKICAgIG1vdW50ZWRTZWNyZXQ6ICIiCiAgICBtaW5pbXVtU2V2ZXJpdHk6ICIiCiAgICBza2lwRXhpc3RpbmdPblN0YXJ0dXA6IHRydWUKCiAgamlyYToKICAgIGNvbmZpZzoKICAgICAgaG9zdDogIiIKICAgICAgdXNlcm5hbWU6ICIiCiAgICAgIHBhc3N3b3JkOiAiIgogICAgICBhcGlUb2tlbjogIiIKICAgICAgYXBpVmVyc2lvbjogInYzIgogICAgICBzdW1tYXJ5VGVtcGxhdGU6ICIiCiAgICAgIHByb2plY3RLZXk6ICIiCiAgICAgIGlzc3VlVHlwZTogIiIKICAgICAgY2VydGlmaWNhdGU6ICIiCiAgICAgIHNraXBUTFM6IGZhbHNlCiAgICBuYW1lOiAKICAgIHNlY3JldFJlZjogIiIKICAgIG1vdW50ZWRTZWNyZXQ6ICIiCiAgICBtaW5pbXVtU2V2ZXJpdHk6ICIiCiAgICBza2lwRXhpc3RpbmdPblN0YXJ0dXA6IHRydWUKCiAgYWxlcnRNYW5hZ2VyOgogICAgY29uZmlnOgogICAgICBob3N0OiAiIgogICAgICBjZXJ0aWZpY2F0ZTogIiIKICAgICAgc2tpcFRMUzogZmFsc2UKICAgIG5hbWU6IAogICAgc2VjcmV0UmVmOiAiIgogICAgbW91bnRlZFNlY3JldDogIiIKICAgIG1pbmltdW1TZXZlcml0eTogIiIKICAgIHNraXBFeGlzdGluZ09uU3RhcnR1cDogdHJ1ZQoKICBzMzoKICAgIGNvbmZpZzoKICAgICAgYWNjZXNzS2V5SWQ6IAogICAgICBzZWNyZXRBY2Nlc3NLZXk6ICAKICAgICAgcmVnaW9uOiAKICAgICAgZW5kcG9pbnQ6IAogICAgICBidWNrZXQ6IAogICAgICBidWNrZXRLZXlFbmFibGVkOiBmYWxzZQogICAgICBrbXNLZXlJZDogCiAgICAgIHNlcnZlclNpZGVFbmNyeXB0aW9uOiAKICAgICAgcGF0aFN0eWxlOiBmYWxzZQogICAgICBwcmVmaXg6IAogICAgbmFtZTogCiAgICBzZWNyZXRSZWY6ICIiCiAgICBtb3VudGVkU2VjcmV0OiAiIgogICAgbWluaW11bVNldmVyaXR5OiAiIgogICAgc2tpcEV4aXN0aW5nT25TdGFydHVwOiB0cnVlCgogIGtpbmVzaXM6CiAgICBjb25maWc6CiAgICAgIGFjY2Vzc0tleUlkOiAKICAgICAgc2VjcmV0QWNjZXNzS2V5OiAgCiAgICAgIHJlZ2lvbjogCiAgICAgIGVuZHBvaW50OiAKICAgICAgc3RyZWFtTmFtZTogCiAgICBuYW1lOiAKICAgIHNlY3JldFJlZjogIiIKICAgIG1vdW50ZWRTZWNyZXQ6ICIiCiAgICBtaW5pbXVtU2V2ZXJpdHk6ICIiCiAgICBza2lwRXhpc3RpbmdPblN0YXJ0dXA6IHRydWUKCiAgc2VjdXJpdHlIdWI6CiAgICBjb25maWc6CiAgICAgIGFjY2Vzc0tleUlkOiAiIgogICAgICBzZWNyZXRBY2Nlc3NLZXk6ICAiIgogICAgICByZWdpb246IAogICAgICBlbmRwb2ludDogCiAgICAgIGFjY291bnRJZDogIiIKICAgICAgcHJvZHVjdE5hbWU6IAogICAgICBjb21wYW55TmFtZTogCiAgICAgIGRlbGF5SW5TZWNvbmRzOiAyCiAgICAgIHN5bmNocm9uaXplOiB0cnVlCiAgICBuYW1lOiAKICAgIHNlY3JldFJlZjogIiIKICAgIG1vdW50ZWRTZWNyZXQ6ICIiCiAgICBtaW5pbXVtU2V2ZXJpdHk6ICIiCiAgICBza2lwRXhpc3RpbmdPblN0YXJ0dXA6IHRydWUKCiAgZ2NzOgogICAgY29uZmlnOgogICAgICBjcmVkZW50aWFsczogCiAgICAgIGJ1Y2tldDogCiAgICAgIHByZWZpeDogCiAgICBuYW1lOiAKICAgIHNlY3JldFJlZjogIiIKICAgIG1vdW50ZWRTZWNyZXQ6ICIiCiAgICBtaW5pbXVtU2V2ZXJpdHk6ICIiCiAgICBza2lwRXhpc3RpbmdPblN0YXJ0dXA6IHRydWUKCndvcmtlcjogNQptZXRyaWNzOgogIGN1c3RvbUxhYmVsczogW10KICBlbmFibGVkOiB0cnVlCiAgZmlsdGVyOiB7fQogIG1vZGU6IGRldGFpbGVkCnNvdXJjZUZpbHRlcnM6CiAgLSBkaXNhYmxlQ2x1c3RlclJlcG9ydHM6IGZhbHNlCiAgICBraW5kczoKICAgICAgZXhjbHVkZTogW10KICAgIHNlbGVjdG9yOgogICAgICBzb3VyY2VzOgogICAgICAtIGt5dmVybm8KICAgICAgLSBLeXZlcm5vVmFsaWRhdGluZ1BvbGljeQogICAgICAtIEt5dmVybm9JbWFnZVZhbGlkYXRpbmdQb2xpY3kKICAgIHVuY29udHJvbGxlZE9ubHk6IHRydWUKCmxlYWRlckVsZWN0aW9uOgogIGVuYWJsZWQ6IHRydWUKICByZWxlYXNlT25DYW5jZWw6IHRydWUKICBsZWFzZUR1cmF0aW9uOiAxNQogIHJlbmV3RGVhZGxpbmU6IDEwCiAgcmV0cnlQZXJpb2Q6IDIKcmVkaXM6CiAgYWRkcmVzczogIiIKICBjZXJ0aWZpY2F0ZTogIiIKICBjbGllbnRDZXJ0OiAiIgogIGNsaWVudEtleTogIiIKICBkYXRhYmFzZTogMAogIGVuYWJsZWQ6IGZhbHNlCiAgcGFzc3dvcmQ6ICIiCiAgcHJlZml4OiBwb2xpY3ktcmVwb3J0ZXIKICBzZWNyZXRSZWY6ICIiCiAgc2tpcFRMUzogZmFsc2UKICB1c2VybmFtZTogIiIKCmxvZ2dpbmc6CiAgc2VydmVyOiBmYWxzZQogIGVuY29kaW5nOiBjb25zb2xlCiAgbG9nTGV2ZWw6IDAKCmFwaToKICBiYXNpY0F1dGg6CiAgICB1c2VybmFtZTogCiAgICBwYXNzd29yZDogCiAgICBzZWNyZXRSZWY6IAoKZGF0YWJhc2U6CiAgdHlwZTogCiAgZGF0YWJhc2U6IAogIHVzZXJuYW1lOiAKICBwYXNzd29yZDogCiAgaG9zdDogCiAgZW5hYmxlU1NMOiBmYWxzZQogIGRzbjogCiAgbWF4T3BlbkNvbm5lY3Rpb25zOiAyNQogIG1heElkbGVDb25uZWN0aW9uczogMjUKICBjb25uZWN0aW9uTWF4SWRsZVRpbWU6IDAKICBjb25uZWN0aW9uTWF4TGlmZXRpbWU6IDAKICB0aW1lb3V0OiAxMAogIG1ldHJpY3M6IGZhbHNlCiAgc2VjcmV0UmVmOiAKICBtb3VudGVkU2VjcmV0OiAKcGVyaW9kaWNTeW5jOgogIGVuYWJsZWQ6IGZhbHNlCiAgaW50ZXJ2YWw6IDMwCmF1dG9NZW1vcnlMaW1pdDoKICBlbmFibGVkOiB0cnVlCiAgcmF0aW86IDAuOQo=
 ---
 # Source: policy-reporter/templates/plugins/kyverno/config-secret.yaml
 apiVersion: v1
@@ -133,7 +133,7 @@ metadata:
   labels:
     app.kubernetes.io/name: policy-reporter-kyverno-plugin
     app.kubernetes.io/instance: policy-reporter
-    app.kubernetes.io/version: "3.9.0"
+    app.kubernetes.io/version: "3.10.0"
 type: Opaque
 data:
   config.yaml: bGVhZGVyRWxlY3Rpb246CiAgZW5hYmxlZDogdHJ1ZQogIHJlbGVhc2VPbkNhbmNlbDogdHJ1ZQogIGxlYXNlRHVyYXRpb246IDE1CiAgcmVuZXdEZWFkbGluZTogMTAKICByZXRyeVBlcmlvZDogMgogIGxvY2tOYW1lOiBreXZlcm5vLXBsdWdpbgoKbG9nZ2luZzoKICBhcGk6IGZhbHNlCiAgc2VydmVyOiBmYWxzZQogIGVuY29kaW5nOiBjb25zb2xlCiAgbG9nTGV2ZWw6IDAKCnNlcnZlcjoKICBiYXNpY0F1dGg6CiAgICB1c2VybmFtZTogCiAgICBwYXNzd29yZDogCiAgICBzZWNyZXRSZWY6IAoKY29yZToKICBob3N0OiBodHRwOi8vcG9saWN5LXJlcG9ydGVyOjgwODAKYmxvY2tSZXBvcnRzOgogICAgZW5hYmxlZDogZmFsc2UKICAgIGV2ZW50TmFtZXNwYWNlOiBkZWZhdWx0CiAgICBwb2xpY3lSZXBvcnQ6CiAgICAgIGFubm90YXRpb25zOiBbXQogICAgICBsYWJlbHM6IFtdCiAgICByZXN1bHRzOgogICAgICBrZWVwT25seUxhdGVzdDogZmFsc2UKICAgICAgbWF4UGVyUmVwb3J0OiAyMDAKICAgIHNvdXJjZTogS3l2ZXJubyBFdmVudAo=
@@ -147,10 +147,10 @@ metadata:
   labels:
     app.kubernetes.io/name: policy-reporter-ui
     app.kubernetes.io/instance: policy-reporter
-    app.kubernetes.io/version: "3.9.0"
+    app.kubernetes.io/version: "3.10.0"
 type: Opaque
 data:
-  config.yaml: bG9nZ2luZzoKICBhcGk6IGZhbHNlCiAgc2VydmVyOiBmYWxzZQogIGVuY29kaW5nOiBjb25zb2xlCiAgbG9nTGV2ZWw6IDAKCnNlcnZlcjoKICBwb3J0OiA4MDgwCiAgY29yczogdHJ1ZQogIG92ZXJ3cml0ZUhvc3Q6IHRydWUKICBzZXNzaW9uczoKICAgIHN0b3JhZ2U6IGZpbGVzeXN0ZW0KICAgIHRlbXBEaXI6IC90bXAKCnVpOgogIGRpc3BsYXlNb2RlOiAKICBiYW5uZXI6IAogIGxvZ286CiAgICBwYXRoOiAKICAgIGRpc2FibGVkOiBmYWxzZQoKY3JkczoKICBjdXN0b21Cb2FyZDogZmFsc2UKCmNsdXN0ZXJzOgogIC0gbmFtZTogRGVmYXVsdAogICAgc2VjcmV0UmVmOiBwb2xpY3ktcmVwb3J0ZXItdWktZGVmYXVsdC1jbHVzdGVyCgpzb3VyY2VzOgogIC0gbmFtZToga3l2ZXJubwogICAgdHlwZTogcmVzdWx0CiAgICBleGNlcHRpb25zOiBmYWxzZQogICAgZXhjbHVkZXM6CiAgICAgIHJlc3VsdHM6CiAgICAgIC0gd2FybgogICAgICAtIGVycm9yCiAgLSBuYW1lOiBLeXZlcm5vVmFsaWRhdGluZ1BvbGljeQogICAgdHlwZTogcmVzdWx0CiAgICBleGNlcHRpb25zOiBmYWxzZQogICAgZXhjbHVkZXM6CiAgICAgIHJlc3VsdHM6CiAgICAgIC0gd2FybgogICAgICAtIGVycm9yCm9wZW5JRENvbm5lY3Q6CiAgICBjYWxsYmFja1VybDogIiIKICAgIGNlcnRpZmljYXRlOiAiIgogICAgY2xpZW50SWQ6ICIiCiAgICBjbGllbnRTZWNyZXQ6ICIiCiAgICBkaXNjb3ZlcnlVcmw6ICIiCiAgICBlbmFibGVkOiBmYWxzZQogICAgZ3JvdXBDbGFpbTogIiIKICAgIHNjb3BlczogW10KICAgIHNlY3JldFJlZjogIiIKICAgIHNraXBUTFM6IGZhbHNlCm9hdXRoOgogICAgY2FsbGJhY2tVcmw6ICIiCiAgICBjbGllbnRJZDogIiIKICAgIGNsaWVudFNlY3JldDogIiIKICAgIGVuYWJsZWQ6IGZhbHNlCiAgICBwcm92aWRlcjogIiIKICAgIHNjb3BlczogW10KICAgIHNlY3JldFJlZjogIiIK
+  config.yaml: bG9nZ2luZzoKICBhcGk6IGZhbHNlCiAgc2VydmVyOiBmYWxzZQogIGVuY29kaW5nOiBjb25zb2xlCiAgbG9nTGV2ZWw6IDAKCnNlcnZlcjoKICBwb3J0OiA4MDgwCiAgY29yczogdHJ1ZQogIG92ZXJ3cml0ZUhvc3Q6IHRydWUKICBzZXNzaW9uczoKICAgIHN0b3JhZ2U6IGZpbGVzeXN0ZW0KICAgIHRlbXBEaXI6IC90bXAKCnVpOgogIGRpc3BsYXlNb2RlOiAKICBiYW5uZXI6IAogIGxvZ286CiAgICBwYXRoOiAKICAgIGRpc2FibGVkOiBmYWxzZQoKY3JkczoKICBjdXN0b21Cb2FyZDogZmFsc2UKICBjbHVzdGVyOiBmYWxzZQoKY2x1c3RlcnM6CiAgLSBuYW1lOiBEZWZhdWx0CiAgICBzZWNyZXRSZWY6IHBvbGljeS1yZXBvcnRlci11aS1kZWZhdWx0LWNsdXN0ZXIKCnNvdXJjZXM6CiAgLSBuYW1lOiBreXZlcm5vCiAgICB0eXBlOiByZXN1bHQKICAgIGV4Y2VwdGlvbnM6IGZhbHNlCiAgICBleGNsdWRlczoKICAgICAgcmVzdWx0czoKICAgICAgLSB3YXJuCiAgICAgIC0gZXJyb3IKICAtIG5hbWU6IEt5dmVybm9WYWxpZGF0aW5nUG9saWN5CiAgICB0eXBlOiByZXN1bHQKICAgIGV4Y2VwdGlvbnM6IGZhbHNlCiAgICBleGNsdWRlczoKICAgICAgcmVzdWx0czoKICAgICAgLSB3YXJuCiAgICAgIC0gZXJyb3IKb3BlbklEQ29ubmVjdDoKICAgIGNhbGxiYWNrVXJsOiAiIgogICAgY2VydGlmaWNhdGU6ICIiCiAgICBjbGllbnRJZDogIiIKICAgIGNsaWVudFNlY3JldDogIiIKICAgIGRpc2NvdmVyeVVybDogIiIKICAgIGVuYWJsZWQ6IGZhbHNlCiAgICBncm91cENsYWltOiAiIgogICAgcGtjZTogZmFsc2UKICAgIHNjb3BlczogW10KICAgIHNlY3JldFJlZjogIiIKICAgIHNraXBUTFM6IGZhbHNlCm9hdXRoOgogICAgY2FsbGJhY2tVcmw6ICIiCiAgICBjbGllbnRJZDogIiIKICAgIGNsaWVudFNlY3JldDogIiIKICAgIGVuYWJsZWQ6IGZhbHNlCiAgICBwcm92aWRlcjogIiIKICAgIHNjb3BlczogW10KICAgIHNlY3JldFJlZjogIiIK
 ---
 # Source: policy-reporter/templates/clusterrole.yaml
 apiVersion: rbac.authorization.k8s.io/v1
@@ -160,7 +160,7 @@ metadata:
     rbac.authorization.k8s.io/aggregate-to-admin: "true"
     app.kubernetes.io/name: policy-reporter
     app.kubernetes.io/instance: policy-reporter
-    app.kubernetes.io/version: "3.9.0"
+    app.kubernetes.io/version: "3.10.0"
     app.kubernetes.io/component: reporting
     app.kubernetes.io/part-of: policy-reporter
   name: policy-reporter
@@ -228,7 +228,7 @@ metadata:
     rbac.authorization.k8s.io/aggregate-to-admin: "true"
     app.kubernetes.io/name: policy-reporter-kyverno-plugin
     app.kubernetes.io/instance: policy-reporter
-    app.kubernetes.io/version: "3.9.0"
+    app.kubernetes.io/version: "3.10.0"
   name: policy-reporter-kyverno-plugin
 rules:
 - apiGroups:
@@ -264,7 +264,7 @@ metadata:
   labels:
     app.kubernetes.io/name: policy-reporter
     app.kubernetes.io/instance: policy-reporter
-    app.kubernetes.io/version: "3.9.0"
+    app.kubernetes.io/version: "3.10.0"
     app.kubernetes.io/component: reporting
     app.kubernetes.io/part-of: policy-reporter
 roleRef:
@@ -284,7 +284,7 @@ metadata:
   labels:
     app.kubernetes.io/name: policy-reporter-kyverno-plugin
     app.kubernetes.io/instance: policy-reporter
-    app.kubernetes.io/version: "3.9.0"
+    app.kubernetes.io/version: "3.10.0"
 roleRef:
   kind: ClusterRole
   name: policy-reporter-kyverno-plugin
@@ -301,7 +301,7 @@ metadata:
   labels:
     app.kubernetes.io/name: policy-reporter-kyverno-plugin
     app.kubernetes.io/instance: policy-reporter
-    app.kubernetes.io/version: "3.9.0"
+    app.kubernetes.io/version: "3.10.0"
   name: policy-reporter-kyverno-plugin-secret-reader
   namespace: policy-reporter
 rules:
@@ -318,7 +318,7 @@ metadata:
   labels:
     app.kubernetes.io/name: policy-reporter
     app.kubernetes.io/instance: policy-reporter
-    app.kubernetes.io/version: "3.9.0"
+    app.kubernetes.io/version: "3.10.0"
     app.kubernetes.io/component: reporting
     app.kubernetes.io/part-of: policy-reporter
   name: policy-reporter-leaderelection
@@ -342,7 +342,7 @@ metadata:
   labels:
     app.kubernetes.io/name: policy-reporter
     app.kubernetes.io/instance: policy-reporter
-    app.kubernetes.io/version: "3.9.0"
+    app.kubernetes.io/version: "3.10.0"
     app.kubernetes.io/component: reporting
     app.kubernetes.io/part-of: policy-reporter
   name: policy-reporter-secret-reader
@@ -363,7 +363,7 @@ metadata:
   labels:
     app.kubernetes.io/name: policy-reporter-ui
     app.kubernetes.io/instance: policy-reporter
-    app.kubernetes.io/version: "3.9.0"
+    app.kubernetes.io/version: "3.10.0"
   name: policy-reporter-ui-secret-reader
   namespace: policy-reporter
 rules:
@@ -382,7 +382,7 @@ metadata:
   labels:
     app.kubernetes.io/name: policy-reporter-kyverno-plugin
     app.kubernetes.io/instance: policy-reporter
-    app.kubernetes.io/version: "3.9.0"
+    app.kubernetes.io/version: "3.10.0"
 roleRef:
   kind: Role
   name: policy-reporter-kyverno-plugin-secret-reader
@@ -401,7 +401,7 @@ metadata:
   labels:
     app.kubernetes.io/name: policy-reporter
     app.kubernetes.io/instance: policy-reporter
-    app.kubernetes.io/version: "3.9.0"
+    app.kubernetes.io/version: "3.10.0"
     app.kubernetes.io/component: reporting
     app.kubernetes.io/part-of: policy-reporter
 roleRef:
@@ -422,7 +422,7 @@ metadata:
   labels:
     app.kubernetes.io/name: policy-reporter
     app.kubernetes.io/instance: policy-reporter
-    app.kubernetes.io/version: "3.9.0"
+    app.kubernetes.io/version: "3.10.0"
     app.kubernetes.io/component: reporting
     app.kubernetes.io/part-of: policy-reporter
 roleRef:
@@ -443,7 +443,7 @@ metadata:
   labels:
     app.kubernetes.io/name: policy-reporter-ui
     app.kubernetes.io/instance: policy-reporter
-    app.kubernetes.io/version: "3.9.0"
+    app.kubernetes.io/version: "3.10.0"
 roleRef:
   kind: Role
   name: policy-reporter-ui-secret-reader
@@ -462,7 +462,7 @@ metadata:
   labels:
     app.kubernetes.io/name: policy-reporter-kyverno-plugin
     app.kubernetes.io/instance: policy-reporter
-    app.kubernetes.io/version: "3.9.0"
+    app.kubernetes.io/version: "3.10.0"
 spec:
   type: ClusterIP
   ports:
@@ -483,7 +483,7 @@ metadata:
   labels:
     app.kubernetes.io/name: policy-reporter
     app.kubernetes.io/instance: policy-reporter
-    app.kubernetes.io/version: "3.9.0"
+    app.kubernetes.io/version: "3.10.0"
     app.kubernetes.io/component: reporting
     app.kubernetes.io/part-of: policy-reporter
 spec:
@@ -506,7 +506,7 @@ metadata:
   labels:
     app.kubernetes.io/name: policy-reporter-ui
     app.kubernetes.io/instance: policy-reporter
-    app.kubernetes.io/version: "3.9.0"
+    app.kubernetes.io/version: "3.10.0"
 spec:
   type: ClusterIP
   ports:
@@ -527,7 +527,7 @@ metadata:
   labels:
     app.kubernetes.io/name: policy-reporter
     app.kubernetes.io/instance: policy-reporter
-    app.kubernetes.io/version: "3.9.0"
+    app.kubernetes.io/version: "3.10.0"
     app.kubernetes.io/component: reporting
     app.kubernetes.io/part-of: policy-reporter
 spec:
@@ -542,10 +542,10 @@ spec:
       labels:
         app.kubernetes.io/name: policy-reporter
         app.kubernetes.io/instance: policy-reporter
-        app.kubernetes.io/version: "3.9.0"
+        app.kubernetes.io/version: "3.10.0"
         app.kubernetes.io/part-of: policy-reporter
       annotations:
-        checksum/secret: "72f6e562b230ef70155a0952de92f6bf8ac62452b9c2f43bb41e14e9c64787f1"
+        checksum/secret: "2fadb54cf695857d0a2a9da26c11c99f5dcb1b6ad9427bc768e70c49b1b48062"
     spec:
       serviceAccountName: policy-reporter
       automountServiceAccountToken: true
@@ -553,7 +553,7 @@ spec:
         fsGroup: 1234
       containers:
         - name: policy-reporter
-          image: "ghcr.io/kyverno/policy-reporter:3.9.0"
+          image: "ghcr.io/kyverno/policy-reporter:3.10.0"
           imagePullPolicy: IfNotPresent
           securityContext:
             allowPrivilegeEscalation: false
@@ -581,11 +581,11 @@ spec:
               protocol: TCP
           livenessProbe:
             httpGet:
-              path: /ready
+              path: /healthz
               port: http
           readinessProbe:
             httpGet:
-              path: /healthz
+              path: /ready
               port: http
           resources:
             {}
@@ -626,7 +626,7 @@ metadata:
   labels:
     app.kubernetes.io/name: policy-reporter-kyverno-plugin
     app.kubernetes.io/instance: policy-reporter
-    app.kubernetes.io/version: "3.9.0"
+    app.kubernetes.io/version: "3.10.0"
 spec:
   replicas: 2
   revisionHistoryLimit: 10
@@ -637,11 +637,11 @@ spec:
   template:
     metadata:
       annotations:
-        checksum/secret: "c995a80234e65107145b04bd190487f5c5affcc3b72c15026a55dc2a61c1966c"
+        checksum/secret: "f1649ddccc2697df2e93bda9d6c97953d168b3765c22efa9ec77d52b1b6e1584"
       labels:
         app.kubernetes.io/name: policy-reporter-kyverno-plugin
         app.kubernetes.io/instance: policy-reporter
-        app.kubernetes.io/version: "3.9.0"
+        app.kubernetes.io/version: "3.10.0"
     spec:
       serviceAccountName: policy-reporter-kyverno-plugin
       automountServiceAccountToken: true
@@ -661,7 +661,7 @@ spec:
             runAsUser: 1234
             seccompProfile:
               type: RuntimeDefault
-          image: "ghcr.io/kyverno/policy-reporter/kyverno-plugin:0.7.0"
+          image: "ghcr.io/kyverno/policy-reporter/kyverno-plugin:0.7.1"
           imagePullPolicy: IfNotPresent
           args:
             - run
@@ -710,7 +710,7 @@ metadata:
   labels:
     app.kubernetes.io/name: policy-reporter-ui
     app.kubernetes.io/instance: policy-reporter
-    app.kubernetes.io/version: "3.9.0"
+    app.kubernetes.io/version: "3.10.0"
 spec:
   replicas: 2
   revisionHistoryLimit: 10
@@ -721,12 +721,12 @@ spec:
   template:
     metadata:
       annotations:
-        checksum/secret: "4f99dd18312bdf83980c665f35e3bf61cd7db66fa30d875000187c9462d237f3"
-        checksum/cluster-secret: "c9a1cc32fdefb0406a9276cf16074e14e7704fa3762d737a97e802094f67e572"
+        checksum/secret: "fa3d4d5f157afd334f238da733362ba4c952f3d31b5e1b24f12f387c697736bd"
+        checksum/cluster-secret: "88131eb62b594970cd13cf662e47b147c50d8d528981d56886bdf3c849dcedee"
       labels:
         app.kubernetes.io/name: policy-reporter-ui
         app.kubernetes.io/instance: policy-reporter
-        app.kubernetes.io/version: "3.9.0"
+        app.kubernetes.io/version: "3.10.0"
     spec:
       serviceAccountName: policy-reporter-ui
       automountServiceAccountToken: true
@@ -746,7 +746,7 @@ spec:
             runAsUser: 1234
             seccompProfile:
               type: RuntimeDefault
-          image: "ghcr.io/kyverno/policy-reporter-ui:2.7.0"
+          image: "ghcr.io/kyverno/policy-reporter-ui:2.8.1"
           imagePullPolicy: IfNotPresent
           args:
             - run

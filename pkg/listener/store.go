@@ -25,6 +25,9 @@ func NewStoreListener(store report.PolicyReportStore) report.PolicyReportListene
 		})
 
 		logOnError(event.Type.String(), event.PolicyReport.GetName(), err)
+		if event.Persisted != nil {
+			event.Persisted(err)
+		}
 	}
 }
 

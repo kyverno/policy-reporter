@@ -24,9 +24,10 @@ type BasicAuth struct {
 }
 
 type Server struct {
-	middleware []gin.HandlerFunc
-	engine     *gin.Engine
-	port       int
+	middleware     []gin.HandlerFunc
+	restMiddleware []gin.HandlerFunc
+	engine         *gin.Engine
+	port           int
 }
 
 func (s *Server) Start() error {
@@ -38,7 +39,9 @@ func (s *Server) Serve(w http.ResponseWriter, req *http.Request) {
 }
 
 func (s *Server) Register(path string, handler Handler) error {
-	return handler.Register(s.engine.Group(path, s.middleware...))
+	middleware := append([]gin.HandlerFunc{}, s.middleware...)
+	middleware = append(middleware, s.restMiddleware...)
+	return handler.Register(s.engine.Group(path, middleware...))
 }
 
 func NewServer(engine *gin.Engine, options ...ServerOption) *Server {
@@ -66,10 +69,10 @@ func WithBasicAuth(auth BasicAuth) ServerOption {
 	}
 }
 
-func WithHealthChecks(checks []HealthCheck) ServerOption {
+func WithHealthChecks(checks []HealthCheck, readinessChecks ...HealthCheck) ServerOption {
 	return func(s *Server) error {
 		s.engine.GET("healthz", HealthzHandler(checks))
-		s.engine.GET("ready", HealthzHandler(checks))
+		s.engine.GET("ready", HealthzHandler(append(append([]HealthCheck{}, checks...), readinessChecks...)))
 
 		return nil
 	}
@@ -120,6 +123,20 @@ func WithMetrics() ServerOption {
 	return func(s *Server) error {
 		s.engine.GET("metrics", append(s.middleware, MetricsHandler())...)
 
+		return nil
+	}
+}
+
+// WithRESTReadiness protects REST groups without gating metrics or profiling.
+func WithRESTReadiness(check HealthCheck) ServerOption {
+	return func(s *Server) error {
+		s.restMiddleware = append(s.restMiddleware, func(ctx *gin.Context) {
+			if err := check(); err != nil {
+				ctx.AbortWithStatusJSON(http.StatusServiceUnavailable, gin.H{"error": err.Error()})
+				return
+			}
+			ctx.Next()
+		})
 		return nil
 	}
 }

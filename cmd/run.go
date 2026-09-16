@@ -31,6 +31,9 @@ func newRunCMD(version string) *cobra.Command {
 				return err
 			}
 			c.Version = version
+			if err := c.ValidateInitialReports(); err != nil {
+				return err
+			}
 
 			logger, err := config.SetupLogger(c)
 			if err != nil {
@@ -77,6 +80,16 @@ func newRunCMD(version string) *cobra.Command {
 			}
 
 			g := &errgroup.Group{}
+			startupErrors := make(chan error, 1)
+			var initialChecks []api.HealthCheck
+			if c.REST.WaitForInitialReports {
+				initialChecks = append(initialChecks, func() error {
+					if (wgClient != nil && !wgClient.HasProcessedInitialReports()) || (orClient != nil && !orClient.HasProcessedInitialReports()) {
+						return errors.New("initial reports have not been persisted")
+					}
+					return nil
+				})
+			}
 
 			var store *database.Store
 			servOptions := []api.ServerOption{
@@ -100,7 +113,10 @@ func newRunCMD(version string) *cobra.Command {
 						}
 						return nil
 					},
-				}),
+				}, initialChecks...),
+			}
+			if c.REST.WaitForInitialReports {
+				servOptions = append(servOptions, api.WithRESTReadiness(initialChecks[0]))
 			}
 
 			if c.REST.Enabled {
@@ -121,7 +137,9 @@ func newRunCMD(version string) *cobra.Command {
 				}
 
 				if !c.LeaderElection.Enabled || store.IsSQLite() {
-					store.PrepareDatabase(cmd.Context())
+					if err := store.PrepareDatabase(cmd.Context()); err != nil {
+						return fmt.Errorf("prepare database: %w", err)
+					}
 					resolver.RegisterStoreListener(cmd.Context(), store)
 				}
 
@@ -155,7 +173,13 @@ func newRunCMD(version string) *cobra.Command {
 					logger.Info("started leadership")
 
 					if c.REST.Enabled && !store.IsSQLite() {
-						store.PrepareDatabase(cmd.Context())
+						if err := store.PrepareDatabase(ctx); err != nil {
+							select {
+							case startupErrors <- fmt.Errorf("prepare database: %w", err):
+							default:
+							}
+							return
+						}
 						logger.Debug("register database persistence")
 						resolver.RegisterStoreListener(ctx, store)
 
@@ -183,7 +207,7 @@ func newRunCMD(version string) *cobra.Command {
 				}).RegisterOnStop(func() {
 					logger.Info("stopped leadership")
 
-					if !store.IsSQLite() {
+					if store != nil && !store.IsSQLite() {
 						resolver.EventPublisher().UnregisterListener(listener.Store)
 					}
 
@@ -279,7 +303,14 @@ func newRunCMD(version string) *cobra.Command {
 				return nil
 			})
 
-			return g.Wait()
+			done := make(chan error, 1)
+			go func() { done <- g.Wait() }()
+			select {
+			case err := <-startupErrors:
+				return err
+			case err := <-done:
+				return err
+			}
 		},
 	}
 
