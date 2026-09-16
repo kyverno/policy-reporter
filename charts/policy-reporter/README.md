@@ -145,6 +145,7 @@ Open `http://localhost:8082/` in your browser.
 | emailReports.summary.ttlSecondsAfterFinished | int | `0` | CronJob ttlSecondsAfterFinished |
 | emailReports.summary.restartPolicy | string | `"Never"` | CronJob restartPolicy |
 | emailReports.summary.to | list | `[]` | List of receiver email addresses |
+| emailReports.summary.attachmentFormat | string | `""` | Attach report data as CSV instead of rendering details in the email body (empty or csv). Channels configure this independently. |
 | emailReports.summary.filter | optional | `{}` | Report filter |
 | emailReports.summary.channels | optional | `[]` | Channels can be used to to send only a subset of namespaces / sources to dedicated email addresses |
 | emailReports.violations.enabled | bool | `false` | Enable Violation Summary E-Mail reports |
@@ -154,6 +155,7 @@ Open `http://localhost:8082/` in your browser.
 | emailReports.violations.ttlSecondsAfterFinished | int | `0` | CronJob ttlSecondsAfterFinished |
 | emailReports.violations.restartPolicy | string | `"Never"` | CronJob restartPolicy |
 | emailReports.violations.to | list | `[]` | List of receiver email addresses |
+| emailReports.violations.attachmentFormat | string | `""` | Attach report data as CSV instead of rendering details in the email body (empty or csv). Channels configure this independently. |
 | emailReports.violations.filter | optional | `{}` | Report filter |
 | emailReports.violations.channels | optional | `[]` | Channels can be used to to send only a subset of namespaces / sources to dedicated email addresses |
 | existingTargetConfig.enabled | bool | `false` | Use an already existing configuration |

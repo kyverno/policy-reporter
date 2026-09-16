@@ -38,6 +38,10 @@ func (o *Reporter) Report(sources []Source, format string) (email.Report, error)
 		return email.Report{}, err
 	}
 
+	return o.newReport(b.String(), format), nil
+}
+
+func (o *Reporter) newReport(message, format string) email.Report {
 	titleCluster := " "
 	if o.clusterName != "" {
 		titleCluster = " on " + o.clusterName + " "
@@ -46,9 +50,9 @@ func (o *Reporter) Report(sources []Source, format string) (email.Report, error)
 	return email.Report{
 		ClusterName: o.clusterName,
 		Title:       o.titlePrefix + " (summary)" + titleCluster + "from " + time.Now().Format("2006-01-02"),
-		Message:     b.String(),
+		Message:     message,
 		Format:      format,
-	}, nil
+	}
 }
 
 // parseTemplate loads name preferring the on-disk templateDir when the file

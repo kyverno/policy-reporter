@@ -8,11 +8,13 @@ import (
 )
 
 type Result struct {
-	Policy string
-	Rule   string
-	Kind   string
-	Name   string
-	Status string
+	Message  string
+	Severity string
+	Policy   string
+	Rule     string
+	Kind     string
+	Name     string
+	Status   string
 }
 
 func mapResult(polr openreports.ReportInterface, res openreports.ResultAdapter) []Result {
@@ -24,28 +26,34 @@ func mapResult(polr openreports.ReportInterface, res openreports.ResultAdapter) 
 
 	if count == 0 && polr.GetScope() == nil {
 		return []Result{{
-			Policy: res.Policy,
-			Rule:   rule,
-			Status: string(res.Result),
+			Policy:   res.Policy,
+			Message:  res.Description,
+			Severity: string(res.Severity),
+			Rule:     rule,
+			Status:   string(res.Result),
 		}}
 	} else if count == 0 && polr.GetScope() != nil {
 		return []Result{{
-			Policy: res.Policy,
-			Rule:   rule,
-			Name:   polr.GetScope().Name,
-			Kind:   polr.GetScope().Kind,
-			Status: string(res.Result),
+			Policy:   res.Policy,
+			Message:  res.Description,
+			Severity: string(res.Severity),
+			Rule:     rule,
+			Name:     polr.GetScope().Name,
+			Kind:     polr.GetScope().Kind,
+			Status:   string(res.Result),
 		}}
 	}
 
 	list := make([]Result, 0, count)
 	for _, re := range res.Subjects {
 		list = append(list, Result{
-			Policy: res.Policy,
-			Rule:   rule,
-			Name:   re.Name,
-			Kind:   re.Kind,
-			Status: string(res.Result),
+			Policy:   res.Policy,
+			Message:  res.Description,
+			Severity: string(res.Severity),
+			Rule:     rule,
+			Name:     re.Name,
+			Kind:     re.Kind,
+			Status:   string(res.Result),
 		})
 	}
 

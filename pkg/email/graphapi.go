@@ -30,10 +30,18 @@ type recipient struct {
 	EmailAddress emailAddress `json:"emailAddress"`
 }
 
+type graphAttachment struct {
+	Type         string `json:"@odata.type"`
+	Name         string `json:"name"`
+	ContentType  string `json:"contentType"`
+	ContentBytes []byte `json:"contentBytes"`
+}
+
 type graphMessage struct {
 	Message struct {
-		Subject string `json:"subject"`
-		Body    struct {
+		Attachments []graphAttachment `json:"attachments,omitempty"`
+		Subject     string            `json:"subject"`
+		Body        struct {
 			ContentType string `json:"contentType"`
 			Content     string `json:"content"`
 		} `json:"body"`
@@ -86,6 +94,13 @@ func (c *graphAPIClient) Send(report Report, to []string) error {
 	msg.Message.CcRecipients = makeRecipients(c.cc)
 	msg.Message.BccRecipients = makeRecipients(c.bcc)
 	msg.SaveToSentItems = !c.disableSaveToSentItems
+
+	for _, attachment := range report.Attachments {
+		msg.Message.Attachments = append(msg.Message.Attachments, graphAttachment{
+			Type: "#microsoft.graph.fileAttachment", Name: attachment.Filename,
+			ContentType: attachment.ContentType, ContentBytes: attachment.Data,
+		})
+	}
 
 	body, err := json.Marshal(msg)
 	if err != nil {

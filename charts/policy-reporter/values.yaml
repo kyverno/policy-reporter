@@ -326,6 +326,8 @@ emailReports:
     restartPolicy: Never
     # -- List of receiver email addresses
     to: []
+    # -- Attach report data as CSV instead of rendering details in the email body (empty or csv). Channels configure this independently.
+    attachmentFormat: ""
     # -- (optional) Report filter
     filter: {}
     #  # remove ClusterPolicyResults from Reports
@@ -339,6 +341,7 @@ emailReports:
     # -- (optional) Channels can be used to to send only a subset of namespaces / sources to dedicated email addresses
     channels: []
     #  - to: ['team-a@company.org']
+    #    attachmentFormat: csv
     #    filter:
     #      disableClusterReports: true
     #      namespaces:
@@ -361,6 +364,8 @@ emailReports:
     restartPolicy: Never
     # -- List of receiver email addresses
     to: []
+    # -- Attach report data as CSV instead of rendering details in the email body (empty or csv). Channels configure this independently.
+    attachmentFormat: ""
     # -- (optional) Report filter
     filter: {}
     #  disableClusterReports: false # remove ClusterPolicyResults from Reports
@@ -373,6 +378,7 @@ emailReports:
     # -- (optional) Channels can be used to to send only a subset of namespaces / sources to dedicated email addresses
     channels: []
     #  - to: ['team-a@company.org']
+    #    attachmentFormat: csv
     #    filter:
     #      disableClusterReports: true
     #      namespaces:
