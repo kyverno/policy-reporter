@@ -14,7 +14,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/securityhub v1.81.0
 	github.com/aws/aws-sdk-go-v2/service/sts v1.50.0
 	github.com/ctreminiom/go-atlassian/v2 v2.12.0
-	github.com/gin-contrib/gzip v1.2.6
+	github.com/gin-contrib/gzip v1.2.7
 	github.com/gin-contrib/pprof v1.5.4
 	github.com/gin-contrib/zap v1.1.8
 	github.com/gin-gonic/gin v1.12.0

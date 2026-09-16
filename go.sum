@@ -121,8 +121,8 @@ github.com/fxamacker/cbor/v2 v2.9.3 h1:oQBnFATpNdY8gJHTndDDv5Xl4QqNaz51G5LLEPhng
 github.com/fxamacker/cbor/v2 v2.9.3/go.mod h1:vM4b+DJCtHn+zz7h3FFp/hDAI9WNWCsZj23V5ytsSxQ=
 github.com/gabriel-vasile/mimetype v1.4.15 h1:05iP/CYtZ/w455R/KZM6rZ5ieAdh99UPtd+d3YzLmaI=
 github.com/gabriel-vasile/mimetype v1.4.15/go.mod h1:azpTcoLcDZRNgFou5j+APrqQx9HqVPWa6ijYQIIVswQ=
-github.com/gin-contrib/gzip v1.2.6 h1:OtN8DplD5DNZCSLAnQ5HxRkD2qZ5VU+JhOrcfJrcRvg=
-github.com/gin-contrib/gzip v1.2.6/go.mod h1:BQy8/+JApnRjAVUplSGZiVtD2k8GmIE2e9rYu/hLzzU=
+github.com/gin-contrib/gzip v1.2.7 h1:eQYOd81DpSU24TYYYNPzATrl7Hv3hGyzQilt3fGkxoc=
+github.com/gin-contrib/gzip v1.2.7/go.mod h1:mfl5NDloGODrP2QryKtW37zsWrLkJkp/Y3iHTw0ZDy8=
 github.com/gin-contrib/pprof v1.5.4 h1:daxf2UNZw5IEx6WBdcpnEzgeDfkp083KdjUAFuMEkK4=
 github.com/gin-contrib/pprof v1.5.4/go.mod h1:AUxwt9kgpJGWiytj6RorBqRMyFuOQk7dPNfM9nHEY9I=
 github.com/gin-contrib/sse v1.1.1 h1:uGYpNwTacv5R68bSGMapo62iLTRa9l5zxGCps4hK6ko=
