@@ -50,6 +50,10 @@ func (c *Client) Send(report Report, to []string) error {
 		msg.SetBody(mail.TextPlain, report.Message)
 	}
 
+	for _, attachment := range report.Attachments {
+		msg.Attach(&mail.File{Name: attachment.Filename, MimeType: attachment.ContentType, Data: attachment.Data})
+	}
+
 	if msg.Error != nil {
 		return msg.Error
 	}

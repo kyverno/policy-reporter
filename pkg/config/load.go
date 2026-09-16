@@ -1,11 +1,14 @@
 package config
 
 import (
+	"fmt"
 	"log"
 	"strings"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+
+	"github.com/kyverno/policy-reporter/pkg/email"
 )
 
 func Load(cmd *cobra.Command) (*Config, error) {
@@ -132,11 +135,35 @@ func Load(cmd *cobra.Command) (*Config, error) {
 
 	c := &Config{}
 
-	err := v.Unmarshal(c)
+	if err := v.Unmarshal(c); err != nil {
+		return nil, err
+	}
+	for _, report := range []struct {
+		name   string
+		config EmailReport
+	}{
+		{"summary", c.EmailReports.Summary}, {"violations", c.EmailReports.Violations},
+	} {
+		if err := validateEmailReport(report.config, "emailReports."+report.name); err != nil {
+			return nil, err
+		}
+	}
 
 	if c.DBFile == "" {
 		c.DBFile = "sqlite-database.db"
 	}
 
-	return c, err
+	return c, nil
+}
+
+func validateEmailReport(report EmailReport, path string) error {
+	if err := email.ValidateAttachmentFormat(report.AttachmentFormat); err != nil {
+		return fmt.Errorf("%s.attachmentFormat: %w", path, err)
+	}
+	for i, channel := range report.Channels {
+		if err := validateEmailReport(channel, fmt.Sprintf("%s.channels[%d]", path, i)); err != nil {
+			return err
+		}
+	}
+	return nil
 }

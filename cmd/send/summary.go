@@ -68,7 +68,7 @@ func NewSummaryCMD() *cobra.Command {
 					return
 				}
 
-				report, err := reporter.Report(data, c.EmailReports.Summary.Format)
+				report, err := reporter.EmailReport(data, c.EmailReports.Summary.Format, c.EmailReports.Summary.AttachmentFormat)
 				if err != nil {
 					logger.Error("failed to create report", zap.Error(err))
 					return
@@ -104,7 +104,7 @@ func NewSummaryCMD() *cobra.Command {
 						return
 					}
 
-					report, err := reporter.Report(sources, channel.Format)
+					report, err := reporter.EmailReport(sources, channel.Format, channel.AttachmentFormat)
 					if err != nil {
 						logger.Error("failed to create report", zap.Error(err))
 						return

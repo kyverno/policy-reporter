@@ -59,10 +59,11 @@ type GraphAPI struct {
 
 // EmailReport configuration
 type EmailReport struct {
-	To       []string          `mapstructure:"to"`
-	Format   string            `mapstructure:"format"`
-	Filter   EmailReportFilter `mapstructure:"filter"`
-	Channels []EmailReport     `mapstructure:"channels"`
+	AttachmentFormat string            `mapstructure:"attachmentFormat"`
+	To               []string          `mapstructure:"to"`
+	Format           string            `mapstructure:"format"`
+	Filter           EmailReportFilter `mapstructure:"filter"`
+	Channels         []EmailReport     `mapstructure:"channels"`
 }
 
 // EmailReport configuration

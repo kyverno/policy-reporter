@@ -68,7 +68,7 @@ func NewViolationsCMD() *cobra.Command {
 					return
 				}
 
-				report, err := reporter.Report(data, c.EmailReports.Violations.Format)
+				report, err := reporter.EmailReport(data, c.EmailReports.Violations.Format, c.EmailReports.Violations.AttachmentFormat)
 				if err != nil {
 					logger.Error("failed to create report", zap.Error(err))
 					return
@@ -104,7 +104,7 @@ func NewViolationsCMD() *cobra.Command {
 						return
 					}
 
-					report, err := reporter.Report(sources, channel.Format)
+					report, err := reporter.EmailReport(sources, channel.Format, channel.AttachmentFormat)
 					if err != nil {
 						logger.Error("failed to create report", zap.Error(err))
 						return
