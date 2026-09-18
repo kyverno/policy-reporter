@@ -1631,6 +1631,18 @@ plugin:
       #   cpu: 100m
       #   memory: 128Mi
 
+    # -- Deployment livenessProbe for policy-reporter-kyverno-plugin
+    livenessProbe:
+      httpGet:
+        path: /v1/policies
+        port: http
+
+    # -- Deployment readinessProbe for policy-reporter-kyverno-plugin
+    readinessProbe:
+      httpGet:
+        path: /v1/policies
+        port: http
+
     # required for HA mode
     # if "blockReports" is disabled, leaderElection is also disabled automatically
     # will be enabled when replicaCount > 1
