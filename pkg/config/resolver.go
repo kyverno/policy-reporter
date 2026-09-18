@@ -796,7 +796,7 @@ func (r *Resolver) WGPolicyReportClient() (report.PolicyReportClient, error) {
 		zap.Bool("periodicSync", periodicSync),
 		zap.Duration("syncInterval", syncInterval))
 
-	r.wgpolicyClient = wgpolicyclient.NewPolicyReportClient(client, r.ReportFilter(), queue, periodicSync, syncInterval, r.ResultCache())
+	r.wgpolicyClient = wgpolicyclient.NewPolicyReportClient(client, r.ReportFilter(), queue, periodicSync, syncInterval, r.ResultCache(), r.config.REST.WaitForInitialReports)
 
 	return r.wgpolicyClient, nil
 }
@@ -834,7 +834,7 @@ func (r *Resolver) OpenReportsClient() (report.PolicyReportClient, error) {
 		zap.Bool("periodicSync", periodicSync),
 		zap.Duration("syncInterval", syncInterval))
 
-	r.openreportsClient = orclient.NewOpenreportsClient(client, r.ReportFilter(), queue, periodicSync, syncInterval, r.ResultCache())
+	r.openreportsClient = orclient.NewOpenreportsClient(client, r.ReportFilter(), queue, periodicSync, syncInterval, r.ResultCache(), r.config.REST.WaitForInitialReports)
 
 	return r.openreportsClient, nil
 }

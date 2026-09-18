@@ -31,6 +31,8 @@ const (
 type LifecycleEvent struct {
 	Type         Event
 	PolicyReport openreports.ReportInterface
+	// Persisted receives the final outcome of the store listener, after its bounded retries.
+	Persisted func(error)
 }
 
 // ResourceType Enum defined for PolicyReport

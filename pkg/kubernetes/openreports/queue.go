@@ -23,6 +23,7 @@ import (
 )
 
 type ORQueue struct {
+	initial       *report.InitialReports
 	queue         workqueue.TypedRateLimitingInterface[string]
 	client        v1alpha1.OpenreportsV1alpha1Interface
 	reconditioner *result.Reconditioner
@@ -88,11 +89,18 @@ func (q *ORQueue) processNextItem() bool {
 		}
 	}
 	if errors.IsNotFound(err) {
+		q.queue.Forget(key)
 		q.handleNotFoundReport(key)
 		return true
 	}
 
+	if err != nil {
+		q.handleErr(err, key)
+		return true
+	}
 	if ok := q.filter.Validate(rep); !ok {
+		q.queue.Forget(key)
+		q.initial.Resolve(key)
 		return true
 	}
 
@@ -110,7 +118,7 @@ func (q *ORQueue) processNextItem() bool {
 
 	q.handleErr(err, key)
 
-	q.debouncer.Add(report.LifecycleEvent{Type: event, PolicyReport: q.reconditioner.Prepare(rep)})
+	q.debouncer.Add(report.LifecycleEvent{Type: event, PolicyReport: q.reconditioner.Prepare(rep), Persisted: q.initial.PersistenceResult(key)})
 
 	return true
 }
@@ -161,7 +169,7 @@ func (q *ORQueue) handleNotFoundReport(key string) {
 		defer q.lock.Unlock()
 		q.cache.Delete(key)
 	}()
-	q.debouncer.Add(report.LifecycleEvent{Type: report.Deleted, PolicyReport: q.reconditioner.Prepare(rep)})
+	q.debouncer.Add(report.LifecycleEvent{Type: report.Deleted, PolicyReport: q.reconditioner.Prepare(rep), Persisted: q.initial.PersistenceResult(key)})
 }
 
 func NewORQueue(

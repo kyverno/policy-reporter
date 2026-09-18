@@ -26,6 +26,8 @@ type PolicyReportClient interface {
 	Sync(stopper chan struct{}) error
 	// HasSynced the configured PolicyReport
 	HasSynced() bool
+	// HasProcessedInitialReports reports successful initial persistence, when enabled.
+	HasProcessedInitialReports() bool
 	// Stop the client
 	Stop()
 }

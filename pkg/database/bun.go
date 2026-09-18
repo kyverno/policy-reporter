@@ -968,7 +968,10 @@ func (s *Store) CreateSchemas(ctx context.Context) error {
 		IfNotExists().
 		Model((*Config)(nil)).
 		Exec(ctx)
-	logOnError("create policy_report table", err)
+	logOnError("create policy_report_config table", err)
+	if err != nil {
+		return err
+	}
 
 	_, err = s.db.
 		NewCreateTable().
@@ -976,6 +979,9 @@ func (s *Store) CreateSchemas(ctx context.Context) error {
 		Model((*PolicyReport)(nil)).
 		Exec(ctx)
 	logOnError("create policy_report table", err)
+	if err != nil {
+		return err
+	}
 
 	_, err = s.db.
 		NewCreateTable().
@@ -984,6 +990,9 @@ func (s *Store) CreateSchemas(ctx context.Context) error {
 		ForeignKey(`(policy_report_id) REFERENCES policy_report(id) ON DELETE CASCADE`).
 		Exec(ctx)
 	logOnError("create policy_report_result table", err)
+	if err != nil {
+		return err
+	}
 
 	_, err = s.db.
 		NewCreateTable().
@@ -992,6 +1001,9 @@ func (s *Store) CreateSchemas(ctx context.Context) error {
 		ForeignKey(`(policy_report_id) REFERENCES policy_report(id) ON DELETE CASCADE`).
 		Exec(ctx)
 	logOnError("create policy_report_filter table", err)
+	if err != nil {
+		return err
+	}
 
 	_, err = s.db.
 		NewCreateTable().
@@ -1000,6 +1012,9 @@ func (s *Store) CreateSchemas(ctx context.Context) error {
 		ForeignKey(`(policy_report_id) REFERENCES policy_report(id) ON DELETE CASCADE`).
 		Exec(ctx)
 	logOnError("create policy_report_resource table", err)
+	if err != nil {
+		return err
+	}
 
 	return err
 }
@@ -1010,30 +1025,45 @@ func (s *Store) DropSchema(ctx context.Context) error {
 		Model((*Config)(nil)).
 		Exec(ctx)
 	logOnError("drop policy_report_config table", err)
+	if err != nil {
+		return err
+	}
 
 	_, err = s.db.NewDropTable().
 		IfExists().
 		Model((*PolicyReportFilter)(nil)).
 		Exec(ctx)
 	logOnError("drop policy_report_filter table", err)
+	if err != nil {
+		return err
+	}
 
 	_, err = s.db.NewDropTable().
 		IfExists().
 		Model((*PolicyReportResult)(nil)).
 		Exec(ctx)
 	logOnError("drop policy_report_result table", err)
+	if err != nil {
+		return err
+	}
 
 	_, err = s.db.NewDropTable().
 		IfExists().
 		Model((*PolicyReport)(nil)).
 		Exec(ctx)
 	logOnError("drop policy_report table", err)
+	if err != nil {
+		return err
+	}
 
 	_, err = s.db.NewDropTable().
 		IfExists().
 		Model((*ResourceResult)(nil)).
 		Exec(ctx)
 	logOnError("drop policy_report_resource table", err)
+	if err != nil {
+		return err
+	}
 
 	return err
 }
@@ -1043,6 +1073,7 @@ func (s *Store) Add(ctx context.Context, report openreports.ReportInterface) err
 	if err != nil {
 		zap.L().Error("failed to persist policy report", zap.Error(err))
 		errorMetric.With(prometheus.Labels{"operation": "INSERT", "table": "policy_report", "reason": mapReason(err)}).Inc()
+		return err
 	}
 
 	filters := chunkSlice(MapPolicyReportFilter(report), 50)
@@ -1084,9 +1115,7 @@ func (s *Store) Update(ctx context.Context, report openreports.ReportInterface) 
 		return err
 	}
 
-	s.Add(ctx, report)
-
-	return err
+	return s.Add(ctx, report)
 }
 
 func (s *Store) Remove(ctx context.Context, id string) error {

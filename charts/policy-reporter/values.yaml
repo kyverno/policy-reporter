@@ -191,6 +191,8 @@ logging:
 rest:
   # -- Enables the REST API
   enabled: false
+  # -- Wait for initial reports to be persisted before readiness and REST requests succeed. Requires REST and SQLite. Custom probes must use /healthz for liveness and /ready for readiness.
+  waitForInitialReports: false
 
 metrics:
   # -- Enables Prometheus Metrics
@@ -1004,13 +1006,13 @@ topologySpreadConstraints: []
 # -- Deployment livenessProbe for policy-reporter
 livenessProbe:
   httpGet:
-    path: /ready
+    path: /healthz
     port: http
 
 # -- Deployment readinessProbe for policy-reporter
 readinessProbe:
   httpGet:
-    path: /healthz
+    path: /ready
     port: http
 
 extraVolumes:
