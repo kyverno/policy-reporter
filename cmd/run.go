@@ -115,7 +115,7 @@ func newRunCMD(version string) *cobra.Command {
 					},
 				}, initialChecks...),
 			}
-			if c.REST.WaitForInitialReports {
+			if c.REST.WaitForInitialReports && len(initialChecks) > 0 {
 				servOptions = append(servOptions, api.WithRESTReadiness(initialChecks[0]))
 			}
 
