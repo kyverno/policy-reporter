@@ -22,4 +22,6 @@ type Filter struct {
 	Sources ValueFilter `mapstructure:"sources" json:"sources"`
 	// +optional
 	ReportLabels ValueFilter `mapstructure:"reportLabels" json:"reportLabels"`
+	// +optional
+	LabelSelector map[string]string `mapstructure:"labelSelector" json:"labelSelector"`
 }
