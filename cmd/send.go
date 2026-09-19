@@ -20,6 +20,7 @@ func newSendCMD() *cobra.Command {
 	cmd.PersistentFlags().StringP("template-dir", "t", "./templates", "template directory for email reports")
 	cmd.AddCommand(send.NewSummaryCMD())
 	cmd.AddCommand(send.NewViolationsCMD())
+	cmd.AddCommand(send.NewEmailReportCMD())
 
 	flag.Parse()
 

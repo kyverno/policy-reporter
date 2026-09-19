@@ -47,6 +47,27 @@ kubectl port-forward service/policy-reporter-ui 8082:8080 -n policy-reporter
 ```
 Open `http://localhost:8082/` in your browser.
 
+## Namespace-owned email reports
+
+Set `emailReports.crd.enabled=true` to install the namespaced `EmailReport` CRD and enable reconciliation. Namespace owners can then choose a `summary` or `violations` report, its recipients, and its cron schedule without changing the Helm release.
+
+Each generated CronJob runs in the Policy Reporter namespace and uses the administrator-configured SMTP or Microsoft Graph transport. Report data is always restricted to the `EmailReport` namespace and excludes cluster-scoped reports. Tenant resources cannot select another namespace, reference transport Secrets, or customize the generated Pod.
+
+```yaml
+apiVersion: policyreporter.kyverno.io/v1alpha1
+kind: EmailReport
+metadata:
+  name: daily-violations
+  namespace: team-a
+spec:
+  type: violations
+  schedule: "0 8 * * *"
+  to:
+    - team-a@example.com
+```
+
+The controller uses a finalizer to remove its central CronJob before an `EmailReport` is deleted. Delete existing `EmailReport` resources before disabling the feature or uninstalling Policy Reporter. A delivery that has already started may still finish after its resource is updated or deleted.
+
 ## Values
 
 | Key | Type | Default | Description |
@@ -124,6 +145,11 @@ Open `http://localhost:8082/` in your browser.
 | basicAuth.username | string | `""` | HTTP BasicAuth username |
 | basicAuth.password | string | `""` | HTTP BasicAuth password |
 | basicAuth.secretRef | optional | `""` | Secret reference to get username and/or password from |
+| emailReports.crd.enabled | bool | `false` | Enable namespace-owned EmailReport resources and central CronJob reconciliation |
+| emailReports.crd.activeDeadlineSeconds | int | `300` | CronJob activeDeadlineSeconds |
+| emailReports.crd.backoffLimit | int | `3` | CronJob backoffLimit |
+| emailReports.crd.ttlSecondsAfterFinished | int | `0` | CronJob ttlSecondsAfterFinished |
+| emailReports.crd.restartPolicy | string | `"Never"` | CronJob restartPolicy |
 | emailReports.clusterName | optional | `""` | - Displayed in the email report if configured |
 | emailReports.titlePrefix | string | `"Report"` | Title prefix in the email subject |
 | emailReports.resources | object | `{}` | Resource constraints for the created CronJobs |

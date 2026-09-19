@@ -11,6 +11,7 @@ import (
 	"github.com/kyverno/policy-reporter/pkg/crd/client/clientset/versioned/typed/policyreport/v1alpha2"
 	"github.com/kyverno/policy-reporter/pkg/email"
 	"github.com/kyverno/policy-reporter/pkg/openreports"
+	"github.com/kyverno/policy-reporter/pkg/validate"
 )
 
 type Generator struct {
@@ -18,6 +19,7 @@ type Generator struct {
 	wgpolicyClient    v1alpha2.Wgpolicyk8sV1alpha2Interface
 	filter            email.Filter
 	clusterReports    bool
+	namespace         string
 }
 
 func (o *Generator) GenerateData(ctx context.Context) ([]Source, error) {
@@ -96,7 +98,7 @@ func (o *Generator) GenerateData(ctx context.Context) ([]Source, error) {
 	reports := []openreports.ReportInterface{}
 
 	if o.openreportsClient != nil {
-		rs, err := o.openreportsClient.Reports(v1.NamespaceAll).List(ctx, v1.ListOptions{})
+		rs, err := o.openreportsClient.Reports(o.namespace).List(ctx, v1.ListOptions{})
 		if err != nil {
 			return make([]Source, 0), err
 		}
@@ -106,7 +108,7 @@ func (o *Generator) GenerateData(ctx context.Context) ([]Source, error) {
 	}
 
 	if o.wgpolicyClient != nil {
-		crs, err := o.wgpolicyClient.PolicyReports(v1.NamespaceAll).List(ctx, v1.ListOptions{})
+		crs, err := o.wgpolicyClient.PolicyReports(o.namespace).List(ctx, v1.ListOptions{})
 		if err != nil {
 			return make([]Source, 0), err
 		}
@@ -169,7 +171,21 @@ func (o *Generator) GenerateData(ctx context.Context) ([]Source, error) {
 }
 
 func NewGenerator(orclient v1alpha1.OpenreportsV1alpha1Interface, wgpolicyclient v1alpha2.Wgpolicyk8sV1alpha2Interface, filter email.Filter, clusterReports bool) *Generator {
-	return &Generator{orclient, wgpolicyclient, filter, clusterReports}
+	return &Generator{orclient, wgpolicyclient, filter, clusterReports, v1.NamespaceAll}
+}
+
+func NewNamespacedGenerator(orclient v1alpha1.OpenreportsV1alpha1Interface, wgpolicyclient v1alpha2.Wgpolicyk8sV1alpha2Interface, namespace string) *Generator {
+	return &Generator{
+		openreportsClient: orclient,
+		wgpolicyClient:    wgpolicyclient,
+		filter: email.NewFilter(
+			nil,
+			validate.RuleSets{Include: []string{namespace}},
+			validate.RuleSets{},
+		),
+		clusterReports: false,
+		namespace:      namespace,
+	}
 }
 
 func FilterSources(sources []Source, filter email.Filter, clusterReports bool) []Source {
