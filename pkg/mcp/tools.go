@@ -95,6 +95,57 @@ type ResourceComplianceResultsResponse struct {
 	Total   int                `json:"total"`
 }
 
+// PolicyResultsRequest is the input for the list_policy_results tool.
+type PolicyResultsRequest struct {
+	Policies   []string `json:"policies,omitempty" jsonschema:"Only include results for the given policy names"`
+	Categories []string `json:"categories,omitempty" jsonschema:"Only include results for the given policy categories"`
+	Namespaces []string `json:"namespaces,omitempty" jsonschema:"Only include results for resources within the given namespaces; omit to include cluster-scoped resources as well"`
+	Sources    []string `json:"sources,omitempty" jsonschema:"Only include results reported by the given policy sources (e.g. kyverno, trivy)"`
+	Kinds      []string `json:"kinds,omitempty" jsonschema:"Only include results for resources of the given Kubernetes kinds"`
+	Names      []string `json:"names,omitempty" jsonschema:"Only include results for resources of the given resource names"`
+	Resources  []string `json:"resources,omitempty" jsonschema:"Only include results for resources of the given API groups/versions"`
+	Status     []string `json:"status,omitempty" jsonschema:"Only include results with the given status (pass, fail, warn, error, skip)"`
+	Severities []string `json:"severities,omitempty" jsonschema:"Only include results with the given severity (info, low, medium, high, critical)"`
+	Search     string   `json:"search,omitempty" jsonschema:"Free text search across namespace, resource name, policy, rule, result and severity"`
+}
+
+func (f PolicyResultsRequest) toFilter() db.Filter {
+	return db.Filter{
+		Policies:     f.Policies,
+		Categories:   f.Categories,
+		Namespaces:   f.Namespaces,
+		Sources:      f.Sources,
+		Kinds:        f.Kinds,
+		Resources:    f.Names,
+		ResourceAPIs: f.Resources,
+		Status:       f.Status,
+		Severities:   f.Severities,
+		Search:       f.Search,
+	}
+}
+
+// PolicyComplianceResult describes a single policy result including the resource it was reported for.
+type PolicyComplianceResult struct {
+	Namespace  string            `json:"namespace,omitempty"`
+	Kind       string            `json:"kind"`
+	Name       string            `json:"name"`
+	Source     string            `json:"source"`
+	Category   string            `json:"category,omitempty"`
+	Policy     string            `json:"policy"`
+	Rule       string            `json:"rule"`
+	Result     string            `json:"result"`
+	Severity   string            `json:"severity,omitempty"`
+	Message    string            `json:"message"`
+	Properties map[string]string `json:"properties,omitempty"`
+	Timestamp  int64             `json:"timestamp"`
+}
+
+// PolicyResultsResponse is the output of the list_policy_results tool.
+type PolicyResultsResponse struct {
+	Results []PolicyComplianceResult `json:"results"`
+	Total   int                      `json:"total"`
+}
+
 // NamespaceComplianceRequest is the input for the get_namespace_compliance_summary tool.
 type NamespaceComplianceRequest struct {
 	ComplianceFilter
@@ -137,6 +188,13 @@ func registerTools(s *server.MCPServer, store *db.Store) {
 		mcp.WithOutputSchema[ResourceComplianceResultsResponse](),
 	)
 	s.AddTool(resourceResultsTool, mcp.NewStructuredToolHandler(getResourceComplianceResultsHandler(store)))
+
+	policyResultsTool := mcp.NewTool("list_policy_results",
+		mcp.WithDescription("List individual policy compliance results for a given policy or a set/category of policies, with optional filters."),
+		mcp.WithInputSchema[PolicyResultsRequest](),
+		mcp.WithOutputSchema[PolicyResultsResponse](),
+	)
+	s.AddTool(policyResultsTool, mcp.NewStructuredToolHandler(listPolicyResultsHandler(store)))
 }
 
 func listResourceComplianceHandler(store *db.Store) func(context.Context, mcp.CallToolRequest, ResourceComplianceRequest) (ResourceComplianceResponse, error) {
@@ -314,6 +372,57 @@ func getResourceComplianceResultsHandler(store *db.Store) func(context.Context, 
 		}
 
 		return ResourceComplianceResultsResponse{
+			Results: list,
+			Total:   len(list),
+		}, nil
+	}
+}
+
+// listPolicyResultsHandler lists individual policy results for the requested
+// policies/categories. When no namespace filter is given, both namespaced and
+// cluster-scoped resources are included since a policy can apply to either.
+func listPolicyResultsHandler(store *db.Store) func(context.Context, mcp.CallToolRequest, PolicyResultsRequest) (PolicyResultsResponse, error) {
+	return func(ctx context.Context, _ mcp.CallToolRequest, args PolicyResultsRequest) (PolicyResultsResponse, error) {
+		filter := args.toFilter()
+
+		pagination := db.Pagination{
+			SortBy:    []string{"resource_namespace", "resource_name"},
+			Direction: "ASC",
+		}
+
+		results, err := store.FetchResults(ctx, true, filter, pagination)
+		if err != nil {
+			return PolicyResultsResponse{}, err
+		}
+
+		if len(args.Namespaces) == 0 {
+			clusterResults, err := store.FetchResults(ctx, false, filter, pagination)
+			if err != nil {
+				return PolicyResultsResponse{}, err
+			}
+
+			results = append(results, clusterResults...)
+		}
+
+		list := make([]PolicyComplianceResult, 0, len(results))
+		for _, r := range results {
+			list = append(list, PolicyComplianceResult{
+				Namespace:  r.Resource.Namespace,
+				Kind:       r.Resource.Kind,
+				Name:       r.Resource.Name,
+				Source:     r.Source,
+				Category:   r.Category,
+				Policy:     r.Policy,
+				Rule:       r.Rule,
+				Result:     r.Result,
+				Severity:   r.Severity,
+				Message:    r.Message,
+				Properties: r.Properties,
+				Timestamp:  r.Created,
+			})
+		}
+
+		return PolicyResultsResponse{
 			Results: list,
 			Total:   len(list),
 		}, nil
