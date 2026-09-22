@@ -43,11 +43,11 @@ var notificationTempl = `*\[Policy Reporter\] \[{{ .Result.Severity }}\] {{ esca
 
 *Message*:
 
-{{ escape .Result.Message }}
+{{ escape .Result.Description }}
 
-*Properties*:
+{{ if .Result.Properties }}*Properties*:
 {{ range $key, $value := .Result.Properties }}• *{{ escape $key }}*: {{ escape $value }}
-{{ end }}
+{{ end }}{{ end }}
 `
 
 type Payload struct {
