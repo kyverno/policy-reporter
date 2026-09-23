@@ -1,10 +1,13 @@
 package target_test
 
 import (
+	"context"
+	"errors"
 	"testing"
 
 	"github.com/openreports/reports-api/apis/openreports.io/v1alpha1"
 	"github.com/stretchr/testify/assert"
+	corev1 "k8s.io/api/core/v1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/kyverno/policy-reporter/pkg/fixtures"
@@ -22,7 +25,7 @@ var preport = &openreports.ReportAdapter{
 	},
 }
 
-var factory = target.NewResultFilterFactory(nil)
+var factory = target.NewResultFilterFactory(nil, nil)
 
 func Test_BaseClient(t *testing.T) {
 	t.Parallel()
@@ -35,6 +38,8 @@ func Test_BaseClient(t *testing.T) {
 			validate.RuleSets{},
 			validate.RuleSets{},
 			openreports.SeverityCritical,
+
+			nil,
 		)
 
 		assert.False(t, filter.Validate(fixtures.FailResult), "Unexpected Validation Result")
@@ -48,6 +53,8 @@ func Test_BaseClient(t *testing.T) {
 			validate.RuleSets{},
 			validate.RuleSets{Include: []string{"jsPolicy"}},
 			"",
+
+			nil,
 		)
 
 		assert.False(t, filter.Validate(fixtures.FailResult), "Unexpected Validation Result")
@@ -62,6 +69,8 @@ func Test_BaseClient(t *testing.T) {
 			validate.RuleSets{},
 			validate.RuleSets{},
 			"",
+
+			nil,
 		)
 
 		assert.True(t, filter.Validate(fixtures.FailResultWithoutResource), "Unexpected Validation Result")
@@ -76,6 +85,8 @@ func Test_BaseClient(t *testing.T) {
 			validate.RuleSets{},
 			validate.RuleSets{},
 			"",
+
+			nil,
 		)
 
 		assert.False(t, filter.Validate(fixtures.FailResult), "Unexpected Validation Result")
@@ -89,6 +100,8 @@ func Test_BaseClient(t *testing.T) {
 			validate.RuleSets{},
 			validate.RuleSets{},
 			"",
+
+			nil,
 		)
 
 		assert.True(t, filter.Validate(fixtures.FailResult), "Unexpected Validation Result")
@@ -102,6 +115,8 @@ func Test_BaseClient(t *testing.T) {
 			validate.RuleSets{},
 			validate.RuleSets{},
 			"",
+
+			nil,
 		)
 
 		assert.True(t, filter.Validate(fixtures.FailResult), "Unexpected Validation Result")
@@ -115,6 +130,8 @@ func Test_BaseClient(t *testing.T) {
 			validate.RuleSets{},
 			validate.RuleSets{},
 			"",
+
+			nil,
 		)
 
 		assert.False(t, filter.Validate(fixtures.FailResult), "Unexpected Validation Result")
@@ -129,6 +146,8 @@ func Test_BaseClient(t *testing.T) {
 			validate.RuleSets{},
 			validate.RuleSets{},
 			"",
+
+			nil,
 		)
 
 		assert.False(t, filter.Validate(fixtures.FailResult), "Unexpected Validation Result")
@@ -142,6 +161,8 @@ func Test_BaseClient(t *testing.T) {
 			validate.RuleSets{},
 			validate.RuleSets{},
 			"",
+
+			nil,
 		)
 
 		assert.True(t, filter.Validate(fixtures.FailResult), "Unexpected Validation Result")
@@ -155,6 +176,8 @@ func Test_BaseClient(t *testing.T) {
 			validate.RuleSets{},
 			validate.RuleSets{},
 			"",
+
+			nil,
 		)
 
 		assert.True(t, filter.Validate(fixtures.FailResult), "Unexpected Validation Result")
@@ -168,6 +191,8 @@ func Test_BaseClient(t *testing.T) {
 			validate.RuleSets{},
 			validate.RuleSets{},
 			"",
+
+			nil,
 		)
 
 		assert.False(t, filter.Validate(fixtures.FailResult), "Unexpected Validation Result")
@@ -182,6 +207,8 @@ func Test_BaseClient(t *testing.T) {
 			validate.RuleSets{},
 			validate.RuleSets{},
 			"",
+
+			nil,
 		)
 
 		assert.False(t, filter.Validate(fixtures.FailResult), "Unexpected Validation Result")
@@ -195,6 +222,8 @@ func Test_BaseClient(t *testing.T) {
 			validate.RuleSets{},
 			validate.RuleSets{},
 			"",
+
+			nil,
 		)
 
 		assert.True(t, filter.Validate(fixtures.FailResult), "Unexpected Validation Result")
@@ -208,6 +237,8 @@ func Test_BaseClient(t *testing.T) {
 			validate.RuleSets{},
 			validate.RuleSets{},
 			"",
+
+			nil,
 		)
 
 		assert.True(t, filter.Validate(fixtures.FailResult), "Unexpected Validation Result")
@@ -221,6 +252,8 @@ func Test_BaseClient(t *testing.T) {
 			validate.RuleSets{},
 			validate.RuleSets{},
 			"",
+
+			nil,
 		)
 
 		assert.False(t, filter.Validate(fixtures.FailResult), "Unexpected Validation Result")
@@ -235,6 +268,8 @@ func Test_BaseClient(t *testing.T) {
 			validate.RuleSets{Exclude: []string{"require-requests-and-limits-required"}},
 			validate.RuleSets{},
 			"",
+
+			nil,
 		)
 
 		assert.False(t, filter.Validate(fixtures.FailResult), "Unexpected Validation Result")
@@ -248,6 +283,8 @@ func Test_BaseClient(t *testing.T) {
 			validate.RuleSets{Exclude: []string{"policy-test"}},
 			validate.RuleSets{},
 			"",
+
+			nil,
 		)
 
 		assert.True(t, filter.Validate(fixtures.FailResult), "Unexpected Validation Result")
@@ -261,6 +298,8 @@ func Test_BaseClient(t *testing.T) {
 			validate.RuleSets{Include: []string{"require-requests-and-limits-required"}},
 			validate.RuleSets{},
 			"",
+
+			nil,
 		)
 
 		if !filter.Validate(fixtures.FailResult) {
@@ -276,6 +315,8 @@ func Test_BaseClient(t *testing.T) {
 			validate.RuleSets{Include: []string{"policy-test"}},
 			validate.RuleSets{},
 			"",
+
+			nil,
 		)
 
 		assert.False(t, filter.Validate(fixtures.FailResult), "Unexpected Validation Result")
@@ -365,6 +406,8 @@ func Test_BaseClient(t *testing.T) {
 				validate.RuleSets{},
 				validate.RuleSets{Include: []string{"jsPolicy"}},
 				"",
+
+				nil,
 			),
 			SkipExistingOnStartup: true,
 		})
@@ -453,4 +496,120 @@ func Test_BaseClient(t *testing.T) {
 		assert.Len(t, client.Sources(), 1)
 		assert.Equal(t, client.Sources()[0], "Kyverno")
 	})
+}
+
+type resourceLabelsClientMock struct {
+	labels map[string]string
+	err    error
+}
+
+func (m resourceLabelsClientMock) Get(context.Context, *corev1.ObjectReference) (map[string]string, error) {
+	return m.labels, m.err
+}
+
+func Test_ResultFilter_ResourceLabelSelector(t *testing.T) {
+	t.Parallel()
+
+	resourceClient := resourceLabelsClientMock{
+		labels: map[string]string{
+			"app":  "frontend",
+			"tier": "web",
+		},
+	}
+
+	filterFactory := target.NewResultFilterFactory(nil, resourceClient)
+
+	tests := []struct {
+		name     string
+		selector map[string]string
+		want     bool
+	}{
+		{
+			name:     "exact match",
+			selector: map[string]string{"app": "frontend"},
+			want:     true,
+		},
+		{
+			name:     "exact mismatch",
+			selector: map[string]string{"app": "backend"},
+			want:     false,
+		},
+		{
+			name: "multiple labels are ANDed",
+			selector: map[string]string{
+				"app":  "frontend",
+				"tier": "web",
+			},
+			want: true,
+		},
+		{
+			name: "multiple labels mismatch",
+			selector: map[string]string{
+				"app":  "frontend",
+				"tier": "api",
+			},
+			want: false,
+		},
+		{
+			name:     "exists",
+			selector: map[string]string{"app": "*"},
+			want:     true,
+		},
+		{
+			name:     "does not exist",
+			selector: map[string]string{"zone": "!*"},
+			want:     true,
+		},
+		{
+			name:     "in",
+			selector: map[string]string{"app": "frontend,backend"},
+			want:     true,
+		},
+		{
+			name:     "in mismatch",
+			selector: map[string]string{"app": "backend,database"},
+			want:     false,
+		},
+	}
+
+	for _, tt := range tests {
+		tt := tt
+
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
+			filter := filterFactory.CreateFilter(
+				validate.RuleSets{},
+				validate.RuleSets{},
+				validate.RuleSets{},
+				validate.RuleSets{},
+				validate.RuleSets{},
+				"",
+				tt.selector,
+			)
+
+			assert.Equal(t, tt.want, filter.Validate(fixtures.FailResult))
+		})
+	}
+}
+
+func Test_ResultFilter_ResourceLabelSelectorError(t *testing.T) {
+	t.Parallel()
+
+	filterFactory := target.NewResultFilterFactory(
+		nil,
+		resourceLabelsClientMock{err: errors.New("forbidden")},
+	)
+
+	filter := filterFactory.CreateFilter(
+		validate.RuleSets{},
+		validate.RuleSets{},
+		validate.RuleSets{},
+		validate.RuleSets{},
+		validate.RuleSets{},
+		"",
+		map[string]string{"app": "frontend"},
+	)
+
+	assert.False(t, filter.Validate(fixtures.FailResult))
 }

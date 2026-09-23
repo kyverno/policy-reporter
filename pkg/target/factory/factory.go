@@ -976,6 +976,7 @@ func (f *TargetFactory) createResultFilter(filter filters.Filter, minimumSeverit
 		ToRuleSet(filter.Policies),
 		ToRuleSet(sourceFilter),
 		minimumSeverity,
+		filter.LabelSelector,
 	)
 }
 

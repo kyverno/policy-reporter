@@ -41,6 +41,7 @@ import (
 	orclient "github.com/kyverno/policy-reporter/pkg/kubernetes/openreports"
 	"github.com/kyverno/policy-reporter/pkg/kubernetes/pods"
 	"github.com/kyverno/policy-reporter/pkg/kubernetes/replicasets"
+	"github.com/kyverno/policy-reporter/pkg/kubernetes/resources"
 	"github.com/kyverno/policy-reporter/pkg/kubernetes/secrets"
 	wgpolicyclient "github.com/kyverno/policy-reporter/pkg/kubernetes/wgpolicy"
 	"github.com/kyverno/policy-reporter/pkg/leaderelection"
@@ -470,7 +471,20 @@ func (r *Resolver) TargetFactory() target.Factory {
 		zap.L().Error("failed to create namespace client", zap.Error(err))
 	}
 
-	r.targetFactory = factory.NewFactory(r.SecretClient(), target.NewResultFilterFactory(ns))
+	metadataClient, err := r.CRDMetadataClient()
+	if err != nil {
+		zap.L().Error("failed to create metadata client", zap.Error(err))
+	}
+
+	var resourceClient resources.Client
+	if metadataClient != nil {
+		resourceClient = resources.NewClient(metadataClient, nil)
+	}
+
+	r.targetFactory = factory.NewFactory(
+		r.SecretClient(),
+		target.NewResultFilterFactory(ns, resourceClient),
+	)
 
 	return r.targetFactory
 }
