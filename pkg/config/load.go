@@ -113,6 +113,8 @@ func Load(cmd *cobra.Command) (*Config, error) {
 	if err := v.BindEnv("namespace", "POD_NAMESPACE"); err != nil {
 		log.Printf("[WARNING] failed to bind env POD_NAMESPACE")
 	}
+	_ = v.BindEnv("crd.emailReports", "EMAIL_REPORTS_CRD_ENABLED")
+	_ = v.BindEnv("emailReports.crd.jobTemplate", "EMAIL_REPORTS_CRD_JOB_TEMPLATE")
 
 	// bind SMTP config from environment vars, if existing
 	_ = v.BindEnv("emailReports.smtp.username", "EMAIL_REPORTS_SMTP_USERNAME")

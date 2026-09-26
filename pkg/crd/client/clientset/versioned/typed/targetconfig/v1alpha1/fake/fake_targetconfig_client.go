@@ -29,6 +29,10 @@ type FakePolicyreporterV1alpha1 struct {
 	*testing.Fake
 }
 
+func (c *FakePolicyreporterV1alpha1) EmailReports(namespace string) v1alpha1.EmailReportInterface {
+	return newFakeEmailReports(c, namespace)
+}
+
 func (c *FakePolicyreporterV1alpha1) TargetConfigs(namespace string) v1alpha1.TargetConfigInterface {
 	return newFakeTargetConfigs(c, namespace)
 }

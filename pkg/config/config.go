@@ -73,12 +73,17 @@ type Templates struct {
 
 // EmailReports configuration
 type EmailReports struct {
-	SMTP        SMTP        `mapstructure:"smtp"`
-	GraphAPI    GraphAPI    `mapstructure:"graphAPI"`
-	Summary     EmailReport `mapstructure:"summary"`
-	Violations  EmailReport `mapstructure:"violations"`
-	ClusterName string      `mapstructure:"clusterName"`
-	TitlePrefix string      `mapstructure:"titlePrefix"`
+	SMTP        SMTP           `mapstructure:"smtp"`
+	GraphAPI    GraphAPI       `mapstructure:"graphAPI"`
+	CRD         EmailReportCRD `mapstructure:"crd"`
+	Summary     EmailReport    `mapstructure:"summary"`
+	Violations  EmailReport    `mapstructure:"violations"`
+	ClusterName string         `mapstructure:"clusterName"`
+	TitlePrefix string         `mapstructure:"titlePrefix"`
+}
+
+type EmailReportCRD struct {
+	JobTemplate string `mapstructure:"jobTemplate"`
 }
 
 // BasicAuth configuration
@@ -209,6 +214,7 @@ type SourceConfig struct {
 
 type CRD struct {
 	TargetConfig bool `mapstructure:"targetConfig"`
+	EmailReports bool `mapstructure:"emailReports"`
 }
 
 type PeriodicSyncConfig struct {

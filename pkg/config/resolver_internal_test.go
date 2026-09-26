@@ -1,6 +1,8 @@
 package config
 
 import (
+	"os"
+	"path/filepath"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -61,6 +63,32 @@ func TestEmailClient_GraphAPI(t *testing.T) {
 
 		assert.IsType(t, graphClientType, resolver.EmailClient())
 	})
+}
+
+func TestEmailReportControllerLoadsJobTemplate(t *testing.T) {
+	dir := t.TempDir()
+	path := filepath.Join(dir, "job-template.yaml")
+	err := os.WriteFile(path, []byte(`spec:
+  template:
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: policy-reporter
+          image: local/policy-reporter:test
+`), 0o600)
+	assert.NoError(t, err)
+
+	resolver := NewResolver(&Config{
+		Namespace: "policy-reporter",
+		EmailReports: EmailReports{CRD: EmailReportCRD{
+			JobTemplate: path,
+		}},
+	}, &rest.Config{Host: "https://example.test"})
+	resolver.k8sClient = fake.NewClientset()
+
+	controller, err := resolver.EmailReportController()
+	assert.NoError(t, err)
+	assert.NotNil(t, controller)
 }
 
 func TestGraphAPIClientSecret(t *testing.T) {

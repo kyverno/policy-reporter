@@ -5,6 +5,7 @@ import (
 	"crypto/tls"
 	"crypto/x509"
 	"errors"
+	"fmt"
 	"os"
 	"strings"
 	"time"
@@ -18,12 +19,14 @@ import (
 	"github.com/uptrace/bun/dialect"
 	mail "github.com/xhit/go-simple-mail/v2"
 	"go.uber.org/zap"
+	batchv1 "k8s.io/api/batch/v1"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/discovery"
 	k8s "k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/metadata"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/util/workqueue"
+	"sigs.k8s.io/yaml"
 	gocache "zgo.at/zcache/v2"
 
 	"github.com/kyverno/policy-reporter/pkg/api"
@@ -34,6 +37,7 @@ import (
 	"github.com/kyverno/policy-reporter/pkg/email"
 	"github.com/kyverno/policy-reporter/pkg/email/summary"
 	"github.com/kyverno/policy-reporter/pkg/email/violations"
+	"github.com/kyverno/policy-reporter/pkg/emailreport"
 	"github.com/kyverno/policy-reporter/pkg/helper"
 	"github.com/kyverno/policy-reporter/pkg/kubernetes"
 	"github.com/kyverno/policy-reporter/pkg/kubernetes/jobs"
@@ -57,24 +61,25 @@ import (
 
 // Resolver manages dependencies
 type Resolver struct {
-	config             *Config
-	k8sConfig          *rest.Config
-	clientset          *k8s.Clientset
-	k8sClient          k8s.Interface
-	publisher          report.EventPublisher
-	policyStore        *database.Store
-	database           *bun.DB
-	wgpolicyClient     report.PolicyReportClient
-	openreportsClient  report.PolicyReportClient
-	leaderElector      *leaderelection.Client
-	resultCache        cache.Cache
-	targetClients      *target.Collection
-	targetFactory      target.Factory
-	targetConfigClient *targetconfig.Client
-	logger             *zap.Logger
-	resultListener     *listener.ResultListener
-	orClient           v1alpha1.OpenreportsV1alpha1Interface
-	wgClient           v1alpha2.Wgpolicyk8sV1alpha2Interface
+	config                *Config
+	k8sConfig             *rest.Config
+	clientset             *k8s.Clientset
+	k8sClient             k8s.Interface
+	publisher             report.EventPublisher
+	policyStore           *database.Store
+	database              *bun.DB
+	wgpolicyClient        report.PolicyReportClient
+	openreportsClient     report.PolicyReportClient
+	leaderElector         *leaderelection.Client
+	resultCache           cache.Cache
+	targetClients         *target.Collection
+	targetFactory         target.Factory
+	targetConfigClient    *targetconfig.Client
+	emailReportController *emailreport.Controller
+	logger                *zap.Logger
+	resultListener        *listener.ResultListener
+	orClient              v1alpha1.OpenreportsV1alpha1Interface
+	wgClient              v1alpha2.Wgpolicyk8sV1alpha2Interface
 }
 
 // APIServer resolver method
@@ -631,6 +636,21 @@ func (r *Resolver) SummaryGenerator() (*summary.Generator, error) {
 	), nil
 }
 
+func (r *Resolver) SummaryGeneratorForNamespace(namespace string) (*summary.Generator, error) {
+	orclient, err := r.OpenreportsCRClient()
+	if err != nil {
+		return nil, err
+	}
+	wgpolicyclient, err := r.WgPolicyCRClient()
+	if err != nil {
+		return nil, err
+	}
+	if orclient == nil && wgpolicyclient == nil {
+		return nil, errors.New("no valid reporting API group found in the cluster")
+	}
+	return summary.NewNamespacedGenerator(orclient, wgpolicyclient, namespace), nil
+}
+
 func (r *Resolver) SummaryReporter() *summary.Reporter {
 	return summary.NewReporter(
 		r.config.Templates.Dir,
@@ -664,6 +684,21 @@ func (r *Resolver) ViolationsGenerator() (*violations.Generator, error) {
 		EmailReportFilterFromConfig(nsclient, r.config.EmailReports.Violations.Filter),
 		!r.config.EmailReports.Violations.Filter.DisableClusterReports,
 	), nil
+}
+
+func (r *Resolver) ViolationsGeneratorForNamespace(namespace string) (*violations.Generator, error) {
+	orclient, err := r.OpenreportsCRClient()
+	if err != nil {
+		return nil, err
+	}
+	wgpolicyclient, err := r.WgPolicyCRClient()
+	if err != nil {
+		return nil, err
+	}
+	if orclient == nil && wgpolicyclient == nil {
+		return nil, errors.New("no valid reporting API group found in the cluster")
+	}
+	return violations.NewNamespacedGenerator(orclient, wgpolicyclient, namespace), nil
 }
 
 func (r *Resolver) ViolationsReporter() *violations.Reporter {
@@ -775,6 +810,35 @@ func (r *Resolver) TargetConfigClient() (*targetconfig.Client, error) {
 
 	r.targetConfigClient = tcc
 	return tcc, nil
+}
+
+func (r *Resolver) EmailReportController() (*emailreport.Controller, error) {
+	if r.emailReportController != nil {
+		return r.emailReportController, nil
+	}
+	if r.config.EmailReports.CRD.JobTemplate == "" {
+		return nil, errors.New("EmailReport job template is not configured")
+	}
+
+	data, err := os.ReadFile(r.config.EmailReports.CRD.JobTemplate)
+	if err != nil {
+		return nil, fmt.Errorf("failed to read EmailReport job template: %w", err)
+	}
+	template := batchv1.JobTemplateSpec{}
+	if err := yaml.UnmarshalStrict(data, &template); err != nil {
+		return nil, fmt.Errorf("failed to parse EmailReport job template: %w", err)
+	}
+
+	reportClient, err := crds.NewForConfig(r.k8sConfig)
+	if err != nil {
+		return nil, err
+	}
+	kubeClient, err := r.k8s()
+	if err != nil {
+		return nil, err
+	}
+	r.emailReportController = emailreport.NewController(reportClient, kubeClient, r.config.Namespace, template)
+	return r.emailReportController, nil
 }
 
 func (r *Resolver) WGPolicyReportClient() (report.PolicyReportClient, error) {

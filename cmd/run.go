@@ -248,6 +248,15 @@ func newRunCMD(version string) *cobra.Command {
 					return nil
 				})
 			}
+			if c.CRD.EmailReports {
+				controller, err := resolver.EmailReportController()
+				if err != nil {
+					return err
+				}
+				g.Go(func() error {
+					return controller.Run(cmd.Context())
+				})
+			}
 			if wgClient != nil {
 				g.Go(func() error {
 					logger.Info("wait for wgpolicy informer")

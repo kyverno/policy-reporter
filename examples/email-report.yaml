@@ -1,0 +1,10 @@
+apiVersion: policyreporter.kyverno.io/v1alpha1
+kind: EmailReport
+metadata:
+  name: daily-violations
+  namespace: team-a
+spec:
+  type: violations
+  schedule: "0 8 * * *"
+  to:
+    - team-a@example.com

@@ -6,6 +6,8 @@ import (
 
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
+	policyreportv1alpha2 "github.com/kyverno/policy-reporter/pkg/crd/api/policyreport/v1alpha2"
+	crdfake "github.com/kyverno/policy-reporter/pkg/crd/client/clientset/versioned/fake"
 	"github.com/kyverno/policy-reporter/pkg/email"
 	"github.com/kyverno/policy-reporter/pkg/email/violations"
 	"github.com/kyverno/policy-reporter/pkg/fixtures"
@@ -63,6 +65,50 @@ func Test_GenerateDataWithSingleSource(t *testing.T) {
 	result = source.NamespaceResults["test"]["fail"][2]
 	if result.Rule != "app-label-required" {
 		t.Fatalf("unexpected rule: %s", result.Rule)
+	}
+}
+
+func Test_NamespacedGeneratorRestrictsWGPolicyReports(t *testing.T) {
+	t.Parallel()
+	ctx := context.Background()
+	client := crdfake.NewSimpleClientset(
+		&policyreportv1alpha2.PolicyReport{
+			ObjectMeta: v1.ObjectMeta{Name: "team-a", Namespace: "team-a"},
+			Summary:    policyreportv1alpha2.PolicyReportSummary{Fail: 1},
+			Results: []policyreportv1alpha2.PolicyReportResult{{
+				Source: "wg", Policy: "team-a-policy", Result: policyreportv1alpha2.StatusFail,
+			}},
+		},
+		&policyreportv1alpha2.PolicyReport{
+			ObjectMeta: v1.ObjectMeta{Name: "team-b", Namespace: "team-b"},
+			Summary:    policyreportv1alpha2.PolicyReportSummary{Fail: 1},
+			Results: []policyreportv1alpha2.PolicyReportResult{{
+				Source: "wg", Policy: "team-b-policy", Result: policyreportv1alpha2.StatusFail,
+			}},
+		},
+		&policyreportv1alpha2.ClusterPolicyReport{
+			ObjectMeta: v1.ObjectMeta{Name: "cluster"},
+			Summary:    policyreportv1alpha2.PolicyReportSummary{Fail: 1},
+			Results: []policyreportv1alpha2.PolicyReportResult{{
+				Source: "wg", Policy: "cluster-policy", Result: policyreportv1alpha2.StatusFail,
+			}},
+		},
+	)
+
+	data, err := violations.NewNamespacedGenerator(nil, client.Wgpolicyk8sV1alpha2(), "team-a").GenerateData(ctx)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(data) != 1 {
+		t.Fatalf("expected one source, got %d", len(data))
+	}
+	if _, ok := data[0].NamespaceResults["team-b"]; ok {
+		t.Fatal("team-b WGPolicyReport leaked into team-a report")
+	}
+	for status, results := range data[0].ClusterResults {
+		if len(results) != 0 {
+			t.Fatalf("cluster WGPolicyReport leaked %d %s results", len(results), status)
+		}
 	}
 }
 
@@ -203,5 +249,47 @@ func Test_RemoveEmptySource(t *testing.T) {
 	data = violations.FilterSources(data, email.NewFilter(nil, validate.RuleSets{Exclude: []string{"kyverno"}}, validate.RuleSets{}), false)
 	if len(data) != 1 {
 		t.Fatalf("expected one source left, got: %d", len(data))
+	}
+}
+
+func Test_NamespacedGeneratorRestrictsReportsAndExcludesClusterScope(t *testing.T) {
+	t.Parallel()
+	ctx := context.Background()
+
+	clientset, teamA, cluster := NewFakeClient()
+	_, err := teamA.Create(ctx, fixtures.DefaultPolicyReport.Report.DeepCopy(), v1.CreateOptions{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	teamBReport := fixtures.DefaultPolicyReport.Report.DeepCopy()
+	teamBReport.Name = "team-b-report"
+	teamBReport.Namespace = "team-b"
+	teamBReport.Results[0].Policy = "team-b-only-policy"
+	_, err = clientset.OpenreportsV1alpha1().Reports("team-b").Create(ctx, teamBReport, v1.CreateOptions{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	_, err = cluster.Create(ctx, fixtures.ClusterPolicyReport.ClusterReport.DeepCopy(), v1.CreateOptions{})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	data, err := violations.NewNamespacedGenerator(clientset.OpenreportsV1alpha1(), nil, "test").GenerateData(ctx)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(data) != 1 {
+		t.Fatalf("expected one source, got %d", len(data))
+	}
+	for status, results := range data[0].ClusterResults {
+		if len(results) != 0 {
+			t.Fatalf("expected no cluster-scoped %s results, got %d", status, len(results))
+		}
+	}
+	if len(data[0].NamespaceResults) != 1 {
+		t.Fatalf("expected one namespace, got %d", len(data[0].NamespaceResults))
+	}
+	if _, ok := data[0].NamespaceResults["team-b"]; ok {
+		t.Fatal("team-b violations leaked into team-a report")
 	}
 }
