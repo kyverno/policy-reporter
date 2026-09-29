@@ -205,6 +205,30 @@ func TestSourceFilter(t *testing.T) {
 		}}))
 	})
 
+	t.Run("filter daemonset controlled pod", func(t *testing.T) {
+		t.Parallel()
+		c := podClient{
+			pod: &corev1.Pod{ObjectMeta: v1.ObjectMeta{Name: "nginx", Namespace: "test", OwnerReferences: []v1.OwnerReference{
+				{APIVersion: "apps/v1", Kind: "DaemonSet", Name: "nginx-ds", Controller: &controlled},
+			}}},
+		}
+
+		filter := report.NewSourceFilter(&c, nil, nil, gocache.New[types.UID, bool](gocache.DefaultExpiration, 0), []report.SourceValidation{
+			{
+				Selector: report.ReportSelector{
+					Source: "kyverno",
+				},
+				UncontrolledOnly: true,
+			},
+		})
+
+		assert.False(t, filter.Validate(&openreports.ReportAdapter{Report: &v1alpha1.Report{
+			ObjectMeta: v1.ObjectMeta{Name: "polr", Namespace: "test"},
+			Scope:      &corev1.ObjectReference{APIVersion: "v1", Kind: "Pod", Name: "nginx", Namespace: "test"},
+			Results:    []v1alpha1.ReportResult{fixtures.FailPodResult.ReportResult},
+		}}))
+	})
+
 	t.Run("filter controlled job", func(t *testing.T) {
 		t.Parallel()
 		c := jobClient{

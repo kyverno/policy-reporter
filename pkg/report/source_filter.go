@@ -175,6 +175,7 @@ func NewSourceFilter(pods pods.Client, jobs jobs.Client, rs replicasets.Client, 
 }
 
 var podControllers = map[string]bool{
+	"apps/v1/DaemonSet":   true,
 	"apps/v1/ReplicaSet":  true,
 	"apps/v1/StatefulSet": true,
 	"batch/v1/Job":        true,
