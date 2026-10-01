@@ -66,6 +66,14 @@ func Load(cmd *cobra.Command) (*Config, error) {
 		v.BindPFlag("rest.enabled", flag)
 	}
 
+	if flag := cmd.Flags().Lookup("mcp-enabled"); flag != nil {
+		v.BindPFlag("mcp.enabled", flag)
+	}
+
+	if flag := cmd.Flags().Lookup("mcp-port"); flag != nil {
+		v.BindPFlag("mcp.port", flag)
+	}
+
 	if flag := cmd.Flags().Lookup("metrics-enabled"); flag != nil {
 		v.BindPFlag("metrics.enabled", flag)
 	}
