@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "policy-reporter": {
+      "type": "http",
+      "url": "http://localhost:9090/mcp"
+    }
+  }
+}

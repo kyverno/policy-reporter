@@ -108,6 +108,8 @@ Open `http://localhost:8082/` in your browser.
 | logging.logLevel | int | `0` | Log level default info |
 | rest.enabled | bool | `false` | Enables the REST API |
 | rest.waitForInitialReports | bool | `false` | Wait for initial reports to be persisted before readiness and REST requests succeed. Requires REST and SQLite. Custom probes must use /healthz for liveness and /ready for readiness. |
+| mcp.enabled | bool | `false` | Enables the MCP Server |
+| mcp.port | int | `9090` | Port for the MCP Server |
 | metrics.enabled | bool | `false` | Enables Prometheus Metrics |
 | metrics.mode | string | `"detailed"` | Metric Mode allows to customize labels Allowed values: detailed, simple, custom |
 | metrics.customLabels | list | `[]` | List of used labels in custom mode Supported fields are: ["namespace", "rule", "policy", "report" // Report name, "kind" // resource kind, "name" // resource name, "status", "severity", "category", "source"] |

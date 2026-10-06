@@ -18,6 +18,7 @@ import (
 	"github.com/kyverno/policy-reporter/pkg/config"
 	"github.com/kyverno/policy-reporter/pkg/database"
 	"github.com/kyverno/policy-reporter/pkg/listener"
+	"github.com/kyverno/policy-reporter/pkg/mcp"
 	"github.com/kyverno/policy-reporter/pkg/report"
 )
 
@@ -115,11 +116,11 @@ func newRunCMD(version string) *cobra.Command {
 					},
 				}, initialChecks...),
 			}
-			if c.REST.WaitForInitialReports {
+			if c.REST.WaitForInitialReports && len(initialChecks) > 0 {
 				servOptions = append(servOptions, api.WithRESTReadiness(initialChecks[0]))
 			}
 
-			if c.REST.Enabled {
+			if c.REST.Enabled || c.MCP.Enabled {
 				db := resolver.Database()
 				if db == nil {
 					return errors.New("unable to create database connection")
@@ -143,8 +144,18 @@ func newRunCMD(version string) *cobra.Command {
 					resolver.RegisterStoreListener(cmd.Context(), store)
 				}
 
-				logger.Info("REST api enabled")
-				servOptions = append(servOptions, v1.WithAPI(store, resolver.TargetClients(), resolver.ViolationsReporter()), v2.WithAPI(store, nsClient, c.Targets))
+				if c.MCP.Enabled {
+					logger.Info("MCP api enabled")
+					mcpServer := mcp.New(store)
+
+					g.Go(func() error {
+						return mcpServer.Start(fmt.Sprintf(":%d", c.MCP.Port))
+					})
+				}
+				if c.REST.Enabled {
+					logger.Info("REST api enabled")
+					servOptions = append(servOptions, v1.WithAPI(store, resolver.TargetClients(), resolver.ViolationsReporter()), v2.WithAPI(store, nsClient, c.Targets))
+				}
 			}
 
 			if c.Metrics.Enabled {
@@ -321,6 +332,8 @@ func newRunCMD(version string) *cobra.Command {
 	cmd.PersistentFlags().StringP("dbfile", "d", "sqlite-database-v2.db", "path to the SQLite DB File")
 	cmd.PersistentFlags().BoolP("metrics-enabled", "m", false, "Enable Policy Reporter's Metrics API")
 	cmd.PersistentFlags().BoolP("rest-enabled", "r", false, "Enable Policy Reporter's REST API")
+	cmd.PersistentFlags().BoolP("mcp-enabled", "", false, "Enable Policy Reporter's MCP API")
+	cmd.PersistentFlags().IntP("mcp-port", "", 9090, "Port for Policy Reporter's MCP API")
 	cmd.PersistentFlags().Bool("profile", false, "Enable application profiling with pprof")
 	cmd.PersistentFlags().String("lease-name", "policy-reporter", "name of the LeaseLock")
 	cmd.PersistentFlags().String("pod-name", "policy-reporter", "name of the pod, used for leaderelection")

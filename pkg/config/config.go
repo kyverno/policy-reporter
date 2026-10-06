@@ -95,6 +95,12 @@ type API struct {
 	DebugMode bool      `mapstructure:"debug"`
 }
 
+// MCP configuration
+type MCP struct {
+	Port    int  `mapstructure:"port"`
+	Enabled bool `mapstructure:"enabled"`
+}
+
 // REST configuration
 type REST struct {
 	WaitForInitialReports bool `mapstructure:"waitForInitialReports"`
@@ -226,6 +232,7 @@ type Config struct {
 	Version         string
 	Namespace       string             `mapstructure:"namespace"`
 	API             API                `mapstructure:"api"`
+	MCP             MCP                `mapstructure:"mcp"`
 	WorkerCount     int                `mapstructure:"worker"`
 	DBFile          string             `mapstructure:"dbfile"`
 	Metrics         Metrics            `mapstructure:"metrics"`
