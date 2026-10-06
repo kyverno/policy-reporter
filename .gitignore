@@ -16,3 +16,4 @@ heap*
 /dist
 /.claude
 .local
+.mcp.json
