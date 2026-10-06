@@ -194,6 +194,12 @@ rest:
   # -- Wait for initial reports to be persisted before readiness and REST requests succeed. Requires REST and SQLite. Custom probes must use /healthz for liveness and /ready for readiness.
   waitForInitialReports: false
 
+mcp:
+  # -- Enables the MCP Server
+  enabled: false
+  # -- Port for the MCP Server
+  port: 9090
+
 metrics:
   # -- Enables Prometheus Metrics
   enabled: false
