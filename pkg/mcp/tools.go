@@ -9,6 +9,11 @@ import (
 	db "github.com/kyverno/policy-reporter/pkg/database"
 )
 
+const (
+	defaultPageSize = 10
+	maxPageSize     = 20
+)
+
 // ComplianceFilter holds the optional filters shared by the compliance tools.
 // Namespaces is required and scopes the result to the given namespace(s).
 type ComplianceFilter struct {
@@ -107,6 +112,8 @@ type PolicyResultsRequest struct {
 	Status     []string `json:"status,omitempty" jsonschema:"Only include results with the given status (pass, fail, warn, error, skip)"`
 	Severities []string `json:"severities,omitempty" jsonschema:"Only include results with the given severity (info, low, medium, high, critical)"`
 	Search     string   `json:"search,omitempty" jsonschema:"Free text search across namespace, resource name, policy, rule, result and severity"`
+	Page       int      `json:"page,omitempty" jsonschema:"Page number to return, starting at 1 (default 1)"`
+	PageSize   int      `json:"page_size,omitempty" jsonschema:"Number of results per page (default 50, max 200)"`
 }
 
 func (f PolicyResultsRequest) toFilter() db.Filter {
@@ -142,8 +149,11 @@ type PolicyComplianceResult struct {
 
 // PolicyResultsResponse is the output of the list_policy_results tool.
 type PolicyResultsResponse struct {
-	Results []PolicyComplianceResult `json:"results"`
-	Total   int                      `json:"total"`
+	Results    []PolicyComplianceResult `json:"results"`
+	Total      int                      `json:"total"`
+	Page       int                      `json:"page"`
+	PageSize   int                      `json:"page_size"`
+	TotalPages int                      `json:"total_pages"`
 }
 
 // NamespaceComplianceRequest is the input for the get_namespace_compliance_summary tool.
@@ -151,8 +161,9 @@ type NamespaceComplianceRequest struct {
 	ComplianceFilter
 }
 
-// NamespaceCompliance describes the aggregated compliance counts of a namespace.
+// NamespaceCompliance describes the aggregated compliance counts of a namespace for a single source.
 type NamespaceCompliance struct {
+	Source    string `json:"source"`
 	Namespace string `json:"namespace"`
 	Pass      int    `json:"pass"`
 	Warn      int    `json:"warn"`
@@ -176,7 +187,7 @@ func registerTools(s *server.MCPServer, store *db.Store) {
 	s.AddTool(resourceComplianceTool, mcp.NewStructuredToolHandler(listResourceComplianceHandler(store)))
 
 	namespaceComplianceTool := mcp.NewTool("get_namespace_compliance_summary",
-		mcp.WithDescription("Get the aggregated policy compliance summary (pass/fail/warn/error/skip and severity counts) per namespace for one or more namespaces, with optional filters."),
+		mcp.WithDescription("Get the aggregated policy compliance summary (pass/fail/warn/error/skip and severity counts) per source and namespace, with optional filters."),
 		mcp.WithInputSchema[NamespaceComplianceRequest](),
 		mcp.WithOutputSchema[[]NamespaceCompliance](),
 	)
@@ -190,7 +201,7 @@ func registerTools(s *server.MCPServer, store *db.Store) {
 	s.AddTool(resourceResultsTool, mcp.NewStructuredToolHandler(getResourceComplianceResultsHandler(store)))
 
 	policyResultsTool := mcp.NewTool("list_policy_results",
-		mcp.WithDescription("List individual policy compliance results for a given policy or a set/category of policies, with optional filters."),
+		mcp.WithDescription("List individual policy compliance results for a given policy or a set/category of policies, with optional filters. Results are paginated; use page and page_size to walk through them."),
 		mcp.WithInputSchema[PolicyResultsRequest](),
 		mcp.WithOutputSchema[PolicyResultsResponse](),
 	)
@@ -245,9 +256,8 @@ func listResourceComplianceHandler(store *db.Store) func(context.Context, mcp.Ca
 }
 
 // getNamespaceComplianceSummaryHandler aggregates the per-resource compliance
-// summaries into a single summary per namespace. It reuses
-// FetchNamespaceResourceResults without pagination so the same filters and
-// semantics as list_resource_compliance apply.
+// summaries into a single summary per source and namespace. It uses the same
+// filters and semantics as list_resource_compliance.
 func getNamespaceComplianceSummaryHandler(store *db.Store) func(context.Context, mcp.CallToolRequest, NamespaceComplianceRequest) ([]NamespaceCompliance, error) {
 	return func(ctx context.Context, _ mcp.CallToolRequest, args NamespaceComplianceRequest) ([]NamespaceCompliance, error) {
 		var err error
@@ -261,24 +271,30 @@ func getNamespaceComplianceSummaryHandler(store *db.Store) func(context.Context,
 			}
 		}
 
-		order := make([]string, 0)
-		summaries := make(map[string]*NamespaceCompliance)
+		list := make([]NamespaceCompliance, 0)
 
 		for _, source := range args.Sources {
-			counts, err := store.FetchNamespaceStatusCounts(ctx, source, filter)
+			order := make([]string, 0)
+			summaries := make(map[string]*NamespaceCompliance)
+
+			summary := func(ns string) *NamespaceCompliance {
+				s, ok := summaries[ns]
+				if !ok {
+					s = &NamespaceCompliance{Source: source, Namespace: ns}
+					summaries[ns] = s
+					order = append(order, ns)
+				}
+
+				return s
+			}
+
+			statusCounts, err := store.FetchNamespaceStatusCounts(ctx, source, filter)
 			if err != nil {
 				return nil, err
 			}
 
-			for _, count := range counts {
-				ns := count.Namespace
-
-				s, ok := summaries[ns]
-				if !ok {
-					s = &NamespaceCompliance{Namespace: ns}
-					summaries[ns] = s
-					order = append(order, ns)
-				}
+			for _, count := range statusCounts {
+				s := summary(count.Namespace)
 
 				switch count.Status {
 				case "pass":
@@ -293,23 +309,14 @@ func getNamespaceComplianceSummaryHandler(store *db.Store) func(context.Context,
 					s.Skip += count.Count
 				}
 			}
-		}
 
-		for _, source := range args.Sources {
-			counts, err := store.FetchNamespaceSeverityCounts(ctx, source, filter)
+			severityCounts, err := store.FetchNamespaceSeverityCounts(ctx, source, filter)
 			if err != nil {
 				return nil, err
 			}
 
-			for _, count := range counts {
-				ns := count.Namespace
-
-				s, ok := summaries[ns]
-				if !ok {
-					s = &NamespaceCompliance{Namespace: ns}
-					summaries[ns] = s
-					order = append(order, ns)
-				}
+			for _, count := range severityCounts {
+				s := summary(count.Namespace)
 
 				switch count.Severity {
 				case "low":
@@ -324,11 +331,10 @@ func getNamespaceComplianceSummaryHandler(store *db.Store) func(context.Context,
 					s.Unknown += count.Count
 				}
 			}
-		}
 
-		list := make([]NamespaceCompliance, 0, len(order))
-		for _, ns := range order {
-			list = append(list, *summaries[ns])
+			for _, ns := range order {
+				list = append(list, *summaries[ns])
+			}
 		}
 
 		return list, nil
@@ -381,27 +387,82 @@ func getResourceComplianceResultsHandler(store *db.Store) func(context.Context, 
 // listPolicyResultsHandler lists individual policy results for the requested
 // policies/categories. When no namespace filter is given, both namespaced and
 // cluster-scoped resources are included since a policy can apply to either.
+// Cluster-scoped results are ordered after the namespaced ones and paginated
+// as one continuous list.
 func listPolicyResultsHandler(store *db.Store) func(context.Context, mcp.CallToolRequest, PolicyResultsRequest) (PolicyResultsResponse, error) {
 	return func(ctx context.Context, _ mcp.CallToolRequest, args PolicyResultsRequest) (PolicyResultsResponse, error) {
 		filter := args.toFilter()
 
-		pagination := db.Pagination{
-			SortBy:    []string{"resource_namespace", "resource_name"},
-			Direction: "ASC",
+		page := max(args.Page, 1)
+		size := args.PageSize
+		switch {
+		case size <= 0:
+			size = defaultPageSize
+		case size > maxPageSize:
+			size = maxPageSize
 		}
 
-		results, err := store.FetchResults(ctx, true, filter, pagination)
+		fetch := func(namespaced bool, page int) ([]db.PolicyReportResult, error) {
+			return store.FetchResults(ctx, namespaced, filter, db.Pagination{
+				Page:      page,
+				Offset:    size,
+				SortBy:    []string{"resource_namespace", "resource_name", "resource_kind", "policy", "rule"},
+				Direction: "ASC",
+			})
+		}
+
+		total, err := store.CountResults(ctx, true, filter)
 		if err != nil {
 			return PolicyResultsResponse{}, err
 		}
 
-		if len(args.Namespaces) == 0 {
-			clusterResults, err := store.FetchResults(ctx, false, filter, pagination)
+		namespacedTotal := total
+		includeCluster := len(args.Namespaces) == 0
+		if includeCluster {
+			clusterTotal, err := store.CountResults(ctx, false, filter)
 			if err != nil {
 				return PolicyResultsResponse{}, err
 			}
 
-			results = append(results, clusterResults...)
+			total += clusterTotal
+		}
+
+		start := (page - 1) * size
+
+		var results []db.PolicyReportResult
+		if start < namespacedTotal {
+			results, err = fetch(true, page)
+			if err != nil {
+				return PolicyResultsResponse{}, err
+			}
+		}
+
+		if includeCluster && len(results) < size && start+len(results) < total {
+			// position within the cluster-scoped results, which are not
+			// necessarily aligned to page boundaries of the combined list
+			from := max(start-namespacedTotal, 0)
+
+			var cluster []db.PolicyReportResult
+			for p := from/size + 1; p <= (from+size-1)/size+1; p++ {
+				chunk, err := fetch(false, p)
+				if err != nil {
+					return PolicyResultsResponse{}, err
+				}
+
+				cluster = append(cluster, chunk...)
+			}
+
+			skip := from % size
+			if skip > len(cluster) {
+				skip = len(cluster)
+			}
+
+			cluster = cluster[skip:]
+			if room := size - len(results); len(cluster) > room {
+				cluster = cluster[:room]
+			}
+
+			results = append(results, cluster...)
 		}
 
 		list := make([]PolicyComplianceResult, 0, len(results))
@@ -423,8 +484,11 @@ func listPolicyResultsHandler(store *db.Store) func(context.Context, mcp.CallToo
 		}
 
 		return PolicyResultsResponse{
-			Results: list,
-			Total:   len(list),
+			Results:    list,
+			Total:      total,
+			Page:       page,
+			PageSize:   size,
+			TotalPages: (total + size - 1) / size,
 		}, nil
 	}
 }
