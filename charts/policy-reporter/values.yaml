@@ -1050,7 +1050,7 @@ ui:
     # -- (string) Image PullPolicy
     pullPolicy: IfNotPresent
     # -- (string) Image tag
-    tag: "2.8.1"
+    tag: "2.9.0"
 
   crds:
     # -- Install UI CustomBoard CRDs
@@ -1441,7 +1441,7 @@ plugin:
       # -- (string) Image PullPolicy
       pullPolicy: IfNotPresent
       # -- (string) Image tag
-      tag: "0.7.1"
+      tag: "0.7.2"
 
     # -- Deployment replica count
     replicaCount: 1
@@ -1707,7 +1707,7 @@ plugin:
       pullPolicy: IfNotPresent
         # -- (string) Image tag
         # Defaults to `Chart.AppVersion` if omitted
-      tag: "0.5.1"
+      tag: "0.5.2"
 
     cli:
       image:
@@ -1719,7 +1719,7 @@ plugin:
         pullPolicy: IfNotPresent
           # -- (string) Image tag
           # Defaults to `Chart.AppVersion` if omitted
-        tag: "0.74.0"
+        tag: "0.75.0"
 
     # -- Additional container args.
     extraArgs: {}
@@ -1984,7 +1984,7 @@ plugin:
       # -- (string) Image PullPolicy
       pullPolicy: IfNotPresent
       # -- (string) Image tag
-      tag: "0.1.0"
+      tag: "0.1.2"
 
     replicaCount: 1
 
