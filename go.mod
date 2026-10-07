@@ -33,11 +33,11 @@ require (
 	github.com/spf13/cobra v1.10.2
 	github.com/spf13/viper v1.21.0
 	github.com/stretchr/testify v1.12.1
-	github.com/uptrace/bun v1.2.18
+	github.com/uptrace/bun v1.3.0
 	github.com/uptrace/bun/dialect/mysqldialect v1.2.18
 	github.com/uptrace/bun/dialect/pgdialect v1.2.18
 	github.com/uptrace/bun/dialect/sqlitedialect v1.2.18
-	github.com/uptrace/bun/driver/pgdriver v1.2.18
+	github.com/uptrace/bun/driver/pgdriver v1.3.0
 	github.com/uptrace/bun/extra/bundebug v1.2.18
 	github.com/xhit/go-simple-mail/v2 v2.16.0
 	go.uber.org/zap v1.28.0
