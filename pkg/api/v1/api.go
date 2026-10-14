@@ -238,8 +238,8 @@ func (h *APIHandler) HTMLViolationsReport(ctx *gin.Context) {
 
 		sources = append(sources, violations.Source{
 			Name:             source,
-			ClusterReports:   (cPass + len(cResults)) > 0,
-			ClusterPassed:    cPass,
+			ClusterReports:   (int(cPass) + len(cResults)) > 0,
+			ClusterPassed:    int(cPass),
 			ClusterResults:   cResults,
 			NamespacePassed:  nsPass,
 			NamespaceResults: nsResults,

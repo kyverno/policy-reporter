@@ -242,6 +242,10 @@ func FromQuery(query *bun.SelectQuery) *QueryBuilder {
 	return &QueryBuilder{query: query}
 }
 
+func CountResult(c int64, err error) (int, error) {
+	return int(c), err
+}
+
 func NewFilterQuery(db *bun.DB, column string) *QueryBuilder {
 	return &QueryBuilder{
 		query: db.
