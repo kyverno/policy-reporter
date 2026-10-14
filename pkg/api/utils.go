@@ -96,8 +96,8 @@ func BuildPagination(ctx *gin.Context, defaultOrder []string) db.Pagination {
 	}
 
 	return db.Pagination{
-		Page:      page,
-		Offset:    offset,
+		Page:      int64(page),
+		Offset:    int64(offset),
 		SortBy:    sortBy,
 		Direction: direction,
 	}

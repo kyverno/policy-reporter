@@ -59,7 +59,7 @@ func (s *Store) FetchPolicyReports(ctx context.Context, filter Filter, paginatio
 }
 
 func (s *Store) CountPolicyReports(ctx context.Context, filter Filter) (int, error) {
-	return FromQuery(s.db.NewSelect().Model((*PolicyReport)(nil))).
+	return CountResult(FromQuery(s.db.NewSelect().Model((*PolicyReport)(nil))).
 		FilterMap(map[string][]string{
 			"pr.source":    filter.Sources,
 			"pr.namespace": filter.Namespaces,
@@ -67,7 +67,7 @@ func (s *Store) CountPolicyReports(ctx context.Context, filter Filter) (int, err
 		FilterLabels(filter.ReportLabel).
 		FilterValue("pr.type", report.PolicyReportType).
 		GetQuery().
-		Count(ctx)
+		Count(ctx))
 }
 
 func (s *Store) FetchClusterPolicyReports(ctx context.Context, filter Filter, pagination Pagination) ([]PolicyReport, error) {
@@ -86,14 +86,14 @@ func (s *Store) FetchClusterPolicyReports(ctx context.Context, filter Filter, pa
 }
 
 func (s *Store) CountClusterPolicyReports(ctx context.Context, filter Filter) (int, error) {
-	return FromQuery(s.db.NewSelect().Model((*PolicyReport)(nil))).
+	return CountResult(FromQuery(s.db.NewSelect().Model((*PolicyReport)(nil))).
 		FilterMap(map[string][]string{
 			"pr.source": filter.Sources,
 		}).
 		FilterLabels(filter.ReportLabel).
 		FilterValue("pr.type", report.ClusterPolicyReportType).
 		GetQuery().
-		Count(ctx)
+		Count(ctx))
 }
 
 func (s *Store) FetchRuleStatusCounts(ctx context.Context, policy, rule string) ([]StatusCount, error) {
@@ -402,7 +402,7 @@ func (s *Store) FetchNamespaceResourceResults(ctx context.Context, filter Filter
 }
 
 func (s *Store) CountNamespaceResourceResults(ctx context.Context, filter Filter) (int, error) {
-	return FromQuery(s.db.NewSelect().Model((*ResourceResult)(nil))).
+	return CountResult(FromQuery(s.db.NewSelect().Model((*ResourceResult)(nil))).
 		Columns("res.id").
 		Distinct().
 		FilterMap(map[string][]string{
@@ -420,7 +420,7 @@ func (s *Store) CountNamespaceResourceResults(ctx context.Context, filter Filter
 		Exclude(filter, "res").
 		NamespaceScope().
 		GetQuery().
-		Count(ctx)
+		Count(ctx))
 }
 
 func (s *Store) FetchTotalResourceResults(ctx context.Context, filter Filter, pagination Pagination) ([]ResourceResult, error) {
@@ -464,7 +464,7 @@ func (s *Store) FetchTotalResourceResults(ctx context.Context, filter Filter, pa
 }
 
 func (s *Store) CountTotalResourceResults(ctx context.Context, filter Filter) (int, error) {
-	return FromQuery(s.db.NewSelect().Model((*ResourceResult)(nil))).
+	return CountResult(FromQuery(s.db.NewSelect().Model((*ResourceResult)(nil))).
 		Columns("resource_namespace").
 		Distinct().
 		FilterMap(map[string][]string{
@@ -478,7 +478,7 @@ func (s *Store) CountTotalResourceResults(ctx context.Context, filter Filter) (i
 		ResourceSearch(filter.Search).
 		Exclude(filter, "res").
 		GetQuery().
-		Count(ctx)
+		Count(ctx))
 }
 
 func (s *Store) FetchClusterResourceResults(ctx context.Context, filter Filter, pagination Pagination) ([]ResourceResult, error) {
@@ -509,7 +509,7 @@ func (s *Store) FetchClusterResourceResults(ctx context.Context, filter Filter, 
 }
 
 func (s *Store) CountClusterResourceResults(ctx context.Context, filter Filter) (int, error) {
-	return FromQuery(s.db.NewSelect().Model((*ResourceResult)(nil))).
+	return CountResult(FromQuery(s.db.NewSelect().Model((*ResourceResult)(nil))).
 		Columns("res.id").
 		Distinct().
 		FilterMap(map[string][]string{
@@ -526,7 +526,7 @@ func (s *Store) CountClusterResourceResults(ctx context.Context, filter Filter) 
 		Exclude(filter, "res").
 		ClusterScope().
 		GetQuery().
-		Count(ctx)
+		Count(ctx))
 }
 
 func (s *Store) FetchResourceResults(ctx context.Context, id string, filter Filter) ([]ResourceResult, error) {
@@ -571,7 +571,7 @@ func (s *Store) FetchResourcePolicyResults(ctx context.Context, id string, filte
 }
 
 func (s *Store) CountResourcePolicyResults(ctx context.Context, id string, filter Filter) (int, error) {
-	return FromQuery(s.db.NewSelect().Model((*PolicyReportResult)(nil))).
+	return CountResult(FromQuery(s.db.NewSelect().Model((*PolicyReportResult)(nil))).
 		FilterValue(`r.resource_id`, id).
 		FilterMap(map[string][]string{
 			"source":   filter.Sources,
@@ -580,7 +580,7 @@ func (s *Store) CountResourcePolicyResults(ctx context.Context, id string, filte
 		ResultSearch(filter.Search).
 		FilterReportLabels(filter.ReportLabel).
 		GetQuery().
-		Count(ctx)
+		Count(ctx))
 }
 
 func (s *Store) FetchResults(ctx context.Context, namespaced bool, filter Filter, pagination Pagination) ([]PolicyReportResult, error) {
@@ -611,7 +611,7 @@ func (s *Store) FetchResults(ctx context.Context, namespaced bool, filter Filter
 }
 
 func (s *Store) CountResults(ctx context.Context, namespaced bool, filter Filter) (int, error) {
-	return FromQuery(s.db.NewSelect().Model((*PolicyReportResult)(nil))).
+	return CountResult(FromQuery(s.db.NewSelect().Model((*PolicyReportResult)(nil))).
 		FilterMap(map[string][]string{
 			"source":             filter.Sources,
 			"category":           filter.Categories,
@@ -630,7 +630,7 @@ func (s *Store) CountResults(ctx context.Context, namespaced bool, filter Filter
 		FilterReportLabels(filter.ReportLabel).
 		Exclude(filter, "r").
 		GetQuery().
-		Count(ctx)
+		Count(ctx))
 }
 
 func (s *Store) FetchResultsWithoutResource(ctx context.Context, filter Filter, pagination Pagination) ([]PolicyReportResult, error) {
@@ -656,7 +656,7 @@ func (s *Store) FetchResultsWithoutResource(ctx context.Context, filter Filter, 
 }
 
 func (s *Store) CountResultsWithoutResource(ctx context.Context, filter Filter) (int, error) {
-	return FromQuery(s.db.NewSelect().Model((*PolicyReportResult)(nil))).
+	return CountResult(FromQuery(s.db.NewSelect().Model((*PolicyReportResult)(nil))).
 		FilterMap(map[string][]string{
 			"source":   filter.Sources,
 			"category": filter.Categories,
@@ -670,7 +670,7 @@ func (s *Store) CountResultsWithoutResource(ctx context.Context, filter Filter) 
 		FilterReportLabels(filter.ReportLabel).
 		Exclude(filter, "r").
 		GetQuery().
-		Count(ctx)
+		Count(ctx))
 }
 
 func (s *Store) UseResources(ctx context.Context, source string, filter Filter) (bool, error) {

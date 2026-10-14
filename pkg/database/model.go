@@ -309,8 +309,8 @@ type Filter struct {
 }
 
 type Pagination struct {
-	Page      int
-	Offset    int
+	Page      int64
+	Offset    int64
 	SortBy    []string
 	Direction string
 }

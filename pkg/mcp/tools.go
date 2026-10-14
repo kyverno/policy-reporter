@@ -404,8 +404,8 @@ func listPolicyResultsHandler(store *db.Store) func(context.Context, mcp.CallToo
 
 		fetch := func(namespaced bool, page int) ([]db.PolicyReportResult, error) {
 			return store.FetchResults(ctx, namespaced, filter, db.Pagination{
-				Page:      page,
-				Offset:    size,
+				Page:      int64(page),
+				Offset:    int64(size),
 				SortBy:    []string{"resource_namespace", "resource_name", "resource_kind", "policy", "rule"},
 				Direction: "ASC",
 			})
