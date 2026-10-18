@@ -188,6 +188,27 @@ func TestGetNamespaceComplianceSummaryHandler(t *testing.T) {
 		assert.Zero(t, b.Fail)
 	})
 
+	t.Run("info and unknown severities", func(t *testing.T) {
+		store := newTestStore(t)
+		require.NoError(t, store.Add(context.Background(), result.NewReconditioner(nil).Prepare(&openreports.ReportAdapter{Report: &v1alpha1.Report{
+			ObjectMeta: v1.ObjectMeta{Name: "report-c", Namespace: "team-c"},
+			Results: []v1alpha1.ReportResult{
+				res("kyverno", "security", "require-probes", "check-probes", v1alpha2.StatusPass, v1alpha2.SeverityInfo, subject("Deployment", "db", "team-c", "uid-5")),
+				res("kyverno", "security", "require-limits", "check-limits", v1alpha2.StatusFail, "", subject("Deployment", "db", "team-c", "uid-5")),
+			},
+		}})))
+
+		list, err := getNamespaceComplianceSummaryHandler(store)(context.Background(), mcp.CallToolRequest{}, NamespaceComplianceRequest{
+			ComplianceFilter{Namespaces: []string{"team-c"}},
+		})
+		require.NoError(t, err)
+
+		c, ok := find(list, "kyverno", "team-c")
+		require.True(t, ok)
+		assert.Equal(t, 1, c.Info)
+		assert.Equal(t, 1, c.Unknown)
+	})
+
 	t.Run("no matches", func(t *testing.T) {
 		list, err := handler(context.Background(), mcp.CallToolRequest{}, NamespaceComplianceRequest{
 			ComplianceFilter{Namespaces: []string{"missing"}},
