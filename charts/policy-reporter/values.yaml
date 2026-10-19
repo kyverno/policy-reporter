@@ -997,6 +997,9 @@ podDisruptionBudget:
   # Cannot be used if `minAvailable` is set.
   maxUnavailable:
 
+# -- Additional hostname mappings for Policy Reporter pods
+hostAliases: []
+
 # -- Node labels for pod assignment
 # ref: https://kubernetes.io/docs/user-guide/node-selection/
 nodeSelector: {}
