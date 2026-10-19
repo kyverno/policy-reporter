@@ -408,6 +408,7 @@ Open `http://localhost:8082/` in your browser.
 | autoMemoryLimit.ratio | float | `0.9` |  |
 | podDisruptionBudget.minAvailable | int | `1` | Configures the minimum available pods for policy-reporter disruptions. Cannot be used if `maxUnavailable` is set. |
 | podDisruptionBudget.maxUnavailable | string | `nil` | Configures the maximum unavailable pods for policy-reporter disruptions. Cannot be used if `minAvailable` is set. |
+| hostAliases | list | `[]` | Additional hostname mappings for Policy Reporter pods |
 | nodeSelector | object | `{}` | Node labels for pod assignment ref: https://kubernetes.io/docs/user-guide/node-selection/ |
 | tolerations | list | `[]` | Tolerations for pod assignment ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/ |
 | affinity | object | `{}` | Anti-affinity to disallow deploying client and master nodes on the same worker node |
