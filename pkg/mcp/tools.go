@@ -319,6 +319,8 @@ func getNamespaceComplianceSummaryHandler(store *db.Store) func(context.Context,
 				s := summary(count.Namespace)
 
 				switch count.Severity {
+				case "info":
+					s.Info += count.Count
 				case "low":
 					s.Low += count.Count
 				case "medium":
@@ -327,7 +329,7 @@ func getNamespaceComplianceSummaryHandler(store *db.Store) func(context.Context,
 					s.High += count.Count
 				case "critical":
 					s.Critical += count.Count
-				case "unknown":
+				default:
 					s.Unknown += count.Count
 				}
 			}
