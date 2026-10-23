@@ -8,7 +8,7 @@ metadata:
   labels:
     app.kubernetes.io/name: policy-reporter-kyverno-plugin
     app.kubernetes.io/instance: policy-reporter
-    app.kubernetes.io/version: "3.11.0"
+    app.kubernetes.io/version: "3.11.2"
 spec:  
   minAvailable: 1
   selector:
@@ -25,7 +25,7 @@ metadata:
   labels:
     app.kubernetes.io/name: policy-reporter
     app.kubernetes.io/instance: policy-reporter
-    app.kubernetes.io/version: "3.11.0"
+    app.kubernetes.io/version: "3.11.2"
     app.kubernetes.io/component: reporting
     app.kubernetes.io/part-of: policy-reporter
 spec:  
@@ -44,7 +44,7 @@ metadata:
   labels:
     app.kubernetes.io/name: policy-reporter-ui
     app.kubernetes.io/instance: policy-reporter
-    app.kubernetes.io/version: "3.11.0"
+    app.kubernetes.io/version: "3.11.2"
 spec:  
   minAvailable: 1
   selector:
@@ -61,7 +61,7 @@ metadata:
   labels:
     app.kubernetes.io/name: policy-reporter-kyverno-plugin
     app.kubernetes.io/instance: policy-reporter
-    app.kubernetes.io/version: "3.11.0"
+    app.kubernetes.io/version: "3.11.2"
 automountServiceAccountToken: true
 ---
 # Source: policy-reporter/templates/serviceaccount.yaml
@@ -73,7 +73,7 @@ metadata:
   labels:
     app.kubernetes.io/name: policy-reporter
     app.kubernetes.io/instance: policy-reporter
-    app.kubernetes.io/version: "3.11.0"
+    app.kubernetes.io/version: "3.11.2"
     app.kubernetes.io/component: reporting
     app.kubernetes.io/part-of: policy-reporter
 ---
@@ -86,7 +86,7 @@ metadata:
   labels:
     app.kubernetes.io/name: policy-reporter-ui
     app.kubernetes.io/instance: policy-reporter
-    app.kubernetes.io/version: "3.11.0"
+    app.kubernetes.io/version: "3.11.2"
 automountServiceAccountToken: true
 ---
 # Source: policy-reporter/templates/cluster-secret.yaml
@@ -98,7 +98,7 @@ metadata:
   labels:
     app.kubernetes.io/name: policy-reporter
     app.kubernetes.io/instance: policy-reporter
-    app.kubernetes.io/version: "3.11.0"
+    app.kubernetes.io/version: "3.11.2"
     app.kubernetes.io/component: reporting
     app.kubernetes.io/part-of: policy-reporter
 type: Opaque
@@ -117,7 +117,7 @@ metadata:
   labels:
     app.kubernetes.io/name: policy-reporter
     app.kubernetes.io/instance: policy-reporter
-    app.kubernetes.io/version: "3.11.0"
+    app.kubernetes.io/version: "3.11.2"
     app.kubernetes.io/component: reporting
     app.kubernetes.io/part-of: policy-reporter
 type: Opaque
@@ -133,7 +133,7 @@ metadata:
   labels:
     app.kubernetes.io/name: policy-reporter-kyverno-plugin
     app.kubernetes.io/instance: policy-reporter
-    app.kubernetes.io/version: "3.11.0"
+    app.kubernetes.io/version: "3.11.2"
 type: Opaque
 data:
   config.yaml: bGVhZGVyRWxlY3Rpb246CiAgZW5hYmxlZDogdHJ1ZQogIHJlbGVhc2VPbkNhbmNlbDogdHJ1ZQogIGxlYXNlRHVyYXRpb246IDE1CiAgcmVuZXdEZWFkbGluZTogMTAKICByZXRyeVBlcmlvZDogMgogIGxvY2tOYW1lOiBreXZlcm5vLXBsdWdpbgoKbG9nZ2luZzoKICBhcGk6IGZhbHNlCiAgc2VydmVyOiBmYWxzZQogIGVuY29kaW5nOiBjb25zb2xlCiAgbG9nTGV2ZWw6IDAKCnNlcnZlcjoKICBiYXNpY0F1dGg6CiAgICB1c2VybmFtZTogCiAgICBwYXNzd29yZDogCiAgICBzZWNyZXRSZWY6IAoKY29yZToKICBob3N0OiBodHRwOi8vcG9saWN5LXJlcG9ydGVyOjgwODAKYmxvY2tSZXBvcnRzOgogICAgZW5hYmxlZDogZmFsc2UKICAgIGV2ZW50TmFtZXNwYWNlOiBkZWZhdWx0CiAgICBwb2xpY3lSZXBvcnQ6CiAgICAgIGFubm90YXRpb25zOiBbXQogICAgICBsYWJlbHM6IFtdCiAgICByZXN1bHRzOgogICAgICBrZWVwT25seUxhdGVzdDogZmFsc2UKICAgICAgbWF4UGVyUmVwb3J0OiAyMDAKICAgIHNvdXJjZTogS3l2ZXJubyBFdmVudAo=
@@ -147,7 +147,7 @@ metadata:
   labels:
     app.kubernetes.io/name: policy-reporter-ui
     app.kubernetes.io/instance: policy-reporter
-    app.kubernetes.io/version: "3.11.0"
+    app.kubernetes.io/version: "3.11.2"
 type: Opaque
 data:
   config.yaml: bG9nZ2luZzoKICBhcGk6IGZhbHNlCiAgc2VydmVyOiBmYWxzZQogIGVuY29kaW5nOiBjb25zb2xlCiAgbG9nTGV2ZWw6IDAKCnNlcnZlcjoKICBwb3J0OiA4MDgwCiAgY29yczogdHJ1ZQogIG92ZXJ3cml0ZUhvc3Q6IHRydWUKICBzZXNzaW9uczoKICAgIHN0b3JhZ2U6IGZpbGVzeXN0ZW0KICAgIHRlbXBEaXI6IC90bXAKCnVpOgogIGRpc3BsYXlNb2RlOiAKICBiYW5uZXI6IAogIGxvZ286CiAgICBwYXRoOiAKICAgIGRpc2FibGVkOiBmYWxzZQoKY3JkczoKICBjdXN0b21Cb2FyZDogZmFsc2UKICBjbHVzdGVyOiBmYWxzZQoKY2x1c3RlcnM6CiAgLSBuYW1lOiBEZWZhdWx0CiAgICBzZWNyZXRSZWY6IHBvbGljeS1yZXBvcnRlci11aS1kZWZhdWx0LWNsdXN0ZXIKCnNvdXJjZXM6CiAgLSBuYW1lOiBreXZlcm5vCiAgICB0eXBlOiByZXN1bHQKICAgIGV4Y2VwdGlvbnM6IGZhbHNlCiAgICBleGNsdWRlczoKICAgICAgcmVzdWx0czoKICAgICAgLSB3YXJuCiAgICAgIC0gZXJyb3IKICAtIG5hbWU6IEt5dmVybm9WYWxpZGF0aW5nUG9saWN5CiAgICB0eXBlOiByZXN1bHQKICAgIGV4Y2VwdGlvbnM6IGZhbHNlCiAgICBleGNsdWRlczoKICAgICAgcmVzdWx0czoKICAgICAgLSB3YXJuCiAgICAgIC0gZXJyb3IKb3BlbklEQ29ubmVjdDoKICAgIGNhbGxiYWNrVXJsOiAiIgogICAgY2VydGlmaWNhdGU6ICIiCiAgICBjbGllbnRJZDogIiIKICAgIGNsaWVudFNlY3JldDogIiIKICAgIGRpc2NvdmVyeVVybDogIiIKICAgIGVuYWJsZWQ6IGZhbHNlCiAgICBncm91cENsYWltOiAiIgogICAgcGtjZTogZmFsc2UKICAgIHNjb3BlczogW10KICAgIHNlY3JldFJlZjogIiIKICAgIHNraXBUTFM6IGZhbHNlCm9hdXRoOgogICAgY2FsbGJhY2tVcmw6ICIiCiAgICBjbGllbnRJZDogIiIKICAgIGNsaWVudFNlY3JldDogIiIKICAgIGVuYWJsZWQ6IGZhbHNlCiAgICBwcm92aWRlcjogIiIKICAgIHNjb3BlczogW10KICAgIHNlY3JldFJlZjogIiIK
@@ -160,7 +160,7 @@ metadata:
     rbac.authorization.k8s.io/aggregate-to-admin: "true"
     app.kubernetes.io/name: policy-reporter
     app.kubernetes.io/instance: policy-reporter
-    app.kubernetes.io/version: "3.11.0"
+    app.kubernetes.io/version: "3.11.2"
     app.kubernetes.io/component: reporting
     app.kubernetes.io/part-of: policy-reporter
   name: policy-reporter
@@ -228,7 +228,7 @@ metadata:
     rbac.authorization.k8s.io/aggregate-to-admin: "true"
     app.kubernetes.io/name: policy-reporter-kyverno-plugin
     app.kubernetes.io/instance: policy-reporter
-    app.kubernetes.io/version: "3.11.0"
+    app.kubernetes.io/version: "3.11.2"
   name: policy-reporter-kyverno-plugin
 rules:
 - apiGroups:
@@ -264,7 +264,7 @@ metadata:
   labels:
     app.kubernetes.io/name: policy-reporter
     app.kubernetes.io/instance: policy-reporter
-    app.kubernetes.io/version: "3.11.0"
+    app.kubernetes.io/version: "3.11.2"
     app.kubernetes.io/component: reporting
     app.kubernetes.io/part-of: policy-reporter
 roleRef:
@@ -284,7 +284,7 @@ metadata:
   labels:
     app.kubernetes.io/name: policy-reporter-kyverno-plugin
     app.kubernetes.io/instance: policy-reporter
-    app.kubernetes.io/version: "3.11.0"
+    app.kubernetes.io/version: "3.11.2"
 roleRef:
   kind: ClusterRole
   name: policy-reporter-kyverno-plugin
@@ -301,7 +301,7 @@ metadata:
   labels:
     app.kubernetes.io/name: policy-reporter-kyverno-plugin
     app.kubernetes.io/instance: policy-reporter
-    app.kubernetes.io/version: "3.11.0"
+    app.kubernetes.io/version: "3.11.2"
   name: policy-reporter-kyverno-plugin-secret-reader
   namespace: policy-reporter
 rules:
@@ -318,7 +318,7 @@ metadata:
   labels:
     app.kubernetes.io/name: policy-reporter
     app.kubernetes.io/instance: policy-reporter
-    app.kubernetes.io/version: "3.11.0"
+    app.kubernetes.io/version: "3.11.2"
     app.kubernetes.io/component: reporting
     app.kubernetes.io/part-of: policy-reporter
   name: policy-reporter-leaderelection
@@ -342,7 +342,7 @@ metadata:
   labels:
     app.kubernetes.io/name: policy-reporter
     app.kubernetes.io/instance: policy-reporter
-    app.kubernetes.io/version: "3.11.0"
+    app.kubernetes.io/version: "3.11.2"
     app.kubernetes.io/component: reporting
     app.kubernetes.io/part-of: policy-reporter
   name: policy-reporter-secret-reader
@@ -363,7 +363,7 @@ metadata:
   labels:
     app.kubernetes.io/name: policy-reporter-ui
     app.kubernetes.io/instance: policy-reporter
-    app.kubernetes.io/version: "3.11.0"
+    app.kubernetes.io/version: "3.11.2"
   name: policy-reporter-ui-secret-reader
   namespace: policy-reporter
 rules:
@@ -382,7 +382,7 @@ metadata:
   labels:
     app.kubernetes.io/name: policy-reporter-kyverno-plugin
     app.kubernetes.io/instance: policy-reporter
-    app.kubernetes.io/version: "3.11.0"
+    app.kubernetes.io/version: "3.11.2"
 roleRef:
   kind: Role
   name: policy-reporter-kyverno-plugin-secret-reader
@@ -401,7 +401,7 @@ metadata:
   labels:
     app.kubernetes.io/name: policy-reporter
     app.kubernetes.io/instance: policy-reporter
-    app.kubernetes.io/version: "3.11.0"
+    app.kubernetes.io/version: "3.11.2"
     app.kubernetes.io/component: reporting
     app.kubernetes.io/part-of: policy-reporter
 roleRef:
@@ -422,7 +422,7 @@ metadata:
   labels:
     app.kubernetes.io/name: policy-reporter
     app.kubernetes.io/instance: policy-reporter
-    app.kubernetes.io/version: "3.11.0"
+    app.kubernetes.io/version: "3.11.2"
     app.kubernetes.io/component: reporting
     app.kubernetes.io/part-of: policy-reporter
 roleRef:
@@ -443,7 +443,7 @@ metadata:
   labels:
     app.kubernetes.io/name: policy-reporter-ui
     app.kubernetes.io/instance: policy-reporter
-    app.kubernetes.io/version: "3.11.0"
+    app.kubernetes.io/version: "3.11.2"
 roleRef:
   kind: Role
   name: policy-reporter-ui-secret-reader
@@ -462,7 +462,7 @@ metadata:
   labels:
     app.kubernetes.io/name: policy-reporter-kyverno-plugin
     app.kubernetes.io/instance: policy-reporter
-    app.kubernetes.io/version: "3.11.0"
+    app.kubernetes.io/version: "3.11.2"
 spec:
   type: ClusterIP
   ports:
@@ -483,7 +483,7 @@ metadata:
   labels:
     app.kubernetes.io/name: policy-reporter
     app.kubernetes.io/instance: policy-reporter
-    app.kubernetes.io/version: "3.11.0"
+    app.kubernetes.io/version: "3.11.2"
     app.kubernetes.io/component: reporting
     app.kubernetes.io/part-of: policy-reporter
 spec:
@@ -506,7 +506,7 @@ metadata:
   labels:
     app.kubernetes.io/name: policy-reporter-ui
     app.kubernetes.io/instance: policy-reporter
-    app.kubernetes.io/version: "3.11.0"
+    app.kubernetes.io/version: "3.11.2"
 spec:
   type: ClusterIP
   ports:
@@ -527,7 +527,7 @@ metadata:
   labels:
     app.kubernetes.io/name: policy-reporter
     app.kubernetes.io/instance: policy-reporter
-    app.kubernetes.io/version: "3.11.0"
+    app.kubernetes.io/version: "3.11.2"
     app.kubernetes.io/component: reporting
     app.kubernetes.io/part-of: policy-reporter
 spec:
@@ -542,10 +542,10 @@ spec:
       labels:
         app.kubernetes.io/name: policy-reporter
         app.kubernetes.io/instance: policy-reporter
-        app.kubernetes.io/version: "3.11.0"
+        app.kubernetes.io/version: "3.11.2"
         app.kubernetes.io/part-of: policy-reporter
       annotations:
-        checksum/secret: "ce4a8b1a7395407dec366c725c32d150761fc9fa5df005725105cac9d7416d33"
+        checksum/secret: "07df6da6fa40563dfb3b246c66347f82e46b324ceb75398573e0d3b32adc9041"
     spec:
       serviceAccountName: policy-reporter
       automountServiceAccountToken: true
@@ -553,7 +553,7 @@ spec:
         fsGroup: 1234
       containers:
         - name: policy-reporter
-          image: "ghcr.io/kyverno/policy-reporter:3.11.0"
+          image: "ghcr.io/kyverno/policy-reporter:3.11.2"
           imagePullPolicy: IfNotPresent
           securityContext:
             allowPrivilegeEscalation: false
@@ -626,7 +626,7 @@ metadata:
   labels:
     app.kubernetes.io/name: policy-reporter-kyverno-plugin
     app.kubernetes.io/instance: policy-reporter
-    app.kubernetes.io/version: "3.11.0"
+    app.kubernetes.io/version: "3.11.2"
 spec:
   replicas: 2
   revisionHistoryLimit: 10
@@ -637,11 +637,11 @@ spec:
   template:
     metadata:
       annotations:
-        checksum/secret: "a6afe997fc72e6a876291a346d6ad15e012fca6f24841f29b941ad65ed511283"
+        checksum/secret: "6e3936a00590ac84108f9b04b13f78c062693ac161cbfe12a14ccb03cb9a96f2"
       labels:
         app.kubernetes.io/name: policy-reporter-kyverno-plugin
         app.kubernetes.io/instance: policy-reporter
-        app.kubernetes.io/version: "3.11.0"
+        app.kubernetes.io/version: "3.11.2"
     spec:
       serviceAccountName: policy-reporter-kyverno-plugin
       automountServiceAccountToken: true
@@ -661,7 +661,7 @@ spec:
             runAsUser: 1234
             seccompProfile:
               type: RuntimeDefault
-          image: "ghcr.io/kyverno/policy-reporter/kyverno-plugin:0.7.2"
+          image: "ghcr.io/kyverno/policy-reporter/kyverno-plugin:0.7.3"
           imagePullPolicy: IfNotPresent
           args:
             - run
@@ -710,7 +710,7 @@ metadata:
   labels:
     app.kubernetes.io/name: policy-reporter-ui
     app.kubernetes.io/instance: policy-reporter
-    app.kubernetes.io/version: "3.11.0"
+    app.kubernetes.io/version: "3.11.2"
 spec:
   replicas: 2
   revisionHistoryLimit: 10
@@ -721,12 +721,12 @@ spec:
   template:
     metadata:
       annotations:
-        checksum/secret: "8cc1b8b47190fdef25a9419b2dc3b29715492dad27de620039873add3d5e34be"
-        checksum/cluster-secret: "d983ea748b7e73a11f0fa4c6022c67c30b066beef7a54903e7188d5240758e75"
+        checksum/secret: "c7a6433fc168768e8b7d3ef85a748c450f9a3f5ee04aca8865ee498e21e95f44"
+        checksum/cluster-secret: "531cb3f9370533d3338f7cb27c41118d15231f3f67460babcc39764364c28743"
       labels:
         app.kubernetes.io/name: policy-reporter-ui
         app.kubernetes.io/instance: policy-reporter
-        app.kubernetes.io/version: "3.11.0"
+        app.kubernetes.io/version: "3.11.2"
     spec:
       serviceAccountName: policy-reporter-ui
       automountServiceAccountToken: true
@@ -746,7 +746,7 @@ spec:
             runAsUser: 1234
             seccompProfile:
               type: RuntimeDefault
-          image: "ghcr.io/kyverno/policy-reporter-ui:2.9.0"
+          image: "ghcr.io/kyverno/policy-reporter-ui:2.9.1"
           imagePullPolicy: IfNotPresent
           args:
             - run

@@ -117,6 +117,10 @@ spec:
                 type: object
               filter:
                 properties:
+                  labelSelector:
+                    additionalProperties:
+                      type: string
+                    type: object
                   namespaces:
                     properties:
                       exclude:
@@ -146,10 +150,6 @@ spec:
                         additionalProperties:
                           type: string
                         type: object
-                    type: object
-                  labelSelector:
-                    additionalProperties:
-                      type: string
                     type: object
                   reportLabels:
                     properties:
