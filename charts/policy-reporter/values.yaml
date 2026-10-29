@@ -1712,7 +1712,7 @@ plugin:
       pullPolicy: IfNotPresent
         # -- (string) Image tag
         # Defaults to `Chart.AppVersion` if omitted
-      tag: "0.5.3"
+      tag: "0.5.4"
 
     cli:
       image:
@@ -1826,14 +1826,14 @@ plugin:
     livenessProbe:
       timeoutSeconds: 3
       httpGet:
-        path: /vulnr/v1/policies
+        path: /healthz
         port: http
 
     # -- Deployment readinessProbe for policy-reporter-trivy-plugin
     readinessProbe:
       timeoutSeconds: 3
       httpGet:
-        path: /vulnr/v1/policies
+        path: /ready
         port: http
 
     # -- Allow additional env variables to be added
