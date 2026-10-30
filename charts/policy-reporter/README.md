@@ -750,7 +750,7 @@ Open `http://localhost:8082/` in your browser.
 | monitoring.serviceMonitor.honorLabels | bool | `false` | HonorLabels chooses the metrics labels on collisions with target labels |
 | monitoring.serviceMonitor.namespace | string | `nil` | Allow to override the namespace for serviceMonitor |
 | monitoring.serviceMonitor.labels | object | `{}` | Labels to match the serviceMonitorSelector of the Prometheus Resource |
-| monitoring.serviceMonitor.relabelings | list | `[]` | ServiceMonitor Relabelings https://github.com/prometheus-operator/prometheus-operator/blob/main/Documentation/api.md#relabelconfig |
+| monitoring.serviceMonitor.relabelings | list | `[]` | ServiceMonitor Relabelings https://github.com/prometheus-operator/prometheus-operator/blob/main/Documentation/api-reference/api.md#monitoring.coreos.com/v1.RelabelConfig |
 | monitoring.serviceMonitor.metricRelabelings | list | `[]` | See serviceMonitor.relabelings |
 | monitoring.serviceMonitor.namespaceSelector | optional | `{}` | NamespaceSelector |
 | monitoring.serviceMonitor.scrapeTimeout | optional | `nil` | ScrapeTimeout |

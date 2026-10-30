@@ -2247,7 +2247,7 @@ monitoring:
     # -- Labels to match the serviceMonitorSelector of the Prometheus Resource
     labels: {}
     # -- ServiceMonitor Relabelings
-    # https://github.com/prometheus-operator/prometheus-operator/blob/main/Documentation/api.md#relabelconfig
+    # https://github.com/prometheus-operator/prometheus-operator/blob/main/Documentation/api-reference/api.md#monitoring.coreos.com/v1.RelabelConfig
     relabelings: []
     # -- See serviceMonitor.relabelings
     metricRelabelings: []

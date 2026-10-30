@@ -4,7 +4,7 @@ CustomBoards allows you to configure additional dashboards with a custom subset 
 
 ## Example CustomBoard Config
 
-![Custom Boards](https://github.com/kyverno/policy-reporter/blob/3.x/docs/images/custom-boards/list.png)
+![Custom Boards](images/custom-boards/list.png)
 
 ```yaml
 ui:
@@ -21,7 +21,7 @@ ui:
 
 ### CustomBoard with NamespaceSelector
 
-![Custom Boards](https://github.com/kyverno/policy-reporter/blob/3.x/docs/images/custom-boards/selector.png)
+![Custom Boards](images/custom-boards/selector.png)
 
 ```yaml
 ui:
@@ -35,7 +35,7 @@ ui:
 ```
 
 ### CustomBoard with ClusterResources
-![Custom Boards](https://github.com/kyverno/policy-reporter/blob/3.x/docs/images/custom-boards/cluster.png)
+![Custom Boards](images/custom-boards/cluster.png)
 
 ```yaml
 ui:
@@ -52,7 +52,7 @@ ui:
 
 ### CustomBoard with Source List
 
-![Custom Boards](https://github.com/kyverno/policy-reporter/blob/3.x/docs/images/custom-boards/source.png)
+![Custom Boards](images/custom-boards/source.png)
 
 ```yaml
 ui:
