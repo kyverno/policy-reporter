@@ -59,6 +59,6 @@ sources:
 
 ### Examples
 
-![Exception Resource List](https://github.com/kyverno/policy-reporter/blob/3.x/docs/images/exceptions/resource-list.png)
+![Exception Resource List](images/exceptions/resource-list.png)
 
-![Exception Dialog](https://github.com/kyverno/policy-reporter/blob/3.x/docs/images/exceptions/exception-dialog.png)
+![Exception Dialog](images/exceptions/exception-dialog.png)
