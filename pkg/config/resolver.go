@@ -3,9 +3,7 @@ package config
 import (
 	"context"
 	"crypto/tls"
-	"crypto/x509"
 	"errors"
-	"os"
 	"strings"
 	"time"
 
@@ -688,14 +686,11 @@ func (r *Resolver) SMTPServer() *mail.SMTPServer {
 	server.TLSConfig = &tls.Config{InsecureSkipVerify: smtp.SkipTLS}
 
 	if smtp.Certificate != "" {
-		caCert, err := os.ReadFile(smtp.Certificate)
+		caCertPool, err := helper.LoadCertPool(smtp.Certificate)
 		if err != nil {
-			zap.L().Error("failed to read certificate for SMTP Client", zap.String("path", smtp.Certificate))
+			zap.L().Error("failed to read certificate for SMTP Client", zap.String("path", smtp.Certificate), zap.Error(err))
 			return server
 		}
-
-		caCertPool := x509.NewCertPool()
-		caCertPool.AppendCertsFromPEM(caCert)
 
 		server.TLSConfig.RootCAs = caCertPool
 	}
@@ -894,15 +889,14 @@ func (r *Resolver) ResultCache() cache.Cache {
 			}
 
 			if r.config.Redis.Certificate != "" {
-				caCert, err := os.ReadFile(r.config.Redis.Certificate)
+				caCertPool, err := helper.LoadCertPool(r.config.Redis.Certificate)
 				if err != nil {
 					zap.L().Error(
 						"failed to read certificate for Redis Client",
 						zap.String("path", r.config.Redis.Certificate),
+						zap.Error(err),
 					)
 				} else {
-					caCertPool := x509.NewCertPool()
-					caCertPool.AppendCertsFromPEM(caCert)
 					tlsConfig.RootCAs = caCertPool
 				}
 			}

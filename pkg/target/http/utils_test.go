@@ -2,8 +2,12 @@ package http_test
 
 import (
 	"encoding/json"
+	"encoding/pem"
 	"errors"
+	nethttp "net/http"
 	"net/http/httptest"
+	"os"
+	"path/filepath"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -48,6 +52,34 @@ func TestCreateJSONRequest(t *testing.T) {
 
 func TestClient(t *testing.T) {
 	assert.NotNil(t, http.NewClient("", true))
+}
+
+func TestClientWithCertificate(t *testing.T) {
+	t.Run("trusts the configured CA", func(t *testing.T) {
+		server := httptest.NewTLSServer(nethttp.HandlerFunc(func(w nethttp.ResponseWriter, _ *nethttp.Request) {
+			w.WriteHeader(nethttp.StatusOK)
+		}))
+		defer server.Close()
+
+		path := filepath.Join(t.TempDir(), "ca.crt")
+		caPEM := pem.EncodeToMemory(&pem.Block{Type: "CERTIFICATE", Bytes: server.Certificate().Raw})
+		assert.NoError(t, os.WriteFile(path, caPEM, 0o600))
+
+		resp, err := http.NewClient(path, false).Get(server.URL)
+		assert.NoError(t, err)
+		resp.Body.Close()
+	})
+
+	t.Run("logs a certificate file without PEM certificate", func(t *testing.T) {
+		obs, logs := observer.New(zap.InfoLevel)
+		zap.ReplaceGlobals(zap.New(obs))
+
+		path := filepath.Join(t.TempDir(), "ca.crt")
+		assert.NoError(t, os.WriteFile(path, []byte("not a certificate"), 0o600))
+
+		assert.NotNil(t, http.NewClient(path, false))
+		assert.Equal(t, 1, logs.FilterMessage("failed to read certificate").Len())
+	})
 }
 
 func TestProcessHTTPResponse(t *testing.T) {
