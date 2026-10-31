@@ -3,15 +3,14 @@ package http
 import (
 	"bytes"
 	"crypto/tls"
-	"crypto/x509"
 	"encoding/json"
 	"net"
 	"net/http"
-	"os"
 	"time"
 
 	"go.uber.org/zap"
 
+	"github.com/kyverno/policy-reporter/pkg/helper"
 	"github.com/kyverno/policy-reporter/pkg/openreports"
 )
 
@@ -106,14 +105,11 @@ func NewClient(certificatePath string, skipTLS bool) *http.Client {
 	}
 
 	if certificatePath != "" {
-		caCert, err := os.ReadFile(certificatePath)
+		caCertPool, err := helper.LoadCertPool(certificatePath)
 		if err != nil {
-			zap.L().Error("failed to read certificate", zap.String("path", certificatePath))
+			zap.L().Error("failed to read certificate", zap.String("path", certificatePath), zap.Error(err))
 			return client
 		}
-
-		caCertPool := x509.NewCertPool()
-		caCertPool.AppendCertsFromPEM(caCert)
 
 		transport.TLSClientConfig.RootCAs = caCertPool
 	}
