@@ -3,8 +3,13 @@
 
 {{- if and $root.grafana.dashboards.enabled $root.grafana.dashboards.enable.policyReportDetails }}
 {{- $filters := $root.grafana.dashboards.labelFilter }}
+{{- /* Replicas export identical series, so totals take the max per pod and cluster, then sum the clusters. */}}
+{{- $cluster := "" }}
+{{- $byCluster := "" }}
 {{- if and $root.grafana.dashboards.multicluster.enabled $root.grafana.dashboards.multicluster.label }}
 {{- $filters = append $filters $root.grafana.dashboards.multicluster.label }}
+{{- $cluster = $root.grafana.dashboards.multicluster.label }}
+{{- $byCluster = printf ", %s" $cluster }}
 {{- end }}
 
 {{- $nsLabel := "exported_namespace" }}
@@ -128,7 +133,7 @@ data:
         "pluginVersion": "7.1.5",
         "targets": [
             {
-            "expr": "max(sum(policy_report_result{policy=~\"$policy\", rule=~\"$rule\", category=~\"$category\", severity=~\"$severity\", source=~\"$source\", kind=~\"$kind\", {{ $nsLabel }}=~\"$namespace\", status=\"pass\"{{ range $filters }}, {{.}}=~\"${{.}}\"{{ end }} } > 0) by ({{ $nsLabel }}, pod)) by ({{ $nsLabel }})",
+            "expr": "sum(max(sum(policy_report_result{policy=~\"$policy\", rule=~\"$rule\", category=~\"$category\", severity=~\"$severity\", source=~\"$source\", kind=~\"$kind\", {{ $nsLabel }}=~\"$namespace\", status=\"pass\"{{ range $filters }}, {{.}}=~\"${{.}}\"{{ end }} } > 0) by ({{ $nsLabel }}, pod{{ $byCluster }})) by ({{ $nsLabel }}{{ $byCluster }})) by ({{ $nsLabel }})",
             "instant": true,
             "interval": "",
             "legendFormat": "{{ printf `{{%s}}` $nsLabel }}",
@@ -183,7 +188,7 @@ data:
         "pluginVersion": "7.1.5",
         "targets": [
             {
-            "expr": "max(sum(policy_report_result{policy=~\"$policy\", rule=~\"$rule\", category=~\"$category\", severity=~\"$severity\", source=~\"$source\", kind=~\"$kind\", {{ $nsLabel }}=~\"$namespace\", status=\"fail\"{{ range $filters }}, {{.}}=~\"${{.}}\"{{ end }} } > 0) by ({{ $nsLabel }}, pod)) by ({{ $nsLabel }})",
+            "expr": "sum(max(sum(policy_report_result{policy=~\"$policy\", rule=~\"$rule\", category=~\"$category\", severity=~\"$severity\", source=~\"$source\", kind=~\"$kind\", {{ $nsLabel }}=~\"$namespace\", status=\"fail\"{{ range $filters }}, {{.}}=~\"${{.}}\"{{ end }} } > 0) by ({{ $nsLabel }}, pod{{ $byCluster }})) by ({{ $nsLabel }}{{ $byCluster }})) by ({{ $nsLabel }})",
             "instant": true,
             "interval": "",
             "legendFormat": "{{ printf `{{%s}}` $nsLabel }}",
@@ -239,7 +244,7 @@ data:
         "pluginVersion": "7.1.5",
         "targets": [
             {
-            "expr": "max(sum(policy_report_result{policy=~\"$policy\", rule=~\"$rule\", category=~\"$category\", severity=~\"$severity\", source=~\"$source\", kind=~\"$kind\", {{ $nsLabel }}=~\"$namespace\", status=\"warn\"{{ range $filters }}, {{.}}=~\"${{.}}\"{{ end }} } > 0)  by ({{ $nsLabel }}, pod)) by ({{ $nsLabel }})",
+            "expr": "sum(max(sum(policy_report_result{policy=~\"$policy\", rule=~\"$rule\", category=~\"$category\", severity=~\"$severity\", source=~\"$source\", kind=~\"$kind\", {{ $nsLabel }}=~\"$namespace\", status=\"warn\"{{ range $filters }}, {{.}}=~\"${{.}}\"{{ end }} } > 0)  by ({{ $nsLabel }}, pod{{ $byCluster }})) by ({{ $nsLabel }}{{ $byCluster }})) by ({{ $nsLabel }})",
             "instant": true,
             "interval": "",
             "legendFormat": "{{ printf `{{%s}}` $nsLabel }}",
@@ -294,7 +299,7 @@ data:
         "pluginVersion": "7.1.5",
         "targets": [
             {
-            "expr": "max(sum(policy_report_result{policy=~\"$policy\", rule=~\"$rule\", category=~\"$category\", severity=~\"$severity\", source=~\"$source\", kind=~\"$kind\", {{ $nsLabel }}=~\"$namespace\", status=\"error\"{{ range $filters }}, {{.}}=~\"${{.}}\"{{ end }} } > 0) by ({{ $nsLabel }}, pod)) by ({{ $nsLabel }})",
+            "expr": "sum(max(sum(policy_report_result{policy=~\"$policy\", rule=~\"$rule\", category=~\"$category\", severity=~\"$severity\", source=~\"$source\", kind=~\"$kind\", {{ $nsLabel }}=~\"$namespace\", status=\"error\"{{ range $filters }}, {{.}}=~\"${{.}}\"{{ end }} } > 0) by ({{ $nsLabel }}, pod{{ $byCluster }})) by ({{ $nsLabel }}{{ $byCluster }})) by ({{ $nsLabel }})",
             "instant": true,
             "interval": "",
             "legendFormat": "{{ printf `{{%s}}` $nsLabel }}",
@@ -420,7 +425,7 @@ data:
           "pluginVersion": "10.4.1",
           "targets": [
             {
-              "expr": "max(sum(policy_report_result{policy=~\"$policy\", rule=~\"$rule\", category=~\"$category\", severity=~\"$severity\", source=~\"$source\", kind=~\"$kind\", {{ $nsLabel }}=~\"$namespace\"{{ range $filters }}, {{.}}=~\"${{.}}\"{{ end }} } > 0) by (status, pod, {{ $nsLabel }})) by (status, {{ $nsLabel }})",
+              "expr": "sum(max(sum(policy_report_result{policy=~\"$policy\", rule=~\"$rule\", category=~\"$category\", severity=~\"$severity\", source=~\"$source\", kind=~\"$kind\", {{ $nsLabel }}=~\"$namespace\"{{ range $filters }}, {{.}}=~\"${{.}}\"{{ end }} } > 0) by (status, pod, {{ $nsLabel }}{{ $byCluster }})) by (status, {{ $nsLabel }}{{ $byCluster }})) by (status, {{ $nsLabel }})",
               "interval": "",
               "legendFormat": "{{ printf `{{%s}}` $nsLabel }} {{`{{ status }}`}}",
               "refId": "A",

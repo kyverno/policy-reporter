@@ -3,8 +3,13 @@
 
 {{- if and $root.grafana.dashboards.enabled $root.grafana.dashboards.enable.overview }}
 {{- $filters := $root.grafana.dashboards.labelFilter }}
+{{- /* Replicas export identical series, so totals take the max per pod and cluster, then sum the clusters. */}}
+{{- $cluster := "" }}
+{{- $byCluster := "" }}
 {{- if and $root.grafana.dashboards.multicluster.enabled $root.grafana.dashboards.multicluster.label }}
 {{- $filters = append $filters $root.grafana.dashboards.multicluster.label }}
+{{- $cluster = $root.grafana.dashboards.multicluster.label }}
+{{- $byCluster = printf ", %s" $cluster }}
 {{- end }}
 
 {{- $nsLabel := "exported_namespace" }}
@@ -118,7 +123,7 @@ data:
         "pluginVersion": "7.1.5",
         "targets": [
             {
-            "expr": "max(sum(policy_report_result{policy=~\"$policy\", category=~\"$category\", severity=~\"$severity\", source=~\"$source\", kind=~\"$kind\", {{ $nsLabel }}=~\"$namespace\", status=~\"fail|error\"{{ range $filters }}, {{.}}=~\"${{.}}\"{{ end }} } > 0) by ({{ $nsLabel }}, pod)) by ({{ $nsLabel }})",
+            "expr": "sum(max(sum(policy_report_result{policy=~\"$policy\", category=~\"$category\", severity=~\"$severity\", source=~\"$source\", kind=~\"$kind\", {{ $nsLabel }}=~\"$namespace\", status=~\"fail|error\"{{ range $filters }}, {{.}}=~\"${{.}}\"{{ end }} } > 0) by ({{ $nsLabel }}, pod{{ $byCluster }})) by ({{ $nsLabel }}{{ $byCluster }})) by ({{ $nsLabel }})",
             "instant": true,
             "interval": "",
             "legendFormat": "{{ printf `{{%s}}` $nsLabel }}",
@@ -179,7 +184,7 @@ data:
         "pluginVersion": "7.1.5",
         "targets": [
             {
-            "expr": "max(sum(cluster_policy_report_result{policy=~\"$policy\", category=~\"$category\", severity=~\"$severity\", source=~\"$source\", kind=~\"$kind\", status=~\"fail|error\"{{ range $filters }}, {{.}}=~\"${{.}}\"{{ end }} } > 0) by (status, pod)) by (status)",
+            "expr": "sum(max(sum(cluster_policy_report_result{policy=~\"$policy\", category=~\"$category\", severity=~\"$severity\", source=~\"$source\", kind=~\"$kind\", status=~\"fail|error\"{{ range $filters }}, {{.}}=~\"${{.}}\"{{ end }} } > 0) by (status, pod{{ $byCluster }})) by (status{{ $byCluster }})) by (status)",
             "format": "time_series",
             "interval": "",
             "intervalFactor": 1,
@@ -304,7 +309,7 @@ data:
           "pluginVersion": "10.4.1",
           "targets": [
             {
-              "expr": "max(sum(cluster_policy_report_result{policy=~\"$policy\", category=~\"$category\", severity=~\"$severity\", source=~\"$source\", kind=~\"$kind\", status=~\"fail|error\"{{ range $filters }}, {{.}}=~\"${{.}}\"{{ end }} } > 0) by (policy, pod)) by (policy)",
+              "expr": "sum(max(sum(cluster_policy_report_result{policy=~\"$policy\", category=~\"$category\", severity=~\"$severity\", source=~\"$source\", kind=~\"$kind\", status=~\"fail|error\"{{ range $filters }}, {{.}}=~\"${{.}}\"{{ end }} } > 0) by (policy, pod{{ $byCluster }})) by (policy{{ $byCluster }})) by (policy)",
               "interval": "",
               "legendFormat": "{{`{{ policy }}`}}",
               "refId": "A",
@@ -313,7 +318,7 @@ data:
               }
             },
             {
-              "expr": "max(sum(policy_report_result{policy=~\"$policy\", category=~\"$category\", severity=~\"$severity\", source=~\"$source\", kind=~\"$kind\", {{ $nsLabel }}=~\"$namespace\", status=~\"fail|error\"{{ range $filters }}, {{.}}=~\"${{.}}\"{{ end }} } > 0) by (policy, pod)) by (policy)",
+              "expr": "sum(max(sum(policy_report_result{policy=~\"$policy\", category=~\"$category\", severity=~\"$severity\", source=~\"$source\", kind=~\"$kind\", {{ $nsLabel }}=~\"$namespace\", status=~\"fail|error\"{{ range $filters }}, {{.}}=~\"${{.}}\"{{ end }} } > 0) by (policy, pod{{ $byCluster }})) by (policy{{ $byCluster }})) by (policy)",
               "interval": "",
               "legendFormat": "{{`{{ policy }}`}}",
               "refId": "B",

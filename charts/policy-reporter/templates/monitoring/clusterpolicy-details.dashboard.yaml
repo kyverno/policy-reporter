@@ -3,8 +3,13 @@
 
 {{- if and $root.grafana.dashboards.enabled $root.grafana.dashboards.enable.clusterPolicyReportDetails }}
 {{- $filters := $root.grafana.dashboards.labelFilter }}
+{{- /* Replicas export identical series, so totals take the max per pod and cluster, then sum the clusters. */}}
+{{- $cluster := "" }}
+{{- $byCluster := "" }}
 {{- if and $root.grafana.dashboards.multicluster.enabled $root.grafana.dashboards.multicluster.label }}
 {{- $filters = append $filters $root.grafana.dashboards.multicluster.label }}
+{{- $cluster = $root.grafana.dashboards.multicluster.label }}
+{{- $byCluster = printf ", %s" $cluster }}
 {{- end }}
 
 {{- $nsLabel := "exported_namespace" }}
@@ -127,7 +132,7 @@ data:
         "pluginVersion": "7.1.5",
         "targets": [
             {
-            "expr": "max(sum(cluster_policy_report_result{policy=~\"$policy\", category=~\"$category\", severity=~\"$severity\", source=~\"$source\", kind=~\"$kind\", status=\"pass\"{{ range $filters }}, {{.}}=~\"${{.}}\"{{ end }} }) by (pod))",
+            "expr": "sum(max(sum(cluster_policy_report_result{policy=~\"$policy\", category=~\"$category\", severity=~\"$severity\", source=~\"$source\", kind=~\"$kind\", status=\"pass\"{{ range $filters }}, {{.}}=~\"${{.}}\"{{ end }} }) by (pod{{ $byCluster }})) by ({{ $cluster }}))",
             "instant": true,
             "interval": "",
             "legendFormat": "",
@@ -184,7 +189,7 @@ data:
         "pluginVersion": "7.1.5",
         "targets": [
             {
-            "expr": "max(sum(cluster_policy_report_result{policy=~\"$policy\", category=~\"$category\", severity=~\"$severity\", source=~\"$source\", kind=~\"$kind\", status=\"warn\"{{ range $filters }}, {{.}}=~\"${{.}}\"{{ end }} }) by (pod))",
+            "expr": "sum(max(sum(cluster_policy_report_result{policy=~\"$policy\", category=~\"$category\", severity=~\"$severity\", source=~\"$source\", kind=~\"$kind\", status=\"warn\"{{ range $filters }}, {{.}}=~\"${{.}}\"{{ end }} }) by (pod{{ $byCluster }})) by ({{ $cluster }}))",
             "instant": true,
             "interval": "",
             "legendFormat": "",
@@ -241,7 +246,7 @@ data:
         "pluginVersion": "7.1.5",
         "targets": [
             {
-            "expr": "max(sum(cluster_policy_report_result{policy=~\"$policy\", category=~\"$category\", severity=~\"$severity\", source=~\"$source\", kind=~\"$kind\", status=\"fail\"{{ range $filters }}, {{.}}=~\"${{.}}\"{{ end }} }) by (pod))",
+            "expr": "sum(max(sum(cluster_policy_report_result{policy=~\"$policy\", category=~\"$category\", severity=~\"$severity\", source=~\"$source\", kind=~\"$kind\", status=\"fail\"{{ range $filters }}, {{.}}=~\"${{.}}\"{{ end }} }) by (pod{{ $byCluster }})) by ({{ $cluster }}))",
             "instant": true,
             "interval": "",
             "legendFormat": "",
@@ -298,7 +303,7 @@ data:
         "pluginVersion": "7.1.5",
         "targets": [
             {
-            "expr": "max(sum(cluster_policy_report_result{policy=~\"$policy\", category=~\"$category\", severity=~\"$severity\", source=~\"$source\", kind=~\"$kind\", status=\"error\"{{ range $filters }}, {{.}}=~\"${{.}}\"{{ end }} }) by (pod))",
+            "expr": "sum(max(sum(cluster_policy_report_result{policy=~\"$policy\", category=~\"$category\", severity=~\"$severity\", source=~\"$source\", kind=~\"$kind\", status=\"error\"{{ range $filters }}, {{.}}=~\"${{.}}\"{{ end }} }) by (pod{{ $byCluster }})) by ({{ $cluster }}))",
             "instant": true,
             "interval": "",
             "legendFormat": "",
@@ -424,7 +429,7 @@ data:
           "pluginVersion": "10.4.1",
           "targets": [
             {
-              "expr": "max(sum(cluster_policy_report_result{policy=~\"$policy\", category=~\"$category\", severity=~\"$severity\", source=~\"$source\", kind=~\"$kind\"{{ range $filters }}, {{.}}=~\"${{.}}\"{{ end }} } > 0) by (status, pod)) by (status)",
+              "expr": "sum(max(sum(cluster_policy_report_result{policy=~\"$policy\", category=~\"$category\", severity=~\"$severity\", source=~\"$source\", kind=~\"$kind\"{{ range $filters }}, {{.}}=~\"${{.}}\"{{ end }} } > 0) by (status, pod{{ $byCluster }})) by (status{{ $byCluster }})) by (status)",
               "interval": "",
               "legendFormat": "{{`{{ status }}`}}",
               "refId": "A",
