@@ -96,3 +96,74 @@ func TestCollection(t *testing.T) {
 		}
 	})
 }
+
+func TestCollectionUpdate(t *testing.T) {
+	t.Parallel()
+
+	newTarget := func(id, name string) *target.Target {
+		return &target.Target{
+			ID:   id,
+			Type: target.Slack,
+			Client: slack.NewClient(slack.Options{
+				ClientOptions: target.ClientOptions{Name: name},
+			}),
+			Config:       &targetconfig.Config[v1alpha1.SlackOptions]{Name: name},
+			ParentConfig: &targetconfig.Config[v1alpha1.SlackOptions]{},
+		}
+	}
+
+	t.Run("replaces a target added with AddTarget instead of adding a second entry", func(t *testing.T) {
+		t.Parallel()
+		collection := target.NewCollection()
+
+		original := newTarget(uuid.NewString(), "original")
+		collection.AddTarget("target-config", original)
+
+		updated := newTarget(original.ID, "updated")
+		collection.Update(updated)
+
+		assert.Equal(t, 1, collection.Length())
+		assert.Len(t, collection.Clients(), 1)
+		assert.Equal(t, "updated", collection.Targets()[0].Client.Name())
+	})
+
+	t.Run("keeps replacing the same entry on repeated updates", func(t *testing.T) {
+		t.Parallel()
+		collection := target.NewCollection()
+
+		original := newTarget(uuid.NewString(), "original")
+		collection.AddTarget("target-config", original)
+
+		collection.Update(newTarget(original.ID, "first"))
+		collection.Update(newTarget(original.ID, "second"))
+
+		assert.Equal(t, 1, collection.Length())
+		assert.Equal(t, "second", collection.Targets()[0].Client.Name())
+	})
+
+	t.Run("adds the target under its ID if it does not exist yet", func(t *testing.T) {
+		t.Parallel()
+		collection := target.NewCollection()
+
+		collection.Update(newTarget(uuid.NewString(), "new"))
+
+		assert.Equal(t, 1, collection.Length())
+	})
+
+	t.Run("does not touch other targets", func(t *testing.T) {
+		t.Parallel()
+		collection := target.NewCollection()
+
+		first := newTarget(uuid.NewString(), "first")
+		second := newTarget(uuid.NewString(), "second")
+		collection.AddTarget("first-config", first)
+		collection.AddTarget("second-config", second)
+
+		collection.Update(newTarget(first.ID, "first-updated"))
+
+		assert.Equal(t, 2, collection.Length())
+		assert.NotNil(t, collection.Client("first-updated"))
+		assert.NotNil(t, collection.Client("second"))
+		assert.Nil(t, collection.Client("first"))
+	})
+}
