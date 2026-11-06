@@ -134,9 +134,18 @@ func (c *Collection) RemoveTarget(key string) {
 
 func (c *Collection) Update(t *Target) {
 	c.mx.Lock()
-	c.targets[t.ID] = t
+	defer c.mx.Unlock()
+
+	key := t.ID
+	for k, existing := range c.targets {
+		if existing != nil && existing.ID == t.ID {
+			key = k
+			break
+		}
+	}
+
+	c.targets[key] = t
 	c.clients = make([]Client, 0)
-	c.mx.Unlock()
 }
 
 func (c *Collection) Reset(ctx context.Context) bool {
