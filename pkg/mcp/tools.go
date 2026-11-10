@@ -178,6 +178,13 @@ type NamespaceCompliance struct {
 	Unknown   int    `json:"unknown"`
 }
 
+// NamespaceComplianceResponse is the output of the get_namespace_compliance_summary tool.
+// MCP requires structuredContent to be a JSON object, so the summaries are wrapped
+// instead of being returned as a top-level array.
+type NamespaceComplianceResponse struct {
+	Namespaces []NamespaceCompliance `json:"namespaces"`
+}
+
 func registerTools(s *server.MCPServer, store *db.Store) {
 	resourceComplianceTool := mcp.NewTool("list_resource_compliance",
 		mcp.WithDescription("List the policy compliance summary (pass/fail/warn/error/skip and severity counts) for resources within one or more namespaces, with optional filters."),
@@ -189,7 +196,7 @@ func registerTools(s *server.MCPServer, store *db.Store) {
 	namespaceComplianceTool := mcp.NewTool("get_namespace_compliance_summary",
 		mcp.WithDescription("Get the aggregated policy compliance summary (pass/fail/warn/error/skip and severity counts) per source and namespace, with optional filters."),
 		mcp.WithInputSchema[NamespaceComplianceRequest](),
-		mcp.WithOutputSchema[[]NamespaceCompliance](),
+		mcp.WithOutputSchema[NamespaceComplianceResponse](),
 	)
 	s.AddTool(namespaceComplianceTool, mcp.NewStructuredToolHandler(getNamespaceComplianceSummaryHandler(store)))
 
@@ -258,8 +265,8 @@ func listResourceComplianceHandler(store *db.Store) func(context.Context, mcp.Ca
 // getNamespaceComplianceSummaryHandler aggregates the per-resource compliance
 // summaries into a single summary per source and namespace. It uses the same
 // filters and semantics as list_resource_compliance.
-func getNamespaceComplianceSummaryHandler(store *db.Store) func(context.Context, mcp.CallToolRequest, NamespaceComplianceRequest) ([]NamespaceCompliance, error) {
-	return func(ctx context.Context, _ mcp.CallToolRequest, args NamespaceComplianceRequest) ([]NamespaceCompliance, error) {
+func getNamespaceComplianceSummaryHandler(store *db.Store) func(context.Context, mcp.CallToolRequest, NamespaceComplianceRequest) (NamespaceComplianceResponse, error) {
+	return func(ctx context.Context, _ mcp.CallToolRequest, args NamespaceComplianceRequest) (NamespaceComplianceResponse, error) {
 		var err error
 
 		filter := args.toFilter()
@@ -267,7 +274,7 @@ func getNamespaceComplianceSummaryHandler(store *db.Store) func(context.Context,
 		if len(args.Sources) == 0 {
 			args.Sources, err = store.FetchSources(ctx, filter)
 			if err != nil {
-				return nil, err
+				return NamespaceComplianceResponse{}, err
 			}
 		}
 
@@ -290,7 +297,7 @@ func getNamespaceComplianceSummaryHandler(store *db.Store) func(context.Context,
 
 			statusCounts, err := store.FetchNamespaceStatusCounts(ctx, source, filter)
 			if err != nil {
-				return nil, err
+				return NamespaceComplianceResponse{}, err
 			}
 
 			for _, count := range statusCounts {
@@ -312,7 +319,7 @@ func getNamespaceComplianceSummaryHandler(store *db.Store) func(context.Context,
 
 			severityCounts, err := store.FetchNamespaceSeverityCounts(ctx, source, filter)
 			if err != nil {
-				return nil, err
+				return NamespaceComplianceResponse{}, err
 			}
 
 			for _, count := range severityCounts {
@@ -339,7 +346,7 @@ func getNamespaceComplianceSummaryHandler(store *db.Store) func(context.Context,
 			}
 		}
 
-		return list, nil
+		return NamespaceComplianceResponse{Namespaces: list}, nil
 	}
 }
 
