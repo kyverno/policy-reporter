@@ -2,10 +2,12 @@ package mcp
 
 import (
 	"context"
+	"encoding/json"
 	"path/filepath"
 	"testing"
 
 	"github.com/mark3labs/mcp-go/mcp"
+	"github.com/mark3labs/mcp-go/server"
 	"github.com/openreports/reports-api/apis/openreports.io/v1alpha1"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -154,10 +156,11 @@ func TestGetNamespaceComplianceSummaryHandler(t *testing.T) {
 	}
 
 	t.Run("all sources", func(t *testing.T) {
-		list, err := handler(context.Background(), mcp.CallToolRequest{}, NamespaceComplianceRequest{
+		resp, err := handler(context.Background(), mcp.CallToolRequest{}, NamespaceComplianceRequest{
 			ComplianceFilter{Namespaces: []string{"team-a"}},
 		})
 		require.NoError(t, err)
+		list := resp.Namespaces
 
 		kyverno, ok := find(list, "kyverno", "team-a")
 		require.True(t, ok)
@@ -173,10 +176,11 @@ func TestGetNamespaceComplianceSummaryHandler(t *testing.T) {
 	})
 
 	t.Run("source filter", func(t *testing.T) {
-		list, err := handler(context.Background(), mcp.CallToolRequest{}, NamespaceComplianceRequest{
+		resp, err := handler(context.Background(), mcp.CallToolRequest{}, NamespaceComplianceRequest{
 			ComplianceFilter{Namespaces: []string{"team-a", "team-b"}, Sources: []string{"kyverno"}},
 		})
 		require.NoError(t, err)
+		list := resp.Namespaces
 
 		for _, s := range list {
 			assert.Equal(t, "kyverno", s.Source)
@@ -198,10 +202,11 @@ func TestGetNamespaceComplianceSummaryHandler(t *testing.T) {
 			},
 		}})))
 
-		list, err := getNamespaceComplianceSummaryHandler(store)(context.Background(), mcp.CallToolRequest{}, NamespaceComplianceRequest{
+		resp, err := getNamespaceComplianceSummaryHandler(store)(context.Background(), mcp.CallToolRequest{}, NamespaceComplianceRequest{
 			ComplianceFilter{Namespaces: []string{"team-c"}},
 		})
 		require.NoError(t, err)
+		list := resp.Namespaces
 
 		c, ok := find(list, "kyverno", "team-c")
 		require.True(t, ok)
@@ -210,10 +215,11 @@ func TestGetNamespaceComplianceSummaryHandler(t *testing.T) {
 	})
 
 	t.Run("no matches", func(t *testing.T) {
-		list, err := handler(context.Background(), mcp.CallToolRequest{}, NamespaceComplianceRequest{
+		resp, err := handler(context.Background(), mcp.CallToolRequest{}, NamespaceComplianceRequest{
 			ComplianceFilter{Namespaces: []string{"missing"}},
 		})
 		require.NoError(t, err)
+		list := resp.Namespaces
 		assert.Empty(t, list)
 		assert.NotNil(t, list)
 	})
@@ -359,4 +365,42 @@ func TestToFilter(t *testing.T) {
 	assert.Equal(t, []string{"n"}, p.Resources)
 	assert.Equal(t, []string{"r"}, p.ResourceAPIs)
 	assert.Equal(t, []string{"p"}, p.Policies)
+}
+
+// MCP requires structuredContent to be a JSON object, so every registered tool
+// must return a record rather than a top-level array.
+func TestToolsReturnObjectStructuredContent(t *testing.T) {
+	s := server.NewMCPServer("test", "0.0.0", server.WithToolCapabilities(false))
+	registerTools(s, newTestStore(t))
+
+	tools := map[string]map[string]any{
+		"list_resource_compliance":         {"namespaces": []string{"team-a"}},
+		"get_namespace_compliance_summary": {"namespaces": []string{"team-a"}},
+		"get_resource_compliance_results":  {"namespace": "team-a", "kind": "Deployment", "name": "nginx"},
+		"list_policy_results":              {"policies": []string{"require-labels"}},
+	}
+
+	for name, args := range tools {
+		t.Run(name, func(t *testing.T) {
+			tool := s.GetTool(name)
+			require.NotNil(t, tool)
+
+			schema, err := json.Marshal(tool.Tool.OutputSchema)
+			require.NoError(t, err)
+			var outputSchema map[string]any
+			require.NoError(t, json.Unmarshal(schema, &outputSchema))
+			assert.Equal(t, "object", outputSchema["type"])
+
+			result, err := tool.Handler(context.Background(), mcp.CallToolRequest{
+				Params: mcp.CallToolParams{Name: name, Arguments: args},
+			})
+			require.NoError(t, err)
+			require.False(t, result.IsError)
+
+			raw, err := json.Marshal(result.StructuredContent)
+			require.NoError(t, err)
+			var content map[string]any
+			assert.NoError(t, json.Unmarshal(raw, &content), "structuredContent must be a JSON object, got %s", raw)
+		})
+	}
 }
