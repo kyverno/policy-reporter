@@ -1069,7 +1069,11 @@ func (s *Store) DropSchema(ctx context.Context) error {
 }
 
 func (s *Store) Add(ctx context.Context, report openreports.ReportInterface) error {
-	_, err := s.db.NewInsert().Model(MapPolicyReport(report)).Exec(ctx)
+	return add(ctx, s.db, report)
+}
+
+func add(ctx context.Context, db bun.IDB, report openreports.ReportInterface) error {
+	_, err := db.NewInsert().Model(MapPolicyReport(report)).Exec(ctx)
 	if err != nil {
 		zap.L().Error("failed to persist policy report", zap.Error(err))
 		errorMetric.With(prometheus.Labels{"operation": "INSERT", "table": "policy_report", "reason": mapReason(err)}).Inc()
@@ -1078,7 +1082,7 @@ func (s *Store) Add(ctx context.Context, report openreports.ReportInterface) err
 
 	filters := chunkSlice(MapPolicyReportFilter(report), 50)
 	for _, list := range filters {
-		_, err = s.db.NewInsert().Ignore().Model(&list).Exec(ctx)
+		_, err = db.NewInsert().Ignore().Model(&list).Exec(ctx)
 		if err != nil {
 			zap.L().Error("failed to bulk import policy report filter", zap.Error(err))
 			errorMetric.With(prometheus.Labels{"operation": "INSERT", "table": "policy_report_filter", "reason": mapReason(err)}).Inc()
@@ -1088,7 +1092,7 @@ func (s *Store) Add(ctx context.Context, report openreports.ReportInterface) err
 
 	resources := chunkSlice(MapPolicyReportResource(report), 50)
 	for _, list := range resources {
-		_, err = s.db.NewInsert().Model(&list).Exec(ctx)
+		_, err = db.NewInsert().Model(&list).Exec(ctx)
 		if err != nil {
 			zap.L().Error("failed to bulk import policy report resources", zap.Error(err))
 			errorMetric.With(prometheus.Labels{"operation": "INSERT", "table": "policy_report_resource", "reason": mapReason(err)}).Inc()
@@ -1098,7 +1102,7 @@ func (s *Store) Add(ctx context.Context, report openreports.ReportInterface) err
 
 	results := chunkSlice(MapPolicyReportResults(report), 50)
 	for _, list := range results {
-		_, err = s.db.NewInsert().Ignore().Model(&list).Exec(ctx)
+		_, err = db.NewInsert().Ignore().Model(&list).Exec(ctx)
 		if err != nil {
 			zap.L().Error("failed to bulk import policy report results", zap.Error(err))
 			errorMetric.With(prometheus.Labels{"operation": "INSERT", "table": "policy_report_result", "reason": mapReason(err)}).Inc()
@@ -1110,16 +1114,23 @@ func (s *Store) Add(ctx context.Context, report openreports.ReportInterface) err
 }
 
 func (s *Store) Update(ctx context.Context, report openreports.ReportInterface) error {
-	err := s.Remove(ctx, report.GetID())
-	if err != nil {
-		return err
-	}
+	// Replace the report in one transaction, so that a failed insert keeps the
+	// previous report and readers never see part of the new one.
+	return s.db.RunInTx(ctx, nil, func(ctx context.Context, tx bun.Tx) error {
+		if err := remove(ctx, tx, report.GetID()); err != nil {
+			return err
+		}
 
-	return s.Add(ctx, report)
+		return add(ctx, tx, report)
+	})
 }
 
 func (s *Store) Remove(ctx context.Context, id string) error {
-	_, err := s.db.NewDelete().Model((*PolicyReport)(nil)).Where("id = ?", id).Exec(ctx)
+	return remove(ctx, s.db, id)
+}
+
+func remove(ctx context.Context, db bun.IDB, id string) error {
+	_, err := db.NewDelete().Model((*PolicyReport)(nil)).Where("id = ?", id).Exec(ctx)
 	if err != nil {
 		zap.L().Error("failed to remove previous policy report", zap.Error(err))
 		errorMetric.With(prometheus.Labels{"operation": "DELETE", "table": "policy_report", "reason": mapReason(err)}).Inc()
