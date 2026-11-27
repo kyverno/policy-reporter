@@ -1016,56 +1016,50 @@ func (s *Store) CreateSchemas(ctx context.Context) error {
 		return err
 	}
 
+	if s.db.Dialect().Name() == dialect.PG {
+		for _, table := range []string{"policy_report_filter", "policy_report_result", "policy_report_resource"} {
+			_, err = s.db.
+				NewCreateIndex().
+				IfNotExists().
+				Table(table).
+				Index(table + "_policy_report_id_idx").
+				Column("policy_report_id").
+				Exec(ctx)
+			logOnError("create "+table+" policy_report_id index", err)
+			if err != nil {
+				return err
+			}
+		}
+	}
+
 	return err
 }
 
 func (s *Store) DropSchema(ctx context.Context) error {
-	_, err := s.db.NewDropTable().
-		IfExists().
-		Model((*Config)(nil)).
-		Exec(ctx)
-	logOnError("drop policy_report_config table", err)
-	if err != nil {
-		return err
+	tables := []struct {
+		name  string
+		model any
+	}{
+		{"policy_report_config", (*Config)(nil)},
+		{"policy_report_filter", (*PolicyReportFilter)(nil)},
+		{"policy_report_result", (*PolicyReportResult)(nil)},
+		{"policy_report_resource", (*ResourceResult)(nil)},
+		// Drop policy_report after its child tables because they reference it.
+		{"policy_report", (*PolicyReport)(nil)},
 	}
 
-	_, err = s.db.NewDropTable().
-		IfExists().
-		Model((*PolicyReportFilter)(nil)).
-		Exec(ctx)
-	logOnError("drop policy_report_filter table", err)
-	if err != nil {
-		return err
+	for _, table := range tables {
+		_, err := s.db.NewDropTable().
+			IfExists().
+			Model(table.model).
+			Exec(ctx)
+		logOnError("drop "+table.name+" table", err)
+		if err != nil {
+			return err
+		}
 	}
 
-	_, err = s.db.NewDropTable().
-		IfExists().
-		Model((*PolicyReportResult)(nil)).
-		Exec(ctx)
-	logOnError("drop policy_report_result table", err)
-	if err != nil {
-		return err
-	}
-
-	_, err = s.db.NewDropTable().
-		IfExists().
-		Model((*PolicyReport)(nil)).
-		Exec(ctx)
-	logOnError("drop policy_report table", err)
-	if err != nil {
-		return err
-	}
-
-	_, err = s.db.NewDropTable().
-		IfExists().
-		Model((*ResourceResult)(nil)).
-		Exec(ctx)
-	logOnError("drop policy_report_resource table", err)
-	if err != nil {
-		return err
-	}
-
-	return err
+	return nil
 }
 
 func (s *Store) Add(ctx context.Context, report openreports.ReportInterface) error {
