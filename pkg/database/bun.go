@@ -1139,11 +1139,22 @@ func remove(ctx context.Context, db bun.IDB, id string) error {
 	return err
 }
 
+// PostgreSQL clears the whole cache in one atomic statement, while the parent
+// DELETE scans and cascades through every row of all four tables.
+const postgresCleanUpQuery = "TRUNCATE TABLE ONLY policy_report, ONLY policy_report_resource, ONLY policy_report_result, ONLY policy_report_filter RESTRICT"
+
 func (s *Store) CleanUp(ctx context.Context) error {
-	_, err := s.db.NewDelete().Model((*PolicyReport)(nil)).Where("id is not null").Exec(ctx)
+	operation := "DELETE"
+	var err error
+	if s.db.Dialect().Name() == dialect.PG {
+		operation = "TRUNCATE"
+		_, err = s.db.ExecContext(ctx, postgresCleanUpQuery)
+	} else {
+		_, err = s.db.NewDelete().Model((*PolicyReport)(nil)).Where("id is not null").Exec(ctx)
+	}
 	if err != nil {
 		zap.L().Error("failed to remove policy reports", zap.Error(err))
-		errorMetric.With(prometheus.Labels{"operation": "DELETE", "table": "policy_report", "reason": mapReason(err)}).Inc()
+		errorMetric.With(prometheus.Labels{"operation": operation, "table": "policy_report", "reason": mapReason(err)}).Inc()
 	}
 
 	return err
