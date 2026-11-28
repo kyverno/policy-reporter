@@ -299,6 +299,27 @@ func TestInitialAcknowledgementSurvivesDebounce(t *testing.T) {
 	}
 }
 
+// Coalesced empty updates stay in the window, so the initial report is only
+// acknowledged once an event supersedes it.
+func TestInitialAcknowledgementSurvivesCoalescedDebounce(t *testing.T) {
+	initial := report.NewInitialReports("reports")
+	initial.Track("reports", "test/report")
+	initial.Seal("reports")
+	publisher := report.NewEventPublisher()
+	publisher.RegisterListener(listener.Store, listener.NewStoreListener(report.NewPolicyReportStore()))
+	debouncer := kubernetes.NewDebouncer(time.Hour, publisher)
+	empty := func(marker string) *openreports.ReportAdapter {
+		return &openreports.ReportAdapter{Report: &or.Report{ObjectMeta: metav1.ObjectMeta{Name: "report", Namespace: "test", Labels: map[string]string{"marker": marker}}}}
+	}
+
+	debouncer.Add(report.LifecycleEvent{Type: report.Updated, PolicyReport: empty("first"), Persisted: initial.PersistenceResult("test/report")})
+	debouncer.Add(report.LifecycleEvent{Type: report.Updated, PolicyReport: empty("latest")})
+	require.False(t, initial.Complete(), "coalesced empty updates must not acknowledge before the window expires")
+
+	debouncer.Add(report.LifecycleEvent{Type: report.Deleted, PolicyReport: empty("latest"), Persisted: initial.PersistenceResult("test/report")})
+	require.True(t, initial.Complete(), "superseding delete must acknowledge the initial report")
+}
+
 // Failed initial writes remain pending even if a relist no longer contains the
 // report. The retained key must be fetched and resolved through deletion.
 func TestInitialPendingDeletionAfterRestart(t *testing.T) {
