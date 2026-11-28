@@ -85,6 +85,48 @@ func Test_Debouncer(t *testing.T) {
 		}
 	})
 
+	t.Run("Coalesce consecutive empty updates into the latest revision", func(t *testing.T) {
+		t.Parallel()
+
+		events := make(chan report.LifecycleEvent, 2)
+
+		publisher := report.NewEventPublisher()
+		publisher.RegisterListener("test", func(_ context.Context, event report.LifecycleEvent) {
+			events <- event
+		})
+
+		debouncer := kubernetes.NewDebouncer(50*time.Millisecond, publisher)
+
+		first := fixtures.MinPolicyReport.Report.DeepCopy()
+		first.ResourceVersion = "1"
+		second := first.DeepCopy()
+		second.ResourceVersion = "2"
+
+		debouncer.Add(report.LifecycleEvent{
+			Type:         report.Updated,
+			PolicyReport: &openreports.ReportAdapter{Report: first},
+		})
+		debouncer.Add(report.LifecycleEvent{
+			Type:         report.Updated,
+			PolicyReport: &openreports.ReportAdapter{Report: second},
+		})
+
+		select {
+		case event := <-events:
+			if version := event.PolicyReport.GetResourceVersion(); version != "2" {
+				t.Errorf("Expected the latest revision to be published, got %q", version)
+			}
+		case <-time.After(time.Second):
+			t.Fatal("Expected the debounced update to be published")
+		}
+
+		select {
+		case event := <-events:
+			t.Errorf("Expected a single coalesced event, got an extra revision %q", event.PolicyReport.GetResourceVersion())
+		case <-time.After(100 * time.Millisecond):
+		}
+	})
+
 	t.Run("Skip Empty Update when delete event follows directly", func(t *testing.T) {
 		t.Parallel()
 		counter := 0
