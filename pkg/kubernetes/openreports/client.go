@@ -158,10 +158,11 @@ func (k *openreportsClient) configureInformer(informer cache.SharedIndexInformer
 			}
 		},
 		DeleteFunc: func(obj interface{}) {
-			if item, ok := obj.(*v1.PartialObjectMetadata); ok {
-				if k.reportFilter.AllowReport(item) {
-					k.queue.Add(item)
-				}
+			if tombstone, ok := obj.(cache.DeletedFinalStateUnknown); ok {
+				obj = tombstone.Obj
+			}
+			if item, ok := obj.(*v1.PartialObjectMetadata); ok && item != nil && k.reportFilter.AllowReport(item) {
+				k.queue.Add(item)
 			}
 		},
 		UpdateFunc: func(_, newObj interface{}) {

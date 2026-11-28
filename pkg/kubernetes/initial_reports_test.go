@@ -2,6 +2,7 @@ package kubernetes_test
 
 import (
 	"context"
+	"database/sql"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -16,9 +17,12 @@ import (
 	or "github.com/openreports/reports-api/apis/openreports.io/v1alpha1"
 	orfake "github.com/openreports/reports-api/pkg/client/clientset/versioned/fake"
 	"github.com/stretchr/testify/require"
+	apierrors "k8s.io/apimachinery/pkg/api/errors"
+	"k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
+	"k8s.io/apimachinery/pkg/watch"
 	metafake "k8s.io/client-go/metadata/fake"
 	ktesting "k8s.io/client-go/testing"
 	"k8s.io/client-go/util/workqueue"
@@ -103,6 +107,95 @@ func startInitialClient(t *testing.T, h initialClient) <-chan error {
 	stop := make(chan struct{})
 	go func() { done <- h.client.Run(2, stop) }()
 	return done
+}
+
+func TestRelistRemovesDeletedReportFromStore(t *testing.T) {
+	for _, family := range []string{"wgpolicy", "openreports"} {
+		t.Run(family, func(t *testing.T) {
+			ctx := context.Background()
+			db, err := database.NewSQLiteDB(filepath.Join(t.TempDir(), "reports.db"))
+			require.NoError(t, err)
+			t.Cleanup(func() { db.Close() })
+			store, err := database.NewStore(db, "test")
+			require.NoError(t, err)
+			require.NoError(t, store.PrepareDatabase(ctx))
+
+			publisher := report.NewEventPublisher()
+			publisher.RegisterListener(listener.Store, listener.NewStoreListener(store))
+			h := newInitialClient(t, family, publisher, false, false, true, report.NewSourceFilter(nil, nil, nil, nil, nil))
+
+			original := &or.Report{ObjectMeta: metav1.ObjectMeta{Namespace: "test", Name: "report"}}
+			marker := original.DeepCopy()
+			marker.Name = "marker"
+			originalID := (&openreports.ReportAdapter{Report: original}).GetID()
+			markerID := (&openreports.ReportAdapter{Report: marker}).GetID()
+
+			firstWatch := watch.NewRaceFreeFake()
+			watchStarted := make(chan struct{})
+			var relist atomic.Bool
+			h.meta.PrependReactor("list", h.resource.Resource, func(ktesting.Action) (bool, runtime.Object, error) {
+				object, version := original, "1"
+				if relist.Load() {
+					object, version = marker, "2"
+				}
+				return true, &metav1.List{
+					ListMeta: metav1.ListMeta{ResourceVersion: version},
+					Items: []runtime.RawExtension{
+						{Object: &metav1.PartialObjectMetadata{ObjectMeta: object.ObjectMeta}},
+					},
+				}, nil
+			})
+			h.meta.PrependWatchReactor(h.resource.Resource, func(ktesting.Action) (bool, watch.Interface, error) {
+				if relist.Load() {
+					return true, watch.NewRaceFreeFake(), nil
+				}
+				close(watchStarted)
+				return true, firstWatch, nil
+			})
+
+			done := startInitialClient(t, h)
+			t.Cleanup(func() {
+				h.client.Stop()
+				select {
+				case err := <-done:
+					require.NoError(t, err)
+				case <-time.After(5 * time.Second):
+					t.Error("client did not stop")
+				}
+			})
+			require.Eventually(t, func() bool {
+				_, err := store.Get(ctx, originalID)
+				return err == nil
+			}, 5*time.Second, 10*time.Millisecond, "initial report was never persisted")
+			select {
+			case <-watchStarted:
+			case <-time.After(5 * time.Second):
+				t.Fatal("initial watch did not start")
+			}
+
+			replacement, err := h.tracker.Get(h.resource, original.Namespace, original.Name)
+			require.NoError(t, err)
+			replacement = replacement.DeepCopyObject()
+			metadata, err := meta.Accessor(replacement)
+			require.NoError(t, err)
+			metadata.SetName(marker.Name)
+			require.NoError(t, h.tracker.Create(h.resource, replacement, marker.Namespace))
+			require.NoError(t, h.tracker.Delete(h.resource, original.Namespace, original.Name))
+
+			// Force a relist without sending a delete event for the original report.
+			relist.Store(true)
+			expired := apierrors.NewResourceExpired("test watch version expired")
+			firstWatch.Error(&expired.ErrStatus)
+			require.Eventually(t, func() bool {
+				_, err := store.Get(ctx, markerID)
+				return err == nil
+			}, 5*time.Second, 10*time.Millisecond, "the replacement list was never persisted")
+			require.Eventually(t, func() bool {
+				_, err := store.Get(ctx, originalID)
+				return errors.Is(err, sql.ErrNoRows)
+			}, 3*time.Second, 10*time.Millisecond, "deleted report remained in storage after relist")
+		})
+	}
 }
 
 func TestInitialPersistenceReadiness(t *testing.T) {
