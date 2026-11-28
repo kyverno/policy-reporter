@@ -33,21 +33,26 @@ func (d *debouncer) Add(event report.LifecycleEvent) {
 		return
 	}
 
-	if len(event.PolicyReport.GetResults()) == 0 && !ok {
+	if len(event.PolicyReport.GetResults()) == 0 {
 		d.mutx.Lock()
-		d.events[event.PolicyReport.GetID()] = event
+		id := event.PolicyReport.GetID()
+		_, pending := d.events[id]
+		// Always keep the latest empty revision so the pending timer publishes
+		// it instead of an older event scheduled by a previous update.
+		d.events[id] = event
+		if !pending {
+			go func() {
+				time.Sleep(d.waitDuration)
+
+				d.mutx.Lock()
+				if event, ok := d.events[id]; ok {
+					d.publisher.Publish(event)
+					delete(d.events, id)
+				}
+				d.mutx.Unlock()
+			}()
+		}
 		d.mutx.Unlock()
-
-		go func() {
-			time.Sleep(d.waitDuration)
-
-			d.mutx.Lock()
-			if event, ok := d.events[event.PolicyReport.GetID()]; ok {
-				d.publisher.Publish(event)
-				delete(d.events, event.PolicyReport.GetID())
-			}
-			d.mutx.Unlock()
-		}()
 
 		return
 	}
